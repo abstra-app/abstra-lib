@@ -1,6 +1,13 @@
 # Publish
 
-## Requirements
+## Publish with github actions
+
+The workflow in .github/workflows/upload_pip.yml publishes the package to the PyPI.
+Create a release in Github with the tag to published in PyPI and the action will be triggered.
+
+## Publish Local
+
+### Requirements
 
 Requires `twine`
 
@@ -8,14 +15,14 @@ Requires `twine`
 pip install twine
 ```
 
-## Build
+### Build
 
-Bump the version number in `setup.py`
+Delete the `dist` and `build` directories, if present
 
 Build the package:
 
 ```sh
-python setup.py sdist bdist_wheel
+TAG=v1.2.3 python setup.py sdist bdist_wheel
 ```
 
 Check the contents of the distribution:
@@ -24,7 +31,7 @@ Check the contents of the distribution:
 twine check dist/*
 ```
 
-## Upload
+### Upload
 
 Upload the package to PyPI (credentials are required):
 
