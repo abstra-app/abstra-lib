@@ -16,13 +16,13 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(
-    name='abstra',
+    name="abstra",
     version=version,
-    description='Abstra Lib',
+    description="Abstra Lib",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/abstra-app/abstra-lib",
-    license='MIT',
-    packages=['abstra'],
-    install_requires=['setuptools', 'requests']
+    license="MIT",
+    packages=["abstra"],
+    install_requires=["setuptools", "requests"],
 )
