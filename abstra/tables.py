@@ -24,9 +24,11 @@ class Statements:
     def run(self, params=None):
         if params is None:
             params = {}
-        res = requests.post(f"{BASE_URL}/execute/{self.id}",
-                            json=params,
-                            headers=get_headers(self.api_key))
+        res = requests.post(
+            f"{BASE_URL}/execute/{self.id}",
+            json=params,
+            headers=get_headers(self.api_key),
+        )
         if res.status_code == 200:
             return res.json()
         else:

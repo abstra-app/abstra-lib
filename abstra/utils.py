@@ -7,8 +7,8 @@ def deserialize(string: str) -> Dict:
 
 
 def serialize(obj: Dict) -> bytes:
-    return bytes(json.dumps(obj), 'UTF-8')
+    return bytes(json.dumps(obj), "UTF-8")
 
 
 def get_headers(api_key: str) -> Dict:
-    return {'Api-Authorization': f'Bearer {api_key}'}
+    return {"Api-Authorization": f"Bearer {api_key}"}
