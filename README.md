@@ -2,13 +2,42 @@
 
 Python package for abstra products
 
-## Examples
-
-### Tables
+## Hooks
 
 ```python
+from abstra.hooks import get_request, send_response, send_json
 
-from abstra import Tables
+# helper to get request
+body, query, headers = get_request()
+
+# helper to send response
+send_response(body='DONE', status_code=207, headers={"Session": 123})
+
+# helper to send json response
+send_json(data={"ok": True})
+```
+
+### Testing locally
+If you are testing the script locally you can pass an optional argument to read/write from a specified file.   
+Defaults to `request.json` and `response.json`
+
+```python
+from abstra.hooks import get_request, send_response
+
+# helper to get request
+body, query, headers = get_request(local_file="request.json")
+
+# helper to send response
+send_response(body='DONE', local_file="response.json")
+```
+
+- the request local_file should be a json file with fields: `body (raw text)`, `headers (key-value map)` and `query (key-value map)` 
+- the response local_file should output to a json file with fields: `body (raw text)`, `headers (key-value map)` and `status_code (number) `
+
+## Tables
+
+```python
+from abstra.tables import Tables
 
 # instantiate a Tables object
 tables = Tables()
@@ -24,13 +53,12 @@ result = statement.run(params={"a": 1, "b": 2})
 
 # or run without instantiating the statement
 result = tables.run_statement(id="STATEMENT_ID", params={"a": 1, "b": 2})
-
 ```
 
-### Connectors
+## Connectors
 
 ```python
-from abstra import Connectors
+from abstra.connectors import Connectors
 
 # instantiate a Connectors object
 connectors = Connectors()

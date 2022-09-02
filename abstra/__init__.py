@@ -1,2 +1,4 @@
-from .tables import Tables, Statements
-from .connectors import Connectors, Methods
+from . import tables, connectors, hooks
+
+# Deprecated root import
+from .tables import Tables
