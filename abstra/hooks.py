@@ -3,11 +3,11 @@ import os, json
 
 def get_request(local_file="request.json"):
     path = os.getenv("REQUEST_FILE", local_file)
-    with open(path) as f:
-        content = f.read()
     try:
-        request = json.loads(content)
-        return request["body"], request["query"], request["headers"]
+        with open(path) as f:
+            content = f.read()
+            request = json.loads(content)
+            return request["body"], request["query"], request["headers"]
     except Exception:
         return None, None, None
 
