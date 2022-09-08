@@ -11,7 +11,7 @@ def get_request(local_file="request.json"):
 
         try:
             if headers["Content-Type"] == "application/json":
-                return json.loads(body), query , headers
+                return json.loads(body), query, headers
             else:
                 return body, query, headers
         except Exception:
