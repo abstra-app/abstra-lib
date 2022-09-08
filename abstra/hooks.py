@@ -7,7 +7,7 @@ def get_request(local_file="request.json"):
             request = json.loads(f.read())
             body = request["body"]
             query = request["query"]
-            headers = { k.lower():v for k,v in request["headers"].items() }
+            headers = {k.lower(): v for k, v in request["headers"].items()}
 
         try:
             if headers["content-type"] == "application/json":
