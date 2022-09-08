@@ -2,12 +2,21 @@ import os, json
 
 
 def get_request(local_file="request.json"):
-    path = os.getenv("REQUEST_FILE", local_file)
     try:
-        with open(path) as f:
-            content = f.read()
-            request = json.loads(content)
-            return request["body"], request["query"], request["headers"]
+        with open(os.getenv("REQUEST_FILE", local_file)) as f:
+            request = json.loads(f.read())
+            body = request["body"]
+            query = request["query"]
+            headers = request["headers"]
+
+        try:
+            if headers["Content-Type"] == "application/json":
+                return json.loads(body), query , headers
+            else:
+                return body, query, headers
+        except Exception:
+            return body, query, headers
+
     except Exception:
         return None, None, None
 
