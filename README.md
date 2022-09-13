@@ -1,3 +1,8 @@
+[![pypi](https://img.shields.io/pypi/v/abstra.svg)](https://pypi.python.org/pypi/abstra)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/abstra.svg)](
+https://pypi.org/project/abstra/)
+[![Code check](https://github.com/abstra-app/abstra-lib/actions/workflows/code_check.yml/badge.svg)](https://github.com/abstra-app/abstra-lib/actions/workflows/code_check.yml)
+
 # abstra lib
 
 Python package for abstra products
