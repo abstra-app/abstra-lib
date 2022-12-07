@@ -15,6 +15,9 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
+# The list of requirements
+requirements = (HERE / "requirements.txt").read_text().split('\n')
+
 setup(
     name="abstra",
     version=version,
@@ -24,5 +27,5 @@ setup(
     url="https://github.com/abstra-app/abstra-lib",
     license="MIT",
     packages=["abstra"],
-    install_requires=["setuptools", "requests"],
+    install_requires=requirements,
 )
