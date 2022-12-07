@@ -16,7 +16,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 # The list of requirements
-requirements = (HERE / "requirements.txt").read_text().split('\n')
+requirements = (HERE / "requirements.txt").read_text().split("\n")
 
 setup(
     name="abstra",
