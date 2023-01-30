@@ -1,6 +1,5 @@
 [![pypi](https://img.shields.io/pypi/v/abstra.svg)](https://pypi.python.org/pypi/abstra)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/abstra.svg)](
-https://pypi.org/project/abstra/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/abstra.svg)](https://pypi.org/project/abstra/)
 [![Code check](https://github.com/abstra-app/abstra-lib/actions/workflows/code_check.yml/badge.svg)](https://github.com/abstra-app/abstra-lib/actions/workflows/code_check.yml)
 
 # abstra lib
@@ -23,7 +22,8 @@ send_json(data={"ok": True})
 ```
 
 ### Testing locally
-If you are testing the script locally you can pass an optional argument to read/write from a specified file.   
+
+If you are testing the script locally you can pass an optional argument to read/write from a specified file.  
 Defaults to `request.json` and `response.json`
 
 ```python
@@ -36,8 +36,8 @@ body, query, headers = get_request(local_file="request.json")
 send_response(body='DONE', local_file="response.json")
 ```
 
-- the request local_file should be a json file with fields: `body (raw text)`, `headers (key-value map)` and `query (key-value map)` 
-- the response local_file should output to a json file with fields: `body (raw text)`, `headers (key-value map)` and `status_code (number) `
+- the request local_file should be a json file with fields: `body (raw text)`, `headers (key-value map)` and `query (key-value map)`
+- the response local_file should output to a json file with fields: `body (raw text)`, `headers (key-value map)` and `status_code (number)`
 
 ## Tables
 
