@@ -7,5 +7,12 @@ class AuthResponse:
 
 
 def get_user() -> AuthResponse:
-    # Placeholder
+    pass
+
+
+def redirect(url: str, params={}):
+    pass
+
+
+def get_query_params() -> dict:
     pass
