@@ -1,4 +1,4 @@
-from .widget_base import Output
+from ..widget_base import Output
 
 
 class LinkOutput(Output):

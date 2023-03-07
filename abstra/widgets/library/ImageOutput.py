@@ -1,4 +1,4 @@
-from .widget_base import Output
+from ..widget_base import Output
 from ..file_utils import convert_file
 from typing import Union
 import io

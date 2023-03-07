@@ -1,4 +1,4 @@
-from .widget_base import Input
+from ..widget_base import Input
 from ..file_utils import convert_file
 from typing import Union, List, Any
 
