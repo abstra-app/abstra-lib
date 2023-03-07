@@ -1,4 +1,4 @@
-from .widget_base import Input
+from ..widget_base import Input
 from ..response_types import FileResponse
 from typing import Optional
 

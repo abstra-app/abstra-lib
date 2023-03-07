@@ -1,4 +1,4 @@
-from .widget_base import Input
+from ..widget_base import Input
 from typing import List, Any
 import json
 

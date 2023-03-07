@@ -1,4 +1,4 @@
-from .library.widget_base import Input, Output
+from .widget_base import Input, Output  # exported
 
 # Output types
 from .library.PandasOutput import PandasOutput
@@ -94,3 +94,7 @@ input_types = [
 ]
 
 widget_types = output_types + input_types
+
+
+def get_widget_class(type: str):
+    return [w for w in widget_types if w.type == type][0]
