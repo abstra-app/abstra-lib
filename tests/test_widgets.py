@@ -1,5 +1,3 @@
-import unittest
-
 from .example_instances import example_instances
 from abstra.widgets.metadata import metadata
 from abstra.widgets.validation import validate_widget_props
