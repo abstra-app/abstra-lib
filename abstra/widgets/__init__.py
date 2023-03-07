@@ -1,3 +1,5 @@
+from .library.widget_base import Input, Output
+
 # Output types
 from .library.PandasOutput import PandasOutput
 from .library.ProgressOutput import ProgressOutput
@@ -42,7 +44,6 @@ from .library.RatingInput import RatingInput
 from .library.ClickInput import ClickInput
 from .library.DropdownInput import DropdownInput
 from .library.PandasRowSelectionInput import PandasRowSelectionInput
-
 
 
 output_types = [
