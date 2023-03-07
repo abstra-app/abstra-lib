@@ -26,6 +26,6 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/abstra-app/abstra-lib",
     license="MIT",
-    packages=["abstra"],
+    packages=["abstra", "abstra.widgets"],
     install_requires=requirements,
 )
