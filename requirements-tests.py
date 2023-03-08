@@ -1,0 +1,4 @@
+pandas
+plotly
+pytest 
+black

@@ -31,7 +31,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install .
-          pip install pytest black
+          pip install -r requirements-tests.txt
 
       - name: Lint
         run: |
