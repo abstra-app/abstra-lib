@@ -7,7 +7,7 @@ class CheckboxInput(Input):
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
         self.label = label
-        self.initial_value = kwargs.get("initial_value", "")
+        self.initial_value = kwargs.get("initial_value", False)
         self.required = kwargs.get("required", True)
         self.hint = kwargs.get("hint", None)
         self.columns = kwargs.get("columns", 1)
