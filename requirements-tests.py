@@ -1,4 +1,0 @@
-pandas
-plotly
-pytest 
-black
