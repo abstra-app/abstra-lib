@@ -66,4 +66,27 @@ example_instances = [
     ),
     CurrencyInput("currency", "How much?", currency="BRL"),
     ProgressOutput(50, 100),
+    NumberSliderInput("slider", "How much?", min=0, max=100, step=1),
+    CheckboxInput("checkbox", "Do you agree?"),
+    CnpjInput("cnpj", "What is your CNPJ?"),
+    CpfInput("cpf", "What is your CPF?"),
+    ToggleInput("toggle", "Do you agree?"),
+    ChecklistInput(
+        "checklist",
+        "What are your interests?",
+        options=["python", "javascript", "c++"],
+    ),
+    KanbanBoardInput(
+        "kanban",
+        label="What are your interests?",
+    ),
+    AnswerSheetInput(
+        "answer-sheet",
+        "What are your interests?",
+        options=["python", "javascript", "c++"],
+        number_of_questions=3,
+    ),
+    LatexOutput("$$\\frac{1}{2}$$"),
+    RatingInput("rating", "How much?", max=10),
+    ClickInput("click", "Click me!"),
 ]
