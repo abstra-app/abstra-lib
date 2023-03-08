@@ -17,7 +17,7 @@ pip install twine
 
 ### Build
 
-Delete the `dist` and `build` directories, if present
+Delete the `dist` and `build` directories, if present.
 
 Build the package:
 
