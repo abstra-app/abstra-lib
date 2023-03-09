@@ -3874,6 +3874,13 @@ metadata = {
                     "default": None,
                 },
                 {
+                    "argName": "multiple",
+                    "description": "Whether the user will be allowed to select multiple rows. Defaults to True.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "True",
+                },
+                {
                     "argName": "disabled",
                     "description": "whether the input is disabled. Defaults to False.",
                     "typeName": "bool",
@@ -3994,6 +4001,12 @@ metadata = {
                     "description": "Whether the widget should take up the full width of the page",
                     "isOptional": True,
                     "formOnly": True,
+                },
+                {
+                    "argName": "multiple",
+                    "typeName": "boolean",
+                    "description": "Whether the input accepts multiple values or not",
+                    "isOptional": True,
                 },
             ]
         },
