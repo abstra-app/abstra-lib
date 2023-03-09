@@ -16,6 +16,7 @@ class PandasRowSelectionInput(Input):
         self.display_index = kwargs.get("display_index", False)
         self.disabled = kwargs.get("disabled", False)
         self.label = kwargs.get("label", None)
+        self.multiple = kwargs.get("multiple", True)
 
     def json(self, **kwargs):
         return {
@@ -29,6 +30,7 @@ class PandasRowSelectionInput(Input):
             "displayIndex": self.display_index,
             "disabled": self.disabled,
             "label": self.label,
+            "multiple": self.multiple,
         }
 
     def convert_answer(self, answer) -> List:
