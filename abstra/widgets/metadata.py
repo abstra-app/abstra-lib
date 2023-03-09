@@ -1,5 +1,7 @@
 metadata = {
     "answer-sheet-input": {
+        "name": "Answer sheet",
+        "description": "Retrieve the answers from a test on usual answersheet",
         "type": "answer-sheet-input",
         "events": [
             {
@@ -8,7 +10,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Retrieve the answers from a test on a usual answersheet",
         "dashProperties": {
             "minWidth": 200,
             "minHeight": 350,
@@ -168,6 +169,8 @@ metadata = {
         ],
     },
     "cards-input": {
+        "name": "Card display",
+        "description": "Read a text value from the user simple text input",
         "type": "cards-input",
         "events": [
             {
@@ -279,7 +282,6 @@ metadata = {
                 }
             ],
         },
-        "description": "Read a text value from the user simple text input",
         "brokerAPI": {
             "params": [
                 {
@@ -461,6 +463,8 @@ metadata = {
         ],
     },
     "checkbox-input": {
+        "name": "Checkbox",
+        "description": "Allow users to select an option by interacting with a checkbox",
         "type": "checkbox-input",
         "events": [
             {
@@ -469,7 +473,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a checkbox value from the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 32,
@@ -632,6 +635,8 @@ metadata = {
         ],
     },
     "checklist-input": {
+        "name": "Checkilst",
+        "description": "Show a checklist for users to select items",
         "type": "checklist-input",
         "events": [
             {
@@ -640,7 +645,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a checklist value from the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 32,
@@ -848,8 +852,9 @@ metadata = {
         ],
     },
     "click-input": {
+        "name": "Button",
+        "description": "Buttons allow users to trigger actions.",
         "type": "click-input",
-        "description": "A button that triggers click events",
         "events": [
             {
                 "key": "click",
@@ -971,6 +976,8 @@ metadata = {
         ],
     },
     "cnpj-input": {
+        "name": "CNPJ field",
+        "description": "Allow users to insert a CNPJ number into the app.",
         "type": "cnpj-input",
         "events": [
             {
@@ -979,7 +986,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a CNPJ value from the user",
         "dashProperties": {
             "minWidth": 222,
             "minHeight": 70,
@@ -1138,6 +1144,8 @@ metadata = {
         ],
     },
     "code-input": {
+        "name": "Code field",
+        "description": "Code field allow users to insert code and reads it.",
         "type": "code-input",
         "events": [
             {
@@ -1146,7 +1154,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a piece of code from the user",
         "dashProperties": {
             "minWidth": 377,
             "minHeight": 552,
@@ -1304,6 +1311,8 @@ metadata = {
         ],
     },
     "cpf-input": {
+        "name": "CPF field",
+        "description": "Allow users to insert a CPF number into the app.",
         "type": "cpf-input",
         "events": [
             {
@@ -1312,7 +1321,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a CPF value from the user",
         "dashProperties": {
             "minWidth": 222,
             "minHeight": 70,
@@ -1468,6 +1476,8 @@ metadata = {
         ],
     },
     "currency-input": {
+        "name": "Currency field",
+        "description": "Currency field allows users to enter monetary values.",
         "type": "currency-input",
         "events": [
             {
@@ -1476,7 +1486,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read currency value from the user",
         "dashProperties": {
             "minWidth": 100,
             "minHeight": 72,
@@ -1688,6 +1697,8 @@ metadata = {
         ],
     },
     "date-input": {
+        "name": "Date picker input",
+        "description": "Allow users to select  a date, or a range of dates.*",
         "type": "date-input",
         "events": [
             {
@@ -1696,7 +1707,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a date value from the user",
         "dashProperties": {
             "minWidth": 200,
             "minHeight": 72,
@@ -1844,6 +1854,8 @@ metadata = {
         ],
     },
     "dropdown-input": {
+        "name": "Dropdown",
+        "description": "Allow users to select one or more options by selecting items in a dropdown",
         "type": "dropdown-input",
         "events": [
             {
@@ -1852,7 +1864,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a dropdown value from the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 60,
@@ -2060,6 +2071,8 @@ metadata = {
         ],
     },
     "email-input": {
+        "name": "Email field",
+        "description": "Email field allow users to enter a valid email address.",
         "type": "email-input",
         "events": [
             {
@@ -2068,7 +2081,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read an email value from the user",
         "dashProperties": {
             "minWidth": 220,
             "minHeight": 60,
@@ -2234,6 +2246,8 @@ metadata = {
         ],
     },
     "file-input": {
+        "name": "File upload area",
+        "description": "File upload adds a drop-area for users to upload one or more files",
         "type": "file-input",
         "events": [
             {
@@ -2242,7 +2256,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a file value from the user",
         "dashProperties": {
             "minWidth": 150,
             "minHeight": 112,
@@ -2411,6 +2424,8 @@ metadata = {
         ],
     },
     "image-input": {
+        "name": "Image upload",
+        "description": "Image upload adds a drop-area for users to upload one or more image files.",
         "type": "image-input",
         "events": [
             {
@@ -2419,7 +2434,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a image file value from the user ",
         "dashProperties": {
             "minWidth": 150,
             "minHeight": 112,
@@ -2590,6 +2604,8 @@ metadata = {
         ],
     },
     "kanban-board-input": {
+        "name": "Kanban board",
+        "description": "Kanban board",
         "type": "kanban-board-input",
         "dashOnly": True,
         "events": [],
@@ -2599,7 +2615,6 @@ metadata = {
             "initialWidth": 500,
             "initialHeight": 500,
         },
-        "description": "Kanban board",
         "pythonAPI": {
             "name": "read_kanban_board",
             "params": [
@@ -2757,8 +2772,9 @@ metadata = {
         ],
     },
     "list-input": {
-        "type": "list-input",
+        "name": "List of inputs",
         "description": "Read a list value from the user",
+        "type": "list-input",
         "formOnly": True,
         "events": [
             {
@@ -2983,6 +2999,8 @@ metadata = {
         ],
     },
     "multiple-choice-input": {
+        "name": "Multiple choice",
+        "description": "Read a multiple choice value from the user",
         "type": "multiple-choice-input",
         "events": [
             {
@@ -2991,7 +3009,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a multiple choice value from the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 70,
@@ -3231,6 +3248,8 @@ metadata = {
         ],
     },
     "nps-input": {
+        "name": "NPS feedback",
+        "description": "NPS feedback allow users to rank their experience from 0 to 10.",
         "type": "nps-input",
         "events": [
             {
@@ -3239,7 +3258,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Gets NPS feedback from user",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -3440,6 +3458,8 @@ metadata = {
         ],
     },
     "number-input": {
+        "name": "Number field",
+        "description": "Number field allow users to enter numeric values.",
         "type": "number-input",
         "events": [
             {
@@ -3448,7 +3468,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a number value from the user",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -3643,6 +3662,8 @@ metadata = {
         ],
     },
     "number-slider-input": {
+        "name": "Number slider",
+        "description": "Allow users to select values in a slider bar. ",
         "type": "number-slider-input",
         "events": [
             {
@@ -3651,7 +3672,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a number value from the user",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 30,
@@ -3833,6 +3853,8 @@ metadata = {
         ],
     },
     "pandas-row-selection-input": {
+        "name": "Table + selection",
+        "description": "Display a pandas dataframe as a table and allow the user to select rows",
         "type": "pandas-row-selection-input",
         "events": [
             {
@@ -3841,7 +3863,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Display a pandas dataframe as a table and allow the user to select rows",
         "dashProperties": {
             "minWidth": 195,
             "minHeight": 72,
@@ -4036,6 +4057,7 @@ metadata = {
         ],
     },
     "password-input": {
+        "name": "Password field",
         "type": "password-input",
         "events": [
             {
@@ -4044,7 +4066,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a password value from the user",
+        "description": "Password field allow users to enter a password before seen the content.",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -4319,6 +4341,8 @@ metadata = {
         ],
     },
     "phone-input": {
+        "name": "Phone field",
+        "description": "Phone field allow users to enter a valid phone number.",
         "type": "phone-input",
         "events": [
             {
@@ -4327,7 +4351,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a phone value from the user",
         "dashProperties": {
             "minWidth": 377,
             "minHeight": 60,
@@ -4496,6 +4519,8 @@ metadata = {
         ],
     },
     "rating-input": {
+        "name": "Rating feedback",
+        "description": "Rating feedback allow users to rank their experience from 1 to 5 starts.",
         "type": "rating-input",
         "events": [
             {
@@ -4504,7 +4529,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a rating value from the user",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -4688,6 +4712,7 @@ metadata = {
         ],
     },
     "tag-input": {
+        "name": "Tag input",
         "type": "tag-input",
         "events": [
             {
@@ -4858,6 +4883,8 @@ metadata = {
         ],
     },
     "text-input": {
+        "name": "Text field",
+        "description": "Text fields allow users to insert plain text.",
         "type": "text-input",
         "events": [
             {
@@ -4866,7 +4893,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a text value from the user",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -5044,6 +5070,7 @@ metadata = {
         ],
     },
     "textarea-input": {
+        "name": "Long text field",
         "type": "textarea-input",
         "events": [
             {
@@ -5052,7 +5079,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a textarea value from the user",
+        "description": "Long text field allow users to type longer textual content.",
         "dashProperties": {
             "minWidth": 200,
             "minHeight": 200,
@@ -5208,6 +5235,7 @@ metadata = {
         ],
     },
     "time-input": {
+        "name": "Time input",
         "type": "time-input",
         "events": [
             {
@@ -5375,6 +5403,8 @@ metadata = {
         ],
     },
     "toggle-input": {
+        "name": "Toggle",
+        "description": "Allow users to set between two items.",
         "type": "toggle-input",
         "events": [
             {
@@ -5383,7 +5413,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a toggle value from the user",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 100,
@@ -5544,6 +5573,8 @@ metadata = {
         ],
     },
     "video-input": {
+        "name": "Video upload",
+        "description": "Video upload adds a drop-area for users to upload one or more video files.",
         "type": "video-input",
         "events": [
             {
@@ -5552,7 +5583,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a video file value from the user",
         "dashProperties": {
             "minWidth": 150,
             "minHeight": 112,
@@ -5724,9 +5754,10 @@ metadata = {
         ],
     },
     "file-output": {
+        "name": "Download file",
+        "description": "Show a button for the user to download a file.",
         "type": "file-output",
         "events": [],
-        "description": "Display a button for the user to download a file",
         "dashProperties": {
             "minWidth": 65,
             "minHeight": 30,
@@ -5810,9 +5841,10 @@ metadata = {
         ],
     },
     "html-output": {
+        "name": "HTML",
+        "description": "Embed HTML to the app.",
         "type": "html-output",
         "events": [],
-        "description": "Display a html snippet to the user",
         "dashProperties": {
             "minWidth": 65,
             "minHeight": 30,
@@ -5882,9 +5914,10 @@ metadata = {
         ],
     },
     "iframe-output": {
+        "name": "iframe",
+        "description": "Embed content using iframe.",
         "type": "iframe-output",
         "events": [],
-        "description": "Display an inline iframe to the user",
         "dashProperties": {
             "minWidth": 377,
             "minHeight": 632,
@@ -5984,9 +6017,10 @@ metadata = {
         ],
     },
     "image-output": {
+        "name": "Show image",
+        "description": "Show an image to the user",
         "type": "image-output",
         "events": [],
-        "description": "Display an image to the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 60,
@@ -6084,9 +6118,10 @@ metadata = {
         ],
     },
     "latex-output": {
+        "name": "Show Latex formula",
+        "description": "Show an Latex formula to the user",
         "type": "latex-output",
         "events": [],
-        "description": "Display a latex formula to the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
@@ -6167,9 +6202,10 @@ metadata = {
         ],
     },
     "link-output": {
+        "name": "Link (text URL)",
+        "description": "Allow users to see and open content from text links.",
         "type": "link-output",
         "events": [],
-        "description": "Display a link to the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 72,
@@ -6262,9 +6298,10 @@ metadata = {
         ],
     },
     "markdown-output": {
+        "name": "Markdown",
+        "description": "Show a formatted text to the user",
         "type": "markdown-output",
         "events": [],
-        "description": "Display a formatted text to the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
@@ -6334,6 +6371,8 @@ metadata = {
         ],
     },
     "pandas-output": {
+        "name": "Table",
+        "description": "Display a pandas dataframe to the user",
         "type": "pandas-output",
         "events": [
             {
@@ -6348,7 +6387,6 @@ metadata = {
                 ],
             }
         ],
-        "description": "Display a pandas dataframe to the user",
         "dashProperties": {
             "minWidth": 195,
             "minHeight": 72,
@@ -6475,9 +6513,10 @@ metadata = {
         ],
     },
     "plotly-output": {
+        "name": "Line chart",
+        "description": "Show a line chart to the user using Plotly",
         "type": "plotly-output",
         "events": [],
-        "description": "Display a plotly figure to the user",
         "dashProperties": {
             "minWidth": 245,
             "minHeight": 112,
@@ -6562,9 +6601,10 @@ metadata = {
         ],
     },
     "progress-output": {
+        "name": "Progress bar",
+        "description": "Show a progress bar when loading the app.",
         "type": "progress-output",
         "events": [],
-        "description": "Display a progress bar. This widget is shown on screen until the script shows a new widget. This widget does not work on Pages, and must be used only with its function.",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
@@ -6671,9 +6711,10 @@ metadata = {
         ],
     },
     "text-output": {
+        "name": "Text display",
+        "description": '"Text display" adds textual information into the app.',
         "type": "text-output",
         "events": [],
-        "description": "Display a text to the user",
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
