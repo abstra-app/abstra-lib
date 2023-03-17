@@ -20,10 +20,29 @@ def get_widget_class(type: str):
     return [w for w in widget_types if w.type == type][0]
 
 
+def _get_prop(widget_type: str, prop_name: str):
+    params = metadata[widget_type]["pythonAPI"]["params"]
+    return [p for p in params if p["argName"] == prop_name][0]
+
+
 def is_prop_required(widget_type: str, prop_name: str):
     try:
-        params = metadata[widget_type]["pythonAPI"]["params"]
-        prop = [p for p in params if p["argName"] == prop_name][0]
+        prop = _get_prop(widget_type, prop_name)
         return not prop["isKwarg"]
     except:
         return False
+
+
+def get_widget_name(widget_type: str):
+    try:
+        return metadata[widget_type]["name"]
+    except:
+        return None
+
+
+def get_prop_type(widget_type: str, prop_name: str):
+    try:
+        prop = _get_prop(widget_type, prop_name)
+        return prop["typeName"]
+    except:
+        return None
