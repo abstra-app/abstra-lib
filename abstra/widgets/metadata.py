@@ -190,7 +190,7 @@ metadata = {
             "params": [
                 {
                     "argName": "label",
-                    "description": "The text related to this field",
+                    "description": "The text related to this input",
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
@@ -976,7 +976,7 @@ metadata = {
         ],
     },
     "cnpj-input": {
-        "name": "CNPJ field",
+        "name": "CNPJ input",
         "description": "Allow users to insert a CNPJ number into the app.",
         "type": "cnpj-input",
         "events": [
@@ -1144,8 +1144,8 @@ metadata = {
         ],
     },
     "code-input": {
-        "name": "Code field",
-        "description": "Code field allow users to insert code and reads it.",
+        "name": "Code input",
+        "description": "Code input allow users to insert code and reads it.",
         "type": "code-input",
         "events": [
             {
@@ -1311,7 +1311,7 @@ metadata = {
         ],
     },
     "cpf-input": {
-        "name": "CPF field",
+        "name": "CPF input",
         "description": "Allow users to insert a CPF number into the app.",
         "type": "cpf-input",
         "events": [
@@ -1476,8 +1476,8 @@ metadata = {
         ],
     },
     "currency-input": {
-        "name": "Currency field",
-        "description": "Currency field allows users to enter monetary values.",
+        "name": "Currency input",
+        "description": "Currency input allows users to enter monetary values.",
         "type": "currency-input",
         "events": [
             {
@@ -2071,8 +2071,8 @@ metadata = {
         ],
     },
     "email-input": {
-        "name": "Email field",
-        "description": "Email field allow users to enter a valid email address.",
+        "name": "Email input",
+        "description": "Email input allow users to enter a valid email address.",
         "type": "email-input",
         "events": [
             {
@@ -3458,8 +3458,8 @@ metadata = {
         ],
     },
     "number-input": {
-        "name": "Number field",
-        "description": "Number field allow users to enter numeric values.",
+        "name": "Number input",
+        "description": "Number input allow users to enter numeric values.",
         "type": "number-input",
         "events": [
             {
@@ -4057,7 +4057,7 @@ metadata = {
         ],
     },
     "password-input": {
-        "name": "Password field",
+        "name": "Password input",
         "type": "password-input",
         "events": [
             {
@@ -4066,7 +4066,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Password field allow users to enter a password before seen the content.",
+        "description": "Password input allow users to enter a password before seen the content.",
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -4274,7 +4274,7 @@ metadata = {
                 {
                     "argName": "secret",
                     "typeName": "boolean",
-                    "description": "Read-only field that indicates whether the widget response value is secret.",
+                    "description": "Read-only input that indicates whether the widget response value is secret.",
                     "default": True,
                     "isOptional": True,
                 },
@@ -4341,8 +4341,8 @@ metadata = {
         ],
     },
     "phone-input": {
-        "name": "Phone field",
-        "description": "Phone field allow users to enter a valid phone number.",
+        "name": "Phone input",
+        "description": "Phone input allow users to enter a valid phone number.",
         "type": "phone-input",
         "events": [
             {
@@ -4883,7 +4883,7 @@ metadata = {
         ],
     },
     "text-input": {
-        "name": "Text field",
+        "name": "Text input",
         "description": "Text fields allow users to insert plain text.",
         "type": "text-input",
         "events": [
@@ -5070,7 +5070,7 @@ metadata = {
         ],
     },
     "textarea-input": {
-        "name": "Long text field",
+        "name": "Long text input",
         "type": "textarea-input",
         "events": [
             {
@@ -5079,7 +5079,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Long text field allow users to type longer textual content.",
+        "description": "Long text input allow users to type longer textual content.",
         "dashProperties": {
             "minWidth": 200,
             "minHeight": 200,
@@ -5415,7 +5415,7 @@ metadata = {
         ],
         "dashProperties": {
             "minWidth": 120,
-            "minHeight": 100,
+            "minHeight": 60,
             "initialWidth": 377,
             "initialHeight": 112,
         },
@@ -6208,7 +6208,7 @@ metadata = {
         "events": [],
         "dashProperties": {
             "minWidth": 60,
-            "minHeight": 72,
+            "minHeight": 30,
             "initialWidth": 146,
             "initialHeight": 72,
         },
@@ -6513,8 +6513,8 @@ metadata = {
         ],
     },
     "plotly-output": {
-        "name": "Line chart",
-        "description": "Show a line chart to the user using Plotly",
+        "name": "Plotly graph",
+        "description": "Displays a Plotly figure to the user",
         "type": "plotly-output",
         "events": [],
         "dashProperties": {
