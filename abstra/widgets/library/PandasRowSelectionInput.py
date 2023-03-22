@@ -17,6 +17,7 @@ class PandasRowSelectionInput(Input):
         self.disabled = kwargs.get("disabled", False)
         self.label = kwargs.get("label", None)
         self.multiple = kwargs.get("multiple", True)
+        self.filterable = kwargs.get("filterable", False)
 
     def json(self, **kwargs):
         return {
@@ -31,6 +32,7 @@ class PandasRowSelectionInput(Input):
             "disabled": self.disabled,
             "label": self.label,
             "multiple": self.multiple,
+            "filterable": self.filterable,
         }
 
     def convert_answer(self, answer) -> List:

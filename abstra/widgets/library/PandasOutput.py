@@ -13,6 +13,7 @@ class PandasOutput(Output):
         self.display_index = kwargs.get("display_index", False)
         self.label = kwargs.get("label", None)
         self.actions = kwargs.get("actions", [])
+        self.filterable = kwargs.get("filterable", False)
 
     def json(self, **kwargs):
         return {
@@ -23,4 +24,5 @@ class PandasOutput(Output):
             "displayIndex": self.display_index,
             "label": self.label,
             "actions": self.actions,
+            "filterable": self.filterable,
         }
