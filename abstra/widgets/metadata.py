@@ -5305,10 +5305,10 @@ metadata = {
         ],
         "description": "Long text input allow users to type longer textual content.",
         "dashProperties": {
-            "minWidth": 200,
-            "minHeight": 200,
-            "initialWidth": 223,
-            "initialHeight": 272,
+            "minWidth": 100,
+            "minHeight": 100,
+            "initialWidth": 200,
+            "initialHeight": 150,
         },
         "pythonAPI": {
             "name": "read_textarea",
