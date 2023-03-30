@@ -185,7 +185,18 @@ metadata = {
                 "key": "change",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
-            }
+            },
+            {
+                "key": "card-click",
+                "description": "Function or expression to be run when a card is clicked",
+                "payloadSchema": [
+                    {
+                        "key": "card",
+                        "typeName": "Object",
+                        "description": "The card that was clicked",
+                    }
+                ],
+            },
         ],
         "dashProperties": {
             "minWidth": 530,
