@@ -199,10 +199,10 @@ metadata = {
             },
         ],
         "dashProperties": {
-            "minWidth": 530,
-            "minHeight": 352,
-            "initialWidth": 530,
-            "initialHeight": 712,
+            "minWidth": 200,
+            "minHeight": 200,
+            "initialWidth": 400,
+            "initialHeight": 350,
         },
         "pythonAPI": {
             "name": "read_cards",
@@ -222,7 +222,7 @@ metadata = {
                     "typeDescription": ["list[AbstraCard]"],
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '[\n          {\n            "title": "Option 1",\n            "subtitle": "Subtitle 1",\n            "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg",\n            "description": "option 1 description",\n            "topLeftExtra": "Left 1",\n            "topRightExtra": "Right 1",\n          },\n          {\n            "title": "Option 2",\n            "subtitle": "Subtitle 2",\n            "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg",\n            "description": "option 2 description",\n            "topLeftExtra": "Left 2",\n            "topRightExtra": "Right 2",\n          },\n        ]',
+                    "dashesInitialValue": '[\n          {\n            "title": "Option 1",\n            "subtitle": "Subtitle 1",\n            "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg",\n            "description": "option 1 description",\n            "topLeftExtra": "Left 1",\n            "topRightExtra": "Right 1",\n          }\n        ]',
                 },
                 {
                     "argName": "multiple",
