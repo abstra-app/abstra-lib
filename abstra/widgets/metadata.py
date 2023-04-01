@@ -7107,6 +7107,13 @@ metadata = {
                     "dashesInitialValue": '"Your text here!"',
                 },
                 {
+                    "argName": "size",
+                    "description": "The size of the text: 'small', 'medium', 'large'",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "medium",
+                },
+                {
                     "argName": "end_program",
                     "description": "Whether the program should end after the widget is shown. Defaults to False.",
                     "typeName": "bool",
@@ -7136,6 +7143,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "text", "description": "", "typeName": "string"},
+                {"argName": "size", "description": "", "typeName": "string"},
                 {
                     "argName": "columns",
                     "typeName": "number",
