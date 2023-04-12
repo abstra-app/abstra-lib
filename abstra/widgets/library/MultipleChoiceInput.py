@@ -29,7 +29,7 @@ class MultipleChoiceInput(Input):
             "options": self.options,
             "hint": self.hint,
             "multiple": self.multiple,
-            "initialValue": self.initial_value or ([] if self.multiple else None),
+            "initialValue": self.initial_value,
             "required": self.required and not self.multiple,
             "columns": self.columns,
             "fullWidth": self.full_width,

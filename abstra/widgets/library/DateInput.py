@@ -1,7 +1,6 @@
+import datetime, time, re
 from ..widget_base import Input
 from typing import Union, Optional
-import datetime
-import time
 
 
 class DateInput(Input):
@@ -17,25 +16,13 @@ class DateInput(Input):
         self.full_width = kwargs.get("full_width", False)
         self.disabled = kwargs.get("disabled", False)
 
-    @staticmethod
-    def convert_value(value: Union[datetime.date, time.struct_time, str]) -> str:
-        if isinstance(value, datetime.date):
-            return value.isoformat()
-        elif isinstance(value, time.struct_time):
-            return (
-                datetime.datetime.fromtimestamp(time.mktime(value)).date().isoformat()
-            )
-        return value
-
     def json(self, **kwargs):
         return {
             "type": self.type,
             "key": self.key,
             "hint": self.hint,
             "label": self.label,
-            "initialValue": DateInput.convert_value(self.initial_value)
-            if self.initial_value
-            else "",
+            "initialValue": DateInput.__revert_value(self.initial_value),
             "required": self.required,
             "columns": self.columns,
             "fullWidth": self.full_width,
@@ -43,8 +30,18 @@ class DateInput(Input):
         }
 
     @staticmethod
-    def __revert_value(value: Union[datetime.date, time.struct_time, str]) -> str:
-        return DateInput.convert_value(value)
+    def __revert_value(
+        value: Optional[Union[datetime.date, time.struct_time, str]]
+    ) -> str:
+        if isinstance(value, datetime.date):
+            return value.isoformat()
+        if isinstance(value, time.struct_time):
+            return (
+                datetime.datetime.fromtimestamp(time.mktime(value)).date().isoformat()
+            )
+        if isinstance(value, str) and re.match("^\\d{4}-\\d{2}-\\d{2}$", value):
+            return value
+        return ""
 
     @staticmethod
     def __convert_answer(answer: str) -> Optional[datetime.date]:

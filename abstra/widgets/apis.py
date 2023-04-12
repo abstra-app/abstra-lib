@@ -1,10 +1,7 @@
-import json
-import requests
-import urllib.request
-import urllib.response
+import json, requests, urllib.request, urllib.response, io
 
 
-def upload_file(file):
+def upload_file(file: io.IOBase):
     response = requests.post(
         "https://upload.abstra.cloud/hackerforms/upload",
         data=json.dumps({"filepath": file.name}),

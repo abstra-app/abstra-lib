@@ -1,5 +1,5 @@
 from ..widget_base import Input
-from typing import Dict
+from typing import Optional, Union
 
 
 class ToggleInput(Input):
@@ -24,7 +24,7 @@ class ToggleInput(Input):
             "label": self.label,
             "onText": self.on_text,
             "offText": self.off_text,
-            "initialValue": self.initial_value,
+            "initialValue": ToggleInput.__revert_value(self.initial_value),
             "required": self.required,
             "hint": self.hint,
             "columns": self.columns,
@@ -33,8 +33,10 @@ class ToggleInput(Input):
         }
 
     @staticmethod
-    def __revert_value(value: bool) -> str:
-        return "1" if value == True else "0"
+    def __revert_value(value: Optional[Union[bool, str]]) -> str:
+        if value == "1" or value == True:
+            return "1"
+        return "0"
 
     @staticmethod
     def __convert_answer(answer: str) -> str:

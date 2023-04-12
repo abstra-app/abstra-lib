@@ -1,6 +1,6 @@
+import datetime, re
 from ..widget_base import Input
-import datetime
-from typing import Optional
+from typing import Optional, Union
 
 
 class TimeInput(Input):
@@ -24,7 +24,7 @@ class TimeInput(Input):
             "label": self.label,
             "format": self.format,
             "hint": self.hint,
-            "initialValue": self.initial_value,
+            "initialValue": TimeInput.__revert_value(self.initial_value),
             "required": self.required,
             "columns": self.columns,
             "fullWidth": self.full_width,
@@ -32,8 +32,17 @@ class TimeInput(Input):
         }
 
     @staticmethod
-    def __revert_value(value: Optional[datetime.time]):
-        return {"hour": value.hour, "minute": value.minute} if value else None
+    def __revert_value(
+        value: Optional[Union[datetime.time, str, dict]]
+    ) -> Optional[dict]:
+        if isinstance(value, str) and re.match("^\\d{2}:\\d{2}$", value):
+            return {
+                "hour": int(value.split(":")[0]),
+                "minute": int(value.split(":")[1]),
+            }
+        if isinstance(value, datetime.time):
+            return {"hour": value.hour, "minute": value.minute}
+        return None
 
     @staticmethod
     def __convert_answer(answer) -> Optional[datetime.time]:

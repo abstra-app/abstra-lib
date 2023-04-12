@@ -1,6 +1,8 @@
+from io import IOBase
+from typing import Optional, Union, List
+from ..apis import upload_file
 from ..widget_base import Input
 from ..response_types import FileResponse
-from typing import Optional
 
 
 class ImageInput(Input):
@@ -24,7 +26,7 @@ class ImageInput(Input):
             "key": self.key,
             "hint": self.hint,
             "label": self.label,
-            "initialValue": self.initial_value,
+            "initialValue": ImageInput.__revert_value(self.initial_value),
             "columns": self.columns,
             "required": self.required,
             "multiple": self.multiple,
@@ -34,12 +36,28 @@ class ImageInput(Input):
         }
 
     @staticmethod
-    def __revert_value(value) -> Optional[str]:
+    def __convert_value(value: Union[FileResponse, str, IOBase]) -> str:
+        if isinstance(value, FileResponse):
+            return value.url
+        if isinstance(value, str):
+            return value
+        if isinstance(value, IOBase):
+            return upload_file(value)
+        return ""
+
+    @staticmethod
+    def __revert_value(
+        value: Optional[
+            Union[
+                FileResponse, List[FileResponse], str, List[str], IOBase, List[IOBase]
+            ]
+        ]
+    ) -> Optional[str]:
         if not value:
             return None
         if isinstance(value, list):
-            return [item.url for item in value]
-        return value.url
+            return [ImageInput.__convert_value(item) for item in value]
+        return ImageInput.__convert_value(value)
 
     @staticmethod
     def __convert_answer(answer) -> Optional[FileResponse]:
