@@ -2465,7 +2465,7 @@ metadata = {
                 },
                 {
                     "argName": "initialValue",
-                    "typeName": ["string", "array"],
+                    "typeName": ["string", "array", "null"],
                     "description": "The initial value of the input",
                     "default": "",
                 },
