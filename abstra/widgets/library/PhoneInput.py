@@ -1,5 +1,5 @@
 from ..widget_base import Input
-from typing import Optional
+from typing import Optional, Union
 from ..response_types import PhoneResponse
 
 
@@ -17,24 +17,12 @@ class PhoneInput(Input):
         self.full_width = kwargs.get("full_width", False)
         self.disabled = kwargs.get("disabled", False)
 
-    def _initial_value_to_json(self, initial_value):
-        if isinstance(initial_value, str):
-            return {"countryCode": "+1", "nationalNumber": initial_value}
-        return {
-            "countryCode": initial_value["country_code"]
-            if "country_code" in initial_value
-            else "",
-            "nationalNumber": initial_value["national_number"]
-            if "national_number" in initial_value
-            else "",
-        }
-
     def json(self, **kwargs):
         return {
             "type": self.type,
             "key": self.key,
             "label": self.label,
-            "initialValue": self._initial_value_to_json(self.initial_value),
+            "initialValue": PhoneInput.__revert_value(self.initial_value),
             "placeholder": self.placeholder,
             "required": self.required,
             "hint": self.hint,
@@ -44,15 +32,22 @@ class PhoneInput(Input):
         }
 
     @staticmethod
-    def __revert_value(value: Optional[PhoneResponse]):
-        if not value:
-            return None
-        return {
-            "raw": value.raw,
-            "masked": value.masked,
-            "countryCode": value.country_code,
-            "nationalNumber": value.national_number,
-        }
+    def __revert_value(value: Optional[Union[PhoneResponse, str, dict]]):
+        if isinstance(value, str):
+            return {"countryCode": "+1", "nationalNumber": value}
+        if isinstance(value, dict):
+            return {
+                "countryCode": value.get("country_code", ""),
+                "nationalNumber": value.get("national_number", ""),
+            }
+        if isinstance(value, PhoneResponse):
+            return {
+                "raw": value.raw,
+                "masked": value.masked,
+                "countryCode": value.country_code,
+                "nationalNumber": value.national_number,
+            }
+        return None
 
     @staticmethod
     def __convert_answer(answer) -> Optional[PhoneResponse]:

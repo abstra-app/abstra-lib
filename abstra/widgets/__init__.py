@@ -1,7 +1,7 @@
 import inspect
 
 from abstra.widgets import library
-from .widget_base import Input, Output  # exported
+from .widget_base import Input, Output
 from .metadata import metadata
 
 
