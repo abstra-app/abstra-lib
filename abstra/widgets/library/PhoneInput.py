@@ -54,10 +54,10 @@ class PhoneInput(Input):
         if not answer:
             return None
         return PhoneResponse(
-            masked=answer["masked"],
-            raw=answer["raw"],
-            country_code=answer["countryCode"],
-            national_number=answer["nationalNumber"],
+            masked=answer.get("masked"),
+            raw=answer.get("raw"),
+            country_code=answer.get("countryCode"),
+            national_number=answer.get("nationalNumber"),
         )
 
     def convert_answer(self, answer) -> Optional[PhoneResponse]:
