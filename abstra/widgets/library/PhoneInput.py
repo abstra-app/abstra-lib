@@ -34,7 +34,7 @@ class PhoneInput(Input):
     @staticmethod
     def __revert_value(value: Optional[Union[PhoneResponse, str, dict]]):
         if isinstance(value, str):
-            return {"countryCode": "+1", "nationalNumber": value}
+            return {"countryCode": None, "nationalNumber": value}
         if isinstance(value, dict):
             return {
                 "countryCode": value.get("country_code", ""),
