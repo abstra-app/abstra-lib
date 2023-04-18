@@ -175,6 +175,7 @@ metadata = {
                 "code": 'from hackerforms import read_answer_sheet\n\nanswer_sheet = read_answer_sheet("SAT - 2023", ["A", "B", "C", "D", "E"], 5)\n# answer_sheet = { \'1\': \'A\', \'2\': None, \'3\': \'C\' }\n',
             }
         ],
+        "autoHeight": False,
     },
     "cards-input": {
         "name": "Card display",
@@ -488,6 +489,7 @@ metadata = {
                 "code": 'from hackerforms import read_cards\n\ncard = read_cards(\n    "Choose your character",\n    [\n        {\n            "title": "Bulbasaur",\n            "subtitle": "Grass / Poison",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",\n            "description": "There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "001",\n        },\n        {\n            "title": "Charmander",\n            "subtitle": "Fire",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",\n            "description": "It has a preference for hot things. When it rains, steam is said to spout from the tip of its tail.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "004",\n        },\n        {\n            "title": "Squirtle",\n            "subtitle": "Water",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",\n            "description": "When it retracts its long neck into its shell, it squirts out water with vigorous force.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "007",\n        },\n    ],\n)\n# card = { \'title\': ..., \'subtitle\': ..., \'image\': ..., \'description\': ..., \'topLeftExtra\': ..., \'topRightExtra\': ... }\n',
             }
         ],
+        "autoHeight": False,
     },
     "checkbox-input": {
         "name": "Checkbox",
@@ -668,6 +670,7 @@ metadata = {
                 "code": 'from hackerforms import read_checkbox\n\nans = read_checkbox(\n    "I have read and agree to the [terms of services](https://example.com)"\n)\n',
             },
         ],
+        "autoHeight": False,
     },
     "checklist-input": {
         "name": "Checkilst",
@@ -893,6 +896,7 @@ metadata = {
                 "code": 'from hackerforms import read_checklist\n\nans = read_checklist(\n    "",\n    [\n        {\n            "label": "I have read and agree to the [terms of services](https://example.com)",\n            "value": "agree",\n        },\n    ],\n)\n',
             },
         ],
+        "autoHeight": False,
     },
     "click-input": {
         "name": "Button",
@@ -1025,6 +1029,7 @@ metadata = {
                 "code": "",
             }
         ],
+        "autoHeight": False,
     },
     "cnpj-input": {
         "name": "CNPJ input",
@@ -1201,6 +1206,7 @@ metadata = {
                 "code": 'from hackerforms import read_cnpj\n\nname = read_cnpj("Insert your CNPJ below")\n',
             }
         ],
+        "autoHeight": False,
     },
     "code-input": {
         "name": "Code input",
@@ -1376,6 +1382,7 @@ metadata = {
                 "code": 'from hackerforms import read_code\n\nans = read_code("Show me the code!", language="c")\n',
             }
         ],
+        "autoHeight": False,
     },
     "cpf-input": {
         "name": "CPF input",
@@ -1549,6 +1556,7 @@ metadata = {
                 "code": 'from hackerforms import read_cpf\n\nname = read_cpf("Insert your CPF below")\n',
             }
         ],
+        "autoHeight": False,
     },
     "currency-input": {
         "name": "Currency input",
@@ -1778,6 +1786,7 @@ metadata = {
                 "code": 'from hackerforms import read_currency\n\nread_currency(\n    f"How many credits do you want?", currency="USD", initial_value=10, min=10\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "date-input": {
         "name": "Date picker input",
@@ -1943,6 +1952,7 @@ metadata = {
                 "code": 'from hackerforms import read_date\n\nbirthday = read_date("When were you born?")\nyear = birthday.year\nmonth = birthday.month\nday = birthday.day\n',
             }
         ],
+        "autoHeight": False,
     },
     "dropdown-input": {
         "name": "Dropdown",
@@ -2168,6 +2178,7 @@ metadata = {
                 "code": 'from hackerforms import read_dropdown\n\nans = read_dropdown(\n    "Choose a color",\n    [\n        {"label": "Red", "value": "R"},\n        {"label": "Green", "value": "G"},\n        {"label": "Blue", "value": "B"},\n    ],\n)\n# ans = "R", "G" or "B"\n',
             },
         ],
+        "autoHeight": False,
     },
     "email-input": {
         "name": "Email input",
@@ -2351,6 +2362,7 @@ metadata = {
                 "code": 'from hackerforms import read_email\n\nemail = read_email("What is your email?")\n',
             }
         ],
+        "autoHeight": False,
     },
     "file-input": {
         "name": "File upload area",
@@ -2537,6 +2549,7 @@ metadata = {
                 "code": 'from hackerforms import read_file\n\nfileResponse = read_file("Upload your .xlsx file")\nfile = fileResponse.file  # File object\nurl = fileResponse.url  # Url to the file\ncontent = fileResponse.content  # Raw file content\n',
             }
         ],
+        "autoHeight": False,
     },
     "image-input": {
         "name": "Image upload",
@@ -2725,6 +2738,7 @@ metadata = {
                 "code": 'from hackerforms import read_image\n\nfileResponse = read_image("Upload your .png image")\nfile = fileResponse.file  # File object\nurl = fileResponse.url  # Url to the file\ncontent = fileResponse.content  # Raw file content\n',
             }
         ],
+        "autoHeight": False,
     },
     "kanban-board-input": {
         "name": "Kanban board",
@@ -2893,6 +2907,7 @@ metadata = {
                 "code": 'import hackerforms as hf\n\nboard = {\n    "type": "kanban-board",\n    "stages": [\n        {\n            "type": "kanban-stage",\n            "name": "Backlog",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #1",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #2",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n        {\n            "type": "kanban-stage",\n            "name": "In progress",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #3",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #4",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n        {\n            "type": "kanban-stage",\n            "name": "Done",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #5",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #6",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n    ],\n}\n\nhf.read_kanban_board(label="Product spring", initial_value=board)\n',
             }
         ],
+        "autoHeight": False,
     },
     "list-input": {
         "name": "List of inputs",
@@ -3128,6 +3143,7 @@ metadata = {
                 "code": "from hackerforms import ListItemSchema, read_list\n\nitem = ListItemSchema().read(\"Name\").read_email(\"Email\")\nans = read_list(item, min=1, max=3)\n# ans = [{'Name': '', 'Email': ''}]\n",
             }
         ],
+        "autoHeight": False,
     },
     "multiple-choice-input": {
         "name": "Multiple choice",
@@ -3385,6 +3401,7 @@ metadata = {
                 "code": 'from hackerforms import read_multiple_choice\n\nans = read_multiple_choice(\n    "What features do you love?", ["forms", "jobs", "hooks"], multiple=True\n)\n# ans = ["forms", "jobs", "hooks"]\n',
             },
         ],
+        "autoHeight": False,
     },
     "nps-input": {
         "name": "NPS feedback",
@@ -3603,6 +3620,7 @@ metadata = {
                 "code": 'from hackerforms import read_nps\n\nans = read_nps(\n    "How likely are you to recommend Abstra Cloud?",\n    min_hint="No way!",\n    max_hint="Hell yeah!",\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "number-input": {
         "name": "Number input",
@@ -3815,6 +3833,7 @@ metadata = {
                 "code": 'from hackerforms import read_number\n\nage = read_number("How old are you?")\n',
             }
         ],
+        "autoHeight": False,
     },
     "number-slider-input": {
         "name": "Number slider",
@@ -4014,6 +4033,7 @@ metadata = {
                 "code": 'from hackeforms import read_number_slider\n\nage = read_number_slider("Set volume")\n',
             }
         ],
+        "autoHeight": False,
     },
     "pandas-row-selection-input": {
         "name": "Table + selection",
@@ -4239,6 +4259,7 @@ metadata = {
                 "code": 'from hackerforms import read_pandas_row_selection\nimport pandas as pd\n\ndata = [\n    {"Country": "USA", "Population": "32,700,000"},\n    {"Country": "China", "Population": "1,300,000,000"},\n    {"Country": "Japan", "Population": "126,000,000"},\n]\ndf = pd.DataFrame(data)\nread_pandas_row_selection(df)\n',
             }
         ],
+        "autoHeight": False,
     },
     "password-input": {
         "name": "Password input",
@@ -4531,6 +4552,7 @@ metadata = {
                 "code": 'from hackerforms import read_password\n\nans = read_password("Insert your password below")\n',
             }
         ],
+        "autoHeight": False,
     },
     "phone-input": {
         "name": "Phone input",
@@ -4717,6 +4739,7 @@ metadata = {
                 "code": 'from hackerforms import read_pandas_row_selection\n\nphone = read_phone("What is your phone number?")\nnumber = phone.raw  # eg: 5521999999999\nmasked = phone.masked  # eg: +55 (21) 99999-9999\n',
             }
         ],
+        "autoHeight": False,
     },
     "rating-input": {
         "name": "Rating feedback",
@@ -4918,6 +4941,7 @@ metadata = {
                 "code": 'from hackerforms import read_rating\n\nrating = read_rating("How do you evaluate your Python skills?", char="🐍", max=3)\n',
             },
         ],
+        "autoHeight": False,
     },
     "tag-input": {
         "name": "Tag input",
@@ -5097,6 +5121,7 @@ metadata = {
                 "code": 'from hackerforms import read_tag\n\nans = read_tag(\n    "Type and press enter to add a tag", initial_value=["Red", "Green", "Blue"]\n)\n# ans = ["Red", "Green" or "Blue"]`\n',
             }
         ],
+        "autoHeight": False,
     },
     "text-input": {
         "name": "Text input",
@@ -5292,6 +5317,7 @@ metadata = {
                 "code": 'from hackerforms import read\n\nread("What is your credit card number?", mask="0000 0000 0000 0000")\n',
             },
         ],
+        "autoHeight": False,
     },
     "textarea-input": {
         "name": "Long text input",
@@ -5465,6 +5491,7 @@ metadata = {
                 "code": 'from hackerforms import read_textarea\n\nans = read_textarea("What kind of things are you building with Abstra Cloud?")\n',
             }
         ],
+        "autoHeight": False,
     },
     "time-input": {
         "name": "Time input",
@@ -5641,6 +5668,7 @@ metadata = {
                 "code": 'from hackerforms import read\n\nans = read_time("Select a time below")\n# ans = 00:00:00\n',
             }
         ],
+        "autoHeight": False,
     },
     "toggle-input": {
         "name": "Toggle",
@@ -5819,6 +5847,7 @@ metadata = {
                 "code": 'from hackerforms import read_toggle\n\nans = read_toggle("Custom Toggle", on_text="Confirm", off_text="Cancel")\n# ans = True or False\n',
             },
         ],
+        "autoHeight": False,
     },
     "video-input": {
         "name": "Video upload",
@@ -6008,6 +6037,7 @@ metadata = {
                 "code": 'from hackerforms import read_video\n\nfileResponse = read_video("Upload your video")\nfile = fileResponse.file  # File object\nurl = fileResponse.url  # Url to the file\ncontent = fileResponse.content  # Raw file content\n',
             }
         ],
+        "autoHeight": False,
     },
     "file-output": {
         "name": "Download file",
@@ -6103,6 +6133,7 @@ metadata = {
                 "code": 'from hackerforms import display_file\n\ndisplay_file(\n    "https://placekitten.com/200/300", download_text="Click here to reveal the secret"\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "html-output": {
         "name": "HTML",
@@ -6184,6 +6215,7 @@ metadata = {
                 "code": 'from hackerforms import display_html\n\ndisplay_html(\n    \'<svg width="100" height="100"><circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" /></svg>\'\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "iframe-output": {
         "name": "iframe",
@@ -6295,6 +6327,7 @@ metadata = {
                 "code": 'from hackerforms import display_iframe\n\ndisplay_iframe(\n    "https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d2965.0824050173574!2d-93.63905729999999!3d41.998507000000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sWebFilings%2C+University+Boulevard%2C+Ames%2C+IA!5e0!3m2!1sen!2sus!4v1390839289319",\n    width="300",\n    height="250",\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "image-output": {
         "name": "Show image",
@@ -6404,6 +6437,7 @@ metadata = {
                 "code": 'from hackerforms import display_image\n\ndisplay_image("https://placekitten.com/200/200", subtitle="Meooow")\n',
             }
         ],
+        "autoHeight": False,
     },
     "latex-output": {
         "name": "Show Latex formula",
@@ -6496,6 +6530,7 @@ metadata = {
                 "code": 'from hackerforms import display_latex\n\ndisplay_latex(\n    """When \\(a \\\\ne 0\\), there are two solutions to \\(ax^2 + bx + c = 0\\) and they are\n$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$"""\n)\n',
             },
         ],
+        "autoHeight": False,
     },
     "link-output": {
         "name": "Link (text URL)",
@@ -6600,6 +6635,7 @@ metadata = {
                 "code": 'from hackerforms import display_link\n\ndisplay_link("https://console.abstracloud.com", link_text="Abstra Cloud Homepage")\n',
             }
         ],
+        "autoHeight": False,
     },
     "markdown-output": {
         "name": "Markdown",
@@ -6681,6 +6717,7 @@ metadata = {
                 "code": 'from hackerforms import display_markdown\n\n\ndisplay_markdown(\n    """\n## Let\'s see some examples 8-)\n\n* 1^th^ H~2~0\n\n\n\n- [ ] Task\n\n* ==Mark==\n\n* [Link](https://www.abstracloud.com/)"""\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "pandas-output": {
         "name": "Table",
@@ -6869,6 +6906,7 @@ metadata = {
                 "code": "from hackerforms import display_pandas\n\ndisplay_pandas(df)\n",
             }
         ],
+        "autoHeight": False,
     },
     "plotly-output": {
         "name": "Plotly graph",
@@ -6965,6 +7003,7 @@ metadata = {
                 "code": 'from hackerforms import display_plotly\nimport plotly.graph_objects as go\n\nfigure = go.Figure(\n    data=[go.Bar(x=[1, 2, 3], y=[1, 3, 2])],\n    layout=go.Layout(title=go.layout.Title(text="Bar chart example")),\n)\n\ndisplay_plotly(figure)\n',
             }
         ],
+        "autoHeight": False,
     },
     "progress-output": {
         "name": "Progress bar",
@@ -7083,11 +7122,13 @@ metadata = {
                 "code": 'from time import sleep\n\ndisplay_progress(0, 10, "Computing values")\n\n# Do some computation\nsleep(1)\n\ndisplay_progress(8, 10, "Almost there!")\n\n# Do some other computation\nsleep(1)\n\ndisplay("Done")\n',
             },
         ],
+        "autoHeight": False,
     },
     "text-output": {
         "name": "Text display",
         "description": '"Text display" adds textual information into the app.',
         "type": "text-output",
+        "autoHeight": True,
         "events": [],
         "dashProperties": {
             "minWidth": 60,
