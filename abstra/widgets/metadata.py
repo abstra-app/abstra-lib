@@ -6641,7 +6641,6 @@ metadata = {
         "name": "Markdown",
         "description": "Show a formatted text to the user",
         "type": "markdown-output",
-        "autoHeight": True,
         "events": [],
         "dashProperties": {
             "minWidth": 60,
@@ -6718,6 +6717,7 @@ metadata = {
                 "code": 'from hackerforms import display_markdown\n\n\ndisplay_markdown(\n    """\n## Let\'s see some examples 8-)\n\n* 1^th^ H~2~0\n\n\n\n- [ ] Task\n\n* ==Mark==\n\n* [Link](https://www.abstracloud.com/)"""\n)\n',
             }
         ],
+        "autoHeight": False,
     },
     "pandas-output": {
         "name": "Table",
