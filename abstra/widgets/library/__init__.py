@@ -1,5 +1,6 @@
 from .TextareaInput import TextareaInput
 from .ListInput import ListInput
+from .CustomInput import CustomInput
 from .VideoInput import VideoInput
 from .TagInput import TagInput
 from .PandasOutput import PandasOutput

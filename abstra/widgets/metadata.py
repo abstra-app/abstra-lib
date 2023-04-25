@@ -1788,6 +1788,178 @@ metadata = {
         ],
         "autoHeight": False,
     },
+    "custom-input": {
+        "type": "custom-input",
+        "name": "Custom widget",
+        "description": "Widget with customizable UI and behaviour",
+        "events": [
+            {
+                "key": "custom-event",
+                "description": "Function or expression to be run when custom event is triggered",
+                "payloadSchema": [],
+            },
+            {
+                "key": "change",
+                "description": "Function or expression to be run when the input value changes",
+                "payloadSchema": [],
+            },
+        ],
+        "dashProperties": {
+            "minWidth": 65,
+            "minHeight": 30,
+            "initialWidth": 146,
+            "initialHeight": 32,
+        },
+        "pythonAPI": {
+            "name": "read_custom",
+            "params": [
+                {
+                    "argName": "html_body",
+                    "description": "The HTML body content",
+                    "typeName": "str",
+                    "typeDescription": ["str (HTML snippet)"],
+                    "isKwarg": False,
+                    "default": None,
+                    "dashesInitialValue": '"<h1>Hello World</h1>"',
+                },
+                {
+                    "argName": "initial_value",
+                    "description": "The initial value to be stored in custom widget state.",
+                    "typeName": "Any",
+                    "isKwarg": True,
+                    "default": None,
+                    "formOnly": True,
+                },
+                {
+                    "argName": "label",
+                    "description": "The label to display to the user",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": None,
+                },
+                {
+                    "argName": "html_head",
+                    "description": "The HTML head content",
+                    "typeName": "str",
+                    "typeDescription": ["str (HTML snippet)"],
+                    "isKwarg": True,
+                    "default": None,
+                    "dashesInitialValue": '""',
+                },
+                {
+                    "argName": "css",
+                    "description": "The widget's CSS",
+                    "typeName": "str",
+                    "typeDescription": ["str (CSS snippet)"],
+                    "isKwarg": True,
+                    "default": None,
+                    "dashesInitialValue": '"h1 { color: red; }"',
+                },
+                {
+                    "argName": "js",
+                    "description": "The widget's JavaScript",
+                    "typeName": "str",
+                    "typeDescription": ["str (JavaScript snippet)"],
+                    "isKwarg": True,
+                    "default": None,
+                    "dashesInitialValue": "\"console.log('Hello World')\"",
+                },
+                {
+                    "argName": "full_width",
+                    "description": "Whether the input should use full screen width. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "button_text",
+                    "description": "What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "Next",
+                    "formOnly": True,
+                },
+            ],
+            "returns": [
+                {"typeName": None, "typeDescription": "any: The custom response"}
+            ],
+        },
+        "brokerAPI": {
+            "params": [
+                {
+                    "argName": "label",
+                    "typeName": "string",
+                    "description": "The label to display to the user",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "initialValue",
+                    "typeName": "any",
+                    "description": "The initial value to be stored in custom widget state.",
+                    "default": None,
+                    "isOptional": True,
+                },
+                {
+                    "argName": "htmlHead",
+                    "typeName": "string",
+                    "description": "The HTML head content",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "htmlBody",
+                    "typeName": "string",
+                    "description": "The HTML body content",
+                },
+                {
+                    "argName": "css",
+                    "typeName": "string",
+                    "description": "The widget's CSS",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "js",
+                    "typeName": "string",
+                    "description": "The widget's JavaScript",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "key",
+                    "typeName": "string",
+                    "description": "The key of the input on the returning object",
+                },
+                {
+                    "argName": "columns",
+                    "typeName": "number",
+                    "description": "number of columns this input will take",
+                    "isOptional": True,
+                    "formOnly": True,
+                },
+                {
+                    "argName": "fullWidth",
+                    "typeName": "boolean",
+                    "description": "Whether the widget should take up the full width of the page",
+                    "isOptional": True,
+                    "formOnly": True,
+                },
+            ]
+        },
+        "examples": [
+            {
+                "props": {
+                    "htmlBody": "<button id='date-btn'>Get current date</button>",
+                    "js": "document.getElementById('date-btn').addEventListener('click',function() {\n    const date = new Date();\n    const day = date.getDate();\n    const month = date.getMonth() + 1;\n    const year = date.getFullYear();\n\n    changeEvent(day + '/' + month + '/' + year);\n});",
+                    "css": "body {\n    margin: 0;\n    padding: 0;\n}\n\n#date-btn {\n    cursor: pointer;\n    background-color: #343b46;\n    border: none;\n    border-radius: 4px;\n    color: white;\n    padding: 15px 32px;\n    text-align: center;\n    text-decoration: none;\n    display: inline-block;\n    font-size: 16px;\n}\n\n#date-btn:hover {\n    background-color: #3e4756;\n}",
+                    "label": "Custom Widget",
+                },
+                "name": "Basic Example",
+                "description": "The following example shows how to create a custom widget with a button that returns the current date.",
+                "key": "example1",
+                "code": 'from hackerforms import read_custom\n\ncurrent_date = read_custom(\n    "<button id=\'date-btn\'>Get current date</button>",\n    label="Custom Widget",\n    js="""\n    document.getElementById(\'date-btn\').addEventListener(\'click\',function() {\n        const date = new Date();\n        const day = date.getDate();\n        const month = date.getMonth() + 1;\n        const year = date.getFullYear();\n\n        changeEvent(day + \'/\' + month + \'/\' + year);\n    });\n    """,\n    css="""\n    body {\n        margin: 0;\n        padding: 0;\n    }\n\n    #date-btn {\n        cursor: pointer;\n        background-color: #343b46;\n        border: none;\n        border-radius: 4px;\n        color: white;\n        padding: 15px 32px;\n        text-align: center;\n        text-decoration: none;\n        display: inline-block;\n        font-size: 16px;\n    }\n\n    #date-btn:hover {\n        background-color: #3e4756;\n    }\n    """,\n)\n',
+            }
+        ],
+        "autoHeight": False,
+    },
     "date-input": {
         "name": "Date picker input",
         "description": "Allow users to select  a date, or a range of dates.*",
@@ -6641,6 +6813,7 @@ metadata = {
         "name": "Markdown",
         "description": "Show a formatted text to the user",
         "type": "markdown-output",
+        "autoHeight": True,
         "events": [],
         "dashProperties": {
             "minWidth": 60,
@@ -6717,7 +6890,6 @@ metadata = {
                 "code": 'from hackerforms import display_markdown\n\n\ndisplay_markdown(\n    """\n## Let\'s see some examples 8-)\n\n* 1^th^ H~2~0\n\n\n\n- [ ] Task\n\n* ==Mark==\n\n* [Link](https://www.abstracloud.com/)"""\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "pandas-output": {
         "name": "Table",
