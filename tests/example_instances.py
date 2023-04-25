@@ -89,4 +89,12 @@ example_instances = [
     LatexOutput("$$\\frac{1}{2}$$"),
     RatingInput("rating", "How much?", max=10),
     ClickInput("click", "Click me!"),
+    CustomInput(
+        "custom",
+        "<button id='date-btn'>Get current date</button>",
+        label="Custom Widget",
+        js="console.log('test')",
+        css="button { border: none; }",
+        html_head="",
+    ),
 ]
