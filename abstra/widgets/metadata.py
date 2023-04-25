@@ -2718,7 +2718,7 @@ metadata = {
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_file",
                 "key": "example1",
-                "code": 'from hackerforms import read_file\n\nfileResponse = read_file("Upload your .xlsx file")\nfile = fileResponse.file  # File object\nurl = fileResponse.url  # Url to the file\ncontent = fileResponse.content  # Raw file content\n',
+                "code": 'from hackerforms import read_file\n\nfile_response = read_file("Upload your .xlsx file")\nfile = file_response.file  # File object\n',
             }
         ],
         "autoHeight": False,
@@ -2907,7 +2907,7 @@ metadata = {
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_image",
                 "key": "example1",
-                "code": 'from hackerforms import read_image\n\nfileResponse = read_image("Upload your .png image")\nfile = fileResponse.file  # File object\nurl = fileResponse.url  # Url to the file\ncontent = fileResponse.content  # Raw file content\n',
+                "code": 'from hackerforms import read_image\n\nfile_response = read_image("Upload your .png image")\nfile = file_response.file  # File object\n',
             }
         ],
         "autoHeight": False,
@@ -6206,7 +6206,7 @@ metadata = {
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_video",
                 "key": "example1",
-                "code": 'from hackerforms import read_video\n\nfileResponse = read_video("Upload your video")\nfile = fileResponse.file  # File object\nurl = fileResponse.url  # Url to the file\ncontent = fileResponse.content  # Raw file content\n',
+                "code": 'from hackerforms import read_video\n\nfile_response = read_video("Upload your video")\nfile = file_response.file  # File object\n',
             }
         ],
         "autoHeight": False,
@@ -7291,7 +7291,7 @@ metadata = {
                 "name": "Custom fields",
                 "description": "You can customize the current and total number of steps. Also the message of each step",
                 "key": "example2",
-                "code": 'from time import sleep\n\ndisplay_progress(0, 10, "Computing values")\n\n# Do some computation\nsleep(1)\n\ndisplay_progress(8, 10, "Almost there!")\n\n# Do some other computation\nsleep(1)\n\ndisplay("Done")\n',
+                "code": 'from time import sleep\n\nfor i in range(10):\n    display_progress(i, 10, text="Computing values")\n\n    sleep(1)  # Do some computation\n',
             },
         ],
         "autoHeight": False,
