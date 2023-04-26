@@ -33,6 +33,19 @@ def is_prop_required(widget_type: str, prop_name: str):
         return False
 
 
+def _get_broker_prop(widget_type: str, prop_name: str):
+    params = metadata[widget_type]["brokerAPI"]["params"]
+    return [p for p in params if p["argName"] == prop_name][0]
+
+
+def is_broker_prop_form_only(widget_type: str, prop_name: str):
+    try:
+        prop = _get_broker_prop(widget_type, prop_name)
+        return prop["formOnly"]
+    except:
+        return False
+
+
 def get_widget_name(widget_type: str):
     try:
         return metadata[widget_type]["name"]
