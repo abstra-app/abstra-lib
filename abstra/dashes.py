@@ -16,3 +16,7 @@ def redirect(url: str, params={}):
 
 def get_query_params() -> dict:
     pass
+
+
+def alert(message: str, severity: str = "info"):
+    pass
