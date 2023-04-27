@@ -20,3 +20,7 @@ def get_query_params() -> dict:
 
 def alert(message: str, severity: str = "info"):
     pass
+
+
+def execute_js():
+    pass
