@@ -10,6 +10,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 200,
             "minHeight": 350,
@@ -177,12 +178,12 @@ metadata = {
                 "code": 'from hackerforms import read_answer_sheet\n\nanswer_sheet = read_answer_sheet("SAT - 2023", ["A", "B", "C", "D", "E"], 5)\n# answer_sheet = { \'1\': \'A\', \'2\': None, \'3\': \'C\' }\n',
             }
         ],
-        "autoHeight": False,
     },
     "cards-input": {
         "name": "Card display",
         "description": "Read a text value from the user simple text input",
         "type": "cards-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -493,12 +494,12 @@ metadata = {
                 "code": 'from hackerforms import read_cards\n\ncard = read_cards(\n    "Choose your character",\n    [\n        {\n            "title": "Bulbasaur",\n            "subtitle": "Grass / Poison",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",\n            "description": "There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "001",\n        },\n        {\n            "title": "Charmander",\n            "subtitle": "Fire",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",\n            "description": "It has a preference for hot things. When it rains, steam is said to spout from the tip of its tail.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "004",\n        },\n        {\n            "title": "Squirtle",\n            "subtitle": "Water",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",\n            "description": "When it retracts its long neck into its shell, it squirts out water with vigorous force.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "007",\n        },\n    ],\n)\n# card = { \'title\': ..., \'subtitle\': ..., \'image\': ..., \'description\': ..., \'topLeftExtra\': ..., \'topRightExtra\': ... }\n',
             }
         ],
-        "autoHeight": False,
     },
     "checkbox-input": {
         "name": "Checkbox",
         "description": "Allow users to select an option by interacting with a checkbox",
         "type": "checkbox-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -676,7 +677,6 @@ metadata = {
                 "code": 'from hackerforms import read_checkbox\n\nans = read_checkbox(\n    "I have read and agree to the [terms of services](https://example.com)"\n)\n',
             },
         ],
-        "autoHeight": False,
     },
     "checklist-input": {
         "name": "Checkilst",
@@ -689,6 +689,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 32,
@@ -904,12 +905,12 @@ metadata = {
                 "code": 'from hackerforms import read_checklist\n\nans = read_checklist(\n    "",\n    [\n        {\n            "label": "I have read and agree to the [terms of services](https://example.com)",\n            "value": "agree",\n        },\n    ],\n)\n',
             },
         ],
-        "autoHeight": False,
     },
     "click-input": {
         "name": "Button",
         "description": "Buttons allow users to trigger actions.",
         "type": "click-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "click",
@@ -1039,12 +1040,12 @@ metadata = {
                 "code": "",
             }
         ],
-        "autoHeight": False,
     },
     "cnpj-input": {
         "name": "CNPJ input",
         "description": "Allow users to insert a CNPJ number into the app.",
         "type": "cnpj-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -1218,12 +1219,12 @@ metadata = {
                 "code": 'from hackerforms import read_cnpj\n\nname = read_cnpj("Insert your CNPJ below")\n',
             }
         ],
-        "autoHeight": False,
     },
     "code-input": {
         "name": "Code input",
         "description": "Code input allow users to insert code and reads it.",
         "type": "code-input",
+        "autoHeight": False,
         "events": [
             {
                 "key": "change",
@@ -1396,7 +1397,6 @@ metadata = {
                 "code": 'from hackerforms import read_code\n\nans = read_code("Show me the code!", language="c")\n',
             }
         ],
-        "autoHeight": False,
     },
     "cpf-input": {
         "name": "CPF input",
@@ -1409,6 +1409,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 222,
             "minHeight": 70,
@@ -1572,7 +1573,6 @@ metadata = {
                 "code": 'from hackerforms import read_cpf\n\nname = read_cpf("Insert your CPF below")\n',
             }
         ],
-        "autoHeight": False,
     },
     "currency-input": {
         "name": "Currency input",
@@ -1585,6 +1585,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 100,
             "minHeight": 72,
@@ -1804,12 +1805,12 @@ metadata = {
                 "code": 'from hackerforms import read_currency\n\nread_currency(\n    f"How many credits do you want?", currency="USD", initial_value=10, min=10\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "custom-input": {
         "type": "custom-input",
         "name": "Custom widget",
         "description": "Widget with customizable UI and behaviour",
+        "autoHeight": True,
         "events": [
             {
                 "key": "custom-event",
@@ -1976,7 +1977,6 @@ metadata = {
                 "code": 'from hackerforms import read_custom\n\ncurrent_date = read_custom(\n    "<button id=\'date-btn\'>Get current date</button>",\n    label="Custom Widget",\n    js="""\n    document.getElementById(\'date-btn\').addEventListener(\'click\',function() {\n        const date = new Date();\n        const day = date.getDate();\n        const month = date.getMonth() + 1;\n        const year = date.getFullYear();\n\n        changeEvent(day + \'/\' + month + \'/\' + year);\n    });\n    """,\n    css="""\n    body {\n        margin: 0;\n        padding: 0;\n    }\n\n    #date-btn {\n        cursor: pointer;\n        background-color: #343b46;\n        border: none;\n        border-radius: 4px;\n        color: white;\n        padding: 15px 32px;\n        text-align: center;\n        text-decoration: none;\n        display: inline-block;\n        font-size: 16px;\n    }\n\n    #date-btn:hover {\n        background-color: #3e4756;\n    }\n    """,\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "date-input": {
         "name": "Date picker input",
@@ -1989,6 +1989,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 200,
             "minHeight": 72,
@@ -2144,12 +2145,12 @@ metadata = {
                 "code": 'from hackerforms import read_date\n\nbirthday = read_date("When were you born?")\nyear = birthday.year\nmonth = birthday.month\nday = birthday.day\n',
             }
         ],
-        "autoHeight": False,
     },
     "dropdown-input": {
         "name": "Dropdown",
         "description": "Allow users to select one or more options by selecting items in a dropdown",
         "type": "dropdown-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -2372,7 +2373,6 @@ metadata = {
                 "code": 'from hackerforms import read_dropdown\n\nans = read_dropdown(\n    "Choose a color",\n    [\n        {"label": "Red", "value": "R"},\n        {"label": "Green", "value": "G"},\n        {"label": "Blue", "value": "B"},\n    ],\n)\n# ans = "R", "G" or "B"\n',
             },
         ],
-        "autoHeight": False,
     },
     "email-input": {
         "name": "Email input",
@@ -2385,6 +2385,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 220,
             "minHeight": 60,
@@ -2558,12 +2559,12 @@ metadata = {
                 "code": 'from hackerforms import read_email\n\nemail = read_email("What is your email?")\n',
             }
         ],
-        "autoHeight": False,
     },
     "file-input": {
         "name": "File upload area",
         "description": "File upload adds a drop-area for users to upload one or more files",
         "type": "file-input",
+        "autoHeight": False,
         "events": [
             {
                 "key": "change",
@@ -2747,7 +2748,6 @@ metadata = {
                 "code": 'from hackerforms import read_file\n\nfile_response = read_file("Upload your .xlsx file")\nfile = file_response.file  # File object\n',
             }
         ],
-        "autoHeight": False,
     },
     "image-input": {
         "name": "Image upload",
@@ -2760,6 +2760,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 150,
             "minHeight": 112,
@@ -2938,7 +2939,6 @@ metadata = {
                 "code": 'from hackerforms import read_image\n\nfile_response = read_image("Upload your .png image")\nfile = file_response.file  # File object\n',
             }
         ],
-        "autoHeight": False,
     },
     "kanban-board-input": {
         "name": "Kanban board",
@@ -2946,6 +2946,7 @@ metadata = {
         "type": "kanban-board-input",
         "dashOnly": True,
         "events": [],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 300,
             "minHeight": 500,
@@ -3108,7 +3109,6 @@ metadata = {
                 "code": 'import hackerforms as hf\n\nboard = {\n    "type": "kanban-board",\n    "stages": [\n        {\n            "type": "kanban-stage",\n            "name": "Backlog",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #1",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #2",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n        {\n            "type": "kanban-stage",\n            "name": "In progress",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #3",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #4",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n        {\n            "type": "kanban-stage",\n            "name": "Done",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #5",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #6",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n    ],\n}\n\nhf.read_kanban_board(label="Product spring", initial_value=board)\n',
             }
         ],
-        "autoHeight": False,
     },
     "list-input": {
         "name": "List of inputs",
@@ -3122,6 +3122,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 146,
             "minHeight": 32,
@@ -3346,7 +3347,6 @@ metadata = {
                 "code": "from hackerforms import ListItemSchema, read_list\n\nitem = ListItemSchema().read(\"Name\").read_email(\"Email\")\nans = read_list(item, min=1, max=3)\n# ans = [{'Name': '', 'Email': ''}]\n",
             }
         ],
-        "autoHeight": False,
     },
     "multiple-choice-input": {
         "name": "Multiple choice",
@@ -3359,6 +3359,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 70,
@@ -3606,7 +3607,6 @@ metadata = {
                 "code": 'from hackerforms import read_multiple_choice\n\nans = read_multiple_choice(\n    "What features do you love?", ["forms", "jobs", "hooks"], multiple=True\n)\n# ans = ["forms", "jobs", "hooks"]\n',
             },
         ],
-        "autoHeight": False,
     },
     "nps-input": {
         "name": "NPS feedback",
@@ -3619,6 +3619,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -3827,7 +3828,6 @@ metadata = {
                 "code": 'from hackerforms import read_nps\n\nans = read_nps(\n    "How likely are you to recommend Abstra Cloud?",\n    min_hint="No way!",\n    max_hint="Hell yeah!",\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "number-input": {
         "name": "Number input",
@@ -3840,6 +3840,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -4042,7 +4043,6 @@ metadata = {
                 "code": 'from hackerforms import read_number\n\nage = read_number("How old are you?")\n',
             }
         ],
-        "autoHeight": False,
     },
     "number-slider-input": {
         "name": "Number slider",
@@ -4055,6 +4055,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 30,
@@ -4244,7 +4245,6 @@ metadata = {
                 "code": 'from hackeforms import read_number_slider\n\nage = read_number_slider("Set volume")\n',
             }
         ],
-        "autoHeight": False,
     },
     "pandas-row-selection-input": {
         "name": "Table + selection",
@@ -4257,6 +4257,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 195,
             "minHeight": 72,
@@ -4472,7 +4473,6 @@ metadata = {
                 "code": 'from hackerforms import read_pandas_row_selection\nimport pandas as pd\n\ndata = [\n    {"Country": "USA", "Population": "32,700,000"},\n    {"Country": "China", "Population": "1,300,000,000"},\n    {"Country": "Japan", "Population": "126,000,000"},\n]\ndf = pd.DataFrame(data)\nread_pandas_row_selection(df)\n',
             }
         ],
-        "autoHeight": False,
     },
     "password-input": {
         "name": "Password input",
@@ -4484,6 +4484,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "description": "Password input allow users to enter a password before seen the content.",
         "dashProperties": {
             "minWidth": 120,
@@ -4767,12 +4768,12 @@ metadata = {
                 "code": 'from hackerforms import read_password\n\nans = read_password("Insert your password below")\n',
             }
         ],
-        "autoHeight": False,
     },
     "phone-input": {
         "name": "Phone input",
         "description": "Phone input allow users to enter a valid phone number.",
         "type": "phone-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -4956,7 +4957,6 @@ metadata = {
                 "code": 'from hackerforms import read_pandas_row_selection\n\nphone = read_phone("What is your phone number?")\nnumber = phone.raw  # eg: 5521999999999\nmasked = phone.masked  # eg: +55 (21) 99999-9999\n',
             }
         ],
-        "autoHeight": False,
     },
     "rating-input": {
         "name": "Rating feedback",
@@ -4969,6 +4969,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -5160,11 +5161,11 @@ metadata = {
                 "code": 'from hackerforms import read_rating\n\nrating = read_rating("How do you evaluate your Python skills?", char="🐍", max=3)\n',
             },
         ],
-        "autoHeight": False,
     },
     "tag-input": {
         "name": "Tag input",
         "type": "tag-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -5342,12 +5343,12 @@ metadata = {
                 "code": 'from hackerforms import read_tag\n\nans = read_tag(\n    "Type and press enter to add a tag", initial_value=["Red", "Green", "Blue"]\n)\n# ans = ["Red", "Green" or "Blue"]`\n',
             }
         ],
-        "autoHeight": False,
     },
     "text-input": {
         "name": "Text input",
         "description": "Text fields allow users to insert plain text.",
         "type": "text-input",
+        "autoHeight": True,
         "events": [
             {
                 "key": "change",
@@ -5540,7 +5541,6 @@ metadata = {
                 "code": 'from hackerforms import read\n\nread("What is your credit card number?", mask="0000 0000 0000 0000")\n',
             },
         ],
-        "autoHeight": False,
     },
     "textarea-input": {
         "name": "Long text input",
@@ -5553,6 +5553,7 @@ metadata = {
             }
         ],
         "description": "Long text input allow users to type longer textual content.",
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 100,
             "minHeight": 100,
@@ -5716,7 +5717,6 @@ metadata = {
                 "code": 'from hackerforms import read_textarea\n\nans = read_textarea("What kind of things are you building with Abstra Cloud?")\n',
             }
         ],
-        "autoHeight": False,
     },
     "time-input": {
         "name": "Time input",
@@ -5728,6 +5728,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "description": "Read a time value from the user",
         "dashProperties": {
             "minWidth": 120,
@@ -5895,7 +5896,6 @@ metadata = {
                 "code": 'from hackerforms import read\n\nans = read_time("Select a time below")\n# ans = 00:00:00\n',
             }
         ],
-        "autoHeight": False,
     },
     "toggle-input": {
         "name": "Toggle",
@@ -5908,6 +5908,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 120,
             "minHeight": 60,
@@ -6076,7 +6077,6 @@ metadata = {
                 "code": 'from hackerforms import read_toggle\n\nans = read_toggle("Custom Toggle", on_text="Confirm", off_text="Cancel")\n# ans = True or False\n',
             },
         ],
-        "autoHeight": False,
     },
     "video-input": {
         "name": "Video upload",
@@ -6089,6 +6089,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 150,
             "minHeight": 112,
@@ -6268,12 +6269,12 @@ metadata = {
                 "code": 'from hackerforms import read_video\n\nfile_response = read_video("Upload your video")\nfile = file_response.file  # File object\n',
             }
         ],
-        "autoHeight": False,
     },
     "file-output": {
         "name": "Download file",
         "description": "Show a button for the user to download a file.",
         "type": "file-output",
+        "autoHeight": True,
         "events": [],
         "dashProperties": {
             "minWidth": 65,
@@ -6364,13 +6365,13 @@ metadata = {
                 "code": 'from hackerforms import display_file\n\ndisplay_file(\n    "https://placekitten.com/200/300", download_text="Click here to reveal the secret"\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "html-output": {
         "name": "HTML",
         "description": "Embed HTML to the app.",
         "type": "html-output",
         "events": [],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 65,
             "minHeight": 30,
@@ -6446,13 +6447,13 @@ metadata = {
                 "code": 'from hackerforms import display_html\n\ndisplay_html(\n    \'<svg width="100" height="100"><circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" /></svg>\'\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "iframe-output": {
         "name": "iframe",
         "description": "Embed content using iframe.",
         "type": "iframe-output",
         "events": [],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 377,
             "minHeight": 632,
@@ -6558,13 +6559,13 @@ metadata = {
                 "code": 'from hackerforms import display_iframe\n\ndisplay_iframe(\n    "https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d2965.0824050173574!2d-93.63905729999999!3d41.998507000000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sWebFilings%2C+University+Boulevard%2C+Ames%2C+IA!5e0!3m2!1sen!2sus!4v1390839289319",\n    width="300",\n    height="250",\n)\n',
             }
         ],
-        "autoHeight": False,
     },
     "image-output": {
         "name": "Show image",
         "description": "Show an image to the user",
         "type": "image-output",
         "events": [],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 60,
@@ -6668,13 +6669,13 @@ metadata = {
                 "code": 'from hackerforms import display_image\n\ndisplay_image("https://placekitten.com/200/200", subtitle="Meooow")\n',
             }
         ],
-        "autoHeight": False,
     },
     "latex-output": {
         "name": "Show Latex formula",
         "description": "Show an Latex formula to the user",
         "type": "latex-output",
         "events": [],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
@@ -6761,13 +6762,13 @@ metadata = {
                 "code": 'from hackerforms import display_latex\n\ndisplay_latex(\n    """When \\(a \\\\ne 0\\), there are two solutions to \\(ax^2 + bx + c = 0\\) and they are\n$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$"""\n)\n',
             },
         ],
-        "autoHeight": False,
     },
     "link-output": {
         "name": "Link (text URL)",
         "description": "Allow users to see and open content from text links.",
         "type": "link-output",
         "events": [],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
@@ -6866,7 +6867,6 @@ metadata = {
                 "code": 'from hackerforms import display_link\n\ndisplay_link("https://console.abstracloud.com", link_text="Abstra Cloud Homepage")\n',
             }
         ],
-        "autoHeight": False,
     },
     "markdown-output": {
         "name": "Markdown",
@@ -6954,6 +6954,7 @@ metadata = {
         "name": "Table",
         "description": "Display a pandas dataframe to the user",
         "type": "pandas-output",
+        "autoHeight": False,
         "events": [
             {
                 "key": "row-click",
@@ -7137,13 +7138,13 @@ metadata = {
                 "code": "from hackerforms import display_pandas\n\ndisplay_pandas(df)\n",
             }
         ],
-        "autoHeight": False,
     },
     "plotly-output": {
         "name": "Plotly graph",
         "description": "Displays a Plotly figure to the user",
         "type": "plotly-output",
         "events": [],
+        "autoHeight": False,
         "dashProperties": {
             "minWidth": 245,
             "minHeight": 112,
@@ -7234,13 +7235,13 @@ metadata = {
                 "code": 'from hackerforms import display_plotly\nimport plotly.graph_objects as go\n\nfigure = go.Figure(\n    data=[go.Bar(x=[1, 2, 3], y=[1, 3, 2])],\n    layout=go.Layout(title=go.layout.Title(text="Bar chart example")),\n)\n\ndisplay_plotly(figure)\n',
             }
         ],
-        "autoHeight": False,
     },
     "progress-output": {
         "name": "Progress bar",
         "description": "Show a progress bar when loading the app.",
         "type": "progress-output",
         "events": [],
+        "autoHeight": True,
         "dashProperties": {
             "minWidth": 60,
             "minHeight": 30,
@@ -7353,7 +7354,6 @@ metadata = {
                 "code": 'from time import sleep\n\nfor i in range(10):\n    display_progress(i, 10, text="Computing values")\n\n    sleep(1)  # Do some computation\n',
             },
         ],
-        "autoHeight": False,
     },
     "text-output": {
         "name": "Text display",
