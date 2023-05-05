@@ -1810,7 +1810,7 @@ metadata = {
         "type": "custom-input",
         "name": "Custom widget",
         "description": "Widget with customizable UI and behaviour",
-        "autoHeight": True,
+        "autoHeight": False,
         "events": [
             {
                 "key": "custom-event",
