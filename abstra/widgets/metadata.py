@@ -4297,13 +4297,6 @@ metadata = {
                     "default": "True",
                 },
                 {
-                    "argName": "filterable",
-                    "description": "Whether the table is filterable",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "disabled",
                     "description": "whether the input is disabled. Defaults to False.",
                     "typeName": "bool",
@@ -4387,12 +4380,6 @@ metadata = {
                     "argName": "label",
                     "typeName": "string",
                     "description": "The label to display above the input",
-                    "isOptional": True,
-                },
-                {
-                    "argName": "filterable",
-                    "typeName": "boolean",
-                    "description": "Whether the table is filterable",
                     "isOptional": True,
                 },
                 {
@@ -7019,13 +7006,6 @@ metadata = {
                     "default": "[]",
                 },
                 {
-                    "argName": "filterable",
-                    "description": "Whether the table is filterable",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "end_program",
                     "description": "Whether the program should end after the widget is shown. Defaults to False.",
                     "typeName": "bool",
@@ -7090,12 +7070,6 @@ metadata = {
                     "argName": "actions",
                     "typeName": "array",
                     "description": "Actions that can be triggered by table rows",
-                    "isOptional": True,
-                },
-                {
-                    "argName": "filterable",
-                    "typeName": "boolean",
-                    "description": "Whether the table is filterable",
                     "isOptional": True,
                 },
                 {
