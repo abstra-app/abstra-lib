@@ -14,6 +14,7 @@ class PandasOutput(Output):
         self.label = kwargs.get("label", None)
         self.actions = kwargs.get("actions", [])
         self.filterable = kwargs.get("filterable", False)
+        self.editable = kwargs.get("editable", False)
 
     def json(self, **kwargs):
         return {
@@ -25,4 +26,5 @@ class PandasOutput(Output):
             "label": self.label,
             "actions": self.actions,
             "filterable": self.filterable,
+            "editable": self.editable,
         }

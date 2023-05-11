@@ -6955,6 +6955,11 @@ metadata = {
                 ],
             },
             {
+                "key": "row-edit",
+                "description": "Function or expression to be run when the user edits a cell",
+                "payloadSchema": [],
+            },
+            {
                 "key": "action-click",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [
@@ -6996,6 +7001,13 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": None,
+                },
+                {
+                    "argName": "editable",
+                    "description": "Whether the user will be allowed to edit the cells. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
                 },
                 {
                     "argName": "actions",
@@ -7065,6 +7077,12 @@ metadata = {
                     "typeName": "string",
                     "description": "The label to display above the dataframe",
                     "isOptional": True,
+                },
+                {
+                    "argName": "editable",
+                    "typeName": "boolean",
+                    "description": "Whether the user will be allowed to edit the cells",
+                    "default": False,
                 },
                 {
                     "argName": "actions",
