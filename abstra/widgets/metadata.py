@@ -253,11 +253,18 @@ metadata = {
                 },
                 {
                     "argName": "layout",
-                    "description": "Whether the cards layout should be 'list' or 'grid'. Defaults to 'list'.",
+                    "description": "Whether the cards layout should be 'list' or 'grid'. Defaults to 'list'. The 'grid' only applies to desktop resolutions.",
                     "typeName": "str",
                     "typeDescription": ["str ('list', 'grid')"],
                     "isKwarg": True,
                     "default": "'list'",
+                },
+                {
+                    "argName": "columns",
+                    "typeName": "int",
+                    "description": "When layout is 'grid', how many columns to display",
+                    "isKwarg": True,
+                    "default": "2",
                 },
                 {
                     "argName": "disabled",
@@ -404,10 +411,17 @@ metadata = {
                 {
                     "argName": "layout",
                     "typeName": "string",
-                    "description": "Whether the cards layout should be 'list' or 'grid'",
+                    "description": "Whether the cards layout should be 'list' or 'grid'. Defaults to 'list'. The 'grid' only applies to desktop resolutions.",
                     "oneOf": ["list", "grid"],
                     "default": "list",
                     "isOptional": True,
+                },
+                {
+                    "argName": "columns",
+                    "typeName": "number",
+                    "description": "When layout is 'grid', how many columns to display",
+                    "isOptional": True,
+                    "default": "2",
                 },
                 {
                     "argName": "key",
@@ -438,13 +452,6 @@ metadata = {
                     "typeName": ["boolean", "string"],
                     "description": "Whether the input is required or not",
                     "default": True,
-                    "isOptional": True,
-                    "formOnly": True,
-                },
-                {
-                    "argName": "columns",
-                    "typeName": "number",
-                    "description": "number of columns this input will take",
                     "isOptional": True,
                     "formOnly": True,
                 },

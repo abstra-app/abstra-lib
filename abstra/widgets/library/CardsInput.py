@@ -15,7 +15,7 @@ class CardsInput(Input):
         self.initial_value = kwargs.get("initial_value", None)
         self.required = kwargs.get("required", True)
         self.hint = kwargs.get("hint", None)
-        self.columns = kwargs.get("columns", 1)
+        self.columns = kwargs.get("columns", 2)
         self.full_width = kwargs.get("full_width", False)
         self.layout = kwargs.get("layout", "list")
         self.disabled = kwargs.get("disabled", False)
