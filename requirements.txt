@@ -1,3 +1,4 @@
 setuptools
 requests
 validators
+multipart
