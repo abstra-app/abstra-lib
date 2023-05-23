@@ -1,4 +1,17 @@
+from io import BytesIO
 import os, json
+from multipart import MultipartParser, to_bytes, parse_options_header
+
+
+def _app_json_parse(body: str):
+    return json.loads(body)
+
+
+def _multipart_form_parse(body: str, headers: dict):
+    _, options = parse_options_header(headers["Content-Type"])
+    boundary = options["boundary"].encode("utf-8")
+    p = MultipartParser(BytesIO(to_bytes(body)), boundary)  # TODO: direct from fs
+    return [{"name": i.name, "value": i.value} for i in p]
 
 
 def get_request(local_file="request.json"):
@@ -10,8 +23,10 @@ def get_request(local_file="request.json"):
             headers = request["headers"]
 
         try:
-            if headers["Content-Type"] == "application/json":
-                return json.loads(body), query, headers
+            if "application/json" in headers["Content-Type"]:
+                return _app_json_parse(body), query, headers
+            elif "multipart/form-data" in headers["Content-Type"]:
+                return _multipart_form_parse(body, headers), query, headers
             else:
                 return body, query, headers
         except Exception:
