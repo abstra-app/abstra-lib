@@ -1,4 +1,3 @@
 setuptools
 requests
 validators
-multipart
