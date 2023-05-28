@@ -5,6 +5,7 @@ from .VideoInput import VideoInput
 from .TagInput import TagInput
 from .PandasOutput import PandasOutput
 from .TimeInput import TimeInput
+from .RichTextInput import RichTextInput
 from .NumberSliderInput import NumberSliderInput
 from .CheckboxInput import CheckboxInput
 from .CnpjInput import CnpjInput

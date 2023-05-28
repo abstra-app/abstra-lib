@@ -5156,6 +5156,183 @@ metadata = {
             },
         ],
     },
+    "rich-text-input": {
+        "name": "Rich text input",
+        "type": "rich-text-input",
+        "events": [
+            {
+                "key": "change",
+                "description": "Function or expression to be run when the input value changes",
+                "payloadSchema": [],
+            }
+        ],
+        "description": "Rich text input allows users to type and format textual content.",
+        "autoHeight": False,
+        "dashProperties": {
+            "minWidth": 100,
+            "minHeight": 100,
+            "initialWidth": 200,
+            "initialHeight": 150,
+        },
+        "pythonAPI": {
+            "name": "read_richtext",
+            "params": [
+                {
+                    "argName": "label",
+                    "description": "The label to display to the user",
+                    "typeName": "str",
+                    "isKwarg": False,
+                    "default": None,
+                    "dashesInitialValue": '"Insert your rich text here!"',
+                },
+                {
+                    "argName": "initial_value",
+                    "description": 'The initial value to display to the user. Defaults to "".',
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": '""',
+                    "formOnly": True,
+                },
+                {
+                    "argName": "placeholder",
+                    "description": 'The placeholder text to display to the user. Defaults to "Your rich text here".',
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": '"Your rich text here"',
+                },
+                {
+                    "argName": "disabled",
+                    "description": "whether the input is disabled. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                },
+                {
+                    "argName": "required",
+                    "description": 'Whether the input is required or not eg. "this field is required". Defaults to True.',
+                    "typeName": "Union[bool, str]",
+                    "typeDescription": ["bool", "str"],
+                    "isKwarg": True,
+                    "default": "True",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "hint",
+                    "description": "A tooltip displayed to the user. Defaults to None.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "end_program",
+                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "full_width",
+                    "description": "Whether the input should use full screen width. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "button_text",
+                    "description": "What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "Next",
+                    "formOnly": True,
+                },
+            ],
+            "returns": [
+                {
+                    "typeName": "str",
+                    "typeDescription": "The rich text value entered by the user",
+                }
+            ],
+        },
+        "brokerAPI": {
+            "params": [
+                {
+                    "argName": "label",
+                    "typeName": "string",
+                    "description": "The label of the input",
+                },
+                {
+                    "argName": "initialValue",
+                    "typeName": "string",
+                    "description": "The initial value of the input",
+                    "default": "",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "key",
+                    "typeName": "string",
+                    "description": "The key of the input on the returning object",
+                },
+                {
+                    "argName": "disabled",
+                    "typeName": "boolean",
+                    "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "hint",
+                    "typeName": ["string", "null"],
+                    "description": "message describing the input",
+                    "default": None,
+                    "isOptional": True,
+                },
+                {
+                    "argName": "end_program",
+                    "typeName": ["boolean", "null"],
+                    "description": "End program after this widget is shown",
+                    "default": False,
+                    "isOptional": True,
+                },
+                {
+                    "argName": "required",
+                    "typeName": ["boolean", "string"],
+                    "description": "Whether the input is required or not",
+                    "default": True,
+                    "isOptional": True,
+                    "formOnly": True,
+                },
+                {
+                    "argName": "columns",
+                    "typeName": "number",
+                    "description": "number of columns this input will take",
+                    "isOptional": True,
+                    "formOnly": True,
+                },
+                {
+                    "argName": "fullWidth",
+                    "typeName": "boolean",
+                    "description": "Whether the widget should take up the full width of the page",
+                    "isOptional": True,
+                    "formOnly": True,
+                },
+                {
+                    "argName": "placeholder",
+                    "typeName": "string",
+                    "description": "The placeholder text to display in the input",
+                    "default": "Your rich text here",
+                },
+            ]
+        },
+        "examples": [
+            {
+                "props": {"label": "Write here your bio"},
+                "name": "Basic Example",
+                "description": "The following example demonstrate some of the available functionality for read_richtext",
+                "key": "example1",
+                "code": 'read_richtext("Write here your bio")\n',
+            }
+        ],
+    },
     "tag-input": {
         "name": "Tag input",
         "type": "tag-input",
