@@ -2753,7 +2753,14 @@ metadata = {
                 "description": "The following example demonstrate some of the available functionality for read_file",
                 "key": "example1",
                 "code": 'from hackerforms import read_file\n\nfile_response = read_file("Upload your .xlsx file")\nfile = file_response.file  # File object\n',
-            }
+            },
+            {
+                "props": {"label": "Upload your file"},
+                "name": "Saving file to a directory on Files storage",
+                "description": "This example shows how to save a file to a directory on Files",
+                "key": "example2",
+                "code": 'from hackerforms import read_file\nimport shutil, os\n\nfile_response = read_file("Upload your file")\n\ndestination_dir = "foo/bar/"\n# Creates directory if it does not exist\nos.makedirs(destination_dir, exist_ok=True)\n\n# Copies file to destination directory\nshutil.copy(file_response.file.name, destination_dir + file_response.name)\n',
+            },
         ],
     },
     "image-input": {
