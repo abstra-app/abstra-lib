@@ -15,26 +15,30 @@ def _multipart_form_parse(body: str, headers: dict):
     return [{"name": i.name, "value": i.value} for i in p]
 
 
-def get_request(local_file="request.json"):
+def get_raw_request(local_file="request.json"):
     try:
         with open(os.getenv("REQUEST_FILE", local_file)) as f:
             request = json.loads(f.read())
             body = request["body"]
             query = request["query"]
             headers = request["headers"]
-
-        try:
-            if "application/json" in headers["Content-Type"]:
-                return _app_json_parse(body), query, headers
-            elif "multipart/form-data" in headers["Content-Type"]:
-                return _multipart_form_parse(body, headers), query, headers
-            else:
-                return body, query, headers
-        except Exception:
-            return body, query, headers
+        return body, query, headers
 
     except Exception:
         return None, None, None
+
+
+def get_request(local_file="request.json"):
+    body, query, headers = get_raw_request(local_file)
+    try:
+        if "application/json" in headers["Content-Type"]:
+            return _app_json_parse(body), query, headers
+        elif "multipart/form-data" in headers["Content-Type"]:
+            return _multipart_form_parse(body, headers), query, headers
+        else:
+            return body, query, headers
+    except Exception:
+        return body, query, headers
 
 
 def send_response(body="", status_code=200, headers={}, local_file="response.json"):
