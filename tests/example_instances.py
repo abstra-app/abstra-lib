@@ -97,4 +97,5 @@ example_instances = [
         css="button { border: none; }",
         html_head="",
     ),
+    RichTextInput("rich-text", "Write your blog post here"),
 ]
