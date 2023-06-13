@@ -1,0 +1,83 @@
+import flask_sock, typing, threading, uuid, traceback, os
+from .utils import serialize, deserialize
+from .contract import Message, should_send
+
+
+class Execution:
+    type = "execution"
+    executions: typing.ClassVar[dict] = {}
+
+    @classmethod
+    def get_execution(cls) -> typing.Optional["Execution"]:
+        thread_id = threading.get_ident()
+        return cls.executions.get(thread_id)
+
+    def __init__(self):
+        self.context = {}
+        self.id = uuid.uuid4().__str__()
+        self.thread_id = threading.get_ident()
+        Execution.executions[self.thread_id] = self
+
+    @property
+    def is_preview(self) -> bool:
+        # return self.__is_preview
+        return os.environ.get("ABSTRA_ENVIRONMENT") != "production"
+
+    def delete(self):
+        del Execution.executions[self.thread_id]
+
+
+class LiveSession(Execution):
+    type = "session"
+
+    @staticmethod
+    def get_session() -> typing.Optional["LiveSession"]:
+        execution = Execution.get_execution()
+        if execution and execution.type == "session":
+            return execution
+
+        return None
+
+    def __init__(self, connection: flask_sock.Server, is_preview: bool):
+        super().__init__()
+        self.__is_preview = is_preview
+        self.__connection = connection
+
+    def send(self, msg: Message):
+        if not should_send(msg, self.is_preview):
+            return
+
+        str_data = serialize(msg.to_json(self.is_preview))
+        self.__connection.send(str_data)
+
+    def recv(self) -> typing.Tuple[str, dict]:
+        str_data = self.__connection.receive()
+        data = deserialize(str_data)
+        return data["type"], data
+
+    def close(self, reason: str = None):
+        self.__connection.close(reason=reason)
+
+    @property
+    def connected(self) -> bool:
+        return self.__connection.connected
+
+    def end(self):
+        if self.connected:
+            self.close(reason=traceback.format_exc() or None)
+        self.delete()
+
+
+class StaticSession(Execution):
+    type = "static-session"
+
+    @staticmethod
+    def get_session() -> typing.Optional["LiveSession"]:
+        execution = Execution.get_execution()
+        if execution and execution.type == "static-session":
+            return execution
+
+        return None
+
+    def __init__(self):
+        super().__init__()
