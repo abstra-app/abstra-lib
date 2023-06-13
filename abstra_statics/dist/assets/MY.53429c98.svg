@@ -1,0 +1,13 @@
+<svg width="21" height="15" viewBox="0 0 21 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="21" height="15" rx="3" fill="white"/>
+<rect y="12.9231" width="21" height="1.07692" fill="#AF010D"/>
+<rect y="10.7692" width="21" height="1.07692" fill="#AF010D"/>
+<rect y="8.61539" width="21" height="1.07692" fill="#AF010D"/>
+<rect y="6.46154" width="21" height="1.07692" fill="#AF010D"/>
+<rect y="4.30769" width="21" height="1.07692" fill="#AF010D"/>
+<rect y="2.15385" width="21" height="1.07692" fill="#AF010D"/>
+<rect width="21" height="1.07692" fill="#AF010D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H11V8.62H0V0Z" fill="#1A47B8"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7 4H8V5H7V4Z" fill="#FFDA2C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 6C7.044 6.607 6.318 7 5.5 7C4.12 7 3 5.88 3 4.5C3 3.12 4.12 2 5.5 2C6.318 2 7.044 2.393 7.5 3H6C5.172 3 4.5 3.672 4.5 4.5C4.5 5.328 5.172 6 6 6H7.5Z" fill="#FFDA2C"/>
+</svg>
