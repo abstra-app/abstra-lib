@@ -1,7 +1,5 @@
-import os
-import re
-import pathlib
-from setuptools import setup
+import os, re, pathlib
+from setuptools import setup, find_packages
 
 regex = "^v(\d+\.\d+\.\d+)$"
 TAG = os.getenv("TAG", "v0.0.0")
@@ -20,12 +18,19 @@ requirements = (HERE / "requirements.txt").read_text().split("\n")
 
 setup(
     name="abstra",
+    license="MIT",
     version=version,
     description="Abstra Lib",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/abstra-app/abstra-lib",
-    license="MIT",
-    packages=["abstra", "abstra.widgets", "abstra.widgets.library"],
+    entry_points={
+        "console_scripts": [
+            "abstra=abstra_cli.cli:main",
+            "abstra-cli=abstra_cli.cli:main",
+        ],
+    },
+    package_data={"abstra_statics": ["dist/**/*", "dist/*"]},
+    packages=find_packages(),
     install_requires=requirements,
 )
