@@ -21,10 +21,8 @@ def get_editor_bp(api: API):
 
     @bp.route("/api/workspace/open-file", methods=["POST"])
     def open_file():
-        print("passei por aqui")
         file_path = flask.request.json["path"]
-        print(file_path)
-        api.open_file(file_path)
+        api.open_file(file_path, create_if_not_exists=True)
         return {"success": True}
 
     @bp.route("/api/workspace/check-file", methods=["GET"])
@@ -42,6 +40,11 @@ def get_editor_bp(api: API):
         if not form:
             flask.abort(404)
         return form.editor_dto
+    
+    @bp.route("/api/forms/<path:path>", methods=["DELETE"])
+    def delete_form(path: str):
+        api.delete_form(path)
+        return {"success": True}
 
     @bp.route("/api/dashes/<path:path>", methods=["GET"])
     def get_dash(path: str):
@@ -133,5 +136,10 @@ def get_editor_bp(api: API):
     def update_job(identifier: str):
         job = api.update_job(identifier, flask.request.json)
         return job.editor_dto
+
+    @bp.route("/api/jobs/<path:path>", methods=["DELETE"])
+    def delete_job(path: str):
+        api.delete_job(path)
+        return {"success": True}
 
     return bp
