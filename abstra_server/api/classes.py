@@ -638,3 +638,17 @@ class AbstraJSON:
             }
 
         return AbstraJSON(**data)
+
+    @staticmethod
+    def make_empty():
+        return AbstraJSON(
+            version="0.1",
+            workspace=dict(
+                name="Untitled Workspace",
+                sidebar=[],
+            ),
+            forms=[],
+            dashes=[],
+            hooks=[],
+            jobs=[],
+        )

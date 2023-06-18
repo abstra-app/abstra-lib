@@ -13,7 +13,10 @@ class API:
         try:
             self.__get_abstra_json()
         except FileNotFoundError:
-            raise Exception("Not a root directory")
+            self.init_empty()
+    
+    def init_empty(self):
+        self.persist(AbstraJSON.make_empty())
 
     def persist(self, abstra_json: AbstraJSON):
         with open(self.abstra_json_path, "w") as f:
