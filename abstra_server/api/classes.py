@@ -428,8 +428,6 @@ class LayoutJSON:
 
     @property
     def editor_dto(self):
-        if self.version != "0.2":
-            raise ValueError("TODO: convert to 0.2")
         return {
             "props": self.props,
             "version": self.version,
@@ -578,8 +576,8 @@ class WorkspaceJSON:
     @staticmethod
     def from_dict(data: dict):
         return WorkspaceJSON(
-            name=data["name"],
-            sidebar=data["sidebar"],
+            name=data.get("name", "Untitled Workspace"),
+            sidebar=data.get("sidebar", []),
             root=data.get("root"),
             theme=data.get("theme"),
             logo_url=data.get("logo_url"),
