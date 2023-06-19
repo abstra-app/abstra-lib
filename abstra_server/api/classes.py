@@ -436,8 +436,6 @@ class LayoutJSON:
 
     @property
     def __dict__(self):
-        if self.version != "0.2":
-            raise ValueError("TODO: convert to 0.2")
         return {
             "props": self.props,
             "version": self.version,
