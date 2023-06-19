@@ -1,10 +1,13 @@
 import sys
 from abstra import dashes as abstra_dashes
 from abstra import hooks as abstra_hooks
+from abstra import forms as abstra_forms
+
+from abstra.forms.overloads import overload_to_widgets
 
 from . import flows
-from .session import LiveSession, StaticSession
 from .contract import dashes_contract
+from .session import LiveSession, StaticSession
 from .runtimes.forms.message_handler import MessageBroker
 
 
@@ -80,9 +83,7 @@ def __overload_abstra_hooks_sdk():
     abstra_hooks.send_response = send_response
 
 
-def __overload_hackerforms():
-    import hackerforms
-
+def __overload_abstra_forms_sdk():
     def get_connection() -> MessageBroker:
         session = get_live_session_throwable()
         broker = session.context.get("broker")
@@ -95,8 +96,8 @@ def __overload_hackerforms():
         session = get_live_session_throwable()
         return flows.get_user(session)
 
-    hackerforms.socket.get_connection = get_connection
-    hackerforms.auth.get_user = get_user
+    abstra_forms.socket.get_connection = get_connection
+    abstra_forms.auth.get_user = get_user
 
 
 def __overload_stdio():
@@ -117,7 +118,10 @@ def __overload_stdio():
 
 
 def overloads():
+    overload_to_widgets()
     __overload_stdio()
+
+    # TODO: remove overloads from sdk and just put the code there
     __overload_abstra_dashes_sdk()
     __overload_abstra_hooks_sdk()
-    # __overload_hackerforms()
+    __overload_abstra_forms_sdk()

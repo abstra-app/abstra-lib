@@ -4802,8 +4802,10 @@ metadata = {
                 {
                     "argName": "initial_value",
                     "description": "The initial value to display to the user. If dictionary, it contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str or number). Ex: {'country_code': '+55', 'national_number': '21999990000'}. Defaults to \"\".",
-                    "typeName": "Union[str, dict]",
-                    "typeDescription": ["str (000000000000)", "AbstraPhone"],
+                    "typeName": "dict",
+                    "typeDescription": [
+                        'dict ({"country_code": str, "national_number": str})'
+                    ],
                     "isKwarg": True,
                     "default": '""',
                     "formOnly": True,

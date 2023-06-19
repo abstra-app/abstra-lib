@@ -40,7 +40,7 @@ def get_editor_bp(api: API):
         if not form:
             flask.abort(404)
         return form.editor_dto
-    
+
     @bp.route("/api/forms/<path:path>", methods=["DELETE"])
     def delete_form(path: str):
         api.delete_form(path)
