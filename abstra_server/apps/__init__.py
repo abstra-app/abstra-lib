@@ -1,4 +1,4 @@
-import os, flask, flask_cors, eventlet, eventlet.wsgi as wsgi
+import os, flask, flask_cors
 
 from ..api import API
 from ..overloads import overloads
@@ -25,5 +25,4 @@ def serve(workspace_root: str, port: int):
 
     api = API(workspace_root)
     app = create_app(api)
-    eventlet.monkey_patch()
-    wsgi.server(eventlet.listen(("localhost", port)), app, debug=True)
+    app.run(host="localhost", port=port, debug=True)

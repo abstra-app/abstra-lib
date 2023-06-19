@@ -12,7 +12,6 @@ jedi
 simplejson
 
 Flask
-eventlet
 flask-cors
 flask-sock
 PyJWT
