@@ -1,4 +1,4 @@
-import fire, webbrowser
+import fire
 
 from abstra_server.apps import serve
 
@@ -157,7 +157,6 @@ class CLI(object):
     # Beta local app
 
     def serve(self, workspace_root: str = ".", port: int = 8002):
-        webbrowser.open(f"http://localhost:{port}/_editor")
         serve(
             workspace_root=workspace_root,
             port=port,
