@@ -14,7 +14,7 @@ class API:
             self.__get_abstra_json()
         except FileNotFoundError:
             self.init_empty()
-    
+
     def init_empty(self):
         self.persist(AbstraJSON.make_empty())
 
@@ -211,11 +211,15 @@ class API:
 
     def open_file(self, file_path: str, create_if_not_exists: bool = False):
         complete_file_path = os.path.join(self.root_path, file_path)
-        
-        if create_if_not_exists and file_path.endswith(".py") and not os.path.isfile(complete_file_path):
+
+        if (
+            create_if_not_exists
+            and file_path.endswith(".py")
+            and not os.path.isfile(complete_file_path)
+        ):
             with open(complete_file_path, "w") as f:
                 f.write("")
-        
+
         webbrowser.open("file://" + complete_file_path)
 
     def check_file(self, file_path: str):

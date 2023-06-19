@@ -126,7 +126,7 @@ abstra add form --name="my_form" -f main.py --background '#fffeee'
 
 abstra add form --path=test -f test.py --enabled=False
 
-abstra add form --name="Form Name" --code "from hackerforms import * \n\ndisplay('hello_world')" --background '#fffeee' --main-color red --start-message 'start message' --error-message 'error-message' --end-message 'end message' --start-button-text 'start button text' --show-sidebar --allow-restart
+abstra add form --name="Form Name" --code "from abstra.forms import display \n\ndisplay('hello_world')" --background '#fffeee' --main-color red --start-message 'start message' --error-message 'error-message' --end-message 'end message' --start-button-text 'start button text' --show-sidebar --allow-restart
 ```
 
 #### `hooks`

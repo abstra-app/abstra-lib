@@ -3,8 +3,9 @@ import inspect
 from ...session import LiveSession
 from ...contract import forms_contract
 
+from abstra.forms.debug_utils import Frames, make_debug_data, CloseDTO
+
 """
-# Must be compatible with hackerforms.connection.Connection
 class Connection:
     url_params: dict = {}
 
@@ -46,10 +47,7 @@ class MessageBroker:
         return data
 
     # Connection interface
-    def send(self, data: dict, frames=None):
-        # from hackerforms.debug_utils import Frames
-        from hackerforms.debug_utils import make_debug_data
-
+    def send(self, data: dict, frames: Frames = None):
         if self.session.is_preview:
             debug = make_debug_data(frames or inspect.stack())
             data.update(debug)
@@ -61,8 +59,7 @@ class MessageBroker:
             return data
         return data.get(path)
 
-    def close(self, dto):
-        # from hackerforms.debug_utils import CloseDTO
+    def close(self, dto: CloseDTO):
         self.send(
             {
                 "type": "program:end",
