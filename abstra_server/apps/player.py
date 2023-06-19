@@ -37,6 +37,10 @@ def get_player_bp(api: API):
             conn.close(message="Not found")
             return
 
+        if runtime.runner_type == "form":
+            conn.close(message="Disabled")
+            return
+
         run = runners[runtime.runner_type]
         if runtime.file:
             code = api.read_text_file(runtime.file)  # TODO: handle 404
