@@ -56,7 +56,7 @@ class LiveSession(Execution):
         return data["type"], data
 
     def close(self, reason: str = None):
-        self.__connection.close(reason=reason)
+        self.__connection.close(message=reason)
 
     @property
     def connected(self) -> bool:
