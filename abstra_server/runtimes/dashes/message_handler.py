@@ -56,7 +56,7 @@ class MessageHandler:
             self.session.send(
                 contract.ProgramStartFailedMessage(traceback.format_exc(), tb)
             )
-            exit()
+            self.session.close()
 
         self._compute_and_send_widgets_props()
 
