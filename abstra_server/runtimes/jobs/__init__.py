@@ -3,6 +3,7 @@ from uuid import uuid4 as uuid
 from code import InteractiveInterpreter
 import sys, io
 
+
 def run_job(code: str, session: StaticSession):
     old_stdout = sys.stdout
     new_stdout = io.StringIO()
@@ -20,6 +21,5 @@ def run_job(code: str, session: StaticSession):
         sys.stderr = old_stderr
         return {
             "stdout": new_stdout.getvalue().strip(),
-            "stderr": new_stderr.getvalue().strip()
+            "stderr": new_stderr.getvalue().strip(),
         }
-
