@@ -143,13 +143,12 @@ def get_editor_bp(api: API):
     def delete_job(identifier: str):
         api.delete_job(identifier)
         return {"success": True}
-    
+
     @bp.route("/api/jobs/<path:identifier>/run", methods=["POST"])
     def _run_job(identifier: str):
         job = api.get_job(identifier)
         code = api.read_text_file(job.file)
         session = StaticSession()
         return run_job(code, session)
-        
 
     return bp
