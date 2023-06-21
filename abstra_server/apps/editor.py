@@ -1,6 +1,8 @@
 import flask
 from ..api import API
 from .utils import send_from_dist
+from ..session import StaticSession
+from ..runtimes import run_job
 
 
 def get_editor_bp(api: API):
@@ -137,9 +139,17 @@ def get_editor_bp(api: API):
         job = api.update_job(identifier, flask.request.json)
         return job.editor_dto
 
-    @bp.route("/api/jobs/<path:path>", methods=["DELETE"])
-    def delete_job(path: str):
-        api.delete_job(path)
+    @bp.route("/api/jobs/<path:identifier>", methods=["DELETE"])
+    def delete_job(identifier: str):
+        api.delete_job(identifier)
         return {"success": True}
+    
+    @bp.route("/api/jobs/<path:identifier>/run", methods=["POST"])
+    def _run_job(identifier: str):
+        job = api.get_job(identifier)
+        code = api.read_text_file(job.file)
+        session = StaticSession()
+        return run_job(code, session)
+        
 
     return bp
