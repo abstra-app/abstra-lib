@@ -4,6 +4,7 @@ from abstra_server.apps import serve
 
 from .deploy import deploy
 from .login import configure, login
+from .version import check_latest_version
 from . import messages
 from . import checkers
 from .resources import (
@@ -156,10 +157,21 @@ class CLI(object):
 
     # Beta local app
 
-    def serve(self, workspace_root: str = ".", port: int = 8002):
+    def serve(
+        self,
+        workspace_root: str = ".",
+        port: int = 8002,
+        debug=False,
+        use_reloader=False,
+    ):
+        messages.serve_message(port)
+        check_latest_version()
+
         serve(
             workspace_root=workspace_root,
             port=port,
+            debug=debug,
+            use_reloader=use_reloader,
         )
 
 
