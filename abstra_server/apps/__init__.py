@@ -19,10 +19,10 @@ def create_app(api: API):
     return app
 
 
-def serve(workspace_root: str, port: int):
+def serve(workspace_root: str, port: int, debug, use_reloader):
     os.environ["ABSTRA_SERVER"] = "true"
     overloads()
 
     api = API(workspace_root)
     app = create_app(api)
-    app.run(host="localhost", port=port, debug=True)
+    app.run(host="localhost", port=port, debug=debug, use_reloader=use_reloader)

@@ -5,6 +5,7 @@ multipart
 progress
 crontab
 colour
+colorama
 
 websocket-client
 fire

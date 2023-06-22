@@ -1,6 +1,16 @@
 import sys
 from progress.bar import FillingSquaresBar
+from colorama import init, Fore, Back, Style
 from . import utils as utils
+
+
+def serve_message(port):
+    print(
+        Fore.MAGENTA
+        + Style.BRIGHT
+        + f"\n\nABSTRA EDITOR RUNNING: http://localhost:{port}/_editor\n\n"
+        + Style.RESET_ALL
+    )
 
 
 def read_credentials():

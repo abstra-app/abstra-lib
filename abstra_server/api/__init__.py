@@ -61,7 +61,11 @@ class API:
         file_path = f"{file_name}.py"
 
         with open(os.path.join(self.root_path, file_path), "w") as f:
-            f.write("print('Hello World')")
+            f.write("""from abstra.forms import display, read
+
+
+name = read("What is your name?")
+display(f"Hello World, {name}")""")
 
         form = FormJSON(file=file_path, path=file_name, title="Untitled Form")
 
@@ -110,8 +114,14 @@ class API:
     def create_dash(self) -> DashJSON:
         abstra_json = self.__get_abstra_json()
 
+        file_name = f"new_dash_{random_id()}"
+        file_path = f"{file_name}.py"
+
+        with open(os.path.join(self.root_path, file_path), "w") as f:
+            f.write("foo = 'bar'")
+
         dash = DashJSON(
-            file=None,
+            file=file_path,
             path=f"new-dash_{random_id()}",
             title="Untitled Dash",
             layout=dict(version="0.2", props={}, slot={}),
