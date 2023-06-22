@@ -7,7 +7,7 @@ from abstra.forms.overloads import overload_to_widgets
 
 from . import flows
 from .contract import dashes_contract
-from .session import LiveSession, StaticSession
+from .session import LiveSession, StaticSession, Execution
 from .runtimes.forms.message_handler import MessageBroker
 
 
@@ -104,9 +104,9 @@ def __overload_stdio():
     def writeWraper(type, write, text):
         try:
             write(text)
-            session = LiveSession.get_session()
-            if session:
-                session.send(dashes_contract.StdioMessage(type, text))
+            execution = Execution.get_execution()
+            if execution:
+                execution.stdio(type, text)
         finally:
             return len(text)
 

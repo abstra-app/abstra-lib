@@ -53,7 +53,6 @@ def get_player_bp(api: API):
     def hook(path):
         runtime = api.get_page_runtime(path)
         if not runtime:
-            print("404", path)
             flask.abort(404)
 
         if not runtime.file:
@@ -67,8 +66,10 @@ def get_player_bp(api: API):
             flask.request.headers,
         )
 
-        response = run_hook(code, session)
-        return response
+        run_hook(code, session)
+
+        body, status, headers = session.context.get("response", ({}, 200, {}))
+        return flask.Response(status=status, headers=headers, response=body)
 
     @bp.route("/<path:filename>", methods=["GET"])
     def spa(filename: str):
