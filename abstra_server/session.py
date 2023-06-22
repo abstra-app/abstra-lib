@@ -1,6 +1,6 @@
 import flask_sock, typing, threading, uuid, traceback, os
 from .utils import serialize, deserialize
-from .contract import Message, should_send
+from .contract import Message, should_send, StdioMessage
 
 
 class Execution:
@@ -15,6 +15,8 @@ class Execution:
     def __init__(self):
         self.context = {}
         self.id = uuid.uuid4().__str__()
+        self.stderr: typing.List[str] = []
+        self.stdout: typing.List[str] = []
         self.thread_id = threading.get_ident()
         Execution.executions[self.thread_id] = self
 
@@ -22,6 +24,13 @@ class Execution:
     def is_preview(self) -> bool:
         # return self.__is_preview
         return os.environ.get("ABSTRA_ENVIRONMENT") != "production"
+
+    def stdio(self, type: str, text: str):
+        if type == "stderr":
+            self.stderr.append(text)
+        elif type == "stdout":
+            self.stdout.append(text)
+        # TODO: save to .logs
 
     def delete(self):
         del Execution.executions[self.thread_id]
@@ -57,6 +66,10 @@ class LiveSession(Execution):
 
     def close(self, reason: str = None):
         self.__connection.close(message=reason)
+
+    def stdio(self, type: str, text: str):
+        self.send(StdioMessage(type, text))
+        return super().stdio(type, text)
 
     @property
     def connected(self) -> bool:

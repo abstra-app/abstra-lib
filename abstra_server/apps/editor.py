@@ -2,7 +2,7 @@ import flask
 from ..api import API
 from .utils import send_from_dist
 from ..session import StaticSession
-from ..runtimes import run_job
+from ..runtimes import run_job, run_hook
 
 
 def get_editor_bp(api: API):
@@ -118,6 +118,30 @@ def get_editor_bp(api: API):
         api.delete_hook(path)
         return {"success": True}
 
+    @bp.route("/api/hooks/<path:path>/test")
+    def test_hook(path: str):
+        hook = api.get_hook(path)
+        if not hook:
+            flask.abort(404)
+
+        code = api.read_text_file(hook.file)
+        session = StaticSession()
+        session.context["request"] = (
+            flask.request.get_data(as_text=True),
+            flask.request.args,
+            flask.request.headers,
+        )
+
+        run_hook(code, session)
+        body, status, headers = session.context.get("response", ({}, 200, {}))
+        return {
+            "body": body,
+            "status": status,
+            "headers": headers,
+            "stdout": "".join(session.stdout),
+            "stderr": "".join(session.stderr),
+        }
+
     @bp.route("/api/jobs/<path:identifier>", methods=["GET"])
     def get_job(identifier: str):
         job = api.get_job(identifier)
@@ -144,11 +168,18 @@ def get_editor_bp(api: API):
         api.delete_job(identifier)
         return {"success": True}
 
-    @bp.route("/api/jobs/<path:identifier>/run", methods=["POST"])
-    def _run_job(identifier: str):
+    @bp.route("/api/jobs/<path:identifier>/test", methods=["POST"])
+    def test_job(identifier: str):
         job = api.get_job(identifier)
+        if not job:
+            flask.abort(404)
+
         code = api.read_text_file(job.file)
         session = StaticSession()
-        return run_job(code, session)
+        run_job(code, session)
+        return {
+            "stdout": "".join(session.stdout),
+            "stderr": "".join(session.stderr),
+        }
 
     return bp
