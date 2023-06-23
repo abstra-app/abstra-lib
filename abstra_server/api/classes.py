@@ -1,3 +1,4 @@
+import sys
 from typing import List, Optional, Union, Any
 from dataclasses import dataclass
 
@@ -633,7 +634,11 @@ class AbstraJSON:
                 "sidebar": [],
             }
 
-        return AbstraJSON(**data)
+        try:
+            return AbstraJSON(**data)
+        except:
+            print("Error: incompatible abstra.json file.")
+            sys.exit(1)
 
     @staticmethod
     def make_empty():
