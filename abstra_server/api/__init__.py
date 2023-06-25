@@ -2,6 +2,7 @@ import json, pathlib, os, typing
 import webbrowser
 from .classes import AbstraJSON, DashJSON, FormJSON, WorkspaceJSON, HookJSON, JobJSON
 from ..utils import random_id
+from abstra.tables import get_db
 
 
 class API:
@@ -9,6 +10,11 @@ class API:
         cwd = pathlib.Path.cwd()
         self.root_path = (cwd / root).resolve().as_posix()
         self.abstra_json_path = (cwd / root / "abstra.json").resolve().as_posix()
+        db_path = os.getenv(
+            "ABSTRA_DATABASE_URL", os.path.join(self.root_path, "db.sqlite3")
+        )
+        os.environ["ABSTRA_DATABASE_URL"] = db_path
+        self.db = get_db()
 
         try:
             self.__get_abstra_json()
@@ -61,11 +67,13 @@ class API:
         file_path = f"{file_name}.py"
 
         with open(os.path.join(self.root_path, file_path), "w") as f:
-            f.write("""from abstra.forms import display, read
+            f.write(
+                """from abstra.forms import display, read
 
 
 name = read("What is your name?")
-display(f"Hello World, {name}")""")
+display(f"Hello World, {name}")"""
+            )
 
         form = FormJSON(file=file_path, path=file_name, title="Untitled Form")
 
@@ -288,3 +296,10 @@ display(f"Hello World, {name}")""")
         self.persist(abstra_json)
 
         return job
+
+    def delete_job(self, identifier: str):
+        abstra_json = self.__get_abstra_json()
+        jobs = abstra_json.jobs
+        abstra_json.jobs = [j for j in jobs if j.identifier != identifier]
+
+        self.persist(abstra_json)

@@ -176,10 +176,89 @@ def get_editor_bp(api: API):
 
         code = api.read_text_file(job.file)
         session = StaticSession()
+
         run_job(code, session)
         return {
             "stdout": "".join(session.stdout),
             "stderr": "".join(session.stderr),
         }
+
+    @bp.route("/api/tables/<path:name>", methods=["GET"])
+    def _get_table(name: str):
+        return api.db.get_table(name).editor_dto
+
+    @bp.route("/api/tables", methods=["GET"])
+    def _get_tables():
+        return [t.editor_dto for t in api.db.get_tables()]
+
+    @bp.route("/api/tables", methods=["POST"])
+    def _create_table():
+        return api.db.create_table().editor_dto
+
+    @bp.route("/api/tables/<path:name>", methods=["PUT"])
+    def _update_table(name: str):
+        changes = flask.request.json
+        updated_table = api.db.update_table(name, changes)
+        return updated_table.editor_dto
+
+    @bp.route("/api/tables/<path:name>", methods=["DELETE"])
+    def _delete_table(name: str):
+        api.db.delete_table(name)
+        return {"success": True}
+
+    @bp.route("/api/tables/<path:name>/duplicate", methods=["POST"])
+    def _duplicate_table(name: str):
+        new_table = api.db.duplicate_table(name)
+        return new_table.editor_dto
+
+    @bp.route("/api/workspace/db-types", methods=["GET"])
+    def _db_types():
+        return api.db.db_types()
+
+    @bp.route("/api/tables/<path:table_name>/rows", methods=["GET"])
+    def _select_row(table_name: str):
+        return api.db.select(table_name)
+
+    @bp.route("/api/tables/<path:table_name>/rows", methods=["POST"])
+    def _insert_row(table_name: str):
+        return api.db.insert(table_name, flask.request.json)
+
+    @bp.route("/api/tables/<path:table_name>/rows", methods=["PUT"])
+    def _update_row(table_name: str):
+        data = flask.request.json
+        return api.db.update(table_name, where=data["where"], set=data["set"])
+
+    @bp.route("/api/tables/<path:table_name>/rows", methods=["DELETE"])
+    def _delete_row(table_name: str):
+        return api.db.delete(table_name, flask.request.json)
+
+    @bp.route("/api/tables/<path:table_name>/columns", methods=["GET"])
+    def _get_columns(table_name: str):
+        return api.db.get_columns(table_name)
+
+    @bp.route(
+        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["GET"]
+    )
+    def _get_column(table_name: str, column_name: str):
+        return api.db.get_column(table_name, column_name).editor_dto
+
+    @bp.route(
+        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["PUT"]
+    )
+    def _update_column(table_name: str, column_name: str):
+        new_column = flask.request.json
+        updated_column = api.db.update_column(table_name, column_name, new_column)
+        return updated_column.editor_dto
+
+    @bp.route(
+        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["DELETE"]
+    )
+    def _delete_column(table_name: str, column_name: str):
+        api.db.delete_column(table_name, column_name)
+        return {"success": True}
+
+    @bp.route("/api/tables/<path:table_name>/columns", methods=["POST"])
+    def _create_column(table_name: str):
+        return api.db.create_column(table_name).editor_dto
 
     return bp

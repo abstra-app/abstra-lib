@@ -1,0 +1,2 @@
+import{d as o,q as n,b as e,c as t,v as a,R as c,H as r,E as i}from"./registerWidgets.d12d7cf9.js";const l=o({name:"ButtonWithIcon",props:{icon:String,message:String,className:String}}),p={class:"button-icon"},d=["d"];function m(s,u,_,f,g,h){return e(),t("button",{class:i(s.className)},[(e(),t("svg",p,[a("path",{d:s.icon},null,8,d)])),c(" "+r(s.message),1)],2)}const N=n(l,[["render",m]]);export{N as default};
+//# sourceMappingURL=ButtonWithIcon.35687b29.js.map
