@@ -320,7 +320,7 @@ class SqliteDB:
     def select(
         self,
         table_name: str,
-        where: str = "WHERE true",
+        where: str = "true",
         rows: list[str] = ["*"],
         **kwargs,
     ) -> list[dict[str, Any]]:
@@ -328,6 +328,7 @@ class SqliteDB:
             where_exp, params = transform_expression(where, kwargs)
             rows_exp = ", ".join(rows)
             query = f'SELECT {rows_exp} FROM "{table_name}" {where_exp}'
+            print(query)
             return conn.execute(query, params).fetchall()
 
     def insert(self, table_name: str, values: dict[str, Any] = {}) -> dict[str, Any]:
