@@ -322,13 +322,12 @@ class SqliteDB:
         table_name: str,
         where: str = "true",
         rows: list[str] = ["*"],
-        **kwargs,
+        params: dict[str, Any] = {}
     ) -> list[dict[str, Any]]:
         with self.connect() as conn:
-            where_exp, params = transform_expression(where, kwargs)
+            where_exp, params = transform_expression(where, params)
             rows_exp = ", ".join(rows)
             query = f'SELECT {rows_exp} FROM "{table_name}" {where_exp}'
-            print(query)
             return conn.execute(query, params).fetchall()
 
     def insert(self, table_name: str, values: dict[str, Any] = {}) -> dict[str, Any]:
@@ -337,30 +336,30 @@ class SqliteDB:
                 query = f'INSERT INTO "{table_name}" DEFAULT VALUES RETURNING *'
                 result = conn.execute(query)
             else:
-                params = [value for key, value in values.items()]
-                keys = ", ".join([key for key, value in values.items()])
-                values_exp = ", ".join(["?" for key, value in values.items()])
+                params = [value for _, value in values.items()]
+                keys = ", ".join([key for key, _ in values.items()])
+                values_exp = ", ".join(["?" for _, _ in values.items()])
                 query = f'INSERT INTO "{table_name}" ({keys}) VALUES ({values_exp}) RETURNING *'
                 result = conn.execute(query, params).fetchone()
 
             return result
 
     def update(
-        self, table_name: str, where: str, set: dict[str, Any] = {}, **kwargs
+        self, table_name: str, where: str, set: dict[str, Any] = {}, params: dict[str, Any] = {}
     ) -> None:
         with self.connect() as conn:
-            params = [value for key, value in set.items()]
+            params = [value for _, value in set.items()]
             set_exp = ", ".join([f"{key} = ?" for key, value in set.items()])
-            where_exp, where_params = transform_expression(where, kwargs)
+            where_exp, where_params = transform_expression(where, params)
             params.extend(where_params)
             query = f'UPDATE "{table_name}" SET {set_exp} {where_exp} RETURNING *'
             result = conn.execute(query, params).fetchone()
 
             return result
 
-    def delete(self, table_name: str, where: str, **kwargs) -> None:
+    def delete(self, table_name: str, where: str, params: dict[str, Any] = {}) -> None:
         with self.connect() as conn:
-            where_exp, params = transform_expression(where, kwargs)
+            where_exp, params = transform_expression(where, params)
             query = f'DELETE FROM "{table_name}" {where_exp} RETURNING *'
             result = conn.execute(query, params).fetchone()
 
