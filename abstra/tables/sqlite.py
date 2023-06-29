@@ -322,7 +322,7 @@ class SqliteDB:
         table_name: str,
         where: str = "true",
         rows: list[str] = ["*"],
-        params: dict[str, Any] = {}
+        params: dict[str, Any] = {},
     ) -> list[dict[str, Any]]:
         with self.connect() as conn:
             where_exp, params = transform_expression(where, params)
@@ -345,7 +345,11 @@ class SqliteDB:
             return result
 
     def update(
-        self, table_name: str, where: str, set: dict[str, Any] = {}, params: dict[str, Any] = {}
+        self,
+        table_name: str,
+        where: str,
+        set: dict[str, Any] = {},
+        params: dict[str, Any] = {},
     ) -> None:
         with self.connect() as conn:
             params = [value for _, value in set.items()]
