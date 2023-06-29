@@ -215,22 +215,17 @@ def get_editor_bp(api: API):
     def _db_types():
         return api.db.db_types()
 
-    @bp.route("/api/tables/<path:table_name>/rows", methods=["GET"])
-    def _select_row(table_name: str):
-        return api.db.select(table_name)
-
     @bp.route("/api/tables/<path:table_name>/rows", methods=["POST"])
-    def _insert_row(table_name: str):
-        return api.db.insert(table_name, flask.request.json)
-
-    @bp.route("/api/tables/<path:table_name>/rows", methods=["PUT"])
-    def _update_row(table_name: str):
+    def _row_action(table_name: str):
         data = flask.request.json
-        return api.db.update(table_name, where=data["where"], set=data["set"])
-
-    @bp.route("/api/tables/<path:table_name>/rows", methods=["DELETE"])
-    def _delete_row(table_name: str):
-        return api.db.delete(table_name, flask.request.json)
+        if data.get("action") == "select":
+            return api.db.select(table_name, where=data.get("where"), params=data.get("params"))
+        elif data.get("action") == "update":
+            return api.db.update(table_name, where=data.get("where"), set=data.get("set"), params=data.get("params"))
+        elif data.get("action") == "insert":
+            return api.db.insert(table_name, values=data.get("values"))
+        elif data.get("action") == "delete":
+            return api.db.delete(table_name, where=data.get("where"), params=data.get("params"))
 
     @bp.route("/api/tables/<path:table_name>/columns", methods=["GET"])
     def _get_columns(table_name: str):

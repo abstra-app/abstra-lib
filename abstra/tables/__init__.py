@@ -8,17 +8,17 @@ class Table:
         self.db = db
         self.table_name = table_name
 
-    def select(self, where: str, rows: list[str] = ["*"], **params) -> list:
-        return self.db.select(self.table_name, where, rows, **params)
+    def select(self, where: str, rows: list[str] = ["*"], params = {}) -> list:
+        return self.db.select(self.table_name, where, rows, params)
 
     def insert(self, values: dict[str, Any] = {}) -> None:
         return self.db.insert(self.table_name, values)
 
-    def update(self, where: str, set: dict[str, Any] = {}, **params) -> None:
-        return self.db.update(self.table_name, where, set, **params)
+    def update(self, where: str, set: dict[str, Any], params) -> None:
+        return self.db.update(self.table_name, where, set, params)
 
-    def delete(self, where: str, **params) -> None:
-        return self.db.delete(self.table_name, where, **params)
+    def delete(self, where: str, params) -> None:
+        return self.db.delete(self.table_name, where, params)
 
 
 def get_db():
