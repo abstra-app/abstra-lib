@@ -8,7 +8,7 @@ class Table:
         self.db = db
         self.table_name = table_name
 
-    def select(self, where: str, rows: list[str] = ["*"], params = {}) -> list:
+    def select(self, where: str, rows: list[str] = ["*"], params={}) -> list:
         return self.db.select(self.table_name, where, rows, params)
 
     def insert(self, values: dict[str, Any] = {}) -> None:
