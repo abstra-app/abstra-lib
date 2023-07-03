@@ -1,136 +1,50 @@
-import json, sys
-from .resources import (
-    Forms,
-    Files,
-    Packages,
-    Vars,
-    Hooks,
-    Jobs,
-    Dashes,
-    Workspaces,
-)
-
-from . import messages
+import pathlib, zipfile, urllib.request, requests
+from uuid import uuid4 as uuid
+from .credentials import get_credentials
+from .utils.file import files_from_directory
 
 
-ACCEPTED_KEYS = ["files", "workspace", "forms", "hooks", "jobs", "packages", "vars"]
+def _generate_zip_file(root_path: str) -> str:
+    zip_path = f"/tmp/{uuid()}.zip"
+    with zipfile.ZipFile(zip_path, "w") as zip_file:
+        for file in files_from_directory(root_path):
+            zip_file.write(file, file.relative_to(root_path))
+    return zip_path
 
 
-def get_abstra_json_path(parameters: dict) -> str:
-    return parameters.get("file") or parameters.get("f") or "abstra.json"
+def _create_build(headers: dict) -> dict:
+    return requests.post(
+        "https://cloud-api.abstra.cloud/cli/build", headers=headers
+    ).json()
 
 
-def evaluate_parameters_file(parameters: dict) -> dict:
-    file = get_abstra_json_path(parameters)
-
-    data = None
-    try:
-        with open(file) as f:
-            data = json.loads(f.read())
-            if not isinstance(data, dict):
-                print("Bad data")
-                sys.exit(1)
-    except:
-        print("Deploy file not found or not correct format")
-        sys.exit(1)
-
-    for key in data.keys():
-        if key not in ACCEPTED_KEYS:
-            print(f"Extra data in deploy file {file} not accepted")
-            sys.exit(1)
-
-    return data, file
+def _upload_file(url: str, file_path: str, headers: dict):
+    with open(file_path, "rb") as f:
+        req = urllib.request.Request(url=url, method="PUT", data=f.read())
+        urllib.request.urlopen(req)
 
 
-def deploy(**kwargs):
-    abstra_json_data, abstra_json_path = evaluate_parameters_file(kwargs)
+def _update_build(build_id: str, headers: dict) -> dict:
+    requests.patch(
+        f"https://cloud-api.abstra.cloud/cli/builds/{build_id}",
+        headers=headers,
+    )
 
-    dashes = Dashes.map_deploy_data(abstra_json_path, abstra_json_data)
-    if len(dashes):
-        messages.start_dashes_deploy()
-        for dash_props in dashes:
-            Dashes.add(upsert=True, **dash_props)
 
-        remote_dashes_files = Files.list_dashes_files(".")
-        local_dashes_files = [
-            d["code"].replace(".py", ".abstradash.json") for d in dashes
-        ]
-        deleted_dashes_files = [
-            f for f in remote_dashes_files if f not in local_dashes_files
-        ]
+def deploy(workspace_root: str = "."):
+    cwd = pathlib.Path.cwd()
+    root_path = (cwd / workspace_root).resolve().as_posix()
+    credentials = get_credentials(root_path)
 
-        for deleted_dash_file in deleted_dashes_files:
-            deleted_dash_path = deleted_dash_file.replace(
-                ".abstradash.json", ""
-            ).replace(f"./", "")
-            Dashes.remove(deleted_dash_path)
-            Files.remove(
-                deleted_dash_file, deleted_dash_file.replace(".abstradash.json", ".py")
-            )
-    else:
-        messages.no_dashes_to_deploy()
-        pass
+    if not credentials:
+        print("No API token found. Please login with `abstra login`")
+        return
 
-    forms = abstra_json_data.pop("forms", None)
-    if forms:
-        messages.start_forms_deploy()
-        for form in forms:
-            Forms.add(upsert=True, **form)
-    else:
-        messages.no_forms_to_deploy()
-        pass
+    headers = {"Api-Authorization": f"Bearer {credentials}"}
+    data = _create_build(headers)
+    url = data["url"]
+    build_id = data["buildId"]
+    zip_path = _generate_zip_file(root_path)
+    _upload_file(url=url, file_path=zip_path, headers=headers)
 
-    hooks = abstra_json_data.pop("hooks", None)
-    if hooks:
-        messages.start_hooks_deploy()
-        for hook in hooks:
-            Hooks.add(upsert=True, **hook)
-    else:
-        messages.no_hooks_to_deploy()
-        pass
-
-    jobs = abstra_json_data.pop("jobs", None)
-    if jobs:
-        messages.start_jobs_deploy()
-        for job in jobs:
-            Jobs.add(upsert=True, **job)
-    else:
-        messages.no_jobs_to_deploy()
-        pass
-
-    files = abstra_json_data.pop("files", ["."])  # review security implications
-    if files:
-        messages.start_files_deploy()
-        if isinstance(files, dict):
-            Files.add(**files)
-        elif isinstance(files, list):
-            Files.add(*files)
-    else:
-        messages.no_files_to_deploy()
-        pass
-
-    packages = abstra_json_data.pop("packages", {"requirement": "requirements.txt"})
-    if packages:
-        messages.start_packages_deploy()
-        if isinstance(packages, dict):
-            Packages.add(**packages)
-        elif isinstance(packages, list):
-            Packages.add(*packages)
-    else:
-        messages.no_packages_to_deploy()
-        pass
-
-    vars = abstra_json_data.pop("vars", None)
-    if vars:
-        messages.start_vars_deploy()
-        if isinstance(vars, dict):
-            Vars.add(**vars)
-        elif isinstance(vars, list):
-            Vars.add(*vars)
-    else:
-        messages.no_vars_to_deploy()
-        pass
-
-    workspace_deploy_data = Workspaces.map_deploy_data(abstra_json_data)
-    if workspace_deploy_data:
-        Workspaces.update(**workspace_deploy_data)
+    _update_build(headers=headers, build_id=build_id)

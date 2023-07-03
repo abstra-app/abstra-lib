@@ -265,4 +265,18 @@ def get_editor_bp(api: API):
     def _create_column(table_name: str):
         return api.db.create_column(table_name).editor_dto
 
+    @bp.route("/api/login", methods=["GET"])
+    def _get_login():
+        print("get login")
+        return api.get_login()
+
+    @bp.route("/api/login", methods=["POST"])
+    def _create_login():
+        data = flask.request.json
+        return api.create_login(data["token"])
+
+    @bp.route("/api/login", methods=["DELETE"])
+    def _delete_login():
+        return api.delete_login()
+
     return bp

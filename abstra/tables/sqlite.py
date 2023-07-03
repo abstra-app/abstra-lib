@@ -74,7 +74,7 @@ def get_column(cur: sqlite3.Cursor, table_name: str, column_name: str):
     ][0]
 
 
-def transform_expression(exp: str, dict_params: dict[str, Any]):
+def transform_expression(exp: str = None, dict_params: dict[str, Any] = {}):
     param_key = r":\w+"
     params = []
     if exp:
@@ -320,10 +320,10 @@ class SqliteDB:
     def select(
         self,
         table_name: str,
-        where: str = "true",
-        rows: list[str] = ["*"],
+        where: Optional[str] = None,
+        rows: List[str] = ["*"],
         params: dict[str, Any] = {},
-    ) -> list[dict[str, Any]]:
+    ) -> List[dict[str, Any]]:
         with self.connect() as conn:
             where_exp, params = transform_expression(where, params)
             rows_exp = ", ".join(rows)

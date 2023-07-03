@@ -1,8 +1,8 @@
-import json, pathlib, os, typing
-import webbrowser
+import json, pathlib, os, typing, webbrowser, requests
 from .classes import AbstraJSON, DashJSON, FormJSON, WorkspaceJSON, HookJSON, JobJSON
 from ..utils import random_id
 from abstra.tables import get_db
+from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
 
 
 class API:
@@ -83,7 +83,7 @@ display(f"Hello World, {name}")"""
 
         return form
 
-    def get_forms(self) -> list[FormJSON]:
+    def get_forms(self) -> typing.List[FormJSON]:
         abstra_json = self.__get_abstra_json()
         return abstra_json.forms
 
@@ -141,7 +141,7 @@ display(f"Hello World, {name}")"""
 
         return dash
 
-    def get_dashes(self) -> list[DashJSON]:
+    def get_dashes(self) -> typing.List[DashJSON]:
         abstra_json = self.__get_abstra_json()
         return abstra_json.dashes
 
@@ -194,7 +194,7 @@ display(f"Hello World, {name}")"""
 
         return hook
 
-    def get_hooks(self) -> list[HookJSON]:
+    def get_hooks(self) -> typing.List[HookJSON]:
         abstra_json = self.__get_abstra_json()
         return abstra_json.hooks
 
@@ -303,3 +303,31 @@ display(f"Hello World, {name}")"""
         abstra_json.jobs = [j for j in jobs if j.identifier != identifier]
 
         self.persist(abstra_json)
+
+    # Login
+
+    def get_login(self):
+        credentials = get_credentials(self.root_path)
+        if not credentials:
+            return {"logged": False, "reason": "NO_API_TOKEN"}
+
+        url = "https://cloud-api.abstra.cloud/cli/auth-info"
+        headers = {"Api-Authorization": f"Bearer {credentials}"}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            response_json = response.json()
+            return {
+                "logged": True,
+                "author_id": response_json["authorId"],
+                "project_id": response_json["projectId"],
+            }
+        else:
+            return {"logged": False, "reason": "INVALID_API_TOKEN"}
+
+    def create_login(self, token):
+        set_credentials(self.root_path, token)
+        return self.get_login()
+
+    def delete_login(self):
+        delete_credentials(self.root_path)
+        return self.get_login()
