@@ -1,45 +1,26 @@
-import os, sys
-from .utils import ABSTRA_FOLDER, CREDENTIALS_FILE
-
-overwriten_auth_headers = {}
+import os
+from .utils import CREDENTIALS_FILE
 
 
-def overwrite_auth_headers(headers):
-    if not isinstance(headers, dict):
-        raise ValueError("headers must be a dict")
-    global overwriten_auth_headers
-    overwriten_auth_headers = headers
-
-
-def create_abstra_dir():
-    if not os.path.exists(ABSTRA_FOLDER):
-        os.makedirs(ABSTRA_FOLDER)
-
-
-def save_credentials(api_token: str):
-    create_abstra_dir()
-    with open(CREDENTIALS_FILE, "w") as f:
-        f.write(api_token.strip())
-
-
-def get_credentials():
+def get_credentials(root_path):
     if os.getenv("ABSTRA_API_TOKEN"):
         return os.getenv("ABSTRA_API_TOKEN")
 
-    if not os.path.exists(CREDENTIALS_FILE):
+    credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
+    if not os.path.exists(credentials_path):
         return None
 
-    with open(CREDENTIALS_FILE) as f:
+    with open(credentials_path) as f:
         return f.read().strip()
 
 
-def get_auth_headers(api_token=None):
-    if overwriten_auth_headers:
-        return {"content-type": "application/json", **overwriten_auth_headers}
+def delete_credentials(root_path):
+    credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
+    if os.path.exists(credentials_path):
+        os.remove(credentials_path)
 
-    api_token = api_token or get_credentials()
-    if api_token:
-        return {"content-type": "application/json", "API-Authorization": api_token}
 
-    print("No API token found. Please login with `abstra login`")
-    return None
+def set_credentials(root_path, token):
+    credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
+    with open(credentials_path, "w") as f:
+        f.write(token)
