@@ -22,5 +22,7 @@ def delete_credentials(root_path):
 
 def set_credentials(root_path, token):
     credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
+    os.makedirs(os.path.dirname(credentials_path), exist_ok=True)
+
     with open(credentials_path, "w") as f:
         f.write(token)

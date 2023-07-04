@@ -14,7 +14,7 @@ def _generate_zip_file(root_path: str) -> str:
 
 def _create_build(headers: dict) -> dict:
     return requests.post(
-        "https://cloud-api.abstra.cloud/cli/build", headers=headers
+        "https://cloud-api.abstra.cloud/cli/builds", headers=headers
     ).json()
 
 
