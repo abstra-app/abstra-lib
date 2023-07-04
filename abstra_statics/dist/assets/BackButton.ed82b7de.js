@@ -1,0 +1,2 @@
+import{x as n}from"./icons.1dc8a69b.js";import{d as a,a as s,b as c,c as r,e as _,z as i,S as l,q as p}from"./registerWidgets.802bba2f.js";const u=a({__name:"BackButton",emits:["exitFullscreenPreview"],setup(m,{emit:t}){return(d,e)=>{const o=s("icon");return c(),r("button",{class:"back-btn",onClick:e[0]||(e[0]=B=>t("exitFullscreenPreview"))},[_(o,{class:"icon",path:i(n),width:"20",height:"20",fill:"#5A677A"},null,8,["path"]),l(" Editor ")])}}});const k=p(u,[["__scopeId","data-v-eaeb3a6e"]]);export{k as B};
+//# sourceMappingURL=BackButton.ed82b7de.js.map

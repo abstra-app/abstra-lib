@@ -1,0 +1,2 @@
+import{M as a}from"./Modal.e13f7972.js";import{d as r,v as n,r as c,b as _,c as m,e,w as l,F as d,a as p,x as i,q as u}from"./registerWidgets.802bba2f.js";const f=["src"],v=r({__name:"Home",setup(x){const o=n({onboardingForm:""}),t=c(null);return(b,g)=>{const s=p("router-view");return _(),m(d,null,[e(s,{class:"router"}),e(a,{ref_key:"modal",ref:t},{content:l(()=>[i("iframe",{class:"form",src:o.onboardingForm},null,8,f)]),_:1},512)],64)}}});const h=u(v,[["__scopeId","data-v-8c8bc27e"]]);export{h as default};
+//# sourceMappingURL=Home.06c025bc.js.map
