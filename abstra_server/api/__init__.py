@@ -3,6 +3,7 @@ from .classes import AbstraJSON, DashJSON, FormJSON, WorkspaceJSON, HookJSON, Jo
 from ..utils import random_id
 from abstra.tables import get_db
 from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
+from abstra_cli.deploy import deploy
 
 
 class API:
@@ -20,6 +21,9 @@ class API:
             self.__get_abstra_json()
         except FileNotFoundError:
             self.init_empty()
+
+    def deploy(self):
+        deploy(self.root_path)
 
     def init_empty(self):
         self.persist(AbstraJSON.make_empty())

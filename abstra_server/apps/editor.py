@@ -32,6 +32,11 @@ def get_editor_bp(api: API):
         file_path = flask.request.args["path"]
         return {"exists": api.check_file(file_path)}
 
+    @bp.route("/api/workspace/deploy", methods=["POST"])
+    def deploy():
+        api.deploy()
+        return {"success": True}
+
     @bp.route("/api/forms/", methods=["GET"])
     def get_forms():
         return [f.editor_dto for f in api.get_forms()]
