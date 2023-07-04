@@ -250,7 +250,7 @@ display(f"Hello World, {name}")"""
 
     def update_workspace(self, changes: dict[str, typing.Any]):
         abstra_json = self.__get_abstra_json()
-        abstra_json.workspace.update(changes)
+        abstra_json.workspace.update(changes, abstra_json.dashes, abstra_json.forms)
         self.persist(abstra_json)
         return abstra_json.workspace
 

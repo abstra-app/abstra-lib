@@ -535,9 +535,77 @@ class DashJSON:
 
 
 @dataclass
+class SidebarItemJSON:
+    id: str
+    name: str
+    path: str
+    type: str
+    visible: Optional[bool]
+
+    @property
+    def __dict__(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "path": self.path,
+            "type": self.type,
+            "visible": self.visible,
+        }
+
+
+@dataclass
+class SidebarJSON:
+    items: List[SidebarItemJSON]
+
+    @staticmethod
+    def from_dict(
+        sidebar_data=List, dashes: List[DashJSON] = [], forms: List[FormJSON] = []
+    ):
+        stored_items = [
+            SidebarItemJSON(
+                id=item["id"],
+                name=item["name"],
+                path=item["path"],
+                type=item["type"],
+                visible=item.get("visible"),
+            )
+            for item in sidebar_data
+        ]
+
+        for dash in dashes:
+            if dash.path not in [item.path for item in stored_items]:
+                stored_items.append(
+                    SidebarItemJSON(
+                        id=dash.path,
+                        name=dash.title,
+                        path=dash.path,
+                        type="dash",
+                        visible=False,
+                    )
+                )
+
+        for form in forms:
+            if form.path not in [item.path for item in stored_items]:
+                stored_items.append(
+                    SidebarItemJSON(
+                        id=form.path,
+                        name=form.title,
+                        path=form.path,
+                        type="form",
+                        visible=False,
+                    )
+                )
+        return SidebarJSON(items=stored_items)
+
+    @property
+    def __dict__(self):
+        return [item.__dict__ for item in self.items]
+
+
+@dataclass
 class WorkspaceJSON:
     name: str
-    sidebar: List[dict]
+    sidebar: SidebarJSON
     root: Optional[str] = None
     theme: Optional[str] = None
     logo_url: Optional[str] = None
@@ -548,13 +616,13 @@ class WorkspaceJSON:
 
     @property
     def runner_dto(self):
-        return {"name": self.name, "sidebar": self.sidebar}
+        return {"name": self.name, "sidebar": self.sidebar.__dict__}
 
     @property
     def __dict__(self):
         return {
             "name": self.name,
-            "sidebar": self.sidebar,
+            "sidebar": self.sidebar.__dict__,
             "root": self.root,
             "theme": self.theme,
             "logo_url": self.logo_url,
@@ -568,15 +636,27 @@ class WorkspaceJSON:
     def editor_dto(self):
         return self.__dict__
 
-    def update(self, changes: dict[str, Any]):
+    def update(
+        self,
+        changes: dict[str, Any],
+        dashes: List[DashJSON] = [],
+        forms: List[FormJSON] = [],
+    ):
         for attr, value in changes.items():
-            setattr(self, attr, value)
+            if attr == "sidebar":
+                self.sidebar = SidebarJSON.from_dict(changes["sidebar"], dashes, forms)
+            else:
+                setattr(self, attr, value)
 
     @staticmethod
-    def from_dict(data: dict):
+    def from_dict(data: dict, dashes: List[DashJSON] = [], forms: List[FormJSON] = []):
         return WorkspaceJSON(
             name=data.get("name", "Untitled Workspace"),
-            sidebar=data.get("sidebar", []),
+            sidebar=SidebarJSON.from_dict(
+                data.get("sidebar", []),
+                dashes=dashes,
+                forms=forms,
+            ),
             root=data.get("root"),
             theme=data.get("theme"),
             logo_url=data.get("logo_url"),
@@ -597,11 +677,13 @@ class AbstraJSON:
     jobs: List[JobJSON]
 
     def __post_init__(self):
-        self.workspace = WorkspaceJSON.from_dict(self.workspace)
         self.forms = [FormJSON.from_dict(form) for form in self.forms]
         self.dashes = [DashJSON.from_dict(dash) for dash in self.dashes]
         self.hooks = [HookJSON.from_dict(hook) for hook in self.hooks]
         self.jobs = [JobJSON.from_dict(job) for job in self.jobs]
+        self.workspace = WorkspaceJSON.from_dict(
+            self.workspace, dashes=self.dashes, forms=self.forms
+        )
 
     @property
     def __dict__(self):
