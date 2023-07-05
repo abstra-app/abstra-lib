@@ -24,15 +24,16 @@ class CLI(object):
         debug=False,
         use_reloader=False,
     ):
-        messages.serve_message(port)
-        check_latest_version()
 
-        if port is None:
-            port = get_free_port()
+        default_port = port or 3000
+        free_port = get_free_port(default_port=default_port)
+
+        messages.serve_message(free_port)
+        check_latest_version()
 
         serve(
             workspace_root=workspace_root,
-            port=port,
+            port=free_port,
             debug=debug,
             use_reloader=use_reloader,
         )
