@@ -283,5 +283,15 @@ def get_editor_bp(api: API):
     @bp.route("/api/login", methods=["DELETE"])
     def _delete_login():
         return api.delete_login()
+    
+    @bp.route("/api/ai/message", methods=["POST"])
+    def _get_next_message():
+        body = flask.request.json
+        streamer = api.send_ai_message(body["messages"], body["runtime"])
 
+        if streamer is None:
+            flask.abort(403)
+
+        return flask.Response(streamer, mimetype='text/event-stream')
+    
     return bp

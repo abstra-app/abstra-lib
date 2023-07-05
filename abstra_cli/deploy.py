@@ -1,8 +1,15 @@
-import pathlib, zipfile, urllib.request, requests
+import os
+import pathlib
+import urllib.request
+import zipfile
 from uuid import uuid4 as uuid
+
+import requests
+
 from .credentials import get_credentials
 from .utils.file import files_from_directory
 
+CLOUD_API_ENDPOINT = os.environ.get("CLOUD_API_ENDPOINT") or f"https://cloud-api.abstra.cloud/api/"
 
 def _generate_zip_file(root_path: str) -> str:
     zip_path = f"/tmp/{uuid()}.zip"
@@ -14,7 +21,7 @@ def _generate_zip_file(root_path: str) -> str:
 
 def _create_build(headers: dict) -> dict:
     return requests.post(
-        "https://cloud-api.abstra.cloud/cli/builds", headers=headers
+        f"{CLOUD_API_ENDPOINT}/builds", headers=headers
     ).json()
 
 
@@ -26,7 +33,7 @@ def _upload_file(url: str, file_path: str, headers: dict):
 
 def _update_build(build_id: str, headers: dict) -> dict:
     requests.patch(
-        f"https://cloud-api.abstra.cloud/cli/builds/{build_id}",
+        f"{CLOUD_API_ENDPOINT}/builds/{build_id}",
         headers=headers,
     )
 

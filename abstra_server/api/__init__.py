@@ -6,6 +6,8 @@ from abstra_cli.credentials import get_credentials, delete_credentials, set_cred
 from abstra_cli.deploy import deploy
 
 
+CLOUD_API_ENDPOINT = os.environ.get("CLOUD_API_ENDPOINT") or f"https://cloud-api.abstra.cloud/api/"
+
 class API:
     def __init__(self, root: str):
         cwd = pathlib.Path.cwd()
@@ -315,7 +317,7 @@ display(f"Hello World, {name}")"""
         if not credentials:
             return {"logged": False, "reason": "NO_API_TOKEN"}
 
-        url = "https://cloud-api.abstra.cloud/cli/auth-info"
+        url = f"{CLOUD_API_ENDPOINT}/auth-info"
         headers = {"Api-Authorization": f"Bearer {credentials}"}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -335,3 +337,22 @@ display(f"Hello World, {name}")"""
     def delete_login(self):
         delete_credentials(self.root_path)
         return self.get_login()
+    
+    # AI
+    def send_ai_message(self, messages, runtime):
+        credentials = get_credentials(self.root_path)
+        
+        if not credentials:
+            return None
+        
+
+        url = f"{CLOUD_API_ENDPOINT}/ai/messages"
+        headers = {"Api-Authorization": f"Bearer {credentials}"}
+        
+        return requests.post(
+            url, 
+            headers=headers,
+            json={"messages": messages, "runtime": runtime}, stream=True
+        ).iter_content()
+
+
