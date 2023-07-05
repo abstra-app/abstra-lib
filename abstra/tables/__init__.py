@@ -9,9 +9,9 @@ class Table:
         self.table_name = table_name
 
     def select(
-        self, where: Optional[str] = None, rows: list[str] = ["*"], params={}
+        self, where: Optional[str] = None, columns: list[str] = ["*"], params={}
     ) -> list:
-        return self.db.select(self.table_name, where, rows, params)
+        return self.db.select(self.table_name, where, columns, params)
 
     def insert(self, values: dict[str, Any] = {}) -> None:
         return self.db.insert(self.table_name, values)
