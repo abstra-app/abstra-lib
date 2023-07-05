@@ -1,5 +1,4 @@
-import os
-import json
+import os, json
 
 abstra_json = {"version": "0.2"}
 
@@ -11,3 +10,4 @@ def init_dir(path: str):
     if not os.path.exists(abstra_json_path):
         with open(abstra_json_path, "w") as f:
             f.write(json.dumps(abstra_json))
+    os.environ[ "ABSTRA_DATABASE_URL"] = os.path.join(path, "db.sqlite3")

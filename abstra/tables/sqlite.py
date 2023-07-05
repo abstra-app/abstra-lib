@@ -3,6 +3,13 @@ import sqlite3
 from dataclasses import dataclass
 import re
 
+class TableNotFound(Exception):
+    def __init__(self, table_name: str) -> None:
+        self.table_name = table_name
+
+    def __str__(self) -> str:
+        return f"Table '{self.table_name}' does not exist"
+
 
 @dataclass
 class Column:
@@ -54,6 +61,9 @@ def get_columns_from_table(cur: sqlite3.Cursor, table_name: str):
         pragma table_info("{table_name}")
     """
     ).fetchall()
+
+    if len(rows) == 0:
+        raise TableNotFound(table_name)
 
     return [
         Column(
@@ -153,8 +163,8 @@ class SqliteDB:
                 RENAME TO "{new_name}"
             """
             )
-
-            return Table(name=new_name, columns=get_columns_from_table(cur, name))
+            
+            return Table(name=new_name, columns=get_columns_from_table(cur, new_name))
 
     def get_table(self, name: str):
         cur = self.connect("tuples").cursor()
@@ -321,12 +331,12 @@ class SqliteDB:
         self,
         table_name: str,
         where: Optional[str] = None,
-        rows: List[str] = ["*"],
+        columns: List[str] = ["*"],
         params: dict[str, Any] = {},
     ) -> List[dict[str, Any]]:
         with self.connect() as conn:
             where_exp, params = transform_expression(where, params)
-            rows_exp = ", ".join(rows)
+            rows_exp = ", ".join(columns)
             query = f'SELECT {rows_exp} FROM "{table_name}" {where_exp}'
             return conn.execute(query, params).fetchall()
 
@@ -352,10 +362,9 @@ class SqliteDB:
         params: dict[str, Any] = {},
     ) -> None:
         with self.connect() as conn:
-            params = [value for _, value in set.items()]
             set_exp = ", ".join([f"{key} = ?" for key, value in set.items()])
-            where_exp, where_params = transform_expression(where, params)
-            params.extend(where_params)
+            where_exp, params = transform_expression(where, params)
+            params = [value for _, value in set.items()] + params
             query = f'UPDATE "{table_name}" SET {set_exp} {where_exp} RETURNING *'
             result = conn.execute(query, params).fetchone()
 
