@@ -10,7 +10,7 @@ from .credentials import get_credentials
 from .utils.file import files_from_directory
 
 CLOUD_API_ENDPOINT = (
-    os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud/api"
+    os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 )
 
 
@@ -23,7 +23,7 @@ def _generate_zip_file(root_path: str) -> str:
 
 
 def _create_build(headers: dict) -> dict:
-    return requests.post(f"{CLOUD_API_ENDPOINT}/builds", headers=headers).json()
+    return requests.post(f"{CLOUD_API_ENDPOINT}/cli/builds", headers=headers).json()
 
 
 def _upload_file(url: str, file_path: str, headers: dict):
@@ -34,7 +34,7 @@ def _upload_file(url: str, file_path: str, headers: dict):
 
 def _update_build(build_id: str, headers: dict) -> dict:
     requests.patch(
-        f"{CLOUD_API_ENDPOINT}/builds/{build_id}",
+        f"{CLOUD_API_ENDPOINT}/cli/builds/{build_id}",
         headers=headers,
     )
 

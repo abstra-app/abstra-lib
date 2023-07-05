@@ -7,7 +7,7 @@ from abstra_cli.deploy import deploy
 
 
 CLOUD_API_ENDPOINT = (
-    os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud/api"
+    os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 )
 
 
@@ -320,10 +320,11 @@ display(f"Hello World, {name}")"""
         if not credentials:
             return {"logged": False, "reason": "NO_API_TOKEN"}
 
-        url = f"{CLOUD_API_ENDPOINT}/auth-info"
+        url = f"{CLOUD_API_ENDPOINT}/cli/auth-info"
         headers = {"Api-Authorization": f"Bearer {credentials}"}
         response = requests.get(url, headers=headers)
-        if response.status_code == 200:
+        print(response.text)
+        if response.ok:
             response_json = response.json()
             return {
                 "logged": True,
@@ -348,7 +349,7 @@ display(f"Hello World, {name}")"""
         if not credentials:
             return None
 
-        url = f"{CLOUD_API_ENDPOINT}/ai/messages"
+        url = f"{CLOUD_API_ENDPOINT}/cli/ai/messages"
         body = {"messages": messages, "runtime": runtime}
         headers = {"Api-Authorization": f"Bearer {credentials}"}
 

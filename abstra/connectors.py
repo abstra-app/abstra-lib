@@ -29,7 +29,7 @@ class Methods:
             json=params,
             headers=get_headers(self.api_key),
         )
-        if res.status_code == 200:
+        if res.ok:
             return res.json()
         else:
             raise Exception(res.text)
