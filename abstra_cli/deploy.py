@@ -9,7 +9,7 @@ import requests
 from .credentials import get_credentials
 from .utils.file import files_from_directory
 
-CLOUD_API_ENDPOINT = os.environ.get("CLOUD_API_ENDPOINT") or f"https://cloud-api.abstra.cloud/api/"
+CLOUD_API_ENDPOINT = os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud/api"
 
 def _generate_zip_file(root_path: str) -> str:
     zip_path = f"/tmp/{uuid()}.zip"
