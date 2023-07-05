@@ -3,6 +3,7 @@ import sqlite3
 from dataclasses import dataclass
 import re
 
+
 class TableNotFound(Exception):
     def __init__(self, table_name: str) -> None:
         self.table_name = table_name
@@ -163,7 +164,7 @@ class SqliteDB:
                 RENAME TO "{new_name}"
             """
             )
-            
+
             return Table(name=new_name, columns=get_columns_from_table(cur, new_name))
 
     def get_table(self, name: str):
