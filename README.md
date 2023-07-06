@@ -28,4 +28,4 @@ Deploy with a single command
 abstra deploy ./your-app-directory
 ```
 
-[Site](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io)
+[Site](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io) | [Privacy](./PRIVACY.md)
