@@ -37,7 +37,10 @@ class HookJSON:
 
     def update(self, changes: dict[str, Any]):
         for attr, value in changes.items():
-            setattr(self, attr, value)
+            if attr in ["file", "path", "title", "enabled"]:
+                setattr(self, attr, value)
+            else:
+                raise Exception(f"Cannot update {attr} of hook")
 
     @staticmethod
     def from_dict(data: dict):
@@ -79,7 +82,10 @@ class JobJSON:
 
     def update(self, changes: dict[str, Any]):
         for attr, value in changes.items():
-            setattr(self, attr, value)
+            if attr in ["file", "identifier", "title", "schedule"]:
+                setattr(self, attr, value)
+            else:
+                raise Exception(f"Cannot update {attr} of job")
 
     @staticmethod
     def from_dict(data: dict):
@@ -153,7 +159,23 @@ class FormJSON:
 
     def update(self, changes: dict[str, Any]):
         for attr, value in changes.items():
-            setattr(self, attr, value)
+            if attr in [
+                "file",
+                "path",
+                "title",
+                "end_message",
+                "auto_start",
+                "start_message",
+                "error_message",
+                "welcome_title",
+                "allow_restart",
+                "timeout_message",
+                "start_button_text",
+                "restart_button_text",
+            ]:
+                setattr(self, attr, value)
+            else:
+                raise Exception(f"Cannot update {attr} of form")
 
     @staticmethod
     def from_dict(data: dict):
@@ -193,7 +215,6 @@ class DashWidgetJSON:
     def runner_dto(self):
         return {
             "id": self.id,
-            # "name": self.name,
             "type": self.type,
             "variable": self.variable,
             "position": {
@@ -487,42 +508,23 @@ class DashJSON:
     def update(self, changes: dict[str, Any]):
         if "path" in changes:
             self.path = changes["path"]
+            del changes["path"]
 
         if "title" in changes:
             self.title = changes["title"]
+            del changes["title"]
 
         if "layout" in changes:
             self.layout = LayoutJSON(**changes["layout"])
+            del changes["layout"]
 
         if "file" in changes:
             self.file = changes["file"]
+            del changes["file"]
+        
+        if len(changes) > 0:
+            raise Exception("Invalid property update")
 
-        if "end_message" in changes:
-            self.end_message = changes["end_message"]
-
-        if "auto_start" in changes:
-            self.auto_start = changes["auto_start"]
-
-        if "start_message" in changes:
-            self.start_message = changes["start_message"]
-
-        if "error_message" in changes:
-            self.error_message = changes["error_message"]
-
-        if "welcome_title" in changes:
-            self.welcome_title = changes["welcome_title"]
-
-        if "allow_restart" in changes:
-            self.allow_restart = changes["allow_restart"]
-
-        if "timeout_message" in changes:
-            self.timeout_message = changes["timeout_message"]
-
-        if "start_button_text" in changes:
-            self.start_button_text = changes["start_button_text"]
-
-        if "restart_button_text" in changes:
-            self.restart_button_text = changes["restart_button_text"]
 
     @staticmethod
     def from_dict(data: dict):
@@ -561,17 +563,18 @@ class SidebarJSON:
     def from_dict(
         sidebar_data=List, dashes: List[DashJSON] = [], forms: List[FormJSON] = []
     ):
-        stored_items = [
-            SidebarItemJSON(
-                id=item["id"],
-                name=item["name"],
-                path=item["path"],
-                type=item["type"],
-                visible=item.get("visible"),
-            )
-            for item in sidebar_data
-        ]
-
+        item_name = lambda path: [s.title for s in [*dashes, *forms] if s.path == path][0]
+        stored_items = []
+        for item in sidebar_data:
+            if item["path"] in [d.path for d in dashes] + [f.path for f in forms]:
+                item = SidebarItemJSON(
+                    id=item["id"],
+                    name=item_name(item["path"]),
+                    path=item["path"],
+                    type=item["type"],
+                    visible=item.get("visible"))
+                stored_items.append(item)
+    
         for dash in dashes:
             if dash.path not in [item.path for item in stored_items]:
                 stored_items.append(
@@ -718,8 +721,9 @@ class AbstraJSON:
 
         try:
             return AbstraJSON(**data)
-        except:
+        except TypeError as e:
             print("Error: incompatible abstra.json file.")
+            print(e)
             sys.exit(1)
 
     @staticmethod
