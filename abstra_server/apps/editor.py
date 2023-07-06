@@ -115,7 +115,6 @@ def get_editor_bp(api: API):
     @usage(api.root_path)
     def spa_index():
         return send_from_dist("editor.html", "editor.html")
-    
 
     @bp.route("/api/hooks/<path:path>", methods=["GET"])
     @usage(api.root_path)
@@ -124,7 +123,7 @@ def get_editor_bp(api: API):
         if not hook:
             flask.abort(404)
         return hook.editor_dto
-    
+
     @bp.route("/api/hooks/", methods=["GET"])
     @usage(api.root_path)
     def get_hooks():
@@ -286,19 +285,25 @@ def get_editor_bp(api: API):
     def _get_columns(table_name: str):
         return api.db.get_columns(table_name)
 
-    @bp.route("/api/tables/<path:table_name>/columns/<path:column_name>", methods=["GET"])
+    @bp.route(
+        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["GET"]
+    )
     @usage(api.root_path)
     def _get_column(table_name: str, column_name: str):
         return api.db.get_column(table_name, column_name).editor_dto
 
-    @bp.route("/api/tables/<path:table_name>/columns/<path:column_name>", methods=["PUT"])
+    @bp.route(
+        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["PUT"]
+    )
     @usage(api.root_path)
     def _update_column(table_name: str, column_name: str):
         new_column = flask.request.json
         updated_column = api.db.update_column(table_name, column_name, new_column)
         return updated_column.editor_dto
 
-    @bp.route("/api/tables/<path:table_name>/columns/<path:column_name>", methods=["DELETE"])
+    @bp.route(
+        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["DELETE"]
+    )
     @usage(api.root_path)
     def _delete_column(table_name: str, column_name: str):
         api.db.delete_column(table_name, column_name)

@@ -24,7 +24,6 @@ class CLI(object):
         debug=False,
         use_reloader=False,
     ):
-
         default_port = port or 3000
         free_port = get_free_port(default_port=default_port)
 
