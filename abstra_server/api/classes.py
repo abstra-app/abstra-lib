@@ -521,10 +521,9 @@ class DashJSON:
         if "file" in changes:
             self.file = changes["file"]
             del changes["file"]
-        
+
         if len(changes) > 0:
             raise Exception("Invalid property update")
-
 
     @staticmethod
     def from_dict(data: dict):
@@ -563,7 +562,9 @@ class SidebarJSON:
     def from_dict(
         sidebar_data=List, dashes: List[DashJSON] = [], forms: List[FormJSON] = []
     ):
-        item_name = lambda path: [s.title for s in [*dashes, *forms] if s.path == path][0]
+        item_name = lambda path: [s.title for s in [*dashes, *forms] if s.path == path][
+            0
+        ]
         stored_items = []
         for item in sidebar_data:
             if item["path"] in [d.path for d in dashes] + [f.path for f in forms]:
@@ -572,9 +573,10 @@ class SidebarJSON:
                     name=item_name(item["path"]),
                     path=item["path"],
                     type=item["type"],
-                    visible=item.get("visible"))
+                    visible=item.get("visible"),
+                )
                 stored_items.append(item)
-    
+
         for dash in dashes:
             if dash.path not in [item.path for item in stored_items]:
                 stored_items.append(
