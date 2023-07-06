@@ -34,16 +34,16 @@ class API:
         self.persist(AbstraJSON.make_empty())
 
     def persist(self, abstra_json: AbstraJSON):
-        with open(self.abstra_json_path, "w") as f:
+        with open(self.abstra_json_path, "w", encoding="utf-8") as f:
             json.dump(abstra_json.__dict__, f, indent=2)
 
     def __get_abstra_json(self) -> AbstraJSON:
-        with open(self.abstra_json_path, "r") as f:
+        with open(self.abstra_json_path, "r", encoding="utf-8") as f:
             abstra_json_content = json.load(f)
         return AbstraJSON.from_dict(abstra_json_content)
 
     def read_text_file(self, path) -> str:
-        with open(os.path.join(self.root_path, path), "r") as f:
+        with open(os.path.join(self.root_path, path), "r", encoding="utf-8") as f:
             return f.read()
 
     def get_workspace(self) -> WorkspaceJSON:
@@ -75,7 +75,7 @@ class API:
         file_name = f"new_form_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w") as f:
+        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write(
                 """from abstra.forms import display, read
 
@@ -134,7 +134,7 @@ display(f"Hello World, {name}")"""
         file_name = f"new_dash_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w") as f:
+        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write("foo = 'bar'")
 
         dash = DashJSON(
@@ -192,7 +192,7 @@ display(f"Hello World, {name}")"""
         file_name = f"new_hook_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w") as f:
+        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write("print('Hello World')")
 
         hook = HookJSON(file=file_path, path=file_name, title="Untitled Hook")
@@ -244,7 +244,7 @@ display(f"Hello World, {name}")"""
             and file_path.endswith(".py")
             and not os.path.isfile(complete_file_path)
         ):
-            with open(complete_file_path, "w") as f:
+            with open(complete_file_path, "w", encoding="utf-8") as f:
                 f.write("")
 
         webbrowser.open("file://" + complete_file_path)
@@ -278,7 +278,7 @@ display(f"Hello World, {name}")"""
         file_name = f"new_job_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w") as f:
+        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write("print('Hello World')")
 
         job = JobJSON(

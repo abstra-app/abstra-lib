@@ -10,7 +10,7 @@ def get_credentials(root_path):
     if not os.path.exists(credentials_path):
         return None
 
-    with open(credentials_path) as f:
+    with open(credentials_path, encoding="utf-8") as f:
         return f.read().strip()
 
 
@@ -24,5 +24,5 @@ def set_credentials(root_path, token):
     credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
     os.makedirs(os.path.dirname(credentials_path), exist_ok=True)
 
-    with open(credentials_path, "w") as f:
+    with open(credentials_path, "w", encoding="utf-8") as f:
         f.write(token)
