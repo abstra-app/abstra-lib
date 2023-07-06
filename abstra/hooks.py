@@ -17,7 +17,7 @@ def _multipart_form_parse(body: str, headers: dict):
 
 def get_raw_request(local_file="request.json"):
     try:
-        with open(os.getenv("REQUEST_FILE", local_file)) as f:
+        with open(os.getenv("REQUEST_FILE", local_file), encoding="utf-8") as f:
             request = json.loads(f.read())
             body = request["body"]
             query = request["query"]
@@ -45,7 +45,7 @@ def send_response(body="", status_code=200, headers={}, local_file="response.jso
     response = {"status_code": status_code, "body": body, "headers": headers}
     path = os.getenv("RESPONSE_FILE", local_file)
     content = json.dumps(response)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(content)
 
 
