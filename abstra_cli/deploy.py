@@ -1,8 +1,10 @@
 import os
 import pathlib
+import tempfile
 import urllib.request
 import zipfile
 from uuid import uuid4 as uuid
+from pathlib import Path
 
 import requests
 
@@ -15,7 +17,7 @@ CLOUD_API_ENDPOINT = (
 
 
 def _generate_zip_file(root_path: str) -> str:
-    zip_path = f"/tmp/{uuid()}.zip"
+    zip_path = Path(tempfile.gettempdir(), f"{uuid()}.zip")
     with zipfile.ZipFile(zip_path, "w") as zip_file:
         for file in files_from_directory(root_path):
             zip_file.write(file, file.relative_to(root_path))

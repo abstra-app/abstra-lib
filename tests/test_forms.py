@@ -1,12 +1,16 @@
+import tempfile
 import unittest
 from uuid import uuid4 as uuid
+from pathlib import Path
+
 from abstra_server.api import API
+
 from .fixtures import init_dir
 
 
 class TestForms(unittest.TestCase):
     def updates_across_reloads(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
         api = API(root=workspace_root_path)
 
@@ -21,7 +25,7 @@ class TestForms(unittest.TestCase):
         self.assertEqual(form.title, new_form.title)
 
     def test_raise_exception_on_invalid_propery_update(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
         api = API(root=workspace_root_path)
 

@@ -34,7 +34,7 @@ def format_digits(n, d):
 
 
 def parse_env_var(var):
-    match = re.search("^(\w+)=(.+)$", var.strip())
+    match = re.search(r"^(\w+)=(.+)$", var.strip())
     if match:
         return match.group(1), match.group(2)
     return None, None
@@ -44,14 +44,14 @@ def parse_package(pkg):
     # https://peps.python.org/pep-0440/#version-specifiers
 
     match = re.search(
-        "^(([\w\.\-]+)\s*)(~=|===|>=|<=|==)(\s*([^\[\]\,\;\>\<\s]+))$", pkg
+        r"^(([\w\.\-]+)\s*)(~=|===|>=|<=|==)(\s*([^\[\]\,\;\>\<\s]+))$", pkg
     )
     if match:
         name = match.group(2)
         version = match.group(5)
         return name, version
 
-    if re.search("\>|\<|\,|\;|\[|\]", pkg):
+    if re.search(r"\>|\<|\,|\;|\[|\]", pkg):
         return None, None
 
     return pkg, None

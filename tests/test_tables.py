@@ -1,12 +1,16 @@
-import json, unittest
+import tempfile
+import unittest
 from uuid import uuid4 as uuid
-from abstra.tables import get_db, get_table, TableNotFound
+from pathlib import Path
+
+from abstra.tables import TableNotFound, get_db, get_table
+
 from .fixtures import init_dir
 
 
 class TestTables(unittest.TestCase):
     def test_create_table(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         db = get_db()
@@ -18,7 +22,7 @@ class TestTables(unittest.TestCase):
         self.assertEqual(created_table.name, retrieved_table.name)
 
     def test_delete_table(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         db = get_db()
@@ -31,7 +35,7 @@ class TestTables(unittest.TestCase):
             db.get_table(created_table.name)
 
     def test_update_table_name(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         db = get_db()
@@ -43,7 +47,7 @@ class TestTables(unittest.TestCase):
         db.get_table("new_name")
 
     def test_create_column(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         db = get_db()
@@ -60,7 +64,7 @@ class TestTables(unittest.TestCase):
         self.assertNotIn(col.name, [c.name for c in cols])
 
     def test_crud_data(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         db = get_db()

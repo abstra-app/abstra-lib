@@ -1,8 +1,10 @@
 import io
+import tempfile
 from typing import Union
+from pathlib import Path
+
 from .apis import upload_file
 from .types import PILImage
-from tempfile import NamedTemporaryFile
 
 
 def convert_file(file: Union[str, io.IOBase, PILImage]) -> str:
@@ -18,7 +20,7 @@ def convert_file(file: Union[str, io.IOBase, PILImage]) -> str:
         file = open(file, "rb")
 
     if callable(getattr(file, "save", None)):
-        file_path = "/tmp/img.png"
+        file_path = Path(tempfile.gettempdir(), "img.png")
         file.save(file_path)
         file = open(file_path, "rb")
 
@@ -28,7 +30,7 @@ def convert_file(file: Union[str, io.IOBase, PILImage]) -> str:
 def download_file(url):
     import requests
 
-    f = NamedTemporaryFile()
+    f = tempfile.NamedTemporaryFile()
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         for chunk in r.iter_content(chunk_size=8192):
