@@ -1,8 +1,21 @@
-import traceback
+import traceback, re
 from ...contract import dashes_contract as contract
 from ...api.classes import SlotJSON
 from ...session import LiveSession
 from .program import PythonProgram, DashPageState
+
+
+def formated_traceback_error_message(
+    tb: traceback.StackSummary, e: Exception, main_file="<string>"
+):
+    files = [
+        re.sub(r"<string>", main_file, f)
+        for f in traceback.format_tb(e.__traceback__)
+        if "abstra_server" not in f
+    ]
+    formated_error = "\n".join(files)
+    formated_error += re.sub(r"<string>", main_file, str(e))
+    return formated_error
 
 
 def preview_only_check(method):
@@ -23,10 +36,11 @@ class MessageHandler:
     session: LiveSession
     dash_page_state: DashPageState
 
-    def __init__(self, py: PythonProgram, session: LiveSession) -> None:
+    def __init__(self, py: PythonProgram, session: LiveSession, main_file=None) -> None:
         self.py = py
         self.session = session
         self.dash_page_state = None
+        self.main_file = main_file
 
     def handle(self, type: str, data):
         handlers = {
@@ -53,9 +67,9 @@ class MessageHandler:
             self.py.execute_initial_code()
         except Exception as e:
             tb = traceback.extract_tb(e.__traceback__)
-            self.session.send(
-                contract.ProgramStartFailedMessage(traceback.format_exc(), tb)
-            )
+            formated_error = formated_traceback_error_message(tb, e, self.main_file)
+
+            self.session.send(contract.ProgramStartFailedMessage(formated_error, tb))
             self.session.close()
 
         self._compute_and_send_widgets_props()
