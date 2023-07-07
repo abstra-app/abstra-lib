@@ -3,19 +3,7 @@ from ...contract import dashes_contract as contract
 from ...api.classes import SlotJSON
 from ...session import LiveSession
 from .program import PythonProgram, DashPageState
-
-
-def formated_traceback_error_message(
-    tb: traceback.StackSummary, e: Exception, main_file="<string>"
-):
-    files = [
-        re.sub(r"<string>", main_file, f)
-        for f in traceback.format_tb(e.__traceback__)
-        if "abstra_server" not in f
-    ]
-    formated_error = "\n".join(files)
-    formated_error += re.sub(r"<string>", main_file, str(e))
-    return formated_error
+from ...utils import formated_traceback_error_message
 
 
 def preview_only_check(method):
@@ -67,7 +55,7 @@ class MessageHandler:
             self.py.execute_initial_code()
         except Exception as e:
             tb = traceback.extract_tb(e.__traceback__)
-            formated_error = formated_traceback_error_message(tb, e, self.main_file)
+            formated_error = formated_traceback_error_message(e, self.main_file)
 
             self.session.send(contract.ProgramStartFailedMessage(formated_error, tb))
             self.session.close()
@@ -105,7 +93,9 @@ class MessageHandler:
                 self.py.ex(data["expression"])
                 self.session.send(contract.EvalReturnMessage(""))
         except Exception as e:
-            self.session.send(contract.EvalErrorMessage(traceback.format_exc()))
+            tb = traceback.extract_tb(e.__traceback__)
+            formated_error = formated_traceback_error_message(e, self.main_file)
+            self.session.send(contract.EvalErrorMessage(formated_error))
 
         self._compute_and_send_widgets_props()
 
@@ -141,6 +131,8 @@ class MessageHandler:
             computed = self.py.evaluate_widgets(self.dash_page_state)
             self.session.send(contract.WidgetsComputedMessage(**computed))
         except Exception as e:
+            tb = traceback.extract_tb(e.__traceback__)
+            formated_error = formated_traceback_error_message(e, self.main_file)
             self.session.send(
-                contract.WidgetsComputedGeneralErrorMessage(traceback.format_exc())
+                contract.WidgetsComputedGeneralErrorMessage(formated_error)
             )

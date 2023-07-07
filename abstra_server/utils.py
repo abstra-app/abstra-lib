@@ -1,4 +1,4 @@
-import base64, simplejson, jwt, os
+import base64, simplejson, jwt, os, traceback, re
 from traceback import StackSummary
 
 
@@ -57,6 +57,17 @@ def prepate_traceback(tb: StackSummary):
             return [{"line": x.lineno, "filename": x.filename} for x in tb[i:]]
     else:
         return []
+
+
+def formated_traceback_error_message(e: Exception, main_file="<string>"):
+    files = [
+        re.sub(r"<string>", main_file, f)
+        for f in traceback.format_tb(e.__traceback__)
+        if "abstra_server" not in f
+    ]
+    formated_error = "\n".join(files)
+    formated_error += re.sub(r"<string>", main_file, str(e))
+    return formated_error
 
 
 def decode_jwt(jwt_str: str):
