@@ -9,9 +9,10 @@ executor = futures.ThreadPoolExecutor()
 
 
 def async_send_usage(data, header):
-    api_url = 'http://cloud-api.abstra.cloud/cli/editor/usage'        
+    api_url = "http://cloud-api.abstra.cloud/cli/editor/usage"
     requests.post(api_url, json=data, headers=header)
-    
+
+
 def usage(root_path: str) -> Callable[..., Any]:
     def usage_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
@@ -19,9 +20,9 @@ def usage(root_path: str) -> Callable[..., Any]:
             arg_values = dict(zip(arg_names, args))
 
             metric_data = {
-            'userId': get_local_user_id(),
-            'payload': {**arg_values, **kwargs, **{'event': func.__name__}},
-            'abstraVersion': get_package_version('abstra')
+                "userId": get_local_user_id(),
+                "payload": {**arg_values, **kwargs, **{"event": func.__name__}},
+                "abstraVersion": get_package_version("abstra"),
             }
 
             headers = {"apiKey": get_credentials(root_path)}

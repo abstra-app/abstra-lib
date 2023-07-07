@@ -1,12 +1,16 @@
+import tempfile
 import unittest
-from abstra_server.api import API
 from uuid import uuid4 as uuid
+from pathlib import Path
+
+from abstra_server.api import API
+
 from .fixtures import init_dir
 
 
 class TestDashes(unittest.TestCase):
     def test_api_create(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         api = API(root=workspace_root_path)
@@ -20,7 +24,7 @@ class TestDashes(unittest.TestCase):
         self.assertEqual(dash.layout.slot.__dict__, {})
 
     def test_api_update(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
 
         api = API(root=workspace_root_path)

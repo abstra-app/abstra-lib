@@ -1,26 +1,28 @@
 import os
 import shutil
+import tempfile
+from pathlib import PosixPath, Path
 from uuid import uuid4
-from pathlib import PosixPath
+
 from abstra_cli.utils import files_from_directory
 
 
 def generate_random_folder():
     name = "dir-" + uuid4().hex
-    path = "/tmp/" + name
+    path = Path(tempfile.gettempdir(), name)
     os.mkdir(path)
     return path
 
 
 class TestListing:
     def add_file(self, name, content, path=None):
-        filepath = (path or self.path) + "/" + name
+        filepath = Path((path or self.path), name)
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
         return filepath
 
     def add_folder(self, name, path=None):
-        folderpath = (path or self.path) + "/" + name
+        folderpath = Path((path or self.path), name)
         os.mkdir(folderpath)
         return folderpath
 

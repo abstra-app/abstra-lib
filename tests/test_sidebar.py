@@ -1,12 +1,16 @@
+import tempfile
 import unittest
-from .fixtures import init_dir
 from uuid import uuid4 as uuid
+from pathlib import Path
+
 from abstra_server.api import API
+
+from .fixtures import init_dir
 
 
 class TestSidebar(unittest.TestCase):
     def test_starts_empty(self):
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
         api = API(root=workspace_root_path)
 
@@ -15,7 +19,7 @@ class TestSidebar(unittest.TestCase):
 
     def test_auto_add_forms(self):
         # given
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
         api = API(root=workspace_root_path)
 
@@ -31,7 +35,7 @@ class TestSidebar(unittest.TestCase):
 
     def test_auto_add_dashes(self):
         # given
-        workspace_root_path = f"/tmp/{uuid()}"
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
         api = API(root=workspace_root_path)
 

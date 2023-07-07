@@ -1,6 +1,5 @@
 import base64, simplejson, jwt, os
 from traceback import StackSummary
-import socket
 
 
 def serialize(obj):
@@ -78,6 +77,7 @@ def random_id(length=10):
 
     return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
+
 def get_package_version(package_name):
     import pkg_resources
 
@@ -86,15 +86,17 @@ def get_package_version(package_name):
         return version
     except pkg_resources.DistributionNotFound:
         return None
-    
+
+
 def hash_string(value):
     import hashlib
 
     sha256_hash = hashlib.sha256()
-    sha256_hash.update(value.encode('utf-8'))
+    sha256_hash.update(value.encode("utf-8"))
     hashed_string = sha256_hash.hexdigest()
 
     return hashed_string
+
 
 def get_local_user_id():
     import uuid
@@ -102,6 +104,3 @@ def get_local_user_id():
     id = str(uuid.getnode())
 
     return hash_string(id)
-
-
-
