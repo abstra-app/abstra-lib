@@ -317,7 +317,6 @@ def get_editor_bp(api: API):
     @bp.route("/api/login", methods=["GET"])
     @usage(api.root_path)
     def _get_login():
-        print("get login")
         return api.get_login()
 
     @bp.route("/api/login", methods=["POST"])
