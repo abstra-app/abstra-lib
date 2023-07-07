@@ -8,7 +8,7 @@ from simple_websocket import ConnectionError
 
 def run_dash(session: LiveSession, dash: DashJSON, code: str):
     py = PythonProgram(dash, code)
-    msg_handler = MessageHandler(py, session)
+    msg_handler = MessageHandler(py, session, main_file=dash.file)
     session.send(dashes_contract.ExecutionIdMessage(session.id))
     while True:
         try:
