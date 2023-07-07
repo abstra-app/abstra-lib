@@ -2,8 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Union, Type, Tuple, Any, Optional
 import traceback
-
-from ...utils import convert_answer, revert_value
+from ...utils import convert_answer, revert_value, formated_traceback_error_message
 from .autocomplete import get_suggestions
 from ...api.classes import DashJSON, SlotJSON, SlottableJSON, DashWidgetJSON
 from abstra.widgets import (
@@ -31,6 +30,7 @@ class PythonProgram:
     def __init__(self, dash: DashJSON, code: str) -> None:
         self.code = code
         self.root = dash.layout.slot
+        self.main_file = dash.file
 
         # state: { [variable: string]: value }
         self.state = {}
@@ -191,7 +191,8 @@ class PythonProgram:
                 props[prop] = self.ev(expr) if expr else None
             except Exception as e:
                 traceback.print_exc()
-                props_errors[prop] = {"repr": traceback.format_exc()}
+                formated_error = formated_traceback_error_message(e, self.main_file)
+                props_errors[prop] = {"repr": formated_error}
         else:
             try:
                 result = self.__filter_form_only_props(
@@ -199,7 +200,8 @@ class PythonProgram:
                 )
             except Exception as e:
                 traceback.print_exc()
-                widget_errors = {"repr": traceback.format_exc()}
+                formated_error = formated_traceback_error_message(e, self.main_file)
+                widget_errors = {"repr": formated_error}
 
         return result, props_errors, widget_errors
 
