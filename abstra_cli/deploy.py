@@ -29,7 +29,7 @@ def _create_build(headers: dict) -> dict:
 
 
 def _upload_file(url: str, file_path: str, headers: dict):
-    with open(file_path, "rb", encoding="utf-8") as f:
+    with open(file_path, "rb") as f:
         req = urllib.request.Request(url=url, method="PUT", data=f.read())
         urllib.request.urlopen(req)
 
