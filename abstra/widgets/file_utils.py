@@ -1,7 +1,5 @@
-import io
-import tempfile
+import io, tempfile, pathlib
 from typing import Union
-from pathlib import Path
 
 from .apis import upload_file
 from .types import PILImage
@@ -17,13 +15,15 @@ def convert_file(file: Union[str, io.IOBase, PILImage]) -> str:
             return file
 
         # path to file
-        file = open(file, "rb")
+        return upload_file(open(file, "rb"))
 
-    if callable(getattr(file, "save", None)):
-        file_path = Path(tempfile.gettempdir(), "img.png")
-        file.save(file_path)
-        file = open(file_path, "rb")
+    if isinstance(file, io.IOBase):
+        return upload_file(file)
 
+    # PILImage
+    file_path = pathlib.Path(tempfile.gettempdir(), "img.png")
+    file.save(str(file_path))
+    file = open(file_path, "rb")
     return upload_file(file)
 
 

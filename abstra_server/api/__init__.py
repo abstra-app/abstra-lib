@@ -1,5 +1,14 @@
 import json, pathlib, os, typing, webbrowser, requests
-from .classes import AbstraJSON, DashJSON, FormJSON, WorkspaceJSON, HookJSON, JobJSON
+from .classes import (
+    AbstraJSON,
+    DashJSON,
+    FormJSON,
+    WorkspaceJSON,
+    HookJSON,
+    JobJSON,
+    LayoutJSON,
+    SlotJSON,
+)
 from ..utils import random_id
 from abstra.tables import get_db
 from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
@@ -61,10 +70,6 @@ class API:
             if path == dash.path:
                 return dash
 
-        for hook in abstra_json.hooks:
-            if path == hook.path:
-                return hook
-
         return None
 
     # Forms CLRUD
@@ -106,7 +111,7 @@ display(f"Hello World, {name}")"""
         return None
 
     def update_form(
-        self, path: str, changes: dict[str, typing.Any]
+        self, path: str, changes: typing.Dict[str, typing.Any]
     ) -> typing.Optional[FormJSON]:
         abstra_json = self.__get_abstra_json()
         forms = [f for f in abstra_json.forms if f.path == path]
@@ -141,7 +146,7 @@ display(f"Hello World, {name}")"""
             file=file_path,
             path=f"new-dash_{random_id()}",
             title="Untitled Dash",
-            layout=dict(version="0.2", props={}, slot={}),
+            layout=LayoutJSON(version="0.2", props={}, slot=SlotJSON({})),
         )
 
         abstra_json.dashes.append(dash)
@@ -164,7 +169,7 @@ display(f"Hello World, {name}")"""
         return None
 
     def update_dash(
-        self, path: str, changes: dict[str, typing.Any]
+        self, path: str, changes: typing.Dict[str, typing.Any]
     ) -> typing.Optional[DashJSON]:
         abstra_json = self.__get_abstra_json()
         dashes = [d for d in abstra_json.dashes if d.path == path]
@@ -217,7 +222,7 @@ display(f"Hello World, {name}")"""
         return None
 
     def update_hook(
-        self, path: str, changes: dict[str, typing.Any]
+        self, path: str, changes: typing.Dict[str, typing.Any]
     ) -> typing.Optional[HookJSON]:
         abstra_json = self.__get_abstra_json()
         hooks = [h for h in abstra_json.hooks if h.path == path]
@@ -253,7 +258,7 @@ display(f"Hello World, {name}")"""
         complete_file_path = os.path.join(self.root_path, file_path)
         return os.path.isfile(complete_file_path)
 
-    def update_workspace(self, changes: dict[str, typing.Any]):
+    def update_workspace(self, changes: typing.Dict[str, typing.Any]):
         abstra_json = self.__get_abstra_json()
         abstra_json.workspace.update(changes, abstra_json.dashes, abstra_json.forms)
         self.persist(abstra_json)
@@ -294,7 +299,7 @@ display(f"Hello World, {name}")"""
 
         return job
 
-    def update_job(self, identifier: str, changes: dict[str, typing.Any]):
+    def update_job(self, identifier: str, changes: typing.Dict[str, typing.Any]):
         abstra_json = self.__get_abstra_json()
         jobs = [j for j in abstra_json.jobs if j.identifier == identifier]
         if len(jobs) == 0:

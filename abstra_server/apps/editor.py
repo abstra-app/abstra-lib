@@ -80,8 +80,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/forms/<path:path>", methods=["PUT"])
     @usage(api.root_path)
     def update_form(path: str):
-        form = api.update_form(path, flask.request.json)
-        return form.editor_dto
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        form = api.update_form(path, data)
+        return form.editor_dto if form else None
 
     @bp.route("/api/dashes/", methods=["GET"])
     @usage(api.root_path)
@@ -97,8 +101,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/dashes/<path:path>", methods=["PUT"])
     @usage(api.root_path)
     def update_dash(path: str):
-        dash = api.update_dash(path, flask.request.json)
-        return dash.editor_dto
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        dash = api.update_dash(path, data)
+        return dash.editor_dto if dash else None
 
     @bp.route("/api/dashes/<path:path>", methods=["DELETE"])
     @usage(api.root_path)
@@ -138,8 +146,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/hooks/<path:path>", methods=["PUT"])
     @usage(api.root_path)
     def update_hook(path: str):
-        hook = api.update_hook(path, flask.request.json)
-        return hook.editor_dto
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        hook = api.update_hook(path, data)
+        return hook.editor_dto if hook else None
 
     @bp.route("/api/hooks/<path:path>", methods=["DELETE"])
     @usage(api.root_path)
@@ -194,8 +206,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/jobs/<path:identifier>", methods=["PUT"])
     @usage(api.root_path)
     def update_job(identifier: str):
-        job = api.update_job(identifier, flask.request.json)
-        return job.editor_dto
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        job = api.update_job(identifier, data)
+        return job.editor_dto if job else None
 
     @bp.route("/api/jobs/<path:identifier>", methods=["DELETE"])
     @usage(api.root_path)
@@ -239,7 +255,7 @@ def get_editor_bp(api: API):
     def _update_table(name: str):
         changes = flask.request.json
         updated_table = api.db.update_table(name, changes)
-        return updated_table.editor_dto
+        return updated_table.editor_dto if updated_table else None
 
     @bp.route("/api/tables/<path:name>", methods=["DELETE"])
     @usage(api.root_path)
@@ -262,20 +278,26 @@ def get_editor_bp(api: API):
     @usage(api.root_path)
     def _row_action(table_name: str):
         data = flask.request.json
+        if not data:
+            flask.abort(400)
+
         if data.get("action") == "select":
             return api.db.select(
                 table_name, where=data.get("where"), params=data.get("params")
             )
-        elif data.get("action") == "update":
+
+        if data.get("action") == "update":
             return api.db.update(
                 table_name,
                 where=data.get("where"),
                 set=data.get("set"),
                 params=data.get("params"),
             )
-        elif data.get("action") == "insert":
+
+        if data.get("action") == "insert":
             return api.db.insert(table_name, values=data.get("values"))
-        elif data.get("action") == "delete":
+
+        if data.get("action") == "delete":
             return api.db.delete(
                 table_name, where=data.get("where"), params=data.get("params")
             )
@@ -290,7 +312,8 @@ def get_editor_bp(api: API):
     )
     @usage(api.root_path)
     def _get_column(table_name: str, column_name: str):
-        return api.db.get_column(table_name, column_name).editor_dto
+        column = api.db.get_column(table_name, column_name)
+        return column.editor_dto if column else None
 
     @bp.route(
         "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["PUT"]
@@ -323,6 +346,9 @@ def get_editor_bp(api: API):
     @usage(api.root_path)
     def _create_login():
         data = flask.request.json
+        if not data:
+            flask.abort(400)
+
         return api.create_login(data["token"])
 
     @bp.route("/api/login", methods=["DELETE"])
@@ -334,6 +360,9 @@ def get_editor_bp(api: API):
     @usage(api.root_path)
     def _get_next_message():
         body = flask.request.json
+        if not body:
+            flask.abort(400)
+
         streamer = api.send_ai_message(body["messages"], body["runtime"])
 
         if streamer is None:

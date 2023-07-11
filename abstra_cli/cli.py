@@ -1,10 +1,12 @@
-import fire
+import fire, os
 from .utils.server import get_free_port
 from abstra_server.apps import serve
 from .deploy import deploy
 from typing import Optional
 from .version import check_latest_version
 from . import messages
+
+PORT = os.getenv("PORT")
 
 
 class CLI(object):
@@ -20,11 +22,11 @@ class CLI(object):
     def serve(
         self,
         workspace_root: str = ".",
-        port: Optional[int] = None,
+        port: int = 3000,
         debug=False,
         use_reloader=False,
     ):
-        default_port = port or 3000
+        default_port = int(PORT or port)
         free_port = get_free_port(default_port=default_port)
 
         messages.serve_message(free_port)

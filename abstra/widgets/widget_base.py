@@ -1,7 +1,13 @@
 from abc import abstractmethod, ABC
 
 
-class Input(ABC):
+class JSONable(ABC):
+    @abstractmethod
+    def json(self, **kwargs):
+        pass
+
+
+class Input(JSONable):
     type: str
 
     def __init__(self, key: str) -> None:
@@ -9,17 +15,9 @@ class Input(ABC):
         self.key = key
 
     @abstractmethod
-    def json(self, **kwargs):
-        pass
-
-    @abstractmethod
     def convert_answer(self, answer):
         pass
 
 
-class Output(ABC):
+class Output(JSONable):
     type: str
-
-    @abstractmethod
-    def json(self, **kwargs):
-        pass

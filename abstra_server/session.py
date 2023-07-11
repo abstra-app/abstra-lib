@@ -5,7 +5,7 @@ from .contract import Message, should_send, StdioMessage
 
 class Execution:
     type = "execution"
-    executions: typing.ClassVar[dict] = {}
+    executions: typing.ClassVar[typing.Dict] = {}
 
     @classmethod
     def get_execution(cls) -> typing.Optional["Execution"]:
@@ -42,7 +42,7 @@ class LiveSession(Execution):
     @staticmethod
     def get_session() -> typing.Optional["LiveSession"]:
         execution = Execution.get_execution()
-        if execution and execution.type == "session":
+        if isinstance(execution, LiveSession):
             return execution
 
         return None
@@ -59,12 +59,12 @@ class LiveSession(Execution):
         str_data = serialize(msg.to_json(self.is_preview))
         self.__connection.send(str_data)
 
-    def recv(self) -> typing.Tuple[str, dict]:
+    def recv(self) -> typing.Tuple[str, typing.Dict]:
         str_data = self.__connection.receive()
         data = deserialize(str_data)
         return data["type"], data
 
-    def close(self, reason: str = None):
+    def close(self, reason: str = ""):
         self.__connection.close(message=reason)
 
     def stdio(self, type: str, text: str):
@@ -85,9 +85,9 @@ class StaticSession(Execution):
     type = "static-session"
 
     @staticmethod
-    def get_session() -> typing.Optional["LiveSession"]:
+    def get_session() -> typing.Optional["StaticSession"]:
         execution = Execution.get_execution()
-        if execution and execution.type == "static-session":
+        if isinstance(execution, StaticSession):
             return execution
 
         return None

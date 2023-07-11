@@ -52,14 +52,22 @@ class VideoInput(Input):
                 FileResponse, List[FileResponse], str, List[str], IOBase, List[IOBase]
             ]
         ]
-    ) -> Optional[str]:
+    ) -> Union[None, str, List[str]]:
         if not value:
             return None
         if isinstance(value, list):
             return [VideoInput.__convert_value(item) for item in value]
         return VideoInput.__convert_value(value)
 
-    def convert_answer(self, answer) -> Optional[FileResponse]:
+    @staticmethod
+    def __convert_answer(answer) -> Union[None, FileResponse, List[FileResponse]]:
+        if not answer:
+            return None
+        if isinstance(answer, list):
+            return [FileResponse(item) for item in answer]
+        return FileResponse(answer)
+
+    def convert_answer(self, answer):
         """
         Returns:
             FileResponse or FileResponse[]: A dict containing the video uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of videos in case of multiple flag set as True

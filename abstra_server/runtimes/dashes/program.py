@@ -26,6 +26,7 @@ class DashPageState(dict):
 
 class PythonProgram:
     root: SlotJSON
+    state: dict
 
     def __init__(self, dash: DashJSON, code: str) -> None:
         self.code = code
@@ -104,9 +105,9 @@ class PythonProgram:
         }
 
     def __compute_slot_widgets(self, slot: SlotJSON, dash_page_state: DashPageState):
-        computed_widgets = {}
-        computed_variables = {}
-        errors = {"props": {}, "variables": {}, "widgets": {}}
+        computed_widgets: dict = {}
+        computed_variables: dict = {}
+        errors: dict = {"props": {}, "variables": {}, "widgets": {}}
 
         for wid, widget in slot.items():
             if isinstance(widget, SlottableJSON):
@@ -118,13 +119,15 @@ class PythonProgram:
                 (
                     widget_props,
                     props_errors,
-                    widget_errors,
+                    slot_errors,
                 ) = self.__compute_slottable_props(widget)
-                computed_widgets = {**computed_widgets, **computed_slot}
-                computed_variables = {**computed_variables, **computed_slot_variables}
                 computed_widgets[wid] = widget_props
-                if widget_errors:
-                    errors["widgets"][wid] = widget_errors
+                if computed_slot:
+                    computed_widgets.update(computed_slot)
+                if computed_slot_variables:
+                    computed_variables.update(computed_slot_variables)
+                if slot_errors:
+                    errors["widgets"][wid] = slot_errors
                 if props_errors:
                     errors["props"][wid] = props_errors
 
@@ -149,7 +152,7 @@ class PythonProgram:
     def __compute_widget(self, widget: DashWidgetJSON, dash_page_state: DashPageState):
         widget_class, widget_value = self.__get_widget_context(widget, dash_page_state)
         self.state.update({"__widget__": widget_value})
-        errors = {"props": {}, "widgets": {}, "variables": {}}
+        errors: dict = {"props": {}, "widgets": {}, "variables": {}}
 
         variable, errors["variables"] = self.__compute_widget_variable(
             widget, widget_class
@@ -207,7 +210,7 @@ class PythonProgram:
 
     def __compute_widget_variable(
         self, widget: DashWidgetJSON, widget_class: WidgetClassType
-    ):
+    ) -> Tuple[Any, Optional[dict]]:
         if not widget.variable:
             return None, None
 
@@ -222,11 +225,13 @@ class PythonProgram:
             traceback.print_exc()
             return None, {"repr": traceback.format_exc()}
 
-    def __compute_slottable_props(self, widget: DashWidgetJSON):
+    def __compute_slottable_props(
+        self, slottable: SlottableJSON
+    ) -> Tuple[dict, dict, Optional[dict]]:
         props = {}
         props_errors = {}
         widget_errors = None
-        for prop, expr in widget.props.items():
+        for prop, expr in slottable.props.items():
             try:
                 props[prop] = self.ev(expr) if expr else None
             except Exception as e:

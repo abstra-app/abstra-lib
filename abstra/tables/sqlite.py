@@ -1,7 +1,5 @@
-from typing import Any, Optional, List
-import sqlite3
+import re, typing, sqlite3
 from dataclasses import dataclass
-import re
 
 
 class TableNotFound(Exception):
@@ -19,7 +17,7 @@ class Column:
     type: str
     not_null: bool
     primary_key: bool
-    default: Optional[str] = None
+    default: typing.Optional[str] = None
 
     @property
     def editor_dto(self):
@@ -36,7 +34,7 @@ class Column:
 @dataclass
 class Table:
     name: str
-    columns: List[Column]
+    columns: typing.List[Column]
 
     @property
     def editor_dto(self):
@@ -85,16 +83,18 @@ def get_column(cur: sqlite3.Cursor, table_name: str, column_name: str):
     ][0]
 
 
-def transform_expression(exp: str = None, dict_params: dict[str, Any] = {}):
+def transform_expression(
+    exp: typing.Optional[str] = "", dict_params: typing.Dict[str, typing.Any] = {}
+):
     param_key = r":\w+"
-    params = []
+    list_params = []
     if exp:
         for match in re.findall(param_key, exp):
-            params.append(dict_params[match[1:]])
+            list_params.append(dict_params[match[1:]])
             exp = exp.replace(match, "?")
-        return f"WHERE {exp}", params
+        return f"WHERE {exp}", list_params
     else:
-        return "", params
+        return "", list_params
 
 
 class SqliteDB:
@@ -151,7 +151,7 @@ class SqliteDB:
             ],
         )
 
-    def update_table(self, name: str, changes: dict[str, str]):
+    def update_table(self, name: str, changes: typing.Dict[str, str]):
         cur = self.connect("tuples").cursor()
 
         if "name" in changes:
@@ -217,7 +217,7 @@ class SqliteDB:
             {"type": "BLOB", "input_spec": {"type": "file"}},
         ]
 
-    def get_column(self, table_name: str, column_name: str) -> Optional[Column]:
+    def get_column(self, table_name: str, column_name: str) -> typing.Optional[Column]:
         cur = self.connect("tuples").cursor()
         return get_column(cur, table_name, column_name)
 
@@ -241,7 +241,9 @@ class SqliteDB:
             for (id, name, type, not_null, default, primary_key) in rows
         ]
 
-    def update_column(self, table_name: str, column_name: str, changes: dict[str, str]):
+    def update_column(
+        self, table_name: str, column_name: str, changes: typing.Dict[str, typing.Any]
+    ):
         cur = self.connect("tuples").cursor()
 
         column = get_column(cur, table_name, column_name)
@@ -331,17 +333,19 @@ class SqliteDB:
     def select(
         self,
         table_name: str,
-        where: Optional[str] = None,
-        columns: List[str] = ["*"],
-        params: dict[str, Any] = {},
-    ) -> List[dict[str, Any]]:
+        where: typing.Optional[str] = None,
+        columns: typing.List[str] = ["*"],
+        params: typing.Dict[str, typing.Any] = {},
+    ) -> typing.List[typing.Dict[str, typing.Any]]:
         with self.connect() as conn:
-            where_exp, params = transform_expression(where, params)
+            where_exp, list_params = transform_expression(where, params)
             rows_exp = ", ".join(columns)
             query = f'SELECT {rows_exp} FROM "{table_name}" {where_exp}'
-            return conn.execute(query, params).fetchall()
+            return conn.execute(query, list_params).fetchall()
 
-    def insert(self, table_name: str, values: dict[str, Any] = {}) -> dict[str, Any]:
+    def insert(
+        self, table_name: str, values: typing.Dict[str, typing.Any] = {}
+    ) -> typing.Dict[str, typing.Any]:
         with self.connect() as conn:
             if len(values) == 0:
                 query = f'INSERT INTO "{table_name}" DEFAULT VALUES RETURNING *'
@@ -359,22 +363,24 @@ class SqliteDB:
         self,
         table_name: str,
         where: str,
-        set: dict[str, Any] = {},
-        params: dict[str, Any] = {},
+        set: typing.Dict[str, typing.Any] = {},
+        params: typing.Dict[str, typing.Any] = {},
     ) -> None:
         with self.connect() as conn:
             set_exp = ", ".join([f"{key} = ?" for key, value in set.items()])
-            where_exp, params = transform_expression(where, params)
-            params = [value for _, value in set.items()] + params
+            where_exp, list_params = transform_expression(where, params)
+            list_params = [value for _, value in set.items()] + list_params
             query = f'UPDATE "{table_name}" SET {set_exp} {where_exp} RETURNING *'
-            result = conn.execute(query, params).fetchone()
+            result = conn.execute(query, list_params).fetchone()
 
             return result
 
-    def delete(self, table_name: str, where: str, params: dict[str, Any] = {}) -> None:
+    def delete(
+        self, table_name: str, where: str, params: typing.Dict[str, typing.Any] = {}
+    ):
         with self.connect() as conn:
-            where_exp, params = transform_expression(where, params)
+            where_exp, list_params = transform_expression(where, params)
             query = f'DELETE FROM "{table_name}" {where_exp} RETURNING *'
-            result = conn.execute(query, params).fetchone()
+            result = conn.execute(query, list_params).fetchone()
 
             return dict(result=result)

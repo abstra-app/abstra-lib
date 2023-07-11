@@ -7,20 +7,20 @@ class AuthResponse:
 
 
 def get_user() -> AuthResponse:
-    pass
+    raise Exception("Not implemented")
 
 
 def redirect(url: str, params={}):
-    pass
+    raise Exception("Not implemented")
 
 
 def get_query_params() -> dict:
-    pass
+    raise Exception("Not implemented")
 
 
 def alert(message: str, severity: str = "info"):
-    pass
+    raise Exception("Not implemented")
 
 
 def execute_js():
-    pass
+    raise Exception("Not implemented")

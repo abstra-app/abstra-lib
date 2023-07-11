@@ -39,8 +39,8 @@ class ToggleInput(Input):
         return "0"
 
     @staticmethod
-    def __convert_answer(answer: str) -> str:
+    def __convert_answer(answer: str) -> bool:
         return True if answer == "1" else False
 
-    def convert_answer(self, answer: str) -> str:
+    def convert_answer(self, answer: str) -> bool:
         return self.__convert_answer(answer)

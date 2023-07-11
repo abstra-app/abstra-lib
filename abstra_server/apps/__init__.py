@@ -5,6 +5,8 @@ from ..overloads import overloads
 from .editor import get_editor_bp
 from .player import get_player_bp
 
+HOST = os.getenv("ABSTRA_HOST", "localhost")
+
 
 def create_app(api: API):
     app = flask.Flask(__name__)
@@ -25,4 +27,4 @@ def serve(workspace_root: str, port: int, debug, use_reloader):
 
     api = API(workspace_root)
     app = create_app(api)
-    app.run(host="localhost", port=port, debug=debug, use_reloader=use_reloader)
+    app.run(host=HOST, port=port, debug=debug, use_reloader=use_reloader)

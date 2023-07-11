@@ -19,5 +19,5 @@ class KanbanBoardInput(Input):
             "disabled": self.disabled,
         }
 
-    def convert_answer(self, board: dict) -> str:
+    def convert_answer(self, board: dict) -> dict:
         return board
