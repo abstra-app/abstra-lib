@@ -210,12 +210,14 @@ class DashWidgetJSON:
     props: Dict[str, str]
     events: Dict[str, str]
     variable: Optional[str] = None
+    name: Optional[str] = None
 
     @property
     def runner_dto(self):
         return {
             "id": self.id,
             "type": self.type,
+            "name": self.name,
             "variable": self.variable,
             "position": {
                 "colStart": self.colStart,
