@@ -1,4 +1,4 @@
-import traceback, re
+import traceback, typing
 from ...contract import dashes_contract as contract
 from ...api.classes import SlotJSON
 from ...session import LiveSession
@@ -22,7 +22,7 @@ def preview_only_check(method):
 class MessageHandler:
     py: PythonProgram
     session: LiveSession
-    dash_page_state: DashPageState
+    dash_page_state: typing.Optional[DashPageState]
 
     def __init__(self, py: PythonProgram, session: LiveSession, main_file=None) -> None:
         self.py = py
@@ -64,12 +64,14 @@ class MessageHandler:
 
     def widget_input(self, data):
         # data: { type: widget-input, widgetId: string, state: PAGESTATE }
-        if self.py.execute_widget_input(data["widgetId"], self.dash_page_state):
+        if self.dash_page_state and self.py.execute_widget_input(
+            data["widgetId"], self.dash_page_state
+        ):
             self._compute_and_send_widgets_props()
 
     def widget_event(self, data):
         # data: { type: widget-event, widgetId: string, event: { type: string, payload: any }, state: PAGESTATE }
-        if self.py.execute_widget_event(
+        if self.dash_page_state and self.py.execute_widget_event(
             data["widgetId"],
             data["event"]["type"],
             data["event"].get("payload", {}),
@@ -128,7 +130,11 @@ class MessageHandler:
 
     def _compute_and_send_widgets_props(self):
         try:
-            computed = self.py.evaluate_widgets(self.dash_page_state)
+            computed = (
+                self.py.evaluate_widgets(self.dash_page_state)
+                if self.dash_page_state
+                else {}
+            )
             self.session.send(contract.WidgetsComputedMessage(**computed))
         except Exception as e:
             tb = traceback.extract_tb(e.__traceback__)

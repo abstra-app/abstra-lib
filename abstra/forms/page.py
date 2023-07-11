@@ -4,7 +4,7 @@ from .page_response import PageResponse
 from abstra.widgets.validation import validate_widget_props
 from .reactive import Reactive
 
-from typing import Callable, Dict, Union, List
+from typing import Callable, Dict, Union, List, Optional
 
 
 class Page(WidgetSchema):
@@ -20,10 +20,10 @@ class Page(WidgetSchema):
         self,
         actions: Union[str, List[str]] = "Next",
         columns: float = 1,
-        validate: Callable = None,
+        validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
-        initial_payload: Dict = None,
+        initial_payload: Optional[Dict] = None,
     ):
         super().__init__()
         self.__actions = actions
@@ -37,11 +37,11 @@ class Page(WidgetSchema):
         self,
         actions: Union[str, List[str]] = "Next",
         columns: float = 1,
-        validate: Callable = None,
+        validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
-        initial_payload: Dict = None,
-        steps_info: Dict = None,
+        initial_payload: Optional[Dict] = None,
+        steps_info: Optional[Dict] = None,
     ) -> Dict:
         """Run the form
 
@@ -88,7 +88,7 @@ class Page(WidgetSchema):
                 reactive_polling_interval=reactive_polling_interval,
                 steps_info=steps_info,
             )
-            return
+            return dict()
 
         self.__send_form_message(
             widgets=widgets_json,

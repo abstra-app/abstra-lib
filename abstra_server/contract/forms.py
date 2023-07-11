@@ -27,8 +27,6 @@ class SessionIdMessage(Message):
 
 
 class GenericMessage(Message):
-    type = None
-
     def __init__(self, data: dict):
         self.type = data["type"]
         super().__init__(data)

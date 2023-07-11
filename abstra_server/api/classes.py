@@ -1,6 +1,12 @@
 import sys
-from typing import List, Optional, Union, Any
+from typing import List, Optional, Union, Any, Dict
 from dataclasses import dataclass
+
+
+@dataclass
+class SidebarRuntime:
+    title: str
+    path: str
 
 
 @dataclass
@@ -31,11 +37,7 @@ class HookJSON:
     def __dict__(self):
         return self.editor_dto
 
-    @property
-    def __dict__(self):
-        return self.editor_dto
-
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in ["file", "path", "title", "enabled"]:
                 setattr(self, attr, value)
@@ -80,7 +82,7 @@ class JobJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in ["file", "identifier", "title", "schedule"]:
                 setattr(self, attr, value)
@@ -88,7 +90,7 @@ class JobJSON:
                 raise Exception(f"Cannot update {attr} of job")
 
     @staticmethod
-    def from_dict(data: dict):
+    def from_dict(data: Dict):
         return JobJSON(
             file=data["file"],
             identifier=data["identifier"],
@@ -98,10 +100,8 @@ class JobJSON:
 
 
 @dataclass
-class FormJSON:
+class FormJSON(SidebarRuntime):
     file: str
-    path: str
-    title: str
     end_message: Optional[str] = None
     auto_start: Optional[bool] = False
     start_message: Optional[str] = None
@@ -157,7 +157,7 @@ class FormJSON:
             "restart_button_text": self.restart_button_text,
         }
 
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in [
                 "file",
@@ -195,7 +195,7 @@ class FormJSON:
         )
 
 
-def is_widget(x: dict[str, Any]):
+def is_widget(x: Dict[str, Any]):
     return "slot" not in x
 
 
@@ -207,8 +207,8 @@ class DashWidgetJSON:
     colEnd: int
     rowStart: int
     rowEnd: int
-    props: dict[str, str]
-    events: dict[str, str]
+    props: Dict[str, str]
+    events: Dict[str, str]
     variable: Optional[str] = None
 
     @property
@@ -257,7 +257,7 @@ class DashWidgetJSON:
             "variable": self.variable,
         }
 
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         if "id" in changes:
             self.id = changes["id"]
 
@@ -309,7 +309,7 @@ class SlottableJSON:
     row: int
     height: int
     order: int
-    props: dict[str, str]
+    props: Dict[str, str]
     slot: "SlotJSON"
 
     def __post_init__(self):
@@ -355,7 +355,7 @@ class SlottableJSON:
             "slot": self.slot.editor_dto,
         }
 
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         if "id" in changes:
             self.id = changes["id"]
 
@@ -393,13 +393,15 @@ class SlottableJSON:
 
 
 class SlotJSON:
-    __data: dict[str, Union[SlottableJSON, DashWidgetJSON]]
+    __data: Dict[str, Union[SlottableJSON, DashWidgetJSON]]
 
-    def __init__(self, slot: dict[str, dict]):
+    def __init__(self, slot: Dict[str, dict]):
         self.__data = {}
         for id, slottable in slot.items():
-            cls = DashWidgetJSON if is_widget(slottable) else SlottableJSON
-            self.__data[id] = cls.from_dict(slottable)
+            if is_widget(slottable):
+                self.__data[id] = DashWidgetJSON.from_dict(slottable)
+            else:
+                self.__data[id] = SlottableJSON.from_dict(slottable)
 
     def get(self, id: str):
         if id in self.__data:
@@ -423,7 +425,7 @@ class SlotJSON:
     def __dict__(self):
         return {id: slottable.__dict__ for id, slottable in self.__data.items()}
 
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         for id, slottable in self.__data.items():
             if id in changes:
                 slottable.update(changes[id])
@@ -432,7 +434,7 @@ class SlotJSON:
 @dataclass
 class LayoutJSON:
     version: str
-    props: dict[str, str]
+    props: Dict[str, str]
     slot: SlotJSON
 
     def __post_init__(self):
@@ -466,14 +468,13 @@ class LayoutJSON:
 
 
 @dataclass
-class DashJSON:
-    path: str
+class DashJSON(SidebarRuntime):
     file: str
-    title: str
     layout: LayoutJSON
 
     def __post_init__(self):
-        self.layout = LayoutJSON(**self.layout)
+        if not isinstance(self.layout, LayoutJSON):
+            self.layout = LayoutJSON(**self.layout)
 
     @property
     def runner_type(self):
@@ -505,7 +506,7 @@ class DashJSON:
             "file": self.file,
         }
 
-    def update(self, changes: dict[str, Any]):
+    def update(self, changes: Dict[str, Any]):
         if "path" in changes:
             self.path = changes["path"]
             del changes["path"]
@@ -643,7 +644,7 @@ class WorkspaceJSON:
 
     def update(
         self,
-        changes: dict[str, Any],
+        changes: Dict[str, Any],
         dashes: List[DashJSON] = [],
         forms: List[FormJSON] = [],
     ):
@@ -654,7 +655,7 @@ class WorkspaceJSON:
                 setattr(self, attr, value)
 
     @staticmethod
-    def from_dict(data: dict, dashes: List[DashJSON] = [], forms: List[FormJSON] = []):
+    def from_dict(data: Dict, dashes: List[DashJSON] = [], forms: List[FormJSON] = []):
         return WorkspaceJSON(
             name=data.get("name", "Untitled Workspace"),
             sidebar=SidebarJSON.from_dict(

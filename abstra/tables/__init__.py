@@ -1,6 +1,6 @@
-from .sqlite import *
+import os, typing
+from .sqlite import SqliteDB, TableNotFound  # expoted
 from .legacy import *  # deprecated
-import os
 
 
 class Table:
@@ -9,17 +9,20 @@ class Table:
         self.table_name = table_name
 
     def select(
-        self, where: Optional[str] = None, columns: list[str] = ["*"], params={}
+        self,
+        where: typing.Optional[str] = None,
+        columns: typing.List[str] = ["*"],
+        params={},
     ) -> list:
         return self.db.select(self.table_name, where, columns, params)
 
-    def insert(self, values: dict[str, Any] = {}) -> None:
+    def insert(self, values: typing.Dict[str, typing.Any] = {}):
         return self.db.insert(self.table_name, values)
 
-    def update(self, where: str, set: dict[str, Any], params) -> None:
+    def update(self, where: str, set: typing.Dict[str, typing.Any], params):
         return self.db.update(self.table_name, where, set, params)
 
-    def delete(self, where: str, params) -> None:
+    def delete(self, where: str, params):
         return self.db.delete(self.table_name, where, params)
 
 

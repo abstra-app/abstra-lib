@@ -52,7 +52,7 @@ class ImageInput(Input):
                 FileResponse, List[FileResponse], str, List[str], IOBase, List[IOBase]
             ]
         ]
-    ) -> Optional[str]:
+    ) -> Union[None, str, List[str]]:
         if not value:
             return None
         if isinstance(value, list):
@@ -60,14 +60,14 @@ class ImageInput(Input):
         return ImageInput.__convert_value(value)
 
     @staticmethod
-    def __convert_answer(answer) -> Optional[FileResponse]:
+    def __convert_answer(answer) -> Union[None, FileResponse, List[FileResponse]]:
         if not answer:
             return None
         if isinstance(answer, list):
             return [FileResponse(item) for item in answer]
         return FileResponse(answer)
 
-    def convert_answer(self, answer) -> Optional[FileResponse]:
+    def convert_answer(self, answer):
         """
         Returns:
             FileResponse or FileResponse[]: A dict containing the image file uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of images in case of multiple flag set as True

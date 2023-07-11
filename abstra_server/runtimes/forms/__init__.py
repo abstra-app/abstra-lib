@@ -9,7 +9,7 @@ from abstra.forms.debug_utils import CloseDTO, traceback_to_infos
 
 
 def run_form(session: LiveSession, formJSON: FormJSON, code: str):
-    namespace = {}
+    namespace: dict = {}
     close_dto = CloseDTO(exit_code=0)
     broker = MessageBroker(session)
     session.context.update(broker=broker)

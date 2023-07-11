@@ -4,8 +4,7 @@ from typing import Any, List
 
 class ListInput(Input):
     type = "list-input"
-    instances = []
-    instances = []
+    instances: List[Any] = []
 
     def __init__(self, key: str, item_schema: Any, **kwargs):
         super().__init__(key)

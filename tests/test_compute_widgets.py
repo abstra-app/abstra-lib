@@ -6,15 +6,17 @@ dash_page_state = {"widgets": {"widgetA": {"value": None}, "widgetB": {"value": 
 
 
 def prepare_program(slot_dict: dict):
-    dash = DashJSON(
-        path="foo",
-        file=None,
-        layout=dict(
-            version="0.2",
-            slot=slot_dict,
-            props={},
-        ),
-        title="foo",
+    dash = DashJSON.from_dict(
+        {
+            "path": "foo",
+            "file": "",
+            "layout": {
+                "version": "0.2",
+                "slot": slot_dict,
+                "props": {},
+            },
+            "title": "foo",
+        }
     )
     program = PythonProgram(dash, "print('hello world')")
     program.root = SlotJSON(slot_dict)

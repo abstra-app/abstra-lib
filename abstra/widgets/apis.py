@@ -2,9 +2,10 @@ import json, requests, urllib.request, urllib.response, io
 
 
 def upload_file(file: io.IOBase):
+    name = file.name if hasattr(file, "name") else "file"
     response = requests.post(
         "https://upload.abstra.cloud/hackerforms/upload",
-        data=json.dumps({"filepath": file.name}),
+        data=json.dumps({"filepath": name}),
         headers={"content-type": "application/json"},
     )
     response_json = json.loads(response.text)

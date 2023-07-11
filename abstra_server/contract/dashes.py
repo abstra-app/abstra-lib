@@ -52,7 +52,7 @@ class EvalErrorMessage(Message):
 class AutocompleteSuggestionsMessage(Message):
     type = "autocomplete:suggestions"
 
-    def __init__(self, suggestionsFor: str, suggestions: list[str]):
+    def __init__(self, suggestionsFor: str, suggestions: typing.List[str]):
         super().__init__({"suggestions": suggestions, "suggestionsFor": suggestionsFor})
 
 
