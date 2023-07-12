@@ -1,9 +1,9 @@
-import flask, flask_sock
+import flask, flask_sock, os
 
-from ..api import API, DashJSON, FormJSON
+from ..api import API
+from .utils import send_from_dist
 from ..session import LiveSession, StaticSession
 from ..runtimes import run_dash, run_form, run_hook
-from .utils import send_from_dist
 
 
 def __form_ws(api: API, session: LiveSession, form_path: str):
@@ -44,6 +44,10 @@ def get_player_bp(api: API):
             "workspace": workspace.runner_dto,  # TODO: fix this in frontend
         }
         return res
+
+    @bp.route("/_version", methods=["GET"])
+    def get_version():
+        return os.getenv("ABSTRA_BUILD_ID")
 
     @sock.route("/_socket")
     def websocket(conn: flask_sock.Server):
