@@ -1,0 +1,2 @@
+import{r as t,K as f,R as h}from"./registerWidgets.4a0d8d45.js";const p=s=>{const r=t(Date.now()),l=t(!0),a=t(null),u=t(null),n=f(()=>(r.value,s())),o=e=>{a.value=e,u.value=null,l.value=!1},c=e=>{u.value=e,a.value=null,l.value=!1},v=()=>{r.value=Date.now()};return h(()=>n.value,()=>{a.value=null,l.value=!0,n.value.then(o).catch(e=>{console.error(e),c(e)})}),n.value.then(o),{result:a,loading:l,error:u,refetch:v}};export{p as a};
+//# sourceMappingURL=asyncComputed.52d81103.js.map

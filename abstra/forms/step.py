@@ -18,6 +18,9 @@ class StepsResponse:
             return self.acc[key]
         raise IndexError("Step not found")
 
+    def get(self, key: str, default=None):
+        return self.acc.get(key, default)
+
     def append(self, res: Dict):
         self.responses.append(res)
         self.__update_acc()
