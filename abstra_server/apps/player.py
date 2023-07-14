@@ -1,5 +1,4 @@
-import flask, flask_sock, os
-
+import flask, flask_sock, os, sys
 from ..api import API
 from .utils import send_from_dist
 from ..session import LiveSession, StaticSession
@@ -51,6 +50,8 @@ def get_player_bp(api: API):
 
     @sock.route("/_socket")
     def websocket(conn: flask_sock.Server):
+        if api.root_path not in sys.path:
+            sys.path.append(api.root_path)
         is_preview = flask.request.args.get("isPreview", False)
         session = LiveSession(conn, bool(is_preview))
 
