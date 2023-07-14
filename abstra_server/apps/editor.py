@@ -167,7 +167,7 @@ def get_editor_bp(api: API):
             flask.abort(404)
 
         code = api.read_text_file(hook.file)
-        session = StaticSession()
+        session = StaticSession("hooks", path)
         session.context["request"] = (
             flask.request.get_data(as_text=True),
             flask.request.args,
@@ -227,7 +227,7 @@ def get_editor_bp(api: API):
             flask.abort(404)
 
         code = api.read_text_file(job.file)
-        session = StaticSession()
+        session = StaticSession("jobs", identifier)
 
         run_job(code, session)
         return {
