@@ -327,7 +327,10 @@ display(f"Hello World, {name}")"""
 
         url = f"{CLOUD_API_ENDPOINT}/cli/auth-info"
         headers = {"Api-Authorization": f"Bearer {credentials}"}
-        response = requests.get(url, headers=headers)
+        try:
+            response = requests.get(url, headers=headers)
+        except:
+            return {"logged": False, "reason": "CONNECTION_ERROR"}
         print(response.text)
         if response.ok:
             response_json = response.json()

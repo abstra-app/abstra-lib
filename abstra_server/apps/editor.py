@@ -287,15 +287,21 @@ def get_editor_bp(api: API):
             )
 
         if data.get("action") == "update":
-            return api.db.update(
-                table_name,
-                where=data.get("where"),
-                set=data.get("set"),
-                params=data.get("params"),
-            )
+            try:
+                return api.db.update(
+                    table_name,
+                    where=data.get("where"),
+                    set=data.get("set"),
+                    params=data.get("params"),
+                )
+            except Exception as e:
+                return flask.Response(str(e), status=500)
 
         if data.get("action") == "insert":
-            return api.db.insert(table_name, values=data.get("values"))
+            try:
+                return api.db.insert(table_name, values=data.get("values"))
+            except Exception as e:
+                return flask.Response(str(e), status=500)
 
         if data.get("action") == "delete":
             return api.db.delete(
