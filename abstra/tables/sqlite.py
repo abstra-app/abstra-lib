@@ -357,7 +357,7 @@ class SqliteDB:
                 query = f'INSERT INTO "{table_name}" ({keys}) VALUES ({values_exp}) RETURNING *'
                 result = conn.execute(query, params).fetchone()
 
-            return result
+            return dict(result=result)
 
     def update(
         self,
@@ -365,15 +365,15 @@ class SqliteDB:
         where: str,
         set: typing.Dict[str, typing.Any] = {},
         params: typing.Dict[str, typing.Any] = {},
-    ) -> None:
+    ) -> typing.Dict[str, typing.Any]:
         with self.connect() as conn:
-            set_exp = ", ".join([f"{key} = ?" for key, value in set.items()])
-            where_exp, list_params = transform_expression(where, params)
-            list_params = [value for _, value in set.items()] + list_params
+            set_exp = ", ".join([f"{key} = ?" for key in set.keys()])
+            set_params = [value for value in set.values()]
+            where_exp, where_params = transform_expression(where, params)
             query = f'UPDATE "{table_name}" SET {set_exp} {where_exp} RETURNING *'
-            result = conn.execute(query, list_params).fetchone()
+            result = conn.execute(query, set_params + where_params).fetchone()
 
-            return result
+            return dict(result=result)
 
     def delete(
         self, table_name: str, where: str, params: typing.Dict[str, typing.Any] = {}
