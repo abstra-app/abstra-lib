@@ -1,30 +1,8 @@
 import flask, flask_sock, os, sys
+
 from ..api import API
 from .utils import send_from_dist
-from ..session import LiveSession, StaticSession
 from ..runtimes import run_dash, run_form, run_hook
-
-
-def __form_ws(conn: flask_sock.Server, api: API, path: str):
-    form = api.get_form(path)
-    if not form:
-        conn.close(reason=404, message="Not found")
-        return
-
-    code = api.read_text_file(form.file) if form.file else ""
-    session = LiveSession(conn, "forms", path)
-    run_form(session, form, code)
-
-
-def __dash_ws(conn: flask_sock.Server, api: API, path: str):
-    dash = api.get_dash(path)
-    if not dash:
-        conn.close(reason=404, message="Not found")
-        return
-
-    code = api.read_text_file(dash.file) if dash.file else ""
-    session = LiveSession(conn, "dashes", path)
-    run_dash(session, dash, code)
 
 
 def get_player_bp(api: API):
@@ -57,37 +35,38 @@ def get_player_bp(api: API):
         try:
             dash_path = flask.request.args.get("dashPath")
             if dash_path is not None:
-                __dash_ws(conn, api, dash_path)
-                return
+                dash = api.get_dash(dash_path)
+                if not dash:
+                    conn.close(reason=404, message="Not found")
+                    return
+
+                code = api.read_text_file(dash.file) if dash.file else ""
+                return run_dash(conn, dash, code)
 
             form_path = flask.request.args.get("formPath")
             if form_path is not None:
-                __form_ws(conn, api, form_path)
-                return
+                form = api.get_form(form_path)
+                if not form:
+                    conn.close(reason=404, message="Not found")
+                    return
+
+                code = api.read_text_file(form.file) if form.file else ""
+                return run_form(conn, form, code)
 
         finally:
             conn.close(message="Done")
 
     @bp.route("/_hooks/<path:path>", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
-    def hook(path):
-        hook_rt = api.get_hook(path)
-        if not hook_rt:
+    def hook_runner(path):
+        hook = api.get_hook(path)
+        if not hook:
             flask.abort(404)
 
-        if not hook_rt.file:
+        if not hook.file:
             flask.abort(500)
 
-        code = api.read_text_file(hook_rt.file)  # TODO: handle 404
-        session = StaticSession("hooks", path)
-        session.context["request"] = (
-            flask.request.get_data(as_text=True),
-            flask.request.args,
-            flask.request.headers,
-        )
-
-        run_hook(code, session)
-
-        body, status, headers = session.context.get("response", ({}, 200, {}))
+        code = api.read_text_file(hook.file)  # TODO: handle 404
+        body, status, headers = run_hook(flask.request, hook, code)
         return flask.Response(status=status, headers=headers, response=body)
 
     @bp.route("/<path:filename>", methods=["GET"])

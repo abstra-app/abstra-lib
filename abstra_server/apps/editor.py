@@ -1,9 +1,10 @@
 import flask
+
 from ..api import API
+from ..usage import usage
 from .utils import send_from_dist
 from ..session import StaticSession
 from ..runtimes import run_job, run_hook
-from ..usage import usage
 
 
 def get_editor_bp(api: API):
@@ -167,21 +168,14 @@ def get_editor_bp(api: API):
             flask.abort(404)
 
         code = api.read_text_file(hook.file)
-        session = StaticSession("hooks", path)
-        session.context["request"] = (
-            flask.request.get_data(as_text=True),
-            flask.request.args,
-            flask.request.headers,
-        )
-
-        run_hook(code, session)
-        body, status, headers = session.context.get("response", ({}, 200, {}))
+        body, status, headers = run_hook(flask.request, hook, code)
+        session = StaticSession.get_session()
         return {
             "body": body,
             "status": status,
             "headers": headers,
-            "stdout": "".join(session.stdout),
-            "stderr": "".join(session.stderr),
+            "stdout": "".join(session.stdout if session else []),
+            "stderr": "".join(session.stderr if session else []),
         }
 
     @bp.route("/api/jobs/<path:identifier>", methods=["GET"])
@@ -227,12 +221,12 @@ def get_editor_bp(api: API):
             flask.abort(404)
 
         code = api.read_text_file(job.file)
-        session = StaticSession("jobs", identifier)
+        run_job(job, code)
+        session = StaticSession.get_session()
 
-        run_job(code, session)
         return {
-            "stdout": "".join(session.stdout),
-            "stderr": "".join(session.stderr),
+            "stdout": "".join(session.stdout if session else []),
+            "stderr": "".join(session.stderr if session else []),
         }
 
     @bp.route("/api/tables/<path:name>", methods=["GET"])

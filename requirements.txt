@@ -3,7 +3,6 @@ requests
 validators
 multipart
 progress
-crontab
 colour
 colorama
 

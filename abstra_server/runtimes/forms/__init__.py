@@ -1,4 +1,4 @@
-import traceback
+import traceback, flask_sock
 
 from ...session import LiveSession
 from ...api.classes import FormJSON
@@ -8,7 +8,8 @@ from .message_handler import MessageBroker
 from abstra.forms.debug_utils import CloseDTO, traceback_to_infos
 
 
-def run_form(session: LiveSession, formJSON: FormJSON, code: str):
+def run_form(conn: flask_sock.Server, form: FormJSON, code: str):
+    session = LiveSession(conn, "forms", form.path)
     namespace: dict = {}
     close_dto = CloseDTO(exit_code=0)
     broker = MessageBroker(session)

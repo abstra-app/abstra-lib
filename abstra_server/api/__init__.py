@@ -1,33 +1,27 @@
 import json, pathlib, os, typing, webbrowser, requests
-from .classes import (
-    AbstraJSON,
-    DashJSON,
-    FormJSON,
-    WorkspaceJSON,
-    HookJSON,
-    JobJSON,
-    LayoutJSON,
-    SlotJSON,
-)
-from ..utils import random_id
+
 from abstra.tables import get_db
-from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
 from abstra_cli.deploy import deploy
+from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
+
+from . import classes
+from ..utils import random_id
 
 
-CLOUD_API_ENDPOINT = (
-    os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
-)
+CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT", "https://cloud-api.abstra.cloud")
+ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
 
 
 class API:
     def __init__(self, root: str):
-        cwd = pathlib.Path.cwd()
-        self.root_path = (cwd / root).resolve().as_posix()
-        self.abstra_json_path = (cwd / root / "abstra.json").resolve().as_posix()
-        db_path = os.getenv(
-            "ABSTRA_DATABASE_URL", os.path.join(self.root_path, "db.sqlite3")
-        )
+        if os.path.isabs(root):
+            self.root_path = root
+        else:
+            cwd = pathlib.Path.cwd()
+            self.root_path = (cwd / root).resolve().as_posix()
+
+        self.abstra_json_path = os.path.join(self.root_path, "abstra.json")
+        db_path = ABSTRA_DATABASE_URL or os.path.join(self.root_path, "db.sqlite3")
         os.environ["ABSTRA_DATABASE_URL"] = db_path
         self.db = get_db()
 
@@ -40,26 +34,28 @@ class API:
         deploy(self.root_path)
 
     def init_empty(self):
-        self.persist(AbstraJSON.make_empty())
+        self.persist(classes.AbstraJSON.make_empty())
 
-    def persist(self, abstra_json: AbstraJSON):
+    def persist(self, abstra_json: classes.AbstraJSON):
         with open(self.abstra_json_path, "w", encoding="utf-8") as f:
             json.dump(abstra_json.__dict__, f, indent=2)
 
-    def __get_abstra_json(self) -> AbstraJSON:
+    def __get_abstra_json(self) -> classes.AbstraJSON:
         with open(self.abstra_json_path, "r", encoding="utf-8") as f:
             abstra_json_content = json.load(f)
-        return AbstraJSON.from_dict(abstra_json_content)
+        return classes.AbstraJSON.from_dict(abstra_json_content)
 
     def read_text_file(self, path) -> str:
         with open(os.path.join(self.root_path, path), "r", encoding="utf-8") as f:
             return f.read()
 
-    def get_workspace(self) -> WorkspaceJSON:
+    def get_workspace(self) -> classes.WorkspaceJSON:
         abstra_json = self.__get_abstra_json()
         return abstra_json.workspace
 
-    def get_page_runtime(self, path) -> typing.Union[DashJSON, FormJSON, None]:
+    def get_page_runtime(
+        self, path
+    ) -> typing.Union[classes.DashJSON, classes.FormJSON, None]:
         abstra_json = self.__get_abstra_json()
 
         for form in abstra_json.forms:
@@ -74,7 +70,7 @@ class API:
 
     # Forms CLRUD
 
-    def create_form(self) -> FormJSON:
+    def create_form(self) -> classes.FormJSON:
         abstra_json = self.__get_abstra_json()
 
         file_name = f"new_form_{random_id()}"
@@ -89,7 +85,7 @@ name = read("What is your name?")
 display(f"Hello World, {name}")"""
             )
 
-        form = FormJSON(file=file_path, path=file_name, title="Untitled Form")
+        form = classes.FormJSON(file=file_path, path=file_name, title="Untitled Form")
 
         abstra_json.forms.append(form)
 
@@ -97,11 +93,11 @@ display(f"Hello World, {name}")"""
 
         return form
 
-    def get_forms(self) -> typing.List[FormJSON]:
+    def get_forms(self) -> typing.List[classes.FormJSON]:
         abstra_json = self.__get_abstra_json()
         return abstra_json.forms
 
-    def get_form(self, path: str) -> typing.Optional[FormJSON]:
+    def get_form(self, path: str) -> typing.Optional[classes.FormJSON]:
         abstra_json = self.__get_abstra_json()
 
         for form in abstra_json.forms:
@@ -112,7 +108,7 @@ display(f"Hello World, {name}")"""
 
     def update_form(
         self, path: str, changes: typing.Dict[str, typing.Any]
-    ) -> typing.Optional[FormJSON]:
+    ) -> typing.Optional[classes.FormJSON]:
         abstra_json = self.__get_abstra_json()
         forms = [f for f in abstra_json.forms if f.path == path]
         if len(forms) == 0:
@@ -133,7 +129,7 @@ display(f"Hello World, {name}")"""
 
     # Dashes CLRUD
 
-    def create_dash(self) -> DashJSON:
+    def create_dash(self) -> classes.DashJSON:
         abstra_json = self.__get_abstra_json()
 
         file_name = f"new_dash_{random_id()}"
@@ -142,11 +138,13 @@ display(f"Hello World, {name}")"""
         with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write("foo = 'bar'")
 
-        dash = DashJSON(
+        dash = classes.DashJSON(
             file=file_path,
             path=f"new-dash_{random_id()}",
             title="Untitled Dash",
-            layout=LayoutJSON(version="0.2", props={}, slot=SlotJSON({})),
+            layout=classes.LayoutJSON(
+                version="0.2", props={}, slot=classes.SlotJSON({})
+            ),
         )
 
         abstra_json.dashes.append(dash)
@@ -155,11 +153,11 @@ display(f"Hello World, {name}")"""
 
         return dash
 
-    def get_dashes(self) -> typing.List[DashJSON]:
+    def get_dashes(self) -> typing.List[classes.DashJSON]:
         abstra_json = self.__get_abstra_json()
         return abstra_json.dashes
 
-    def get_dash(self, path: str) -> typing.Optional[DashJSON]:
+    def get_dash(self, path: str) -> typing.Optional[classes.DashJSON]:
         abstra_json = self.__get_abstra_json()
 
         for dash in abstra_json.dashes:
@@ -170,7 +168,7 @@ display(f"Hello World, {name}")"""
 
     def update_dash(
         self, path: str, changes: typing.Dict[str, typing.Any]
-    ) -> typing.Optional[DashJSON]:
+    ) -> typing.Optional[classes.DashJSON]:
         abstra_json = self.__get_abstra_json()
         dashes = [d for d in abstra_json.dashes if d.path == path]
         if len(dashes) == 0:
@@ -191,7 +189,7 @@ display(f"Hello World, {name}")"""
 
     # Hooks CLRUD
 
-    def create_hook(self) -> HookJSON:
+    def create_hook(self) -> classes.HookJSON:
         abstract_json = self.__get_abstra_json()
 
         file_name = f"new_hook_{random_id()}"
@@ -200,7 +198,7 @@ display(f"Hello World, {name}")"""
         with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write("print('Hello World')")
 
-        hook = HookJSON(file=file_path, path=file_name, title="Untitled Hook")
+        hook = classes.HookJSON(file=file_path, path=file_name, title="Untitled Hook")
 
         abstract_json.hooks.append(hook)
 
@@ -208,11 +206,11 @@ display(f"Hello World, {name}")"""
 
         return hook
 
-    def get_hooks(self) -> typing.List[HookJSON]:
+    def get_hooks(self) -> typing.List[classes.HookJSON]:
         abstra_json = self.__get_abstra_json()
         return abstra_json.hooks
 
-    def get_hook(self, path: str) -> typing.Optional[HookJSON]:
+    def get_hook(self, path: str) -> typing.Optional[classes.HookJSON]:
         abstra_json = self.__get_abstra_json()
 
         for hook in abstra_json.hooks:
@@ -223,7 +221,7 @@ display(f"Hello World, {name}")"""
 
     def update_hook(
         self, path: str, changes: typing.Dict[str, typing.Any]
-    ) -> typing.Optional[HookJSON]:
+    ) -> typing.Optional[classes.HookJSON]:
         abstra_json = self.__get_abstra_json()
         hooks = [h for h in abstra_json.hooks if h.path == path]
         if len(hooks) == 0:
@@ -286,10 +284,10 @@ display(f"Hello World, {name}")"""
         with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
             f.write("print('Hello World')")
 
-        job = JobJSON(
+        job = classes.JobJSON(
             file=file_path,
             identifier=random_id(),
-            schedule="* * * * *",
+            schedule="0 * * * *",
             title="Untitled Job",
         )
 
