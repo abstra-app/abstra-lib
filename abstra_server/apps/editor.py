@@ -10,6 +10,10 @@ from ..runtimes import run_job, run_hook
 def get_editor_bp(api: API):
     bp = flask.Blueprint("editor", __name__)
 
+    @bp.route("/api/assets/<path:path>", methods=["GET"])
+    def _asset(path):
+        return flask.send_from_directory(directory=api.root_path, path=path)
+
     @bp.route("/api/workspace", methods=["GET"])
     @usage(api.root_path)
     def get_workspace():

@@ -623,10 +623,6 @@ class WorkspaceJSON:
     font_color: Optional[str] = None
 
     @property
-    def runner_dto(self):
-        return {"name": self.name, "sidebar": self.sidebar.__dict__}
-
-    @property
     def __dict__(self):
         return {
             "name": self.name,
@@ -639,6 +635,10 @@ class WorkspaceJSON:
             "font_family": self.font_family,
             "font_color": self.font_color,
         }
+
+    @property
+    def runner_dto(self):
+        return self.__dict__
 
     @property
     def editor_dto(self):

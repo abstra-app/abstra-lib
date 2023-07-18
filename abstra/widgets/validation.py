@@ -61,8 +61,12 @@ def validate_widget_props(widget):
             raise Exception(
                 f"Error in {widget['type']}: {prop_name} not in {widget.keys()}"
             )
-        assert types_compatible(widget[prop_name], prop.typeName)
-        assert valid_prop(widget[prop_name], prop)
+        if not types_compatible(widget[prop_name], prop.typeName):
+            raise Exception(
+                f"{prop_name}: {type(widget[prop_name])} is not compatible with {prop}"
+            )
+        if not valid_prop(widget[prop_name], prop):
+            raise Exception(f"{prop_name}: {widget[prop_name]} is not valid for {prop}")
 
     optional_props = [
         prop for prop in metadata_widget.brokerAPI.params if prop.isOptional
