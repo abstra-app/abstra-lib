@@ -2,6 +2,9 @@ import json, pathlib, os, typing, webbrowser, requests
 
 from abstra.tables import get_db
 from abstra_cli.deploy import deploy
+import tempfile
+from uuid import uuid4 as uuid
+from werkzeug.datastructures import FileStorage
 from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
 
 from . import classes
@@ -362,3 +365,18 @@ display(f"Hello World, {name}")"""
         return requests.post(
             url, headers=headers, json=body, stream=True
         ).iter_content()
+
+    # files
+    def save_file(self, file: FileStorage):
+        directory = tempfile.gettempdir()
+        name = str(uuid())
+        path = os.path.join(directory, "_uploaded_files", name)
+        if not os.path.exists(os.path.join(directory, "_uploaded_files")):
+            os.mkdir(os.path.join(directory, "_uploaded_files"))
+        file.save(path)
+
+        return name
+
+    def get_file(self, path: str) -> str:
+        directory = tempfile.gettempdir()
+        return os.path.join(directory, "_uploaded_files", path)

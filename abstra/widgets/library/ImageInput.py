@@ -1,4 +1,4 @@
-from io import IOBase
+from io import BufferedReader, TextIOWrapper
 from typing import Optional, Union, List
 from ..apis import upload_file
 from ..widget_base import Input
@@ -36,12 +36,16 @@ class ImageInput(Input):
         }
 
     @staticmethod
-    def __convert_value(value: Union[FileResponse, str, IOBase]) -> str:
+    def __convert_value(
+        value: Union[FileResponse, str, BufferedReader, TextIOWrapper]
+    ) -> str:
         if isinstance(value, FileResponse):
             return value.url
-        if isinstance(value, str):
+        elif isinstance(value, str):
             return value
-        if isinstance(value, IOBase):
+        elif isinstance(value, BufferedReader):
+            return upload_file(value)
+        elif isinstance(value, TextIOWrapper):
             return upload_file(value)
         return ""
 
@@ -49,7 +53,14 @@ class ImageInput(Input):
     def __revert_value(
         value: Optional[
             Union[
-                FileResponse, List[FileResponse], str, List[str], IOBase, List[IOBase]
+                FileResponse,
+                List[FileResponse],
+                str,
+                List[str],
+                BufferedReader,
+                List[BufferedReader],
+                TextIOWrapper,
+                List[TextIOWrapper],
             ]
         ]
     ) -> Union[None, str, List[str]]:

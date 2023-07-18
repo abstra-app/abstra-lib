@@ -1,22 +1,32 @@
-import json, requests, urllib.request, urllib.response, io
+import io, os, tempfile, shutil
+from typing import Union
+from werkzeug.datastructures import FileStorage
+from uuid import uuid4 as uuid
 
 
-def upload_file(file: io.IOBase):
-    name = file.name if hasattr(file, "name") else "file"
-    response = requests.post(
-        "https://upload.abstra.cloud/hackerforms/upload",
-        data=json.dumps({"filepath": name}),
-        headers={"content-type": "application/json"},
-    )
-    response_json = json.loads(response.text)
+def public_path(name: str):
+    return "/_files/" + name
 
-    file.seek(0)
-    content = file.read()
-    content = str.encode(content) if not isinstance(content, bytes) else content
 
-    req = urllib.request.Request(
-        url=response_json["putURL"], method="PUT", data=content
-    )
-    urllib.request.urlopen(req)
+def internal_path(name: str):
+    return os.path.join(tempfile.gettempdir(), "_uploaded_files", name)
 
-    return response_json["getURL"]
+
+def upload_file(file: Union[FileStorage, io.BufferedReader, io.TextIOWrapper]):
+    if isinstance(file, io.BufferedReader) or isinstance(file, io.TextIOWrapper):
+        name = str(uuid())
+        path = internal_path(name)
+        shutil.copy(file.name, path)
+        return public_path(name)
+
+    elif isinstance(file, FileStorage):
+        directory = tempfile.gettempdir()
+        name = str(uuid())
+        path = os.path.join(directory, "_uploaded_files", name)
+        if not os.path.exists(os.path.join(directory, "_uploaded_files")):
+            os.mkdir(os.path.join(directory, "_uploaded_files"))
+        file.save(path)
+
+        return public_path(name)
+
+    raise ValueError(f"Cannot upload {type(file)}")
