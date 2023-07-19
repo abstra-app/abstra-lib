@@ -80,9 +80,6 @@ def validate_widget_props(widget):
                 and valid_prop(widget[prop_name], prop)
             )
         ):
-            print(types_compatible(widget[prop_name], prop.typeName))
-            print(widget.get(prop_name))
-            print(valid_prop(widget[prop_name], prop))
             raise Exception(
                 f"{prop_name}: {type(widget[prop_name])} is not compatible with {prop}"
             )

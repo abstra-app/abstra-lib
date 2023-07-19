@@ -1,16 +1,12 @@
-import io, tempfile, pathlib, os
-from typing import Union
-from .apis import upload_file
-from .types import PILImage
+import io, tempfile, pathlib, typing
+from .apis import upload_file, internal_path
 
 
-def convert_file(
-    file: Union[str, io.BufferedReader, io.TextIOWrapper, PILImage]
-) -> str:
+def convert_file(file: typing.Union[str, io.BufferedReader, io.TextIOWrapper]) -> str:
     if not file:
         return ""
 
-    elif isinstance(file, str):
+    if isinstance(file, str):
         # URL or base64 encoded string
         if file.startswith("http") or file.startswith("data:"):
             return file
@@ -18,21 +14,20 @@ def convert_file(
         # path to file
         return upload_file(open(file, "rb"))
 
-    elif isinstance(file, io.BufferedReader):
+    if isinstance(file, io.BufferedReader):
         return upload_file(file)
 
-    elif isinstance(file, io.TextIOWrapper):
+    if isinstance(file, io.TextIOWrapper):
         return upload_file(file)
 
-    # PILImage
-    elif isinstance(file, PILImage):
+    # PILImage. TODO: check with isinstance without external dependency
+    if hasattr(file, "save"):
         file_path = pathlib.Path(tempfile.gettempdir(), "img.png")
         file.save(str(file_path))
-        file = open(file_path, "rb")
-        return upload_file(file)
+        return upload_file(open(file_path, "rb"))
 
-    # FileResponse. TODO: check with isinstance withour circular import
-    elif hasattr(file, "file"):
+    # FileResponse. TODO: check with isinstance without circular import
+    if hasattr(file, "file"):
         return upload_file(file.file)
 
     raise ValueError(f"Cannot convert {type(file)} to file")
@@ -52,7 +47,7 @@ def download_file(url: str):
 
     elif url.startswith("/_files/"):
         name = url[len("/_files/") :]
-        path = os.path.join(tempfile.gettempdir(), "_uploaded_files", name)
+        path = internal_path(name)
         return open(path, "rb")
 
     raise ValueError(f"Cannot download {url}")

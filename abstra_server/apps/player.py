@@ -2,33 +2,7 @@ import flask, flask_sock, os, sys
 
 from ..api import API
 from .utils import send_from_dist
-from ..session import LiveSession, StaticSession
-from ..runtimes import run_dash, run_form, run_hook, normalize_run
 from ..runtimes import run_dash, run_form, run_hook
-
-
-def __form_ws(conn: flask_sock.Server, api: API, path: str):
-    form = api.get_form(path)
-    if not form:
-        conn.close(reason=404, message="Not found")
-        return
-
-    code = api.read_text_file(form.file) if form.file else ""
-    session = LiveSession(conn, "forms", path)
-    normalize_run(api.root_path)
-    run_form(session, form, code)
-
-
-def __dash_ws(conn: flask_sock.Server, api: API, path: str):
-    dash = api.get_dash(path)
-    if not dash:
-        conn.close(reason=404, message="Not found")
-        return
-
-    code = api.read_text_file(dash.file) if dash.file else ""
-    session = LiveSession(conn, "dashes", path)
-    normalize_run(api.root_path)
-    run_dash(session, dash, code)
 
 
 def get_player_bp(api: API):
@@ -117,7 +91,6 @@ def get_player_bp(api: API):
             flask.abort(500)
 
         code = api.read_text_file(hook.file)  # TODO: handle 404
-        normalize_run(api.root_path)
         body, status, headers = run_hook(flask.request, hook, code)
         return flask.Response(status=status, headers=headers, response=body)
 
