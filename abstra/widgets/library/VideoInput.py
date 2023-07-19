@@ -39,13 +39,13 @@ class VideoInput(Input):
     def __convert_value(
         value: Union[FileResponse, str, BufferedReader, TextIOWrapper]
     ) -> str:
+        if isinstance(value, str):
+            return value
         if isinstance(value, FileResponse):
             return value.url
-        elif isinstance(value, str):
-            return value
-        elif isinstance(value, BufferedReader):
+        if isinstance(value, BufferedReader):
             return upload_file(value)
-        elif isinstance(value, TextIOWrapper):
+        if isinstance(value, TextIOWrapper):
             return upload_file(value)
         return ""
 
