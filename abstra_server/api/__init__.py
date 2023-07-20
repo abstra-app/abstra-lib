@@ -1,6 +1,5 @@
 import json, pathlib, os, typing, webbrowser, requests, tempfile
 from werkzeug.datastructures import FileStorage
-
 from abstra.tables import get_db
 from abstra_cli.deploy import deploy
 from abstra.widgets.apis import get_random_filepath, internal_path
@@ -116,7 +115,7 @@ display(f"Hello World, {name}")"""
         if len(forms) == 0:
             raise Exception("Form not found for path ", path)
         form = forms[0]
-        form.update(changes)
+        form.update(changes, workspace_root=self.root_path)
 
         self.persist(abstra_json)
 
@@ -176,7 +175,7 @@ display(f"Hello World, {name}")"""
         if len(dashes) == 0:
             raise Exception("Dash not found for path ", path)
         dash = dashes[0]
-        dash.update(changes)
+        dash.update(changes, workspace_root=self.root_path)
 
         self.persist(abstra_json)
 
@@ -229,7 +228,7 @@ display(f"Hello World, {name}")"""
         if len(hooks) == 0:
             raise Exception("Hook not found for path ", path)
         hook = hooks[0]
-        hook.update(changes)
+        hook.update(changes, workspace_root=self.root_path)
         self.persist(abstra_json)
 
         return hook
@@ -305,7 +304,7 @@ display(f"Hello World, {name}")"""
         if len(jobs) == 0:
             raise Exception("Job not found for identifier ", identifier)
         job = jobs[0]
-        job.update(changes)
+        job.update(changes, workspace_root=self.root_path)
 
         self.persist(abstra_json)
 

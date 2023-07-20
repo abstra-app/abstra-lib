@@ -23,6 +23,10 @@ class TestDashes(unittest.TestCase):
 
         self.assertEqual(dash.layout.slot.__dict__, {})
 
+        file_path = Path(workspace_root_path, dash.file)
+
+        self.assertTrue(file_path.exists())
+
     def test_api_update(self):
         workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
         init_dir(workspace_root_path)
@@ -57,6 +61,40 @@ class TestDashes(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(updated_dash.title, "new title")
         self.assertEqual(updated_dash.layout.__dict__, new_layout)
+
+    def test_updating_file_from_existing_to_non_existing(self):
+        # given a dash
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
+        init_dir(workspace_root_path)
+        api = API(root=workspace_root_path)
+        dash = api.create_dash()
+        old_file = Path(workspace_root_path, dash.file)
+        new_file = Path(workspace_root_path, "non-existing-file.py")
+
+        # when updating the file to a non existing file
+        api.update_dash(dash.path, dict(file="non-existing-file.py"))
+
+        # then the existing file is renamed
+        self.assertFalse(old_file.exists())
+        self.assertTrue(new_file.exists())
+
+    def test_updating_file_from_non_existing_to_existing(self):
+        # given a dash
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
+        init_dir(workspace_root_path)
+        api = API(root=workspace_root_path)
+        dash = api.create_dash()
+        old_file = Path(workspace_root_path, dash.file)
+        new_file = Path(workspace_root_path, "existing-file.py")
+        old_file.unlink()
+        new_file.write_text("print('hello')")
+
+        # when updating the file to a non existing file
+        api.update_dash(dash.path, dict(file="existing-file.py"))
+
+        # then just the file property is updated
+        self.assertFalse(old_file.exists())
+        self.assertTrue(new_file.exists())
 
 
 if __name__ == "__main__":

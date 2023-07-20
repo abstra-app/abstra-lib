@@ -1,6 +1,7 @@
 import sys
 from typing import List, Optional, Union, Any, Dict
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -37,10 +38,12 @@ class HookJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: Dict[str, Any]):
+    def update(self, changes: Dict[str, Any], workspace_root: str):
         for attr, value in changes.items():
-            if attr in ["file", "path", "title", "enabled"]:
+            if attr in ["path", "title", "enabled"]:
                 setattr(self, attr, value)
+            elif attr == "file":
+                _update_file(self, workspace_root, value)
             else:
                 raise Exception(f"Cannot update {attr} of hook")
 
@@ -82,10 +85,12 @@ class JobJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: Dict[str, Any]):
+    def update(self, changes: Dict[str, Any], workspace_root: str):
         for attr, value in changes.items():
-            if attr in ["file", "identifier", "title", "schedule"]:
+            if attr in ["identifier", "title", "schedule"]:
                 setattr(self, attr, value)
+            elif attr == "file":
+                _update_file(self, workspace_root, value)
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
@@ -157,10 +162,9 @@ class FormJSON(SidebarRuntime):
             "restart_button_text": self.restart_button_text,
         }
 
-    def update(self, changes: Dict[str, Any]):
+    def update(self, changes: Dict[str, Any], workspace_root: str):
         for attr, value in changes.items():
             if attr in [
-                "file",
                 "path",
                 "title",
                 "end_message",
@@ -174,6 +178,8 @@ class FormJSON(SidebarRuntime):
                 "restart_button_text",
             ]:
                 setattr(self, attr, value)
+            elif attr == "file":
+                _update_file(self, workspace_root, value)
             else:
                 raise Exception(f"Cannot update {attr} of form")
 
@@ -508,7 +514,7 @@ class DashJSON(SidebarRuntime):
             "file": self.file,
         }
 
-    def update(self, changes: Dict[str, Any]):
+    def update(self, changes: Dict[str, Any], workspace_root: str):
         if "path" in changes:
             self.path = changes["path"]
             del changes["path"]
@@ -522,7 +528,7 @@ class DashJSON(SidebarRuntime):
             del changes["layout"]
 
         if "file" in changes:
-            self.file = changes["file"]
+            _update_file(self, workspace_root, changes["file"])
             del changes["file"]
 
         if len(changes) > 0:
@@ -744,3 +750,15 @@ class AbstraJSON:
             hooks=[],
             jobs=[],
         )
+
+
+def _update_file(
+    runtime: Union[DashJSON, FormJSON, HookJSON, JobJSON],
+    workspace_root: str,
+    new_file_relative: str,
+):
+    old_file = Path(workspace_root, runtime.file)
+    new_file = Path(workspace_root, new_file_relative)
+    if old_file.exists() and not new_file.exists():
+        old_file.rename(new_file)
+    runtime.file = new_file_relative
