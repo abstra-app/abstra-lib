@@ -1,0 +1,2 @@
+import{d as l,r,o as c,a2 as m,b as u,c as p,L as d,ac as f}from"./registerWidgets.4cc86716.js";const v=l({__name:"ActionButton",props:{action:null},emits:["next"],setup(t,{emit:a}){const o=t,n=r(null);c(()=>{n.value&&o.action.setElement(n.value),m.addAction(o.action)});const s=()=>a("next");return(x,e)=>(u(),p("button",{ref_key:"element",ref:n,class:"next-button",onClick:e[0]||(e[0]=i=>s()),onKeydown:e[1]||(e[1]=f(i=>s(),["enter"]))},d(t.action.name),545))}});export{v as _};
+//# sourceMappingURL=ActionButton.vue_vue_type_script_setup_true_lang.a22e4194.js.map
