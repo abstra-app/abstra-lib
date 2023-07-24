@@ -35,27 +35,25 @@ def read_answer_sheet(label: str, options: list, number_of_questions: int, **kwa
 def read_cards(label: str, options: list, **kwargs):
     """Read a text value from the user simple text input
 
-            Position Args:
-                    label (str): The text related to this input
-                    options (list): The options to display to the user, eg. [
-    {'title': 'Option 1', 'subtitle': 'Subtitle 1', 'image': 'https://image_1.png', 'description': 'option 1 description', 'topLeftExtra': 'Left 1', 'topRightExtra': 'Right 1' },
-    {'title': 'Option 2', 'subtitle': 'Subtitle 2', 'image': 'https://image_2.png', 'description': 'option 2 description', 'topLeftExtra': 'Left 2', 'topRightExtra': 'Right 2' }]
+    Position Args:
+            label (str): The text related to this input
+            options (list): List of dicts representing the cards, each dict can have the following keys: title, subtitle, image, description, topLeftExtra, topRightExtra
 
-            Keyword Args:
-                    multiple (bool): Whether the user can select multiple options. Defaults to False.
-                    initial_value (list): The initial value to display to the user. Defaults to None.
-                    searchable (bool): Whether to show a search bar. Defaults to False.
-                    layout (str): Whether the cards layout should be 'list' or 'grid'. Defaults to 'list'. The 'grid' only applies to desktop resolutions.
-                    columns (int): When layout is 'grid', how many columns to display
-                    disabled (bool): whether the input is disabled. Defaults to False.
-                    required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
-                    hint (str): A tooltip displayed to the user. Defaults to None.
-                    end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
-                    full_width (bool): Whether the input should use full screen width. Defaults to False.
-                    button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
+    Keyword Args:
+            multiple (bool): Whether the user can select multiple options. Defaults to False.
+            initial_value (list): The initial value to display to the user. Defaults to None.
+            searchable (bool): Whether to show a search bar. Defaults to False.
+            layout (str): Whether the cards layout should be 'list' or 'grid'. Defaults to 'list'. The 'grid' only applies to desktop resolutions.
+            columns (int): When layout is 'grid', how many columns to display
+            disabled (bool): whether the input is disabled. Defaults to False.
+            required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
+            hint (str): A tooltip displayed to the user. Defaults to None.
+            end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
+            full_width (bool): Whether the input should use full screen width. Defaults to False.
+            button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
-            Returns:
-              list, any: The options/option selected by the user
+    Returns:
+      list, any: The options/option selected by the user
     """
 
     button_text = kwargs.get("button_text", "Next")
