@@ -105,12 +105,14 @@ class TestTables(unittest.TestCase):
             4,
         )
         self.assertEqual(
-            crud_table.select(
-                columns=["name"],
-                where="email = :email",
-                params=dict(email="uzumaki.naruto@konoha.jp"),
+            dict(
+                crud_table.select(
+                    columns=["name"],
+                    where="email = :email",
+                    params=dict(email="uzumaki.naruto@konoha.jp"),
+                )[0]
             ),
-            [dict(name="Uzumaki Naruto")],
+            dict(name="Uzumaki Naruto"),
         )
 
         crud_table.update(
@@ -120,12 +122,14 @@ class TestTables(unittest.TestCase):
         )
 
         self.assertEqual(
-            crud_table.select(
-                columns=["email"],
-                where="name = :name",
-                params=dict(name="Uchiha Sasuke"),
+            dict(
+                crud_table.select(
+                    columns=["email"],
+                    where="name = :name",
+                    params=dict(name="Uchiha Sasuke"),
+                )[0]
             ),
-            [dict(email="uchiha.sasuke@akatsuki.jp")],
+            dict(email="uchiha.sasuke@akatsuki.jp"),
         )
 
         crud_table.delete(
@@ -133,3 +137,95 @@ class TestTables(unittest.TestCase):
         )
 
         self.assertEqual(len(crud_table.select()), 7)
+
+        naruto = crud_table.select_one(
+            where="email = :email", params=dict(email="uzumaki.naruto@konoha.jp")
+        )
+        naruto.delete()
+
+        self.assertEqual(len(crud_table.select()), 6)
+
+        sakura = crud_table.select_one(
+            where="email = :email", params=dict(email="haruno.sakura@konoha.jp")
+        )
+
+        sakura["name"] = "Sakura"
+        sakura.save()
+
+        self.assertEqual(
+            dict(
+                crud_table.select(
+                    columns=["name"],
+                    where="email = :email",
+                    params=dict(email="haruno.sakura@konoha.jp"),
+                )[0]
+            ),
+            dict(name="Sakura"),
+        )
+
+    def test_join(self):
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
+        init_dir(workspace_root_path)
+
+        db = get_db()
+        print(workspace_root_path)
+
+        consoles = db.create_table()
+        consoles = db.update_table(consoles.name, dict(name="consoles"))
+        console_name = db.create_column("consoles")
+        db.update_column("consoles", console_name.name, dict(name="name"))
+
+        games = db.create_table()
+        games = db.update_table(games.name, dict(name="games"))
+        game_name = db.create_column("games")
+        db.update_column("games", game_name.name, dict(name="name"))
+        console_id = db.create_column("games")
+        db.update_column("games", console_id.name, dict(name="console_id"))
+
+        ps4 = consoles.insert(
+            dict(
+                name="Play Station 4",
+            )
+        )
+        nswitch = consoles.insert(dict(name="Nintendo Switch"))
+
+        games.insert(
+            [
+                dict(name="God of War", console_id=ps4["id"]),
+                dict(name="Elden Ring", console_id=ps4["id"]),
+                dict(name="Metroid Dread", console_id=nswitch["id"]),
+                dict(name="Zelda - Breath of the Wild", console_id=nswitch["id"]),
+            ]
+        )
+
+        self.assertEqual(len(consoles.select()), 2)
+        self.assertEqual(len(games.select()), 4)
+
+        rows = consoles.join(games, on="games.console_id = consoles.id").select(
+            columns=["consoles.name", "games.name"]
+        )
+        self.assertEqual(len(rows), 4)
+
+        self.assertIn(
+            {
+                "consoles.name": "Nintendo Switch",
+                "games.name": "Zelda - Breath of the Wild",
+            },
+            [dict(row) for row in rows],
+        )
+
+    def test_insert_defaults(self):
+        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
+        init_dir(workspace_root_path)
+
+        db = get_db()
+
+        table = db.create_table()
+
+        self.assertEqual(len(table.select()), 0)
+        table.insert()
+        self.assertEqual(len(table.select()), 1)
+        table.insert({})
+        self.assertEqual(len(table.select()), 2)
+        table.insert([])
+        self.assertEqual(len(table.select()), 2)
