@@ -280,31 +280,47 @@ def get_editor_bp(api: API):
             flask.abort(400)
 
         if data.get("action") == "select":
-            return api.db.select(
-                table_name, where=data.get("where"), params=data.get("params")
-            )
+            table = api.db.get_table(table_name)
+            return [
+                dict(row)
+                for row in table.select(
+                    where=data.get("where"), params=data.get("params")
+                )
+            ]
 
         if data.get("action") == "update":
             try:
-                return api.db.update(
-                    table_name,
-                    where=data.get("where"),
-                    set=data.get("set"),
-                    params=data.get("params"),
-                )
+                table = api.db.get_table(table_name)
+                return [
+                    dict(row)
+                    for row in table.update(
+                        where=data.get("where"),
+                        set=data.get("set"),
+                        params=data.get("params"),
+                    )
+                ]
             except Exception as e:
                 return flask.Response(str(e), status=500)
 
         if data.get("action") == "insert":
             try:
-                return api.db.insert(table_name, values=data.get("values"))
+                table = api.db.get_table(table_name)
+                result = table.insert(values=data.get("values"))
+                if type(result) == list:
+                    return [dict(row) for row in result]
+                else:
+                    return dict(result)
             except Exception as e:
                 return flask.Response(str(e), status=500)
 
         if data.get("action") == "delete":
-            return api.db.delete(
-                table_name, where=data.get("where"), params=data.get("params")
-            )
+            table = api.db.get_table(table_name)
+            return [
+                dict(row)
+                for row in table.delete(
+                    where=data.get("where"), params=data.get("params")
+                )
+            ]
 
     @bp.route("/api/tables/<path:table_name>/columns", methods=["GET"])
     @usage(api.root_path)
