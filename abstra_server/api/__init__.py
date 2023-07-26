@@ -23,7 +23,7 @@ class API:
         else:
             db_path = Path(self.root_path, "db.sqlite3")
 
-        self.db = get_db(db_path.as_uri())
+        self.db = get_db(db_path.absolute().as_uri())
 
         try:
             self.__get_abstra_json()
@@ -245,7 +245,7 @@ display(f"Hello World, {name}")"""
         ):
             complete_file_path.touch()
 
-        webbrowser.open(complete_file_path.as_uri())
+        webbrowser.open(complete_file_path.absolute().as_uri())
 
     def check_file(self, file_path: str):
         complete_file_path = Path(self.root_path, file_path)
