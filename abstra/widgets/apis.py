@@ -1,4 +1,5 @@
-import io, os, tempfile, shutil, uuid, typing
+import io, tempfile, shutil, uuid, typing
+from pathlib import Path
 from werkzeug.datastructures import FileStorage
 
 
@@ -7,15 +8,14 @@ def public_path(name: str):
 
 
 def ensure_uploaded_files_dir():
-    uploaded_files_dir = os.path.join(tempfile.gettempdir(), "_uploaded_files")
-    if not os.path.exists(uploaded_files_dir):
-        os.mkdir(uploaded_files_dir)
+    uploaded_files_dir = Path(tempfile.gettempdir(), "_uploaded_files")
+    uploaded_files_dir.mkdir(exist_ok=True)
     return uploaded_files_dir
 
 
 def internal_path(name: str):
     uploaded_files_dir = ensure_uploaded_files_dir()
-    return os.path.join(uploaded_files_dir, name)
+    return uploaded_files_dir.joinpath(name)
 
 
 def get_random_filepath():

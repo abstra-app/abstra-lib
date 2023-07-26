@@ -1,10 +1,10 @@
-import json, pathlib, os, typing, webbrowser, requests, tempfile
+import json, os, typing, webbrowser, requests, tempfile
 from werkzeug.datastructures import FileStorage
 from abstra.tables import get_db
 from abstra_cli.deploy import deploy
 from abstra.widgets.apis import get_random_filepath, internal_path
 from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
-
+from pathlib import Path
 from . import classes
 from ..utils import random_id
 
@@ -14,17 +14,16 @@ ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
 
 
 class API:
-    def __init__(self, root: str):
-        if os.path.isabs(root):
-            self.root_path = root
+    def __init__(self, root: Path):
+        root.mkdir(exist_ok=True)
+        self.root_path = root
+        self.abstra_json_path = Path(self.root_path, "abstra.json")
+        if ABSTRA_DATABASE_URL:
+            db_path = Path(ABSTRA_DATABASE_URL)
         else:
-            cwd = pathlib.Path.cwd()
-            self.root_path = (cwd / root).resolve().as_posix()
+            db_path = Path(self.root_path, "db.sqlite3")
 
-        self.abstra_json_path = os.path.join(self.root_path, "abstra.json")
-        db_path = ABSTRA_DATABASE_URL or os.path.join(self.root_path, "db.sqlite3")
-        os.environ["ABSTRA_DATABASE_URL"] = db_path
-        self.db = get_db()
+        self.db = get_db(db_path.as_uri())
 
         try:
             self.__get_abstra_json()
@@ -42,13 +41,13 @@ class API:
             json.dump(abstra_json.__dict__, f, indent=2)
 
     def __get_abstra_json(self) -> classes.AbstraJSON:
-        with open(self.abstra_json_path, "r", encoding="utf-8") as f:
-            abstra_json_content = json.load(f)
+        abstra_json_content = json.loads(
+            self.abstra_json_path.read_text(encoding="utf-8")
+        )
         return classes.AbstraJSON.from_dict(abstra_json_content)
 
     def read_text_file(self, path) -> str:
-        with open(os.path.join(self.root_path, path), "r", encoding="utf-8") as f:
-            return f.read()
+        return self.root_path.joinpath(path).read_text(encoding="utf-8")
 
     def get_workspace(self) -> classes.WorkspaceJSON:
         abstra_json = self.__get_abstra_json()
@@ -77,14 +76,10 @@ class API:
         file_name = f"new_form_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
-            f.write(
-                """from abstra.forms import display, read
-
-
+        txt = """from abstra.forms import display, read
 name = read("What is your name?")
 display(f"Hello World, {name}")"""
-            )
+        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
         form = classes.FormJSON(file=file_path, path=file_name, title="Untitled Form")
 
@@ -136,8 +131,8 @@ display(f"Hello World, {name}")"""
         file_name = f"new_dash_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
-            f.write("foo = 'bar'")
+        txt = "foo = 'bar'"
+        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
         dash = classes.DashJSON(
             file=file_path,
@@ -196,8 +191,8 @@ display(f"Hello World, {name}")"""
         file_name = f"new_hook_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
-            f.write("print('Hello World')")
+        txt = "print('Hello World')"
+        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
         hook = classes.HookJSON(file=file_path, path=file_name, title="Untitled Hook")
 
@@ -241,21 +236,20 @@ display(f"Hello World, {name}")"""
         self.persist(abstra_json)
 
     def open_file(self, file_path: str, create_if_not_exists: bool = False):
-        complete_file_path = os.path.join(self.root_path, file_path)
+        complete_file_path = Path(self.root_path, file_path)
 
         if (
             create_if_not_exists
             and file_path.endswith(".py")
-            and not os.path.isfile(complete_file_path)
+            and not complete_file_path.is_file()
         ):
-            with open(complete_file_path, "w", encoding="utf-8") as f:
-                f.write("")
+            complete_file_path.touch()
 
-        webbrowser.open("file://" + complete_file_path)
+        webbrowser.open(complete_file_path.as_uri())
 
     def check_file(self, file_path: str):
-        complete_file_path = os.path.join(self.root_path, file_path)
-        return os.path.isfile(complete_file_path)
+        complete_file_path = Path(self.root_path, file_path)
+        return complete_file_path.is_file()
 
     def update_workspace(self, changes: typing.Dict[str, typing.Any]):
         abstra_json = self.__get_abstra_json()
@@ -282,8 +276,8 @@ display(f"Hello World, {name}")"""
         file_name = f"new_job_{random_id()}"
         file_path = f"{file_name}.py"
 
-        with open(os.path.join(self.root_path, file_path), "w", encoding="utf-8") as f:
-            f.write("print('Hello World')")
+        txt = "print('Hello World')"
+        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
         job = classes.JobJSON(
             file=file_path,

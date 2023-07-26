@@ -1,17 +1,18 @@
-import unittest, tempfile
-from abstra_server.runtimes.dashes.program import PythonProgram, DashPageState
-from pathlib import Path
-from .fixtures import init_dir
+import unittest
+from abstra_server.runtimes.dashes.program import PythonProgram
+from .fixtures import init_dir, clear_dir
 from abstra_server.api import API
-from uuid import uuid4 as uuid
-from datetime import datetime
 
 
 class TestProgram(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = init_dir()
+
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
     def test_program_works(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
         dash = api.create_dash()
         code = "a = 1"
         py = PythonProgram(dash, code)

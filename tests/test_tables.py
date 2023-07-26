@@ -5,14 +5,17 @@ from pathlib import Path
 
 from abstra.tables import TableNotFound, get_db, get_table
 
-from .fixtures import init_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestTables(unittest.TestCase):
-    def test_create_table(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
+    def setUp(self) -> None:
+        self.root = init_dir()
 
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
+    def test_create_table(self):
         db = get_db()
 
         created_table = db.create_table()
@@ -22,9 +25,6 @@ class TestTables(unittest.TestCase):
         self.assertEqual(created_table.name, retrieved_table.name)
 
     def test_delete_table(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
         db = get_db()
 
         created_table = db.create_table()
@@ -35,9 +35,6 @@ class TestTables(unittest.TestCase):
             db.get_table(created_table.name)
 
     def test_update_table_name(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
         db = get_db()
 
         created_table = db.create_table()
@@ -47,9 +44,6 @@ class TestTables(unittest.TestCase):
         db.get_table("new_name")
 
     def test_create_column(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
         db = get_db()
 
         table = db.create_table()
@@ -64,9 +58,6 @@ class TestTables(unittest.TestCase):
         self.assertNotIn(col.name, [c.name for c in cols])
 
     def test_crud_data(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
         db = get_db()
 
         table = db.create_table()
@@ -164,11 +155,7 @@ class TestTables(unittest.TestCase):
         )
 
     def test_join(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
         db = get_db()
-        print(workspace_root_path)
 
         consoles = db.create_table()
         consoles = db.update_table(consoles.name, dict(name="consoles"))
@@ -215,9 +202,6 @@ class TestTables(unittest.TestCase):
         )
 
     def test_insert_defaults(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
         db = get_db()
 
         table = db.create_table()

@@ -5,15 +5,18 @@ from pathlib import Path
 
 from abstra_server.api import API
 
-from .fixtures import init_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestHooks(unittest.TestCase):
-    def test_api_list(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
+    def setUp(self) -> None:
+        self.root = init_dir()
 
-        api = API(root=workspace_root_path)
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
+    def test_api_list(self):
+        api = API(root=self.root)
 
         self.assertEqual(len(api.get_hooks()), 0)
 

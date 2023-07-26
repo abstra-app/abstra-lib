@@ -1,7 +1,6 @@
 import fire, os
-
 from abstra_server.apps import serve
-
+from pathlib import Path
 from . import messages
 from .deploy import deploy
 from .version import check_latest_version
@@ -18,7 +17,7 @@ class CLI(object):
     """
 
     def deploy(self, workspace_root: str = "."):
-        deploy(workspace_root=workspace_root)
+        deploy(workspace_root=Path(workspace_root))
 
     def serve(
         self,
@@ -35,7 +34,7 @@ class CLI(object):
         check_latest_version()
 
         serve(
-            workspace_root=workspace_root,
+            workspace_root=Path(workspace_root),
             port=free_port,
             debug=debug,
             use_reloader=use_reloader,

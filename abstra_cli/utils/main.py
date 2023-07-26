@@ -13,7 +13,7 @@ to_kebab = lambda strs: f"{DASH}".join(to_lower(strs))
 reverse = lambda strs: strs[::-1]
 
 
-def remove_prefix(text, prefix):
+def remove_prefix(text: str, prefix: str) -> str:
     if text.startswith(prefix):
         return text[len(prefix) :]
     return text

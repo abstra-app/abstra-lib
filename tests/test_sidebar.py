@@ -1,27 +1,24 @@
-import tempfile
 import unittest
-from uuid import uuid4 as uuid
-from pathlib import Path
-
 from abstra_server.api import API
-
-from .fixtures import init_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestSidebar(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = init_dir()
+
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
     def test_starts_empty(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
 
         workspace = api.get_workspace()
         self.assertEqual(workspace.__dict__["sidebar"], [])
 
     def test_auto_add_forms(self):
         # given
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
 
         # when
         form = api.create_form()
@@ -35,9 +32,7 @@ class TestSidebar(unittest.TestCase):
 
     def test_auto_add_dashes(self):
         # given
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
 
         # when
         dash = api.create_dash()

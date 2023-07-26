@@ -3,8 +3,15 @@ from .sqlite import SqliteDB, TableNotFound  # expoted
 from .legacy import *  # deprecated
 
 
-def get_db():
-    db_url = os.getenv("ABSTRA_DATABASE_URL")
+def get_db(path: typing.Optional[str] = None):
+    env_db_url = os.getenv("ABSTRA_DATABASE_URL")
+    if path:
+        db_url = path
+    elif env_db_url:
+        db_url = env_db_url
+    else:
+        db_url = "sqlite:///:memory:"
+
     if db_url.startswith("postgres://"):
         raise NotImplementedError("Postgres is not supported yet")
     elif db_url.startswith("mysql://"):

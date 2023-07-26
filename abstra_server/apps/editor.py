@@ -28,7 +28,7 @@ def get_editor_bp(api: API):
     @bp.route("/api/workspace/root-path", methods=["GET"])
     @usage(api.root_path)
     def get_workspace_root_path():
-        return api.root_path
+        return str(api.root_path)
 
     @bp.route("/api/workspace/open-file", methods=["POST"])
     @usage(api.root_path)
