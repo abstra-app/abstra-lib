@@ -5,15 +5,18 @@ from pathlib import Path
 
 from abstra_server.api import API
 
-from .fixtures import init_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestDashes(unittest.TestCase):
-    def test_api_create(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
+    def setUp(self) -> None:
+        self.root = init_dir()
 
-        api = API(root=workspace_root_path)
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
+    def test_api_create(self):
+        api = API(root=self.root)
 
         dashes_len = len(api.get_dashes())
 
@@ -23,15 +26,12 @@ class TestDashes(unittest.TestCase):
 
         self.assertEqual(dash.layout.slot.__dict__, {})
 
-        file_path = Path(workspace_root_path, dash.file)
+        file_path = Path(self.root, dash.file)
 
         self.assertTrue(file_path.exists())
 
     def test_api_update(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
 
         dash = api.create_dash()
 
@@ -64,12 +64,10 @@ class TestDashes(unittest.TestCase):
 
     def test_updating_file_from_existing_to_non_existing(self):
         # given a dash
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
         dash = api.create_dash()
-        old_file = Path(workspace_root_path, dash.file)
-        new_file = Path(workspace_root_path, "non-existing-file.py")
+        old_file = Path(self.root, dash.file)
+        new_file = Path(self.root, "non-existing-file.py")
 
         # when updating the file to a non existing file
         api.update_dash(dash.path, dict(file="non-existing-file.py"))
@@ -80,12 +78,10 @@ class TestDashes(unittest.TestCase):
 
     def test_updating_file_from_non_existing_to_existing(self):
         # given a dash
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+        api = API(root=self.root)
         dash = api.create_dash()
-        old_file = Path(workspace_root_path, dash.file)
-        new_file = Path(workspace_root_path, "existing-file.py")
+        old_file = Path(self.root, dash.file)
+        new_file = Path(self.root, "existing-file.py")
         old_file.unlink()
         new_file.write_text("print('hello')")
 

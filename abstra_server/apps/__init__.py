@@ -1,6 +1,5 @@
 import os, flask, flask_cors
-
-
+from pathlib import Path
 from ..api import API
 from .editor import get_editor_bp
 from .player import get_player_bp
@@ -22,7 +21,7 @@ def create_app(api: API):
     return app
 
 
-def serve(workspace_root: str, port: int, debug, use_reloader, load_dotenv):
+def serve(workspace_root: Path, port: int, debug, use_reloader, load_dotenv):
     os.environ["ABSTRA_SERVER"] = "true"
     overloads()
 

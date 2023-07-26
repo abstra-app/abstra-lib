@@ -5,30 +5,30 @@ from pathlib import Path
 
 from abstra_server.api import API
 
-from .fixtures import init_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestForms(unittest.TestCase):
-    def updates_across_reloads(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+    def setUp(self) -> None:
+        self.root = init_dir()
 
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
+    def updates_across_reloads(self):
+        api = API(root=self.root)
         form = api.create_form()
 
         api.update_form(form.path, dict(title="New Title"))
 
-        api2 = API(root=workspace_root_path)
+        api2 = API(root=self.root)
         api2.get_workspace()
         new_form = api2.get_form(form.path)
 
         self.assertEqual(form.title, new_form.title)
 
     def test_raise_exception_on_invalid_propery_update(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
-
+        api = API(root=self.root)
         form = api.create_form()
 
         with self.assertRaises(Exception):

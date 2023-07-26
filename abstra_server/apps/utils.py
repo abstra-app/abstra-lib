@@ -1,7 +1,8 @@
-import inspect, os, flask, werkzeug.exceptions as wz_ex
+import inspect, flask, werkzeug.exceptions as wz_ex
 import abstra_statics
+from pathlib import Path
 
-dist_folder = os.path.join(os.path.dirname(inspect.getfile(abstra_statics)), "dist")
+dist_folder = Path(inspect.getfile(abstra_statics)).joinpath("../dist")
 
 
 def send_from_dist(filename: str, fallback: str):

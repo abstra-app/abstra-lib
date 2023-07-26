@@ -94,11 +94,14 @@ def transform_expression(
 
 
 class SqliteDB:
-    def __init__(self, db_path: str) -> None:
-        self.db_path = db_path
+    db_path: str
+
+    def __init__(self, db_path) -> None:
+        self.db_path = str(db_path)
 
     def connect(self):
-        conn = sqlite3.connect(self.db_path)
+        is_uri = self.db_path.startswith("file://")
+        conn = sqlite3.connect(self.db_path, uri=is_uri)
         return conn
 
     def create_table(self, table_name=f"table-{random_id()}", columns=[]):

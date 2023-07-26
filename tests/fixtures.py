@@ -1,13 +1,29 @@
-import os, json
+import os, json, tempfile
+from pathlib import Path
 
 abstra_json = {"version": "0.2"}
 
 
-def init_dir(path: str):
-    abstra_json_path = os.path.join(path, "abstra.json")
-    if not os.path.exists(path):
-        os.makedirs(path)
-    if not os.path.exists(abstra_json_path):
-        with open(abstra_json_path, "w") as f:
-            f.write(json.dumps(abstra_json))
-    os.environ["ABSTRA_DATABASE_URL"] = os.path.join(path, "db.sqlite3")
+def rm_tree(pth: Path):
+    pth = Path(pth)
+    for child in pth.glob("*"):
+        if child.is_file():
+            child.unlink()
+        else:
+            rm_tree(child)
+    pth.rmdir()
+
+
+def init_dir():
+    path = Path(tempfile.mkdtemp())
+    abstra_json_path = path / "abstra.json"
+    path.mkdir(exist_ok=True)
+    if not abstra_json_path.exists():
+        abstra_json_path.write_text(json.dumps(abstra_json))
+    os.environ["ABSTRA_DATABASE_URL"] = str(Path(path, "db.sqlite3"))
+    os.chdir(path)
+    return path
+
+
+def clear_dir(path: Path):
+    rm_tree(path)

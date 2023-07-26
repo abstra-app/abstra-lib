@@ -1,5 +1,5 @@
-import requests
-import inspect
+import requests, inspect
+from pathlib import Path
 from concurrent import futures
 from typing import Any, Callable, Tuple
 from abstra_cli.credentials import get_credentials
@@ -13,7 +13,7 @@ def async_send_usage(data, header):
     requests.post(api_url, json=data, headers=header)
 
 
-def usage(root_path: str) -> Callable[..., Any]:
+def usage(root_path: Path) -> Callable[..., Any]:
     def usage_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
             arg_names = inspect.getfullargspec(func).args

@@ -5,15 +5,18 @@ from pathlib import Path
 
 from abstra_server.api import API
 
-from .fixtures import init_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestWorkspace(unittest.TestCase):
-    def test_api_update(self):
-        workspace_root_path = Path(tempfile.gettempdir(), f"{uuid()}")
+    def setUp(self) -> None:
+        self.root = init_dir()
 
-        init_dir(workspace_root_path)
-        api = API(root=workspace_root_path)
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
+    def test_api_update(self):
+        api = API(root=self.root)
 
         api.update_workspace({"name": "test-workspace-updated"})
 

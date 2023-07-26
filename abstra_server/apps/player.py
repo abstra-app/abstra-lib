@@ -9,7 +9,7 @@ def get_player_bp(api: API):
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
     if api.root_path not in sys.path:
-        sys.path.append(api.root_path)
+        sys.path.append(str(api.root_path))
 
     @bp.route("/_api/<path:id_or_path>", methods=["GET"])
     def get_runner_data(id_or_path):

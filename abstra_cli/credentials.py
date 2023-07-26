@@ -1,28 +1,29 @@
 import os
+from pathlib import Path
 from .utils import CREDENTIALS_FILE
 
 
-def get_credentials(root_path):
+def get_credentials(root_path: Path):
     if os.getenv("ABSTRA_API_TOKEN"):
         return os.getenv("ABSTRA_API_TOKEN")
 
-    credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
-    if not os.path.exists(credentials_path):
+    credentials_path = Path(root_path, CREDENTIALS_FILE)
+    if not credentials_path.exists():
         return None
 
-    with open(credentials_path, encoding="utf-8") as f:
-        return f.read().strip()
+    return credentials_path.read_text(encoding="utf-8").strip()
 
 
-def delete_credentials(root_path):
-    credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
-    if os.path.exists(credentials_path):
-        os.remove(credentials_path)
+def delete_credentials(root_path: Path):
+    credentials_path = Path(root_path, CREDENTIALS_FILE)
+
+    if credentials_path.exists():
+        credentials_path.unlink()
 
 
-def set_credentials(root_path, token):
-    credentials_path = os.path.join(root_path, CREDENTIALS_FILE)
-    os.makedirs(os.path.dirname(credentials_path), exist_ok=True)
+def set_credentials(root_path: Path, token: str):
+    credentials_path = Path(root_path, CREDENTIALS_FILE)
+    credentials_path.parent.mkdir(exist_ok=True)
 
-    with open(credentials_path, "w", encoding="utf-8") as f:
-        f.write(token)
+    print(str(credentials_path))
+    credentials_path.write_text(token, encoding="utf-8")

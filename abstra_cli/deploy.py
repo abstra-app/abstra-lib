@@ -1,6 +1,6 @@
-import os, pathlib, tempfile, urllib.request, zipfile, requests
+import os, tempfile, urllib.request, zipfile, requests
 from uuid import uuid4 as uuid
-
+from pathlib import Path
 from .credentials import get_credentials
 from .utils.file import files_from_directory
 
@@ -9,8 +9,8 @@ CLOUD_API_ENDPOINT = (
 )
 
 
-def _generate_zip_file(root_path: str) -> pathlib.Path:
-    zip_path = pathlib.Path(tempfile.gettempdir(), f"{uuid()}.zip")
+def _generate_zip_file(root_path: Path) -> Path:
+    zip_path = Path(tempfile.gettempdir(), f"{uuid()}.zip")
     with zipfile.ZipFile(zip_path, "w") as zip_file:
         for file in files_from_directory(root_path):
             zip_file.write(file, file.relative_to(root_path))
@@ -21,7 +21,7 @@ def _create_build(headers: dict) -> dict:
     return requests.post(f"{CLOUD_API_ENDPOINT}/cli/builds", headers=headers).json()
 
 
-def _upload_file(url: str, file_path: pathlib.Path, headers: dict):
+def _upload_file(url: str, file_path: Path, headers: dict):
     with file_path.open("rb") as f:
         req = urllib.request.Request(url=url, method="PUT", data=f.read())
         urllib.request.urlopen(req)
@@ -34,9 +34,9 @@ def _update_build(build_id: str, headers: dict):
     )
 
 
-def deploy(workspace_root: str = "."):
-    cwd = pathlib.Path.cwd()
-    root_path = (cwd / workspace_root).resolve().as_posix()
+def deploy(workspace_root: Path = Path(".")):
+    cwd = Path.cwd()
+    root_path = (cwd / workspace_root).resolve()
     credentials = get_credentials(root_path)
 
     if not credentials:

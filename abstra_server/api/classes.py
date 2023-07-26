@@ -38,7 +38,7 @@ class HookJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: Dict[str, Any], workspace_root: str):
+    def update(self, changes: Dict[str, Any], workspace_root: Path):
         for attr, value in changes.items():
             if attr in ["path", "title", "enabled"]:
                 setattr(self, attr, value)
@@ -85,7 +85,7 @@ class JobJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: Dict[str, Any], workspace_root: str):
+    def update(self, changes: Dict[str, Any], workspace_root: Path):
         for attr, value in changes.items():
             if attr in ["identifier", "title", "schedule"]:
                 setattr(self, attr, value)
@@ -162,7 +162,7 @@ class FormJSON(SidebarRuntime):
             "restart_button_text": self.restart_button_text,
         }
 
-    def update(self, changes: Dict[str, Any], workspace_root: str):
+    def update(self, changes: Dict[str, Any], workspace_root: Path):
         for attr, value in changes.items():
             if attr in [
                 "path",
@@ -514,7 +514,7 @@ class DashJSON(SidebarRuntime):
             "file": self.file,
         }
 
-    def update(self, changes: Dict[str, Any], workspace_root: str):
+    def update(self, changes: Dict[str, Any], workspace_root: Path):
         if "path" in changes:
             self.path = changes["path"]
             del changes["path"]
@@ -754,11 +754,11 @@ class AbstraJSON:
 
 def _update_file(
     runtime: Union[DashJSON, FormJSON, HookJSON, JobJSON],
-    workspace_root: str,
+    workspace_root: Path,
     new_file_relative: str,
 ):
-    old_file = Path(workspace_root, runtime.file)
-    new_file = Path(workspace_root, new_file_relative)
+    old_file = workspace_root.joinpath(runtime.file)
+    new_file = workspace_root.joinpath(new_file_relative)
     if old_file.exists() and not new_file.exists():
         old_file.rename(new_file)
     runtime.file = new_file_relative
