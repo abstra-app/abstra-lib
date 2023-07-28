@@ -221,9 +221,11 @@ metadata = {
                 },
                 {
                     "argName": "options",
-                    "description": "The options to display to the user, eg. [\n{'title': 'Option 1', 'subtitle': 'Subtitle 1', 'image': 'https://image_1.png', 'description': 'option 1 description', 'topLeftExtra': 'Left 1', 'topRightExtra': 'Right 1' },\n{'title': 'Option 2', 'subtitle': 'Subtitle 2', 'image': 'https://image_2.png', 'description': 'option 2 description', 'topLeftExtra': 'Left 2', 'topRightExtra': 'Right 2' }]",
+                    "description": "List of dicts representing the cards, each dict can have the following keys: title, subtitle, image, description, topLeftExtra, topRightExtra",
                     "typeName": "list",
-                    "typeDescription": ["list[AbstraCard]"],
+                    "typeDescription": [
+                        "list[{'title': str, 'subtitle': str, 'image': str, 'description': str, 'topLeftExtra': str, 'topRightExtra': str}]"
+                    ],
                     "isKwarg": False,
                     "default": None,
                     "dashesInitialValue": '[\n          {\n            "title": "Option 1",\n            "subtitle": "Subtitle 1",\n            "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg",\n            "description": "option 1 description",\n            "topLeftExtra": "Left 1",\n            "topRightExtra": "Right 1",\n          }\n        ]',
@@ -1087,6 +1089,14 @@ metadata = {
                     "formOnly": True,
                 },
                 {
+                    "argName": "invalid_message",
+                    "description": "The message to display when the user enters an invalid value. Defaults to None.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "None",
+                    "formOnly": True,
+                },
+                {
                     "argName": "placeholder",
                     "description": 'The placeholder text to display to the user. Defaults to "00.000.000/0001-00".',
                     "typeName": "str",
@@ -1160,6 +1170,13 @@ metadata = {
                     "argName": "initialValue",
                     "typeName": "string",
                     "description": "The initial value of the input",
+                    "default": "",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "invalidMessage",
+                    "description": "The message to display when the user enters an invalid value. Defaults to None.",
+                    "typeName": "string",
                     "default": "",
                     "isOptional": True,
                 },
@@ -1444,6 +1461,14 @@ metadata = {
                     "formOnly": True,
                 },
                 {
+                    "argName": "invalid_message",
+                    "description": "The message to display when the user enters an invalid value. Defaults to None.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "None",
+                    "formOnly": True,
+                },
+                {
                     "argName": "placeholder",
                     "description": 'The placeholder text to display to the user. Defaults to "000.000.000-00".',
                     "typeName": "str",
@@ -1514,6 +1539,13 @@ metadata = {
                     "argName": "initialValue",
                     "typeName": "string",
                     "description": "The initial value of the input",
+                    "default": "",
+                    "isOptional": True,
+                },
+                {
+                    "argName": "invalidMessage",
+                    "description": "The message to display when the user enters an invalid value. Defaults to None.",
+                    "typeName": "string",
                     "default": "",
                     "isOptional": True,
                 },

@@ -14,6 +14,7 @@ class CnpjInput(Input):
         self.columns = kwargs.get("columns", 1)
         self.full_width = kwargs.get("full_width", False)
         self.disabled = kwargs.get("disabled", False)
+        self.invalid_message = kwargs.get("invalid_message", "")
 
     def json(self, **kwargs):
         return {
@@ -27,6 +28,7 @@ class CnpjInput(Input):
             "columns": self.columns,
             "fullWidth": self.full_width,
             "disabled": self.disabled,
+            "invalidMessage": self.invalid_message,
         }
 
     def convert_answer(self, answer: str) -> str:
