@@ -23,7 +23,7 @@ class CLI(object):
         self,
         workspace_root: str = ".",
         port: int = 3000,
-        debug=False,
+        debug=True,
         use_reloader=False,
         load_dotenv=True,
     ):
