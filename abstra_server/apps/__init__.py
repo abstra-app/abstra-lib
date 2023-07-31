@@ -1,4 +1,4 @@
-import os, flask, flask_cors
+import os, flask, flask_cors, threading, webbrowser
 from pathlib import Path
 from ..api import API
 from .editor import get_editor_bp
@@ -29,6 +29,10 @@ def serve(workspace_root: Path, port: int, debug, use_reloader, load_dotenv):
     os.chdir(api.root_path)
 
     app = create_app(api)
+    if debug:
+        threading.Timer(
+            1, lambda: webbrowser.open(f"http://{HOST}:{port}/_editor")
+        ).start()
     app.run(
         host=HOST,
         port=port,
