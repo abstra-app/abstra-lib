@@ -324,7 +324,6 @@ display(f"Hello World, {name}")"""
             response = requests.get(url, headers=headers)
         except:
             return {"logged": False, "reason": "CONNECTION_ERROR"}
-        print(response.text)
         if response.ok:
             response_json = response.json()
             return {

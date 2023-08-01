@@ -25,5 +25,4 @@ def set_credentials(root_path: Path, token: str):
     credentials_path = Path(root_path, CREDENTIALS_FILE)
     credentials_path.parent.mkdir(exist_ok=True)
 
-    print(str(credentials_path))
     credentials_path.write_text(token, encoding="utf-8")
