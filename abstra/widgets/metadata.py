@@ -688,7 +688,7 @@ metadata = {
         ],
     },
     "checklist-input": {
-        "name": "Checkilst",
+        "name": "Checklist",
         "description": "Show a checklist for users to select items",
         "type": "checklist-input",
         "events": [
@@ -4305,10 +4305,10 @@ metadata = {
         ],
         "autoHeight": False,
         "dashProperties": {
-            "minWidth": 195,
-            "minHeight": 72,
-            "initialWidth": 245,
-            "initialHeight": 72,
+            "minWidth": 200,
+            "minHeight": 250,
+            "initialWidth": 500,
+            "initialHeight": 500,
         },
         "pythonAPI": {
             "name": "read_pandas_row_selection",
@@ -7197,10 +7197,10 @@ metadata = {
             },
         ],
         "dashProperties": {
-            "minWidth": 195,
-            "minHeight": 72,
-            "initialWidth": 245,
-            "initialHeight": 72,
+            "minWidth": 200,
+            "minHeight": 250,
+            "initialWidth": 500,
+            "initialHeight": 500,
         },
         "pythonAPI": {
             "name": "display_pandas",
