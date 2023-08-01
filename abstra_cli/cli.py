@@ -1,10 +1,14 @@
-import fire, os
-from abstra_server.apps import serve
+import logging
+import os
 from pathlib import Path
+
+import fire
+from abstra_server.apps import serve
+
 from . import messages
 from .deploy import deploy
-from .version import check_latest_version
 from .utils.server import get_free_port
+from .version import check_latest_version
 
 PORT = os.getenv("PORT")
 
@@ -29,6 +33,9 @@ class CLI(object):
     ):
         default_port = int(PORT or port)
         free_port = get_free_port(default_port=default_port)
+
+        log = logging.getLogger("werkzeug")
+        log.setLevel(logging.WARNING)
 
         messages.serve_message(free_port)
         check_latest_version()
