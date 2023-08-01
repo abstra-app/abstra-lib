@@ -23,7 +23,8 @@ class API:
         else:
             db_path = Path(self.root_path, "db.sqlite3")
 
-        self.db = get_db(db_path.absolute().as_uri())
+        os.environ["ABSTRA_DATABASE_URL"] = db_path.absolute().as_uri()
+        self.db = get_db()
 
         try:
             self.__get_abstra_json()
