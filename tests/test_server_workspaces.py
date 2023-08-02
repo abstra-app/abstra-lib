@@ -22,6 +22,7 @@ class TestWorkspace(unittest.TestCase):
             api = API(root=root)
             forms = api.get_forms()
             self.assertEqual(forms, [])
+            api.create_form()
         finally:
             clear_dir(root)
 
@@ -31,6 +32,7 @@ class TestWorkspace(unittest.TestCase):
             api = API(root=root)
             forms = api.get_forms()
             self.assertEqual(forms, [])
+            api.create_form()
         finally:
             clear_dir(root)
 
@@ -40,6 +42,7 @@ class TestWorkspace(unittest.TestCase):
             api = API(root=root)
             forms = api.get_forms()
             self.assertEqual(forms, [])
+            api.create_form()
         finally:
             clear_dir(root)
 
@@ -53,6 +56,7 @@ class TestWorkspace(unittest.TestCase):
             api = API(root=root)
             forms = api.get_forms()
             self.assertEqual(forms, [])
+            api.create_form()
         finally:
             clear_dir(root)
 
@@ -62,6 +66,7 @@ class TestWorkspace(unittest.TestCase):
             api = API(root=root)
             forms = api.get_forms()
             self.assertEqual(forms, [])
+            api.create_form()
         finally:
             clear_dir(root)
 
@@ -75,6 +80,7 @@ class TestWorkspace(unittest.TestCase):
             api = API(root=root)
             forms = api.get_forms()
             self.assertEqual(forms, [])
+            api.create_form()
         finally:
             clear_dir(root)
 
