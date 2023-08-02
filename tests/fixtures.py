@@ -6,6 +6,8 @@ abstra_json = {"version": "0.2"}
 
 def rm_tree(pth: Path):
     pth = Path(pth)
+    if not pth.exists():
+        return
     for child in pth.glob("*"):
         if child.is_file():
             child.unlink()

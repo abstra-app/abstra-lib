@@ -15,7 +15,7 @@ ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
 
 class API:
     def __init__(self, root: Path):
-        root.mkdir(exist_ok=True)
+        root.mkdir(exist_ok=True, parents=True)
         self.root_path = root
         self.abstra_json_path = Path(self.root_path, "abstra.json")
         if ABSTRA_DATABASE_URL:
