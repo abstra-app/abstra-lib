@@ -26,7 +26,6 @@ def serve(workspace_root: Path, port: int, debug, use_reloader, load_dotenv):
     overloads()
 
     api = API(workspace_root)
-    os.chdir(api.root_path)
 
     app = create_app(api)
     if debug:

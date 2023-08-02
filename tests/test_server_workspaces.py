@@ -20,6 +20,8 @@ class TestWorkspace(unittest.TestCase):
         root = Path("./relative-non-new-dir")
         try:
             api = API(root=root)
+            forms = api.get_forms()
+            self.assertEqual(forms, [])
         finally:
             clear_dir(root)
 
@@ -27,6 +29,8 @@ class TestWorkspace(unittest.TestCase):
         root = Path("./relative-non-new-dir/deep/dir")
         try:
             api = API(root=root)
+            forms = api.get_forms()
+            self.assertEqual(forms, [])
         finally:
             clear_dir(root)
 
@@ -34,6 +38,8 @@ class TestWorkspace(unittest.TestCase):
         root = Path(tempfile.gettempdir()).joinpath("absolute-non-new-dir").absolute()
         try:
             api = API(root=root)
+            forms = api.get_forms()
+            self.assertEqual(forms, [])
         finally:
             clear_dir(root)
 
@@ -45,6 +51,8 @@ class TestWorkspace(unittest.TestCase):
         )
         try:
             api = API(root=root)
+            forms = api.get_forms()
+            self.assertEqual(forms, [])
         finally:
             clear_dir(root)
 
@@ -52,6 +60,8 @@ class TestWorkspace(unittest.TestCase):
         root = Path("./relative-non-new-dir/deep/dir/")
         try:
             api = API(root=root)
+            forms = api.get_forms()
+            self.assertEqual(forms, [])
         finally:
             clear_dir(root)
 
@@ -63,6 +73,8 @@ class TestWorkspace(unittest.TestCase):
         )
         try:
             api = API(root=root)
+            forms = api.get_forms()
+            self.assertEqual(forms, [])
         finally:
             clear_dir(root)
 
