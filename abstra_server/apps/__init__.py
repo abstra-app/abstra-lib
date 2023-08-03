@@ -1,4 +1,8 @@
-import os, flask, flask_cors, threading, webbrowser
+import os
+import flask
+import flask_cors
+import threading
+import webbrowser
 from pathlib import Path
 from ..api import API
 from .editor import get_editor_bp
@@ -26,6 +30,9 @@ def serve(workspace_root: Path, port: int, debug, use_reloader, load_dotenv):
     overloads()
 
     api = API(workspace_root)
+
+    credential = api.get_credentials()
+    os.environ["ABSTRA_API_TOKEN"] = credential
 
     app = create_app(api)
     if debug:

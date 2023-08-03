@@ -1,1 +1,1 @@
-from .legacy import *  # deprecated
+from .classes import get_connector, ConnectorExecutionError

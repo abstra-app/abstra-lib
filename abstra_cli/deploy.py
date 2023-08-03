@@ -1,4 +1,8 @@
-import os, tempfile, urllib.request, zipfile, requests
+import os
+import tempfile
+import urllib.request
+import zipfile
+import requests
 from uuid import uuid4 as uuid
 from pathlib import Path
 from .credentials import get_credentials
