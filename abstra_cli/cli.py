@@ -27,15 +27,16 @@ class CLI(object):
         self,
         workspace_root: str = ".",
         port: int = 3000,
-        debug=True,
+        debug=False,
         use_reloader=False,
         load_dotenv=True,
     ):
         default_port = int(PORT or port)
         free_port = get_free_port(default_port=default_port)
 
-        log = logging.getLogger("werkzeug")
-        log.setLevel(logging.WARNING)
+        if not debug:
+            log = logging.getLogger("werkzeug")
+            log.setLevel(logging.WARNING)
 
         messages.serve_message(free_port)
         check_latest_version()
