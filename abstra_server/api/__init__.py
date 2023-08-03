@@ -1,4 +1,8 @@
-import json, os, typing, webbrowser, requests, tempfile
+import json
+import os
+import typing
+import webbrowser
+import requests
 from werkzeug.datastructures import FileStorage
 from abstra.tables import get_db
 from abstra_cli.deploy import deploy
@@ -315,8 +319,11 @@ display(f"Hello World, {name}")"""
 
     # Login
 
+    def get_credentials(self):
+        return get_credentials(self.root_path)
+
     def get_login(self):
-        credentials = get_credentials(self.root_path)
+        credentials = self.get_credentials()
         if not credentials:
             return {"logged": False, "reason": "NO_API_TOKEN"}
 
