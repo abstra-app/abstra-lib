@@ -15,7 +15,7 @@ class PlotlyOutput(Output):
     def json(self, **kwargs):
         return {
             "type": self.type,
-            "figure": json.loads(self.fig.to_json()),
+            "figure": json.loads(self.fig.to_json()) if self.fig else None,
             "columns": self.columns,
             "fullWidth": self.full_width,
             "label": self.label,
