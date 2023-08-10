@@ -32,7 +32,8 @@ def serve(workspace_root: Path, port: int, debug, use_reloader, load_dotenv):
     api = API(workspace_root)
 
     credential = api.get_credentials()
-    os.environ["ABSTRA_API_TOKEN"] = credential
+    if credential:
+        os.environ["ABSTRA_API_TOKEN"] = credential
 
     app = create_app(api)
     if debug:
