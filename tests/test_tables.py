@@ -1,4 +1,4 @@
-import tempfile
+from abstra.forms.page_response import PageResponse
 import unittest
 from uuid import uuid4 as uuid
 from pathlib import Path
@@ -261,3 +261,21 @@ class TestTables(unittest.TestCase):
         self.assertEqual(len(table.select()), 2)
         table.insert([])
         self.assertEqual(len(table.select()), 2)
+
+    def test_page_response_as_insert_value(self):
+        db = get_db()
+
+        table = db.create_table(columns=[dict(name="name"), dict(name="email")])
+        page_response = PageResponse(
+            data=dict(
+                name="Michael Scott",
+                email="michael.scott@dundermifflin.com",
+            ),
+            action="insert",
+        )
+        table.insert(page_response)
+
+        self.assertEqual(
+            [dict(r) for r in table.select(columns=["name", "email"])],
+            [dict(name="Michael Scott", email="michael.scott@dundermifflin.com")],
+        )

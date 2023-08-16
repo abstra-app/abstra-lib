@@ -1,4 +1,5 @@
 import re, typing, sqlite3
+from abstra.forms.page_response import PageResponse
 
 
 class TableNotFound(Exception):
@@ -453,8 +454,10 @@ class SqliteTable:
             values_list = [values]
         elif type(values) == list:
             values_list = values
+        elif type(values) == PageResponse:
+            values_list = [dict(values)]
         else:
-            raise Exception(f"Invalid values argument type: {values}")
+            raise Exception(f"Invalid values argument type: {type(values)}")
 
         if len(values_list) == 0:
             return []
@@ -485,8 +488,10 @@ class SqliteTable:
                 return SqliteRow(self, dict(zip(columns, result[0])))
             elif type(values) == list:
                 return [SqliteRow(self, dict(zip(columns, row))) for row in result]
+            elif type(values) == PageResponse:
+                return SqliteRow(self, dict(zip(columns, result[0])))
             else:
-                raise Exception(f"Invalid values argument type: {values}")
+                raise Exception(f"Invalid values argument type: {type(values)}")
 
     def update(
         self,
