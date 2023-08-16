@@ -30,6 +30,8 @@ class StepsResponse:
         for res in self.responses:
             if isinstance(res, PageResponse):
                 self.acc.update(res)
+            elif isinstance(res, dict):
+                self.acc.update(res)
 
     def pop(self, i: int = -1):
         step = self.responses.pop(i)
@@ -118,9 +120,13 @@ def run_page(
 ):
     steps_info = get_page_info(steps, next_page)
     response = (
-        next_page.run(steps_info=steps_info)
+        next_page.run(steps_info=steps_info, initial_payload=responses.acc)
         if steps_info["current"] == 1
-        else next_page.run(actions=["Back", "Next"], steps_info=steps_info)
+        else next_page.run(
+            actions=["Back", "Next"],
+            steps_info=steps_info,
+            initial_payload=responses.acc,
+        )
     )
     responses.append(response)
     executed_steps.append(next_page)
