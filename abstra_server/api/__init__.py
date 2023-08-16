@@ -3,6 +3,7 @@ import os
 import typing
 import webbrowser
 import requests
+import fcntl
 from werkzeug.datastructures import FileStorage
 from abstra.tables import get_db
 from abstra_cli.deploy import deploy
@@ -43,8 +44,14 @@ class API:
         self.persist(classes.AbstraJSON.make_empty())
 
     def persist(self, abstra_json: classes.AbstraJSON):
-        with open(self.abstra_json_path, "w", encoding="utf-8") as f:
-            json.dump(abstra_json.__dict__, f, indent=2)
+        with self.abstra_json_path.open("w") as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            try:
+                json.dump(abstra_json.__dict__, f, indent=2)
+            except IOError:
+                print("Error writing to abstra.json")
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
     def __get_abstra_json(self) -> classes.AbstraJSON:
         abstra_json_content = json.loads(
