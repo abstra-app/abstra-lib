@@ -77,7 +77,9 @@ class Page(WidgetSchema):
                 ):
                     widget.initial_value = initial_payload[widget.key]
 
-        widgets_json = self.__get_validated_page_widgets_json(self.convert_answer({}))
+        widgets_json = self.__get_validated_page_widgets_json(
+            dict(**(initial_payload or {}), **self.convert_answer({}))
+        )
 
         if self.__is_progress_screen():
             self.__send_form_message(
@@ -98,7 +100,9 @@ class Page(WidgetSchema):
             reactive_polling_interval=reactive_polling_interval,
             steps_info=steps_info,
         )
-        response: Dict = self.__user_event_messages(validate=validate)
+        response: Dict = self.__user_event_messages(
+            validate=validate, initial_payload=dict(initial_payload or {})
+        )
 
         if end_program:
             exit()
@@ -108,16 +112,18 @@ class Page(WidgetSchema):
             response.get("action"),
         )
 
-    def __user_event_messages(self, **kwargs):
+    def __user_event_messages(self, validate, initial_payload: Dict):
         response: Dict = receive()
 
         while response["type"] == "user-event":
             converted_payload = self.convert_answer(response["payload"])
-            widgets_json = self.__get_validated_page_widgets_json(converted_payload)
+            widgets_json = self.__get_validated_page_widgets_json(
+                dict(**initial_payload, **converted_payload)
+            )
             self.__send_user_event_message(
                 widgets=widgets_json,
                 validation=self.__build_validation_object(
-                    validation=kwargs.get("validate"), payload=converted_payload
+                    validation=validate, payload=converted_payload
                 ),
             )
 
