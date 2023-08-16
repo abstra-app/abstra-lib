@@ -41,7 +41,55 @@ class TestTables(unittest.TestCase):
 
         db.update_table(created_table.name, dict(name="new_name"))
 
-        db.get_table("new_name")
+        table = db.get_table("new_name")
+
+        self.assertEqual(table.name, "new_name")
+
+    def test_update_table_columns_insertion(self):
+        db = get_db()
+
+        my_table = db.create_table("my_table", [dict(name="my_column")])
+        cols = [c.editor_dto for c in my_table.columns]
+        cols.append(dict(name="my_column2"))
+
+        db.update_table("my_table", dict(columns=cols))
+
+        cols = get_table("my_table").columns
+
+        self.assertEqual(len(cols), 5)
+        self.assertIn("my_column2", [c.name for c in cols])
+
+    def test_update_table_columns_deletion(self):
+        db = get_db()
+
+        my_table = db.create_table(
+            "my_table", [dict(name="my_column"), dict(name="my_column2")]
+        )
+        cols = [c.editor_dto for c in my_table.columns]
+        cols.pop()
+
+        db.update_table("my_table", dict(columns=cols))
+
+        cols = get_table("my_table").columns
+
+        self.assertEqual(len(cols), 4)
+        self.assertNotIn("my_column2", [c.name for c in cols])
+
+    def test_update_table_columns_rename(self):
+        db = get_db()
+
+        my_table = db.create_table("my_table", [dict(name="my_column")])
+        cols = [c.editor_dto for c in my_table.columns]
+        col = [c for c in cols if c["name"] == "my_column"][0]
+        col["name"] = "renamed_column"
+
+        db.update_table("my_table", dict(columns=cols))
+
+        cols = get_table("my_table").columns
+
+        self.assertEqual(len(cols), 4)
+        self.assertIn("renamed_column", [c.name for c in cols])
+        self.assertNotIn("my_column", [c.name for c in cols])
 
     def test_create_column(self):
         db = get_db()

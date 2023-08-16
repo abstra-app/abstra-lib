@@ -322,41 +322,6 @@ def get_editor_bp(api: API):
                 )
             ]
 
-    @bp.route("/api/tables/<path:table_name>/columns", methods=["GET"])
-    @usage(api.root_path)
-    def _get_columns(table_name: str):
-        return api.db.get_columns(table_name)
-
-    @bp.route(
-        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["GET"]
-    )
-    @usage(api.root_path)
-    def _get_column(table_name: str, column_name: str):
-        column = api.db.get_column(table_name, column_name)
-        return column.editor_dto if column else None
-
-    @bp.route(
-        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["PUT"]
-    )
-    @usage(api.root_path)
-    def _update_column(table_name: str, column_name: str):
-        new_column = flask.request.json
-        updated_column = api.db.update_column(table_name, column_name, new_column)
-        return updated_column.editor_dto
-
-    @bp.route(
-        "/api/tables/<path:table_name>/columns/<path:column_name>", methods=["DELETE"]
-    )
-    @usage(api.root_path)
-    def _delete_column(table_name: str, column_name: str):
-        api.db.delete_column(table_name, column_name)
-        return {"success": True}
-
-    @bp.route("/api/tables/<path:table_name>/columns", methods=["POST"])
-    @usage(api.root_path)
-    def _create_column(table_name: str):
-        return api.db.create_column(table_name).editor_dto
-
     @bp.route("/api/login", methods=["GET"])
     @usage(api.root_path)
     def _get_login():

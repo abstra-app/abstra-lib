@@ -98,6 +98,7 @@ def __overload_abstra_forms_sdk():
 
     abstra_forms.socket.get_connection = get_connection
     abstra_forms.auth.get_user = get_user
+    abstra_forms.get_user = get_user
 
 
 def __overload_stdio():

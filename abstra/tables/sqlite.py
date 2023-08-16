@@ -61,6 +61,7 @@ class SqliteColumn:
             "not_null": self.not_null,
             "default": self.default,
             "primary_key": self.primary_key,
+            "original_name": self.name,
         }
 
 
@@ -104,7 +105,9 @@ class SqliteDB:
         conn = sqlite3.connect(self.db_path, uri=is_uri)
         return conn
 
-    def create_table(self, table_name=f"table-{random_id()}", columns=[]):
+    def create_table(self, table_name=None, columns=[]):
+        if table_name is None:
+            table_name = f"table-{random_id()}"
         with self.connect() as conn:
             conn.execute(
                 f"""
@@ -121,7 +124,10 @@ class SqliteDB:
 
             return self.get_table(table_name)
 
-    def update_table(self, name: str, changes: typing.Dict[str, str]):
+    def update_table(self, name: str, changes: typing.Dict[str, typing.Any]):
+        old_table = self.get_table(name)
+        table_name = changes.get("name", name)
+
         with self.connect() as conn:
             if "name" in changes:
                 old_name = name
@@ -134,7 +140,41 @@ class SqliteDB:
                 """
                 )
 
-            return self.get_table(new_name)
+            if "columns" in changes:
+                # delete columns contained in old table but not in changes
+                old_column_names = set(c.name for c in old_table.columns)
+                new_column_names = set(
+                    c.get("original_name")
+                    for c in changes["columns"]
+                    if c.get("original_name")
+                )
+                deleted_column_names = old_column_names - new_column_names
+                for column_name in deleted_column_names:
+                    self.delete_column(table_name, column_name)
+
+                # add columns contained in changes without an original name
+                new_columns = [
+                    c for c in changes["columns"] if not c.get("original_name")
+                ]
+                for column in new_columns:
+                    self.create_column(
+                        table_name,
+                        column["name"],
+                        column.get("type", self.db_types()[0]["type"]),
+                    )
+
+                # update all remaining columns
+                inserted_column_names = set(c["name"] for c in new_columns)
+                remaining_column_names = deleted_column_names | inserted_column_names
+                updated_columns = [
+                    c
+                    for c in changes["columns"]
+                    if c["name"] not in remaining_column_names
+                ]
+                for column in updated_columns:
+                    self.update_column(table_name, column["original_name"], column)
+
+            return self.get_table(table_name)
 
     def get_table(self, name: str):
         with self.connect() as conn:
@@ -219,7 +259,11 @@ class SqliteDB:
         with self.connect() as conn:
             column = self.get_column(table_name, column_name)
 
-            if ("type" in changes) or ("not_null" in changes) or ("default" in changes):
+            if (
+                (("type" in changes) and changes["type"] != column.type)
+                or (("not_null" in changes) and changes["not_null"] != column.not_null)
+                or (("default" in changes) and changes["default"] != column.default)
+            ):
                 new_column_name = changes.get("name", column_name)
                 new_column_type = changes.get("type", column.type)
                 new_column_not_null = changes.get("not_null", column.not_null)
@@ -279,9 +323,9 @@ class SqliteDB:
         """
         )
 
-    def create_column(
-        self, table_name: str, column_name=f"column_{random_id()}", column_type=None
-    ):
+    def create_column(self, table_name: str, column_name=None, column_type=None):
+        if column_name is None:
+            column_name = f"column-{random_id()}"
         cur = self.connect().cursor()
 
         if column_type is None:
