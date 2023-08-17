@@ -59,12 +59,13 @@ def get_player_bp(api: API):
     @bp.route("/_files", methods=["PUT"])
     def _upload_file():
         files = flask.request.files
+        filename = flask.request.form.get("filename")
         if len(files) == 0:
             flask.abort(400)
 
         paths = []
         for file in files.values():
-            paths.append(api.save_file(file))
+            paths.append(api.save_file(file, filename))
         return paths
 
     @bp.route("/_files/<path:path>", methods=["GET"])

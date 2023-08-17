@@ -18,8 +18,11 @@ def internal_path(name: str):
     return uploaded_files_dir.joinpath(name)
 
 
-def get_random_filepath():
-    name = str(uuid.uuid4())
+def get_random_filepath(name=None):
+    if name is None:
+        name = str(uuid.uuid4())
+    else:
+        name = str(uuid.uuid4()) + "_" + name
     path = internal_path(name)
     return name, path
 
