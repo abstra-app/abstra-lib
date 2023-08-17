@@ -78,7 +78,7 @@ class Page(WidgetSchema):
                     widget.initial_value = initial_payload[widget.key]
 
         widgets_json = self.__get_validated_page_widgets_json(
-            dict(**(initial_payload or {}), **self.convert_answer({}))
+            {**(initial_payload or {}), **self.convert_answer({})}
         )
 
         if self.__is_progress_screen():
@@ -118,7 +118,7 @@ class Page(WidgetSchema):
         while response["type"] == "user-event":
             converted_payload = self.convert_answer(response["payload"])
             widgets_json = self.__get_validated_page_widgets_json(
-                dict(**initial_payload, **converted_payload)
+                {**initial_payload, **converted_payload}
             )
             self.__send_user_event_message(
                 widgets=widgets_json,

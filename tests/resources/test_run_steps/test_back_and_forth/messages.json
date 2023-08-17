@@ -1,0 +1,171 @@
+[
+    [
+        "browser",
+        {
+            "type": "start",
+            "params": {}
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "session-id",
+            "sessionId": "session-id"
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "number-input",
+                    "key": "a",
+                    "label": "a",
+                    "initialValue": 0,
+                    "placeholder": "Insert a number",
+                    "required": true,
+                    "hint": null,
+                    "columns": 1,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "step": null,
+                    "disabled": false
+                }
+            ],
+            "columns": 1,
+            "actions": [
+                "Next"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 1,
+                "total": 3
+            }
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "form-response",
+            "payload": {
+                "a": 1
+            },
+            "action": "Next"
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "number-input",
+                    "key": "b",
+                    "label": "b",
+                    "initialValue": 0,
+                    "placeholder": "Insert a number",
+                    "required": true,
+                    "hint": null,
+                    "columns": 1,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "step": null,
+                    "disabled": false
+                }
+            ],
+            "columns": 1,
+            "actions": [
+                "Back",
+                "Next"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 2,
+                "total": 3
+            }
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "form-response",
+            "payload": {
+                "b": 2
+            },
+            "action": "Next"
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "text-output",
+                    "text": "3",
+                    "size": "medium",
+                    "columns": 1,
+                    "fullWidth": false
+                }
+            ],
+            "columns": 1,
+            "actions": [
+                "Back",
+                "Next"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 3,
+                "total": 3
+            }
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "form-response",
+            "payload": {},
+            "action": "Back"
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "number-input",
+                    "key": "b",
+                    "label": "b",
+                    "initialValue": 2,
+                    "placeholder": "Insert a number",
+                    "required": true,
+                    "hint": null,
+                    "columns": 1,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "step": null,
+                    "disabled": false
+                }
+            ],
+            "columns": 1,
+            "actions": [
+                "Back",
+                "Next"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 2,
+                "total": 3
+            }
+        }
+    ]
+]

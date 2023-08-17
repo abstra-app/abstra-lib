@@ -1,9 +1,6 @@
-import inspect
-
 from ...session import LiveSession
 from ...contract import forms_contract
-
-from abstra.forms.debug_utils import Frames, make_debug_data, CloseDTO
+from abstra.forms.debug_utils import Frames, CloseDTO
 
 """
 class Connection:
@@ -48,9 +45,6 @@ class MessageBroker:
 
     # Connection interface
     def send(self, data: dict, frames: Frames = None):
-        if self.session.is_preview:
-            debug = make_debug_data(frames or inspect.stack())
-            data.update(debug)
         self.session.send(forms_contract.GenericMessage(data))
 
     def receive(self, path: str = ""):
