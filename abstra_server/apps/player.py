@@ -30,6 +30,10 @@ def get_player_bp(api: API):
     def get_version():
         return os.getenv("ABSTRA_BUILD_ID")
 
+    @bp.route("/_healthcheck")
+    def _healthcheck():
+        return {"ok": True}
+
     @sock.route("/_socket")
     def websocket(conn: flask_sock.Server):
         try:
