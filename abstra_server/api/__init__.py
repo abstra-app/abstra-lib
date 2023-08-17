@@ -374,8 +374,8 @@ display(f"Hello World, {name}")"""
         ).iter_content()
 
     # files
-    def save_file(self, file: FileStorage):
-        name, path = get_random_filepath()
+    def save_file(self, file: FileStorage, filename: str):
+        name, path = get_random_filepath(filename)
         file.save(path)
         return name
 
