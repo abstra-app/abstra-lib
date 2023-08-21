@@ -23,6 +23,9 @@ class CLI(object):
     def deploy(self, workspace_root: str = "."):
         deploy(workspace_root=Path(workspace_root))
 
+    def version(self):
+        check_latest_version()
+
     def serve(
         self,
         workspace_root: str = ".",
