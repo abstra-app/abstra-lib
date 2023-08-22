@@ -47,11 +47,8 @@ class API:
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
         with temp_file.open("w") as f:
-            try:
-                json.dump(abstra_json.__dict__, f, indent=2)
-                temp_file.rename(self.abstra_json_path)
-            except IOError:
-                print("Error writing to abstra.json")
+            json.dump(abstra_json.__dict__, f, indent=2)
+        temp_file.replace(self.abstra_json_path)
 
     def __get_abstra_json(self) -> classes.AbstraJSON:
         abstra_json_content = json.loads(
