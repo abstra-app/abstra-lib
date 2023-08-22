@@ -3,6 +3,8 @@ import os
 import tempfile
 import typing
 import webbrowser
+import shutil
+
 import requests
 from werkzeug.datastructures import FileStorage
 from abstra.tables import get_db
@@ -48,7 +50,7 @@ class API:
 
         with temp_file.open("w") as f:
             json.dump(abstra_json.__dict__, f, indent=2)
-        temp_file.replace(self.abstra_json_path)
+        shutil.copy(temp_file, "abstra.json")
 
     def __get_abstra_json(self) -> classes.AbstraJSON:
         abstra_json_content = json.loads(
