@@ -10,8 +10,8 @@ CLOUD_API_ENDPOINT = (
 
 def upload(db_path: pathlib.Path):
     db_path = resolve_cwd(db_path)
-    if db_path.suffix != ".sqlite" and db_path.suffix != ".db":
-        print("Your file must be a sqlite database")
+    if db_path.suffix != ".sqlite3":
+        print("Your file must be a sqlite3 database")
         return
 
     if not db_path.exists():
@@ -48,7 +48,7 @@ def download():
     response = requests.get(endpoint, headers=headers)
     response.raise_for_status()
 
-    with open("downloaded.sqlite", "wb") as file:
+    with open("download.sqlite3", "wb") as file:
         file.write(response.content)
 
     return {"error": None}

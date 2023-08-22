@@ -13,7 +13,7 @@ PORT = os.getenv("PORT")
 class Tables(object):
     # tables command always assume that the cwd is the workspace root
 
-    def upload(self, f: str = "db.sqlite"):
+    def upload(self, f: str = "db.sqlite3"):
         upload(db_path=pathlib.Path(f))
 
     def download(self):
