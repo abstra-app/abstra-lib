@@ -15,7 +15,6 @@ from pathlib import Path
 from . import classes
 from ..utils import random_id
 
-
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT", "https://cloud-api.abstra.cloud")
 ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
 
@@ -50,7 +49,7 @@ class API:
 
         with temp_file.open("w") as f:
             json.dump(abstra_json.__dict__, f, indent=2)
-        shutil.copy(temp_file, "abstra.json")
+        shutil.copy(temp_file, self.abstra_json_path)
 
     def __get_abstra_json(self) -> classes.AbstraJSON:
         abstra_json_content = json.loads(
