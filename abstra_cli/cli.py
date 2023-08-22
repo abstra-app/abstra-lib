@@ -5,22 +5,8 @@ from . import messages
 from .deploy import deploy
 from .utils.server import get_free_port
 from .version import check_latest_version
-from .tables import upload, download, list_backups
 
 PORT = os.getenv("PORT")
-
-
-class Tables(object):
-    # tables command always assume that the cwd is the workspace root
-
-    def upload(self, f: str = "db.sqlite3"):
-        upload(db_path=pathlib.Path(f))
-
-    def download(self):
-        download()
-
-    def list_backups(self):
-        list_backups()
 
 
 class CLI(object):
@@ -29,9 +15,6 @@ class CLI(object):
 
     usage: abstra <command> <resource> [<argument> ...] [parameters]
     """
-
-    def __init__(self):
-        self.tables = Tables()
 
     def deploy(self, workspace_root: str = "."):
         deploy(workspace_root=pathlib.Path(workspace_root))
