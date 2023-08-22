@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+
 from .utils import CREDENTIALS_FILE
+from .path_resolver import resolve_cwd
 
 
 def get_credentials(root_path: Path):
@@ -26,3 +28,13 @@ def set_credentials(root_path: Path, token: str):
     credentials_path.parent.mkdir(exist_ok=True)
 
     credentials_path.write_text(token, encoding="utf-8")
+
+
+def resolve_headers(root: Path = Path(".")):
+    root_path = resolve_cwd(root)
+    credentials = get_credentials(root_path)
+
+    if not credentials:
+        return None
+
+    return {"Api-Authorization": f"Bearer {credentials}"}
