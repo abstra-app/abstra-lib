@@ -20,6 +20,9 @@ def convert_file(file: typing.Union[str, io.BufferedReader, io.TextIOWrapper]) -
     if isinstance(file, io.TextIOWrapper):
         return upload_file(file)
 
+    if isinstance(file, pathlib.Path):
+        return upload_file(open(file, "rb"))
+
     # PILImage. TODO: check with isinstance without external dependency
     if hasattr(file, "save"):
         file_path = pathlib.Path(tempfile.gettempdir(), "img.png")

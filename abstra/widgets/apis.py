@@ -22,13 +22,13 @@ def get_random_filepath(name=None):
     if name is None:
         name = str(uuid.uuid4())
     else:
-        name = str(uuid.uuid4()) + "_" + name
+        name = str(uuid.uuid4()) + "_" + Path(name).name
     path = internal_path(name)
     return name, path
 
 
 def upload_file(file: typing.Union[FileStorage, io.BufferedReader, io.TextIOWrapper]):
-    name, path = get_random_filepath()
+    name, path = get_random_filepath(file.name)
 
     if isinstance(file, io.BufferedReader) or isinstance(file, io.TextIOWrapper):
         shutil.copy(file.name, path)
