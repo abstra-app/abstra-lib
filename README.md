@@ -7,7 +7,8 @@ Abstra is the simplest way to build tools using Python.
 
 It is a complete backoffice engine with:
 - drag'n drop UI builders
-- dynamic forms, serveless endpoints
+- dynamic forms
+- serveless endpoints
 - script schedulers
 - zero-config authentication
 - one-click scalable deploy
