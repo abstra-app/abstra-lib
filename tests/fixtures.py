@@ -1,5 +1,6 @@
 import os, json, tempfile
 from pathlib import Path
+import shutil
 
 abstra_json = {"version": "0.2"}
 
@@ -28,4 +29,5 @@ def init_dir():
 
 
 def clear_dir(path: Path):
+    os.chdir(path.parent)
     rm_tree(path)

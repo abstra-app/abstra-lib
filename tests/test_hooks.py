@@ -1,16 +1,23 @@
 import json
 import tempfile
 from pathlib import Path
-
+import unittest
 import abstra.hooks as hooks
+from .fixtures import init_dir, clear_dir
 
 
-class TestUtils:
+class TestUtils(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = init_dir()
+
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
     def test_get_request_without_file(self):
         body, query, headers = hooks.get_request()
-        assert body is None
-        assert query is None
-        assert headers is None
+        self.assertIsNone(body)
+        self.assertIsNone(query)
+        self.assertIsNone(headers)
 
     def test_get_request_with_local_file(self):
         local_file = Path(tempfile.gettempdir(), "request.json")
@@ -25,9 +32,9 @@ class TestUtils:
                 )
             )
         body, query, headers = hooks.get_request(local_file=local_file)
-        assert body == "ABCD"
-        assert query == {"q": "pandas"}
-        assert headers == {"content-type": "application/json"}
+        self.assertEqual(body, "ABCD")
+        self.assertEqual(query, {"q": "pandas"})
+        self.assertEqual(headers, {"content-type": "application/json"})
 
     def test_send_response_with_local_file(self):
         local_file = Path(tempfile.gettempdir(), "response.json")
@@ -42,9 +49,9 @@ class TestUtils:
             content = f.read()
             response = json.loads(content)
 
-        assert response["body"] == "ABCD"
-        assert response["status_code"] == 207
-        assert response["headers"] == {"Session": 123}
+        self.assertEqual(response["body"], "ABCD")
+        self.assertEqual(response["status_code"], 207)
+        self.assertEqual(response["headers"], {"Session": 123})
 
     def test_send_json_with_local_file(self):
         local_file = Path(tempfile.gettempdir(), "response.json")
@@ -59,9 +66,12 @@ class TestUtils:
             content = f.read()
             response = json.loads(content)
 
-        assert response["body"] == '{"ok": true}'
-        assert response["status_code"] == 207
-        assert response["headers"] == {
-            "Session": 123,
-            "content-type": "application/json",
-        }
+        self.assertEqual(response["body"], '{"ok": true}')
+        self.assertEqual(response["status_code"], 207)
+        self.assertEqual(
+            response["headers"],
+            {
+                "Session": 123,
+                "content-type": "application/json",
+            },
+        )
