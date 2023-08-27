@@ -1,7 +1,7 @@
 from .socket import send, receive
 from .generated.widget_schema import WidgetSchema
 from .page_response import PageResponse
-from abstra.widgets.validation import validate_widget_props
+from abstra.widgets.prop_check import validate_widget_props
 from .reactive import Reactive
 
 from typing import Callable, Dict, Union, List, Optional
@@ -23,7 +23,7 @@ class Page(WidgetSchema):
         validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
-        initial_payload: Optional[Dict] = None,
+        context: Optional[Dict] = None,
     ):
         super().__init__()
         self.__actions = actions
@@ -31,7 +31,8 @@ class Page(WidgetSchema):
         self.__validate = validate
         self.__end_program = end_program
         self.__reactive_polling_interval = reactive_polling_interval
-        self.__initial_payload = initial_payload
+        self.__context = context or {}
+        self.user_event_sent_widgets = None
 
     def run(
         self,
@@ -40,7 +41,7 @@ class Page(WidgetSchema):
         validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
-        initial_payload: Optional[Dict] = None,
+        context: Optional[Dict] = None,
         steps_info: Optional[Dict] = None,
     ) -> Dict:
         """Run the form
@@ -63,27 +64,28 @@ class Page(WidgetSchema):
             if reactive_polling_interval != 0
             else self.__reactive_polling_interval
         )
-        initial_payload = (
-            initial_payload if initial_payload != None else self.__initial_payload
-        )
+        self.__context = context if context is not None else self.__context
         validate = validate if validate != None else self.__validate
 
-        if initial_payload:
+        if self.__context:
             for widget in self.widgets:
                 if (
                     not isinstance(widget, Reactive)
                     and hasattr(widget, "key")
-                    and widget.key in initial_payload
+                    and widget.key in self.__context
                 ):
-                    widget.initial_value = initial_payload[widget.key]
+                    widget.value = self.__context[widget.key]
 
-        widgets_json = self.__get_validated_page_widgets_json(
-            {**(initial_payload or {}), **self.convert_answer({})}
-        )
+        if self.user_event_sent_widgets:
+            rendered_page = self.user_event_sent_widgets
+        else:
+            rendered_page = self.render(context=self.__context)
+
+        self.__check_widget_props(rendered_page)
 
         if self.__is_progress_screen():
             self.__send_form_message(
-                widgets=widgets_json,
+                widgets=rendered_page,
                 columns=columns,
                 actions=[],
                 end_program=end_program,
@@ -93,49 +95,52 @@ class Page(WidgetSchema):
             return dict()
 
         self.__send_form_message(
-            widgets=widgets_json,
+            widgets=rendered_page,
             columns=columns,
             actions=self.__actions_property(actions, end_program),
             end_program=end_program,
             reactive_polling_interval=reactive_polling_interval,
             steps_info=steps_info,
         )
-        response: Dict = self.__user_event_messages(
-            validate=validate, initial_payload=dict(initial_payload or {})
-        )
+        response: Dict = self.__handle_page_user_events(validate=validate)
 
         if end_program:
             exit()
 
         return PageResponse(
-            self.convert_answer(response["payload"]),
+            self.parse_value(response["payload"]),
             response.get("action"),
         )
 
-    def __user_event_messages(self, validate, initial_payload: Dict):
-        response: Dict = receive()
+    def __handle_page_user_events(self, **kwargs):
+        while True:
+            response: Dict = receive()
 
-        while response["type"] == "user-event":
-            converted_payload = self.convert_answer(response["payload"])
-            widgets_json = self.__get_validated_page_widgets_json(
-                {**initial_payload, **converted_payload}
-            )
-            self.__send_user_event_message(
-                widgets=widgets_json,
+            self.update(response["payload"])
+
+            rendered_page = self.render(self.__context)
+            self.user_event_sent_widgets = rendered_page
+
+            if response["type"] != "user-event" and not self.has_errors():
+                break
+
+            # TODO: Refactor validation to use values instead of payload
+            parsed_payload = self.parse_value(response["payload"])
+            self.__send_form_update_message(
+                widgets=rendered_page,
                 validation=self.__build_validation_object(
-                    validation=validate, payload=converted_payload
+                    validation=kwargs.get("validate"), payload=parsed_payload
                 ),
             )
 
-            response = receive()
-
         return response
 
-    def __get_validated_page_widgets_json(self, converted_payload):
-        widgets_json = self.json(converted_payload)
-        for widget in widgets_json:
-            validate_widget_props(widget)
-        return widgets_json
+    def __check_widget_props(self, rendered_page):
+        for widget in rendered_page:
+            if isinstance(widget, list):
+                self.__check_widget_props(widget)
+            else:
+                validate_widget_props(widget)
 
     def __actions_property(self, actions, end_page):
         if end_page:
@@ -149,7 +154,14 @@ class Page(WidgetSchema):
     def __is_progress_screen(self):
         return len(self.widgets) == 1 and self.widgets[0].type == "progress-output"
 
+    def update(self, payload):
+        parsed_values = self.parse_value(payload)
+        self.set_values(parsed_values)
+        self.validate()
+        self.__context.update(parsed_values)
+
     def __build_validation_object(self, validation, payload):
+        # TODO: Refactor this to use widget.get_value() instead of payload
         validation_status = True
         validation_message = ""
 
@@ -185,10 +197,10 @@ class Page(WidgetSchema):
             }
         )
 
-    def __send_user_event_message(self, widgets, validation):
+    def __send_form_update_message(self, widgets, validation):
         send(
             {
-                "type": "user-event",
+                "type": "form-update",
                 "widgets": widgets,
                 "validation": validation,
             }

@@ -120,12 +120,12 @@ def run_page(
 ):
     steps_info = get_page_info(steps, next_page)
     response = (
-        next_page.run(steps_info=steps_info, initial_payload=responses.acc)
+        next_page.run(steps_info=steps_info, context=responses.acc)
         if steps_info["current"] == 1
         else next_page.run(
             actions=["Back", "Next"],
             steps_info=steps_info,
-            initial_payload=responses.acc,
+            context=responses.acc,
         )
     )
     responses.append(response)
@@ -142,11 +142,11 @@ def run_back_page(
     steps_info = get_page_info(steps, next_page)
     old_response: PageResponse = responses.pop()
     response = (
-        next_page.run(initial_payload=old_response, steps_info=steps_info)
+        next_page.run(context=old_response, steps_info=steps_info)
         if steps_info["current"] == 1
         else next_page.run(
             actions=["Back", "Next"],
-            initial_payload=old_response,
+            context=old_response,
             steps_info=steps_info,
         )
     )

@@ -5,22 +5,28 @@ from typing import Union, List, Any
 
 class CardsInput(Input):
     type = "cards-input"
+    empty_value = None
+    multiple: bool = False
 
     def __init__(self, key: str, label: str, options: Any, **kwargs):
         super().__init__(key)
-        self.label = label
-        self.options = options
-        self.multiple = kwargs.get("multiple", False)
-        self.searchable = kwargs.get("searchable", False)
-        self.initial_value = kwargs.get("initial_value", None)
-        self.required = kwargs.get("required", True)
-        self.hint = kwargs.get("hint", None)
-        self.columns = kwargs.get("columns", 2)
-        self.full_width = kwargs.get("full_width", False)
-        self.layout = kwargs.get("layout", "list")
-        self.disabled = kwargs.get("disabled", False)
+        self.set_props(dict(label=label, options=options, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.label = props.get("label", "Label")
+        self.options = props.get("options", [])
+        self.searchable = props.get("searchable", False)
+        self.required = props.get("required", True)
+        self.hint = props.get("hint", None)
+        self.columns = props.get("columns", 2)
+        self.full_width = props.get("full_width", False)
+        self.layout = props.get("layout", "list")
+        self.disabled = props.get("disabled", False)
+        self.multiple = props.get("multiple", False)
+        self.empty_value = [] if self.multiple else None
+        self.value = props.get("initial_value", self.empty_value)
+
+    def render(self, context: dict):
         return {
             "type": self.type,
             "key": self.key,
@@ -31,17 +37,18 @@ class CardsInput(Input):
             ],
             "multiple": self.multiple,
             "searchable": self.searchable,
-            "initialValue": self.initial_value,
+            "value": self.serialize_value(),
             "required": self.required,
             "columns": self.columns,
             "fullWidth": self.full_width,
             "layout": self.layout,
             "disabled": self.disabled,
+            "errors": self.errors,
         }
 
-    def convert_answer(self, answer: Union[List, Any]) -> Union[List, Any]:
-        """
-        Returns:
-            list, any: The options/option selected by the user
-        """
-        return answer
+    def serialize_value(self) -> Union[List, Any]:
+        if isinstance(self.value, list):
+            return self.value
+        if self.value is None:
+            return []
+        return [self.value]

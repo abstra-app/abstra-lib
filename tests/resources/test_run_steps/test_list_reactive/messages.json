@@ -1,0 +1,151 @@
+[
+  ["browser", { "type": "start", "params": {} }],
+  ["python", { "type": "session-id", "sessionId": "session-id" }],
+  [
+    "python",
+    {
+      "type": "form",
+      "widgets": [
+        {
+          "type": "markdown-output",
+          "text": "## Define Your Variant Attributes",
+          "fullWidth": false
+        },
+        {
+          "type": "list-input",
+          "key": "attr_list",
+          "hint": null,
+          "errors": [],
+          "min": 0,
+          "max": 4,
+          "addButtonText": "Add a Variant Attribute",
+          "fullWidth": false,
+          "required": true,
+          "disabled": false,
+          "itemSchema": [
+            {
+              "type": "dropdown-input",
+              "key": "attr",
+              "label": " ",
+              "options": [
+                "Wood Type",
+                "Wood Stain",
+                "Metal Type",
+                "Metal Finish",
+                "Color",
+                "Material",
+                "Dimension",
+                "Other"
+              ],
+              "hint": null,
+              "multiple": false,
+              "placeholder": "Select attribute type",
+              "value": [],
+              "required": true,
+              "fullWidth": false,
+              "disabled": false,
+              "errors": []
+            }
+          ],
+          "value": []
+        }
+      ],
+      "columns": 1,
+      "actions": ["Next"],
+      "endProgram": false,
+      "reactivePollingInterval": 0,
+      "steps": null
+    }
+  ],
+  [
+    "browser",
+    {
+      "type": "user-event",
+      "payload": {
+        "attr_list": [
+          [
+            {
+              "type": "dropdown-input",
+              "key": "attr",
+              "label": " ",
+              "options": [
+                "Wood Type",
+                "Wood Stain",
+                "Metal Type",
+                "Metal Finish",
+                "Color",
+                "Material",
+                "Dimension",
+                "Other"
+              ],
+              "hint": null,
+              "multiple": false,
+              "placeholder": "Select attribute type",
+              "value": [],
+              "required": true,
+              "fullWidth": false,
+              "disabled": false,
+              "errors": []
+            }
+          ]
+        ]
+      }
+    }
+  ],
+  [
+    "python",
+    {
+      "type": "form-update",
+      "widgets": [
+        {
+          "type": "markdown-output",
+          "text": "## Define Your Variant Attributes",
+          "fullWidth": false
+        },
+        {
+          "type": "list-input",
+          "key": "attr_list",
+          "hint": null,
+          "errors": [],
+          "min": 0,
+          "max": 4,
+          "addButtonText": "Add a Variant Attribute",
+          "fullWidth": false,
+          "required": true,
+          "disabled": false,
+          "itemSchema": [
+            {
+              "type": "dropdown-input",
+              "key": "attr",
+              "label": " ",
+              "options": [
+                "Wood Type",
+                "Wood Stain",
+                "Metal Type",
+                "Metal Finish",
+                "Color",
+                "Material",
+                "Dimension",
+                "Other"
+              ],
+              "hint": null,
+              "multiple": false,
+              "placeholder": "Select attribute type",
+              "value": [],
+              "required": true,
+              "fullWidth": false,
+              "disabled": false,
+              "errors": []
+            }
+          ],
+          "value": [
+            {
+              "attr": null
+            }
+          ]
+        }
+      ],
+      "validation": { "status": true, "message": "" }
+    }
+  ]
+]

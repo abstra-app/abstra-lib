@@ -6,17 +6,27 @@ import json
 class PlotlyOutput(Output):
     type = "plotly-output"
 
-    def __init__(self, fig: Any, **kwargs):
-        self.fig = fig
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
-        self.label = kwargs.get("label", None)
+    def __init__(self, fig: Any = None, **kwargs):
+        self.set_props(dict(fig=fig, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.fig = props.get("fig", None)
+        self.full_width = props.get("full_width", False)
+        self.label = props.get("label", None)
+
+    def serialize_figure(self):
+        if self.fig is None:
+            import plotly.express as px
+
+            df = px.data.tips()
+            fig = px.density_heatmap(df, x="total_bill", y="tip")
+            return json.loads(fig.to_json())
+        return json.loads(self.fig.to_json())
+
+    def render(self, context: dict):
         return {
             "type": self.type,
-            "figure": json.loads(self.fig.to_json()) if self.fig else None,
-            "columns": self.columns,
+            "figure": self.serialize_figure(),
             "fullWidth": self.full_width,
             "label": self.label,
         }

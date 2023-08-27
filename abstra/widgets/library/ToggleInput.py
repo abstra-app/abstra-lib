@@ -1,46 +1,45 @@
-from ..widget_base import Input
 from typing import Optional, Union
+from ..widget_base import Input
 
 
 class ToggleInput(Input):
     type = "toggle-input"
+    empty_value: bool = False
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
-        self.label = label
-        self.on_text = kwargs.get("on_text", "Yes")
-        self.off_text = kwargs.get("off_text", "No")
-        self.initial_value = kwargs.get("initial_value", "")
-        self.required = kwargs.get("required", True)
-        self.hint = kwargs.get("hint", None)
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
-        self.disabled = kwargs.get("disabled", False)
+        self.set_props(dict(label=label, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.label = props.get("label", "Label")
+        self.on_text = props.get("on_text", "Yes")
+        self.off_text = props.get("off_text", "No")
+        self.value = props.get("initial_value", False)
+        self.required = props.get("required", True)
+        self.hint = props.get("hint", None)
+        self.full_width = props.get("full_width", False)
+        self.disabled = props.get("disabled", False)
+
+    def is_value_unset(self):
+        return False
+
+    def render(self, context: dict):
         return {
             "type": self.type,
             "key": self.key,
             "label": self.label,
             "onText": self.on_text,
             "offText": self.off_text,
-            "initialValue": ToggleInput.__revert_value(self.initial_value),
+            "value": self.serialize_value(),
             "required": self.required,
             "hint": self.hint,
-            "columns": self.columns,
             "fullWidth": self.full_width,
             "disabled": self.disabled,
+            "errors": self.errors,
         }
 
-    @staticmethod
-    def __revert_value(value: Optional[Union[bool, str]]) -> str:
-        if value == "1" or value == True:
-            return "1"
-        return "0"
+    def serialize_value(self) -> bool:
+        return self.value or False
 
-    @staticmethod
-    def __convert_answer(answer: str) -> bool:
-        return True if answer == "1" else False
-
-    def convert_answer(self, answer: str) -> bool:
-        return self.__convert_answer(answer)
+    def parse_value(self, value: bool) -> bool:
+        return bool(value)

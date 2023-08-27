@@ -1,43 +1,61 @@
 from ..widget_base import Input
-from typing import List, Any
+from typing import List, Any, Union
 import json
 
 
 class PandasRowSelectionInput(Input):
     type = "pandas-row-selection-input"
+    empty_value: Union[List, Any] = None
+    multiple: bool = False
 
-    def __init__(self, key: str, df: Any, **kwargs):
+    def __init__(self, key: str, df: Any = None, **kwargs):
         super().__init__(key)
-        self.df = df
-        self.required = kwargs.get("required", True)
-        self.hint = kwargs.get("hint", None)
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
-        self.display_index = kwargs.get("display_index", False)
-        self.disabled = kwargs.get("disabled", False)
-        self.label = kwargs.get("label", None)
-        self.multiple = kwargs.get("multiple", True)
-        self.filterable = kwargs.get("filterable", False)
+        self.set_props(dict(df=df, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.df = props.get("df", "")
+        self.required = props.get("required", True)
+        self.hint = props.get("hint", None)
+        self.full_width = props.get("full_width", False)
+        self.display_index = props.get("display_index", False)
+        self.disabled = props.get("disabled", False)
+        self.label = props.get("label", None)
+        self.filterable = props.get("filterable", False)
+        self.multiple = props.get("multiple", False)
+        self.empty_value = [] if self.multiple else None
+        self.value = props.get("initial_value", self.empty_value)
+
+    def serialize_table(self):
+        if self.df is None:
+            import pandas as pd
+
+            return json.loads(
+                pd.DataFrame(
+                    {"change the": [1, 2, 3], "df property": [4, 5, 6]}
+                ).to_json(orient="table")
+            )
+        return json.loads(self.df.to_json(orient="table"))
+
+    def render(self, context: dict):
         return {
             "type": self.type,
             "key": self.key,
             "hint": self.hint,
-            "table": json.loads(self.df.to_json(orient="table")),
+            "table": self.serialize_table(),
             "required": self.required,
-            "columns": self.columns,
             "fullWidth": self.full_width,
             "displayIndex": self.display_index,
             "disabled": self.disabled,
             "label": self.label,
             "multiple": self.multiple,
             "filterable": self.filterable,
+            "value": self.serialize_value(),
+            "errors": self.errors,
         }
 
-    def convert_answer(self, answer) -> List:
-        """
-        Returns:
-            list: The list of selected rows
-        """
-        return answer
+    def serialize_value(self) -> List:
+        if isinstance(self.value, list):
+            return self.value
+        if self.value is None:
+            return []
+        return [self.value]

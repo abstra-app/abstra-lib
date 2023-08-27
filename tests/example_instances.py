@@ -80,12 +80,6 @@ example_instances = [
         "kanban",
         label="What are your interests?",
     ),
-    AnswerSheetInput(
-        "answer-sheet",
-        "What are your interests?",
-        options=["python", "javascript", "c++"],
-        number_of_questions=3,
-    ),
     LatexOutput("$$\\frac{1}{2}$$"),
     RatingInput("rating", "How much?", max=10),
     ClickInput("click", "Click me!"),

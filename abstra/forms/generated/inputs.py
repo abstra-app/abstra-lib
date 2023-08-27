@@ -4,34 +4,6 @@ from ..page import Page
 from ..utils import get_single_value
 
 
-def read_answer_sheet(label: str, options: list, number_of_questions: int, **kwargs):
-    """Retrieve the answers from a test on usual answersheet
-
-    Position Args:
-            label (str): The label to display to the user
-            options (list): The options which can be chosen as an answer
-            number_of_questions (int): Number of questions the answersheet will cover
-
-    Keyword Args:
-            disabled (bool): whether the input is disabled. Defaults to False.
-            required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
-            hint (str): A tooltip displayed to the user. Defaults to None.
-            end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
-            full_width (bool): Whether the input should use full screen width. Defaults to False.
-            button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
-
-    Returns:
-      list: The values/value selected by the user
-    """
-
-    button_text = kwargs.get("button_text", "Next")
-    return get_single_value(
-        Page()
-        .read_answer_sheet(label, options, number_of_questions, **kwargs)
-        .run(button_text)
-    )
-
-
 def read_cards(label: str, options: list, **kwargs):
     """Read a text value from the user simple text input
 
@@ -268,7 +240,7 @@ def read_dropdown(label: str, options: list, **kwargs):
 
     Keyword Args:
             multiple (bool): Whether the user can select multiple options. Defaults to False.
-            initial_value (str): The initial value to display to the user. Defaults to None.
+            initial_value (str or list): The initial value to display to the user. Defaults to [].
             placeholder (str): The placeholder text to display to the user. Defaults to "Choose an option".
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -400,7 +372,7 @@ def read_multiple_choice(label: str, options: list, **kwargs):
             multiple (bool): Whether the user can select multiple options. Defaults to False.
             min (number): The minimal amount of options that should be selected. Defaults to None.
             max (number): The maximum amount of options that should be selected. Defaults to None.
-            initial_value (str): The initial value to display to the user. Defaults to None.
+            initial_value ([]): The initial value of the selection. Defaults to [].
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
@@ -508,6 +480,7 @@ def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
             display_index (bool): Whether to show a index column. Defaults to False.
             label (str): The label to display to the user
             multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to True.
+            initial_value (list): The initial value of the selection. Defaults to []
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
@@ -564,8 +537,9 @@ def read_phone(label: str, **kwargs):
             label (str): The label to display to the user
 
     Keyword Args:
-            initial_value (dict): The initial value to display to the user. If dictionary, it contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str or number). Ex: {'country_code': '+55', 'national_number': '21999990000'}. Defaults to "".
+            initial_value (dict): The initial value to display to the user. It contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str). Ex: {'country_code': '55', 'national_number': '21999990000'}.
             placeholder (str): The placeholder text to display to the user. Defaults to "".
+            invalid_message (str): The message to display when the input is invalid
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
@@ -574,7 +548,7 @@ def read_phone(label: str, **kwargs):
             button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
     Returns:
-      A dict containing the value entered by the user ({"raw": str, "masked": str})
+      A dict containing the value entered by the user ({"country_code": str, "national_number": str})
     """
 
     button_text = kwargs.get("button_text", "Next")
@@ -710,7 +684,7 @@ def read_time(label: str, **kwargs):
             label (str): The label to display to the user
 
     Keyword Args:
-            initial_value (str): The initial value to display to the user. Defaults to "".
+            initial_value (str or datetime.time): The initial value to display to the user. Defaults to "00:00".
             format (str): Whether the input is in the format 24hs or AM/PM. Defaults to "24hs".
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -736,6 +710,7 @@ def read_toggle(label: str, **kwargs):
     Keyword Args:
             on_text (str): Text of On Toggle option
             off_text (str): Text of Off Toggle option
+            initial_value (bool): Initial value of the toggle
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.

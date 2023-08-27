@@ -28,13 +28,13 @@ def get_staticmethod(cls, name):
     return getattr(cls, method_key, None)
 
 
-def convert_answer(cls, value):
-    convert = get_staticmethod(cls, "__convert_answer")
+def parse_value(cls, value):
+    convert = get_staticmethod(cls, "__parse_value")
     return convert(value) if convert else value
 
 
-def revert_value(cls, value):
-    revert = get_staticmethod(cls, "__revert_value")
+def serialize_value(cls, value):
+    revert = get_staticmethod(cls, "__serialize_value")
     return revert(value) if revert else value
 
 

@@ -63,7 +63,7 @@ def validate_widget_props(widget):
             )
         if not types_compatible(widget[prop_name], prop.typeName):
             raise Exception(
-                f"{prop_name}: {type(widget[prop_name])} is not compatible with {prop}"
+                f"{widget['type']}: {prop_name}: {type(widget[prop_name])} is not compatible with {prop}"
             )
         if not valid_prop(widget[prop_name], prop):
             raise Exception(f"{prop_name}: {widget[prop_name]} is not valid for {prop}")
