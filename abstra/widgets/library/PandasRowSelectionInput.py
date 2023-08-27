@@ -29,12 +29,16 @@ class PandasRowSelectionInput(Input):
         if self.df is None:
             import pandas as pd
 
-            return json.loads(
+            serialized = json.loads(
                 pd.DataFrame(
                     {"change the": [1, 2, 3], "df property": [4, 5, 6]}
                 ).to_json(orient="table")
             )
-        return json.loads(self.df.to_json(orient="table"))
+            del serialized["schema"]["pandas_version"]
+            return serialized
+        serialized = json.loads(self.df.to_json(orient="table"))
+        del serialized["schema"]["pandas_version"]
+        return serialized
 
     def render(self, context: dict):
         return {
