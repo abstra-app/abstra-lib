@@ -51,7 +51,7 @@ class WPythonAPI:
 class WBrokerAPIParams:
     argName: str
     typeName: typing.Union[str, typing.List[str]]
-    description: str
+    description: typing.Optional[str] = None
     default: typing.Any = None
     isOptional: bool = False
     formOnly: bool = False

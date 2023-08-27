@@ -45,7 +45,7 @@ def get_player_bp(api: API):
                     return
 
                 code = api.read_text_file(dash.file) if dash.file else ""
-                return run_dash(conn, dash, code)
+                return run_dash(conn, dash)
 
             form_path = flask.request.args.get("formPath")
             if form_path is not None:

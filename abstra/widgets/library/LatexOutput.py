@@ -5,14 +5,11 @@ class LatexOutput(Output):
     type = "latex-output"
 
     def __init__(self, text: str, **kwargs):
-        self.text = text
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
+        self.set_props(dict(text=text, **kwargs))
 
-    def json(self, **kwargs):
-        return {
-            "type": self.type,
-            "text": self.text,
-            "columns": self.columns,
-            "fullWidth": self.full_width,
-        }
+    def set_props(self, props):
+        self.text = props.get("text", "")
+        self.full_width = props.get("full_width", False)
+
+    def render(self, context: dict):
+        return {"type": self.type, "text": self.text, "fullWidth": self.full_width}

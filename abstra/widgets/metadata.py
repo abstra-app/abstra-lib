@@ -1,184 +1,4 @@
 metadata = {
-    "answer-sheet-input": {
-        "name": "Answer sheet",
-        "description": "Retrieve the answers from a test on usual answersheet",
-        "type": "answer-sheet-input",
-        "events": [
-            {
-                "key": "change",
-                "description": "Function or expression to be run when the input value changes",
-                "payloadSchema": [],
-            }
-        ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 200,
-            "minHeight": 350,
-            "initialWidth": 200,
-            "initialHeight": 350,
-        },
-        "pythonAPI": {
-            "name": "read_answer_sheet",
-            "params": [
-                {
-                    "argName": "label",
-                    "description": "The label to display to the user",
-                    "typeName": "str",
-                    "isKwarg": False,
-                    "default": None,
-                    "dashesInitialValue": '"Answer Sheet Title"',
-                },
-                {
-                    "argName": "options",
-                    "description": "The options which can be chosen as an answer",
-                    "typeName": "list",
-                    "typeDescription": ["list[str]"],
-                    "isKwarg": False,
-                    "default": '["A", "B", "C", "D", "E"]',
-                    "dashesInitialValue": '["A", "B", "C", "D", "E"]',
-                },
-                {
-                    "argName": "number_of_questions",
-                    "description": "Number of questions the answersheet will cover",
-                    "typeName": "int",
-                    "isKwarg": False,
-                    "default": "5",
-                    "dashesInitialValue": "5",
-                },
-                {
-                    "argName": "disabled",
-                    "description": "whether the input is disabled. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
-                    "argName": "required",
-                    "description": 'Whether the input is required or not eg. "this field is required". Defaults to True.',
-                    "typeName": "Union[bool, str]",
-                    "typeDescription": ["bool", "str"],
-                    "isKwarg": True,
-                    "default": "True",
-                    "formOnly": True,
-                },
-                {
-                    "argName": "hint",
-                    "description": "A tooltip displayed to the user. Defaults to None.",
-                    "typeName": "str",
-                    "isKwarg": True,
-                    "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                    "formOnly": True,
-                },
-                {
-                    "argName": "full_width",
-                    "description": "Whether the input should use full screen width. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                    "formOnly": True,
-                },
-                {
-                    "argName": "button_text",
-                    "description": "What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.",
-                    "typeName": "str",
-                    "isKwarg": True,
-                    "default": "Next",
-                    "formOnly": True,
-                },
-            ],
-            "returns": [
-                {
-                    "typeName": None,
-                    "typeDescription": "list: The values/value selected by the user",
-                }
-            ],
-        },
-        "brokerAPI": {
-            "params": [
-                {
-                    "argName": "label",
-                    "typeName": "string",
-                    "description": "The label of the input",
-                },
-                {
-                    "argName": "options",
-                    "typeName": "array",
-                    "description": "The options which can be chosen as an answer",
-                },
-                {
-                    "argName": "numberOfQuestions",
-                    "typeName": "number",
-                    "description": "Number of questions the answersheet will cover",
-                },
-                {
-                    "argName": "key",
-                    "typeName": "string",
-                    "description": "The key of the input on the returning object",
-                },
-                {
-                    "argName": "disabled",
-                    "typeName": "boolean",
-                    "description": "Whether the input is disabled",
-                },
-                {
-                    "argName": "hint",
-                    "typeName": ["string", "null"],
-                    "description": "message describing the input",
-                    "default": None,
-                    "isOptional": True,
-                },
-                {
-                    "argName": "end_program",
-                    "typeName": ["boolean", "null"],
-                    "description": "End program after this widget is shown",
-                    "default": False,
-                    "isOptional": True,
-                },
-                {
-                    "argName": "required",
-                    "typeName": ["boolean", "string"],
-                    "description": "Whether the input is required or not",
-                    "default": True,
-                    "isOptional": True,
-                    "formOnly": True,
-                },
-                {
-                    "argName": "columns",
-                    "typeName": "number",
-                    "description": "number of columns this input will take",
-                    "isOptional": True,
-                    "formOnly": True,
-                },
-                {
-                    "argName": "fullWidth",
-                    "typeName": "boolean",
-                    "description": "Whether the widget should take up the full width of the page",
-                    "isOptional": True,
-                    "formOnly": True,
-                },
-            ]
-        },
-        "examples": [
-            {
-                "props": {
-                    "label": "SAT - 2023",
-                    "options": ["A", "B", "C", "D", "E"],
-                    "numberOfQuestions": 5,
-                },
-                "name": "Basic Example",
-                "description": "The following example demonstrate some of the available functionality for read_answer_sheet",
-                "key": "example1",
-                "code": 'from abstra.forms import read_answer_sheet\n\nanswer_sheet = read_answer_sheet("SAT - 2023", ["A", "B", "C", "D", "E"], 5)\n# answer_sheet = { \'1\': \'A\', \'2\': None, \'3\': \'C\' }\n',
-            }
-        ],
-    },
     "cards-input": {
         "name": "Card display",
         "description": "Read a text value from the user simple text input",
@@ -186,7 +6,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             },
@@ -384,15 +204,20 @@ metadata = {
                     "isOptional": True,
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": ["object", "array", "null"],
+                    "argName": "value",
+                    "typeName": ["array"],
                     "description": "The initial value of the input",
-                    "isOptional": True,
+                    "isOptional": False,
                     "items": {
                         "typeName": "object",
                         "properties": [
                             {
                                 "argName": "title",
+                                "typeName": "string",
+                                "description": "",
+                            },
+                            {
+                                "argName": "subtitle",
                                 "typeName": "string",
                                 "description": "",
                             },
@@ -406,8 +231,18 @@ metadata = {
                                 "typeName": "string",
                                 "description": "",
                             },
+                            {
+                                "argName": "topLeftExtra",
+                                "typeName": "string",
+                                "description": "",
+                            },
+                            {
+                                "argName": "topRightExtra",
+                                "typeName": "string",
+                                "description": "",
+                            },
                         ],
-                        "default": None,
+                        "default": "[]",
                     },
                 },
                 {
@@ -436,6 +271,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -451,7 +292,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -511,7 +352,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -604,7 +445,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "any",
                     "description": "The initial value of the input",
                     "items": {"typeName": ["string", "number"]},
@@ -622,6 +463,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -637,7 +484,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -693,7 +540,7 @@ metadata = {
         "type": "checklist-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -796,7 +643,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "any",
                     "description": "The initial value of the input",
                     "items": {"typeName": ["string", "number"]},
@@ -834,6 +681,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -849,7 +702,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -1010,6 +863,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -1018,7 +877,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -1057,7 +916,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -1167,11 +1026,11 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
-                    "isOptional": True,
+                    "isOptional": False,
                 },
                 {
                     "argName": "invalidMessage",
@@ -1191,6 +1050,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -1206,7 +1071,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -1251,7 +1116,7 @@ metadata = {
         "autoHeight": False,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -1354,11 +1219,11 @@ metadata = {
                     "isOptional": True,
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
-                    "isOptional": True,
+                    "isOptional": False,
                 },
                 {
                     "argName": "key",
@@ -1369,6 +1234,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -1386,7 +1257,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -1428,7 +1299,7 @@ metadata = {
         "type": "cpf-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -1536,11 +1407,11 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
-                    "isOptional": True,
+                    "isOptional": False,
                 },
                 {
                     "argName": "invalidMessage",
@@ -1560,6 +1431,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -1575,7 +1452,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -1619,7 +1496,7 @@ metadata = {
         "type": "currency-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -1753,11 +1630,10 @@ metadata = {
                     "description": "The currency to use",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": "number",
+                    "argName": "value",
+                    "typeName": ["number", "null"],
                     "description": "The initial value of the input",
                     "default": "",
-                    "isOptional": True,
                 },
                 {
                     "argName": "min",
@@ -1788,6 +1664,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -1803,7 +1685,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -1857,7 +1739,7 @@ metadata = {
                 "payloadSchema": [],
             },
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             },
@@ -1952,7 +1834,7 @@ metadata = {
                     "isOptional": True,
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "any",
                     "description": "The initial value to be stored in custom widget state.",
                     "default": None,
@@ -2023,7 +1905,7 @@ metadata = {
         "type": "date-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -2122,7 +2004,7 @@ metadata = {
                     "description": "The label to display above the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": None,
@@ -2136,6 +2018,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -2153,7 +2041,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -2192,7 +2080,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -2232,10 +2120,10 @@ metadata = {
                 },
                 {
                     "argName": "initial_value",
-                    "description": "The initial value to display to the user. Defaults to None.",
-                    "typeName": "str",
+                    "description": "The initial value to display to the user. Defaults to [].",
+                    "typeName": "str or list",
                     "isKwarg": True,
-                    "default": "None",
+                    "default": "[]",
                     "formOnly": True,
                 },
                 {
@@ -2305,10 +2193,10 @@ metadata = {
                     "description": "The label to display above the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "any",
                     "description": "The initial value of the input",
-                    "items": {"typeName": ["string", "number"]},
+                    "items": {"typeName": ["array"]},
                     "isOptional": True,
                 },
                 {
@@ -2320,6 +2208,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -2337,7 +2231,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -2419,7 +2313,7 @@ metadata = {
         "type": "email-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -2530,11 +2424,10 @@ metadata = {
                     "default": "Hmm… doesn't look like an email",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
-                    "isOptional": True,
                 },
                 {
                     "argName": "key",
@@ -2545,6 +2438,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -2562,7 +2461,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -2606,7 +2505,7 @@ metadata = {
         "autoHeight": False,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -2633,7 +2532,7 @@ metadata = {
                     "description": 'The initial value to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": '""',
+                    "default": "None",
                     "formOnly": True,
                 },
                 {
@@ -2713,10 +2612,10 @@ metadata = {
                     "description": "The label to display above the input",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": ["string", "array", "null"],
+                    "argName": "value",
+                    "typeName": ["array"],
                     "description": "The initial value of the input",
-                    "default": "",
+                    "default": "[]",
                 },
                 {
                     "argName": "multiple",
@@ -2741,6 +2640,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -2756,7 +2661,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -2801,7 +2706,7 @@ metadata = {
         "type": "image-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -2909,11 +2814,11 @@ metadata = {
                     "description": "The label to display above the input",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": ["string", "array"],
+                    "argName": "value",
+                    "typeName": ["array"],
                     "description": "The initial value of the input",
                     "default": "",
-                    "isOptional": True,
+                    "isOptional": False,
                     "items": {"typeName": "string"},
                 },
                 {
@@ -2933,6 +2838,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -2948,7 +2859,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -2991,7 +2902,13 @@ metadata = {
         "description": "Kanban board",
         "type": "kanban-board-input",
         "dashOnly": True,
-        "events": [],
+        "events": [
+            {
+                "key": "update:value",
+                "description": "Function or expression to be run when the input value changes",
+                "payloadSchema": [],
+            }
+        ],
         "autoHeight": False,
         "dashProperties": {
             "minWidth": 300,
@@ -3012,10 +2929,18 @@ metadata = {
                 {
                     "argName": "initial_value",
                     "description": "The initial board state.",
-                    "typeName": "KanbanBoard",
+                    "typeName": "List[KanbanCard]",
                     "isKwarg": True,
                     "default": None,
                     "formOnly": True,
+                },
+                {
+                    "argName": "stages",
+                    "description": "List of stages",
+                    "typeName": "List[KanbanStage]",
+                    "isKwarg": True,
+                    "default": None,
+                    "dashesInitialValue": '["To do", "In progress", "Done"]',
                 },
             ],
             "returns": [
@@ -3033,9 +2958,14 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": "object",
+                    "argName": "value",
+                    "typeName": "array",
                     "description": "The initial board state.",
+                },
+                {
+                    "argName": "stages",
+                    "typeName": "array",
+                    "description": "List of stages",
                 },
                 {
                     "argName": "key",
@@ -3046,6 +2976,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -3063,7 +2999,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -3163,7 +3099,7 @@ metadata = {
         "formOnly": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -3278,13 +3214,12 @@ metadata = {
         },
         "brokerAPI": {
             "params": [
-                {"argName": "itemSchema", "typeName": "any", "description": ""},
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "array",
                     "description": "",
-                    "default": [{}],
-                    "isOptional": True,
+                    "default": [],
+                    "isOptional": False,
                 },
                 {
                     "argName": "min",
@@ -3307,10 +3242,9 @@ metadata = {
                     "isOptional": True,
                 },
                 {
-                    "argName": "overloadedItemSchemas",
-                    "typeName": "any",
-                    "description": "",
-                    "isOptional": True,
+                    "argName": "schemas",
+                    "typeName": "array",
+                    "description": "The schemas for the items of the list",
                 },
                 {
                     "argName": "key",
@@ -3321,6 +3255,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -3338,7 +3278,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -3400,7 +3340,7 @@ metadata = {
         "type": "multiple-choice-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -3455,8 +3395,8 @@ metadata = {
                 },
                 {
                     "argName": "initial_value",
-                    "description": "The initial value to display to the user. Defaults to None.",
-                    "typeName": "str",
+                    "description": "The initial value of the selection. Defaults to [].",
+                    "typeName": "[]",
                     "isKwarg": True,
                     "default": "None",
                     "formOnly": True,
@@ -3531,10 +3471,10 @@ metadata = {
                     "isOptional": True,
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "any",
                     "description": "The initial value of the input",
-                    "items": {"typeName": ["string", "number"]},
+                    "items": {"typeName": ["array"]},
                     "default": None,
                     "isOptional": True,
                 },
@@ -3563,6 +3503,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -3578,7 +3524,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -3660,7 +3606,7 @@ metadata = {
         "type": "nps-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -3808,7 +3754,7 @@ metadata = {
                     "isOptional": True,
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "number",
                     "description": "The initial value of the input",
                     "isOptional": True,
@@ -3822,6 +3768,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -3839,7 +3791,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -3881,7 +3833,7 @@ metadata = {
         "type": "number-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -4003,10 +3955,9 @@ metadata = {
                     "description": "The label to display above the input",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": "number",
+                    "argName": "value",
+                    "typeName": ["number", "null"],
                     "description": "The initial value of the input",
-                    "isOptional": True,
                 },
                 {
                     "argName": "min",
@@ -4037,6 +3988,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -4052,7 +4009,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -4096,7 +4053,7 @@ metadata = {
         "type": "number-slider-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -4211,7 +4168,7 @@ metadata = {
                     "description": "The label to display above the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "number",
                     "description": "The initial value of the input",
                     "isOptional": True,
@@ -4245,6 +4202,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -4260,7 +4223,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -4293,12 +4256,12 @@ metadata = {
         ],
     },
     "pandas-row-selection-input": {
-        "name": "Table + selection",
+        "name": "Table with selection",
         "description": "Display a pandas dataframe as a table and allow the user to select rows",
         "type": "pandas-row-selection-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -4319,7 +4282,6 @@ metadata = {
                     "typeName": "PandasDataFrame",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": "pandas.Series([1, 3, 5, 4, 6, 8])",
                 },
                 {
                     "argName": "display_index",
@@ -4341,6 +4303,13 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "True",
+                },
+                {
+                    "argName": "initial_value",
+                    "description": "The initial value of the selection. Defaults to []",
+                    "typeName": "list",
+                    "isKwarg": True,
+                    "default": "[]",
                 },
                 {
                     "argName": "disabled",
@@ -4429,6 +4398,12 @@ metadata = {
                     "isOptional": True,
                 },
                 {
+                    "argName": "value",
+                    "typeName": "array",
+                    "description": "The initial value of the selection",
+                    "isOptional": True,
+                },
+                {
                     "argName": "key",
                     "typeName": "string",
                     "description": "The key of the input on the returning object",
@@ -4437,6 +4412,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -4454,7 +4435,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -4512,7 +4493,7 @@ metadata = {
         "type": "password-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -4750,6 +4731,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -4765,7 +4752,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -4809,7 +4796,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -4833,13 +4820,13 @@ metadata = {
                 },
                 {
                     "argName": "initial_value",
-                    "description": "The initial value to display to the user. If dictionary, it contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str or number). Ex: {'country_code': '+55', 'national_number': '21999990000'}. Defaults to \"\".",
+                    "description": "The initial value to display to the user. It contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str). Ex: {'country_code': '55', 'national_number': '21999990000'}.",
                     "typeName": "dict",
                     "typeDescription": [
                         'dict ({"country_code": str, "national_number": str})'
                     ],
                     "isKwarg": True,
-                    "default": '""',
+                    "default": '{"country_code": "", "national_number": ""}',
                     "formOnly": True,
                 },
                 {
@@ -4848,6 +4835,13 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
+                },
+                {
+                    "argName": "invalid_message",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": '"Invalid phone number."',
+                    "description": "The message to display when the input is invalid",
                 },
                 {
                     "argName": "disabled",
@@ -4900,7 +4894,7 @@ metadata = {
             "returns": [
                 {
                     "typeName": "PhoneResponse",
-                    "typeDescription": 'A dict containing the value entered by the user ({"raw": str, "masked": str})',
+                    "typeDescription": 'A dict containing the value entered by the user ({"country_code": str, "national_number": str})',
                 }
             ],
         },
@@ -4912,10 +4906,10 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "object",
                     "description": "The initial value of the input",
-                    "isOptional": True,
+                    "isOptional": False,
                     "properties": [
                         {
                             "argName": "countryCode",
@@ -4930,6 +4924,12 @@ metadata = {
                     ],
                 },
                 {
+                    "argName": "invalidMessage",
+                    "typeName": "string",
+                    "isOptional": False,
+                    "description": "The message to display when the input is invalid",
+                },
+                {
                     "argName": "key",
                     "typeName": "string",
                     "description": "The key of the input on the returning object",
@@ -4938,6 +4938,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -4955,7 +4961,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -4999,7 +5005,7 @@ metadata = {
         "type": "rating-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -5108,7 +5114,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "number",
                     "description": "The initial value of the input",
                     "default": 0,
@@ -5139,6 +5145,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -5154,7 +5166,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -5202,7 +5214,7 @@ metadata = {
         "type": "rich-text-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -5304,7 +5316,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
@@ -5319,6 +5331,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -5336,7 +5354,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -5380,7 +5398,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -5482,7 +5500,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": ["array", "null"],
                     "description": "The initial value of the input",
                     "default": [""],
@@ -5506,6 +5524,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -5521,7 +5545,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -5563,7 +5587,7 @@ metadata = {
         "autoHeight": True,
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -5667,7 +5691,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
@@ -5691,6 +5715,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -5706,7 +5736,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -5759,7 +5789,7 @@ metadata = {
         "type": "textarea-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -5858,7 +5888,7 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
+                    "argName": "value",
                     "typeName": "string",
                     "description": "The initial value of the input",
                     "default": "",
@@ -5873,6 +5903,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -5890,7 +5926,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -5935,7 +5971,7 @@ metadata = {
         "type": "time-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -5961,9 +5997,9 @@ metadata = {
                 },
                 {
                     "argName": "initial_value",
-                    "description": 'The initial value to display to the user. Defaults to "".',
-                    "typeName": "str",
-                    "typeDescription": ["str (HH:MM:SS)"],
+                    "description": 'The initial value to display to the user. Defaults to "00:00".',
+                    "typeName": "str or datetime.time",
+                    "typeDescription": ["str (HH:MM:SS)", "datetime.time"],
                     "isKwarg": True,
                     "default": '""',
                     "formOnly": True,
@@ -6038,8 +6074,8 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": "string",
+                    "argName": "value",
+                    "typeName": "object",
                     "description": "The initial value of the input",
                     "default": None,
                     "isOptional": True,
@@ -6062,6 +6098,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -6077,7 +6119,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -6115,7 +6157,7 @@ metadata = {
         "type": "toggle-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -6149,6 +6191,13 @@ metadata = {
                     "argName": "off_text",
                     "description": "Text of Off Toggle option",
                     "typeName": "str",
+                    "isKwarg": True,
+                    "default": "No",
+                },
+                {
+                    "argName": "initial_value",
+                    "description": "Initial value of the toggle",
+                    "typeName": "bool",
                     "isKwarg": True,
                     "default": "No",
                 },
@@ -6222,6 +6271,11 @@ metadata = {
                     "description": "Text of Off toggle option",
                 },
                 {
+                    "argName": "value",
+                    "typeName": "boolean",
+                    "description": "Initial value of the toggle",
+                },
+                {
                     "argName": "key",
                     "typeName": "string",
                     "description": "The key of the input on the returning object",
@@ -6230,6 +6284,12 @@ metadata = {
                     "argName": "disabled",
                     "typeName": "boolean",
                     "description": "Whether the input is disabled",
+                },
+                {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
                 },
                 {
                     "argName": "hint",
@@ -6247,7 +6307,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -6296,7 +6356,7 @@ metadata = {
         "type": "video-input",
         "events": [
             {
-                "key": "change",
+                "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
             }
@@ -6405,12 +6465,12 @@ metadata = {
                     "description": "The label of the input",
                 },
                 {
-                    "argName": "initialValue",
-                    "typeName": ["string", "array"],
+                    "argName": "value",
+                    "typeName": ["array"],
                     "description": "The initial value of the input",
                     "items": {"typeName": "string"},
                     "default": None,
-                    "isOptional": True,
+                    "isOptional": False,
                 },
                 {
                     "argName": "maxFileSize",
@@ -6429,6 +6489,12 @@ metadata = {
                     "description": "Whether the input is disabled",
                 },
                 {
+                    "argName": "errors",
+                    "typeName": "array",
+                    "description": "Errors computed by Python code",
+                    "default": "[]",
+                },
+                {
                     "argName": "hint",
                     "typeName": ["string", "null"],
                     "description": "message describing the input",
@@ -6444,7 +6510,7 @@ metadata = {
                 },
                 {
                     "argName": "required",
-                    "typeName": ["boolean", "string"],
+                    "typeName": ["string", "boolean"],
                     "description": "Whether the input is required or not",
                     "default": True,
                     "isOptional": True,
@@ -6668,7 +6734,7 @@ metadata = {
         "autoHeight": False,
         "dashProperties": {
             "minWidth": 377,
-            "minHeight": 632,
+            "minHeight": 100,
             "initialWidth": 377,
             "initialHeight": 632,
         },
@@ -7211,7 +7277,6 @@ metadata = {
                     "typeName": "PandasDataFrame",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": "pandas.Series([1, 3, 5, 4, 6, 8])",
                 },
                 {
                     "argName": "display_index",
@@ -7377,7 +7442,6 @@ metadata = {
                     "typeName": "PlotlyFigure",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": 'plotly_express.bar(x=["a", "b", "c"], y=[1, 3, 2])',
                 },
                 {
                     "argName": "label",

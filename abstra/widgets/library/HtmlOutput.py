@@ -5,14 +5,11 @@ class HtmlOutput(Output):
     type = "html-output"
 
     def __init__(self, html: str, **kwargs):
-        self.html = html
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
+        self.set_props(dict(html=html, **kwargs))
 
-    def json(self, **kwargs):
-        return {
-            "type": self.type,
-            "html": self.html,
-            "columns": self.columns,
-            "fullWidth": self.full_width,
-        }
+    def set_props(self, props):
+        self.html = props.get("html", "")
+        self.full_width = props.get("full_width", False)
+
+    def render(self, context: dict):
+        return {"type": self.type, "html": self.html, "fullWidth": self.full_width}

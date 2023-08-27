@@ -5,16 +5,17 @@ class TextOutput(Output):
     type = "text-output"
 
     def __init__(self, text: str, **kwargs):
-        self.text = str(text)
-        self.size = kwargs.get("size", "medium")
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
+        self.set_props(dict(text=text, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.text = str(props["text"])
+        self.size = props.get("size", "medium")
+        self.full_width = props.get("full_width", False)
+
+    def render(self, context: dict):
         return {
             "type": self.type,
             "text": self.text,
             "size": self.size,
-            "columns": self.columns,
             "fullWidth": self.full_width,
         }

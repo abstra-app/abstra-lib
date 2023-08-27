@@ -22,22 +22,23 @@
                     "type": "number-input",
                     "key": "a",
                     "label": "a",
-                    "initialValue": 0,
+                    "value": 0,
                     "placeholder": "Insert a number",
                     "required": true,
                     "hint": null,
-                    "columns": 1,
                     "fullWidth": false,
+                    "errors": [
+                    ],
                     "min": null,
                     "max": null,
                     "step": null,
                     "disabled": false
                 }
             ],
-            "columns": 1,
             "actions": [
                 "Next"
             ],
+            "columns": 1,
             "endProgram": false,
             "reactivePollingInterval": 0,
             "steps": {
@@ -60,16 +61,18 @@
         "python",
         {
             "type": "form",
+            "columns": 1,
             "widgets": [
                 {
                     "type": "number-input",
+                    "errors": [
+                    ],
                     "key": "b",
                     "label": "b",
-                    "initialValue": 0,
+                    "value": 0,
                     "placeholder": "Insert a number",
                     "required": true,
                     "hint": null,
-                    "columns": 1,
                     "fullWidth": false,
                     "min": null,
                     "max": null,
@@ -77,7 +80,6 @@
                     "disabled": false
                 }
             ],
-            "columns": 1,
             "actions": [
                 "Back",
                 "Next"
@@ -104,16 +106,15 @@
         "python",
         {
             "type": "form",
+            "columns": 1,
             "widgets": [
                 {
                     "type": "text-output",
                     "text": "3",
                     "size": "medium",
-                    "columns": 1,
                     "fullWidth": false
                 }
             ],
-            "columns": 1,
             "actions": [
                 "Back",
                 "Next"
@@ -138,16 +139,18 @@
         "python",
         {
             "type": "form",
+            "columns": 1,
             "widgets": [
                 {
                     "type": "number-input",
                     "key": "b",
                     "label": "b",
-                    "initialValue": 2,
+                    "value": 2,
                     "placeholder": "Insert a number",
+                    "errors": [
+                    ],
                     "required": true,
                     "hint": null,
-                    "columns": 1,
                     "fullWidth": false,
                     "min": null,
                     "max": null,
@@ -155,7 +158,6 @@
                     "disabled": false
                 }
             ],
-            "columns": 1,
             "actions": [
                 "Back",
                 "Next"

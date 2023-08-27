@@ -1,0 +1,351 @@
+[
+    [
+        "python",
+        {
+            "type": "execution-id",
+            "executionId": "session-id"
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "client-start",
+            "state": {
+                "timestamp": 1693157458464,
+                "widgets": {
+                    "38fe4582-decd-4725-a553-601b7d31219a": {
+                        "value": null
+                    }
+                }
+            },
+            "params": {}
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "widgets-computed",
+            "props": {
+                "38fe4582-decd-4725-a553-601b7d31219a": {
+                    "type": "kanban-board-input",
+                    "key": null,
+                    "label": null,
+                    "value": [
+                        {
+                            "key": 1,
+                            "title": "Card 1",
+                            "text": "This is card 1",
+                            "tags": [
+                                {
+                                    "key": "tag1",
+                                    "label": "Tag 1"
+                                }
+                            ],
+                            "stageKey": "todo"
+                        },
+                        {
+                            "key": 2,
+                            "title": "Card 2",
+                            "text": "This is card 2",
+                            "tags": [
+                                {
+                                    "key": "tag2",
+                                    "label": "Tag 2"
+                                }
+                            ],
+                            "stageKey": "todo"
+                        },
+                        {
+                            "key": 3,
+                            "title": "Card 3",
+                            "text": "This is card 3",
+                            "tags": [
+                                {
+                                    "key": "tag3",
+                                    "label": "Tag 3"
+                                }
+                            ],
+                            "stageKey": "doing"
+                        },
+                        {
+                            "key": 4,
+                            "title": "Card 4",
+                            "text": "This is card 4",
+                            "tags": [
+                                {
+                                    "key": "tag4",
+                                    "label": "Tag 4"
+                                }
+                            ],
+                            "stageKey": "done"
+                        },
+                        {
+                            "key": 5,
+                            "title": "Card 5",
+                            "text": "This is card 5",
+                            "tags": [
+                                {
+                                    "key": "tag5",
+                                    "label": "Tag 5"
+                                }
+                            ],
+                            "stageKey": "done"
+                        },
+                        {
+                            "key": 6,
+                            "title": "Card 6",
+                            "text": "This is card 6",
+                            "tags": [
+                                {
+                                    "key": "tag6",
+                                    "label": "Tag 6"
+                                }
+                            ],
+                            "stageKey": "done"
+                        }
+                    ],
+                    "stages": [
+                        {
+                            "key": "todo",
+                            "label": "To Do"
+                        },
+                        {
+                            "key": "doing",
+                            "label": "Doing"
+                        },
+                        {
+                            "key": "done",
+                            "label": "Done"
+                        }
+                    ],
+                    "disabled": false,
+                    "errors": []
+                }
+            },
+            "variables": {
+                "38fe4582-decd-4725-a553-601b7d31219a": [
+                    {
+                        "key": 1,
+                        "title": "Card 1",
+                        "text": "This is card 1",
+                        "tags": [],
+                        "stageKey": "todo"
+                    },
+                    {
+                        "key": 2,
+                        "title": "Card 2",
+                        "text": "This is card 2",
+                        "tags": [],
+                        "stageKey": "todo"
+                    },
+                    {
+                        "key": 3,
+                        "title": "Card 3",
+                        "text": "This is card 3",
+                        "tags": [],
+                        "stageKey": "doing"
+                    },
+                    {
+                        "key": 4,
+                        "title": "Card 4",
+                        "text": "This is card 4",
+                        "tags": [],
+                        "stageKey": "done"
+                    },
+                    {
+                        "key": 5,
+                        "title": "Card 5",
+                        "text": "This is card 5",
+                        "tags": [],
+                        "stageKey": "done"
+                    },
+                    {
+                        "key": 6,
+                        "title": "Card 6",
+                        "text": "This is card 6",
+                        "tags": [],
+                        "stageKey": "done"
+                    }
+                ]
+            },
+            "errors": {
+                "38fe4582-decd-4725-a553-601b7d31219a": {}
+            },
+            "stateTimestamp": 0
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "widget-input",
+            "widgetId": "38fe4582-decd-4725-a553-601b7d31219a",
+            "newValue": [
+                {
+                    "key": 1,
+                    "title": "Card 1",
+                    "text": "This is card 1",
+                    "tags": [],
+                    "stageKey": "todo"
+                },
+                {
+                    "key": 2,
+                    "title": "Card 2",
+                    "text": "This is card 2",
+                    "tags": [],
+                    "stageKey": "todo"
+                },
+                {
+                    "key": 3,
+                    "title": "Card 3",
+                    "text": "This is card 3",
+                    "tags": [],
+                    "stageKey": "todo"
+                },
+                {
+                    "key": 4,
+                    "title": "Card 4",
+                    "text": "This is card 4",
+                    "tags": [],
+                    "stageKey": "done"
+                },
+                {
+                    "key": 5,
+                    "title": "Card 5",
+                    "text": "This is card 5",
+                    "tags": [],
+                    "stageKey": "done"
+                },
+                {
+                    "key": 6,
+                    "title": "Card 6",
+                    "text": "This is card 6",
+                    "tags": [],
+                    "stageKey": "done"
+                }
+            ]
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "widgets-computed",
+            "props": {
+                "38fe4582-decd-4725-a553-601b7d31219a": {
+                    "type": "kanban-board-input",
+                    "key": null,
+                    "label": null,
+                    "value": [
+                        {
+                            "key": 1,
+                            "title": "Card 1",
+                            "text": "This is card 1",
+                            "tags": [],
+                            "stageKey": "todo"
+                        },
+                        {
+                            "key": 2,
+                            "title": "Card 2",
+                            "text": "This is card 2",
+                            "tags": [],
+                            "stageKey": "todo"
+                        },
+                        {
+                            "key": 3,
+                            "title": "Card 3",
+                            "text": "This is card 3",
+                            "tags": [],
+                            "stageKey": "todo"
+                        },
+                        {
+                            "key": 4,
+                            "title": "Card 4",
+                            "text": "This is card 4",
+                            "tags": [],
+                            "stageKey": "done"
+                        },
+                        {
+                            "key": 5,
+                            "title": "Card 5",
+                            "text": "This is card 5",
+                            "tags": [],
+                            "stageKey": "done"
+                        },
+                        {
+                            "key": 6,
+                            "title": "Card 6",
+                            "text": "This is card 6",
+                            "tags": [],
+                            "stageKey": "done"
+                        }
+                    ],
+                    "stages": [
+                        {
+                            "key": "todo",
+                            "label": "To Do"
+                        },
+                        {
+                            "key": "doing",
+                            "label": "Doing"
+                        },
+                        {
+                            "key": "done",
+                            "label": "Done"
+                        }
+                    ],
+                    "disabled": false,
+                    "errors": []
+                }
+            },
+            "variables": {
+                "38fe4582-decd-4725-a553-601b7d31219a": [
+                    {
+                        "key": 1,
+                        "title": "Card 1",
+                        "text": "This is card 1",
+                        "tags": [],
+                        "stageKey": "todo"
+                    },
+                    {
+                        "key": 2,
+                        "title": "Card 2",
+                        "text": "This is card 2",
+                        "tags": [],
+                        "stageKey": "todo"
+                    },
+                    {
+                        "key": 3,
+                        "title": "Card 3",
+                        "text": "This is card 3",
+                        "tags": [],
+                        "stageKey": "todo"
+                    },
+                    {
+                        "key": 4,
+                        "title": "Card 4",
+                        "text": "This is card 4",
+                        "tags": [],
+                        "stageKey": "done"
+                    },
+                    {
+                        "key": 5,
+                        "title": "Card 5",
+                        "text": "This is card 5",
+                        "tags": [],
+                        "stageKey": "done"
+                    },
+                    {
+                        "key": 6,
+                        "title": "Card 6",
+                        "text": "This is card 6",
+                        "tags": [],
+                        "stageKey": "done"
+                    }
+                ]
+            },
+            "errors": {
+                "38fe4582-decd-4725-a553-601b7d31219a": {}
+            },
+            "stateTimestamp": 0
+        }
+    ]
+]

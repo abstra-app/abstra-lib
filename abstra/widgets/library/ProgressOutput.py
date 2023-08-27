@@ -5,18 +5,19 @@ class ProgressOutput(Output):
     type = "progress-output"
 
     def __init__(self, current: float = 50, total: float = 100, **kwargs):
-        self.current = current
-        self.total = total
-        self.text = kwargs.get("text", "")
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
+        self.set_props(dict(current=current, total=total, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.current = props.get("current", 0)
+        self.total = props.get("total", 0)
+        self.text = props.get("text", "")
+        self.full_width = props.get("full_width", False)
+
+    def render(self, context: dict):
         return {
             "type": self.type,
             "current": self.current,
             "total": self.total,
             "text": self.text,
-            "columns": self.columns,
             "fullWidth": self.full_width,
         }

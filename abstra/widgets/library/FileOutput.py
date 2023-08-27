@@ -8,16 +8,17 @@ class FileOutput(Output):
     type = "file-output"
 
     def __init__(self, file: Union[str, io.IOBase], **kwargs):
-        self.file = file
-        self.download_text = kwargs.get("download_text", "Download")
-        self.columns = kwargs.get("columns", 1)
-        self.full_width = kwargs.get("full_width", False)
+        self.set_props(dict(file=file, **kwargs))
 
-    def json(self, **kwargs):
+    def set_props(self, props):
+        self.file = props.get("file", "")
+        self.download_text = props.get("download_text", "Download")
+        self.full_width = props.get("full_width", False)
+
+    def render(self, context: dict):
         return {
             "type": self.type,
             "fileUrl": convert_file(self.file),
             "downloadText": self.download_text,
-            "columns": self.columns,
             "fullWidth": self.full_width,
         }

@@ -2,7 +2,7 @@ from typing import List, Union, Dict, Any
 import io
 from ..reactive import Reactive
 from abstra.widgets.library import *
-from abstra.widgets import Input
+from abstra.widgets import Input, Output
 from abstra.widgets.types import PlotlyFigure, PandasDataFrame
 
 
@@ -20,7 +20,27 @@ class WidgetSchema:
         self.widgets.append(Reactive(callback))
         return self
 
-    def convert_answer(self, form_answers: Dict) -> Dict:
+    def has_errors(self):
+        return any([widget.has_errors() for widget in self.widgets])
+
+    def set_values(self, values: Dict):
+        for widget in self.widgets:
+            if isinstance(widget, Output):
+                continue
+            elif isinstance(widget, Reactive):
+                widget.set_value(values)
+            elif widget.key in values:
+                widget.set_value(values[widget.key])
+
+    def validate(self):
+        errors = []
+        for widget in self.widgets:
+            if isinstance(widget, Output):
+                continue
+            errors.extend(widget.validate())
+        return errors
+
+    def parse_value(self, form_answers: Dict) -> Dict:
         """Convert the answer from the form to the expected format
         Args:
             answer: The answer from the form
@@ -28,57 +48,26 @@ class WidgetSchema:
             The converted answer
         """
         answer: Dict = {}
-        inputs = self.get_input_widgets()
+        inputs = self.widgets
         for input in inputs:
-            answer[input.key] = input.convert_answer(form_answers.get(input.key))
+            if isinstance(input, Reactive):
+                answer = {**answer, **input.parse_value(form_answers)}
+            elif isinstance(input, Input):
+                answer[input.key] = input.parse_value(form_answers.get(input.key))
         return answer
 
     def get_input_widgets(self):
-        return list(
-            filter(
-                lambda widget: isinstance(widget, Input), self.get_concrete_widgets()
-            )
-        )
+        return list(filter(lambda widget: isinstance(widget, Input), self.widgets))
 
-    def json(self, payload):
+    def render(self, context=None):
         output = []
         for widget in self.widgets:
-            widget_json = widget.json(payload=payload)
-            if isinstance(widget_json, list):
-                output.extend(widget_json)
+            rendered_widget = widget.render(context)
+            if isinstance(rendered_widget, list):
+                output.extend(rendered_widget)
             else:
-                output.append(widget_json)
-
+                output.append(rendered_widget)
         return output
-
-    def read_answer_sheet(
-        self, label: str, options: list, number_of_questions: int, **kwargs
-    ):
-        """Retrieve the answers from a test on usual answersheet
-
-        Position Args:
-                label (str): The label to display to the user
-                options (list): The options which can be chosen as an answer
-                number_of_questions (int): Number of questions the answersheet will cover
-
-        Keyword Args:
-                disabled (bool): whether the input is disabled. Defaults to False.
-                required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
-                hint (str): A tooltip displayed to the user. Defaults to None.
-                end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
-                full_width (bool): Whether the input should use full screen width. Defaults to False.
-                button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
-
-        Returns:
-          list: The values/value selected by the user
-        """
-
-        key = kwargs.pop("key", label)
-
-        self.widgets.append(
-            AnswerSheetInput(key, label, options, number_of_questions, **kwargs)
-        )
-        return self
 
     def read_cards(self, label: str, options: list, **kwargs):
         """Read a text value from the user simple text input
@@ -322,7 +311,7 @@ class WidgetSchema:
 
         Keyword Args:
                 multiple (bool): Whether the user can select multiple options. Defaults to False.
-                initial_value (str): The initial value to display to the user. Defaults to None.
+                initial_value (str or list): The initial value to display to the user. Defaults to [].
                 placeholder (str): The placeholder text to display to the user. Defaults to "Choose an option".
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -458,7 +447,7 @@ class WidgetSchema:
                 multiple (bool): Whether the user can select multiple options. Defaults to False.
                 min (number): The minimal amount of options that should be selected. Defaults to None.
                 max (number): The maximum amount of options that should be selected. Defaults to None.
-                initial_value (str): The initial value to display to the user. Defaults to None.
+                initial_value ([]): The initial value of the selection. Defaults to [].
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -568,6 +557,7 @@ class WidgetSchema:
                 display_index (bool): Whether to show a index column. Defaults to False.
                 label (str): The label to display to the user
                 multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to True.
+                initial_value (list): The initial value of the selection. Defaults to []
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -625,8 +615,9 @@ class WidgetSchema:
                 label (str): The label to display to the user
 
         Keyword Args:
-                initial_value (dict): The initial value to display to the user. If dictionary, it contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str or number). Ex: {'country_code': '+55', 'national_number': '21999990000'}. Defaults to "".
+                initial_value (dict): The initial value to display to the user. It contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str). Ex: {'country_code': '55', 'national_number': '21999990000'}.
                 placeholder (str): The placeholder text to display to the user. Defaults to "".
+                invalid_message (str): The message to display when the input is invalid
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -635,7 +626,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          A dict containing the value entered by the user ({"raw": str, "masked": str})
+          A dict containing the value entered by the user ({"country_code": str, "national_number": str})
         """
 
         key = kwargs.pop("key", label)
@@ -777,7 +768,7 @@ class WidgetSchema:
                 label (str): The label to display to the user
 
         Keyword Args:
-                initial_value (str): The initial value to display to the user. Defaults to "".
+                initial_value (str or datetime.time): The initial value to display to the user. Defaults to "00:00".
                 format (str): Whether the input is in the format 24hs or AM/PM. Defaults to "24hs".
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -804,6 +795,7 @@ class WidgetSchema:
         Keyword Args:
                 on_text (str): Text of On Toggle option
                 off_text (str): Text of Off Toggle option
+                initial_value (bool): Initial value of the toggle
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -1048,13 +1040,13 @@ class WidgetSchema:
         self.widgets.append(TextOutput(text, **kwargs))
         return self
 
-    def get_concrete_widgets(self):
-        concrete_widgets = []
-        for widget in self.widgets:
+    def serialize_value(self):
+        serialized = {}
+        for widget in self.get_input_widgets():
             if isinstance(widget, Reactive):
-                concrete_widgets.extend(widget.get_widgets())
+                serialized.update(widget.serialize_value())
             else:
-                concrete_widgets.append(widget)
-        return concrete_widgets
+                serialized[widget.key] = widget.serialize_value()
+        return serialized
 
     input = read
