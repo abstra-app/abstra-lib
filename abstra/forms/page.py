@@ -118,11 +118,13 @@ class Page(WidgetSchema):
 
             self.update(response["payload"])
 
+            if response["type"] != "user-event":
+                self.set_errors()
+                if not self.has_errors():
+                    break
+
             rendered_page = self.render(self.__context)
             self.user_event_sent_widgets = rendered_page
-
-            if response["type"] != "user-event" and not self.has_errors():
-                break
 
             # TODO: Refactor validation to use values instead of payload
             parsed_payload = self.parse_value(response["payload"])
@@ -157,7 +159,6 @@ class Page(WidgetSchema):
     def update(self, payload):
         parsed_values = self.parse_value(payload)
         self.set_values(parsed_values)
-        self.validate()
         self.__context.update(parsed_values)
 
     def __build_validation_object(self, validation, payload):

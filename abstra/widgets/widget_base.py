@@ -29,8 +29,12 @@ class Input(Widget):
     def has_errors(self):
         return len(self.errors) > 0
 
-    def set_value(self, value):
+    def set_value(self, value, set_errors=False):
+        old_value = self.value if hasattr(self, "value") else None
         self.value = value
+
+        if set_errors and old_value != value:
+            self.set_errors()
 
     def set_errors(self):
         self.errors = self.validate()
@@ -54,7 +58,6 @@ class Input(Widget):
         errors = []
         if hasattr(self, "required") and self.required and self.is_value_unset():
             errors.append(self.i18n.get("error_required_field"))
-
         return errors
 
     def __first_or_list(self, value: List) -> Union[List, Any]:

@@ -3,10 +3,12 @@ from ..widget_base import Input
 
 class ClickInput(Input):
     type = "click-input"
+    value = None
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
+        self.value = None
 
     def set_props(self, props):
         self.label = props["label"]

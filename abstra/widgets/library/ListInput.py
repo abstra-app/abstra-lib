@@ -30,7 +30,7 @@ class ListInput(Input):
         self.disabled = props.get("disabled", False)
         self.schemas = [self.item_schema.copy() for _ in range(self.min)]
         if props.get("initial_value", None):
-            self.set_value(props.get("initial_value", None))
+            self.set_value(props.get("initial_value", None), set_errors=False)
 
     def render(self, context: dict):
         schemas = [schema.render(context) for schema in self.schemas]
@@ -49,7 +49,7 @@ class ListInput(Input):
             "value": self.serialize_value(),
         }
 
-    def set_value(self, value: List):
+    def set_value(self, value: List, set_errors=False):
         if not value:
             value = []
         self.value = value
