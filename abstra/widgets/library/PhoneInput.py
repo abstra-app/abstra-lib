@@ -6,6 +6,9 @@ import re
 
 class PhoneInput(Input):
     type = "phone-input"
+    empty_value: PhoneResponse = PhoneResponse(
+        raw="", masked="", country_code="", national_number=""
+    )
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
@@ -48,6 +51,17 @@ class PhoneInput(Input):
             errors.append(self.i18n.get("error_required_field"))
         return errors
 
+    def is_value_unset(self):
+        return self.value.raw == ""
+
+    def set_value(self, value, set_errors=False):
+        if isinstance(value, PhoneResponse):
+            self.value = value
+        elif isinstance(value, dict):
+            self.value = self.parse_value(value)
+        elif value == None:
+            self.value = self.empty_value
+
     def serialize_value(self):
         if isinstance(self.value, dict):
             return {
@@ -65,9 +79,9 @@ class PhoneInput(Input):
             }
         return {"countryCode": "", "nationalNumber": ""}
 
-    def parse_value(self, value) -> Optional[PhoneResponse]:
-        if not value:
-            return None
+    def parse_value(self, value) -> PhoneResponse:
+        if value is None:
+            return self.empty_value
         masked = f"+{value.get('countryCode')} {value.get('nationalNumber')}"
         raw = re.sub("\\D", "", masked)
         return PhoneResponse(
