@@ -23,7 +23,6 @@ def init_dir():
     path.mkdir(exist_ok=True)
     if not abstra_json_path.exists():
         abstra_json_path.write_text(json.dumps(abstra_json))
-    os.environ["ABSTRA_DATABASE_URL"] = str(Path(path, "db.sqlite3"))
     os.chdir(path)
     return path
 

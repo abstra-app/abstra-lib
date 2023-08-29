@@ -1,17 +1,12 @@
-import json
-import os
-import tempfile
-import typing
-import webbrowser
-import requests
+import json, os, tempfile, typing, webbrowser, requests
 from werkzeug.datastructures import FileStorage
-from abstra.tables import get_db
-from abstra_cli.deploy import deploy
-from abstra.widgets.apis import get_random_filepath, internal_path
-from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
 from pathlib import Path
-from . import classes
+
+from abstra_cli.credentials import get_credentials, delete_credentials, set_credentials
+from abstra.widgets.apis import get_random_filepath, internal_path
+from abstra_cli.deploy import deploy
 from ..utils import random_id
+from . import classes
 
 
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT", "https://cloud-api.abstra.cloud")
@@ -22,18 +17,9 @@ class API:
     def __init__(self, root: Path):
         root.mkdir(exist_ok=True, parents=True)
         self.root_path = root.absolute()
-
         os.chdir(root)
 
         self.abstra_json_path = root.joinpath("abstra.json").relative_to(root)
-        if ABSTRA_DATABASE_URL:
-            db_path = Path(ABSTRA_DATABASE_URL)
-        else:
-            db_path = Path(self.root_path, "db.sqlite3")
-
-        os.environ["ABSTRA_DATABASE_URL"] = db_path.absolute().as_uri()
-        self.db = get_db()
-
         if not self.abstra_json_path.exists():
             self.init_empty()
 
