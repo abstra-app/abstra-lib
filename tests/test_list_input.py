@@ -36,7 +36,7 @@ class TestListInput(unittest.TestCase):
 
         self.assertEqual(input.render({})["value"], [])
 
-        input.set_value([{"foo": "bar"}])
+        input.set_value([{"foo": "bar"}], set_errors=False)
 
         self.assertEqual(
             input.serialize_value(),

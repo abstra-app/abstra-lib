@@ -30,15 +30,13 @@ class WidgetSchema:
             elif isinstance(widget, Reactive):
                 widget.set_value(values)
             elif widget.key in values:
-                widget.set_value(values[widget.key])
+                widget.set_value(values[widget.key], set_errors=True)
 
-    def validate(self):
-        errors = []
+    def set_errors(self):
         for widget in self.widgets:
             if isinstance(widget, Output):
                 continue
-            errors.extend(widget.validate())
-        return errors
+            widget.set_errors()
 
     def parse_value(self, form_answers: Dict) -> Dict:
         """Convert the answer from the form to the expected format

@@ -8,6 +8,7 @@ class Reactive(Input):
 
     def __init__(self, callback: typing.Callable, **kwargs):
         self.set_props(dict(callback=callback, **kwargs))
+        self.page = None
 
     def has_errors(self):
         return False
@@ -21,6 +22,11 @@ class Reactive(Input):
             self.page.set_values(self.value)
         return self.page.render(context)
 
+    def set_value(self, value):
+        self.value = value
+        if hasattr(self, "page") and self.page:
+            self.page.set_values(value)
+
     def serialize_value(self):
         return self.page.serialize_value() if self.page else []
 
@@ -29,14 +35,9 @@ class Reactive(Input):
         self.set_value(props.get("initial_value", {}))
         self.page = None
 
-    def validate(self):
-        errors = []
+    def set_errors(self):
         if self.page:
-            errors.extend(self.page.validate())
-        return errors
-
-    def set_value(self, value):
-        return super().set_value(value)
+            self.page.set_errors()
 
     def parse_value(self, value):
         if self.page:
