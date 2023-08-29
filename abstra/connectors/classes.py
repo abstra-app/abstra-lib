@@ -1,6 +1,4 @@
-import requests
-import os
-from ..utils import get_headers
+import requests, os
 
 DEFAULT_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/connectors/execute"
 EXECUTE_URL = os.getenv("ABSTRA_CONNECTORS_EXECUTE_URL", DEFAULT_EXECUTE_URL)
