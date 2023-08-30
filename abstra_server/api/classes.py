@@ -644,7 +644,7 @@ class WorkspaceJSON:
 
     @property
     def runner_dto(self):
-        return self.__dict__
+        return {**self.__dict__, "logo_url": "/_assets/logo"}
 
     @property
     def editor_dto(self):
