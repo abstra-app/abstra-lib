@@ -11,7 +11,7 @@ class Reactive(Input):
         self.page = None
 
     def has_errors(self):
-        return False
+        return self.page.has_errors() if self.page else False
 
     def render(self, context: dict):
         self.page = self.callback(context)
@@ -20,6 +20,8 @@ class Reactive(Input):
 
         if self.value:
             self.page.set_values(self.value)
+
+        self.page.set_errors()
         return self.page.render(context)
 
     def set_value(self, value):
@@ -28,7 +30,7 @@ class Reactive(Input):
             self.page.set_values(value)
 
     def serialize_value(self):
-        return self.page.serialize_value() if self.page else []
+        return self.page.serialize_value() if self.page else {}
 
     def set_props(self, props):
         self.callback = props.get("callback")
