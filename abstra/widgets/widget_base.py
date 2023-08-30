@@ -54,10 +54,42 @@ class Input(Widget):
     def has_prop_multiple(self):
         return "multiple" in self.__dict__
 
+    def _validate_required(self) -> List[str]:
+        if hasattr(self, "required") and self.required and self.is_value_unset():
+            return [self.i18n.get("error_required_field")]
+
+        return []
+
+    def _validate_number_min_max(self) -> List[str]:
+        if type(self.value) != int and type(self.value) != float:
+            return []
+
+        if hasattr(self, "min") and self.min is not None and self.value < self.min:
+            return [self.i18n.get("error_min_number").format(min=self.min)]
+
+        if hasattr(self, "max") and self.max is not None and self.value > self.max:
+            return [self.i18n.get("error_max_number").format(max=self.max)]
+
+        return []
+
+    def _validate_list_min_max(self) -> List[str]:
+        if type(self.value) != list:
+            return []
+
+        if hasattr(self, "min") and self.min is not None and len(self.value) < self.min:
+            return [self.i18n.get("error_min_list").format(min=self.min)]
+
+        if hasattr(self, "max") and self.max is not None and len(self.value) > self.max:
+            return [self.i18n.get("error_max_list").format(max=self.max)]
+
+        return []
+
     def validate(self) -> List[str]:
         errors = []
-        if hasattr(self, "required") and self.required and self.is_value_unset():
-            errors.append(self.i18n.get("error_required_field"))
+        errors.extend(self._validate_required())
+        errors.extend(self._validate_number_min_max())
+        errors.extend(self._validate_list_min_max())
+
         return errors
 
     def __first_or_list(self, value: List) -> Union[List, Any]:
