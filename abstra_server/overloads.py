@@ -25,16 +25,23 @@ def get_static_session_throwable() -> StaticSession:
     return session
 
 
+def get_user():
+    session = get_live_session_throwable()
+    return flows.get_user(session)
+
+
+def redirect(url, query_params=None):
+    session = get_live_session_throwable()
+    query_params = query_params or session.context.get("query_params", {})
+    session.send(dashes_contract.RedirectMessage(url, query_params))
+
+
+def execute_js(code, context={}):
+    session = get_live_session_throwable()
+    session.send(dashes_contract.ExecuteJSRequestMessage(code, context))
+
+
 def __overload_abstra_dashes_sdk():
-    def get_user():
-        session = get_live_session_throwable()
-        return flows.get_user(session)
-
-    def redirect(url, query_params=None):
-        session = get_live_session_throwable()
-        query_params = query_params or session.context.get("query_params", {})
-        session.send(dashes_contract.RedirectMessage(url, query_params))
-
     def get_query_params():
         session = get_live_session_throwable()
         return session.context.get("query_params", {})
@@ -47,10 +54,6 @@ def __overload_abstra_dashes_sdk():
 
         session.send(dashes_contract.AlertMessage(message, severity))
 
-    def execute_js(code, context={}):
-        session = get_live_session_throwable()
-        session.send(dashes_contract.ExecuteJSRequestMessage(code, context))
-
         while True:
             type, data = session.recv()
             if type != "execute-js:response":
@@ -58,7 +61,6 @@ def __overload_abstra_dashes_sdk():
 
             return data.get("value")
 
-    abstra_dashes.get_user = get_user
     abstra_dashes.redirect = redirect
     abstra_dashes.get_query_params = get_query_params
     abstra_dashes.alert = alert
@@ -92,13 +94,11 @@ def __overload_abstra_forms_sdk():
 
         return broker
 
-    def get_user():
-        session = get_live_session_throwable()
-        return flows.get_user(session)
-
     abstra_forms.socket.get_connection = get_connection
     abstra_forms.auth.get_user = get_user
     abstra_forms.get_user = get_user
+    abstra_forms.redirect = redirect
+    abstra_forms.execute_js = execute_js
 
 
 def __overload_stdio():
