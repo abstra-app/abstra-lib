@@ -118,9 +118,6 @@ class Page(WidgetSchema):
 
             self.update(response["payload"])
 
-            if response.get("action") == "Back":
-                break
-
             if response["type"] != "user-event":
                 self.set_errors()
                 if not self.has_errors():
