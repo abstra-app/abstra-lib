@@ -56,6 +56,9 @@ class Input(Widget):
 
     def _validate_required(self) -> List[str]:
         if hasattr(self, "required") and self.required and self.is_value_unset():
+            if type(self.required) == str:
+                return [self.required]
+
             return [self.i18n.get("error_required_field")]
 
         return []
