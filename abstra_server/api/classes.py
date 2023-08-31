@@ -645,7 +645,7 @@ class WorkspaceJSON:
 
     @property
     def runner_dto(self):
-        if check_is_url(self.logo_url):
+        if isinstance(self.logo_url, str) and check_is_url(self.logo_url):
             logo_url = self.logo_url
         elif self.logo_url:
             logo_url = "/_assets/logo"
