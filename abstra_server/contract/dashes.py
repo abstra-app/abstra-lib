@@ -105,3 +105,10 @@ class ExecuteJSRequestMessage(Message):
 
     def __init__(self, code: str, context: dict):
         super().__init__({"code": code, "context": context})
+
+
+class SetupRefreshIntervalMessage(Message):
+    type = "refresh:setup"
+
+    def __init__(self):
+        super().__init__({})

@@ -1,4 +1,4 @@
-import sys
+import sys, threading, typing
 from abstra import dashes as abstra_dashes
 from abstra import hooks as abstra_hooks
 from abstra import forms as abstra_forms
@@ -61,10 +61,41 @@ def __overload_abstra_dashes_sdk():
 
             return data.get("value")
 
+    def __set_refresh_interval(
+        session: LiveSession,
+        interval: int,
+        user_callback: typing.Optional[typing.Callable],
+    ):
+        def timer_callback():
+            if user_callback:
+                user_callback()
+            if session.connected:
+                session.send(dashes_contract.SetupRefreshIntervalMessage())
+                __set_refresh_interval(session, interval, user_callback)
+
+        timer = threading.Timer(interval, timer_callback)
+        session.context["refresh_interval"] = timer
+        timer.start()
+
+    def start_refresh_interval(
+        interval: int, user_callback: typing.Optional[typing.Callable] = None
+    ):
+        session = get_live_session_throwable()
+        __set_refresh_interval(session, interval, user_callback)
+
+    def stop_refresh_interval():
+        session = get_live_session_throwable()
+        timer = session.context.get("refresh_interval")
+        if timer:
+            timer.cancel()
+            session.context["refresh_interval"] = None
+
     abstra_dashes.redirect = redirect
     abstra_dashes.get_query_params = get_query_params
     abstra_dashes.alert = alert
     abstra_dashes.execute_js = execute_js
+    abstra_dashes.start_refresh_interval = start_refresh_interval
+    abstra_dashes.stop_refresh_interval = stop_refresh_interval
 
 
 def __overload_abstra_hooks_sdk():

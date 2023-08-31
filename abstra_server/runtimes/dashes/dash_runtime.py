@@ -183,6 +183,7 @@ class DashRuntime:
             "widget-input": self.widget_input,
             "widget-event": self.widget_event,
             "browser:try-disconnect": self.log_only,
+            "refresh:request": self.refresh_request,
             "eval": self.eval,
             "widgets-changed": self.widgets_changed,
             "variable-created": self.variable_created,
@@ -221,6 +222,10 @@ class DashRuntime:
             data["widgetId"], data["event"]["type"], data["event"].get("payload", {})
         ):
             self._compute_and_send_widgets_props()
+
+    def refresh_request(self, data):
+        # data: { type: refresh:request }
+        self._compute_and_send_widgets_props()
 
     def log_only(self, _data):
         # data: { type: 'browser:try-disconnect', ... }
