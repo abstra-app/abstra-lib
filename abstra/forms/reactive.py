@@ -20,8 +20,8 @@ class Reactive(Input):
 
         if self.value:
             self.page.set_values(self.value)
+            self.page.set_errors()
 
-        self.page.set_errors()
         return self.page.render(context)
 
     def set_value(self, value):
