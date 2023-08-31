@@ -2,6 +2,7 @@ import sys
 from typing import List, Optional, Union, Any, Dict
 from dataclasses import dataclass
 from pathlib import Path
+from abstra_cli.utils.main import check_is_url
 
 
 @dataclass
@@ -644,7 +645,13 @@ class WorkspaceJSON:
 
     @property
     def runner_dto(self):
-        return {**self.__dict__, "logo_url": "/_assets/logo"}
+        if check_is_url(self.logo_url):
+            logo_url = self.logo_url
+        elif self.logo_url:
+            logo_url = "/_assets/logo"
+        else:
+            logo_url = None
+        return {**self.__dict__, "logo_url": logo_url}
 
     @property
     def editor_dto(self):
