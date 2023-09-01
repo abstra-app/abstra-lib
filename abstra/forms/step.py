@@ -1,6 +1,7 @@
-from typing import List, Union, Callable, Dict, Optional, Tuple
-from .page import Page
+from typing import List, Union, Callable, Dict, Optional
+
 from .page_response import PageResponse
+from .page import Page
 
 Step = Union[Page, Callable]
 Steps = List[Step]

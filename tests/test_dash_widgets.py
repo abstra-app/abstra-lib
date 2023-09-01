@@ -1,12 +1,9 @@
-import unittest, json, shutil
+import unittest, json
 from pathlib import Path
-from .fixtures import init_dir, clear_dir, copy_dir
-from abstra_server.runtimes.dashes.dash_runtime import DashRuntime
-from abstra_server.api.classes import SlotJSON, DashWidgetJSON
-from abstra_server.api import API
-from abstra_server.contract.dashes import Message
-from abstra_server.contract.dashes import WidgetsComputedMessage
-from .utils import assert_dash
+
+from abstra_internals.server.api import API
+from fixtures import init_dir, clear_dir, copy_dir
+from utils import assert_dash
 
 
 class TestDashWidgets(unittest.TestCase):

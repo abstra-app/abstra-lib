@@ -1,7 +1,8 @@
-from typing import Union, Any
-from abstra.widgets.types import PlotlyFigure, PandasDataFrame
-from ..page import Page
 import io
+from typing import Union, Any
+from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame
+
+from ..page import Page
 
 
 def display_file(file: Union[str, io.IOBase], **kwargs):

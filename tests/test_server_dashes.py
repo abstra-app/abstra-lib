@@ -1,11 +1,7 @@
-import tempfile
 import unittest
-from uuid import uuid4 as uuid
 from pathlib import Path
-
-from abstra_server.api import API
-
-from .fixtures import init_dir, clear_dir
+from abstra_internals.server.api import API
+from fixtures import init_dir, clear_dir
 
 
 class TestDashes(unittest.TestCase):

@@ -1,17 +1,16 @@
-from abstra_server.runtimes.forms.message_handler import MessageBroker
-from abstra_server.contract import forms_contract
-from abstra_server.session import LiveSession
 from concurrent.futures import ThreadPoolExecutor
+import queue, typing, unittest
 from collections import deque
 from json import loads, dumps
-import queue, typing, unittest
-from abstra_server.overloads import __overload_abstra_forms_sdk
-from abstra_server.utils import formated_traceback_error_message
-from abstra_server.runtimes.dashes import DashRuntime
-from abstra_server.api.classes import DashJSON
-from abstra_server.contract.dashes import ExecutionIdMessage
 
-__overload_abstra_forms_sdk()
+from abstra_internals.server.api.classes import DashJSON, FormJSON
+from abstra_internals.server.runtimes.dashes import DashRuntime
+from abstra_internals.contract.dashes import ExecutionIdMessage
+from abstra_internals.server.runtimes.forms import run_form
+from abstra_internals.server.overloads import overloads
+from abstra_internals.session import LiveSession
+
+overloads()
 
 
 class MockConnection:
@@ -39,26 +38,6 @@ class MockConnection:
         raise NotImplementedError()
 
 
-def start_form_sync(conn: MockConnection, code: str, session_id: str):
-    try:
-        error = None
-
-        session = LiveSession(conn, "forms", "path")
-        session.id = session_id
-        broker = MessageBroker(session)
-        session.context.update(broker=broker)
-        session.send(forms_contract.SessionIdMessage(session.id))
-        namespace: typing.Dict[str, typing.Any] = {}
-
-        exec(code, namespace, namespace)
-    except Exception as e:
-        print(formated_traceback_error_message(e))
-
-        error = e
-    finally:
-        conn.close(error)
-
-
 def iter_messages(
     conn: MockConnection, msgs: typing.Deque[list], test_case: unittest.TestCase
 ):
@@ -82,13 +61,13 @@ def iter_messages(
 
 
 def assert_form(
-    test_case: unittest.TestCase, code: str, msg_list: list, session_id: str
+    test_case: unittest.TestCase, form_json: FormJSON, msg_list: list, session_id: str
 ):
     msgs: typing.Deque[list] = deque(msg_list)
     executor = ThreadPoolExecutor()
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     conn = MockConnection(browser_msgs)
-    executor.submit(start_form_sync, conn, code, session_id)
+    executor.submit(run_form, conn, form_json, session_id)
 
     for msg in iter_messages(conn, msgs, test_case):
         pass

@@ -45,7 +45,6 @@
           "errors": []
         }
       ],
-      "columns": 1,
       "actions": ["Next"],
       "endProgram": false,
       "reactivePollingInterval": 0,
