@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objs as go
-from abstra.widgets.library import *
+from abstra_internals.widgets.library import *
 
 example_instances = [
     TextInput("text", "What is your name?"),

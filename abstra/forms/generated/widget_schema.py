@@ -1,9 +1,10 @@
 from typing import List, Union, Dict, Any
 import io
+
 from ..reactive import Reactive
-from abstra.widgets.library import *
-from abstra.widgets import Input, Output
-from abstra.widgets.types import PlotlyFigure, PandasDataFrame
+from abstra_internals.widgets.library import *
+from abstra_internals.widgets import Input, Output
+from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame
 
 
 class WidgetSchema:

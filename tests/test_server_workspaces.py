@@ -1,12 +1,7 @@
-import tempfile
-import unittest
-from uuid import uuid4 as uuid
+import tempfile, unittest
 from pathlib import Path
-
-from abstra_server.api import API
-
-from .fixtures import init_dir, clear_dir
-from pathlib import Path
+from abstra_internals.server.api import API
+from fixtures import init_dir, clear_dir
 
 
 class TestWorkspace(unittest.TestCase):

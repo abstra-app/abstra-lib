@@ -1,10 +1,12 @@
-from .socket import send, receive
+from typing import Callable, Dict, Union, List, Optional
+
+from abstra_internals.widgets.prop_check import validate_widget_props
+from abstra_internals.contract import forms_contract
+
 from .generated.widget_schema import WidgetSchema
 from .page_response import PageResponse
-from abstra.widgets.prop_check import validate_widget_props
+from .connection import send, receive
 from .reactive import Reactive
-
-from typing import Callable, Dict, Union, List, Optional
 
 
 class Page(WidgetSchema):
@@ -19,7 +21,6 @@ class Page(WidgetSchema):
     def __init__(
         self,
         actions: Union[str, List[str]] = "Next",
-        columns: float = 1,
         validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
@@ -27,7 +28,6 @@ class Page(WidgetSchema):
     ):
         super().__init__()
         self.__actions = actions
-        self.__columns = columns
         self.__validate = validate
         self.__end_program = end_program
         self.__reactive_polling_interval = reactive_polling_interval
@@ -37,7 +37,6 @@ class Page(WidgetSchema):
     def run(
         self,
         actions: Union[str, List[str]] = "Next",
-        columns: float = 1,
         validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
@@ -48,7 +47,6 @@ class Page(WidgetSchema):
 
         Args:
             button_text: The text of the button that is used to submit the form
-            columns: The number of columns of the form
             end_program: End program whilst showing this page, making this an end page
             reactive_polling_interval: Interval to poll and rerender reactive slots, in seconds (0 to disable)
 
@@ -57,7 +55,6 @@ class Page(WidgetSchema):
         """
 
         actions = actions if actions != "Next" else self.__actions
-        columns = columns if columns != 1 else self.__columns
         end_program = end_program if end_program != False else self.__end_program
         reactive_polling_interval = (
             reactive_polling_interval
@@ -86,7 +83,6 @@ class Page(WidgetSchema):
         if self.__is_progress_screen():
             self.__send_form_message(
                 widgets=rendered_page,
-                columns=columns,
                 actions=[],
                 end_program=end_program,
                 reactive_polling_interval=reactive_polling_interval,
@@ -96,7 +92,6 @@ class Page(WidgetSchema):
 
         self.__send_form_message(
             widgets=rendered_page,
-            columns=columns,
             actions=self.__actions_property(actions, end_program),
             end_program=end_program,
             reactive_polling_interval=reactive_polling_interval,
@@ -114,7 +109,7 @@ class Page(WidgetSchema):
 
     def __handle_page_user_events(self, **kwargs):
         while True:
-            response: Dict = receive()
+            response = receive()
 
             self.update(response["payload"])
 
@@ -183,30 +178,26 @@ class Page(WidgetSchema):
 
     def __send_form_message(
         self,
-        widgets,
-        actions,
-        columns,
-        end_program,
+        widgets: list,
+        actions: list,
+        end_program: bool,
         reactive_polling_interval,
         steps_info,
     ):
         send(
-            {
-                "type": "form",
-                "widgets": widgets,
-                "columns": columns,
-                "actions": actions,
-                "endProgram": end_program,
-                "reactivePollingInterval": reactive_polling_interval,
-                "steps": steps_info,
-            }
+            forms_contract.FormMessage(
+                widgets=widgets,
+                actions=actions,
+                end_program=end_program,
+                reactive_polling_interval=reactive_polling_interval,
+                steps=steps_info,
+            )
         )
 
-    def __send_form_update_message(self, widgets, validation):
+    def __send_form_update_message(self, widgets: list, validation: dict):
         send(
-            {
-                "type": "form-update",
-                "widgets": widgets,
-                "validation": validation,
-            }
+            forms_contract.FormUpdateMessage(
+                widgets=widgets,
+                validation=validation,
+            )
         )

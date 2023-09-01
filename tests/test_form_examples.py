@@ -1,8 +1,7 @@
-import unittest
+from abstra_internals.server.api.classes import FormJSON
+from utils import assert_form
+import unittest, json, os
 from pathlib import Path
-from .utils import assert_form
-import json
-import os
 
 
 class TestFormExamples(unittest.TestCase):
@@ -12,17 +11,17 @@ class TestFormExamples(unittest.TestCase):
     def test_back_and_forth(self):
         code_path = "./resources/test_form_examples/test_back_and_forth/code.py"
         msgs_path = "./resources/test_form_examples/test_back_and_forth/messages.json"
-        code = open(code_path).read()
         msgs = json.load(open(msgs_path))
-        assert_form(self, code, msgs, session_id="session-id")
+        form_json = FormJSON(title="Test Form", path="test_form", file=code_path)
+        assert_form(self, form_json, msgs, session_id="session-id")
 
     # Tests if required errors are correctly sent when field becomes empty
     def test_required_error(self):
         code_path = "./resources/test_form_examples/test_required_error/code.py"
         msgs_path = "./resources/test_form_examples/test_required_error/messages.json"
-        code = open(code_path).read()
         msgs = json.load(open(msgs_path))
-        assert_form(self, code, msgs, session_id="session-id")
+        form_json = FormJSON(title="Test Form", path="test_form", file=code_path)
+        assert_form(self, form_json, msgs, session_id="session-id")
 
     # Tests if required errors are correctly sent when next button is pressed
     def test_required_error_next_page(self):
@@ -32,13 +31,6 @@ class TestFormExamples(unittest.TestCase):
         msgs_path = (
             "./resources/test_form_examples/test_required_error_next_page/messages.json"
         )
-        code = open(code_path).read()
         msgs = json.load(open(msgs_path))
-        assert_form(self, code, msgs, session_id="session-id")
-
-    # def test_list_reactive(self):
-    #     code_path = "./resources/test_run_steps/test_list_reactive/code.py"
-    #     msgs_path = "./resources/test_run_steps/test_list_reactive/messages.json"
-    #     code = open(code_path).read()
-    #     msgs = json.load(open(msgs_path))
-    #     assert_form(self, code, msgs, session_id="session-id")
+        form_json = FormJSON(title="Test Form", path="test_form", file=code_path)
+        assert_form(self, form_json, msgs, session_id="session-id")

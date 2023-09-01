@@ -1,7 +1,11 @@
 from typing import Any, Dict, Union, List
-from abstra.widgets.types import PandasDataFrame
+from abstra_internals.widgets.types import PandasDataFrame
+
 from ..page import Page
-from ..utils import get_single_value
+
+
+def get_single_value(answer: Dict):
+    return list(answer.values())[0]
 
 
 def read_cards(label: str, options: list, **kwargs):

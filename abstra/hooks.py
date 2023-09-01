@@ -1,5 +1,6 @@
+import json
 from io import BytesIO
-import os, json
+from abstra_internals.session import get_static_session_throwable
 
 
 def _app_json_parse(body: str):
@@ -15,21 +16,14 @@ def _multipart_form_parse(body: str, headers: dict):
     return [{"name": i.name, "value": i.value} for i in p]
 
 
-def get_raw_request(local_file="request.json"):
-    try:
-        with open(os.getenv("REQUEST_FILE", local_file), encoding="utf-8") as f:
-            request = json.loads(f.read())
-            body = request["body"]
-            query = request["query"]
-            headers = request["headers"]
-        return body, query, headers
-
-    except Exception:
-        return None, None, None
+def get_raw_request():
+    session = get_static_session_throwable()
+    raw, args, headers = session.context.get("request", (None, None, None))
+    return raw, args, headers
 
 
-def get_request(local_file="request.json"):
-    body, query, headers = get_raw_request(local_file)
+def get_request():
+    body, query, headers = get_raw_request()
     try:
         if "application/json" in headers["Content-Type"]:
             return _app_json_parse(body), query, headers
@@ -41,18 +35,14 @@ def get_request(local_file="request.json"):
         return body, query, headers
 
 
-def send_response(body="", status_code=200, headers={}, local_file="response.json"):
-    response = {"status_code": status_code, "body": body, "headers": headers}
-    path = os.getenv("RESPONSE_FILE", local_file)
-    content = json.dumps(response)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(content)
+def send_response(body="", status_code=200, headers={}):
+    session = get_static_session_throwable()
+    session.context["response"] = (body, status_code, headers)
 
 
-def send_json(data={}, status_code=200, headers={}, local_file="response.json"):
+def send_json(data={}, status_code=200, headers={}):
     send_response(
         body=json.dumps(data, allow_nan=False),
         headers={**headers, "content-type": "application/json"},
         status_code=status_code,
-        local_file=local_file,
     )

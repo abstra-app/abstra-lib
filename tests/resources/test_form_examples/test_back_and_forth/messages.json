@@ -38,7 +38,6 @@
             "actions": [
                 "Next"
             ],
-            "columns": 1,
             "endProgram": false,
             "reactivePollingInterval": 0,
             "steps": {
@@ -61,7 +60,6 @@
         "python",
         {
             "type": "form",
-            "columns": 1,
             "widgets": [
                 {
                     "type": "number-input",
@@ -106,7 +104,6 @@
         "python",
         {
             "type": "form",
-            "columns": 1,
             "widgets": [
                 {
                     "type": "text-output",
@@ -139,7 +136,6 @@
         "python",
         {
             "type": "form",
-            "columns": 1,
             "widgets": [
                 {
                     "type": "number-input",
