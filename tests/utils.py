@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 import queue, typing, unittest
 from collections import deque
 from json import loads, dumps
-
+from pathlib import Path
 from abstra_internals.server.api.classes import DashJSON, FormJSON
 from abstra_internals.server.runtimes.dashes import DashRuntime
 from abstra_internals.contract.dashes import ExecutionIdMessage
@@ -67,7 +67,7 @@ def assert_form(
     executor = ThreadPoolExecutor()
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     conn = MockConnection(browser_msgs)
-    executor.submit(run_form, conn, form_json, session_id)
+    executor.submit(run_form, conn, form_json, Path.cwd(), session_id)
 
     for msg in iter_messages(conn, msgs, test_case):
         pass
