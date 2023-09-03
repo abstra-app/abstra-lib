@@ -1,5 +1,5 @@
 import traceback, flask_sock, typing, pathlib
-
+from pathlib import Path
 from ....session import LiveSession
 from ...api.classes import FormJSON
 from ....contract import forms_contract
@@ -15,9 +15,11 @@ def __wait_start(session: LiveSession):
 def run_form(
     conn: flask_sock.Server,
     form_json: FormJSON,
+    root_path: Path,
     session_id: typing.Optional[str] = None,
 ):
     session = LiveSession(conn, "forms", form_json.path)
+    session.start_files_monitoring(root_path)
     if session_id is not None:
         session.id = session_id
 

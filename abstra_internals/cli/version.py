@@ -1,8 +1,9 @@
 import pkg_resources, os, requests
+from ..utils.environment import is_preview
 
 
 def check_latest_version(package_name="abstra"):
-    if os.environ.get("ABSTRA_ENVIRONMENT") == "production":
+    if not is_preview():
         return
 
     try:
