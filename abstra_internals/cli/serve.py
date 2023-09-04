@@ -26,7 +26,7 @@ def serve(
     check_latest_version()
 
     serve_local(
-        workspace_root=pathlib.Path(workspace_root),
+        workspace_root=pathlib.Path(workspace_root).resolve(),
         port=free_port,
         debug=debug,
         use_reloader=use_reloader,
