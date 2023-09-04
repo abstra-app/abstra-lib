@@ -19,7 +19,6 @@ def run_form(
     session_id: typing.Optional[str] = None,
 ):
     session = LiveSession(conn, "forms", form_json.path)
-    session.start_files_monitoring(root_path)
     if session_id is not None:
         session.id = session_id
 

@@ -1,8 +1,6 @@
 import flask, flask_sock, os, sys
 from ..api import API
 from .utils import send_from_dist
-from ...utils.environment import is_preview
-from ...utils.modules import reload_modules_from_path
 from ..runtimes import run_dash, run_form, run_hook
 
 
@@ -45,8 +43,6 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                if is_preview():
-                    reload_modules_from_path(api.root_path)
                 return run_dash(conn, dash, api.root_path)
 
             form_path = flask.request.args.get("formPath")
@@ -56,8 +52,6 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                if is_preview():
-                    reload_modules_from_path(api.root_path)
                 return run_form(conn, form, api.root_path)
 
         finally:
@@ -99,8 +93,6 @@ def get_player_bp(api: API):
             flask.abort(500)
 
         code = api.read_text_file(hook.file)  # TODO: handle 404
-        if is_preview():
-            reload_modules_from_path(api.root_path)
         body, status, headers = run_hook(flask.request, hook, code)
         return flask.Response(status=status, headers=headers, response=body)
 

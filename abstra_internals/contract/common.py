@@ -2,7 +2,7 @@ class Message:
     type: str
     data: dict
 
-    def __init__(self, data: dict = {}):
+    def __init__(self, data: dict):
         self.data = data
 
     def to_json(self, is_preview: bool):
@@ -63,4 +63,4 @@ class FilesChangedMessage(Message):
     type = "files:changed"
 
     def __init__(self):
-        super().__init__()
+        super().__init__({})
