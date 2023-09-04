@@ -164,7 +164,9 @@ def get_editor_bp(api: API):
         api.delete_hook(path)
         return {"success": True}
 
-    @bp.route("/api/hooks/<path:path>/test")
+    @bp.route(
+        "/api/hooks/<path:path>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"]
+    )
     @usage(api.root_path)
     def test_hook(path: str):
         hook = api.get_hook(path)
