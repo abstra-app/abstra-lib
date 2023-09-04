@@ -3,6 +3,15 @@ class PageResponse(dict):
         self.action = action
         self.data = data
 
+    def __getattr__(self, key):
+        if key in self.data:
+            return self.data[key]
+        else:
+            raise AttributeError(key)
+
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
     def __getitem__(self, key):
         return self.data[key]
 
