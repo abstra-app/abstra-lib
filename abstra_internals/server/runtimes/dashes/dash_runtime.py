@@ -51,7 +51,7 @@ class IfSlottable:
 
 
 class ItemRuntime(ABC):
-    props_errors: Dict[str, Exception]
+    props_errors: Dict[str, str]
     runtime_state: Optional[Union[IfSlottable, Input, Output]]
     props: List[Tuple[str, str]]
     metadata: Union[DashWidgetJSON, SlottableJSON]
@@ -367,7 +367,7 @@ class DashRuntime:
                 self.__compute_widget_variable(widget)
         except Exception as e:
             traceback.print_exc()
-            widget.props_errors["__general__"] = e
+            widget.props_errors["__general__"] = str(e)
 
     def __compute_slot_props(self, slot: ItemRuntime):
         if slot.metadata.type in [i.type for i in input_types] and issubclass(
@@ -381,7 +381,7 @@ class DashRuntime:
                 props[prop] = self.py.ev(expr) if expr else None
             except Exception as e:
                 traceback.print_exc()
-                slot.props_errors[prop] = e
+                slot.props_errors[prop] = str(e)
         slot.set_props(props)
 
     def __compute_widget_variable(self, widget: WidgetRuntime):
