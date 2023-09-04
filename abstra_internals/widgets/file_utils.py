@@ -1,4 +1,7 @@
-import io, tempfile, pathlib, typing
+import io
+import tempfile
+import pathlib
+import typing
 from .apis import upload_file, internal_path
 
 
@@ -32,8 +35,6 @@ def convert_file(file: typing.Union[str, io.BufferedReader, io.TextIOWrapper]) -
     # FileResponse. TODO: check with isinstance without circular import
     if hasattr(file, "file"):
         return upload_file(file.file)
-
-    raise ValueError(f"Cannot convert {type(file)} to file")
 
 
 def download_file(url: str):
