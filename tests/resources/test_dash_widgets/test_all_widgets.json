@@ -209,7 +209,7 @@
                     "fullWidth": false,
                     "displayIndex": false,
                     "disabled": false,
-                    "label": null,
+                    "label": "",
                     "multiple": false,
                     "filterable": false,
                     "value": [],
@@ -405,7 +405,7 @@
                     "hint": null,
                     "fullWidth": false,
                     "max": null,
-                    "char": null,
+                    "char": "⭐️",
                     "disabled": false,
                     "errors": []
                 },
@@ -1811,7 +1811,7 @@
                         }
                     },
                     "fullWidth": false,
-                    "label": null
+                    "label": ""
                 },
                 "6678e279-ec84-4e0d-9fa8-169b6d128c0b": {
                     "type": "number-input",
@@ -1824,7 +1824,6 @@
                     "fullWidth": false,
                     "min": null,
                     "max": null,
-                    "step": null,
                     "disabled": false,
                     "errors": []
                 },
@@ -1906,7 +1905,6 @@
                     "fullWidth": false,
                     "min": null,
                     "max": null,
-                    "step": null,
                     "currency": "USD",
                     "disabled": false,
                     "errors": []
@@ -2058,7 +2056,7 @@
                     },
                     "fullWidth": false,
                     "displayIndex": false,
-                    "label": null,
+                    "label": "",
                     "actions": [],
                     "filterable": false,
                     "editable": false
@@ -2074,7 +2072,7 @@
                     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg",
                     "subtitle": "",
                     "fullWidth": false,
-                    "label": null
+                    "label": ""
                 },
                 "e9d8c098-2140-4f52-8153-43b94d7f5bed": {
                     "type": "phone-input",
@@ -2095,7 +2093,7 @@
                 "f71eaa4f-d1c4-4384-8343-c57a5cad94fd": {
                     "type": "kanban-board-input",
                     "key": null,
-                    "label": null,
+                    "label": "",
                     "value": [],
                     "stages": [
                         {
@@ -2194,7 +2192,7 @@
                 "e9d8c098-2140-4f52-8153-43b94d7f5bed": {},
                 "f71eaa4f-d1c4-4384-8343-c57a5cad94fd": {}
             },
-            "stateTimestamp": 0
+            "seq": 0
         }
     ]
 ]

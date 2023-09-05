@@ -55,7 +55,8 @@
     "browser",
     {
       "type": "user-event",
-      "payload": { "What is your name?": "a", "What is your last name?": "" }
+      "payload": { "What is your name?": "a", "What is your last name?": "" },
+      "seq": 0
     }
   ],
   [
@@ -90,20 +91,23 @@
           "errors": []
         }
       ],
-      "validation": { "status": true, "message": "" }
+      "validation": { "status": true, "message": "" },
+      "seq": 0
     }
   ],
   [
     "browser",
     {
       "type": "user-event",
-      "payload": { "What is your name?": "", "What is your last name?": "" }
+      "payload": { "What is your name?": "", "What is your last name?": "" },
+      "seq": 1
     }
   ],
   [
     "python",
     {
       "type": "form-update",
+      "seq": 1,
       "widgets": [
         {
           "type": "text-input",
@@ -139,13 +143,15 @@
     "browser",
     {
       "type": "user-event",
-      "payload": { "What is your name?": "", "What is your last name?": "a" }
+      "payload": { "What is your name?": "", "What is your last name?": "a" },
+      "seq": 2
     }
   ],
   [
     "python",
     {
       "type": "form-update",
+      "seq": 2,
       "widgets": [
         {
           "type": "text-input",
@@ -181,13 +187,15 @@
     "browser",
     {
       "type": "user-event",
-      "payload": { "What is your name?": "", "What is your last name?": "" }
+      "payload": { "What is your name?": "", "What is your last name?": "" },
+      "seq": 3
     }
   ],
   [
     "python",
     {
       "type": "form-update",
+      "seq": 3,
       "widgets": [
         {
           "type": "text-input",

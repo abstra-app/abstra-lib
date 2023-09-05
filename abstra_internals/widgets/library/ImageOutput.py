@@ -11,15 +11,15 @@ class ImageOutput(Output):
         self.set_props(dict(image=image, **kwargs))
 
     def set_props(self, props):
-        self.image = props.get("image", None)
+        self.image = convert_file(props.get("image", None))
         self.subtitle = props.get("subtitle", "")
         self.full_width = props.get("full_width", False)
-        self.label = props.get("label", None)
+        self.label = props.get("label", "")
 
     def render(self, context: dict):
         return {
             "type": self.type,
-            "imageUrl": convert_file(self.image),
+            "imageUrl": self.image,
             "subtitle": self.subtitle,
             "fullWidth": self.full_width,
             "label": self.label,

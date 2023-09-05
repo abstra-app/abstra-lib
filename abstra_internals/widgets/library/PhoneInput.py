@@ -43,10 +43,8 @@ class PhoneInput(Input):
 
     def validate(self):
         errors = []
-        if (
-            self.required
-            and self.value.country_code == ""
-            or self.value.national_number == ""
+        if self.required and (
+            self.value.country_code == "" or self.value.national_number == ""
         ):
             errors.append(self.i18n.get("error_required_field"))
         return errors

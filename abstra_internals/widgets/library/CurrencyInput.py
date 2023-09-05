@@ -18,7 +18,6 @@ class CurrencyInput(Input):
         self.full_width = props.get("full_width", False)
         self.min = props.get("min")
         self.max = props.get("max")
-        self.step = props.get("step")
         self.currency = props.get("currency", "USD")
         self.disabled = props.get("disabled", False)
 
@@ -34,7 +33,6 @@ class CurrencyInput(Input):
             "fullWidth": self.full_width,
             "min": self.min,
             "max": self.max,
-            "step": self.step,
             "currency": self.currency,
             "disabled": self.disabled,
             "errors": self.errors,

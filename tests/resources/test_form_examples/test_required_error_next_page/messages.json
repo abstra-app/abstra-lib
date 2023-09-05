@@ -57,13 +57,15 @@
       "type": "form-response",
       "payload": { "What is your name?": "", "What is your last name?": "" },
       "action": "Next",
-      "secrets": []
+      "secrets": [],
+      "seq": 0
     }
   ],
   [
     "python",
     {
       "type": "form-update",
+      "seq": 0,
       "widgets": [
         {
           "type": "text-input",

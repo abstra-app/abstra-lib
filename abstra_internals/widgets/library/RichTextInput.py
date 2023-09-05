@@ -10,7 +10,7 @@ class RichTextInput(Input):
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
-        self.label = props.get("label", None)
+        self.label = props.get("label", "")
         self.value = props.get("initial_value", self.empty_value)
         self.required = props.get("required", True)
         self.placeholder = props.get("placeholder", "Your value here")

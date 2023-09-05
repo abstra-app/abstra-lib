@@ -29,7 +29,7 @@
                 "38fe4582-decd-4725-a553-601b7d31219a": {
                     "type": "kanban-board-input",
                     "key": null,
-                    "label": null,
+                    "label": "",
                     "value": [
                         {
                             "key": 1,
@@ -171,13 +171,14 @@
             "errors": {
                 "38fe4582-decd-4725-a553-601b7d31219a": {}
             },
-            "stateTimestamp": 0
+            "seq": 0
         }
     ],
     [
         "browser",
         {
             "type": "widget-input",
+            "seq": 1,
             "widgetId": "38fe4582-decd-4725-a553-601b7d31219a",
             "newValue": [
                 {
@@ -233,7 +234,7 @@
                 "38fe4582-decd-4725-a553-601b7d31219a": {
                     "type": "kanban-board-input",
                     "key": null,
-                    "label": null,
+                    "label": "",
                     "value": [
                         {
                             "key": 1,
@@ -345,7 +346,7 @@
             "errors": {
                 "38fe4582-decd-4725-a553-601b7d31219a": {}
             },
-            "stateTimestamp": 0
+            "seq": 1
         }
     ]
 ]

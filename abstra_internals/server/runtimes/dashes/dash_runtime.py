@@ -164,7 +164,7 @@ class DashRuntime:
     session: LiveSession
     root_slot_runtime: RootRuntime
     dash_json: DashJSON
-    last_timestamp_received: int
+    seq: int
 
     def __init__(self, session: LiveSession, dash_json: DashJSON) -> None:
         code_file_path = dash_json.file
@@ -173,7 +173,7 @@ class DashRuntime:
         self.session = session
         self.root_slot_runtime = RootRuntime(dash_json.layout.slot)
         self.dash_json = dash_json
-        self.last_timestamp_received = 0
+        self.seq = 0
 
     def handle(self, type: str, data):
         handlers = {
@@ -207,7 +207,8 @@ class DashRuntime:
             self.session.close()
 
     def widget_input(self, data):
-        # data: { type: widget-input, widgetId: string, newValue: any }
+        # data: { type: widget-input, widgetId: string, newValue: any, seq: number }
+        self.seq = data["seq"]
         if self.execute_widget_input(data["widgetId"], data["newValue"]):
             self.execute_widget_event(
                 data["widgetId"], "update:value", data["newValue"]
@@ -215,7 +216,8 @@ class DashRuntime:
             self._compute_and_send_widgets_props()
 
     def widget_event(self, data):
-        # data: { type: widget-event, widgetId: string, event: { type: string, payload: any } }
+        # data: { type: widget-event, widgetId: string, event: { type: string, payload: any }, seq: number }
+        self.seq = data["seq"]
         if self.execute_widget_event(
             data["widgetId"], data["event"]["type"], data["event"].get("payload", {})
         ):
@@ -290,7 +292,7 @@ class DashRuntime:
             props=props,
             variables=variables,
             errors=errors,
-            stateTimestamp=self.last_timestamp_received,
+            seq=self.seq,
         )
 
     def _compute_and_send_widgets_props(self):

@@ -19,7 +19,7 @@ class PandasRowSelectionInput(Input):
         self.full_width = props.get("full_width", False)
         self.display_index = props.get("display_index", False)
         self.disabled = props.get("disabled", False)
-        self.label = props.get("label", None)
+        self.label = props.get("label", "")
         self.filterable = props.get("filterable", False)
         self.multiple = props.get("multiple", False)
         self.empty_value = [] if self.multiple else None

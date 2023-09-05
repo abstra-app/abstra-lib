@@ -132,6 +132,7 @@ class Page(WidgetSchema):
                 validation=self.__build_validation_object(
                     validation=kwargs.get("validate"), payload=parsed_payload
                 ),
+                event_seq=response["seq"],
             )
 
         return response
@@ -194,10 +195,13 @@ class Page(WidgetSchema):
             )
         )
 
-    def __send_form_update_message(self, widgets: list, validation: dict):
+    def __send_form_update_message(
+        self, widgets: list, validation: dict, event_seq: int
+    ):
         send(
             forms_contract.FormUpdateMessage(
                 widgets=widgets,
                 validation=validation,
+                event_seq=event_seq,
             )
         )

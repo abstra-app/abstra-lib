@@ -31,7 +31,6 @@
                     ],
                     "min": null,
                     "max": null,
-                    "step": null,
                     "disabled": false
                 }
             ],
@@ -74,7 +73,6 @@
                     "fullWidth": false,
                     "min": null,
                     "max": null,
-                    "step": null,
                     "disabled": false
                 }
             ],
@@ -150,7 +148,6 @@
                     "fullWidth": false,
                     "min": null,
                     "max": null,
-                    "step": null,
                     "disabled": false
                 }
             ],

@@ -11,14 +11,14 @@ class FileOutput(Output):
         self.set_props(dict(file=file, **kwargs))
 
     def set_props(self, props):
-        self.file = props.get("file", "")
+        self.file = convert_file(props.get("file", ""))
         self.download_text = props.get("download_text", "Download")
         self.full_width = props.get("full_width", False)
 
     def render(self, context: dict):
         return {
             "type": self.type,
-            "fileUrl": convert_file(self.file),
+            "fileUrl": self.file,
             "downloadText": self.download_text,
             "fullWidth": self.full_width,
         }
