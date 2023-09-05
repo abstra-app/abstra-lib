@@ -85,7 +85,7 @@ class KanbanBoardInput(Input):
         self.set_props(kwargs)
 
     def set_props(self, kwargs):
-        self.label = kwargs.get("label", None)
+        self.label = kwargs.get("label", "")
         self.disabled = kwargs.get("disabled", False)
         self.stages = list(
             map(

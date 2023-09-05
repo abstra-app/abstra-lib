@@ -16,7 +16,7 @@ class RatingInput(Input):
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)
         self.max = props.get("max")
-        self.char = props.get("char")
+        self.char = props.get("char", "⭐️")
         self.disabled = props.get("disabled", False)
 
     def render(self, context: dict):

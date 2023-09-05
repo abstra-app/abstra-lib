@@ -18,7 +18,6 @@ class NumberInput(Input):
         self.full_width = props.get("full_width", False)
         self.min = props.get("min")
         self.max = props.get("max")
-        self.step = props.get("step")
         self.disabled = props.get("disabled", False)
 
     def render(self, context: dict):
@@ -33,7 +32,6 @@ class NumberInput(Input):
             "fullWidth": self.full_width,
             "min": self.min,
             "max": self.max,
-            "step": self.step,
             "disabled": self.disabled,
             "errors": self.errors,
         }

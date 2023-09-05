@@ -96,7 +96,7 @@
                     "fullWidth": false,
                     "displayIndex": false,
                     "disabled": false,
-                    "label": null,
+                    "label": "",
                     "multiple": false,
                     "filterable": false,
                     "value": [],
@@ -116,13 +116,14 @@
                 "ad0486dd-b839-4532-9e50-418f7d6be8d4": {},
                 "ec23a29a-c2c1-4872-a4a2-69f5850529c7": {}
             },
-            "stateTimestamp": 0
+            "seq": 0
         }
     ],
     [
         "browser",
         {
             "type": "widget-input",
+            "seq": 0,
             "widgetId": "ad0486dd-b839-4532-9e50-418f7d6be8d4",
             "newValue": [
                 {
@@ -204,7 +205,7 @@
                     "fullWidth": false,
                     "displayIndex": false,
                     "disabled": false,
-                    "label": null,
+                    "label": "",
                     "multiple": false,
                     "filterable": false,
                     "value": [
@@ -234,7 +235,7 @@
                 "ad0486dd-b839-4532-9e50-418f7d6be8d4": {},
                 "ec23a29a-c2c1-4872-a4a2-69f5850529c7": {}
             },
-            "stateTimestamp": 0
+            "seq": 0
         }
     ]
 ]

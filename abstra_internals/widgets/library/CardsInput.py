@@ -14,7 +14,10 @@ class CardsInput(Input):
 
     def set_props(self, props):
         self.label = props.get("label", "Label")
-        self.options = props.get("options", [])
+        self.options = [
+            {**opt, "image": convert_file(opt.get("image"))}
+            for opt in props.get("options", [])
+        ]
         self.searchable = props.get("searchable", False)
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
@@ -32,9 +35,7 @@ class CardsInput(Input):
             "key": self.key,
             "label": self.label,
             "hint": self.hint,
-            "options": [
-                {**opt, "image": convert_file(opt.get("image"))} for opt in self.options
-            ],
+            "options": self.options,
             "multiple": self.multiple,
             "searchable": self.searchable,
             "value": self.serialize_value(),

@@ -51,9 +51,7 @@ def to_generic_type(type):
 
 def validate_widget_props(widget):
     metadata_widget = metadata_objects[widget["type"]]
-    required_props = [
-        prop for prop in metadata_widget.brokerAPI.params if not prop.isOptional
-    ]
+    required_props = [prop for prop in metadata_widget.brokerAPI.params]
 
     for prop in required_props:
         prop_name = prop.argName

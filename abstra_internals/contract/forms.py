@@ -34,11 +34,12 @@ class CloseMessage(Message):
 class FormUpdateMessage(Message):
     type = "form-update"
 
-    def __init__(self, widgets: typing.List, validation: typing.Dict):
+    def __init__(self, widgets: typing.List, validation: typing.Dict, event_seq: int):
         super().__init__(
             {
                 "widgets": widgets,
                 "validation": validation,
+                "seq": event_seq,
             }
         )
 

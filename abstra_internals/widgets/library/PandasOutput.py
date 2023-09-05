@@ -13,7 +13,7 @@ class PandasOutput(Output):
         self.df = props.get("df", "")
         self.full_width = props.get("full_width", False)
         self.display_index = props.get("display_index", False)
-        self.label = props.get("label", None)
+        self.label = props.get("label", "")
         self.actions = props.get("actions", [])
         self.filterable = props.get("filterable", False)
         self.editable = props.get("editable", False)

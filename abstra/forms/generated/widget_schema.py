@@ -89,7 +89,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          list, any: The options/option selected by the user
+          The options/option selected by the user
         """
 
         key = kwargs.pop("key", label)
@@ -104,7 +104,7 @@ class WidgetSchema:
                 label (str): The label to display to the user
 
         Keyword Args:
-                initial_value (str): The initial value to display to the user. Defaults to None.
+                initial_value (str): The initial value to display to the user.
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -113,7 +113,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          list(str) or list(float): The value entered by the user
+          The value entered by the user
         """
 
         key = kwargs.pop("key", label)
@@ -138,7 +138,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          list or any: The value entered by the user
+          The selected values
         """
 
         key = kwargs.pop("key", label)
@@ -164,7 +164,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          list(str) or list(float): The value entered by the user
+          The value entered by the user
         """
 
         key = kwargs.pop("key", label)
@@ -234,7 +234,6 @@ class WidgetSchema:
                 placeholder (str): The placeholder text to display to the user. Defaults to "Insert the amount here".
                 min (float): The minimum value allowed, eg. "0". Defaults to None.
                 max (float): The maximum value allowed, eg. "100". Defaults to None.
-                step (float): The value to be incremented or decremented while using the input button. Defaults to None.
                 currency (str): The currency to display to the user, eg. "USD", "BRL, "EUR", "GBP". Defaults to "USD".
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -268,7 +267,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          any: The custom response
+          The custom response
         """
 
         default_key = kwargs.get("label") or self.__get_next_result_key()
@@ -413,11 +412,10 @@ class WidgetSchema:
                 item_schema (Any): The schema for the items of the list
 
         Keyword Args:
-                initial_value (Any): The initial value to display to the user. Defaults to [{}].
-                hint (str): A tooltip displayed to the user. Defaults to None.
+                initial_value (array): ''
                 min (float): Min value accepted by the input. Defaults to None.
                 max (float): Max value accepted by the input. Defaults to None.
-                add_button_text (str): Label to be displayed on the add button. Defaults to "+".
+                add_button_text (str): ''
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -455,7 +453,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          list or any: The values/value selected by the user
+          The values/value selected by the user
         """
 
         key = kwargs.pop("key", label)
@@ -502,7 +500,6 @@ class WidgetSchema:
                 placeholder (str): The placeholder text to display to the user. Defaults to "Insert a number".
                 min (float): Min value accepted by the input. Defaults to None.
                 max (float): Max value accepted by the input. Defaults to None.
-                step (float): The value to be incremented or decremented while using the input button. Defaults to None.
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -701,7 +698,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          list(str) or list(float): The value entered by the user
+          The values entered by the user
         """
 
         key = kwargs.pop("key", label)
@@ -803,7 +800,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          bool: if the toggle was checked
+          The toggle value
         """
 
         key = kwargs.pop("key", label)

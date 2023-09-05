@@ -67,15 +67,10 @@ class WidgetsComputedMessage(Message):
         props: dict,
         variables: dict,
         errors: dict,
-        stateTimestamp: typing.Union[int, str],
+        seq: int,
     ):
         super().__init__(
-            {
-                "props": props,
-                "variables": variables,
-                "errors": errors,
-                "stateTimestamp": stateTimestamp,
-            }
+            {"props": props, "variables": variables, "errors": errors, "seq": seq}
         )
 
 

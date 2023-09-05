@@ -46,7 +46,7 @@
             "errors": {
                 "688ef481-bf1f-495f-9a45-3b6f0791ee7e": {}
             },
-            "stateTimestamp": 0
+            "seq": 0
         }
     ],
     [
@@ -54,13 +54,15 @@
         {
             "type": "widget-input",
             "widgetId": "688ef481-bf1f-495f-9a45-3b6f0791ee7e",
-            "newValue": "new value"
+            "newValue": "new value",
+            "seq": 0
         }
     ],
     [
         "python",
         {
             "type": "widgets-computed",
+            "seq": 0,
             "props": {
                 "688ef481-bf1f-495f-9a45-3b6f0791ee7e": {
                     "type": "text-input",
@@ -81,8 +83,7 @@
             },
             "errors": {
                 "688ef481-bf1f-495f-9a45-3b6f0791ee7e": {}
-            },
-            "stateTimestamp": 0
+            }
         }
     ]
 ]

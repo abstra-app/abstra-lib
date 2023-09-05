@@ -1428,14 +1428,14 @@
                         }
                     },
                     "fullWidth": false,
-                    "label": null
+                    "label": ""
                 }
             },
             "variables": {},
             "errors": {
                 "99e8f368-74a3-4bf4-9e1a-c51615848b96": {}
             },
-            "stateTimestamp": 0
+            "seq": 0
         }
     ]
 ]
