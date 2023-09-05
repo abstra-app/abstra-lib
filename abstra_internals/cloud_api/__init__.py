@@ -12,7 +12,7 @@ def create_build(headers: dict) -> dict:
 
 def update_build(build_id: str, headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/builds/{build_id}"
-    return requests.patch(url=url, headers=headers).json()
+    requests.patch(url=url, headers=headers)
 
 
 def get_auth_info(headers: dict) -> dict:
