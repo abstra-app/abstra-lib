@@ -425,7 +425,7 @@
             "rowStart": 12,
             "rowEnd": 15,
             "props": {
-              "label": "\"Select your preference\"",
+              "label": "\"\"",
               "options": "[\n    {\n      \"label\": \"Option 1\",\n      \"value\": 1,\n    },\n    {\n      \"label\": \"Option 2\",\n      \"value\": 2,\n    },\n  ]"
             },
             "events": {},

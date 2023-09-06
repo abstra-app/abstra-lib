@@ -1,13 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import Any, List, Union
-from . import i18n
 
 
 class Widget(ABC):
-    def __init__(self, i18n_lang="en_us") -> None:
-        super().__init__()
-        self.i18n = i18n.Provider(lang=i18n_lang)
-
     @abstractmethod
     def render(self, ctx: dict):
         raise NotImplementedError("render not implemented")
@@ -59,7 +54,7 @@ class Input(Widget):
             if type(self.required) == str:
                 return [self.required]
 
-            return [self.i18n.get("error_required_field")]
+            return ["i18n_error_required_field"]
 
         return []
 
@@ -68,10 +63,10 @@ class Input(Widget):
             return []
 
         if hasattr(self, "min") and self.min is not None and self.value < self.min:
-            return [self.i18n.get("error_min_number").format(min=self.min)]
+            return ["i18n_error_min_number"]
 
         if hasattr(self, "max") and self.max is not None and self.value > self.max:
-            return [self.i18n.get("error_max_number").format(max=self.max)]
+            return ["i18n_error_max_number"]
 
         return []
 
@@ -80,10 +75,10 @@ class Input(Widget):
             return []
 
         if hasattr(self, "min") and self.min is not None and len(self.value) < self.min:
-            return [self.i18n.get("error_min_list").format(min=self.min)]
+            return ["i18n_error_min_list"]
 
         if hasattr(self, "max") and self.max is not None and len(self.value) > self.max:
-            return [self.i18n.get("error_max_list").format(max=self.max)]
+            return ["i18n_error_max_list"]
 
         return []
 

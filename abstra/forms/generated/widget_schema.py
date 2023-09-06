@@ -231,7 +231,7 @@ class WidgetSchema:
 
         Keyword Args:
                 initial_value (str): The initial value to display to the user. Defaults to 0.
-                placeholder (str): The placeholder text to display to the user. Defaults to "Insert the amount here".
+                placeholder (str): The placeholder text to display to the user. Defaults to "".
                 min (float): The minimum value allowed, eg. "0". Defaults to None.
                 max (float): The maximum value allowed, eg. "100". Defaults to None.
                 currency (str): The currency to display to the user, eg. "USD", "BRL, "EUR", "GBP". Defaults to "USD".
@@ -335,7 +335,7 @@ class WidgetSchema:
 
         Keyword Args:
                 initial_value (str): The initial value to display to the user. Defaults to "".
-                placeholder (str): The placeholder text to display to the user. Defaults to "Your email here".
+                placeholder (str): The placeholder text to display to the user. Defaults to "".
                 invalid_email_message (str): Invalid e-mail message
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -497,7 +497,7 @@ class WidgetSchema:
 
         Keyword Args:
                 initial_value (str): The initial value to display to the user. Defaults to 0.
-                placeholder (str): The placeholder text to display to the user. Defaults to "Insert a number".
+                placeholder (str): The placeholder text to display to the user. Defaults to "".
                 min (float): Min value accepted by the input. Defaults to None.
                 max (float): Max value accepted by the input. Defaults to None.
                 disabled (bool): whether the input is disabled. Defaults to False.
@@ -689,7 +689,7 @@ class WidgetSchema:
 
         Keyword Args:
                 initial_value (list): The initial value to display to the user. Defaults to [].
-                placeholder (str): The placeholder text to display to the user. Defaults to "Your answer here".
+                placeholder (str): The placeholder text to display to the user. Defaults to "".
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -740,7 +740,7 @@ class WidgetSchema:
 
         Keyword Args:
                 initial_value (str): The initial value to display to the user. Defaults to "".
-                placeholder (str): The placeholder text to display to the user. Defaults to "Your answer here".
+                placeholder (str): The placeholder text to display to the user. Defaults to "".
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.

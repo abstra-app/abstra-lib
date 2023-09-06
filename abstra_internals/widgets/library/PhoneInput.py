@@ -23,7 +23,7 @@ class PhoneInput(Input):
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
         self.invalid_message = props.get(
-            "invalid_message", self.i18n.get("error_invalid_phone_number")
+            "invalid_message", "i18n_error_invalid_phone_number"
         )
 
     def render(self, context: dict):
@@ -46,7 +46,7 @@ class PhoneInput(Input):
         if self.required and (
             self.value.country_code == "" or self.value.national_number == ""
         ):
-            errors.append(self.i18n.get("error_required_field"))
+            errors.append("i18n_error_required_field")
         return errors
 
     def is_value_unset(self):

@@ -17,9 +17,7 @@ class CnpjInput(Input):
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
-        self.invalid_message = props.get(
-            "invalid_message", self.i18n.get("error_invalid_cnpj")
-        )
+        self.invalid_message = props.get("invalid_message", "i18n_error_invalid_cnpj")
 
     def render(self, context: dict):
         return {

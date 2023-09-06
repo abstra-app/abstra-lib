@@ -32,7 +32,7 @@ def read_cards(label: str, options: list, **kwargs):
       The options/option selected by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(
         Page().read_cards(label, options, **kwargs).run(button_text)
     )
@@ -57,7 +57,7 @@ def read_checkbox(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_checkbox(label, **kwargs).run(button_text))
 
 
@@ -81,7 +81,7 @@ def read_checklist(label: str, options: list, **kwargs):
       The selected values
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(
         Page().read_checklist(label, options, **kwargs).run(button_text)
     )
@@ -108,7 +108,7 @@ def read_cnpj(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_cnpj(label, **kwargs).run(button_text))
 
 
@@ -132,7 +132,7 @@ def read_code(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_code(label, **kwargs).run(button_text))
 
 
@@ -157,7 +157,7 @@ def read_cpf(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_cpf(label, **kwargs).run(button_text))
 
 
@@ -169,7 +169,7 @@ def read_currency(label: str, **kwargs):
 
     Keyword Args:
             initial_value (str): The initial value to display to the user. Defaults to 0.
-            placeholder (str): The placeholder text to display to the user. Defaults to "Insert the amount here".
+            placeholder (str): The placeholder text to display to the user. Defaults to "".
             min (float): The minimum value allowed, eg. "0". Defaults to None.
             max (float): The maximum value allowed, eg. "100". Defaults to None.
             currency (str): The currency to display to the user, eg. "USD", "BRL, "EUR", "GBP". Defaults to "USD".
@@ -184,7 +184,7 @@ def read_currency(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_currency(label, **kwargs).run(button_text))
 
 
@@ -207,7 +207,7 @@ def read_custom(html_body: str, **kwargs):
       The custom response
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_custom(html_body, **kwargs).run(button_text))
 
 
@@ -230,7 +230,7 @@ def read_date(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_date(label, **kwargs).run(button_text))
 
 
@@ -256,7 +256,7 @@ def read_dropdown(label: str, options: list, **kwargs):
       The value selected by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(
         Page().read_dropdown(label, options, **kwargs).run(button_text)
     )
@@ -270,7 +270,7 @@ def read_email(label: str, **kwargs):
 
     Keyword Args:
             initial_value (str): The initial value to display to the user. Defaults to "".
-            placeholder (str): The placeholder text to display to the user. Defaults to "Your email here".
+            placeholder (str): The placeholder text to display to the user. Defaults to "".
             invalid_email_message (str): Invalid e-mail message
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
@@ -283,7 +283,7 @@ def read_email(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_email(label, **kwargs).run(button_text))
 
 
@@ -308,7 +308,7 @@ def read_file(label: str, **kwargs):
       A dict containing the file uploaded by the user FileResponse(file: TemporaryFile, url: str, content: bytes) or a list of FileResponses in case of multiple flag set as True. ⚠️ The url expires after 48 hours
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_file(label, **kwargs).run(button_text))
 
 
@@ -333,7 +333,7 @@ def read_image(label: str, **kwargs):
       A dict containing the image file uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of images in case of multiple flag set as True
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_image(label, **kwargs).run(button_text))
 
 
@@ -359,7 +359,7 @@ def read_list(item_schema: Any, **kwargs):
       The values entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_list(item_schema, **kwargs).run(button_text))
 
 
@@ -386,7 +386,7 @@ def read_multiple_choice(label: str, options: list, **kwargs):
       The values/value selected by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(
         Page().read_multiple_choice(label, options, **kwargs).run(button_text)
     )
@@ -415,7 +415,7 @@ def read_nps(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_nps(label, **kwargs).run(button_text))
 
 
@@ -427,7 +427,7 @@ def read_number(label: str, **kwargs):
 
     Keyword Args:
             initial_value (str): The initial value to display to the user. Defaults to 0.
-            placeholder (str): The placeholder text to display to the user. Defaults to "Insert a number".
+            placeholder (str): The placeholder text to display to the user. Defaults to "".
             min (float): Min value accepted by the input. Defaults to None.
             max (float): Max value accepted by the input. Defaults to None.
             disabled (bool): whether the input is disabled. Defaults to False.
@@ -441,7 +441,7 @@ def read_number(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_number(label, **kwargs).run(button_text))
 
 
@@ -467,7 +467,7 @@ def read_number_slider(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_number_slider(label, **kwargs).run(button_text))
 
 
@@ -493,7 +493,7 @@ def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
       The list of selected rows
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(
         Page().read_pandas_row_selection(df, **kwargs).run(button_text)
     )
@@ -527,7 +527,7 @@ def read_password(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_password(label, **kwargs).run(button_text))
 
 
@@ -552,7 +552,7 @@ def read_phone(label: str, **kwargs):
       A dict containing the value entered by the user ({"country_code": str, "national_number": str})
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_phone(label, **kwargs).run(button_text))
 
 
@@ -577,7 +577,7 @@ def read_rating(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_rating(label, **kwargs).run(button_text))
 
 
@@ -601,7 +601,7 @@ def read_richtext(label: str, **kwargs):
       The rich text value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_richtext(label, **kwargs).run(button_text))
 
 
@@ -613,7 +613,7 @@ def read_tag(label: str, **kwargs):
 
     Keyword Args:
             initial_value (list): The initial value to display to the user. Defaults to [].
-            placeholder (str): The placeholder text to display to the user. Defaults to "Your answer here".
+            placeholder (str): The placeholder text to display to the user. Defaults to "".
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
@@ -625,7 +625,7 @@ def read_tag(label: str, **kwargs):
       The values entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_tag(label, **kwargs).run(button_text))
 
 
@@ -650,7 +650,7 @@ def read(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read(label, **kwargs).run(button_text))
 
 
@@ -662,7 +662,7 @@ def read_textarea(label: str, **kwargs):
 
     Keyword Args:
             initial_value (str): The initial value to display to the user. Defaults to "".
-            placeholder (str): The placeholder text to display to the user. Defaults to "Your answer here".
+            placeholder (str): The placeholder text to display to the user. Defaults to "".
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
@@ -674,7 +674,7 @@ def read_textarea(label: str, **kwargs):
       The value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_textarea(label, **kwargs).run(button_text))
 
 
@@ -698,7 +698,7 @@ def read_time(label: str, **kwargs):
       A datetime.time object representing the value entered by the user
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_time(label, **kwargs).run(button_text))
 
 
@@ -723,7 +723,7 @@ def read_toggle(label: str, **kwargs):
       The toggle value
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_toggle(label, **kwargs).run(button_text))
 
 
@@ -748,5 +748,5 @@ def read_video(label: str, **kwargs):
       A dict containing the video uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of videos in case of multiple flag set as True
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_video(label, **kwargs).run(button_text))

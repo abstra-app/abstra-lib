@@ -20,7 +20,7 @@ def display_file(file: Union[str, io.IOBase], **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return Page().display_file(file, **kwargs).run(button_text, end_program=end_program)
 
@@ -39,7 +39,7 @@ def display_html(html: str, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return Page().display_html(html, **kwargs).run(button_text, end_program=end_program)
 
@@ -60,7 +60,7 @@ def display_iframe(url_or_html: str, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page()
@@ -85,7 +85,7 @@ def display_image(image: Union[str, io.IOBase], **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page().display_image(image, **kwargs).run(button_text, end_program=end_program)
@@ -106,7 +106,7 @@ def display_latex(text: str, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page().display_latex(text, **kwargs).run(button_text, end_program=end_program)
@@ -129,7 +129,7 @@ def display_link(link_url: str, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page()
@@ -152,7 +152,7 @@ def display_markdown(text: str, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page()
@@ -179,7 +179,7 @@ def display_pandas(df: PandasDataFrame, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return Page().display_pandas(df, **kwargs).run(button_text, end_program=end_program)
 
@@ -199,7 +199,7 @@ def display_plotly(fig: PlotlyFigure, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page().display_plotly(fig, **kwargs).run(button_text, end_program=end_program)
@@ -222,7 +222,7 @@ def display_progress(current: float, total: float, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return (
         Page()
@@ -246,6 +246,6 @@ def display(text: str, **kwargs):
 
     """
 
-    button_text = kwargs.get("button_text", "Next")
+    button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return Page().display(text, **kwargs).run(button_text, end_program=end_program)

@@ -18,7 +18,7 @@ class DropdownInput(Input):
         self.options = props.get("options", [])
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
-        self.placeholder = props.get("placeholder", "Select your preference")
+        self.placeholder = props.get("placeholder", "")
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
         self.multiple = props.get("multiple", False)

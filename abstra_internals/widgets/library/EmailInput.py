@@ -14,7 +14,7 @@ class EmailInput(Input):
         self.value = props.get("initial_value", self.empty_value)
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
-        self.placeholder = props.get("placeholder", "Your email here")
+        self.placeholder = props.get("placeholder", "")
         self.full_width = props.get("full_width", False)
         self.invalid_email_message = props.get(
             "invalid_email_message", "Hmm… doesn't look like an email"
