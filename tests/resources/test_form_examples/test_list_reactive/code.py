@@ -123,7 +123,7 @@ def enterVariants():
 
 
 def pageToGoBack():
-    return Page().display("Next Page. Go back if needed")
+    return Page().display("i18n_next_action Page. Go back if needed")
 
 
 enterVariants().run()

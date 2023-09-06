@@ -50,7 +50,7 @@
           "value": []
         }
       ],
-      "actions": ["Next"],
+      "actions": ["i18n_next_action"],
       "endProgram": false,
       "reactivePollingInterval": 0,
       "steps": null

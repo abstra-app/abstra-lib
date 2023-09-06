@@ -58,14 +58,14 @@ def run_steps(steps: Steps) -> StepsResponse:
         raise ValueError("First step needs to be a Page")
     response = run_page(steps, first_step, executed_steps, responses)
 
-    while steps_to_execute or response.action == "Back":
-        if steps_to_execute and response.action != "Back":
+    while steps_to_execute or response.action == "i18n_back_action":
+        if steps_to_execute and response.action != "i18n_back_action":
             next_page = execute_functions(steps_to_execute, executed_steps, responses)
             if not next_page:
                 break
             response = run_page(steps, next_page, executed_steps, responses)
 
-        if response.action == "Back":
+        if response.action == "i18n_back_action":
             response = go_back(steps, steps_to_execute, executed_steps, responses)
 
     return responses
@@ -124,7 +124,7 @@ def run_page(
         next_page.run(steps_info=steps_info, context=responses.acc)
         if steps_info["current"] == 1
         else next_page.run(
-            actions=["Back", "Next"],
+            actions=["i18n_back_action", "i18n_next_action"],
             steps_info=steps_info,
             context=responses.acc,
         )
@@ -146,7 +146,7 @@ def run_back_page(
         next_page.run(context=old_response, steps_info=steps_info)
         if steps_info["current"] == 1
         else next_page.run(
-            actions=["Back", "Next"],
+            actions=["i18n_back_action", "i18n_next_action"],
             context=old_response,
             steps_info=steps_info,
         )

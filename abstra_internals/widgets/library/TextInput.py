@@ -13,7 +13,7 @@ class TextInput(Input):
         self.label = props.get("label", "")
         self.required = props.get("required", True)
         self.value = props.get("initial_value", self.empty_value)
-        self.placeholder = props.get("placeholder", "Your value here")
+        self.placeholder = props.get("placeholder", "")
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)
         self.mask = props.get("mask", None)

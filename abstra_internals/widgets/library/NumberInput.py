@@ -14,7 +14,7 @@ class NumberInput(Input):
         self.value = props.get("initial_value", 0)
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
-        self.placeholder = props.get("placeholder", "Insert a number")
+        self.placeholder = props.get("placeholder", "")
         self.full_width = props.get("full_width", False)
         self.min = props.get("min")
         self.max = props.get("max")

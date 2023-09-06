@@ -23,7 +23,7 @@
                     "key": "a",
                     "label": "a",
                     "value": 0,
-                    "placeholder": "Insert a number",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -35,7 +35,7 @@
                 }
             ],
             "actions": [
-                "Next"
+                "i18n_next_action"
             ],
             "endProgram": false,
             "reactivePollingInterval": 0,
@@ -52,7 +52,7 @@
             "payload": {
                 "a": 1
             },
-            "action": "Next"
+            "action": "i18n_next_action"
         }
     ],
     [
@@ -67,7 +67,7 @@
                     "key": "b",
                     "label": "b",
                     "value": 0,
-                    "placeholder": "Insert a number",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -77,8 +77,8 @@
                 }
             ],
             "actions": [
-                "Back",
-                "Next"
+                "i18n_back_action",
+                "i18n_next_action"
             ],
             "endProgram": false,
             "reactivePollingInterval": 0,
@@ -95,7 +95,7 @@
             "payload": {
                 "b": 2
             },
-            "action": "Next"
+            "action": "i18n_next_action"
         }
     ],
     [
@@ -111,8 +111,8 @@
                 }
             ],
             "actions": [
-                "Back",
-                "Next"
+                "i18n_back_action",
+                "i18n_next_action"
             ],
             "endProgram": false,
             "reactivePollingInterval": 0,
@@ -127,7 +127,7 @@
         {
             "type": "form-response",
             "payload": {},
-            "action": "Back"
+            "action": "i18n_back_action"
         }
     ],
     [
@@ -140,7 +140,7 @@
                     "key": "b",
                     "label": "b",
                     "value": 2,
-                    "placeholder": "Insert a number",
+                    "placeholder": "",
                     "errors": [
                     ],
                     "required": true,
@@ -152,8 +152,8 @@
                 }
             ],
             "actions": [
-                "Back",
-                "Next"
+                "i18n_back_action",
+                "i18n_next_action"
             ],
             "endProgram": false,
             "reactivePollingInterval": 0,

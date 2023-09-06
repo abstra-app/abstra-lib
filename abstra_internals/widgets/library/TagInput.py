@@ -13,7 +13,7 @@ class TagInput(Input):
     def set_props(self, props):
         self.label = props.get("label", "Label")
         self.value = props.get("initial_value", self.empty_value)
-        self.placeholder = props.get("placeholder", "Your value here")
+        self.placeholder = props.get("placeholder", "")
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)

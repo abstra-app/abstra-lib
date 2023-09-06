@@ -23,7 +23,7 @@
           "key": "What is your name?",
           "label": "What is your name?",
           "value": "",
-          "placeholder": "Your value here",
+          "placeholder": "",
           "required": true,
           "hint": null,
           "fullWidth": false,
@@ -36,7 +36,7 @@
           "key": "What is your last name?",
           "label": "What is your last name?",
           "value": "",
-          "placeholder": "Your value here",
+          "placeholder": "",
           "required": true,
           "hint": null,
           "fullWidth": false,
@@ -45,7 +45,7 @@
           "errors": []
         }
       ],
-      "actions": ["Next"],
+      "actions": ["i18n_next_action"],
       "endProgram": false,
       "reactivePollingInterval": 0,
       "steps": null
@@ -56,7 +56,7 @@
     {
       "type": "form-response",
       "payload": { "What is your name?": "", "What is your last name?": "" },
-      "action": "Next",
+      "action": "i18n_next_action",
       "secrets": [],
       "seq": 0
     }
@@ -72,26 +72,26 @@
           "key": "What is your name?",
           "label": "What is your name?",
           "value": "",
-          "placeholder": "Your value here",
+          "placeholder": "",
           "required": true,
           "hint": null,
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["This field is required."]
+          "errors": ["i18n_error_required_field"]
         },
         {
           "type": "text-input",
           "key": "What is your last name?",
           "label": "What is your last name?",
           "value": "",
-          "placeholder": "Your value here",
+          "placeholder": "",
           "required": true,
           "hint": null,
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["This field is required."]
+          "errors": ["i18n_error_required_field"]
         }
       ],
       "validation": { "status": true, "message": "" }

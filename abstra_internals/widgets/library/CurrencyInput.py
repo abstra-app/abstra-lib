@@ -1,4 +1,5 @@
 from ..widget_base import Input
+from typing import List
 
 
 class CurrencyInput(Input):
@@ -14,12 +15,21 @@ class CurrencyInput(Input):
         self.value = props.get("initial_value", self.empty_value)
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
-        self.placeholder = props.get("placeholder", "Insert the amount here")
+        self.placeholder = props.get("placeholder", "")
         self.full_width = props.get("full_width", False)
         self.min = props.get("min")
         self.max = props.get("max")
         self.currency = props.get("currency", "USD")
         self.disabled = props.get("disabled", False)
+
+    def _validate_number_min_max(self) -> List[str]:
+        if type(self.value) != int and type(self.value) != float:
+            return []
+        if hasattr(self, "min") and self.min is not None and self.value < self.min:
+            return ["i18n_error_min_amount"]
+        if hasattr(self, "max") and self.max is not None and self.value > self.max:
+            return ["i18n_error_max_amount"]
+        return []
 
     def render(self, context: dict):
         return {

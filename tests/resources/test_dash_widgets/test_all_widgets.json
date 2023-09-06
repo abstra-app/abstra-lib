@@ -269,7 +269,7 @@
                     "hint": null,
                     "fullWidth": false,
                     "disabled": false,
-                    "invalidMessage": "This CNPJ is invalid.",
+                    "invalidMessage": "i18n_error_invalid_cnpj",
                     "errors": []
                 },
                 "3981ea20-52e2-4c94-98db-26bb40a9a735": {
@@ -277,7 +277,7 @@
                     "key": null,
                     "label": "Insert the desired tags.",
                     "value": [],
-                    "placeholder": "Your value here",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -1818,7 +1818,7 @@
                     "key": null,
                     "label": "Number",
                     "value": null,
-                    "placeholder": "Insert a number",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -1832,7 +1832,7 @@
                     "key": null,
                     "label": "Insert your rich text here!",
                     "value": "",
-                    "placeholder": "Your value here",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -1856,7 +1856,7 @@
                 "781b2f11-5417-4db4-9447-562246948ccb": {
                     "type": "dropdown-input",
                     "key": null,
-                    "label": "Select your preference",
+                    "label": "",
                     "options": [
                         {
                             "label": "Option 1",
@@ -1869,7 +1869,7 @@
                     ],
                     "hint": null,
                     "multiple": false,
-                    "placeholder": "Select your preference",
+                    "placeholder": "",
                     "value": [],
                     "required": true,
                     "fullWidth": false,
@@ -1891,7 +1891,7 @@
                     "hint": null,
                     "fullWidth": false,
                     "disabled": false,
-                    "invalidMessage": "This CPF is invalid.",
+                    "invalidMessage": "i18n_error_invalid_cpf",
                     "errors": []
                 },
                 "8db02425-bc0a-4bc4-86a0-a8a1b4ef8cf3": {
@@ -1899,7 +1899,7 @@
                     "key": null,
                     "label": "Insert the proper amount.",
                     "value": null,
-                    "placeholder": "Insert the amount here",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -1943,7 +1943,7 @@
                     "key": null,
                     "label": "Insert your text here!",
                     "value": "",
-                    "placeholder": "Your value here",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -1980,7 +1980,7 @@
                     "key": null,
                     "label": "Insert your text here!",
                     "value": "",
-                    "placeholder": "Your value here",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -2006,7 +2006,7 @@
                     "key": null,
                     "label": "Insert your email",
                     "value": "",
-                    "placeholder": "Your email here",
+                    "placeholder": "",
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
@@ -2088,7 +2088,7 @@
                     "fullWidth": false,
                     "disabled": false,
                     "errors": [],
-                    "invalidMessage": "This phone number is invalid."
+                    "invalidMessage": "i18n_error_invalid_phone_number"
                 },
                 "f71eaa4f-d1c4-4384-8343-c57a5cad94fd": {
                     "type": "kanban-board-input",

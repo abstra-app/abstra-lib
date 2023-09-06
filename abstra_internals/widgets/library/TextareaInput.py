@@ -13,7 +13,7 @@ class TextareaInput(Input):
         self.label = props.get("label", "Label")
         self.value = props.get("initial_value", self.empty_value)
         self.required = props.get("required", True)
-        self.placeholder = props.get("placeholder", "Your value here")
+        self.placeholder = props.get("placeholder", "")
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)

@@ -1099,10 +1099,10 @@ metadata = {
                 },
                 {
                     "argName": "placeholder",
-                    "description": 'The placeholder text to display to the user. Defaults to "Insert the amount here".',
+                    "description": 'The placeholder text to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": '"Insert the amount here"',
+                    "default": '""',
                 },
                 {
                     "argName": "min",
@@ -1484,7 +1484,7 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Select your preference"',
+                    "dashesInitialValue": '""',
                 },
                 {
                     "argName": "options",
@@ -1664,10 +1664,10 @@ metadata = {
                 },
                 {
                     "argName": "placeholder",
-                    "description": 'The placeholder text to display to the user. Defaults to "Your email here".',
+                    "description": 'The placeholder text to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": '"Your email here"',
+                    "default": '""',
                 },
                 {
                     "argName": "invalid_email_message",
@@ -2293,7 +2293,7 @@ metadata = {
                             "initialValue": "",
                             "key": "Name",
                             "label": "Name",
-                            "placeholder": "Your answer here",
+                            "placeholder": "",
                             "required": True,
                             "type": "text-input",
                         },
@@ -2302,7 +2302,7 @@ metadata = {
                             "initialValue": "",
                             "key": "Email",
                             "label": "Email",
-                            "placeholder": "Your answer here",
+                            "placeholder": "",
                             "required": True,
                             "type": "email-input",
                         },
@@ -2692,10 +2692,10 @@ metadata = {
                 },
                 {
                     "argName": "placeholder",
-                    "description": 'The placeholder text to display to the user. Defaults to "Insert a number".',
+                    "description": 'The placeholder text to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": '"Insert a number"',
+                    "default": '""',
                 },
                 {
                     "argName": "min",
@@ -3721,10 +3721,10 @@ metadata = {
                 },
                 {
                     "argName": "placeholder",
-                    "description": 'The placeholder text to display to the user. Defaults to "Your answer here".',
+                    "description": 'The placeholder text to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": '"Your answer here"',
+                    "default": '""',
                 },
                 {
                     "argName": "disabled",
@@ -3983,10 +3983,10 @@ metadata = {
                 },
                 {
                     "argName": "placeholder",
-                    "description": 'The placeholder text to display to the user. Defaults to "Your answer here".',
+                    "description": 'The placeholder text to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": '"Your answer here"',
+                    "default": '""',
                 },
                 {
                     "argName": "disabled",

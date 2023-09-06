@@ -20,7 +20,7 @@ class Page(WidgetSchema):
 
     def __init__(
         self,
-        actions: Union[str, List[str]] = "Next",
+        actions: Union[str, List[str]] = "i18n_next_action",
         validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
@@ -36,7 +36,7 @@ class Page(WidgetSchema):
 
     def run(
         self,
-        actions: Union[str, List[str]] = "Next",
+        actions: Union[str, List[str]] = "i18n_next_action",
         validate: Optional[Callable] = None,
         end_program: bool = False,
         reactive_polling_interval=0,
@@ -54,7 +54,7 @@ class Page(WidgetSchema):
             The form result as a dict with the keys being the key of the input and the value being the value of the input
         """
 
-        actions = actions if actions != "Next" else self.__actions
+        actions = actions if actions != "i18n_next_action" else self.__actions
         end_program = end_program if end_program != False else self.__end_program
         reactive_polling_interval = (
             reactive_polling_interval
@@ -114,7 +114,7 @@ class Page(WidgetSchema):
             self.update(response["payload"])
 
             # TODO: handle back actions without string comparison
-            if response.get("action") == "Back":
+            if response.get("action") == "i18n_back_action":
                 break
 
             if response["type"] != "user-event":
