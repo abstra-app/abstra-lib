@@ -3,6 +3,7 @@ from pathlib import Path
 from ....session import LiveSession
 from ...api.classes import FormJSON
 from ....contract import forms_contract
+import abstra.forms as abstra_forms
 
 
 def __wait_start(session: LiveSession):
@@ -27,7 +28,8 @@ def run_form(
 
     namespace: dict = {}
     close_dto = forms_contract.CloseDTO(exit_code=0)
-    __wait_start(session)
+    params = __wait_start(session)
+    abstra_forms.url_params = params
     session.send(forms_contract.SessionIdMessage(session.id))
 
     try:
