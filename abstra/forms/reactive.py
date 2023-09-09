@@ -13,7 +13,10 @@ class Reactive(Input):
         return self.page.has_errors() if self.page else False
 
     def render(self, context: dict):
-        self.page = self.callback(context)
+        payload = {}
+        payload.update(self.value)
+        payload.update(context)
+        self.page = self.callback(payload)
         if self.page is None:
             return []
 

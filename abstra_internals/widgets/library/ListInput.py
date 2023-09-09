@@ -1,7 +1,5 @@
 from ..widget_base import Input
 from typing import Any, List
-from ..widget_base import Input
-from typing import Any, List
 
 
 class ListInput(Input):
