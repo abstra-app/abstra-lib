@@ -4,7 +4,7 @@ DEFAULT_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/tables/execute"
 EXECUTE_URL = os.getenv("ABSTRA_TABLES_EXECUTE_URL", DEFAULT_EXECUTE_URL)
 
 
-def run(query: str, params: typing.Optional[typing.List] = None):  # public api
+def _execute(query: str, params: typing.Optional[typing.List] = None):  # private api
     j_body = {"query": query, "params": params or []}
 
     headers = {
@@ -23,7 +23,23 @@ def run(query: str, params: typing.Optional[typing.List] = None):  # public api
     if response["errors"]:
         raise TablesExecutionError(response["errors"], query, params)
 
-    return response["returns"]["result"]
+    return response["returns"]
+
+
+def _run(query: str, params: typing.Optional[typing.List] = None):  # private api
+    return _execute(query, params)["result"]
+
+
+def run(query: str, params: typing.Optional[typing.List] = None):  # public api
+    return _run(query, params)
+
+
+def query_df(query: str, params: typing.Optional[typing.List] = None):  # public api
+    import pandas as pd
+
+    api_response = _execute(query, params)
+    col_names = [c["name"] for c in api_response["fields"]]
+    return pd.DataFrame.from_records(api_response["result"], columns=col_names)
 
 
 class TablesExecutionError(Exception):  # public api
