@@ -28,8 +28,7 @@ def run_form(
 
     namespace: dict = {}
     close_dto = forms_contract.CloseDTO(exit_code=0)
-    params = __wait_start(session)
-    abstra_forms.url_params = params
+    session.context["query_params"] = __wait_start(session)
     session.send(forms_contract.SessionIdMessage(session.id))
 
     try:
