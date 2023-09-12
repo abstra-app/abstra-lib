@@ -24,7 +24,7 @@ def run_form(
         session.id = session_id
 
     code_file_path = form_json.file
-    code = pathlib.Path(code_file_path).read_text()
+    code = pathlib.Path(code_file_path).read_text(encoding="utf-8")
 
     namespace: dict = {}
     close_dto = forms_contract.CloseDTO(exit_code=0)

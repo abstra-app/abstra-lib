@@ -168,7 +168,7 @@ class DashRuntime:
 
     def __init__(self, session: LiveSession, dash_json: DashJSON) -> None:
         code_file_path = dash_json.file
-        code = Path(code_file_path).read_text()
+        code = Path(code_file_path).read_text(encoding="utf-8")
         self.py = PythonProgram(code)
         self.session = session
         self.root_slot_runtime = RootRuntime(dash_json.layout.slot)
