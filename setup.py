@@ -12,10 +12,10 @@ version = match.group(1) if match else "0.0.0"
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README = (HERE / "README.md").read_text()
+README = (HERE / "README.md").read_text(encoding="utf-8")
 
 # The list of requirements
-requirements = (HERE / "requirements.txt").read_text().split("\n")
+requirements = (HERE / "requirements.txt").read_text(encoding="utf-8").split("\n")
 
 setup(
     name="abstra",
