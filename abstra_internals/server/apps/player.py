@@ -1,5 +1,7 @@
-import flask, flask_sock, os, sys
+import flask, flask_sock, os
+
 from ..api import API
+from ...settings import Settings
 from .utils import send_from_dist
 from ..runtimes import run_dash, run_form, run_hook
 
@@ -7,8 +9,6 @@ from ..runtimes import run_dash, run_form, run_hook
 def get_player_bp(api: API):
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
-    if api.root_path not in sys.path:
-        sys.path.append(str(api.root_path))
 
     @bp.route("/_api/<path:id_or_path>", methods=["GET"])
     def get_runner_data(id_or_path):
@@ -43,7 +43,7 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                return run_dash(conn, dash, api.root_path)
+                return run_dash(conn, dash)
 
             form_path = flask.request.args.get("formPath")
             if form_path is not None:
@@ -52,7 +52,7 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                return run_form(conn, form, api.root_path)
+                return run_form(conn, form)
 
         finally:
             conn.close(message="Done")
@@ -76,12 +76,14 @@ def get_player_bp(api: API):
     @bp.route("/_assets/logo", methods=["GET"])
     def _logo():
         logo_path = api.get_workspace().logo_url
-        return flask.send_from_directory(directory=api.root_path, path=logo_path)
+        return flask.send_from_directory(directory=Settings.root_path, path=logo_path)
 
     @bp.route("/_assets/background", methods=["GET"])
     def _background():
         background_path = api.get_workspace().theme
-        return flask.send_from_directory(directory=api.root_path, path=background_path)
+        return flask.send_from_directory(
+            directory=Settings.root_path, path=background_path
+        )
 
     @bp.route("/_hooks/<path:path>", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     def hook_runner(path):
@@ -92,8 +94,7 @@ def get_player_bp(api: API):
         if not hook.file:
             flask.abort(500)
 
-        code = api.read_text_file(hook.file)  # TODO: handle 404
-        body, status, headers = run_hook(flask.request, hook, code)
+        body, status, headers = run_hook(flask.request, hook)
         return flask.Response(status=status, headers=headers, response=body)
 
     @bp.route("/<path:filename>", methods=["GET"])

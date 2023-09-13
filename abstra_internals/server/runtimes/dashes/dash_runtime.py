@@ -16,7 +16,6 @@ from ....contract import dashes_contract as contract
 from .autocomplete import get_suggestions
 from ....session import LiveSession
 from .program import PythonProgram
-from pathlib import Path
 
 
 def preview_only_check(method):
@@ -167,8 +166,7 @@ class DashRuntime:
     seq: int
 
     def __init__(self, session: LiveSession, dash_json: DashJSON) -> None:
-        code_file_path = dash_json.file
-        code = Path(code_file_path).read_text(encoding="utf-8")
+        code = dash_json.file_path.read_text(encoding="utf-8")
         self.py = PythonProgram(code)
         self.session = session
         self.root_slot_runtime = RootRuntime(dash_json.layout.slot)

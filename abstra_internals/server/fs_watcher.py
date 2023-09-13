@@ -2,6 +2,7 @@ import threading, os, time, sys, importlib
 from datetime import datetime
 from pathlib import Path
 
+from ..settings import Settings
 from ..session import LiveSession
 from ..contract.common import FilesChangedMessage
 
@@ -40,5 +41,7 @@ def __files_changed_polling_loop(path: Path):
         time.sleep(1)
 
 
-def watch_py_files(path: Path):
-    threading.Thread(target=lambda: __files_changed_polling_loop(path)).start()
+def watch_py_root_files():
+    threading.Thread(
+        target=lambda: __files_changed_polling_loop(Settings.root_path)
+    ).start()

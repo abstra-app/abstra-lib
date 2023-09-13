@@ -2,7 +2,9 @@ import sys
 from typing import List, Optional, Union, Any, Dict
 from dataclasses import dataclass
 from pathlib import Path
+
 from ...utils import check_is_url
+from ...settings import Settings
 
 
 @dataclass
@@ -39,12 +41,16 @@ class HookJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: Dict[str, Any], workspace_root: Path):
+    @property
+    def file_path(self):
+        return Settings.root_path.joinpath(self.file)
+
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in ["path", "title", "enabled"]:
                 setattr(self, attr, value)
             elif attr == "file":
-                _update_file(self, workspace_root, value)
+                _update_file(self, value)
             else:
                 raise Exception(f"Cannot update {attr} of hook")
 
@@ -86,12 +92,16 @@ class JobJSON:
     def __dict__(self):
         return self.editor_dto
 
-    def update(self, changes: Dict[str, Any], workspace_root: Path):
+    @property
+    def file_path(self):
+        return Settings.root_path.joinpath(self.file)
+
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in ["identifier", "title", "schedule"]:
                 setattr(self, attr, value)
             elif attr == "file":
-                _update_file(self, workspace_root, value)
+                _update_file(self, value)
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
@@ -163,7 +173,11 @@ class FormJSON(SidebarRuntime):
             "restart_button_text": self.restart_button_text,
         }
 
-    def update(self, changes: Dict[str, Any], workspace_root: Path):
+    @property
+    def file_path(self):
+        return Settings.root_path.joinpath(self.file)
+
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in [
                 "path",
@@ -180,7 +194,7 @@ class FormJSON(SidebarRuntime):
             ]:
                 setattr(self, attr, value)
             elif attr == "file":
-                _update_file(self, workspace_root, value)
+                _update_file(self, value)
             else:
                 raise Exception(f"Cannot update {attr} of form")
 
@@ -515,7 +529,11 @@ class DashJSON(SidebarRuntime):
             "file": self.file,
         }
 
-    def update(self, changes: Dict[str, Any], workspace_root: Path):
+    @property
+    def file_path(self):
+        return Settings.root_path.joinpath(self.file)
+
+    def update(self, changes: Dict[str, Any]):
         if "path" in changes:
             self.path = changes["path"]
             del changes["path"]
@@ -529,7 +547,7 @@ class DashJSON(SidebarRuntime):
             del changes["layout"]
 
         if "file" in changes:
-            _update_file(self, workspace_root, changes["file"])
+            _update_file(self, changes["file"])
             del changes["file"]
 
         if len(changes) > 0:
@@ -621,7 +639,7 @@ class SidebarJSON:
 class WorkspaceJSON:
     name: str
     sidebar: SidebarJSON
-    root: Optional[str] = None
+    root: Optional[str] = None  # deprecated
     theme: Optional[str] = None
     logo_url: Optional[str] = None
     brand_name: Optional[str] = None
@@ -634,7 +652,7 @@ class WorkspaceJSON:
         return {
             "name": self.name,
             "sidebar": self.sidebar.__dict__,
-            "root": self.root,
+            "root": self.root,  # deprecated
             "theme": self.theme,
             "logo_url": self.logo_url,
             "brand_name": self.brand_name,
@@ -678,7 +696,7 @@ class WorkspaceJSON:
                 dashes=dashes,
                 forms=forms,
             ),
-            root=data.get("root"),
+            root=data.get("root"),  # deprecated
             theme=data.get("theme"),
             logo_url=data.get("logo_url"),
             brand_name=data.get("brand_name"),
@@ -761,11 +779,12 @@ class AbstraJSON:
 
 def _update_file(
     runtime: Union[DashJSON, FormJSON, HookJSON, JobJSON],
-    workspace_root: Path,
     new_file_relative: str,
 ):
-    old_file = workspace_root.joinpath(runtime.file)
-    new_file = workspace_root.joinpath(new_file_relative)
+    old_file = Settings.root_path.joinpath(runtime.file)
+    new_file = Settings.root_path.joinpath(new_file_relative)
+
     if old_file.exists() and not new_file.exists():
         old_file.rename(new_file)
+
     runtime.file = new_file_relative

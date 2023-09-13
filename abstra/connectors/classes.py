@@ -1,7 +1,4 @@
-import requests, os
-
-DEFAULT_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/connectors/execute"
-EXECUTE_URL = os.getenv("ABSTRA_CONNECTORS_EXECUTE_URL", DEFAULT_EXECUTE_URL)
+from abstra_internals.player_api_clients import connectors_api_http_client
 
 
 class ConnectorExecutionError(Exception):  # public api
@@ -17,17 +14,10 @@ class Method:
         self.connector = connector
 
     def __call__(self, **kwargs):  # public api
-        j_body = {"name": self.connector.name, "method": self.name, "params": kwargs}
+        r = connectors_api_http_client.execute(
+            name=self.connector.name, method=self.name, params=kwargs
+        )
 
-        headers = {
-            "Content-Type": "application/json",
-            "api-authorization": f"Bearer {os.getenv('ABSTRA_API_TOKEN')}",
-        }
-
-        if EXECUTE_URL == DEFAULT_EXECUTE_URL and not os.getenv("ABSTRA_API_TOKEN"):
-            raise Exception("You must be logged in to execute a connector method")
-
-        r = requests.post(EXECUTE_URL, headers=headers, json=j_body)
         if not r.ok:
             raise Exception(f"Error executing method {self.name}: {r.text}")
 

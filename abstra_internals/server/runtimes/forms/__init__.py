@@ -1,9 +1,7 @@
-import traceback, flask_sock, typing, pathlib
-from pathlib import Path
+import traceback, flask_sock, typing
 from ....session import LiveSession
 from ...api.classes import FormJSON
 from ....contract import forms_contract
-import abstra.forms as abstra_forms
 
 
 def __wait_start(session: LiveSession):
@@ -16,15 +14,12 @@ def __wait_start(session: LiveSession):
 def run_form(
     conn: flask_sock.Server,
     form_json: FormJSON,
-    root_path: Path,
     session_id: typing.Optional[str] = None,
 ):
+    code = form_json.file_path.read_text(encoding="utf-8")
     session = LiveSession(conn, "forms", form_json.path)
     if session_id is not None:
         session.id = session_id
-
-    code_file_path = form_json.file
-    code = pathlib.Path(code_file_path).read_text(encoding="utf-8")
 
     namespace: dict = {}
     close_dto = forms_contract.CloseDTO(exit_code=0)

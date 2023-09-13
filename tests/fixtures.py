@@ -1,6 +1,8 @@
-import os, json, tempfile, shutil
+import os, json, tempfile, shutil, typing
 from pathlib import Path
 import shutil
+
+from abstra_internals.settings import SettingsController
 
 abstra_json = {"version": "0.2"}
 
@@ -17,13 +19,16 @@ def rm_tree(pth: Path):
     pth.rmdir()
 
 
-def init_dir():
-    path = Path(tempfile.mkdtemp())
+def init_dir(path: typing.Optional[Path] = None):
+    path = path or Path(tempfile.mkdtemp())
+    SettingsController.set_root_path(path.as_posix())
+
     abstra_json_path = path / "abstra.json"
     path.mkdir(exist_ok=True)
+
     if not abstra_json_path.exists():
         abstra_json_path.write_text(json.dumps(abstra_json))
-    os.chdir(path)
+
     return path
 
 

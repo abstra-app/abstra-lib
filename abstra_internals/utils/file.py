@@ -42,8 +42,3 @@ def files_from_directory(directory):
         Path(directory).rglob("*"),
     )
     return list(paths)
-
-
-def resolve_cwd(root: Path):
-    cwd = Path.cwd()
-    return (cwd / root).resolve()

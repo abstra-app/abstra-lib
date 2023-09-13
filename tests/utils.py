@@ -63,11 +63,13 @@ def iter_messages(
 def assert_form(
     test_case: unittest.TestCase, form_json: FormJSON, msg_list: list, session_id: str
 ):
+    print("asserting form", form_json.file_path)
+
     msgs: typing.Deque[list] = deque(msg_list)
     executor = ThreadPoolExecutor()
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     conn = MockConnection(browser_msgs)
-    executor.submit(run_form, conn, form_json, Path.cwd(), session_id)
+    executor.submit(run_form, conn, form_json, session_id)
 
     for msg in iter_messages(conn, msgs, test_case):
         pass

@@ -1,4 +1,4 @@
-import os, logging, pathlib
+import os, logging
 
 from ..utils import get_free_port
 from .messages import serve_message
@@ -9,7 +9,6 @@ PORT = os.getenv("PORT")
 
 
 def serve(
-    workspace_root: str,
     port: int,
     debug: bool,
     use_reloader: bool,
@@ -26,7 +25,6 @@ def serve(
     check_latest_version()
 
     serve_local(
-        workspace_root=pathlib.Path(workspace_root).resolve(),
         port=free_port,
         debug=debug,
         use_reloader=use_reloader,
