@@ -1,0 +1,5 @@
+from .connectors import connectors_api_http_client_factory
+from .tables import tables_api_http_client_factory
+
+connectors_api_http_client = connectors_api_http_client_factory()
+tables_api_http_client = tables_api_http_client_factory()

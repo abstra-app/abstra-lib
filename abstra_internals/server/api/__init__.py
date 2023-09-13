@@ -1,4 +1,4 @@
-import json, os, tempfile, typing, webbrowser, requests
+import json, os, tempfile, typing, webbrowser
 from werkzeug.datastructures import FileStorage
 from pathlib import Path
 
@@ -11,6 +11,7 @@ from ...credentials import (
 )
 from ...widgets.apis import get_random_filepath, internal_path
 from ...cloud_api import get_auth_info, get_ai_messages
+from ...settings import Settings
 from ...cli.deploy import deploy
 from ...utils import random_id
 from . import classes
@@ -21,17 +22,13 @@ ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
 
 
 class API:
-    def __init__(self, root: Path):
-        root.mkdir(exist_ok=True, parents=True)
-        self.root_path = root.absolute()
-        os.chdir(root)
-
-        self.abstra_json_path = root.joinpath("abstra.json").relative_to(root)
+    def __init__(self):
+        self.abstra_json_path = Settings.root_path.joinpath("abstra.json")
         if not self.abstra_json_path.exists():
             self.init_empty()
 
     def deploy(self):
-        deploy(self.root_path)
+        deploy()
 
     def init_empty(self):
         self.persist(classes.AbstraJSON.make_empty())
@@ -48,9 +45,6 @@ class API:
             self.abstra_json_path.read_text(encoding="utf-8")
         )
         return classes.AbstraJSON.from_dict(abstra_json_content)
-
-    def read_text_file(self, path) -> str:
-        return self.root_path.joinpath(path).read_text(encoding="utf-8")
 
     def get_workspace(self) -> classes.WorkspaceJSON:
         abstra_json = self.__get_abstra_json()
@@ -71,20 +65,40 @@ class API:
 
         return None
 
+    def open_file(self, file_path: str, create_if_not_exists: bool = False):
+        complete_file_path = Settings.root_path.joinpath(file_path)
+
+        if (
+            create_if_not_exists
+            and file_path.endswith(".py")
+            and not complete_file_path.is_file()
+        ):
+            complete_file_path.touch()
+
+        webbrowser.open(complete_file_path.absolute().as_uri())
+
+    def check_file(self, file_path: str):
+        return Settings.root_path.joinpath(file_path).is_file()
+
+    def update_workspace(self, changes: typing.Dict[str, typing.Any]):
+        abstra_json = self.__get_abstra_json()
+        abstra_json.workspace.update(changes, abstra_json.dashes, abstra_json.forms)
+        self.persist(abstra_json)
+        return abstra_json.workspace
+
     # Forms CLRUD
 
     def create_form(self) -> classes.FormJSON:
         abstra_json = self.__get_abstra_json()
 
         file_name = f"new_form_{random_id()}"
-        file_path = f"{file_name}.py"
-
+        file = f"{file_name}.py"
         txt = """from abstra.forms import display, read
 name = read("What is your name?")
 display(f"Hello World, {name}")"""
-        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
-        form = classes.FormJSON(file=file_path, path=file_name, title="Untitled Form")
+        Settings.root_path.joinpath(file).write_text(encoding="utf-8", data=txt)
+        form = classes.FormJSON(file=file, path=file_name, title="Untitled Form")
 
         abstra_json.forms.append(form)
 
@@ -113,7 +127,7 @@ display(f"Hello World, {name}")"""
         if len(forms) == 0:
             raise Exception("Form not found for path ", path)
         form = forms[0]
-        form.update(changes, workspace_root=self.root_path)
+        form.update(changes)
 
         self.persist(abstra_json)
 
@@ -132,13 +146,12 @@ display(f"Hello World, {name}")"""
         abstra_json = self.__get_abstra_json()
 
         file_name = f"new_dash_{random_id()}"
-        file_path = f"{file_name}.py"
-
+        file = f"{file_name}.py"
         txt = "foo = 'bar'"
-        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
+        Settings.root_path.joinpath(file).write_text(encoding="utf-8", data=txt)
         dash = classes.DashJSON(
-            file=file_path,
+            file=file,
             path=f"new-dash_{random_id()}",
             title="Untitled Dash",
             layout=classes.LayoutJSON(
@@ -173,7 +186,7 @@ display(f"Hello World, {name}")"""
         if len(dashes) == 0:
             raise Exception("Dash not found for path ", path)
         dash = dashes[0]
-        dash.update(changes, workspace_root=self.root_path)
+        dash.update(changes)
 
         self.persist(abstra_json)
 
@@ -192,12 +205,11 @@ display(f"Hello World, {name}")"""
         abstract_json = self.__get_abstra_json()
 
         file_name = f"new_hook_{random_id()}"
-        file_path = f"{file_name}.py"
-
+        file = f"{file_name}.py"
         txt = "print('Hello World')"
-        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
-        hook = classes.HookJSON(file=file_path, path=file_name, title="Untitled Hook")
+        Settings.root_path.joinpath(file).write_text(encoding="utf-8", data=txt)
+        hook = classes.HookJSON(file=file, path=file_name, title="Untitled Hook")
 
         abstract_json.hooks.append(hook)
 
@@ -226,7 +238,7 @@ display(f"Hello World, {name}")"""
         if len(hooks) == 0:
             raise Exception("Hook not found for path ", path)
         hook = hooks[0]
-        hook.update(changes, workspace_root=self.root_path)
+        hook.update(changes)
         self.persist(abstra_json)
 
         return hook
@@ -237,28 +249,6 @@ display(f"Hello World, {name}")"""
         abstra_json.hooks = [h for h in hooks if h.path != path]
 
         self.persist(abstra_json)
-
-    def open_file(self, file_path: str, create_if_not_exists: bool = False):
-        complete_file_path = Path(self.root_path, file_path)
-
-        if (
-            create_if_not_exists
-            and file_path.endswith(".py")
-            and not complete_file_path.is_file()
-        ):
-            complete_file_path.touch()
-
-        webbrowser.open(complete_file_path.absolute().as_uri())
-
-    def check_file(self, file_path: str):
-        complete_file_path = Path(self.root_path, file_path)
-        return complete_file_path.is_file()
-
-    def update_workspace(self, changes: typing.Dict[str, typing.Any]):
-        abstra_json = self.__get_abstra_json()
-        abstra_json.workspace.update(changes, abstra_json.dashes, abstra_json.forms)
-        self.persist(abstra_json)
-        return abstra_json.workspace
 
     # Jobs CLRUD
 
@@ -277,13 +267,12 @@ display(f"Hello World, {name}")"""
         abstra_json = self.__get_abstra_json()
 
         file_name = f"new_job_{random_id()}"
-        file_path = f"{file_name}.py"
-
+        file = f"{file_name}.py"
         txt = "print('Hello World')"
-        self.root_path.joinpath(file_path).write_text(encoding="utf-8", data=txt)
 
+        Settings.root_path.joinpath(file).write_text(encoding="utf-8", data=txt)
         job = classes.JobJSON(
-            file=file_path,
+            file=file,
             identifier=random_id(),
             schedule="0 * * * *",
             title="Untitled Job",
@@ -301,7 +290,7 @@ display(f"Hello World, {name}")"""
         if len(jobs) == 0:
             raise Exception("Job not found for identifier ", identifier)
         job = jobs[0]
-        job.update(changes, workspace_root=self.root_path)
+        job.update(changes)
 
         self.persist(abstra_json)
 
@@ -317,25 +306,25 @@ display(f"Hello World, {name}")"""
     # Login
 
     def get_credentials(self):
-        return get_credentials(self.root_path)
+        return get_credentials()
 
     def get_login(self):
-        headers = resolve_headers(self.root_path)
+        headers = resolve_headers()
         if not headers:
             return {"logged": False, "reason": "NO_API_TOKEN"}
         return get_auth_info(headers)
 
     def create_login(self, token):
-        set_credentials(self.root_path, token)
+        set_credentials(token)
         return self.get_login()
 
     def delete_login(self):
-        delete_credentials(self.root_path)
+        delete_credentials()
         return self.get_login()
 
     # AI
     def send_ai_message(self, messages, runtime):
-        headers = resolve_headers(self.root_path)
+        headers = resolve_headers()
         yield from get_ai_messages(messages, runtime, headers)
 
     # files

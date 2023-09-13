@@ -11,68 +11,8 @@ class TestWorkspace(unittest.TestCase):
     def tearDown(self) -> None:
         clear_dir(self.root)
 
-    def test_start_at_relative_new_dir(self):
-        root = Path("relative-non-new-dir")
-        try:
-            api = API(root=root)
-            forms = api.get_forms()
-            self.assertEqual(forms, [])
-            api.create_form()
-        finally:
-            clear_dir(root)
-
-    def test_start_at_relative_new_deep_dir(self):
-        root = Path.cwd() / "relative-non-new-dir" / "deep" / "dir"
-        try:
-            api = API(root=root)
-            forms = api.get_forms()
-            self.assertEqual(forms, [])
-            api.create_form()
-        finally:
-            clear_dir(root)
-
-    def test_start_at_absolute_new_dir(self):
-        root = Path(tempfile.gettempdir()).joinpath("absolute-non-new-dir").absolute()
-        try:
-            api = API(root=root)
-            forms = api.get_forms()
-            self.assertEqual(forms, [])
-            api.create_form()
-        finally:
-            clear_dir(root)
-
-    def test_start_at_absolute_new_deep_dir(self):
-        root = (
-            Path(tempfile.gettempdir())
-            .joinpath("absolute-non-new-dir")
-            .joinpath("deep")
-            .joinpath("dir")
-            .absolute()
-        )
-        try:
-            api = API(root=root)
-            forms = api.get_forms()
-            self.assertEqual(forms, [])
-            api.create_form()
-        finally:
-            clear_dir(root)
-
-    def test_start_at_absolute_new_deep_dir_ending_with_slash(self):
-        root = (
-            Path(tempfile.gettempdir())
-            .joinpath("absolute-non-new-dir/deep/dir/")
-            .absolute()
-        )
-        try:
-            api = API(root=root)
-            forms = api.get_forms()
-            self.assertEqual(forms, [])
-            api.create_form()
-        finally:
-            clear_dir(root)
-
     def test_api_update(self):
-        api = API(root=self.root)
+        api = API()
 
         api.update_workspace({"name": "test-workspace-updated"})
 

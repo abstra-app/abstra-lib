@@ -11,7 +11,7 @@ class TestDashWidgets(unittest.TestCase):
         self.root = init_dir()
         source_path = Path(__file__).parent.joinpath("./resources/test_dash_widgets")
         copy_dir(source_path, self.root)
-        self.api = API(self.root)
+        self.api = API()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

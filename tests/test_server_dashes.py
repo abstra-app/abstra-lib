@@ -12,7 +12,7 @@ class TestDashes(unittest.TestCase):
         clear_dir(self.root)
 
     def test_api_create(self):
-        api = API(root=self.root)
+        api = API()
 
         dashes_len = len(api.get_dashes())
 
@@ -27,7 +27,7 @@ class TestDashes(unittest.TestCase):
         self.assertTrue(file_path.exists())
 
     def test_api_update(self):
-        api = API(root=self.root)
+        api = API()
 
         dash = api.create_dash()
 
@@ -60,7 +60,7 @@ class TestDashes(unittest.TestCase):
 
     def test_updating_file_from_existing_to_non_existing(self):
         # given a dash
-        api = API(root=self.root)
+        api = API()
         dash = api.create_dash()
         old_file = Path(self.root, dash.file)
         new_file = Path(self.root, "non-existing-file.py")
@@ -74,7 +74,7 @@ class TestDashes(unittest.TestCase):
 
     def test_updating_file_from_non_existing_to_existing(self):
         # given a dash
-        api = API(root=self.root)
+        api = API()
         dash = api.create_dash()
         old_file = Path(self.root, dash.file)
         new_file = Path(self.root, "existing-file.py")

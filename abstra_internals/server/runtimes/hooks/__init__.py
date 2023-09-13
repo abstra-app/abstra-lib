@@ -4,7 +4,8 @@ from ...api.classes import HookJSON
 from ....session import StaticSession
 
 
-def run_hook(request: flask.Request, hook: HookJSON, code: str):
+def run_hook(request: flask.Request, hook: HookJSON):
+    code = hook.file_path.read_text()
     session = StaticSession("hooks", hook.path)
     session.context["request"] = (
         request.get_data(as_text=True),

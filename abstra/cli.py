@@ -1,8 +1,10 @@
 import fire
 
-from abstra_internals.cli.deploy import deploy
 from abstra_internals.cli.serve import serve
+from abstra_internals.cli.deploy import deploy
 from abstra_internals.cli.version import check_latest_version
+
+from abstra_internals.settings import SettingsController
 
 
 class CLI(object):
@@ -13,7 +15,8 @@ class CLI(object):
     """
 
     def deploy(self, workspace_root: str = "."):
-        deploy(workspace_root=workspace_root)
+        SettingsController.set_root_path(workspace_root)
+        deploy()
 
     def version(self):
         check_latest_version()
@@ -26,8 +29,8 @@ class CLI(object):
         use_reloader=False,
         load_dotenv=True,
     ):
+        SettingsController.set_root_path(workspace_root)
         serve(
-            workspace_root=workspace_root,
             port=port,
             debug=debug,
             use_reloader=use_reloader,

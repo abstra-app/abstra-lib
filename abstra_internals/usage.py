@@ -13,27 +13,26 @@ def async_send_usage(data, header):
     requests.post(api_url, json=data, headers=header)
 
 
-def usage(root_path: Path) -> Callable[..., Any]:
-    def usage_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
-            arg_names = inspect.getfullargspec(func).args
-            arg_values = dict(zip(arg_names, args))
+def usage(func: Callable[..., Any]) -> Callable[..., Any]:
+    def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
+        arg_names = inspect.getfullargspec(func).args
+        arg_values = dict(zip(arg_names, args))
 
-            metric_data = {
-                "userId": get_local_user_id(),
-                "payload": {**arg_values, **kwargs, **{"event": func.__name__}},
-                "abstraVersion": get_package_version("abstra"),
-            }
+        metric_data = {
+            "userId": get_local_user_id(),
+            "payload": {**arg_values, **kwargs, **{"event": func.__name__}},
+            "abstraVersion": get_package_version("abstra"),
+        }
 
-            headers = {"apiKey": get_credentials(root_path)}
+        headers = {"apiKey": get_credentials()}
 
-            executor.submit(async_send_usage, metric_data, headers)
+        executor.submit(async_send_usage, metric_data, headers)
 
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
-        original_route_name = func.__name__
-        wrapper.__name__ = f"{original_route_name}_usage_wrapper"  ## avoid name collision in blueprints
+    original_route_name = func.__name__
+    wrapper.__name__ = (
+        f"{original_route_name}_usage_wrapper"  ## avoid name collision in blueprints
+    )
 
-        return wrapper
-
-    return usage_decorator
+    return wrapper

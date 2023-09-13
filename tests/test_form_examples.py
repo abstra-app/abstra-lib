@@ -12,7 +12,10 @@ class TestFormExamples(unittest.TestCase):
         code_path = "./resources/test_form_examples/test_back_and_forth/code.py"
         msgs_path = "./resources/test_form_examples/test_back_and_forth/messages.json"
         msgs = json.load(open(msgs_path))
-        form_json = FormJSON(title="Test Form", path="test_form", file=code_path)
+        file_path = Path(__file__).parent.joinpath(code_path)
+        form_json = FormJSON(
+            title="Test Form", path="test_form", file=file_path.as_posix()
+        )
         assert_form(self, form_json, msgs, session_id="session-id")
 
     # Tests if required errors are correctly sent when field becomes empty
@@ -20,7 +23,10 @@ class TestFormExamples(unittest.TestCase):
         code_path = "./resources/test_form_examples/test_required_error/code.py"
         msgs_path = "./resources/test_form_examples/test_required_error/messages.json"
         msgs = json.load(open(msgs_path))
-        form_json = FormJSON(title="Test Form", path="test_form", file=code_path)
+        file_path = Path(__file__).parent.joinpath(code_path)
+        form_json = FormJSON(
+            title="Test Form", path="test_form", file=file_path.as_posix()
+        )
         assert_form(self, form_json, msgs, session_id="session-id")
 
     # Tests if required errors are correctly sent when next button is pressed
@@ -32,5 +38,8 @@ class TestFormExamples(unittest.TestCase):
             "./resources/test_form_examples/test_required_error_next_page/messages.json"
         )
         msgs = json.load(open(msgs_path))
-        form_json = FormJSON(title="Test Form", path="test_form", file=code_path)
+        file_path = Path(__file__).parent.joinpath(code_path)
+        form_json = FormJSON(
+            title="Test Form", path="test_form", file=file_path.as_posix()
+        )
         assert_form(self, form_json, msgs, session_id="session-id")

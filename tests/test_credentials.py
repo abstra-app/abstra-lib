@@ -15,10 +15,10 @@ class TestCredentials(unittest.TestCase):
         clear_dir(self.root)
 
     def test_get_credentials(self):
-        self.assertIsNone(get_credentials(self.root))
+        self.assertIsNone(get_credentials())
 
-        set_credentials(self.root, "test")
-        self.assertEqual(get_credentials(self.root), "test")
+        set_credentials("test")
+        self.assertEqual(get_credentials(), "test")
 
-        delete_credentials(self.root)
-        self.assertIsNone(get_credentials(self.root))
+        delete_credentials()
+        self.assertIsNone(get_credentials())

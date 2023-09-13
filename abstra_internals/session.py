@@ -14,7 +14,11 @@ class Execution:
         thread_id = threading.get_ident()
         return cls.executions.get(thread_id)
 
-    def __init__(self, runtime_type: str, runtime_name: str):
+    def __init__(
+        self,
+        runtime_type: str,
+        runtime_name: str,
+    ):
         self.id: str = uuid.uuid4().__str__()
         self.thread_id = threading.get_ident()
         self.runtime_type: str = runtime_type
@@ -139,3 +143,10 @@ def get_static_session_throwable() -> StaticSession:
     if not session:
         raise Exception("No session found")
     return session
+
+
+def get_execution_throwable() -> Execution:
+    execution = Execution.get_execution()
+    if not execution:
+        raise Exception("No execution found")
+    return execution

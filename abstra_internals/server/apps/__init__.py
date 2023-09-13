@@ -1,10 +1,11 @@
-import os, flask, flask_cors, threading, webbrowser, pathlib
+import os, flask, flask_cors, threading, webbrowser
 
-from ..fs_watcher import watch_py_files
+from ..fs_watcher import watch_py_root_files
 from ..overloads import overloads
 from .editor import get_editor_bp
 from .player import get_player_bp
 from ..api import API
+
 
 HOST = os.getenv("ABSTRA_HOST", "localhost")
 
@@ -22,21 +23,18 @@ def create_app(api: API) -> flask.Flask:
     return app
 
 
-def serve_local(
-    workspace_root: pathlib.Path, port: int, debug, use_reloader, load_dotenv
-):
+def serve_local(port: int, debug, use_reloader, load_dotenv):
     os.environ["ABSTRA_SERVER"] = "true"
     overloads()
 
-    api = API(workspace_root)
-
+    api = API()
     credential = api.get_credentials()
     if credential:
         os.environ["ABSTRA_API_TOKEN"] = credential
 
     # TODO: use flask reloader
     if use_reloader:
-        watch_py_files(workspace_root)
+        watch_py_root_files()
 
     app = create_app(api)
     threading.Timer(1, lambda: webbrowser.open(f"http://{HOST}:{port}/_editor")).start()

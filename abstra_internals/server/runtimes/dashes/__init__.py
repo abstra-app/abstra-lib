@@ -1,5 +1,4 @@
 import flask_sock, simple_websocket, typing
-from pathlib import Path
 from ....session import LiveSession
 from ...api.classes import DashJSON
 from .dash_runtime import DashRuntime
@@ -9,7 +8,6 @@ from ....contract import dashes_contract
 def run_dash(
     conn: flask_sock.Server,
     dash: DashJSON,
-    root_path: Path,
     session_id: typing.Optional[str] = None,
 ):
     session = LiveSession(conn, "dashes", dash.path)

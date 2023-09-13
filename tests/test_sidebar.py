@@ -11,14 +11,14 @@ class TestSidebar(unittest.TestCase):
         clear_dir(self.root)
 
     def test_starts_empty(self):
-        api = API(root=self.root)
+        api = API()
 
         workspace = api.get_workspace()
         self.assertEqual(workspace.__dict__["sidebar"], [])
 
     def test_auto_add_forms(self):
         # given
-        api = API(root=self.root)
+        api = API()
 
         # when
         form = api.create_form()
@@ -32,7 +32,7 @@ class TestSidebar(unittest.TestCase):
 
     def test_auto_add_dashes(self):
         # given
-        api = API(root=self.root)
+        api = API()
 
         # when
         dash = api.create_dash()

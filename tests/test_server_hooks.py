@@ -11,7 +11,7 @@ class TestHooks(unittest.TestCase):
         clear_dir(self.root)
 
     def test_api_list(self):
-        api = API(root=self.root)
+        api = API()
 
         self.assertEqual(len(api.get_hooks()), 0)
 
