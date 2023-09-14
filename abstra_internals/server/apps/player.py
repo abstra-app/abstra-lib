@@ -1,14 +1,15 @@
-import flask, flask_sock, os
+import flask, flask_sock, os, threading
 
 from ..api import API
 from ...settings import Settings
 from .utils import send_from_dist
-from ..runtimes import run_dash, run_form, run_hook
+from ..runtimes import run_dash, run_form, run_hook, run_job
 
 
 def get_player_bp(api: API):
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
+    SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN")
 
     @bp.route("/_api/<path:id_or_path>", methods=["GET"])
     def get_runner_data(id_or_path):
@@ -96,6 +97,21 @@ def get_player_bp(api: API):
 
         body, status, headers = run_hook(flask.request, hook)
         return flask.Response(status=status, headers=headers, response=body)
+
+    @bp.route("/_jobs/<path:path>", methods=["POST"])
+    def job_runner(path):
+        if flask.request.headers.get("Shared-Token") != SHARED_TOKEN:
+            flask.abort(401)
+
+        job = api.get_job(path)
+        if not job:
+            flask.abort(404)
+
+        if not job.file:
+            flask.abort(500)
+
+        threading.Thread(target=run_job, args=(job,)).start()
+        return {"status": "running"}
 
     @bp.route("/<path:filename>", methods=["GET"])
     def spa(filename: str):

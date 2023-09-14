@@ -2,44 +2,45 @@ from abstra_internals.server.api.classes import FormJSON
 from utils import assert_form
 import unittest, json, os
 from pathlib import Path
+from fixtures import init_dir, clear_dir
 
 
 class TestFormExamples(unittest.TestCase):
     def setUp(self) -> None:
-        os.chdir(Path(__file__).parent)
+        self.base_path = (
+            Path(Path(__file__).parent, "./resources/test_form_examples")
+            .absolute()
+            .resolve()
+        )
+        self.root = init_dir()
 
-    def test_back_and_forth(self):
-        code_path = "./resources/test_form_examples/test_back_and_forth/code.py"
-        msgs_path = "./resources/test_form_examples/test_back_and_forth/messages.json"
-        msgs = json.load(open(msgs_path))
-        file_path = Path(__file__).parent.joinpath(code_path)
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
+    def assertFormExample(self, example_name: str):
+        code_path = f"./{example_name}/code.py"
+        msgs_path = f"./{example_name}/messages.json"
+        msgs = json.load(self.base_path.joinpath(msgs_path).open())
+        file_path = self.base_path.joinpath(code_path)
         form_json = FormJSON(
             title="Test Form", path="test_form", file=file_path.as_posix()
         )
         assert_form(self, form_json, msgs, session_id="session-id")
+
+    def test_back_and_forth(self):
+        self.assertFormExample("test_back_and_forth")
 
     # Tests if required errors are correctly sent when field becomes empty
     def test_required_error(self):
-        code_path = "./resources/test_form_examples/test_required_error/code.py"
-        msgs_path = "./resources/test_form_examples/test_required_error/messages.json"
-        msgs = json.load(open(msgs_path))
-        file_path = Path(__file__).parent.joinpath(code_path)
-        form_json = FormJSON(
-            title="Test Form", path="test_form", file=file_path.as_posix()
-        )
-        assert_form(self, form_json, msgs, session_id="session-id")
+        self.assertFormExample("test_required_error")
 
     # Tests if required errors are correctly sent when next button is pressed
     def test_required_error_next_page(self):
-        code_path = (
-            "./resources/test_form_examples/test_required_error_next_page/code.py"
-        )
-        msgs_path = (
-            "./resources/test_form_examples/test_required_error_next_page/messages.json"
-        )
-        msgs = json.load(open(msgs_path))
-        file_path = Path(__file__).parent.joinpath(code_path)
-        form_json = FormJSON(
-            title="Test Form", path="test_form", file=file_path.as_posix()
-        )
-        assert_form(self, form_json, msgs, session_id="session-id")
+        self.assertFormExample("test_required_error_next_page")
+
+    # back n forth on run_steps should not cache future responses and not compute errors on future pages
+    def test_change_last_response_error(self):
+        self.assertFormExample("test_change_last_response_error")
+
+    def test_list_reactive(self):
+        self.assertFormExample("test_list_reactive")
