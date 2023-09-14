@@ -1,0 +1,360 @@
+[
+    [
+        "browser",
+        {
+            "type": "start",
+            "params": {}
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "session-id",
+            "sessionId": "session-id"
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "multiple-choice-input",
+                    "key": "whatodo",
+                    "label": "",
+                    "options": [
+                        {
+                            "label": " Lets do a)",
+                            "value": "doA"
+                        },
+                        {
+                            "label": "Lets do b)",
+                            "value": "doB"
+                        }
+                    ],
+                    "hint": null,
+                    "multiple": false,
+                    "value": [],
+                    "required": true,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "disabled": false,
+                    "errors": []
+                }
+            ],
+            "actions": [
+                "i18n_next_action"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 1,
+                "total": 2
+            }
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "user-event",
+            "payload": {
+                "whatodo": [
+                    "doA"
+                ]
+            },
+            "seq": 8
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form-update",
+            "widgets": [
+                {
+                    "type": "multiple-choice-input",
+                    "key": "whatodo",
+                    "label": "",
+                    "options": [
+                        {
+                            "label": " Lets do a)",
+                            "value": "doA"
+                        },
+                        {
+                            "label": "Lets do b)",
+                            "value": "doB"
+                        }
+                    ],
+                    "hint": null,
+                    "multiple": false,
+                    "value": [
+                        "doA"
+                    ],
+                    "required": true,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "disabled": false,
+                    "errors": []
+                }
+            ],
+            "validation": {
+                "status": true,
+                "message": ""
+            },
+            "seq": 8
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "form-response",
+            "payload": {
+                "whatodo": [
+                    "doA"
+                ]
+            },
+            "action": "i18n_next_action",
+            "secrets": [],
+            "seq": 9
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "text-output",
+                    "text": "We're Doing A",
+                    "size": "medium",
+                    "fullWidth": false
+                },
+                {
+                    "type": "text-input",
+                    "key": "Enter things for A",
+                    "label": "Enter things for A",
+                    "value": "",
+                    "placeholder": "",
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "mask": null,
+                    "disabled": false,
+                    "errors": []
+                }
+            ],
+            "actions": [
+                "i18n_back_action",
+                "i18n_next_action"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 2,
+                "total": 2
+            }
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "user-event",
+            "payload": {
+                "Enter things for A": "a"
+            },
+            "seq": 10
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form-update",
+            "widgets": [
+                {
+                    "type": "text-output",
+                    "text": "We're Doing A",
+                    "size": "medium",
+                    "fullWidth": false
+                },
+                {
+                    "type": "text-input",
+                    "key": "Enter things for A",
+                    "label": "Enter things for A",
+                    "value": "a",
+                    "placeholder": "",
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "mask": null,
+                    "disabled": false,
+                    "errors": []
+                }
+            ],
+            "validation": {
+                "status": true,
+                "message": ""
+            },
+            "seq": 10
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "form-response",
+            "payload": {
+                "Enter things for A": "a"
+            },
+            "action": "i18n_back_action",
+            "secrets": [],
+            "seq": 11
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "multiple-choice-input",
+                    "key": "whatodo",
+                    "label": "",
+                    "options": [
+                        {
+                            "label": " Lets do a)",
+                            "value": "doA"
+                        },
+                        {
+                            "label": "Lets do b)",
+                            "value": "doB"
+                        }
+                    ],
+                    "hint": null,
+                    "multiple": false,
+                    "value": [
+                        "doA"
+                    ],
+                    "required": true,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "disabled": false,
+                    "errors": []
+                }
+            ],
+            "actions": [
+                "i18n_next_action"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 1,
+                "total": 2
+            }
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "user-event",
+            "payload": {
+                "whatodo": [
+                    "doB"
+                ]
+            },
+            "seq": 12
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form-update",
+            "widgets": [
+                {
+                    "type": "multiple-choice-input",
+                    "key": "whatodo",
+                    "label": "",
+                    "options": [
+                        {
+                            "label": " Lets do a)",
+                            "value": "doA"
+                        },
+                        {
+                            "label": "Lets do b)",
+                            "value": "doB"
+                        }
+                    ],
+                    "hint": null,
+                    "multiple": false,
+                    "value": [
+                        "doB"
+                    ],
+                    "required": true,
+                    "fullWidth": false,
+                    "min": null,
+                    "max": null,
+                    "disabled": false,
+                    "errors": []
+                }
+            ],
+            "validation": {
+                "status": true,
+                "message": ""
+            },
+            "seq": 12
+        }
+    ],
+    [
+        "browser",
+        {
+            "type": "form-response",
+            "payload": {
+                "whatodo": [
+                    "doB"
+                ]
+            },
+            "action": "i18n_next_action",
+            "secrets": [],
+            "seq": 13
+        }
+    ],
+    [
+        "python",
+        {
+            "type": "form",
+            "widgets": [
+                {
+                    "type": "text-output",
+                    "text": "We're doing B",
+                    "size": "medium",
+                    "fullWidth": false
+                },
+                {
+                    "type": "text-input",
+                    "key": "Enter things for B",
+                    "label": "Enter things for B",
+                    "value": "",
+                    "placeholder": "",
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "mask": null,
+                    "disabled": false,
+                    "errors": [
+                        "i18n_error_required_field"
+                    ]
+                }
+            ],
+            "actions": [
+                "i18n_back_action",
+                "i18n_next_action"
+            ],
+            "endProgram": false,
+            "reactivePollingInterval": 0,
+            "steps": {
+                "current": 2,
+                "total": 2
+            }
+        }
+    ]
+]

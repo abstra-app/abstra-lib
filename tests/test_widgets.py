@@ -5,7 +5,6 @@ from abstra_internals.widgets.prop_check import validate_widget_props
 generated_widgets = [
     example_instance.render({}) for example_instance in example_instances
 ]
-del metadata_objects["list-input"]
 
 
 class TestFunction:

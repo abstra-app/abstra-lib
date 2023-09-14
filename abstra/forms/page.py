@@ -32,7 +32,6 @@ class Page(WidgetSchema):
         self.__end_program = end_program
         self.__reactive_polling_interval = reactive_polling_interval
         self.__context = context or {}
-        self.user_event_sent_widgets = None
 
     def run(
         self,
@@ -73,10 +72,7 @@ class Page(WidgetSchema):
                 ):
                     widget.value = self.__context[widget.key]
 
-        if self.user_event_sent_widgets:
-            rendered_page = self.user_event_sent_widgets
-        else:
-            rendered_page = self.render(context=self.__context)
+        rendered_page = self.render(context=self.__context)
 
         self.__check_widget_props(rendered_page)
 
@@ -123,7 +119,6 @@ class Page(WidgetSchema):
                     break
 
             rendered_page = self.render(self.__context)
-            self.user_event_sent_widgets = rendered_page
 
             # TODO: Refactor validation to use values instead of payload
             parsed_payload = self.parse_value(response["payload"])

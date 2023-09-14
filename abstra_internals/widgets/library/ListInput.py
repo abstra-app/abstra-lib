@@ -62,7 +62,7 @@ class ListInput(Input):
 
     def parse_value(self, values) -> List:
         parsed_values = []
-        for index, value in enumerate(values):
+        for index, value in enumerate(values or self.empty_value):
             if index >= len(self.schemas):
                 schema = self.item_schema.copy()
                 value = schema.parse_value(value or {})
