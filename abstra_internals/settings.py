@@ -12,16 +12,14 @@ class SettingsController(object):
 
     @staticmethod
     def set_root_path(root_path_str: str):
-        root_path = pathlib.Path(root_path_str)
+        root_path = pathlib.Path(root_path_str).absolute()
         root_path.mkdir(exist_ok=True, parents=True)
         os.chdir(root_path)
 
         if root_path not in sys.path:
             sys.path.append(str(root_path))
 
-        SettingsController._root_path = (
-            (pathlib.Path.cwd() / root_path).resolve().absolute()
-        )
+        SettingsController._root_path = root_path
 
     @property
     def root_path(self) -> pathlib.Path:
