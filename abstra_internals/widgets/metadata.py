@@ -190,7 +190,6 @@ metadata = {
                 {
                     "argName": "value",
                     "typeName": "array",
-                    "default": [],
                     "items": {
                         "typeName": "object",
                         "properties": [
@@ -240,38 +239,34 @@ metadata = {
         "examples": [
             {
                 "props": {
-                    "label": "Choose your character",
+                    "value": [],
+                    "label": "Choose your favorite dessert",
                     "options": [
                         {
-                            "title": "Bulbasaur",
-                            "subtitle": "Grass / Poison",
-                            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
-                            "description": "There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.",
-                            "topLeftExtra": "Nº",
-                            "topRightExtra": "001",
+                            "title": "Crepe",
+                            "subtitle": "French",
+                            "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",
+                            "description": "A crêpe or crepe is a type of very thin pancake.",
                         },
                         {
-                            "title": "Charmander",
-                            "subtitle": "Fire",
-                            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
-                            "description": "It has a preference for hot things. When it rains, steam is said to spout from the tip of its tail.",
-                            "topLeftExtra": "Nº",
-                            "topRightExtra": "004",
+                            "title": "Pancake",
+                            "subtitle": "American",
+                            "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",
+                            "description": "A pancake is a flat cake, often thin and round.",
                         },
                         {
-                            "title": "Squirtle",
-                            "subtitle": "Water",
-                            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
-                            "description": "When it retracts its long neck into its shell, it squirts out water with vigorous force.",
-                            "topLeftExtra": "Nº",
-                            "topRightExtra": "007",
+                            "title": "Waffle",
+                            "subtitle": "Belgian",
+                            "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",
+                            "description": "A waffle is a patterned dish made from leavened batter or dough.",
                         },
                     ],
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_cards",
+                "iframeHeight": "700px",
                 "key": "example1",
-                "code": 'from abstra.forms import read_cards\n\ncard = read_cards(\n    "Choose your character",\n    [\n        {\n            "title": "Bulbasaur",\n            "subtitle": "Grass / Poison",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",\n            "description": "There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "001",\n        },\n        {\n            "title": "Charmander",\n            "subtitle": "Fire",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",\n            "description": "It has a preference for hot things. When it rains, steam is said to spout from the tip of its tail.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "004",\n        },\n        {\n            "title": "Squirtle",\n            "subtitle": "Water",\n            "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",\n            "description": "When it retracts its long neck into its shell, it squirts out water with vigorous force.",\n            "topLeftExtra": "Nº",\n            "topRightExtra": "007",\n        },\n    ],\n)\n# card = { \'title\': ..., \'subtitle\': ..., \'image\': ..., \'description\': ..., \'topLeftExtra\': ..., \'topRightExtra\': ... }\n',
+                "code": 'from abstra.forms import read_cards\n\ncard = read_cards(\n    "Choose your favorite dessert",\n    [\n        {\n            "title": "Crepe",\n            "subtitle": "French",\n            "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",\n            "description": "A crêpe or crepe is a type of very thin pancake.",\n        },\n        {\n            "title": "Pancake",\n            "subtitle": "American",\n            "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",\n            "description": "A pancake is a flat cake, often thin and round.",\n        },\n        {\n            "title": "Waffle",\n            "subtitle": "Belgian",\n            "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",\n            "description": "A waffle is a patterned dish made from leavened batter or dough.",\n        },\n    ],\n)\n# card = { \'title\': ..., \'subtitle\': ..., \'image\': ..., \'description\': ..., \'topLeftExtra\': ..., \'topRightExtra\': ... }\n',
             }
         ],
     },
@@ -371,7 +366,6 @@ metadata = {
                     "argName": "value",
                     "typeName": "boolean",
                     "items": {"typeName": ["string", "number"]},
-                    "default": False,
                 },
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
@@ -383,7 +377,10 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "I have read and agree to the terms of services"},
+                "props": {
+                    "label": "I have read and agree to the terms of services",
+                    "value": False,
+                },
                 "name": "Basic Example",
                 "description": "Basic use of read_checkbox",
                 "key": "example1",
@@ -391,7 +388,8 @@ metadata = {
             },
             {
                 "props": {
-                    "label": "Would you like to receive product updates and announcements via email?"
+                    "label": "Would you like to receive product updates and announcements via email?",
+                    "value": False,
                 },
                 "name": "Optional field",
                 "description": "If check the box is optional, pass the optional parameter required",
@@ -400,7 +398,8 @@ metadata = {
             },
             {
                 "props": {
-                    "label": "I have read and agree to the [terms of services](https://example.com)"
+                    "label": "I have read and agree to the [terms of services](https://example.com)",
+                    "value": False,
                 },
                 "name": "Use markdown to customize label",
                 "description": "Use markdown syntax to customize the label",
@@ -514,7 +513,6 @@ metadata = {
                     "argName": "value",
                     "typeName": "array",
                     "items": {"typeName": ["string", "number"]},
-                    "default": [],
                 },
                 {
                     "argName": "options",
@@ -548,6 +546,7 @@ metadata = {
                 "props": {
                     "label": "Which programming language have you worked with?",
                     "options": ["Python", "JavaScript", "Go", "Elixir", "Haskell"],
+                    "value": [],
                 },
                 "name": "Basic Example",
                 "description": "Basic use of read_checklist",
@@ -564,6 +563,7 @@ metadata = {
                         {"label": "0 and 1", "value": "d"},
                         {"label": "None of the above", "value": "e"},
                     ],
+                    "value": [],
                 },
                 "name": "Label and value dict",
                 "description": "Use a dictionary to specify the label and value of each option. The label will be displayed to the user, and the value will be returned by the widget.",
@@ -579,6 +579,7 @@ metadata = {
                             "value": "agree",
                         }
                     ],
+                    "value": [],
                 },
                 "name": "Use markdown in options",
                 "description": "Use markdown syntax to customize the options.",
@@ -786,7 +787,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "invalidMessage", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
@@ -799,7 +800,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Insert your CNPJ below"},
+                "props": {"label": "Insert your CNPJ below", "value": ""},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_cnpj",
                 "key": "example1",
@@ -907,7 +908,7 @@ metadata = {
             "params": [
                 {"argName": "label", "typeName": "string"},
                 {"argName": "language", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -921,7 +922,7 @@ metadata = {
                 "props": {
                     "label": "Show me the code!",
                     "language": "c",
-                    "initialValue": '#include<stdio.h>\nint main(int argc, char** argv) {\nchar name[256];\nscanf("%s", name);\nprintf("%s, here is", name);\n}',
+                    "value": '#include<stdio.h>\nint main(int argc, char** argv) {\n  char name[256];\n  scanf("%s", name);\np  rintf("%s, here is", name);\n}',
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_code",
@@ -1039,7 +1040,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "invalidMessage", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
@@ -1184,7 +1185,7 @@ metadata = {
             "params": [
                 {"argName": "label", "typeName": "string"},
                 {"argName": "currency", "typeName": "string"},
-                {"argName": "value", "typeName": ["number", "null"], "default": None},
+                {"argName": "value", "typeName": ["number", "null"]},
                 {"argName": "min", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
@@ -1200,7 +1201,7 @@ metadata = {
             {
                 "props": {
                     "label": "How many credits do you want?",
-                    "initialValue": 10,
+                    "value": 10,
                     "min": 10,
                     "currency": "USD",
                 },
@@ -1313,7 +1314,6 @@ metadata = {
                 {
                     "argName": "value",
                     "typeName": ["string", "number", "boolean", "object", "null"],
-                    "default": None,
                 },
                 {"argName": "htmlHead", "typeName": "string"},
                 {"argName": "htmlBody", "typeName": "string"},
@@ -1438,7 +1438,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -1449,7 +1449,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "When were you born?"},
+                "props": {"label": "When were you born?", "value": ""},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_date",
                 "key": "example1",
@@ -1572,7 +1572,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "array", "default": []},
+                {"argName": "value", "typeName": "array"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -1732,7 +1732,7 @@ metadata = {
             "params": [
                 {"argName": "label", "typeName": "string"},
                 {"argName": "invalidEmailMessage", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -1861,7 +1861,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": ["array"], "default": []},
+                {"argName": "value", "typeName": ["array"]},
                 {"argName": "multiple", "typeName": "boolean"},
                 {"argName": "maxFileSize", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
@@ -1998,7 +1998,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "array", "default": []},
+                {"argName": "value", "typeName": "array"},
                 {"argName": "maxFileSize", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
@@ -2075,83 +2075,14 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "array", "default": []},
+                {"argName": "value", "typeName": "array"},
                 {"argName": "stages", "typeName": "array"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
             ]
         },
-        "examples": [
-            {
-                "props": {
-                    "initialValue": {
-                        "type": "kanban-board",
-                        "stages": [
-                            {
-                                "type": "kanban-stage",
-                                "name": "Backlog",
-                                "cards": [
-                                    {
-                                        "type": "kanban-card",
-                                        "name": "Add a new feature #1",
-                                        "description": "Add a new feature to the product",
-                                        "tags": ["feature", "enhancement"],
-                                    },
-                                    {
-                                        "type": "kanban-card",
-                                        "name": "Fix a bug #2",
-                                        "description": "Fix a bug in the product",
-                                        "tags": ["bug"],
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "kanban-stage",
-                                "name": "In progress",
-                                "cards": [
-                                    {
-                                        "type": "kanban-card",
-                                        "name": "Add a new feature #3",
-                                        "description": "Add a new feature to the product",
-                                        "tags": ["feature", "enhancement"],
-                                    },
-                                    {
-                                        "type": "kanban-card",
-                                        "name": "Fix a bug #4",
-                                        "description": "Fix a bug in the product",
-                                        "tags": ["bug"],
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "kanban-stage",
-                                "name": "Done",
-                                "cards": [
-                                    {
-                                        "type": "kanban-card",
-                                        "name": "Add a new feature #5",
-                                        "description": "Add a new feature to the product",
-                                        "tags": ["feature", "enhancement"],
-                                    },
-                                    {
-                                        "type": "kanban-card",
-                                        "name": "Fix a bug #6",
-                                        "description": "Fix a bug in the product",
-                                        "tags": ["bug"],
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                    "label": "Spring backlog",
-                },
-                "name": "Basic Example",
-                "description": "The following example demonstrate some of the available functionality for read_kanban_board",
-                "key": "example1",
-                "code": 'from abstra.forms import read_kanban_board\n\nboard = {\n    "type": "kanban-board",\n    "stages": [\n        {\n            "type": "kanban-stage",\n            "name": "Backlog",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #1",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #2",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n        {\n            "type": "kanban-stage",\n            "name": "In progress",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #3",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #4",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n        {\n            "type": "kanban-stage",\n            "name": "Done",\n            "cards": [\n                {\n                    "type": "kanban-card",\n                    "name": "Add a new feature #5",\n                    "description": "Add a new feature to the product",\n                    "tags": ["feature", "enhancement"],\n                },\n                {\n                    "type": "kanban-card",\n                    "name": "Fix a bug #6",\n                    "description": "Fix a bug in the product",\n                    "tags": ["bug"],\n                },\n            ],\n        },\n    ],\n}\n\nread_kanban_board(label="Product spring", initial_value=board)\n',
-            }
-        ],
+        "examples": [],
     },
     "list-input": {
         "name": "List of inputs",
@@ -2268,7 +2199,7 @@ metadata = {
         },
         "brokerAPI": {
             "params": [
-                {"argName": "value", "typeName": "array", "default": []},
+                {"argName": "value", "typeName": "array"},
                 {"argName": "min", "typeName": "number"},
                 {"argName": "max", "typeName": "number"},
                 {"argName": "addButtonText", "typeName": "string"},
@@ -2284,28 +2215,38 @@ metadata = {
         "examples": [
             {
                 "props": {
-                    "initialValue": [{}],
+                    "value": [{"Name": "", "Email": ""}],
                     "min": 1,
                     "max": 3,
-                    "itemSchema": [
-                        {
-                            "hint": None,
-                            "initialValue": "",
-                            "key": "Name",
-                            "label": "Name",
-                            "placeholder": "",
-                            "required": True,
-                            "type": "text-input",
-                        },
-                        {
-                            "hint": None,
-                            "initialValue": "",
-                            "key": "Email",
-                            "label": "Email",
-                            "placeholder": "",
-                            "required": True,
-                            "type": "email-input",
-                        },
+                    "schemas": [
+                        [
+                            {
+                                "type": "text-input",
+                                "key": "Name",
+                                "label": "Name",
+                                "value": "",
+                                "placeholder": "",
+                                "required": True,
+                                "hint": None,
+                                "fullWidth": False,
+                                "mask": None,
+                                "disabled": False,
+                                "errors": [],
+                            },
+                            {
+                                "type": "email-input",
+                                "key": "Email",
+                                "label": "Email",
+                                "value": "",
+                                "placeholder": "",
+                                "required": True,
+                                "hint": None,
+                                "fullWidth": False,
+                                "invalidEmailMessage": "Hmm… doesn't look like an email",
+                                "disabled": False,
+                                "errors": [],
+                            },
+                        ]
                     ],
                 },
                 "name": "Basic Example",
@@ -2441,7 +2382,7 @@ metadata = {
             "params": [
                 {"argName": "label", "typeName": "string"},
                 {"argName": "multiple", "typeName": "boolean"},
-                {"argName": "value", "typeName": "array", "default": []},
+                {"argName": "value", "typeName": "array"},
                 {"argName": "min", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
@@ -2476,6 +2417,7 @@ metadata = {
                 "props": {
                     "label": "Which programming language do you prefer?",
                     "options": ["Python", "JavaScript"],
+                    "value": [],
                 },
                 "name": "Basic Example",
                 "description": "Basic use of read_multiple_choice",
@@ -2486,6 +2428,7 @@ metadata = {
                 "props": {
                     "label": "Which programming language do you prefer?",
                     "options": ["Python", "JavaScript"],
+                    "value": [],
                 },
                 "name": "Label and value dict",
                 "description": "Use a dictionary to specify the label and value of each option. The label will be displayed to the user, and the value will be returned by the widget.",
@@ -2497,6 +2440,7 @@ metadata = {
                     "label": "What features do you love?",
                     "options": ["forms", "jobs", "hooks"],
                     "multiple": True,
+                    "value": [],
                 },
                 "name": "Checkboxes",
                 "description": "Use `multiple=true` when you want allow users to select more than one option. This will make it returns a list.",
@@ -2630,7 +2574,7 @@ metadata = {
                 {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "minHint", "typeName": "string"},
                 {"argName": "maxHint", "typeName": "string"},
-                {"argName": "value", "typeName": ["number", "null"], "default": None},
+                {"argName": "value", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -2769,7 +2713,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": ["number", "null"], "default": None},
+                {"argName": "value", "typeName": ["number", "null"]},
                 {"argName": "min", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
@@ -2907,7 +2851,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "number", "default": 0},
+                {"argName": "value", "typeName": "number"},
                 {"argName": "min", "typeName": "number"},
                 {"argName": "max", "typeName": "number"},
                 {"argName": "step", "typeName": "number"},
@@ -3053,7 +2997,7 @@ metadata = {
                 },
                 {"argName": "displayIndex", "typeName": "boolean"},
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "array", "default": []},
+                {"argName": "value", "typeName": "array"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -3066,6 +3010,7 @@ metadata = {
         "examples": [
             {
                 "props": {
+                    "value": [],
                     "table": {
                         "schema": {
                             "fields": [
@@ -3079,7 +3024,7 @@ metadata = {
                             {"Country": "China", "Population": "1,300,000,000"},
                             {"Country": "Japan", "Population": "126,000,000"},
                         ],
-                    }
+                    },
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_pandas",
@@ -3256,7 +3201,7 @@ metadata = {
                 {"argName": "pattern", "typeName": ["string", "null"]},
                 {"argName": "autocomplete", "typeName": "string"},
                 {"argName": "secret", "typeName": "boolean"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -3268,7 +3213,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Insert your password below"},
+                "props": {"label": "Insert your password below", "value": ""},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_password",
                 "key": "example1",
@@ -3391,7 +3336,6 @@ metadata = {
                 {
                     "argName": "value",
                     "typeName": "object",
-                    "default": {"countryCode": "", "nationalNumber": ""},
                     "properties": [
                         {"argName": "countryCode", "typeName": "string"},
                         {"argName": "nationalNumber", "typeName": "string"},
@@ -3409,7 +3353,10 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "What is your phone number?"},
+                "props": {
+                    "label": "What is your phone number?",
+                    "value": {"countryCode": "", "nationalNumber": ""},
+                },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_phone",
                 "key": "example1",
@@ -3527,7 +3474,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": ["number", "null"], "default": None},
+                {"argName": "value", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": "number"},
                 {"argName": "char", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
@@ -3540,7 +3487,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "How much do you rate this movie?"},
+                "props": {"label": "How much do you rate this movie?", "value": 3},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_rating",
                 "key": "example1",
@@ -3551,6 +3498,7 @@ metadata = {
                     "label": "How do you evaluate your Python skills?",
                     "char": "🐍",
                     "max": 3,
+                    "value": 2,
                 },
                 "name": "Custom chars and number of points",
                 "description": "The following example demonstrate some of the available functionality for read_rating",
@@ -3661,7 +3609,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -3673,7 +3621,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Write here your bio"},
+                "props": {"label": "Write here your bio", "value": ""},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_richtext",
                 "key": "example1",
@@ -3784,7 +3732,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": ["array"], "default": []},
+                {"argName": "value", "typeName": ["array"]},
                 {"argName": "placeholder", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
@@ -3798,7 +3746,7 @@ metadata = {
             {
                 "props": {
                     "label": "Type and press enter to add a tag",
-                    "initialValue": ["Red", "Green", "Blue"],
+                    "value": ["Red", "Green", "Blue"],
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_tag",
@@ -3913,7 +3861,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "mask", "typeName": ["string", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
@@ -3926,7 +3874,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "What is your name?"},
+                "props": {"label": "What is your name?", "value": ""},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read",
                 "key": "example1",
@@ -3936,6 +3884,7 @@ metadata = {
                 "props": {
                     "label": "What is your credit card number?",
                     "mask": "0000 0000 0000 0000",
+                    "value": "1234567890123456",
                 },
                 "name": "Mask Example",
                 "description": "The following example shows the usage of the mask property for read widget. In the mask property, the '0' digit represents a numeric value, the 'a' digit represents an alphabetic value and other digits are recognized as part of the value",
@@ -4043,7 +3992,7 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "string", "default": ""},
+                {"argName": "value", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -4056,7 +4005,8 @@ metadata = {
         "examples": [
             {
                 "props": {
-                    "label": "What kind of things are you building with Abstra Cloud?"
+                    "label": "What kind of things are you building with Abstra?",
+                    "value": "",
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_textarea",
@@ -4175,7 +4125,6 @@ metadata = {
                         {"argName": "hour", "typeName": "number"},
                         {"argName": "minute", "typeName": "number"},
                     ],
-                    "default": {"hour": 0, "minute": 0},
                 },
                 {"argName": "format", "typeName": "string"},
                 {"argName": "key", "typeName": "string"},
@@ -4188,7 +4137,10 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Select a time below"},
+                "props": {
+                    "label": "Select a time below",
+                    "value": {"hour": 0, "minute": 0},
+                },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_time",
                 "key": "example1",
@@ -4301,7 +4253,7 @@ metadata = {
                 {"argName": "label", "typeName": "string"},
                 {"argName": "onText", "typeName": "string"},
                 {"argName": "offText", "typeName": "string"},
-                {"argName": "value", "typeName": "boolean", "default": False},
+                {"argName": "value", "typeName": "boolean"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -4312,7 +4264,12 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Toggle", "onText": "On", "offText": "Off"},
+                "props": {
+                    "label": "Toggle",
+                    "onText": "On",
+                    "offText": "Off",
+                    "value": True,
+                },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_toggle",
                 "key": "example1",
@@ -4323,6 +4280,7 @@ metadata = {
                     "label": "Custom Toggle",
                     "onText": "Confirm",
                     "offText": "Cancel",
+                    "value": True,
                 },
                 "name": "Custom Example",
                 "description": "The following example demonstrate how to customize the toggle options text",
@@ -4445,7 +4403,6 @@ metadata = {
                     "argName": "value",
                     "typeName": "array",
                     "items": {"typeName": "string"},
-                    "default": [],
                 },
                 {"argName": "maxFileSize", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
@@ -4459,7 +4416,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Upload your video"},
+                "props": {"label": "Upload your video", "value": []},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_video",
                 "key": "example1",
@@ -4779,13 +4736,13 @@ metadata = {
         "examples": [
             {
                 "props": {
-                    "imageUrl": "https://placekitten.com/200/200",
-                    "subtitle": "Meooow",
+                    "imageUrl": "https://cdn.pixabay.com/photo/2019/02/25/19/22/cakes-4020342_1280.jpg",
+                    "subtitle": "Happy Birthday!",
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for display_image",
                 "key": "example1",
-                "code": 'from abstra.forms import display_image\n\ndisplay_image("https://placekitten.com/200/200", subtitle="Meooow")\n',
+                "code": 'from abstra.forms import display_image\n\ndisplay_image(\n    "https://cdn.pixabay.com/photo/2019/02/25/19/22/cakes-4020342_1280.jpg",\n    subtitle="Happy Birthday!",\n)\n',
             }
         ],
     },
