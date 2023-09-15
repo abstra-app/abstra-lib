@@ -74,6 +74,7 @@ class WExample:
     description: str
     key: str
     code: str
+    iframeHeight: typing.Optional[str] = None
 
 
 class WMetadata:
