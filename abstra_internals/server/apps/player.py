@@ -1,4 +1,4 @@
-import flask, flask_sock, os, threading
+import flask, flask_sock, os, concurrent.futures as futures
 
 from ..api import API
 from ...settings import Settings
@@ -10,6 +10,7 @@ def get_player_bp(api: API):
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
     SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN")
+    executor = futures.ThreadPoolExecutor()
 
     @bp.route("/_api/<path:id_or_path>", methods=["GET"])
     def get_runner_data(id_or_path):
@@ -110,7 +111,7 @@ def get_player_bp(api: API):
         if not job.file:
             flask.abort(500)
 
-        threading.Thread(target=run_job, args=(job,)).start()
+        executor.submit(run_job, job)
         return {"status": "running"}
 
     @bp.route("/<path:filename>", methods=["GET"])

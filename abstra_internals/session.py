@@ -127,7 +127,7 @@ class StaticSession(Execution):
         super().__init__(runtime_type, runtime_name)
 
     def stdio(self, type: str, text: str):
-        self.log(type, text)
+        self.log(type, {"log": text})
         return super().stdio(type, text)
 
 

@@ -3,11 +3,11 @@ from ..session import Execution
 
 
 def __overload_stdio():
-    def writeWraper(type, write, text):
+    def writeWraper(type, write, text: str):
         try:
             write(text)
             execution = Execution.get_execution()
-            if execution:
+            if execution and text.strip() != "":
                 execution.stdio(type, text)
         finally:
             return len(text)
