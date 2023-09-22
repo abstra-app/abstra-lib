@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from ..settings import Settings
-from ..session import LiveSession
+from ..execution.live_execution import LiveExecution
 from ..contract.common import FilesChangedMessage
 
 
@@ -36,7 +36,7 @@ def __files_changed_polling_loop(path: Path):
 
         if something_changed:
             __reload_modules_from_path(path)
-            LiveSession.broadcast(FilesChangedMessage())
+            LiveExecution.broadcast(FilesChangedMessage())
 
         time.sleep(1)
 

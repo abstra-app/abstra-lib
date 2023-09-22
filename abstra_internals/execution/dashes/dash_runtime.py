@@ -1,30 +1,29 @@
-from typing import Union, List, Optional, Tuple, Any, Dict
-from abc import ABC
 import traceback
+from abc import ABC
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ....widgets import (
+from ...contract import dashes_contract as contract
+from ...server.api.classes import DashJSON, DashWidgetJSON, SlotJSON, SlottableJSON
+from ...utils import formated_traceback_error_message
+from ...widgets import (
     Input,
     Output,
-    is_broker_prop_form_only,
     get_widget_class,
     input_types,
+    is_broker_prop_form_only,
 )
-
-from ...api.classes import DashWidgetJSON, SlotJSON, DashJSON, SlottableJSON
-from ....utils import formated_traceback_error_message
-from ....contract import dashes_contract as contract
+from ..live_execution import LiveExecution
 from .autocomplete import get_suggestions
-from ....session import LiveSession
 from .program import PythonProgram
 
 
 def preview_only_check(method):
     def wrapper(self: "DashRuntime", *args, **kwargs):
-        if self.session.is_preview:
+        if self.execution.is_preview:
             method(self, *args, **kwargs)
             return
 
-        self.session.send(
+        self.execution.send(
             contract.ErrorMessage("This method is only allowed in preview mode")
         )
 
@@ -160,15 +159,15 @@ class WidgetRuntime(ItemRuntime):
 
 class DashRuntime:
     py: PythonProgram
-    session: LiveSession
+    execution: LiveExecution
     root_slot_runtime: RootRuntime
     dash_json: DashJSON
     seq: int
 
-    def __init__(self, session: LiveSession, dash_json: DashJSON) -> None:
+    def __init__(self, execution: LiveExecution, dash_json: DashJSON) -> None:
         code = dash_json.file_path.read_text(encoding="utf-8")
         self.py = PythonProgram(code)
-        self.session = session
+        self.execution = execution
         self.root_slot_runtime = RootRuntime(dash_json.layout.slot)
         self.dash_json = dash_json
         self.seq = 0
@@ -189,11 +188,11 @@ class DashRuntime:
         handler(data)
 
     def default_handler(self, _data):
-        self.session.send(contract.ErrorMessage("unknown type"))
+        self.execution.send(contract.ErrorMessage("unknown type"))
 
     def start(self, data):
         # data: { type: client-start, params: PARAMS }
-        self.session.context["query_params"] = data.get("params", {})
+        self.execution.context["query_params"] = data.get("params", {})
         try:
             self.py.execute_initial_code()
             self._compute_and_send_widgets_props()
@@ -201,8 +200,8 @@ class DashRuntime:
             tb = traceback.extract_tb(e.__traceback__)
             formated_error = formated_traceback_error_message(e, self.dash_json.file)
 
-            self.session.send(contract.ProgramStartFailedMessage(formated_error, tb))
-            self.session.close()
+            self.execution.send(contract.ProgramStartFailedMessage(formated_error, tb))
+            self.execution.close()
 
     def widget_input(self, data):
         # data: { type: widget-input, widgetId: string, newValue: any, seq: number }
@@ -235,14 +234,14 @@ class DashRuntime:
         try:
             try:
                 value = self.py.ev(data["expression"])
-                self.session.send(contract.EvalReturnMessage(repr(value)))
+                self.execution.send(contract.EvalReturnMessage(repr(value)))
             except SyntaxError:
                 self.py.ex(data["expression"])
-                self.session.send(contract.EvalReturnMessage(""))
+                self.execution.send(contract.EvalReturnMessage(""))
         except Exception as e:
             tb = traceback.extract_tb(e.__traceback__)
             formated_error = formated_traceback_error_message(e, self.dash_json.file)
-            self.session.send(contract.EvalErrorMessage(formated_error))
+            self.execution.send(contract.EvalErrorMessage(formated_error))
 
         self._compute_and_send_widgets_props()
 
@@ -267,7 +266,7 @@ class DashRuntime:
         except Exception as e:
             suggestions = []
 
-        self.session.send(
+        self.execution.send(
             contract.AutocompleteSuggestionsMessage(
                 suggestions=suggestions,
                 suggestionsFor=data["suggestionsFor"],
@@ -296,12 +295,12 @@ class DashRuntime:
     def _compute_and_send_widgets_props(self):
         try:
             self.evaluate_widgets()
-            self.session.send(self.make_widgets_computed_response())
+            self.execution.send(self.make_widgets_computed_response())
         except Exception as e:
             tb = traceback.extract_tb(e.__traceback__)
             formated_error = formated_traceback_error_message(e, self.dash_json.file)
             traceback.print_exc()
-            self.session.send(
+            self.execution.send(
                 contract.WidgetsComputedGeneralErrorMessage(formated_error)
             )
 

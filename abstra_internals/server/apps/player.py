@@ -1,9 +1,12 @@
 import flask, flask_sock, os, concurrent.futures as futures
-
+from ...execution.execution import RequestData
 from ..api import API
 from ...settings import Settings
 from .utils import send_from_dist
-from ..runtimes import run_dash, run_form, run_hook, run_job
+from ...execution.hook_execution import HookExecution
+from ...execution.job_execution import JobExecution
+from ...execution.dashes.dash_execution import DashExecution
+from ...execution.form_execution import FormExecution
 
 
 def get_player_bp(api: API):
@@ -22,13 +25,13 @@ def get_player_bp(api: API):
         workspace = api.get_workspace()
         res = {}
         res[runtime.runner_type] = {
-            **runtime.runner_dto,
-            "workspace": workspace.runner_dto,  # TODO: fix this in frontend
+            **runtime.browser_runner_dto,
+            "workspace": workspace.browser_runner_dto,  # TODO: fix this in frontend
         }
         return res
 
     @bp.route("/_version", methods=["GET"])
-    def get_version():
+    def _get_version():
         return os.getenv("ABSTRA_BUILD_ID")
 
     @bp.route("/_healthcheck")
@@ -45,7 +48,7 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                return run_dash(conn, dash)
+                return DashExecution(dash, conn).run()
 
             form_path = flask.request.args.get("formPath")
             if form_path is not None:
@@ -54,7 +57,13 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                return run_form(conn, form)
+                request_data = RequestData(
+                    query_params=flask.request.args,
+                    body=flask.request.get_data(as_text=True),
+                    headers=flask.request.headers,
+                    method=flask.request.method,
+                )
+                return FormExecution(form, conn).run(request_data)
 
         finally:
             conn.close(message="Done")
@@ -63,6 +72,9 @@ def get_player_bp(api: API):
     def _upload_file():
         files = flask.request.files
         filename = flask.request.form.get("filename")
+        if filename is None:
+            flask.abort(400)
+
         if len(files) == 0:
             flask.abort(400)
 
@@ -83,6 +95,10 @@ def get_player_bp(api: API):
     @bp.route("/_assets/background", methods=["GET"])
     def _background():
         background_path = api.get_workspace().theme
+
+        if not background_path:
+            return flask.abort(404)
+
         return flask.send_from_directory(
             directory=Settings.root_path, path=background_path
         )
@@ -96,7 +112,16 @@ def get_player_bp(api: API):
         if not hook.file:
             flask.abort(500)
 
-        body, status, headers = run_hook(flask.request, hook)
+        execution = HookExecution(hook)
+        request_data = RequestData(
+            query_params=flask.request.args,
+            body=flask.request.get_data(as_text=True),
+            headers=flask.request.headers,
+            method=flask.request.method,
+        )
+        execution.run(request_data)
+        body, status, headers = execution.get_response()
+
         return flask.Response(status=status, headers=headers, response=body)
 
     @bp.route("/_jobs/<path:path>", methods=["POST"])
@@ -111,7 +136,12 @@ def get_player_bp(api: API):
         if not job.file:
             flask.abort(500)
 
-        executor.submit(run_job, job)
+        def run_job(job, request):
+            execution = JobExecution(job)
+            execution.run(request)
+
+        executor.submit(run_job, job, flask.request)
+
         return {"status": "running"}
 
     @bp.route("/<path:filename>", methods=["GET"])

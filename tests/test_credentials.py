@@ -4,7 +4,7 @@ from abstra_internals.credentials import (
     delete_credentials,
     set_credentials,
 )
-from fixtures import init_dir, clear_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestCredentials(unittest.TestCase):

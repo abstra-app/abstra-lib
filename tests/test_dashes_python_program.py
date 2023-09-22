@@ -1,6 +1,6 @@
 import unittest
-from abstra_internals.server.runtimes.dashes.program import PythonProgram
-from fixtures import init_dir, clear_dir
+from abstra_internals.execution.dashes.program import PythonProgram
+from .fixtures import init_dir, clear_dir
 
 
 class TestProgram(unittest.TestCase):

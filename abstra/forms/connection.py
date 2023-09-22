@@ -1,16 +1,16 @@
 from abstra_internals.contract import Message
-from abstra_internals.session import get_live_session_throwable
+from abstra_internals.execution.live_execution import get_live_execution_throwable
 
 
 def send(message: Message):
-    session = get_live_session_throwable()
-    return session.send(message)
+    execution = get_live_execution_throwable()
+    return execution.send(message)
 
 
 def receive():
-    session = get_live_session_throwable()
+    execution = get_live_execution_throwable()
     while True:
-        type, data = session.recv()
+        type, data = execution.recv()
         if type in ["heartbeat", "browser:try-disconnect"]:
             continue
 

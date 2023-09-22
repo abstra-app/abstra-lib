@@ -1,4 +1,4 @@
-from abstra_internals.session import get_live_session_throwable
+from abstra_internals.execution.live_execution import get_live_execution_throwable
 from abstra_internals.utils import decode_jwt
 from abstra_internals.contract import common
 
@@ -15,29 +15,29 @@ class AuthResponse:
 
 
 def get_user():
-    session = get_live_session_throwable()
-    session.send(common.AuthRequireInfoMessage())
+    execution = get_live_execution_throwable()
+    execution.send(common.AuthRequireInfoMessage())
 
     while True:
-        type, data = session.recv()
+        type, data = execution.recv()
         if type != "auth:saved-jwt":
             continue
 
         jwt_claims = decode_jwt(data["jwt"])
         if not jwt_claims:
-            session.send(common.AuthInvalidJWTMessage())
+            execution.send(common.AuthInvalidJWTMessage())
             continue
 
-        session.send(common.AuthValidJWTMessage())
+        execution.send(common.AuthValidJWTMessage())
         return AuthResponse(jwt_claims["email"])
 
 
 def execute_js(code: str, context: dict = {}):
-    session = get_live_session_throwable()
-    session.send(common.ExecuteJSRequestMessage(code, context))
+    execution = get_live_execution_throwable()
+    execution.send(common.ExecuteJSRequestMessage(code, context))
 
     while True:
-        type, data = session.recv()
+        type, data = execution.recv()
         if type != "execute-js:response":
             continue
 
@@ -45,17 +45,17 @@ def execute_js(code: str, context: dict = {}):
 
 
 def alert(message: str, severity: str = "info"):
-    session = get_live_session_throwable()
+    execution = get_live_execution_throwable()
     severity = severity if severity in ["info", "warn", "error", "success"] else "info"
-    session.send(common.AlertMessage(message, severity))
+    execution.send(common.AlertMessage(message, severity))
 
 
 def redirect(url: str, query_params: dict = {}):
-    session = get_live_session_throwable()
+    execution = get_live_execution_throwable()
     query_params = query_params or get_query_params()
-    session.send(common.RedirectMessage(url, query_params))
+    execution.send(common.RedirectMessage(url, query_params))
 
 
 def get_query_params() -> dict:
-    session = get_live_session_throwable()
-    return session.context.get("query_params", {})
+    execution = get_live_execution_throwable()
+    return execution.context.get("query_params", {})

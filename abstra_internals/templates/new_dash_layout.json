@@ -1,0 +1,100 @@
+{
+    "props": {},
+    "version": "0.2",
+    "slot": {
+      "29088739-581d-4465-a11f-7742c70f49f2": {
+        "id": "29088739-581d-4465-a11f-7742c70f49f2",
+        "type": "text-output",
+        "colStart": 7,
+        "colEnd": 9,
+        "rowStart": 10,
+        "rowEnd": 11,
+        "props": {
+          "text": "f\"X + Y = {get_sum()}\""
+        },
+        "events": {},
+        "variable": null
+      },
+      "5941831e-2ecb-4f54-a42f-c0f260239d4b": {
+        "id": "5941831e-2ecb-4f54-a42f-c0f260239d4b",
+        "type": "text-output",
+        "colStart": 1,
+        "colEnd": 6,
+        "rowStart": 6,
+        "rowEnd": 8,
+        "props": {
+          "text": "\"Drag'n drop widgets to the interface\""
+        },
+        "events": {},
+        "variable": null
+      },
+      "7972cbf5-cb0f-44be-b469-e402ab041492": {
+        "id": "7972cbf5-cb0f-44be-b469-e402ab041492",
+        "type": "markdown-output",
+        "colStart": 1,
+        "colEnd": 6,
+        "rowStart": 1,
+        "rowEnd": 5,
+        "props": {
+          "text": "\"# Welcome to Abstra\""
+        },
+        "events": {},
+        "variable": null
+      },
+      "b82d1af7-a616-4e83-b783-ca779f57b161": {
+        "id": "b82d1af7-a616-4e83-b783-ca779f57b161",
+        "type": "number-input",
+        "colStart": 4,
+        "colEnd": 6,
+        "rowStart": 9,
+        "rowEnd": 12,
+        "props": {
+          "label": "\"Set the value of Y\""
+        },
+        "events": {},
+        "variable": "y"
+      },
+      "d8dc57af-cd01-4a06-81fd-4a58f8a13525": {
+        "id": "d8dc57af-cd01-4a06-81fd-4a58f8a13525",
+        "type": "number-input",
+        "colStart": 1,
+        "colEnd": 3,
+        "rowStart": 9,
+        "rowEnd": 12,
+        "props": {
+          "label": "\"Set the value of X\""
+        },
+        "events": {},
+        "variable": "x"
+      },
+      "3ddc73c8-bb7f-47a0-8ab8-fef2eeae6144": {
+        "id": "3ddc73c8-bb7f-47a0-8ab8-fef2eeae6144",
+        "type": "click-input",
+        "colStart": 3,
+        "colEnd": 4,
+        "rowStart": 14,
+        "rowEnd": 15,
+        "props": {
+          "label": "\"Click here!\""
+        },
+        "events": {
+          "click": "show_sum()"
+        },
+        "variable": null
+      },
+      "10c69790-4592-48dc-ae9b-35e501cc3fb2": {
+        "id": "10c69790-4592-48dc-ae9b-35e501cc3fb2",
+        "type": "link-output",
+        "colStart": 3,
+        "colEnd": 5,
+        "rowStart": 17,
+        "rowEnd": 18,
+        "props": {
+          "link_url": "\"https://docs.abstra.io/dashes/overview\"",
+          "link_text": "\"See the docs\""
+        },
+        "events": {},
+        "variable": null
+      }
+    }
+  }

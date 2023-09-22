@@ -15,8 +15,8 @@ from ..utils import prepate_traceback
 class ExecutionIdMessage(Message):
     type = "execution-id"
 
-    def __init__(self, executionId: str):
-        super().__init__({"executionId": executionId})
+    def __init__(self, execution_id: str):
+        super().__init__({"executionId": execution_id})
 
 
 class ErrorMessage(Message):
