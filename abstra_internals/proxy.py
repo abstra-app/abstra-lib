@@ -1,4 +1,4 @@
-class ProxyDict:
+class ReadOnlyProxyDict:
     def __init__(self, data_getter):
         self.data_getter = data_getter
 
@@ -11,12 +11,6 @@ class ProxyDict:
 
     def __getitem__(self, key):
         return self.data.__getitem__(key)
-
-    def __setitem__(self, key, value):
-        return self.data.__setitem__(key, value)
-
-    def __delitem__(self, key):
-        return self.data.__delitem__(key)
 
     def __missing__(self, key):
         return self.data.__missing__(key)
@@ -35,6 +29,12 @@ class ProxyDict:
 
     def __repr__(self) -> str:
         return self.data.__repr__()
+
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
+    def copy(self):
+        return self.data.copy()
 
     def keys(self):
         return self.data.keys()

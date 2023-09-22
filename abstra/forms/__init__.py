@@ -5,7 +5,7 @@ from .step import run_steps  # exported
 from .list_item_schema import ListItemSchema  # exported
 from ..common import execute_js, redirect, get_user, get_query_params, alert  # exported
 
-from abstra_internals.proxy import ProxyDict
+from abstra_internals.proxy import ReadOnlyProxyDict
 
 # legacy
-url_params = ProxyDict(get_query_params)
+url_params = ReadOnlyProxyDict(get_query_params)
