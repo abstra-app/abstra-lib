@@ -1,6 +1,6 @@
 import json
 from io import BytesIO
-from abstra_internals.session import get_static_session_throwable
+from abstra_internals.execution.static_execution import get_static_execution_throwable
 
 
 def _app_json_parse(body: str):
@@ -17,8 +17,8 @@ def _multipart_form_parse(body: str, headers: dict):
 
 
 def get_raw_request():
-    session = get_static_session_throwable()
-    raw, args, headers = session.context.get("request", (None, None, None))
+    execution = get_static_execution_throwable()
+    raw, args, headers = execution.context.get("request", (None, None, None))
     return raw, args, headers
 
 
@@ -36,8 +36,8 @@ def get_request():
 
 
 def send_response(body="", status_code=200, headers={}):
-    session = get_static_session_throwable()
-    session.context["response"] = (body, status_code, headers)
+    execution = get_static_execution_throwable()
+    execution.context["response"] = (body, status_code, headers)
 
 
 def send_json(data={}, status_code=200, headers={}):

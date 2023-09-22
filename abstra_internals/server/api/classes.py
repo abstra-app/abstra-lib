@@ -1,10 +1,174 @@
-import sys
-from typing import List, Optional, Union, Any, Dict
+import sys, warnings
+from typing import List, Optional, Union, Any, Dict, Tuple
 from dataclasses import dataclass
-from pathlib import Path
-
-from ...utils import check_is_url
 from ...settings import Settings
+from ...utils import check_is_url
+import uuid
+
+
+def strict_compatible_missing_entities(data):
+    if "hooks" not in data:
+        data["hooks"] = []
+
+    if "jobs" not in data:
+        data["jobs"] = []
+
+    if "forms" not in data:
+        data["forms"] = []
+
+    if "dashes" not in data:
+        data["dashes"] = []
+
+    if "workspace" not in data:
+        data["workspace"] = {
+            "name": "Untitled Workspace",
+            "sidebar": [],
+        }
+
+    if "workflow_transitions" not in data:
+        data["workflow_transitions"] = []
+    return data
+
+
+def strict_compatible_workflow_positions(data: dict):
+    # On release v{TBD} we added workflow positions to the abstra.json file.
+    # By default, positions should be placed in columns
+    size = 110
+    forms = data["forms"]
+    for idx, form in enumerate(forms):
+        if "workflow_position" not in form:
+            form["workflow_position"] = [0, idx * size]
+
+    for idx, job in enumerate(data["jobs"]):
+        if "workflow_position" not in job:
+            job["workflow_position"] = [size, idx * size]
+
+    for idx, hook in enumerate(data["hooks"]):
+        if "workflow_position" not in hook:
+            hook["workflow_position"] = [2 * size, idx * size]
+    return data
+
+
+def strict_compatible_is_initial(data: dict):
+    for form in data["forms"]:
+        if "is_initial" not in form:
+            form["is_initial"] = True
+
+    for job in data["jobs"]:
+        if "is_initial" not in job:
+            job["is_initial"] = True
+
+    for hook in data["hooks"]:
+        if "is_initial" not in hook:
+            hook["is_initial"] = True
+    return data
+
+
+def strict_compatible_transitions(data: dict):
+    for form in data["forms"]:
+        if "transitions" not in form:
+            form["transitions"] = []
+
+    for job in data["jobs"]:
+        if "transitions" not in job:
+            job["transitions"] = []
+
+    for hook in data["hooks"]:
+        if "transitions" not in hook:
+            hook["transitions"] = []
+    return data
+
+
+def _find_transition_target(data: dict, target_path: str, target_type: str, warn: bool):
+    for form in data["forms"]:
+        if form["path"] == target_path and target_type == "forms":
+            return form
+
+    for job in data["jobs"]:
+        if job["identifier"] == target_path and target_type == "jobs":
+            return job
+
+    for hook in data["hooks"]:
+        if hook["path"] == target_path and target_type == "hooks":
+            return hook
+
+    if warn:
+        warnings.warn(
+            f"Could not find transition target {target_type}:{target_path}. This will be ignored, but please, make sure to remove it from your abstra.json file"
+        )
+    return None
+
+
+def strict_compatible_remove_dangling_transitions(data: dict):
+    for form in data["forms"]:
+        form["transitions"] = [
+            transition
+            for transition in form["transitions"]
+            if _find_transition_target(
+                data, transition["target_path"], transition["target_type"], warn=True
+            )
+            is not None
+        ]
+
+    for job in data["jobs"]:
+        job["transitions"] = [
+            transition
+            for transition in job["transitions"]
+            if _find_transition_target(
+                data, transition["target_path"], transition["target_type"], warn=True
+            )
+            is not None
+        ]
+
+    for hook in data["hooks"]:
+        hook["transitions"] = [
+            transition
+            for transition in hook["transitions"]
+            if _find_transition_target(
+                data, transition["target_path"], transition["target_type"], warn=True
+            )
+            is not None
+        ]
+
+    return data
+
+
+def strict_compatible(data: dict):
+    data = strict_compatible_missing_entities(data)
+    data = strict_compatible_workflow_positions(data)
+    data = strict_compatible_is_initial(data)
+    data = strict_compatible_transitions(data)
+    data = strict_compatible_remove_dangling_transitions(data)
+    return data
+
+
+@dataclass
+class WorkflowTransitionJSON:
+    target_path: str
+    target_type: str
+    label: str
+    id: str
+
+    def __post_init__(self):
+        self.id = str(uuid.uuid4()) if self.id is None else self.id
+
+    @property
+    def __dict__(self):
+        return {
+            "target_path": self.target_path,
+            "target_type": self.target_type,
+            "label": self.label,
+            "id": self.id,
+        }
+
+    @staticmethod
+    def from_dict(data: dict):
+        return WorkflowTransitionJSON(
+            target_path=data["target_path"],
+            target_type=data["target_type"],
+            label=data["label"],
+            id=data["id"],
+        )
 
 
 @dataclass
@@ -18,28 +182,30 @@ class HookJSON:
     file: str
     path: str
     title: str
+    workflow_transitions: List[WorkflowTransitionJSON]
     enabled: bool = False
+    is_initial: bool = True
+    workflow_position: Tuple[float, float] = (0, 0)
 
     @property
     def runner_type(self):
         return "hook"
 
     @property
-    def runner_dto(self):
+    def __dict__(self):
         return {
             "file": self.file,
             "path": self.path,
             "title": self.title,
             "enabled": self.enabled,
+            "workflow_position": self.workflow_position,
+            "is_initial": self.is_initial,
+            "transitions": [t.__dict__ for t in self.workflow_transitions],
         }
 
     @property
     def editor_dto(self):
-        return self.runner_dto
-
-    @property
-    def __dict__(self):
-        return self.editor_dto
+        return self.__dict__
 
     @property
     def file_path(self):
@@ -56,12 +222,21 @@ class HookJSON:
 
     @staticmethod
     def from_dict(data: dict):
+        x, y = data["workflow_position"]
         return HookJSON(
             file=data["file"],
             path=data["path"],
             title=data["title"],
             enabled=data["enabled"],
+            workflow_position=(x, y),
+            is_initial=data["is_initial"],
+            workflow_transitions=[
+                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+            ],
         )
+
+    def duplicate(self):
+        return self.from_dict(self.__dict__)
 
 
 @dataclass
@@ -70,27 +245,27 @@ class JobJSON:
     title: str
     identifier: str
     schedule: str
+    workflow_position: Tuple[float, float]
+    workflow_transitions: List[WorkflowTransitionJSON]
 
     @property
     def runner_type(self):
         return "job"
 
     @property
-    def runner_dto(self):
+    def __dict__(self):
         return {
             "file": self.file,
             "identifier": self.identifier,
             "title": self.title,
             "schedule": self.schedule,
+            "workflow_position": self.workflow_position,
+            "transitions": [t.__dict__ for t in self.workflow_transitions],
         }
 
     @property
     def editor_dto(self):
-        return self.runner_dto
-
-    @property
-    def __dict__(self):
-        return self.editor_dto
+        return self.__dict__
 
     @property
     def file_path(self):
@@ -107,17 +282,37 @@ class JobJSON:
 
     @staticmethod
     def from_dict(data: Dict):
+        x, y = data["workflow_position"]
         return JobJSON(
             file=data["file"],
             identifier=data["identifier"],
             title=data["title"],
             schedule=data["schedule"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+            ],
         )
+
+    def duplicate(self):
+        return self.from_dict(self.__dict__)
+
+    @property
+    def path(self):
+        return self.identifier
+
+    @property
+    def is_initial(self):
+        return True
 
 
 @dataclass
 class FormJSON(SidebarRuntime):
     file: str
+    title: str
+    workflow_transitions: List[WorkflowTransitionJSON]
+    workflow_position: Tuple[float, float] = (0, 0)
+    is_initial: bool = True
     end_message: Optional[str] = None
     auto_start: Optional[bool] = False
     start_message: Optional[str] = None
@@ -133,7 +328,7 @@ class FormJSON(SidebarRuntime):
         return "form"
 
     @property
-    def runner_dto(self):
+    def browser_runner_dto(self):
         return {
             "id": self.path,
             "path": self.path,
@@ -152,26 +347,16 @@ class FormJSON(SidebarRuntime):
     @property
     def editor_dto(self):
         return {
-            **self.runner_dto,
+            **self.browser_runner_dto,
             "file": self.file,
+            "workflow_position": self.workflow_position,
+            "is_initial": self.is_initial,
+            "transitions": [t.__dict__ for t in self.workflow_transitions],
         }
 
     @property
     def __dict__(self):
-        return {
-            "file": self.file,
-            "path": self.path,
-            "title": self.title,
-            "end_message": self.end_message,
-            "auto_start": self.auto_start,
-            "start_message": self.start_message,
-            "error_message": self.error_message,
-            "welcome_title": self.welcome_title,
-            "allow_restart": self.allow_restart,
-            "timeout_message": self.timeout_message,
-            "start_button_text": self.start_button_text,
-            "restart_button_text": self.restart_button_text,
-        }
+        return self.editor_dto
 
     @property
     def file_path(self):
@@ -200,6 +385,7 @@ class FormJSON(SidebarRuntime):
 
     @staticmethod
     def from_dict(data: dict):
+        x, y = data["workflow_position"]
         return FormJSON(
             file=data["file"],
             path=data["path"],
@@ -213,7 +399,15 @@ class FormJSON(SidebarRuntime):
             timeout_message=data["timeout_message"],
             start_button_text=data["start_button_text"],
             restart_button_text=data["restart_button_text"],
+            workflow_position=(x, y),
+            is_initial=data["is_initial"],
+            workflow_transitions=[
+                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+            ],
         )
+
+    def duplicate(self):
+        return self.from_dict(self.__dict__)
 
 
 def is_widget(x: Dict[str, Any]):
@@ -234,7 +428,7 @@ class DashWidgetJSON:
     name: Optional[str] = None
 
     @property
-    def runner_dto(self):
+    def browser_runner_dto(self):
         return {
             "id": self.id,
             "type": self.type,
@@ -335,11 +529,8 @@ class SlottableJSON:
     props: Dict[str, str]
     slot: "SlotJSON"
 
-    def __post_init__(self):
-        self.slot = SlotJSON(self.slot)
-
     @property
-    def runner_dto(self):
+    def browser_runner_dto(self):
         return {
             "id": self.id,
             "type": self.type,
@@ -349,7 +540,7 @@ class SlottableJSON:
                 "order": self.order,
             },
             "props": [k for k in self.props.keys()],
-            "slot": self.slot.runner_dto,
+            "slot": self.slot.browser_runner_dto,
         }
 
     @property
@@ -437,8 +628,10 @@ class SlotJSON:
         return self.__data.values()
 
     @property
-    def runner_dto(self):
-        return {id: slottable.runner_dto for id, slottable in self.__data.items()}
+    def browser_runner_dto(self):
+        return {
+            id: slottable.browser_runner_dto for id, slottable in self.__data.items()
+        }
 
     @property
     def editor_dto(self):
@@ -453,6 +646,10 @@ class SlotJSON:
             if id in changes:
                 slottable.update(changes[id])
 
+    @staticmethod
+    def from_dict(data: dict):
+        return SlotJSON(data)
+
 
 @dataclass
 class LayoutJSON:
@@ -460,17 +657,14 @@ class LayoutJSON:
     props: Dict[str, str]
     slot: SlotJSON
 
-    def __post_init__(self):
-        self.slot = SlotJSON(self.slot)
-
     @property
-    def runner_dto(self):
+    def browser_runner_dto(self):
         if self.version != "0.2":
             raise ValueError("TODO: convert to 0.2")
         return {
             "props": [k for k in self.props.keys()],
             "version": self.version,
-            "slot": self.slot.runner_dto,
+            "slot": self.slot.browser_runner_dto,
         }
 
     @property
@@ -489,26 +683,30 @@ class LayoutJSON:
             "slot": self.slot.__dict__,
         }
 
+    @staticmethod
+    def from_dict(data: dict):
+        return LayoutJSON(
+            version=data["version"],
+            props=data["props"],
+            slot=SlotJSON.from_dict(data["slot"]),
+        )
+
 
 @dataclass
 class DashJSON(SidebarRuntime):
     file: str
     layout: LayoutJSON
 
-    def __post_init__(self):
-        if not isinstance(self.layout, LayoutJSON):
-            self.layout = LayoutJSON(**self.layout)
-
     @property
     def runner_type(self):
         return "dash"
 
     @property
-    def runner_dto(self):
+    def browser_runner_dto(self):
         return {
             "path": self.path,
             "title": self.title,
-            "layout": self.layout.runner_dto,
+            "layout": self.layout.browser_runner_dto,
         }
 
     @property
@@ -543,7 +741,7 @@ class DashJSON(SidebarRuntime):
             del changes["title"]
 
         if "layout" in changes:
-            self.layout = LayoutJSON(**changes["layout"])
+            self.layout = LayoutJSON.from_dict(changes["layout"])
             del changes["layout"]
 
         if "file" in changes:
@@ -559,7 +757,7 @@ class DashJSON(SidebarRuntime):
             path=data["path"],
             file=data["file"],
             title=data["title"],
-            layout=data["layout"],
+            layout=LayoutJSON.from_dict(data["layout"]),
         )
 
 
@@ -588,7 +786,9 @@ class SidebarJSON:
 
     @staticmethod
     def from_dict(
-        sidebar_data=List, dashes: List[DashJSON] = [], forms: List[FormJSON] = []
+        sidebar_data: List[dict],
+        dashes: List[DashJSON] = [],
+        forms: List[FormJSON] = [],
     ):
         item_name = lambda path: [s.title for s in [*dashes, *forms] if s.path == path][
             0
@@ -596,14 +796,14 @@ class SidebarJSON:
         stored_items = []
         for item in sidebar_data:
             if item["path"] in [d.path for d in dashes] + [f.path for f in forms]:
-                item = SidebarItemJSON(
+                sidebar_item = SidebarItemJSON(
                     id=item["id"],
                     name=item_name(item["path"]),
                     path=item["path"],
                     type=item["type"],
                     visible=item.get("visible"),
                 )
-                stored_items.append(item)
+                stored_items.append(sidebar_item)
 
         for dash in dashes:
             if dash.path not in [item.path for item in stored_items]:
@@ -662,7 +862,7 @@ class WorkspaceJSON:
         }
 
     @property
-    def runner_dto(self):
+    def browser_runner_dto(self):
         if isinstance(self.logo_url, str) and check_is_url(self.logo_url):
             logo_url = self.logo_url
         elif self.logo_url:
@@ -706,6 +906,10 @@ class WorkspaceJSON:
         )
 
 
+class PathConflictError(Exception):
+    pass
+
+
 @dataclass
 class AbstraJSON:
     version: str
@@ -714,15 +918,6 @@ class AbstraJSON:
     dashes: List[DashJSON]
     hooks: List[HookJSON]
     jobs: List[JobJSON]
-
-    def __post_init__(self):
-        self.forms = [FormJSON.from_dict(form) for form in self.forms]
-        self.dashes = [DashJSON.from_dict(dash) for dash in self.dashes]
-        self.hooks = [HookJSON.from_dict(hook) for hook in self.hooks]
-        self.jobs = [JobJSON.from_dict(job) for job in self.jobs]
-        self.workspace = WorkspaceJSON.from_dict(
-            self.workspace, dashes=self.dashes, forms=self.forms
-        )
 
     @property
     def __dict__(self):
@@ -735,40 +930,90 @@ class AbstraJSON:
             "jobs": [job.__dict__ for job in self.jobs],
         }
 
+    def get_runtime_by_path(
+        self, path: str
+    ) -> Optional[Union[FormJSON, DashJSON, HookJSON, JobJSON]]:
+        for form in self.forms:
+            if form.path == path:
+                return form
+
+        for dash in self.dashes:
+            if dash.path == path:
+                return dash
+
+        for hook in self.hooks:
+            if hook.path == path:
+                return hook
+
+        for job in self.jobs:
+            if job.identifier == path:
+                return job
+
+        return None
+
+    def _update_path_refs(self, old_path: str, new_path: str):
+        runtimes: List[Union[FormJSON, HookJSON, JobJSON]] = [
+            *self.forms,
+            *self.hooks,
+            *self.jobs,
+        ]
+
+        for runtime in runtimes:
+            for wt in runtime.workflow_transitions:
+                if wt.target_path == old_path:
+                    wt.target_path = new_path
+
+    def update_runtime(
+        self, path: str, changes: Dict[str, Any]
+    ) -> Union[FormJSON, DashJSON, HookJSON, JobJSON]:
+        new_path = changes.get("path") or changes.get("identifier")
+
+        if new_path:
+            if self.get_runtime_by_path(new_path):
+                raise PathConflictError(f"Path {path} already exists")
+
+            self._update_path_refs(path, changes["path"])
+
+        runtime = self.get_runtime_by_path(path)
+
+        if not runtime:
+            raise Exception(f"Runtime {path} not found")
+
+        runtime.update(changes)
+
+        return runtime
+
     @staticmethod
     def from_dict(data: dict):
-        if "hooks" not in data:
-            data["hooks"] = []
-
-        if "jobs" not in data:
-            data["jobs"] = []
-
-        if "forms" not in data:
-            data["forms"] = []
-
-        if "dashes" not in data:
-            data["dashes"] = []
-
-        if "workspace" not in data:
-            data["workspace"] = {
-                "name": "Untitled Workspace",
-                "sidebar": [],
-            }
+        data = strict_compatible(data)
 
         try:
-            return AbstraJSON(**data)
+            dashes = [DashJSON.from_dict(dash) for dash in data["dashes"]]
+            forms = [FormJSON.from_dict(form) for form in data["forms"]]
+            return AbstraJSON(
+                version=data["version"],
+                forms=forms,
+                dashes=dashes,
+                hooks=[HookJSON.from_dict(hook) for hook in data["hooks"]],
+                jobs=[JobJSON.from_dict(job) for job in data["jobs"]],
+                workspace=WorkspaceJSON.from_dict(
+                    data["workspace"], dashes=dashes, forms=forms
+                ),
+            )
         except TypeError as e:
             print("Error: incompatible abstra.json file.")
-            print(e)
+            import traceback
+
+            traceback.print_exc()
             sys.exit(1)
 
     @staticmethod
     def make_empty():
         return AbstraJSON(
             version="0.1",
-            workspace=dict(
+            workspace=WorkspaceJSON(
                 name="Untitled Workspace",
-                sidebar=[],
+                sidebar=SidebarJSON([]),
             ),
             forms=[],
             dashes=[],

@@ -1,7 +1,7 @@
 import tempfile, unittest
 from pathlib import Path
 from abstra_internals.server.api import API
-from fixtures import init_dir, clear_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestWorkspace(unittest.TestCase):

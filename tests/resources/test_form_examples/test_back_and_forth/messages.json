@@ -9,8 +9,8 @@
     [
         "python",
         {
-            "type": "session-id",
-            "sessionId": "session-id"
+            "type": "execution-id",
+            "executionId": "execution-id"
         }
     ],
     [

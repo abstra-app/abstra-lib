@@ -1,5 +1,5 @@
 import typing
-from abstra_internals.player_api_clients import tables_api_http_client
+from abstra_internals.repositories import tables_api_http_client
 
 
 def _execute(query: str, params: typing.List):  # private api

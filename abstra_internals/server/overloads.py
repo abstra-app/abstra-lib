@@ -1,5 +1,5 @@
 import sys
-from ..session import Execution
+from ..execution.execution import Execution
 
 
 def __overload_stdio():

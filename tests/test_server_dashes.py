@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
 from abstra_internals.server.api import API
-from fixtures import init_dir, clear_dir
+from .fixtures import init_dir, clear_dir
+from abstra_internals.templates import new_dash_layout
 
 
 class TestDashes(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestDashes(unittest.TestCase):
 
         self.assertEqual(len(api.get_dashes()), dashes_len + 1)
 
-        self.assertEqual(dash.layout.slot.__dict__, {})
+        self.assertEqual(dash.layout.slot.__dict__, new_dash_layout["slot"])
 
         file_path = Path(self.root, dash.file)
 
@@ -51,7 +52,7 @@ class TestDashes(unittest.TestCase):
             },
         }
 
-        updated_dash = api.update_dash(
+        updated_dash = api.update_runtime(
             dash.path, dict(title="new title", layout=new_layout)
         )
         self.maxDiff = None
@@ -66,7 +67,7 @@ class TestDashes(unittest.TestCase):
         new_file = Path(self.root, "non-existing-file.py")
 
         # when updating the file to a non existing file
-        api.update_dash(dash.path, dict(file="non-existing-file.py"))
+        api.update_runtime(dash.path, dict(file="non-existing-file.py"))
 
         # then the existing file is renamed
         self.assertFalse(old_file.exists())
@@ -82,7 +83,7 @@ class TestDashes(unittest.TestCase):
         new_file.write_text("print('hello')")
 
         # when updating the file to a non existing file
-        api.update_dash(dash.path, dict(file="existing-file.py"))
+        api.update_runtime(dash.path, dict(file="existing-file.py"))
 
         # then just the file property is updated
         self.assertFalse(old_file.exists())

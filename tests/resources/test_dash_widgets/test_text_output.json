@@ -1,5 +1,5 @@
 [
-    ["python", {"type": "execution-id", "executionId": "session-id"}],
+    ["python", {"type": "execution-id", "executionId": "execution-id"}],
     ["browser", {"type":"client-start","state":{"timestamp":1692901447756,"widgets":{"36fc646f-6b9f-4784-b264-ceb8fed9b59e":{"value":null}}},"params":{}}],
     ["python", {"type": "widgets-computed", "props": {"36fc646f-6b9f-4784-b264-ceb8fed9b59e": {"type": "text-output", "text": "Hello World!", "size": "medium", "fullWidth": false}}, "variables": {}, "errors": {"36fc646f-6b9f-4784-b264-ceb8fed9b59e": {}}, "seq": 0}]
 ]

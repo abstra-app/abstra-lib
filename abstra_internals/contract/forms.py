@@ -8,18 +8,30 @@ from .common import (  # exported
     AuthRequireInfoMessage,
 )
 
+exit_status = {
+    "success": "SUCCESS",
+    "lock_acquisition_failed": "LOCK_ACQUISITION_FAILED",
+    "generic_exception": "GENERIC_EXCEPTION",
+}
+
 
 @dataclass
 class CloseDTO:
-    exit_code: typing.Union[int, None] = None
+    exit_status: str
     exception: typing.Union[str, None] = None
 
+    def __post_init__(self):
+        if self.exit_status not in exit_status.values():
+            raise ValueError(
+                f"exit_status must be one of {exit_status.values()}, got {self.exit_status}"
+            )
 
-class SessionIdMessage(Message):
-    type = "session-id"
 
-    def __init__(self, session_id: str):
-        super().__init__({"sessionId": session_id})
+class ExecutionIdMessage(Message):
+    type = "execution-id"
+
+    def __init__(self, execution_id: str):
+        super().__init__({"executionId": execution_id})
 
 
 class CloseMessage(Message):
@@ -27,7 +39,7 @@ class CloseMessage(Message):
 
     def __init__(self, close_dto: CloseDTO):
         super().__init__(
-            {"exitCode": close_dto.exit_code, "exception": close_dto.exception}
+            {"exitStatus": close_dto.exit_status, "exception": close_dto.exception}
         )
 
 

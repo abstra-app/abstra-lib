@@ -1,4 +1,4 @@
-from abstra_internals.player_api_clients import connectors_api_http_client
+from abstra_internals.repositories import connectors_api_http_client
 
 
 class ConnectorExecutionError(Exception):  # public api

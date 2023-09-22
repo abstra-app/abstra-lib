@@ -1,6 +1,6 @@
 import unittest
 from abstra_internals.utils.file import files_from_directory
-from fixtures import init_dir, clear_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestListing(unittest.TestCase):

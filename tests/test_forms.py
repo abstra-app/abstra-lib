@@ -1,6 +1,6 @@
 import unittest
 from abstra_internals.server.api import API
-from fixtures import init_dir, clear_dir
+from .fixtures import init_dir, clear_dir
 
 
 class TestForms(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestForms(unittest.TestCase):
         api = API()
         form = api.create_form()
 
-        api.update_form(form.path, dict(title="New Title"))
+        api.update_runtime(form.path, dict(title="New Title"))
 
         api2 = API()
         api2.get_workspace()
@@ -27,6 +27,6 @@ class TestForms(unittest.TestCase):
         form = api.create_form()
 
         with self.assertRaises(Exception):
-            api.update_form(
+            api.update_runtime(
                 form.path, dict(title="New Title", invalid_property="invalid")
             )
