@@ -1,2 +1,0 @@
-import"./registerWidgets.1e9167ab.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},t=new Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]="c3c08528-1f92-4554-a953-b4d64bf9393e",e._sentryDebugIdIdentifier="sentry-dbid-c3c08528-1f92-4554-a953-b4d64bf9393e")}catch{}})();function r(e){switch(typeof e){case"object":return Object.entries(e).map(([t,n])=>({title:t,key:t,children:r(n)}));default:return[{title:e,key:e}]}}export{r as t};
-//# sourceMappingURL=ant-design.6175823c.js.map
