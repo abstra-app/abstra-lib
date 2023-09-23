@@ -104,13 +104,13 @@ class Execution:
         )
 
     def handle_success(self):
-        raise NotImplementedError()
+        pass
 
     def handle_failure(self, exception: Exception):
-        raise NotImplementedError()
+        pass
 
     def handle_lock_failed(self):
-        raise NotImplementedError()
+        pass
 
     def set_stage(self, data: Optional[Dict] = None, assignee: Optional[str] = None):
         raise NotImplementedError("Can only be called from a hook")
