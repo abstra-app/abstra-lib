@@ -13,13 +13,13 @@ class HookExecution(StaticExecution):
             pass
 
     def handle_success(self):
-        self.context["response"] = self.context.get("response", ({}, 200, {}))
+        self.context["response"] = self.context.get("response", ("", 200, {}))
 
     def handle_failure(self, exception: Exception):
-        self.context["response"] = self.context.get("response", ({}, 500, {}))
+        self.context["response"] = self.context.get("response", ("", 500, {}))
 
     def handle_lock_failed(self):
-        self.context["response"] = self.context.get("response", ({}, 409, {}))
+        self.context["response"] = self.context.get("response", ("", 409, {}))
 
     def get_response(self) -> typing.Tuple[Dict, int, Dict]:
         if "response" not in self.context:
