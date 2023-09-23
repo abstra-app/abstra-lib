@@ -3,10 +3,7 @@ from ...execution.execution import RequestData
 from ..api import API
 from ...settings import Settings
 from .utils import send_from_dist
-from ...execution.hook_execution import HookExecution
-from ...execution.job_execution import JobExecution
-from ...execution.dashes.dash_execution import DashExecution
-from ...execution.form_execution import FormExecution
+from ...execution import HookExecution, JobExecution, DashExecution, FormExecution
 
 
 def get_player_bp(api: API):
