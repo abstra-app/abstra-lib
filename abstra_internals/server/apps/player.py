@@ -32,7 +32,7 @@ def get_player_bp(api: API):
 
     @bp.route("/_version", methods=["GET"])
     def _get_version():
-        return os.getenv("ABSTRA_BUILD_ID")
+        return os.getenv("ABSTRA_BUILD_ID") or "dev"
 
     @bp.route("/_healthcheck")
     def _healthcheck():
@@ -90,6 +90,8 @@ def get_player_bp(api: API):
     @bp.route("/_assets/logo", methods=["GET"])
     def _logo():
         logo_path = api.get_workspace().logo_url
+        if not logo_path:
+            return flask.abort(404)
         return flask.send_from_directory(directory=Settings.root_path, path=logo_path)
 
     @bp.route("/_assets/background", methods=["GET"])
