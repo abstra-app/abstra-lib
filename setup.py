@@ -30,7 +30,10 @@ setup(
             "abstra=abstra.cli:main",
         ],
     },
-    package_data={"abstra_statics": ["dist/**/*", "dist/*"]},
+    package_data={
+        "abstra_statics": ["dist/**/*", "dist/*"],
+        "abstra_internals": ["templates/*"],
+    },
     packages=find_packages(exclude=["tests"]),
     install_requires=requirements,
 )
