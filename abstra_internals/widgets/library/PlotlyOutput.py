@@ -20,7 +20,10 @@ class PlotlyOutput(Output):
 
             df = px.data.tips()
             fig = px.density_heatmap(df, x="total_bill", y="tip")
-            return json.loads(fig.to_json())
+            fig_json = fig.to_json()
+            if not isinstance(fig_json, str):
+                raise Exception("fig.to_json() did not return a string")
+            return json.loads(fig_json)
         return json.loads(self.fig.to_json())
 
     def render(self, context: dict):

@@ -109,9 +109,9 @@ class WMetadata:
         self.type = type
         self.autoHeight = autoHeight
         self.events = [WEvents(**event) for event in events]
-        self.dashProperties = WDashProperties(**dashProperties)
-        self.pythonAPI = WPythonAPI(**pythonAPI)
-        self.brokerAPI = WBrokerAPI(**brokerAPI)
+        self.dashProperties = WDashProperties(**dashProperties)  # type: ignore
+        self.pythonAPI = WPythonAPI(**pythonAPI)  # type: ignore
+        self.brokerAPI = WBrokerAPI(**brokerAPI)  # type: ignore
         self.examples = [WExample(**example) for example in examples]
         self.dashOnly = dashOnly
         self.formOnly = formOnly

@@ -65,7 +65,7 @@ class Execution:
 
     def __init__(
         self,
-        runtime_json: Union["HookJSON", JobJSON, FormJSON, DashJSON],
+        runtime_json: Union["FormJSON", "DashJSON", "HookJSON", "JobJSON"],
         execution_id=None,
     ):
         if execution_id:

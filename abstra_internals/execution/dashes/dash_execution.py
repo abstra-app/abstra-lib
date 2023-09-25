@@ -1,13 +1,14 @@
 import simple_websocket
 from ..live_execution import LiveExecution
 from ...contract import dashes_contract
+import typing
 
 
 class DashExecution(LiveExecution):
     def run(self):
         from .dash_runtime import DashRuntime
 
-        msg_handler = DashRuntime(self, dash_json=self.runtime_json)
+        msg_handler = DashRuntime(self, dash_json=self.runtime_json)  # type: ignore
         self.send(dashes_contract.ExecutionIdMessage(self.id))
         while True:
             try:

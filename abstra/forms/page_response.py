@@ -1,5 +1,11 @@
+from typing import Optional
+
+
 class PageResponse(dict):
-    def __init__(self, data, action):
+    data: dict
+    action: Optional[str]
+
+    def __init__(self, data: dict, action: Optional[str]):
         self.action = action
         self.data = data
 
@@ -36,8 +42,11 @@ class PageResponse(dict):
     def __repr__(self):
         return repr(self.data)
 
-    def __cmp__(self, cmp_dict):
-        return self.__cmp__(self.data, cmp_dict)
+    def __eq__(self, cmp_dict):
+        return self.data.__eq__(cmp_dict)
+
+    def __ne__(self, cmp_dict):
+        return self.data.__ne__(cmp_dict)
 
     def keys(self):
         return self.data.keys()

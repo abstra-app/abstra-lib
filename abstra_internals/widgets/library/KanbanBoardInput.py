@@ -39,6 +39,7 @@ class KanbanTag:
             )
         elif isinstance(data, KanbanTag):
             return data
+        raise ValueError("Invalid tag data")
 
     def to_dict(self):
         return {"key": self.key, "label": self.label}
@@ -50,19 +51,19 @@ class KanbanCard:
     title: Optional[str]
     text: Optional[str]
     tags: List[KanbanTag]
-    stageKey: str
+    stage_key: Optional[str]
 
     @staticmethod
     def make(data):
         if isinstance(data, str):
-            return KanbanCard(key=data, title=data, text=None, tags=[], stageKey=None)
+            return KanbanCard(key=data, title=data, text=None, tags=[], stage_key=None)
         elif isinstance(data, dict):
             return KanbanCard(
                 key=data.get("key", str(uuid())),
                 title=data.get("title", None),
                 text=data.get("text", None),
-                tags=map(KanbanTag.make, data.get("tags", [])),
-                stageKey=data.get("stageKey", None),
+                tags=list(map(KanbanTag.make, data.get("tags", []))),
+                stage_key=data.get("stageKey", None),
             )
         elif isinstance(data, KanbanCard):
             return data
@@ -73,7 +74,7 @@ class KanbanCard:
             "title": self.title,
             "text": self.text,
             "tags": [tag.to_dict() for tag in self.tags],
-            "stageKey": self.stageKey,
+            "stageKey": self.stage_key,
         }
 
 
@@ -108,10 +109,10 @@ class KanbanBoardInput(Input):
     def serialize_value(self):
         if self.value is None:
             return []
-        return [card.to_dict() for card in self.value]
+        return [(card.to_dict() if card else None) for card in self.value]
 
     def render(self, context: dict):
-        stages = [stage.to_dict() for stage in self.stages]
+        stages = [(stage.to_dict() if stage else None) for stage in self.stages]
         return {
             "type": self.type,
             "key": self.key,

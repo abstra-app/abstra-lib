@@ -1,25 +1,16 @@
 from abc import abstractmethod, ABC
 
+from typing import TYPE_CHECKING
 
-# Represents an Image from PIL package
-# from PIL.Image import Image
-class PILImage(ABC):
-    @abstractmethod
-    def save(self, path: str):
-        pass
+PILImage = ABC
+PandasDataFrame = ABC
+PlotlyFigure = ABC
 
+if TYPE_CHECKING:
+    from plotly.graph_objects import Figure
+    from PIL.Image import Image
+    from pandas import DataFrame
 
-# Represents a DataFrame from pandas package
-# from pandas import DataFrame
-class PandasDataFrame(ABC):
-    @abstractmethod
-    def to_json(self, **kwargs):
-        pass
-
-
-# Represents a Figure from plotly package
-# from plotly.graph_objects import Figure
-class PlotlyFigure(ABC):
-    @abstractmethod
-    def to_json(self, **kwargs):
-        pass
+    PILImage = Image
+    PandasDataFrame = DataFrame
+    PlotlyFigure = Figure

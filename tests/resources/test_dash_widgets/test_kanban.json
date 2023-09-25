@@ -128,42 +128,72 @@
                         "key": 1,
                         "title": "Card 1",
                         "text": "This is card 1",
-                        "tags": [],
+                        "tags": [
+                            {
+                                "key": "tag1",
+                                "label": "Tag 1"
+                            }
+                        ],
                         "stageKey": "todo"
                     },
                     {
                         "key": 2,
                         "title": "Card 2",
                         "text": "This is card 2",
-                        "tags": [],
+                        "tags": [
+                            {
+                                "key": "tag2",
+                                "label": "Tag 2"
+                            }
+                        ],
                         "stageKey": "todo"
                     },
                     {
                         "key": 3,
                         "title": "Card 3",
                         "text": "This is card 3",
-                        "tags": [],
+                        "tags": [
+                            {
+                                "key": "tag3",
+                                "label": "Tag 3"
+                            }
+                        ],
                         "stageKey": "doing"
                     },
                     {
                         "key": 4,
                         "title": "Card 4",
                         "text": "This is card 4",
-                        "tags": [],
+                        "tags": [
+                            {
+                                "key": "tag4",
+                                "label": "Tag 4"
+                            }
+                        ],
                         "stageKey": "done"
                     },
                     {
                         "key": 5,
                         "title": "Card 5",
                         "text": "This is card 5",
-                        "tags": [],
+                        "tags": [
+                            {
+                                "key": "tag5",
+                                "label": "Tag 5"
+                            }
+                        ],
                         "stageKey": "done"
                     },
                     {
                         "key": 6,
                         "title": "Card 6",
                         "text": "This is card 6",
-                        "tags": [],
+                        "tags": [
+                            {
+                                "key": "tag6",
+                                "label": "Tag 6"
+                            }
+                        ],
                         "stageKey": "done"
                     }
                 ]

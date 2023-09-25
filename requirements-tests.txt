@@ -3,4 +3,3 @@ plotly
 pytest==7.1.2
 black==23.1.0
 Pillow
-mypy

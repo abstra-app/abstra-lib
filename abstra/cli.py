@@ -48,7 +48,7 @@ def _SeparateFlagArgs(args):
 
 
 def main():
-    fire.core.parser.SeparateFlagArgs = _SeparateFlagArgs
+    fire.core.parser.SeparateFlagArgs = _SeparateFlagArgs  # type: ignore
     fire.Fire(CLI)
 
 

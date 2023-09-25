@@ -2,6 +2,7 @@ import io
 import tempfile
 import pathlib
 import typing
+from typing import Union
 from .apis import upload_file, internal_path
 
 
@@ -37,7 +38,7 @@ def convert_file(file: typing.Union[str, io.BufferedReader, io.TextIOWrapper]) -
         return upload_file(file.file)
 
 
-def download_file(url: str):
+def download_file(url: str) -> Union[io.BufferedReader, tempfile._TemporaryFileWrapper]:
     import requests
 
     if url.startswith("http://") or url.startswith("https://"):
@@ -47,6 +48,7 @@ def download_file(url: str):
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
         f.seek(0)
+
         return f
 
     elif url.startswith("/_files/"):

@@ -22,11 +22,11 @@ class PandasOutput(Output):
         if self.df is None:
             import pandas as pd
 
-            serialized = json.loads(
-                pd.DataFrame(
-                    {"change the": [1, 2, 3], "df property": [4, 5, 6]}
-                ).to_json(orient="table")
-            )
+            df = pd.DataFrame({"change the": [1, 2, 3], "df property": [4, 5, 6]})
+            df_json = df.to_json(orient="table")
+            if not isinstance(df_json, str):
+                raise Exception("df.to_json() did not return a string")
+            serialized = json.loads(df_json)
             del serialized["schema"]["pandas_version"]
             return serialized
         serialized = json.loads(self.df.to_json(orient="table"))

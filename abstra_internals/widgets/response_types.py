@@ -1,6 +1,8 @@
-import typing
+from typing import Union
 from dataclasses import dataclass
 from .file_utils import download_file
+from io import BufferedReader
+from tempfile import _TemporaryFileWrapper
 
 
 class FileResponse:
@@ -24,7 +26,7 @@ class FileResponse:
             return f.read()
 
     @property
-    def file(self) -> typing.BinaryIO:
+    def file(self) -> Union[BufferedReader, _TemporaryFileWrapper]:
         if not self.__file:
             self.__file = download_file(self.url)
         return self.__file

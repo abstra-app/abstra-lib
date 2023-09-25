@@ -6,8 +6,13 @@ from .execution import RequestData
 class FormExecution(LiveExecution):
     def _wait_start(self):
         type = None
-        while type != "start":
-            type, data = self.recv()
+        data = None
+
+        type, data = self.recv()
+
+        if type != "start":
+            return self._wait_start()
+
         return data["params"]
 
     def setup_context(self, request: RequestData):
