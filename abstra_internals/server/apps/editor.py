@@ -18,7 +18,7 @@ def get_editor_bp(api: API):
 
     @bp.route("/api/assets/<path:path>", methods=["GET"])
     def _asset(path):
-        return flask.send_from_directory(directory=Settings.root_path, path=path)
+        return send_from_dist(path, dist_folder=Settings.root_path)
 
     @bp.route("/api/workspace", methods=["GET"])
     @usage

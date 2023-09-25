@@ -89,7 +89,7 @@ def get_player_bp(api: API):
         logo_path = api.get_workspace().logo_url
         if not logo_path:
             return flask.abort(404)
-        return flask.send_from_directory(directory=Settings.root_path, path=logo_path)
+        return send_from_dist(logo_path, dist_folder=Settings.root_path)
 
     @bp.route("/_assets/background", methods=["GET"])
     def _background():
@@ -98,9 +98,7 @@ def get_player_bp(api: API):
         if not background_path:
             return flask.abort(404)
 
-        return flask.send_from_directory(
-            directory=Settings.root_path, path=background_path
-        )
+        return send_from_dist(background_path, dist_folder=Settings.root_path)
 
     @bp.route("/_hooks/<path:path>", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     def hook_runner(path):
@@ -145,6 +143,8 @@ def get_player_bp(api: API):
 
     @bp.route("/<path:filename>", methods=["GET"])
     def spa(filename: str):
-        return send_from_dist(filename, "player.html")
+        res = send_from_dist(filename, "player.html")
+        print(filename, res.mimetype, res.headers)
+        return res
 
     return bp
