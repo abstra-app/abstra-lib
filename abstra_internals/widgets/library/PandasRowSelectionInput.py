@@ -1,12 +1,17 @@
 from ..widget_base import Input
 from typing import List, Any, Union
 import json
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class PandasRowSelectionInput(Input):
     type = "pandas-row-selection-input"
     empty_value: Union[List, Any] = None
     multiple: bool = False
+    df: "pd.DataFrame"
 
     def __init__(self, key: str, df: Any = None, **kwargs):
         super().__init__(key)
@@ -29,14 +34,15 @@ class PandasRowSelectionInput(Input):
         if self.df is None:
             import pandas as pd
 
-            serialized = json.loads(
-                pd.DataFrame(
-                    {"change the": [1, 2, 3], "df property": [4, 5, 6]}
-                ).to_json(orient="table")
-            )
+            df = pd.DataFrame({"change the": [1, 2, 3], "df property": [4, 5, 6]})
+            df_json = df.to_json(orient="table")
+            if not isinstance(df_json, str):
+                raise Exception("df.to_json() did not return a string")
+            serialized = json.loads(df_json)
             del serialized["schema"]["pandas_version"]
             return serialized
-        serialized = json.loads(self.df.to_json(orient="table"))
+        df_json = str(self.df.to_json(orient="table"))
+        serialized = json.loads(df_json)
         del serialized["schema"]["pandas_version"]
         return serialized
 

@@ -41,7 +41,7 @@ class Page(WidgetSchema):
         reactive_polling_interval=0,
         context: Optional[Dict] = None,
         steps_info: Optional[Dict] = None,
-    ) -> Dict:
+    ) -> PageResponse:
         """Run the form
 
         Args:
@@ -84,7 +84,7 @@ class Page(WidgetSchema):
                 reactive_polling_interval=reactive_polling_interval,
                 steps_info=steps_info,
             )
-            return dict()
+            return PageResponse({}, "")
 
         self.__send_form_message(
             widgets=rendered_page,

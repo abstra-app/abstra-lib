@@ -12,14 +12,8 @@ class ReadOnlyProxyDict:
     def __getitem__(self, key):
         return self.data.__getitem__(key)
 
-    def __missing__(self, key):
-        return self.data.__missing__(key)
-
     def __iter__(self):
         return self.data.__iter__()
-
-    def __reversed__(self):
-        return self.data.__reversed__()
 
     def __contains__(self, key):
         return self.data.__contains__(key)

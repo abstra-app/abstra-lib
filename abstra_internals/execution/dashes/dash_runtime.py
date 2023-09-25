@@ -146,7 +146,7 @@ class WidgetRuntime(ItemRuntime):
     @property
     def props(self):
         return filter(
-            lambda prop: not is_broker_prop_form_only(self.metadata.type, prop),
+            lambda prop: not is_broker_prop_form_only(self.metadata.type, prop[0]),
             self.metadata.props.items(),
         )
 
@@ -163,10 +163,11 @@ class DashRuntime:
     root_slot_runtime: RootRuntime
     dash_json: DashJSON
     seq: int
+    code: str
 
     def __init__(self, execution: LiveExecution, dash_json: DashJSON) -> None:
-        code = dash_json.file_path.read_text(encoding="utf-8")
-        self.py = PythonProgram(code)
+        self.code = dash_json.file_path.read_text(encoding="utf-8")
+        self.py = PythonProgram(self.code)
         self.execution = execution
         self.root_slot_runtime = RootRuntime(dash_json.layout.slot)
         self.dash_json = dash_json

@@ -8,8 +8,10 @@ Steps = List[Step]
 
 
 class StepsResponse:
+    responses: List[PageResponse]
+
     def __init__(self):
-        self.responses: List[Dict] = []
+        self.responses = []
         self.acc = {}
 
     def __getitem__(self, key: Union[int, str]):
@@ -22,7 +24,7 @@ class StepsResponse:
     def get(self, key: str, default=None):
         return self.acc.get(key, default)
 
-    def append(self, res: Dict):
+    def append(self, res: PageResponse):
         self.responses.append(res)
         self.__update_acc()
 
@@ -34,10 +36,10 @@ class StepsResponse:
             elif isinstance(res, dict):
                 self.acc.update(res)
 
-    def pop(self, i: int = -1):
-        step = self.responses.pop(i)
+    def pop(self, i: int = -1) -> PageResponse:
+        step_response = self.responses.pop(i)
         self.__update_acc()
-        return step
+        return step_response
 
 
 def get_page_info(steps: Steps, current_page: Page) -> Dict:
@@ -118,7 +120,7 @@ def run_page(
     next_page: Page,
     executed_steps: Steps,
     responses: StepsResponse,
-):
+) -> PageResponse:
     steps_info = get_page_info(steps, next_page)
     response = (
         next_page.run(steps_info=steps_info, context=responses.acc)

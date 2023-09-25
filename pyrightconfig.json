@@ -1,0 +1,16 @@
+{
+  "include": [
+    "abstra", "abstra_internals", "abstra_statics"
+  ],
+  
+  "exclude": [
+    "tests/"
+  ],
+
+  "reportGeneralTypeIssues": "error",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+
+  "pythonVersion": "3.7",
+  "pythonPlatform": "Linux",
+}
