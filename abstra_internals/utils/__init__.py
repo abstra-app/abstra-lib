@@ -2,6 +2,8 @@ import base64, simplejson, jwt, os, traceback, re, socket
 from contextlib import closing
 from traceback import StackSummary
 
+PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
+
 
 def serialize(obj):
     return simplejson.dumps(obj, ignore_nan=True)
@@ -68,14 +70,11 @@ def formated_traceback_error_message(e: Exception, main_file="<string>"):
 
 def decode_jwt(jwt_str: str):
     try:
-        if os.getenv("PASSWORDLESS_JWT_SECRET"):
-            return jwt.decode(
-                jwt_str, key=os.getenv("PASSWORDLESS_JWT_SECRET"), algorithms=["HS256"]
-            )
-        return jwt.decode(
-            jwt_str, options={"verify_signature": False}, algorithms=["HS256"]
-        )
-    except:
+        if PUBLIC_KEY:
+            return jwt.decode(jwt_str, key=PUBLIC_KEY, algorithms=["RS256"])
+        return jwt.decode(jwt_str, options={"verify_signature": False})
+    except Exception as e:
+        print("error decoding jwt", e)
         return None
 
 
