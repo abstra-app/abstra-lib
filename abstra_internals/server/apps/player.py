@@ -144,7 +144,6 @@ def get_player_bp(api: API):
     @bp.route("/<path:filename>", methods=["GET"])
     def spa(filename: str):
         res = send_from_dist(filename, "player.html")
-        print(filename, res.mimetype, res.headers)
         return res
 
     return bp
