@@ -6,6 +6,9 @@ def types_compatible(prop, typeName: typing.Union[typing.List[str], str]):
     if type(typeName) == list:
         return any(types_compatible(prop, tn) for tn in typeName)
 
+    if prop == None:
+        return True
+
     if typeName == "string":
         return type(prop) == str
     if typeName == "number":
