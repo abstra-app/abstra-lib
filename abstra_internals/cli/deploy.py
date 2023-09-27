@@ -1,5 +1,4 @@
-import tempfile, urllib.request, zipfile, uuid, pathlib
-
+import tempfile, requests, zipfile, uuid, pathlib
 from ..settings import Settings
 from ..credentials import resolve_headers
 from ..utils.file import files_from_directory
@@ -19,8 +18,7 @@ def _generate_zip_file() -> pathlib.Path:
 
 def _upload_file(url: str, file_path: pathlib.Path):
     with file_path.open("rb") as f:
-        req = urllib.request.Request(url=url, method="PUT", data=f.read())
-        urllib.request.urlopen(req)
+        requests.put(url=url, data=f.read())
 
 
 def deploy():
