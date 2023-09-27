@@ -8,7 +8,12 @@ from abstra_internals.server.api import (
     DoubleTransitionError,
     _find_transition,
 )
-from abstra_internals.server.api.classes import AbstraJSON, FormJSON, JobJSON, HookJSON
+from abstra_internals.repositories.json.classes import (
+    AbstraJSON,
+    FormJSON,
+    JobJSON,
+    HookJSON,
+)
 from .fixtures import init_dir, clear_dir
 
 

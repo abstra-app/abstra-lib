@@ -3,7 +3,12 @@ from abc import ABC
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ...contract import dashes_contract as contract
-from ...server.api.classes import DashJSON, DashWidgetJSON, SlotJSON, SlottableJSON
+from ...repositories.json.classes import (
+    DashJSON,
+    DashWidgetJSON,
+    SlotJSON,
+    SlottableJSON,
+)
 from ...utils import formated_traceback_error_message
 from ...widgets import (
     Input,

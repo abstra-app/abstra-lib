@@ -6,6 +6,7 @@ from ...settings import Settings
 from .utils import send_from_dist
 from ...execution.hook_execution import HookExecution
 from ...execution.job_execution import JobExecution
+from ...execution.script_execution import ScriptExecution
 
 
 def get_editor_bp(api: API):
@@ -173,16 +174,20 @@ def get_editor_bp(api: API):
         if not hook:
             flask.abort(404)
 
-        execution = HookExecution(hook)
-
         request_data = RequestData(
             method=flask.request.method,
             body=flask.request.get_data(as_text=True),
             headers=flask.request.headers,
             query_params=flask.request.args,
         )
-        execution.run(request_data)
+
+        execution = HookExecution(hook, request_data)
+
+        execution.run_sync()
+
         body, status, headers = execution.get_response()
+
+        api.run_next_scripts(execution.stage_run)
 
         return {
             "body": body,
@@ -234,20 +239,68 @@ def get_editor_bp(api: API):
         if not job:
             flask.abort(404)
 
-        execution = JobExecution(job)
-
         request_data = RequestData(
             method=flask.request.method,
             body=flask.request.get_data(as_text=True),
             headers=flask.request.headers,
             query_params=flask.request.args,
         )
-        execution.run(request_data)
+
+        execution = JobExecution(job, request_data)
+
+        execution.run_sync()
+
+        api.run_next_scripts(execution.stage_run)
 
         return {
             "stdout": "".join(execution.stdout if execution else []),
             "stderr": "".join(execution.stderr if execution else []),
         }
+
+    @bp.route("/api/scripts/<path:identifier>", methods=["GET"])
+    @usage
+    def _get_script(identifier: str):
+        script = api.get_script(identifier)
+        if not script:
+            flask.abort(404)
+        return script.editor_dto
+
+    @bp.route("/api/scripts/", methods=["GET"])
+    @usage
+    def _get_scripts():
+        return [f.editor_dto for f in api.get_scripts()]
+
+    @bp.route("/api/scripts/", methods=["POST"])
+    @usage
+    def _create_script():
+        script = api.create_script()
+        return script.editor_dto
+
+    @bp.route("/api/scripts/<path:identifier>", methods=["PUT"])
+    @usage
+    def _update_script(identifier: str):
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        script = api.update_runtime(identifier, data)
+        return script.editor_dto if script else None
+
+    @bp.route("/api/scripts/<path:identifier>", methods=["DELETE"])
+    @usage
+    def _delete_script(identifier: str):
+        api.delete_script(identifier)
+        return {"success": True}
+
+    @bp.route("/api/scripts/<path:path>/test", methods=["POST"])
+    @usage
+    def _test_script(path: str):
+        script = api.get_script(path)
+
+        if not script:
+            flask.abort(404)
+
+        return api.run_initial_script(script)
 
     @bp.route("/api/stage_runs", methods=["GET"])
     @usage

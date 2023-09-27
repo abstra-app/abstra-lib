@@ -3,7 +3,7 @@ import queue, typing, unittest
 from collections import deque
 from json import loads, dumps
 from abstra_internals.execution.execution import RequestData
-from abstra_internals.server.api.classes import DashJSON, FormJSON
+from abstra_internals.repositories.json.classes import DashJSON, FormJSON
 from abstra_internals.contract.dashes import ExecutionIdMessage
 from abstra_internals.server.overloads import overloads
 from abstra_internals.execution.dashes.dash_execution import DashExecution
@@ -66,13 +66,12 @@ def assert_form(
     print("asserting form", form_json.file_path)
 
     msgs: typing.Deque[list] = deque(msg_list)
-    executor = ThreadPoolExecutor()
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     conn = MockConnection(browser_msgs)
 
-    execution = FormExecution(form_json, conn, execution_id)  # type: ignore
     request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
-    executor.submit(execution.run, request_data)
+    execution = FormExecution(form_json, conn, request_data, execution_id)  # type: ignore
+    execution.run_async()
 
     for msg in iter_messages(conn, msgs, test_case):
         pass
@@ -84,7 +83,10 @@ def assert_dash(
     msgs = deque(msg_list)
     browser_msgs = [msg[1] for msg in msg_list if msg[0] == "browser"]
     conn = MockConnection(browser_msgs=browser_msgs)
-    execution = DashExecution(dash_json, conn, execution_id)
+
+    request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
+
+    execution = DashExecution(dash_json, conn, request_data, execution_id)  # type: ignore
 
     # copy of implemetation of DashExecution.run()
     dash_runtime = DashRuntime(execution=execution, dash_json=dash_json)

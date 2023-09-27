@@ -19,6 +19,9 @@ def strict_compatible_missing_entities(data):
     if "dashes" not in data:
         data["dashes"] = []
 
+    if "scripts" not in data:
+        data["scripts"] = []
+
     if "workspace" not in data:
         data["workspace"] = {
             "name": "Untitled Workspace",
@@ -92,6 +95,10 @@ def _find_transition_target(data: dict, target_path: str, target_type: str, warn
         if hook["path"] == target_path and target_type == "hooks":
             return hook
 
+    for script in data["scripts"]:
+        if script["path"] == target_path and target_type == "scripts":
+            return script
+
     if warn:
         warnings.warn(
             f"Could not find transition target {target_type}:{target_path}. This will be ignored, but please, make sure to remove it from your abstra.json file"
@@ -140,6 +147,9 @@ def strict_compatible(data: dict):
     data = strict_compatible_transitions(data)
     data = strict_compatible_remove_dangling_transitions(data)
     return data
+
+
+RuntimeJSON = Union["FormJSON", "DashJSON", "HookJSON", "JobJSON", "ScriptJSON"]
 
 
 @dataclass
@@ -237,6 +247,67 @@ class HookJSON:
 
     def duplicate(self):
         return self.from_dict(self.__dict__)
+
+
+@dataclass
+class ScriptJSON:
+    file: str
+    title: str
+    path: str
+    workflow_transitions: List[WorkflowTransitionJSON]
+    workflow_position: Tuple[float, float] = (0, 0)
+
+    @property
+    def runner_type(self):
+        return "script"
+
+    @property
+    def __dict__(self):
+        return {
+            "id": self.path,
+            "file": self.file,
+            "path": self.path,
+            "title": self.title,
+            "workflow_position": self.workflow_position,
+            "transitions": [t.__dict__ for t in self.workflow_transitions],
+        }
+
+    @property
+    def editor_dto(self):
+        return self.__dict__
+
+    @property
+    def file_path(self):
+        return Settings.root_path.joinpath(self.file)
+
+    def update(self, changes: Dict[str, Any]):
+        for attr, value in changes.items():
+            if attr in ["id", "title", "schedule"]:
+                setattr(self, attr, value)
+            elif attr == "file":
+                _update_file(self, value)
+            else:
+                raise Exception(f"Cannot update {attr} of job")
+
+    @staticmethod
+    def from_dict(data: Dict):
+        x, y = data["workflow_position"]
+        return ScriptJSON(
+            file=data["file"],
+            path=data["path"],
+            title=data["title"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+            ],
+        )
+
+    def duplicate(self):
+        return self.from_dict(self.__dict__)
+
+    @property
+    def is_initial(self):
+        return True
 
 
 @dataclass
@@ -918,6 +989,7 @@ class AbstraJSON:
     dashes: List[DashJSON]
     hooks: List[HookJSON]
     jobs: List[JobJSON]
+    scripts: List[ScriptJSON]
 
     @property
     def __dict__(self):
@@ -928,11 +1000,10 @@ class AbstraJSON:
             "dashes": [dash.__dict__ for dash in self.dashes],
             "hooks": [hook.__dict__ for hook in self.hooks],
             "jobs": [job.__dict__ for job in self.jobs],
+            "scripts": [script.__dict__ for script in self.scripts],
         }
 
-    def get_runtime_by_path(
-        self, path: str
-    ) -> Optional[Union[FormJSON, DashJSON, HookJSON, JobJSON]]:
+    def get_runtime_by_path(self, path: str) -> Optional[RuntimeJSON]:
         for form in self.forms:
             if form.path == path:
                 return form
@@ -949,6 +1020,10 @@ class AbstraJSON:
             if job.identifier == path:
                 return job
 
+        for script in self.scripts:
+            if script.path == path:
+                return script
+
         return None
 
     def _update_path_refs(self, old_path: str, new_path: str):
@@ -963,9 +1038,7 @@ class AbstraJSON:
                 if wt.target_path == old_path:
                     wt.target_path = new_path
 
-    def update_runtime(
-        self, path: str, changes: Dict[str, Any]
-    ) -> Union[FormJSON, DashJSON, HookJSON, JobJSON]:
+    def update_runtime(self, path: str, changes: Dict[str, Any]) -> RuntimeJSON:
         new_path = changes.get("path") or changes.get("identifier")
 
         if new_path:
@@ -994,6 +1067,7 @@ class AbstraJSON:
                 version=data["version"],
                 forms=forms,
                 dashes=dashes,
+                scripts=[ScriptJSON.from_dict(script) for script in data["scripts"]],
                 hooks=[HookJSON.from_dict(hook) for hook in data["hooks"]],
                 jobs=[JobJSON.from_dict(job) for job in data["jobs"]],
                 workspace=WorkspaceJSON.from_dict(
@@ -1019,11 +1093,12 @@ class AbstraJSON:
             dashes=[],
             hooks=[],
             jobs=[],
+            scripts=[],
         )
 
 
 def _update_file(
-    runtime: Union[DashJSON, FormJSON, HookJSON, JobJSON],
+    runtime: RuntimeJSON,
     new_file_relative: str,
 ):
     old_file = Settings.root_path.joinpath(runtime.file)

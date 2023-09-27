@@ -37,6 +37,13 @@ def get_player_bp(api: API):
 
     @sock.route("/_socket")
     def websocket(conn: flask_sock.Server):
+        request_data = RequestData(
+            query_params=flask.request.args,
+            body=flask.request.get_data(as_text=True),
+            headers=flask.request.headers,
+            method=flask.request.method,
+        )
+
         try:
             dash_path = flask.request.args.get("dashPath")
             if dash_path is not None:
@@ -45,7 +52,7 @@ def get_player_bp(api: API):
                     conn.close(reason=404, message="Not found")
                     return
 
-                return DashExecution(dash, conn).run()
+                return DashExecution(dash, conn, request_data).run_sync()
 
             form_path = flask.request.args.get("formPath")
             if form_path is not None:
@@ -53,14 +60,7 @@ def get_player_bp(api: API):
                 if not form:
                     conn.close(reason=404, message="Not found")
                     return
-
-                request_data = RequestData(
-                    query_params=flask.request.args,
-                    body=flask.request.get_data(as_text=True),
-                    headers=flask.request.headers,
-                    method=flask.request.method,
-                )
-                return FormExecution(form, conn).run(request_data)
+                return FormExecution(form, conn, request_data).run_sync()
 
         finally:
             conn.close(message="Done")
@@ -109,14 +109,19 @@ def get_player_bp(api: API):
         if not hook.file:
             flask.abort(500)
 
-        execution = HookExecution(hook)
         request_data = RequestData(
             query_params=flask.request.args,
             body=flask.request.get_data(as_text=True),
             headers=flask.request.headers,
             method=flask.request.method,
         )
-        execution.run(request_data)
+
+        execution = HookExecution(hook, request_data)
+
+        execution.run_sync()
+
+        api.run_next_scripts(execution.stage_run)
+
         body, status, headers = execution.get_response()
 
         return flask.Response(status=status, headers=headers, response=body)
@@ -133,11 +138,20 @@ def get_player_bp(api: API):
         if not job.file:
             flask.abort(500)
 
-        def run_job(job, request):
-            execution = JobExecution(job)
-            execution.run(request)
+        def run_job(job):
+            request_data = RequestData(
+                method=flask.request.method,
+                body=flask.request.get_data(as_text=True),
+                headers=flask.request.headers,
+                query_params=flask.request.args,
+            )
 
-        executor.submit(run_job, job, flask.request)
+            execution = JobExecution(job, request_data)
+
+            execution.run_sync()
+            api.run_next_scripts(execution.stage_run)
+
+        executor.submit(run_job, job)
 
         return {"status": "running"}
 

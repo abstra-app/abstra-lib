@@ -1,7 +1,7 @@
 import unittest
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.api import API
-from abstra_internals.server.api.classes import AbstraJSON, HookJSON
+from abstra_internals.repositories.json.classes import AbstraJSON, HookJSON
 from abstra_internals.server.apps import create_app
 
 

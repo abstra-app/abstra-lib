@@ -30,5 +30,4 @@ def next_stage(next_stage_runs: Optional[List[dict]] = None):
     """
     execution = get_execution_throwable()
 
-    print(next_stage_runs)
-    execution.advance_stage(next_stage_runs)
+    execution.advance_stage(next_stage_runs, False)

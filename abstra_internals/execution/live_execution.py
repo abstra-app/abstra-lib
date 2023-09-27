@@ -4,10 +4,10 @@ from typing import Optional, TYPE_CHECKING, Tuple, Dict, Union
 import flask_sock
 from ..contract import Message, StdioMessage, should_send
 from ..utils import deserialize, serialize
-from .execution import Execution
+from .execution import Execution, RequestData
 
 if TYPE_CHECKING:
-    from ..server.api.classes import DashJSON, FormJSON
+    from ..repositories.json.classes import DashJSON, FormJSON
 
 
 class LiveExecution(Execution):
@@ -32,13 +32,14 @@ class LiveExecution(Execution):
         self,
         runtime_json: Union["FormJSON", "DashJSON"],
         connection: flask_sock.Server,
+        request: RequestData,
         execution_id=None,
     ):
         self._connection = connection
         if execution_id is not None:
             self.id = execution_id
 
-        super().__init__(runtime_json, execution_id=execution_id)
+        super().__init__(runtime_json, request, execution_id=execution_id)
 
     def send(self, msg: Message):
         self.log(msg.type, msg.data)
@@ -70,7 +71,6 @@ class LiveExecution(Execution):
     def end(self):
         if self.connected:
             self.close(reason=traceback.format_exc() or None)
-        self.delete()
 
 
 def get_live_execution_throwable() -> LiveExecution:

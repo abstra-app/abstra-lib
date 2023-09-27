@@ -1,4 +1,4 @@
-from abstra_internals.server.api.classes import FormJSON
+from abstra_internals.repositories.json.classes import FormJSON
 from .utils import assert_form
 import unittest, json, os
 from pathlib import Path
