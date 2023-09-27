@@ -1,6 +1,6 @@
 from __future__ import annotations
 import traceback
-from ...server.api.classes import SlotJSON
+from ...repositories.json.classes import SlotJSON
 
 
 class PythonProgram:

@@ -5,6 +5,8 @@ import tempfile
 import webbrowser
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+import uuid
+import concurrent.futures as futures
 
 import flask
 from werkzeug.datastructures import FileStorage
@@ -25,19 +27,26 @@ from ...templates import (
     new_form_code,
     new_hook_code,
     new_job_code,
+    new_script_code,
 )
 from ...utils import random_id
 from ...widgets.apis import get_random_filepath, internal_path
-from .classes import (
+from ...repositories.json.classes import (
     DashJSON,
     FormJSON,
     HookJSON,
     JobJSON,
+    ScriptJSON,
     AbstraJSON,
     WorkflowTransitionJSON,
     WorkspaceJSON,
     LayoutJSON,
+    RuntimeJSON,
+    ScriptJSON,
 )
+
+from ...execution.script_execution import ScriptExecution
+from ...repositories.stage_run import StageRun
 
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT", "https://cloud-api.abstra.cloud")
 ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
@@ -121,6 +130,10 @@ def _find_node(abstra_json: AbstraJSON, node_type: str, node_id: str):
         for hook in abstra_json.hooks:
             if hook.path == node_id:
                 return hook
+    elif node_type == "scripts":
+        for script in abstra_json.scripts:
+            if script.path == node_id:
+                return script
     else:
         raise UnknownNodeTypeError(node_type)
     raise NodeNotFoundError(node_type, node_id)
@@ -150,6 +163,8 @@ def _find_transition(
                 node_runner_type = "jobs"
             elif node.runner_type == "hook":
                 node_runner_type = "hooks"
+            elif node.runner_type == "script":
+                node_runner_type = "scripts"
             else:
                 raise UnknownNodeTypeError(node.runner_type)
             if (
@@ -202,8 +217,10 @@ def _delete_transition_by_id(abstra_json: AbstraJSON, transition_id: str):
         ]
 
 
+## TODO: rename to controller
 class API:
     def __init__(self):
+        self.executor = futures.ThreadPoolExecutor()
         self.abstra_json_path = Settings.root_path.joinpath("abstra.json")
         if not self.abstra_json_path.exists():
             self.init_empty()
@@ -265,7 +282,86 @@ class API:
         self.persist(abstra_json)
         return abstra_json.workspace
 
-    # Forms CLRUD
+    # Script CRUDL
+
+    def run_initial_script(self, script: ScriptJSON):
+        execution = ScriptExecution(script)
+
+        execution.run_sync()
+
+        self.run_next_scripts(execution.stage_run)
+
+        return {
+            "stdout": "".join(execution.stdout if execution else []),
+            "stderr": "".join(execution.stderr if execution else []),
+        }
+
+    def run_next_scripts(self, parent_stage_run: Optional[StageRun]):
+        if not parent_stage_run:
+            return
+
+        next_stage_runs = StageRunRepository.find({"parent_id": parent_stage_run.id})
+
+        if len(next_stage_runs) == 0:
+            return
+
+        for next_stage_run in next_stage_runs:
+            script = self.get_script(next_stage_run.stage)
+
+            if not script:
+                continue
+
+            def run_next(script: ScriptJSON, api: API):
+                execution = ScriptExecution.create_with_stage_run(
+                    script, next_stage_run.id
+                )
+                execution.run_sync()
+                api.run_next_scripts(execution.stage_run)
+
+            self.executor.submit(run_next, script, self)
+
+    def create_script(self) -> ScriptJSON:
+        abstra_json = self.load_abstra_json()
+
+        file_name = f"new_script_{random_id()}"
+        file = f"{file_name}.py"
+        Settings.root_path.joinpath(file).write_text("", encoding="utf-8")
+
+        script = ScriptJSON(
+            path=str(uuid.uuid4()),
+            file=file,
+            title="Untitled Form",
+            workflow_transitions=[],
+            workflow_position=(0, 0),
+        )
+
+        abstra_json.scripts.append(script)
+
+        self.persist(abstra_json)
+
+        return script
+
+    def get_scripts(self) -> List[ScriptJSON]:
+        abstra_json = self.load_abstra_json()
+        return abstra_json.scripts
+
+    def get_script(self, path: str) -> Optional[ScriptJSON]:
+        abstra_json = self.load_abstra_json()
+
+        for script in abstra_json.scripts:
+            if path == script.path:
+                return script
+
+        return None
+
+    def delete_script(self, path: str):
+        abstra_json = self.load_abstra_json()
+        scripts = abstra_json.scripts
+        abstra_json.scripts = [f for f in scripts if f.path != path]
+
+        self.persist(abstra_json)
+
+    # Forms CRUDL
 
     def create_form(self) -> FormJSON:
         abstra_json = self.load_abstra_json()
@@ -303,7 +399,7 @@ class API:
 
         self.persist(abstra_json)
 
-    # Dashes CLRUD
+    # Dashes CRUDL
 
     def create_dash(self) -> DashJSON:
         abstra_json = self.load_abstra_json()
@@ -347,7 +443,7 @@ class API:
 
         self.persist(abstra_json)
 
-    # Hooks CLRUD
+    # Hooks CRUDL
 
     def create_hook(self) -> HookJSON:
         abstract_json = self.load_abstra_json()
@@ -385,7 +481,7 @@ class API:
 
         self.persist(abstra_json)
 
-    # Jobs CLRUD
+    # Jobs CRUDL
 
     def get_jobs(self):
         abstra_json = self.load_abstra_json()
@@ -419,9 +515,7 @@ class API:
 
         return job
 
-    def update_runtime(
-        self, path: str, changes: Dict[str, Any]
-    ) -> Union[FormJSON, DashJSON, HookJSON, JobJSON]:
+    def update_runtime(self, path: str, changes: Dict[str, Any]) -> RuntimeJSON:
         abstra_json = self.load_abstra_json()
         runtime = abstra_json.update_runtime(path, changes)
         self.persist(abstra_json)
@@ -498,6 +592,25 @@ class API:
                             "targetType": t.target_type,
                         }
                         for t in hook.workflow_transitions
+                    ],
+                }
+            )
+        for script in abstra_json.scripts:
+            result.append(
+                {
+                    "id": script.path,
+                    "path": script.path,
+                    "type": "scripts",
+                    "label": script.title,
+                    "position": script.workflow_position,
+                    "transitions": [
+                        {
+                            "id": t.id,
+                            "label": t.label,
+                            "targetPath": t.target_path,
+                            "targetType": t.target_type,
+                        }
+                        for t in script.workflow_transitions
                     ],
                 }
             )
@@ -592,6 +705,16 @@ class API:
                 )
                 abstra_json.hooks.append(hook)
                 Settings.root_path.joinpath(hook.file).write_text(new_hook_code)
+            elif node_type == "scripts":
+                script = ScriptJSON(
+                    file=f"new_script_{node_id}.py",
+                    path=node_id,
+                    title=node["title"],
+                    workflow_position=node_position,
+                    workflow_transitions=[],
+                )
+                abstra_json.scripts.append(script)
+                Settings.root_path.joinpath(script.file).write_text(new_script_code)
             else:
                 raise UnknownNodeTypeError(node_type)
         self.persist(abstra_json)

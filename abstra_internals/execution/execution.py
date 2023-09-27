@@ -3,7 +3,7 @@ from __future__ import annotations  # Required for TYPE_CHECKING
 import threading
 import traceback
 import uuid
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Callable
 from dataclasses import dataclass
 from ..monitoring import LogMessage, log
 from ..repositories import StageRunRepository
@@ -11,7 +11,7 @@ from ..repositories.stage_run import StageRun
 from ..utils.environment import is_preview
 
 if TYPE_CHECKING:
-    from ..server.api.classes import DashJSON, FormJSON, HookJSON, JobJSON
+    from ..repositories.json.classes import RuntimeJSON
 
 
 @dataclass
@@ -56,7 +56,9 @@ class Execution:
     type = "execution"
     executions: ClassVar[Dict[int, "Execution"]] = {}
     stage_run: Optional[StageRun] = None
-    runtime_json: Union[HookJSON, JobJSON, FormJSON, DashJSON]
+    runtime_json: RuntimeJSON
+    request: RequestData
+    thread: threading.Thread
 
     @classmethod
     def get_execution(cls) -> Optional["Execution"]:
@@ -65,7 +67,8 @@ class Execution:
 
     def __init__(
         self,
-        runtime_json: Union["FormJSON", "DashJSON", "HookJSON", "JobJSON"],
+        runtime_json: RuntimeJSON,
+        request: RequestData,
         execution_id=None,
     ):
         if execution_id:
@@ -73,12 +76,20 @@ class Execution:
         else:
             self.id = uuid.uuid4().__str__()
 
-        self.thread_id = threading.get_ident()
+        self.thread = threading.Thread(target=self._run, args=())
+        self.request = request
+
         self.stderr: List[str] = []
         self.stdout: List[str] = []
         self.context: Dict = {}
         self.runtime_json = runtime_json
-        Execution.executions[self.thread_id] = self
+
+    def run_async(self):
+        self.thread.start()
+
+    def run_sync(self):
+        self.thread.start()
+        self.thread.join()
 
     @property
     def is_preview(self) -> bool:
@@ -135,11 +146,14 @@ class Execution:
 
         raise UnsetStageRun()
 
-    def run(self, request: RequestData) -> None:
+    def _run(self) -> None:
+        self.thread_id = threading.get_ident()
+        Execution.executions[self.thread_id] = self
+
         code = self.runtime_json.file_path.read_text(encoding="utf-8")
         namespace: dict = {}
 
-        self.setup_context(request)
+        self.setup_context(self.request)
 
         if self.stage_run and not self.set_stage_run_status("running"):
             return self.handle_lock_failed()
@@ -154,6 +168,8 @@ class Execution:
             traceback.print_exc()
             self.set_stage_run_status("failed")
             return self.handle_failure(e)
+        finally:
+            self.delete()
 
     def set_stage_run_status(self, status: str) -> bool:
         if not self.stage_run:
@@ -172,6 +188,7 @@ class Execution:
             if self.runtime_json.runner_type != "dash"
             else []
         )
+
         allowed_stages = list([transition.target_path for transition in transitions])
 
         if len(allowed_stages) == 0:

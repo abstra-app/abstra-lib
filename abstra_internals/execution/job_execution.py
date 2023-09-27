@@ -1,4 +1,3 @@
-import traceback
 from .static_execution import StaticExecution
 from .execution import RequestData
 
