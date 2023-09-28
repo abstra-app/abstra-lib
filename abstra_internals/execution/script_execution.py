@@ -1,4 +1,4 @@
-from abstra_internals.repositories.json.classes import RuntimeJSON
+from ..repositories.json.classes import RuntimeJSON
 from .static_execution import StaticExecution
 from .execution import RequestData
 
