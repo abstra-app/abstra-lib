@@ -12,7 +12,7 @@ def get_player_bp(api: API):
     SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN")
     executor = futures.ThreadPoolExecutor()
 
-    @bp.route("/_api/<path:id_or_path>", methods=["GET"])
+    @bp.route("/_pages/<path:id_or_path>", methods=["GET"])
     def get_runner_data(id_or_path):
         runtime = api.get_page_runtime(id_or_path)
         if not runtime:
