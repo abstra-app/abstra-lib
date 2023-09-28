@@ -1,8 +1,8 @@
-from ..widget_base import Input
+from ..widget_base import OptionalListInput
 from typing import List, Dict, Union, Any
 
 
-class MultipleChoiceInput(Input):
+class MultipleChoiceInput(OptionalListInput):
     type = "multiple-choice-input"
     empty_value: Union[List, Any] = None
     multiple: bool = False

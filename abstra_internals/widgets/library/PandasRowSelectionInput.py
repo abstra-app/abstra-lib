@@ -1,4 +1,4 @@
-from ..widget_base import Input
+from ..widget_base import OptionalListInput
 from typing import List, Any, Union
 import json
 from typing import TYPE_CHECKING
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
-class PandasRowSelectionInput(Input):
+class PandasRowSelectionInput(OptionalListInput):
     type = "pandas-row-selection-input"
     empty_value: Union[List, Any] = None
     multiple: bool = False

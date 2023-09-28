@@ -1,9 +1,9 @@
-from ..widget_base import Input
+from ..widget_base import OptionalListInput
 from ..file_utils import convert_file
 from typing import Union, List, Any
 
 
-class CardsInput(Input):
+class CardsInput(OptionalListInput):
     type = "cards-input"
     empty_value = None
     multiple: bool = False

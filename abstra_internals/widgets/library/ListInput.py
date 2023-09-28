@@ -30,6 +30,17 @@ class ListInput(Input):
         if props.get("initial_value", None):
             self.set_value(props.get("initial_value", None), set_errors=False)
 
+    def _validate_list_min_max(self) -> List[str]:
+        if self.min is not None and len(self.value) < self.min:
+            return ["i18n_error_min_list"]
+        if self.max is not None and len(self.value) > self.max:
+            return ["i18n_error_max_list"]
+        return []
+
+    @property
+    def validators(self):
+        return super().validators + [self._validate_list_min_max]
+
     def render(self, context: dict):
         schemas = [schema.render(context) for schema in self.schemas]
         return {

@@ -1,9 +1,10 @@
 from ..widget_base import Input
-from typing import List
+from typing import List, Optional
 
 
 class CurrencyInput(Input):
     type = "currency-input"
+    value: Optional[float]
     empty_value = None
 
     def __init__(self, key: str, label: str, **kwargs):
@@ -31,6 +32,10 @@ class CurrencyInput(Input):
             return ["i18n_error_max_amount"]
         return []
 
+    @property
+    def validators(self):
+        return super().validators + [self._validate_number_min_max]
+
     def render(self, context: dict):
         return {
             "type": self.type,
@@ -48,5 +53,5 @@ class CurrencyInput(Input):
             "errors": self.errors,
         }
 
-    def serialize_value(self) -> float:
+    def serialize_value(self) -> Optional[float]:
         return self.value if self.value != None else self.empty_value

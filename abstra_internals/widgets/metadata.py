@@ -1674,7 +1674,7 @@ metadata = {
                     "typeName": "str",
                     "description": "Invalid e-mail message",
                     "isKwarg": True,
-                    "default": '"Hmm… doesn\'t look like an email"',
+                    "default": '"This email is invalid."',
                 },
                 {
                     "argName": "disabled",
@@ -2242,7 +2242,6 @@ metadata = {
                                 "required": True,
                                 "hint": None,
                                 "fullWidth": False,
-                                "invalidEmailMessage": "Hmm… doesn't look like an email",
                                 "disabled": False,
                                 "errors": [],
                             },

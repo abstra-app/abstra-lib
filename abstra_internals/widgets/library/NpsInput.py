@@ -1,7 +1,7 @@
-from ..widget_base import Input
+from ..widget_base import NumberishInput
 
 
-class NpsInput(Input):
+class NpsInput(NumberishInput):
     type = "nps-input"
     empty_value = None
 

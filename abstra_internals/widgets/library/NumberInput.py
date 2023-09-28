@@ -1,7 +1,7 @@
-from ..widget_base import Input
+from ..widget_base import NumberishInput
 
 
-class NumberInput(Input):
+class NumberInput(NumberishInput):
     type = "number-input"
     empty_value = None
 
