@@ -1,10 +1,10 @@
-from ..widget_base import Input
+from ..widget_base import OptionalListInput
 from typing import Union, List, Dict, Any
 
 
-class DropdownInput(Input):
+class DropdownInput(OptionalListInput):
     type = "dropdown-input"
-    empty_value: Union[List, Any] = None
+    empty_value = None
     multiple: bool = False
 
     def __init__(

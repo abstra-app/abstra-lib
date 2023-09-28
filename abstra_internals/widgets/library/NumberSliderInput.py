@@ -1,7 +1,7 @@
-from ..widget_base import Input
+from ..widget_base import NumberishInput
 
 
-class NumberSliderInput(Input):
+class NumberSliderInput(NumberishInput):
     type = "number-slider-input"
     empty_value = 0
 

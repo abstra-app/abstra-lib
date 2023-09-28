@@ -2010,7 +2010,7 @@
                     "required": true,
                     "hint": null,
                     "fullWidth": false,
-                    "invalidEmailMessage": "Hmm\u2026 doesn't look like an email",
+                    "invalidEmailMessage": "i18n_error_invalid_email",
                     "disabled": false,
                     "errors": []
                 },

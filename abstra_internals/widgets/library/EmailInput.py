@@ -17,7 +17,7 @@ class EmailInput(Input):
         self.placeholder = props.get("placeholder", "")
         self.full_width = props.get("full_width", False)
         self.invalid_email_message = props.get(
-            "invalid_email_message", "Hmm… doesn't look like an email"
+            "invalid_email_message", "i18n_error_invalid_email"
         )
         self.disabled = props.get("disabled", False)
 

@@ -1,11 +1,11 @@
 from io import BufferedReader, TextIOWrapper
 from typing import Optional, Union, List
 from ..apis import upload_file
-from ..widget_base import Input
+from ..widget_base import OptionalListInput
 from ..response_types import FileResponse
 
 
-class FileInput(Input):
+class FileInput(OptionalListInput):
     type = "file-input"
     empty_value = None
     multiple: bool = False
