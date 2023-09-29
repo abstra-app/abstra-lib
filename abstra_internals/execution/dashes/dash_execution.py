@@ -5,7 +5,7 @@ import typing
 
 
 class DashExecution(LiveExecution):
-    def run(self):
+    def run_sync(self):
         from .dash_runtime import DashRuntime
 
         msg_handler = DashRuntime(self, dash_json=self.runtime_json)  # type: ignore
