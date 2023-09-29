@@ -1,9 +1,7 @@
-import requests, os, typing, abc
+import requests, typing, abc
 
 from ..credentials import resolve_headers
-
-LOCAL_TABLES_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/tables/execute"
-ABSTRA_TABLES_EXECUTE_URL = os.getenv("ABSTRA_TABLES_EXECUTE_URL")
+from ..utils.environment import TABLES_EXECUTE_URL, LOCAL_TABLES_EXECUTE_URL
 
 
 class TablesApiHttpClient(abc.ABC):
@@ -32,7 +30,7 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
 
 
 def tables_api_http_client_factory() -> TablesApiHttpClient:
-    if ABSTRA_TABLES_EXECUTE_URL is None:
+    if TABLES_EXECUTE_URL is None:
         return LocalTablesApiHttpClient(LOCAL_TABLES_EXECUTE_URL)
     else:
-        return ProductionTablesApiHttpClient(ABSTRA_TABLES_EXECUTE_URL)
+        return ProductionTablesApiHttpClient(TABLES_EXECUTE_URL)

@@ -1,8 +1,10 @@
-import base64, simplejson, jwt, os, traceback, re, socket
+import base64, simplejson, jwt, traceback, re, socket, datetime
 from contextlib import closing
 from traceback import StackSummary
 
-PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
+from .environment import PUBLIC_KEY
+
+email_rgexp = r"""^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$"""
 
 
 def serialize(obj):
@@ -68,6 +70,12 @@ def formated_traceback_error_message(e: Exception, main_file="<string>"):
     return formated_error
 
 
+def is_valid_email(email):
+    if not isinstance(email, str):
+        return False
+    return re.match(email_rgexp, email)
+
+
 def decode_jwt(jwt_str: str):
     try:
         if PUBLIC_KEY:
@@ -76,6 +84,17 @@ def decode_jwt(jwt_str: str):
     except Exception as e:
         print("error decoding jwt", e)
         return None
+
+
+def endcode_fake_jwt(email: str):
+    return jwt.encode(
+        key="fake",
+        algorithm="HS256",
+        payload={
+            "email": email,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+        },
+    )
 
 
 def random_id(length=10):
@@ -116,7 +135,7 @@ def check_is_url(url: str) -> bool:
     return bool(re.match(r"^https?://", url))
 
 
-def get_free_port(default_port=3000) -> int:
+def get_free_port(default_port: int) -> int:
     range_start = default_port
     range_end = default_port + 100
 

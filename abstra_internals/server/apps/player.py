@@ -1,16 +1,22 @@
-import flask, flask_sock, os, concurrent.futures as futures
-from ...execution.execution import RequestData
+import flask, flask_sock, concurrent.futures as futures
+
 from ..api import API
+from .auth import get_auth_bp
 from ...settings import Settings
 from .utils import send_from_dist
+from ...execution.execution import RequestData
+from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN
 from ...execution import HookExecution, JobExecution, DashExecution, FormExecution
 
 
 def get_player_bp(api: API):
+    executor = futures.ThreadPoolExecutor()
+
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
-    SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN")
-    executor = futures.ThreadPoolExecutor()
+
+    auth_bp = get_auth_bp(api)
+    bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
     @bp.route("/_pages/<path:id_or_path>", methods=["GET"])
     def get_runner_data(id_or_path):
@@ -29,7 +35,7 @@ def get_player_bp(api: API):
 
     @bp.route("/_version", methods=["GET"])
     def _get_version():
-        return os.getenv("ABSTRA_BUILD_ID") or "dev"
+        return BUILD_ID
 
     @bp.route("/_healthcheck")
     def _healthcheck():
@@ -128,7 +134,7 @@ def get_player_bp(api: API):
 
     @bp.route("/_jobs/<path:path>", methods=["POST"])
     def job_runner(path):
-        if flask.request.headers.get("Shared-Token") != SHARED_TOKEN:
+        if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
             flask.abort(401)
 
         job = api.get_job(path)

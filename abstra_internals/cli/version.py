@@ -1,9 +1,9 @@
 import pkg_resources, os, requests
-from ..utils.environment import is_preview
+from ..utils.environment import IS_PREVIEW
 
 
 def check_latest_version(package_name="abstra"):
-    if not is_preview():
+    if not IS_PREVIEW:
         return
 
     try:

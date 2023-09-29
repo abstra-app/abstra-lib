@@ -1,10 +1,7 @@
-import requests, os, typing, abc
+import requests, typing, abc
 
 from ..credentials import resolve_headers
-
-
-LOCAL_CONNECTORS_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/connectors/execute"
-ABSTRA_CONNECTORS_EXECUTE_URL = os.getenv("ABSTRA_CONNECTORS_EXECUTE_URL")
+from ..utils.environment import CONNECTORS_EXECUTE_URL, LOCAL_CONNECTORS_EXECUTE_URL
 
 
 class ConnectorsApiHttpClient(abc.ABC):
@@ -33,7 +30,7 @@ class LocalConnectorsApiHttpClient(ConnectorsApiHttpClient):
 
 
 def connectors_api_http_client_factory() -> ConnectorsApiHttpClient:
-    if ABSTRA_CONNECTORS_EXECUTE_URL is None:
+    if CONNECTORS_EXECUTE_URL is None:
         return LocalConnectorsApiHttpClient(LOCAL_CONNECTORS_EXECUTE_URL)
     else:
-        return ProductionConnectorsApiHttpClient(ABSTRA_CONNECTORS_EXECUTE_URL)
+        return ProductionConnectorsApiHttpClient(CONNECTORS_EXECUTE_URL)

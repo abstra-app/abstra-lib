@@ -1,9 +1,9 @@
-import sys, warnings
-from typing import List, Optional, Union, Any, Dict, Tuple
+import sys, warnings, uuid
 from dataclasses import dataclass
+from typing import List, Optional, Union, Any, Dict, Tuple
+
 from ...settings import Settings
 from ...utils import check_is_url
-import uuid
 
 
 def strict_compatible_missing_entities(data):
@@ -30,6 +30,7 @@ def strict_compatible_missing_entities(data):
 
     if "workflow_transitions" not in data:
         data["workflow_transitions"] = []
+
     return data
 
 
@@ -985,21 +986,21 @@ class PathConflictError(Exception):
 class AbstraJSON:
     version: str
     workspace: WorkspaceJSON
-    forms: List[FormJSON]
+    scripts: List[ScriptJSON]
     dashes: List[DashJSON]
+    forms: List[FormJSON]
     hooks: List[HookJSON]
     jobs: List[JobJSON]
-    scripts: List[ScriptJSON]
 
     @property
     def __dict__(self):
         return {
             "version": self.version,
             "workspace": self.workspace.__dict__,
+            "jobs": [job.__dict__ for job in self.jobs],
+            "hooks": [hook.__dict__ for hook in self.hooks],
             "forms": [form.__dict__ for form in self.forms],
             "dashes": [dash.__dict__ for dash in self.dashes],
-            "hooks": [hook.__dict__ for hook in self.hooks],
-            "jobs": [job.__dict__ for job in self.jobs],
             "scripts": [script.__dict__ for script in self.scripts],
         }
 
@@ -1061,18 +1062,24 @@ class AbstraJSON:
         data = strict_compatible(data)
 
         try:
+            scripts = [ScriptJSON.from_dict(script) for script in data["scripts"]]
             dashes = [DashJSON.from_dict(dash) for dash in data["dashes"]]
             forms = [FormJSON.from_dict(form) for form in data["forms"]]
+            hooks = [HookJSON.from_dict(hook) for hook in data["hooks"]]
+            jobs = [JobJSON.from_dict(job) for job in data["jobs"]]
+
+            workspace = WorkspaceJSON.from_dict(
+                data["workspace"], dashes=dashes, forms=forms
+            )
+
             return AbstraJSON(
                 version=data["version"],
-                forms=forms,
+                workspace=workspace,
+                scripts=scripts,
                 dashes=dashes,
-                scripts=[ScriptJSON.from_dict(script) for script in data["scripts"]],
-                hooks=[HookJSON.from_dict(hook) for hook in data["hooks"]],
-                jobs=[JobJSON.from_dict(job) for job in data["jobs"]],
-                workspace=WorkspaceJSON.from_dict(
-                    data["workspace"], dashes=dashes, forms=forms
-                ),
+                forms=forms,
+                hooks=hooks,
+                jobs=jobs,
             )
         except TypeError as e:
             print("Error: incompatible abstra.json file.")
@@ -1085,10 +1092,7 @@ class AbstraJSON:
     def make_empty():
         return AbstraJSON(
             version="0.1",
-            workspace=WorkspaceJSON(
-                name="Untitled Workspace",
-                sidebar=SidebarJSON([]),
-            ),
+            workspace=WorkspaceJSON(name="Untitled Workspace", sidebar=SidebarJSON([])),
             forms=[],
             dashes=[],
             hooks=[],

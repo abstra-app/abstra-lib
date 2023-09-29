@@ -5,10 +5,11 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Callable
 from dataclasses import dataclass
+
 from ..monitoring import LogMessage, log
+from ..utils.environment import IS_PREVIEW
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
-from ..utils.environment import is_preview
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import RuntimeJSON
@@ -93,7 +94,7 @@ class Execution:
 
     @property
     def is_preview(self) -> bool:
-        return is_preview()
+        return IS_PREVIEW
 
     def stdio(self, type: str, text: str):
         if type == "stderr":

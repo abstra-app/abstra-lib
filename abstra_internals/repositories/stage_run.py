@@ -1,14 +1,11 @@
 import abc
-import os
-from typing import Optional, List, Dict, Type, Mapping, Any
 import uuid
-from dataclasses import dataclass
-
 import requests
 
+from dataclasses import dataclass
+from typing import Optional, List, Dict, Type, Mapping, Any
 
-ABSTRA_SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
-ABSTRA_SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "")
+from ..utils.environment import SIDECAR_URL, SIDECAR_SHARED_TOKEN
 
 
 @dataclass
@@ -139,10 +136,10 @@ class LocalStageRunRepository(IStageRunRepository):
 class ProductionStageRunRepository(IStageRunRepository):
     @classmethod
     def _request(cls, method: str, path: str, body: Any = None, params: dict = {}):
-        headers: Mapping[str, str] = {"shared-token": ABSTRA_SIDECAR_SHARED_TOKEN}
+        headers: Mapping[str, str] = {"shared-token": SIDECAR_SHARED_TOKEN}
         r = requests.request(
             method=method,
-            url=f"{ABSTRA_SIDECAR_URL}/stage-runs{path}",
+            url=f"{SIDECAR_URL}/stage-runs{path}",
             headers=headers,
             json=body,
             params=params,
@@ -235,7 +232,7 @@ class ProductionStageRunRepository(IStageRunRepository):
 
 
 def get_stage_run_repository() -> Type[IStageRunRepository]:
-    if ABSTRA_SIDECAR_URL is None:
+    if SIDECAR_URL is None:
         return LocalStageRunRepository
     else:
         return ProductionStageRunRepository
