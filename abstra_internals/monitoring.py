@@ -1,6 +1,6 @@
-import requests, os, typing, concurrent.futures as futures, dataclasses
+import requests, typing, concurrent.futures as futures, dataclasses
 
-LOG_SERVICE_URL = os.getenv("ABSTRA_LOG_SERVICE_URL")
+from .utils.environment import LOG_SERVICE_URL
 
 executor = futures.ThreadPoolExecutor()
 

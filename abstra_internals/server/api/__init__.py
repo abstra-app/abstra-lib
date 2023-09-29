@@ -1,55 +1,52 @@
+import uuid
 import json
-import os
+import flask
 import shutil
 import tempfile
 import webbrowser
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-import uuid
 import concurrent.futures as futures
-
-import flask
 from werkzeug.datastructures import FileStorage
+from typing import Any, Dict, List, Optional, Union
 
-from ...cli.deploy import deploy
+from ...widgets.apis import get_random_filepath, internal_path
+from ...execution.script_execution import ScriptExecution
 from ...cloud_api import get_ai_messages, get_auth_info
+from ...repositories.stage_run import StageRun
+from ...repositories import StageRunRepository
+from ...cli.deploy import deploy
+from ...settings import Settings
+from ...utils import random_id
+
 from ...credentials import (
     delete_credentials,
     get_credentials,
     resolve_headers,
     set_credentials,
 )
-from ...repositories import StageRunRepository
-from ...settings import Settings
+
 from ...templates import (
-    new_dash_code,
+    new_script_code,
     new_dash_layout,
+    new_dash_code,
     new_form_code,
     new_hook_code,
     new_job_code,
-    new_script_code,
 )
-from ...utils import random_id
-from ...widgets.apis import get_random_filepath, internal_path
+
 from ...repositories.json.classes import (
+    WorkflowTransitionJSON,
+    WorkspaceJSON,
+    RuntimeJSON,
+    ScriptJSON,
+    AbstraJSON,
+    LayoutJSON,
+    ScriptJSON,
     DashJSON,
     FormJSON,
     HookJSON,
     JobJSON,
-    ScriptJSON,
-    AbstraJSON,
-    WorkflowTransitionJSON,
-    WorkspaceJSON,
-    LayoutJSON,
-    RuntimeJSON,
-    ScriptJSON,
 )
-
-from ...execution.script_execution import ScriptExecution
-from ...repositories.stage_run import StageRun
-
-CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT", "https://cloud-api.abstra.cloud")
-ABSTRA_DATABASE_URL = os.environ.get("ABSTRA_DATABASE_URL")
 
 
 class NodeNotFoundError(Exception):

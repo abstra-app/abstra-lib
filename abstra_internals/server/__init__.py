@@ -1,4 +1,4 @@
-import flask, flask_cors, pathlib
+import flask, flask_cors
 
 from .api import API
 from .overloads import overloads
@@ -8,9 +8,10 @@ from ..settings import SettingsController
 
 # USED ON CLOUD SERVER
 def get_cloud_app(root: str):
-    overloads()
     SettingsController.set_root_path(root)
+    SettingsController.set_server_port(None)
 
+    overloads()
     api = API()
     app = flask.Flask(__name__)
     flask_cors.CORS(app)

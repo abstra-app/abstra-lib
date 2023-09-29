@@ -1,8 +1,6 @@
-import os, requests
+import requests
 
-CLOUD_API_ENDPOINT = (
-    os.environ.get("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
-)
+from ..utils.environment import CLOUD_API_ENDPOINT
 
 
 def create_build(headers: dict) -> dict:

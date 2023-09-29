@@ -30,8 +30,8 @@ class CLI(object):
         load_dotenv=True,
     ):
         SettingsController.set_root_path(workspace_root)
+        SettingsController.set_server_port(port)
         serve(
-            port=port,
             debug=debug,
             use_reloader=use_reloader,
             load_dotenv=load_dotenv,

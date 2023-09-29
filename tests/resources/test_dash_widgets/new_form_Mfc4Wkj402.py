@@ -1,7 +1,5 @@
 from abstra.forms import *
 
-# from hackerforms import *
-
 combination_desc = """## Step#2: Add your variants
 ### Add variants and select the attribute values for each variant"""
 

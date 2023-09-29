@@ -1,9 +1,12 @@
 import typing, pathlib, os, sys
+from .utils import get_free_port
+from .utils.environment import DEFAULT_PORT
 
 
 class SettingsController(object):
     _instance: typing.Optional["SettingsController"] = None
     _root_path: typing.Optional[pathlib.Path] = None
+    _server_port: typing.Optional[int] = None
 
     def __new__(cls):
         if not cls._instance:
@@ -21,11 +24,30 @@ class SettingsController(object):
 
         SettingsController._root_path = root_path
 
+    @staticmethod
+    def set_server_port(server_port: typing.Union[int, str, None]):
+        port = 3000
+        if isinstance(server_port, int):
+            port = server_port
+        elif isinstance(server_port, str):
+            port = int(server_port)
+        elif DEFAULT_PORT:
+            port = int(DEFAULT_PORT)
+
+        free_port = get_free_port(port)
+        SettingsController._server_port = free_port
+
     @property
     def root_path(self) -> pathlib.Path:
         if SettingsController._root_path is None:
             raise Exception("You must set the root path before using it")
         return SettingsController._root_path
+
+    @property
+    def server_port(self) -> int:
+        if SettingsController._server_port is None:
+            raise Exception("You must set the server before using it")
+        return SettingsController._server_port
 
 
 Settings = SettingsController()
