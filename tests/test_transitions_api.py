@@ -69,6 +69,7 @@ class TestTransitionsApi(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": "form1"},
                     "target": {"type": "forms", "id": "form2"},
+                    "id": "foo",
                 }
             ]
         )
@@ -82,6 +83,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "forms", "id": "form1"},
                         "target": {"type": "forms", "id": "form1"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -93,6 +95,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "forms", "id": "form1"},
                         "target": {"type": "invalid", "id": "form1"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -104,6 +107,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "invalid", "id": "form1"},
                         "target": {"type": "forms", "id": "form1"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -115,6 +119,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "jobs", "id": "job1"},
                         "target": {"type": "forms", "id": "invalid"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -126,6 +131,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "jobs", "id": "invalid"},
                         "target": {"type": "forms", "id": "form1"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -137,6 +143,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "forms", "id": "form1"},
                         "target": {"type": "jobs", "id": "job1"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -147,6 +154,7 @@ class TestTransitionsApi(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": "form1"},
                     "target": {"type": "forms", "id": "form2"},
+                    "id": "foo",
                 }
             ]
         )
@@ -167,6 +175,7 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "forms", "id": "form1"},
                         "target": {"type": "forms", "id": "form2"},
+                        "id": "foo",
                     }
                 ]
             )
@@ -175,6 +184,20 @@ class TestTransitionsApi(unittest.TestCase):
                     {
                         "source": {"type": "forms", "id": "form1"},
                         "target": {"type": "forms", "id": "form2"},
+                        "id": "bar",
                     }
                 ]
             )
+
+    def test_save_with_given_id(self):
+        self.api.workflow_add_transition(
+            [
+                {
+                    "source": {"type": "forms", "id": "form1"},
+                    "target": {"type": "forms", "id": "form2"},
+                    "id": "foo",
+                }
+            ],
+        )
+        abstra_json = self.api.load_abstra_json()
+        self.assertEqual(abstra_json.forms[1].workflow_transitions[0].id, "foo")

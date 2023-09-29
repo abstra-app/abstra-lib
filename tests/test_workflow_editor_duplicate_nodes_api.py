@@ -132,6 +132,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": "form1"},
                     "target": {"type": "hooks", "id": "hook1"},
+                    "id": "transition1",
                 }
             ]
         )
@@ -157,6 +158,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": "form1"},
                     "target": {"type": "hooks", "id": "hook1"},
+                    "id": "transition1",
                 }
             ]
         )

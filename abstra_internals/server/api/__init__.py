@@ -792,7 +792,7 @@ class API:
             source.workflow_transitions.append(
                 WorkflowTransitionJSON(
                     target_path=transition["target"]["id"],
-                    id=random_id(),
+                    id=transition["id"],
                     label="",
                     target_type=transition["target"]["type"],
                 )
