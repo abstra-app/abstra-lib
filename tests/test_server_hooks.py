@@ -41,6 +41,7 @@ class TestHooks(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": source["path"]},
                     "target": {"type": "hooks", "id": target["path"]},
+                    "id": "transition1",
                 }
             ],
         )

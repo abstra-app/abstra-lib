@@ -69,6 +69,7 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": "form1"},
                     "target": {"type": "forms", "id": "form2"},
+                    "id": "foo",
                 }
             ]
         )
@@ -105,6 +106,7 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
                 {
                     "source": {"type": "forms", "id": "form1"},
                     "target": {"type": "forms", "id": "form2"},
+                    "id": "foo",
                 }
             ]
         )
