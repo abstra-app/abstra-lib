@@ -447,7 +447,7 @@ class API:
 
         file_name = f"new_hook_{random_id()}"
         file = f"{file_name}.py"
-        Settings.root_path.joinpath(file).write_text(new_form_code, encoding="utf-8")
+        Settings.root_path.joinpath(file).write_text(new_hook_code, encoding="utf-8")
         hook = HookJSON(
             file=file, path=file_name, title="Untitled Hook", workflow_transitions=[]
         )
