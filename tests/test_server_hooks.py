@@ -1,7 +1,8 @@
-import unittest
+import unittest, pathlib
 from abstra_internals.server.api import API
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.apps import create_app
+from abstra_internals.templates import new_hook_code
 
 
 class TestHooks(unittest.TestCase):
@@ -28,6 +29,11 @@ class TestHooks(unittest.TestCase):
         hooks = self.client.get("/_editor/api/hooks/").get_json()
         self.assertEqual(len(hooks), 1)
         self.assertEqual(hooks[0]["path"], "new_path")
+
+    def test_create_hook_with_right_template(self):
+        hook = self.client.post("/_editor/api/hooks/").get_json()
+        file_content = pathlib.Path(hook["file"]).read_text()
+        self.assertEqual(file_content, new_hook_code)
 
     def test_renaming_hook_should_change_all_transitions_pointing_to_it(self):
         api = API()
