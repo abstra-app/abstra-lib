@@ -20,8 +20,8 @@ class StdioMessage(Message):
 class AuthRequireInfoMessage(Message):
     type = "auth:require-info"
 
-    def __init__(self):
-        super().__init__({})
+    def __init__(self, refresh: bool):
+        super().__init__({"refresh": refresh})
 
 
 class AuthInvalidJWTMessage(Message):
