@@ -66,7 +66,12 @@ def get_player_bp(api: API):
                 if not form:
                     conn.close(reason=404, message="Not found")
                     return
-                return FormExecution(form, conn, request_data).run_sync()
+
+                execution = FormExecution(form, conn, request_data)
+
+                execution.run_sync()
+
+                api.run_waiting_scripts(execution.stage_run)
 
         finally:
             conn.close(message="Done")
@@ -126,7 +131,7 @@ def get_player_bp(api: API):
 
         execution.run_sync()
 
-        api.run_next_scripts(execution.stage_run)
+        api.run_waiting_scripts(execution.stage_run)
 
         body, status, headers = execution.get_response()
 
@@ -155,7 +160,7 @@ def get_player_bp(api: API):
             execution = JobExecution(job, request_data)
 
             execution.run_sync()
-            api.run_next_scripts(execution.stage_run)
+            api.run_waiting_scripts(execution.stage_run)
 
         executor.submit(run_job, job)
 

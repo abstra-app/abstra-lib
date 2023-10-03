@@ -67,9 +67,15 @@ class LocalStageRunRepository(IStageRunRepository):
 
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
+        for key in filter.keys():
+            if key not in ["data", "stage", "assignee", "status", "parent_id"]:
+                raise Exception(f"Invalid filter key {key}")
+
         stage = filter.get("stage")
         data = filter.get("data")
         assignee = filter.get("assignee")
+        status = filter.get("status")
+        parent_id = filter.get("parent_id")
 
         return [
             stage_run
@@ -78,6 +84,8 @@ class LocalStageRunRepository(IStageRunRepository):
                 (not stage or stage_run.stage == stage)
                 and (not data or stage_run.data == data)
                 and (not assignee or stage_run.assignee == assignee)
+                and (not status or stage_run.status == status)
+                and (not parent_id or stage_run.parent_id == parent_id)
             )
         ]
 
@@ -170,7 +178,7 @@ class ProductionStageRunRepository(IStageRunRepository):
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
         for key in filter.keys():
-            if key not in ["data", "stage", "assignee"]:
+            if key not in ["data", "stage", "assignee", "status"]:
                 raise Exception(f"Invalid filter key {key}")
 
         r = cls._request(

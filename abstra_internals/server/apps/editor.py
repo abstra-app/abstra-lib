@@ -187,7 +187,7 @@ def get_editor_bp(api: API):
 
         body, status, headers = execution.get_response()
 
-        api.run_next_scripts(execution.stage_run)
+        api.run_waiting_scripts(execution.stage_run)
 
         return {
             "body": body,
@@ -250,7 +250,7 @@ def get_editor_bp(api: API):
 
         execution.run_sync()
 
-        api.run_next_scripts(execution.stage_run)
+        api.run_waiting_scripts(execution.stage_run)
 
         return {
             "stdout": "".join(execution.stdout if execution else []),
