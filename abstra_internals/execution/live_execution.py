@@ -5,6 +5,7 @@ import flask_sock
 from ..contract import Message, StdioMessage, should_send
 from ..utils import deserialize, serialize
 from .execution import Execution, RequestData
+from simple_websocket.ws import ConnectionClosed
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import DashJSON, FormJSON
@@ -51,7 +52,12 @@ class LiveExecution(Execution):
         self._connection.send(str_data)
 
     def recv(self) -> Tuple[str, Dict]:
-        str_data = self._connection.receive()
+        try:
+            str_data = self._connection.receive()
+        except ConnectionClosed:
+            self.close()
+            return "close", {}
+
         data = deserialize(str_data)
         self.log(data["type"], data)
         return data["type"], data
