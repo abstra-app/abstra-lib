@@ -286,18 +286,20 @@ class API:
 
         execution.run_sync()
 
-        self.run_next_scripts(execution.stage_run)
+        self.run_waiting_scripts(execution.stage_run)
 
         return {
             "stdout": "".join(execution.stdout if execution else []),
             "stderr": "".join(execution.stderr if execution else []),
         }
 
-    def run_next_scripts(self, parent_stage_run: Optional[StageRun]):
+    def run_waiting_scripts(self, parent_stage_run: Optional[StageRun]):
         if not parent_stage_run:
             return
 
-        next_stage_runs = StageRunRepository.find({"parent_id": parent_stage_run.id})
+        next_stage_runs = StageRunRepository.find(
+            {"parent_id": parent_stage_run.id, "status": "waiting"}
+        )
 
         if len(next_stage_runs) == 0:
             return
@@ -313,7 +315,7 @@ class API:
                     script, next_stage_run.id
                 )
                 execution.run_sync()
-                api.run_next_scripts(execution.stage_run)
+                api.run_waiting_scripts(execution.stage_run)
 
             self.executor.submit(run_next, script, self)
 

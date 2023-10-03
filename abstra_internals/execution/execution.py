@@ -211,7 +211,9 @@ class Execution:
                 if stage_run["stage"] not in allowed_stages:
                     raise InvalidNextStageRun(stage_run["stage"], allowed_stages)
 
-        default_next_stage_runs = [dict(stage=allowed_stages[0])]
+        default_next_stage_runs = [
+            dict(stage=allowed_stage) for allowed_stage in allowed_stages
+        ]
 
         dtos = next_stage_runs or default_next_stage_runs
 
