@@ -1,6 +1,8 @@
 import unittest
 from abstra_internals.server.api import API
 from .fixtures import init_dir, clear_dir
+from abstra.forms import display
+from abstra_internals.execution.execution import NoExecutionFound
 
 
 class TestForms(unittest.TestCase):
@@ -30,3 +32,7 @@ class TestForms(unittest.TestCase):
             api.update_runtime(
                 form.path, dict(title="New Title", invalid_property="invalid")
             )
+
+    def test_raises_exception_on_running_directly(self):
+        with self.assertRaises(NoExecutionFound):
+            display("test")

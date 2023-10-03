@@ -4,7 +4,7 @@ from typing import Optional, TYPE_CHECKING, Tuple, Dict, Union
 import flask_sock
 from ..contract import Message, StdioMessage, should_send
 from ..utils import deserialize, serialize
-from .execution import Execution, RequestData
+from .execution import Execution, RequestData, NoExecutionFound
 from simple_websocket.ws import ConnectionClosed
 
 if TYPE_CHECKING:
@@ -82,5 +82,5 @@ class LiveExecution(Execution):
 def get_live_execution_throwable() -> LiveExecution:
     execution = LiveExecution.get_execution()
     if not execution:
-        raise Exception("No execution found")
+        raise NoExecutionFound
     return execution
