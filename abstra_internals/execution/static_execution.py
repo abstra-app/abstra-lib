@@ -1,6 +1,6 @@
 import typing
 
-from .execution import Execution
+from .execution import Execution, NoExecutionFound
 
 
 class StaticExecution(Execution):
@@ -22,5 +22,5 @@ class StaticExecution(Execution):
 def get_static_execution_throwable() -> StaticExecution:
     execution = StaticExecution.get_execution()
     if not execution:
-        raise Exception("No execution found")
+        raise NoExecutionFound()
     return execution

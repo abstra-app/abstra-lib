@@ -15,6 +15,11 @@ if TYPE_CHECKING:
     from ..repositories.json.classes import RuntimeJSON
 
 
+class NoExecutionFound(Exception):
+    def __str__(self) -> str:
+        return "No execution found. If you are running this locally, make sure you are running it with `abstra serve`. For more information, see https://docs.abstra.io"
+
+
 @dataclass
 class RequestData:
     headers: Dict[str, str]
@@ -221,5 +226,5 @@ class Execution:
 def get_execution_throwable() -> Execution:
     execution = Execution.get_execution()
     if not execution:
-        raise Exception("No execution found")
+        raise NoExecutionFound()
     return execution
