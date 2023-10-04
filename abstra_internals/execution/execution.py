@@ -173,6 +173,9 @@ class Execution:
         try:
             exec(code, namespace, namespace)
             self.advance_stage(internal_call=True)
+        except SystemExit:
+            self.set_stage_run_status("finished")
+            return self.handle_success()
         except StageRunEnded:
             self.set_stage_run_status("finished")
             return self.handle_success()
