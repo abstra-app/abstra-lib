@@ -64,7 +64,6 @@ class TestWorkflowNext(unittest.TestCase):
         return HookJSON(
             file=file,
             enabled=True,
-            is_initial=True,
             path=path,
             title=title,
             workflow_position=(0, 0),

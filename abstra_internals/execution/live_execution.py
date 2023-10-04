@@ -32,6 +32,7 @@ class LiveExecution(Execution):
     def __init__(
         self,
         runtime_json: Union["FormJSON", "DashJSON"],
+        is_initial: bool,
         connection: flask_sock.Server,
         request: RequestData,
         execution_id=None,
@@ -40,7 +41,7 @@ class LiveExecution(Execution):
         if execution_id is not None:
             self.id = execution_id
 
-        super().__init__(runtime_json, request, execution_id=execution_id)
+        super().__init__(runtime_json, is_initial, request, execution_id=execution_id)
 
     def send(self, msg: Message):
         self.log(msg.type, msg.data)

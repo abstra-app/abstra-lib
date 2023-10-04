@@ -16,7 +16,6 @@ class TestHookExecution(unittest.TestCase):
             file=file,
             path="initial_hook",
             title="Hook 1",
-            is_initial=True,
             workflow_transitions=[],
         )
         abstra_json.hooks.append(hook)

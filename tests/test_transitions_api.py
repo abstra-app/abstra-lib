@@ -29,7 +29,6 @@ class TestTransitionsApi(unittest.TestCase):
                 workflow_transitions=[],
                 workflow_position=(0, 0),
                 title=f"Form {i}",
-                is_initial=False,
             )
             abstra_json.forms.append(form)
             job = JobJSON(
@@ -44,7 +43,6 @@ class TestTransitionsApi(unittest.TestCase):
             hook = HookJSON(
                 file="foo.py",
                 enabled=True,
-                is_initial=True,
                 path=f"hook{i}",
                 title=f"Hook {i}",
                 workflow_position=(0, 0),

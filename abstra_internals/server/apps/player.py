@@ -54,20 +54,28 @@ def get_player_bp(api: API):
             dash_path = flask.request.args.get("dashPath")
             if dash_path is not None:
                 dash = api.get_dash(dash_path)
+
+                abstra_json = api.load_abstra_json()
+                is_initial = abstra_json.is_initial(dash_path)
+
                 if not dash:
                     conn.close(reason=404, message="Not found")
                     return
 
-                return DashExecution(dash, conn, request_data).run_sync()
+                return DashExecution(dash, is_initial, conn, request_data).run_sync()
 
             form_path = flask.request.args.get("formPath")
             if form_path is not None:
                 form = api.get_form(form_path)
+
+                abstra_json = api.load_abstra_json()
+                is_initial = abstra_json.is_initial(form_path)
+
                 if not form:
                     conn.close(reason=404, message="Not found")
                     return
 
-                execution = FormExecution(form, conn, request_data)
+                execution = FormExecution(form, is_initial, conn, request_data)
 
                 execution.run_sync()
 
@@ -127,7 +135,10 @@ def get_player_bp(api: API):
             method=flask.request.method,
         )
 
-        execution = HookExecution(hook, request_data)
+        abstra_json = api.load_abstra_json()
+        is_initial = abstra_json.is_initial(path)
+
+        execution = HookExecution(hook, is_initial, request_data)
 
         execution.run_sync()
 
@@ -157,7 +168,10 @@ def get_player_bp(api: API):
                 query_params=flask.request.args,
             )
 
-            execution = JobExecution(job, request_data)
+            abstra_json = api.load_abstra_json()
+            is_initial = abstra_json.is_initial(path)
+
+            execution = JobExecution(job, is_initial, request_data)
 
             execution.run_sync()
             api.run_waiting_scripts(execution.stage_run)

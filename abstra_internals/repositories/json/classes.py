@@ -55,16 +55,21 @@ def strict_compatible_workflow_positions(data: dict):
 
 def strict_compatible_is_initial(data: dict):
     for form in data["forms"]:
-        if "is_initial" not in form:
-            form["is_initial"] = True
+        if "is_initial" in form:
+            del form["is_initial"]
 
     for job in data["jobs"]:
-        if "is_initial" not in job:
-            job["is_initial"] = True
+        if "is_initial" in job:
+            del job["is_initial"]
 
     for hook in data["hooks"]:
-        if "is_initial" not in hook:
-            hook["is_initial"] = True
+        if "is_initial" in hook:
+            del hook["is_initial"]
+
+    for script in data["scripts"]:
+        if "is_initial" in script:
+            del script["is_initial"]
+
     return data
 
 
@@ -151,6 +156,7 @@ def strict_compatible(data: dict):
 
 
 RuntimeJSON = Union["FormJSON", "DashJSON", "HookJSON", "JobJSON", "ScriptJSON"]
+WorkflowRuntimeJSON = Union["FormJSON", "HookJSON", "JobJSON", "ScriptJSON"]
 
 
 @dataclass
@@ -195,7 +201,6 @@ class HookJSON:
     title: str
     workflow_transitions: List[WorkflowTransitionJSON]
     enabled: bool = False
-    is_initial: bool = True
     workflow_position: Tuple[float, float] = (0, 0)
 
     @property
@@ -210,7 +215,6 @@ class HookJSON:
             "title": self.title,
             "enabled": self.enabled,
             "workflow_position": self.workflow_position,
-            "is_initial": self.is_initial,
             "transitions": [t.__dict__ for t in self.workflow_transitions],
         }
 
@@ -240,7 +244,6 @@ class HookJSON:
             title=data["title"],
             enabled=data["enabled"],
             workflow_position=(x, y),
-            is_initial=data["is_initial"],
             workflow_transitions=[
                 WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
             ],
@@ -306,10 +309,6 @@ class ScriptJSON:
     def duplicate(self):
         return self.from_dict(self.__dict__)
 
-    @property
-    def is_initial(self):
-        return True
-
 
 @dataclass
 class JobJSON:
@@ -373,10 +372,6 @@ class JobJSON:
     def path(self):
         return self.identifier
 
-    @property
-    def is_initial(self):
-        return True
-
 
 @dataclass
 class FormJSON(SidebarRuntime):
@@ -384,7 +379,6 @@ class FormJSON(SidebarRuntime):
     title: str
     workflow_transitions: List[WorkflowTransitionJSON]
     workflow_position: Tuple[float, float] = (0, 0)
-    is_initial: bool = True
     end_message: Optional[str] = None
     auto_start: Optional[bool] = False
     start_message: Optional[str] = None
@@ -422,7 +416,6 @@ class FormJSON(SidebarRuntime):
             **self.browser_runner_dto,
             "file": self.file,
             "workflow_position": self.workflow_position,
-            "is_initial": self.is_initial,
             "transitions": [t.__dict__ for t in self.workflow_transitions],
         }
 
@@ -472,7 +465,6 @@ class FormJSON(SidebarRuntime):
             start_button_text=data["start_button_text"],
             restart_button_text=data["restart_button_text"],
             workflow_position=(x, y),
-            is_initial=data["is_initial"],
             workflow_transitions=[
                 WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
             ],
@@ -1004,6 +996,14 @@ class AbstraJSON:
             "scripts": [script.__dict__ for script in self.scripts],
         }
 
+    @property
+    def runtimes(self) -> List[RuntimeJSON]:
+        return [*self.forms, *self.dashes, *self.hooks, *self.jobs]
+
+    @property
+    def workflow_runtimes(self) -> List[WorkflowRuntimeJSON]:
+        return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
+
     def get_runtime_by_path(self, path: str) -> Optional[RuntimeJSON]:
         for form in self.forms:
             if form.path == path:
@@ -1056,6 +1056,19 @@ class AbstraJSON:
         runtime.update(changes)
 
         return runtime
+
+    def is_initial(self, runtime_path: str) -> bool:
+        runtime = self.get_runtime_by_path(runtime_path)
+
+        if not runtime:
+            raise Exception(f"Runtime {runtime_path} not found")
+
+        for runtime in self.workflow_runtimes:
+            for wt in runtime.workflow_transitions:
+                if wt.target_path == runtime_path:
+                    return False
+
+        return True
 
     @staticmethod
     def from_dict(data: dict):

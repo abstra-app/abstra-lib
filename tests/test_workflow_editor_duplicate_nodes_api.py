@@ -20,7 +20,6 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
             workflow_transitions=[],
             workflow_position=(0, 0),
             title=f"Form 1",
-            is_initial=False,
         )
         abstra_json.forms.append(form)
         job = JobJSON(
@@ -35,7 +34,6 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         hook = HookJSON(
             file="hook1.py",
             enabled=True,
-            is_initial=True,
             path="hook1",
             title=f"Hook 1",
             workflow_position=(0, 0),

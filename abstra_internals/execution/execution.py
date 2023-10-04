@@ -3,13 +3,13 @@ from __future__ import annotations  # Required for TYPE_CHECKING
 import threading
 import traceback
 import uuid
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Optional
 
 from ..monitoring import LogMessage, log
-from ..utils.environment import IS_PREVIEW
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
+from ..utils.environment import IS_PREVIEW
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import RuntimeJSON
@@ -61,6 +61,7 @@ class Execution:
     id: str
     type = "execution"
     executions: ClassVar[Dict[int, "Execution"]] = {}
+    is_initial: bool
     stage_run: Optional[StageRun] = None
     runtime_json: RuntimeJSON
     request: RequestData
@@ -74,6 +75,7 @@ class Execution:
     def __init__(
         self,
         runtime_json: RuntimeJSON,
+        is_initial: bool,
         request: RequestData,
         execution_id=None,
     ):
@@ -81,6 +83,8 @@ class Execution:
             self.id = execution_id
         else:
             self.id = uuid.uuid4().__str__()
+
+        self.is_initial = is_initial
 
         self.thread = threading.Thread(target=self._run, args=())
         self.request = request
@@ -144,13 +148,15 @@ class Execution:
             else:
                 raise MismatchedStage()
 
-        if self.runtime_json.runner_type != "dash" and self.runtime_json.is_initial:  # type: ignore
+        if self.is_initial:
             self.stage_run = StageRunRepository.create_initial(
                 stage=self.runtime_json.path, assignee=None
             )
             return
 
-        raise UnsetStageRun()
+        raise UnsetStageRun(
+            f"This Task is in the middle of a workflow, but no Task Instance run was specified"
+        )
 
     def _run(self) -> None:
         self.thread_id = threading.get_ident()

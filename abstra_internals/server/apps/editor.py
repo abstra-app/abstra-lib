@@ -181,7 +181,9 @@ def get_editor_bp(api: API):
             query_params=flask.request.args,
         )
 
-        execution = HookExecution(hook, request_data)
+        abstra_json = api.load_abstra_json()
+        is_initial = abstra_json.is_initial(hook.path)
+        execution = HookExecution(hook, is_initial, request_data)
 
         execution.run_sync()
 
@@ -246,7 +248,9 @@ def get_editor_bp(api: API):
             query_params=flask.request.args,
         )
 
-        execution = JobExecution(job, request_data)
+        abstra_json = api.load_abstra_json()
+        is_initial = abstra_json.is_initial(job.path)
+        execution = JobExecution(job, is_initial, request_data)
 
         execution.run_sync()
 
