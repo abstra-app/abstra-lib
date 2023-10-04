@@ -70,7 +70,7 @@ def assert_form(
     conn = MockConnection(browser_msgs)
 
     request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
-    execution = FormExecution(form_json, conn, request_data, execution_id)  # type: ignore
+    execution = FormExecution(form_json, True, conn, request_data, execution_id)  # type: ignore
     execution.run_async()
 
     for msg in iter_messages(conn, msgs, test_case):
@@ -86,7 +86,7 @@ def assert_dash(
 
     request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
 
-    execution = DashExecution(dash_json, conn, request_data, execution_id)  # type: ignore
+    execution = DashExecution(dash_json, True, conn, request_data, execution_id)  # type: ignore
 
     # copy of implemetation of DashExecution.run()
     dash_runtime = DashRuntime(execution=execution, dash_json=dash_json)

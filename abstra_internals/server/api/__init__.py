@@ -282,7 +282,8 @@ class API:
     # Script CRUDL
 
     def run_initial_script(self, script: ScriptJSON):
-        execution = ScriptExecution(script)
+        # This was added to allow script to run without a stage run while testing
+        execution = ScriptExecution(script, True)
 
         execution.run_sync()
 
@@ -688,7 +689,6 @@ class API:
                     path=node_id,
                     title=node["title"],
                     workflow_position=node_position,
-                    is_initial=True,
                     workflow_transitions=[],
                 )
                 abstra_json.forms.append(form)
@@ -699,7 +699,6 @@ class API:
                     path=node_id,
                     title=node["title"],
                     workflow_position=node_position,
-                    is_initial=True,
                     workflow_transitions=[],
                 )
                 abstra_json.hooks.append(hook)

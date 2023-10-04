@@ -18,7 +18,7 @@ class FormExecution(LiveExecution):
     def setup_context(self, request: RequestData):
         self.context["query_params"] = self._wait_start()
         self.send(forms_contract.ExecutionIdMessage(self.id))
-        self.init_stage_run(self.context["query_params"].get("abstra_stage_run_id"))
+        self.init_stage_run(self.context["query_params"].get("abstra-run-id"))
 
     def handle_success(self):
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
