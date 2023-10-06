@@ -3,6 +3,7 @@ from abstra_internals.server.api import API
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.apps import create_app
 from abstra_internals.templates import new_hook_code
+from abstra_internals.repositories.json.classes import AbstraJSONRepository
 
 
 class TestHooks(unittest.TestCase):
@@ -52,7 +53,9 @@ class TestHooks(unittest.TestCase):
             ],
         )
 
-        self.assertEqual(len(api.load_abstra_json().forms[0].workflow_transitions), 1)
+        self.assertEqual(
+            len(AbstraJSONRepository.load().forms[0].workflow_transitions), 1
+        )
 
         self.client.put(
             "/_editor/api/hooks/" + target["path"], json={"path": "new_path"}

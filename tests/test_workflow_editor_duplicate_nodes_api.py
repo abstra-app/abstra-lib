@@ -5,6 +5,7 @@ from abstra_internals.repositories.json.classes import (
     FormJSON,
     JobJSON,
     HookJSON,
+    AbstraJSONRepository,
 )
 from .fixtures import init_dir, clear_dir
 
@@ -13,7 +14,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
 
-        abstra_json = AbstraJSON.make_empty()
+        abstra_json = AbstraJSON.create()
         form = FormJSON(
             path="form1",
             file="form1.py",
@@ -44,15 +45,15 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         pathlib.Path("hook1.py").write_text("print('hello world')")
         abstra_json.hooks.append(hook)
         self.api = API()
-        self.api.persist(abstra_json=abstra_json)
+        AbstraJSONRepository.save(abstra_json=abstra_json)
 
     def tearDown(self) -> None:
         clear_dir(self.path)
 
     def test_accept_empty_duplicate_nodes(self):
-        old_json = self.api.load_abstra_json()
+        old_json = AbstraJSONRepository.load()
         self.api.workflow_duplicate_nodes([])
-        new_json = self.api.load_abstra_json()
+        new_json = AbstraJSONRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_duplicating(self):
@@ -67,7 +68,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 }
             ]
         )
-        json = self.api.load_abstra_json()
+        json = AbstraJSONRepository.load()
         self.assertEqual(len(json.forms), 2)
         self.assertEqual(json.forms[0].path, "form1")
         self.assertEqual(json.forms[0].workflow_position, (0, 0))
@@ -116,7 +117,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 }
             ]
         )
-        json = self.api.load_abstra_json()
+        json = AbstraJSONRepository.load()
         self.assertEqual(len(json.jobs), 2)
         self.assertEqual(json.jobs[0].identifier, "job1")
         self.assertEqual(json.jobs[0].workflow_position, (0, 0))
@@ -145,7 +146,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 }
             ]
         )
-        json = self.api.load_abstra_json()
+        json = AbstraJSONRepository.load()
         duplicated = json.forms[1]
         self.assertEqual(duplicated.path, "duplicated")
         self.assertEqual(duplicated.workflow_transitions, [])
@@ -178,7 +179,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 },
             ]
         )
-        json = self.api.load_abstra_json()
+        json = AbstraJSONRepository.load()
         duplicated = json.forms[1]
         self.assertEqual(duplicated.path, "duplicated-form")
         self.assertEqual(len(duplicated.workflow_transitions), 1)

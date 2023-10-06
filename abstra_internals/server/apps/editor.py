@@ -7,6 +7,7 @@ from .utils import send_from_dist
 from ...execution.hook_execution import HookExecution
 from ...execution.job_execution import JobExecution
 from ...execution.script_execution import ScriptExecution
+from ...repositories.json.classes import AbstraJSONRepository
 
 
 def get_editor_bp(api: API):
@@ -181,7 +182,7 @@ def get_editor_bp(api: API):
             query_params=flask.request.args,
         )
 
-        abstra_json = api.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         is_initial = abstra_json.is_initial(hook.path)
         execution = HookExecution(hook, is_initial, request_data)
 
@@ -248,7 +249,7 @@ def get_editor_bp(api: API):
             query_params=flask.request.args,
         )
 
-        abstra_json = api.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         is_initial = abstra_json.is_initial(job.path)
         execution = JobExecution(job, is_initial, request_data)
 

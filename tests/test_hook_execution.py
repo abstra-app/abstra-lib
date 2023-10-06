@@ -3,13 +3,14 @@ from .fixtures import init_dir, clear_dir
 from abstra_internals.server.api import API
 from abstra_internals.repositories.json.classes import AbstraJSON, HookJSON
 from abstra_internals.server.apps import create_app
+from abstra_internals.repositories.json.classes import AbstraJSONRepository
 
 
 class TestHookExecution(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         api = API()
-        abstra_json = AbstraJSON.make_empty()
+        abstra_json = AbstraJSON.create()
         file = "initial_hook.py"
         self.root.joinpath(file).write_text("print('hello world')")
         hook = HookJSON(
@@ -19,7 +20,7 @@ class TestHookExecution(unittest.TestCase):
             workflow_transitions=[],
         )
         abstra_json.hooks.append(hook)
-        api.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
         self.client = create_app(api).test_client()
 
     def tearDown(self) -> None:

@@ -7,6 +7,7 @@ from .utils import send_from_dist
 from ...execution.execution import RequestData
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN
 from ...execution import HookExecution, JobExecution, DashExecution, FormExecution
+from ...repositories.json.classes import AbstraJSONRepository
 
 
 def get_player_bp(api: API):
@@ -55,7 +56,7 @@ def get_player_bp(api: API):
             if dash_path is not None:
                 dash = api.get_dash(dash_path)
 
-                abstra_json = api.load_abstra_json()
+                abstra_json = AbstraJSONRepository.load()
                 is_initial = abstra_json.is_initial(dash_path)
 
                 if not dash:
@@ -68,7 +69,7 @@ def get_player_bp(api: API):
             if form_path is not None:
                 form = api.get_form(form_path)
 
-                abstra_json = api.load_abstra_json()
+                abstra_json = AbstraJSONRepository.load()
                 is_initial = abstra_json.is_initial(form_path)
 
                 if not form:
@@ -135,7 +136,7 @@ def get_player_bp(api: API):
             method=flask.request.method,
         )
 
-        abstra_json = api.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         is_initial = abstra_json.is_initial(path)
 
         execution = HookExecution(hook, is_initial, request_data)
@@ -168,7 +169,7 @@ def get_player_bp(api: API):
                 query_params=flask.request.args,
             )
 
-            abstra_json = api.load_abstra_json()
+            abstra_json = AbstraJSONRepository.load()
             is_initial = abstra_json.is_initial(path)
 
             execution = JobExecution(job, is_initial, request_data)
