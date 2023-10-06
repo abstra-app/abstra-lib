@@ -46,6 +46,7 @@ from ...repositories.json.classes import (
     FormJSON,
     HookJSON,
     JobJSON,
+    AbstraJSONRepository,
 )
 
 
@@ -218,35 +219,17 @@ def _delete_transition_by_id(abstra_json: AbstraJSON, transition_id: str):
 class API:
     def __init__(self):
         self.executor = futures.ThreadPoolExecutor()
-        self.abstra_json_path = Settings.root_path.joinpath("abstra.json")
-        if not self.abstra_json_path.exists():
-            self.init_empty()
+        AbstraJSONRepository.initialize_on_empty()
 
     def deploy(self):
         deploy()
 
-    def init_empty(self):
-        self.persist(AbstraJSON.make_empty())
-
-    def persist(self, abstra_json: AbstraJSON):
-        temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
-
-        with temp_file.open("w") as f:
-            json.dump(abstra_json.__dict__, f, indent=2)
-        temp_file.replace(self.abstra_json_path)
-
-    def load_abstra_json(self) -> AbstraJSON:
-        abstra_json_content = json.loads(
-            self.abstra_json_path.read_text(encoding="utf-8")
-        )
-        return AbstraJSON.from_dict(abstra_json_content)
-
     def get_workspace(self) -> WorkspaceJSON:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         return abstra_json.workspace
 
     def get_page_runtime(self, path) -> Union[DashJSON, FormJSON, None]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         for form in abstra_json.forms:
             if path == form.path:
@@ -274,9 +257,9 @@ class API:
         return Settings.root_path.joinpath(file_path).is_file()
 
     def update_workspace(self, changes: Dict[str, Any]):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         abstra_json.workspace.update(changes, abstra_json.dashes, abstra_json.forms)
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
         return abstra_json.workspace
 
     # Script CRUDL
@@ -321,7 +304,7 @@ class API:
             self.executor.submit(run_next, script, self)
 
     def create_script(self) -> ScriptJSON:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         file_name = f"new_script_{random_id()}"
         file = f"{file_name}.py"
@@ -337,16 +320,16 @@ class API:
 
         abstra_json.scripts.append(script)
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
         return script
 
     def get_scripts(self) -> List[ScriptJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         return abstra_json.scripts
 
     def get_script(self, path: str) -> Optional[ScriptJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         for script in abstra_json.scripts:
             if path == script.path:
@@ -355,16 +338,16 @@ class API:
         return None
 
     def delete_script(self, path: str):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         scripts = abstra_json.scripts
         abstra_json.scripts = [f for f in scripts if f.path != path]
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     # Forms CRUDL
 
     def create_form(self) -> FormJSON:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         file_name = f"new_form_{random_id()}"
         file = f"{file_name}.py"
@@ -375,16 +358,16 @@ class API:
 
         abstra_json.forms.append(form)
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
         return form
 
     def get_forms(self) -> List[FormJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         return abstra_json.forms
 
     def get_form(self, path: str) -> Optional[FormJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         for form in abstra_json.forms:
             if path == form.path:
@@ -393,16 +376,16 @@ class API:
         return None
 
     def delete_form(self, path: str):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         forms = abstra_json.forms
         abstra_json.forms = [f for f in forms if f.path != path]
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     # Dashes CRUDL
 
     def create_dash(self) -> DashJSON:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         file_name = f"new_dash_{random_id()}"
         file = f"{file_name}.py"
@@ -419,16 +402,16 @@ class API:
 
         abstra_json.dashes.append(dash)
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
         return dash
 
     def get_dashes(self) -> List[DashJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         return abstra_json.dashes
 
     def get_dash(self, path: str) -> Optional[DashJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         for dash in abstra_json.dashes:
             if path == dash.path:
@@ -437,16 +420,16 @@ class API:
         return None
 
     def delete_dash(self, path: str):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         dashes = abstra_json.dashes
         abstra_json.dashes = [d for d in dashes if d.path != path]
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     # Hooks CRUDL
 
     def create_hook(self) -> HookJSON:
-        abstract_json = self.load_abstra_json()
+        abstract_json = AbstraJSONRepository.load()
 
         file_name = f"new_hook_{random_id()}"
         file = f"{file_name}.py"
@@ -457,16 +440,16 @@ class API:
 
         abstract_json.hooks.append(hook)
 
-        self.persist(abstract_json)
+        AbstraJSONRepository.save(abstract_json)
 
         return hook
 
     def get_hooks(self) -> List[HookJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         return abstra_json.hooks
 
     def get_hook(self, path: str) -> Optional[HookJSON]:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         for hook in abstra_json.hooks:
             if path == hook.path:
@@ -475,27 +458,27 @@ class API:
         return None
 
     def delete_hook(self, path: str):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         hooks = abstra_json.hooks
         abstra_json.hooks = [h for h in hooks if h.path != path]
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     # Jobs CRUDL
 
     def get_jobs(self):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         return abstra_json.jobs
 
     def get_job(self, identifier: str):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         for job in abstra_json.jobs:
             if identifier == job.identifier:
                 return job
         return None
 
     def create_job(self):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         file_name = f"new_job_{random_id()}"
         file = f"{file_name}.py"
@@ -511,23 +494,23 @@ class API:
 
         abstra_json.jobs.append(job)
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
         return job
 
     def update_runtime(self, path: str, changes: Dict[str, Any]) -> RuntimeJSON:
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         runtime = abstra_json.update_runtime(path, changes)
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
         return runtime
 
     def delete_job(self, identifier: str):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         jobs = abstra_json.jobs
         abstra_json.jobs = [j for j in jobs if j.identifier != identifier]
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     def get_stage_runs(self):
         stage = flask.request.args.get("stage")
@@ -539,7 +522,7 @@ class API:
     # workflow visual editor
 
     def workflow_initial_data(self):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         result = []
         for job in abstra_json.jobs:
             result.append(
@@ -618,14 +601,14 @@ class API:
         return result
 
     def workflow_move(self, payload):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         for move in payload:
             node = _find_node(abstra_json, move["type"], move["id"])
             node.workflow_position = move["position"]
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     def workflow_duplicate_nodes(self, payload):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         for item in payload:
             node = _find_node(abstra_json, item["type"], item["original_id"])
             duplicated = node.duplicate()
@@ -662,10 +645,10 @@ class API:
                     Settings.root_path.joinpath(duplicated.file),
                 )
 
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     def workflow_add_nodes(self, payload):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         for node in payload:
             node_type = node["type"]
             node_id = node["id"]
@@ -715,10 +698,10 @@ class API:
                 Settings.root_path.joinpath(script.file).write_text(new_script_code)
             else:
                 raise UnknownNodeTypeError(node_type)
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     def workflow_delete(self, payload):
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
 
         for item in payload:
             if item["type"] == "transitions":
@@ -743,12 +726,12 @@ class API:
                 _delete_transitions_pointing_to(
                     abstra_json=abstra_json, node_type=item["type"], node_id=item["id"]
                 )
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     def workflow_add_transition(self, payload):
         if len(payload) == 0:
             return
-        abstra_json = self.load_abstra_json()
+        abstra_json = AbstraJSONRepository.load()
         for transition in payload:
             double_transition = _find_transition(
                 abstra_json,
@@ -795,7 +778,7 @@ class API:
                     target_type=transition["target"]["type"],
                 )
             )
-        self.persist(abstra_json)
+        AbstraJSONRepository.save(abstra_json)
 
     # Login
 

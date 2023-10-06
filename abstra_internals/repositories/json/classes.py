@@ -1,6 +1,11 @@
 import sys, warnings, uuid
 from dataclasses import dataclass
 from typing import List, Optional, Union, Any, Dict, Tuple
+import json
+from pathlib import Path
+from ...utils import check_is_url
+from ...settings import Settings
+import tempfile
 
 from ...settings import Settings
 from ...utils import check_is_url
@@ -1118,7 +1123,7 @@ class AbstraJSON:
             sys.exit(1)
 
     @staticmethod
-    def make_empty():
+    def create():
         return AbstraJSON(
             version="0.1",
             workspace=WorkspaceJSON(name="Untitled Workspace", sidebar=SidebarJSON([])),
@@ -1141,3 +1146,29 @@ def _update_file(
         old_file.rename(new_file)
 
     runtime.file = new_file_relative
+
+
+class AbstraJSONRepository:
+    @classmethod
+    def get_file_path(cls):
+        return Settings.root_path / "abstra.json"
+
+    @classmethod
+    def initialize_on_empty(cls):
+        if not cls.get_file_path().exists():
+            cls.save(AbstraJSON.create())
+
+    @classmethod
+    def save(cls, abstra_json: AbstraJSON):
+        temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
+
+        with temp_file.open("w") as f:
+            json.dump(abstra_json.__dict__, f, indent=2)
+        temp_file.replace(cls.get_file_path())
+
+    @classmethod
+    def load(cls) -> AbstraJSON:
+        abstra_json_content = json.loads(
+            cls.get_file_path().read_text(encoding="utf-8")
+        )
+        return AbstraJSON.from_dict(abstra_json_content)

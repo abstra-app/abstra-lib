@@ -7,6 +7,7 @@ from abstra_internals.repositories.json.classes import (
     HookJSON,
     WorkflowTransitionJSON,
     ScriptJSON,
+    AbstraJSONRepository,
 )
 from abstra_internals.server.apps import create_app
 from abstra_internals.repositories import StageRunRepository
@@ -105,7 +106,7 @@ class TestWorkflowNext(unittest.TestCase):
                 break
 
     def test_file(self):
-        abstra_json = AbstraJSON.make_empty()
+        abstra_json = AbstraJSON.create()
 
         file = "test_file.py"
 
@@ -118,7 +119,7 @@ class TestWorkflowNext(unittest.TestCase):
         abstra_json.hooks = [hook_a, hook_b]
 
         self.api = API()
-        self.api.persist(abstra_json=abstra_json)
+        AbstraJSONRepository.save(abstra_json=abstra_json)
 
         response = self.client.post("/_hooks/hook_a")
         stage_runs = StageRunRepository.find({})
@@ -136,7 +137,7 @@ class TestWorkflowNext(unittest.TestCase):
         LocalStageRunRepository.clear()
 
     def test_explicit_single_transition(self):
-        abstra_json = AbstraJSON.make_empty()
+        abstra_json = AbstraJSON.create()
 
         file = "test_file.py"
 
@@ -149,7 +150,7 @@ class TestWorkflowNext(unittest.TestCase):
         abstra_json.hooks = [hook_a, hook_b]
 
         self.api = API()
-        self.api.persist(abstra_json=abstra_json)
+        AbstraJSONRepository.save(abstra_json=abstra_json)
 
         response = self.client.post(f"/_hooks/hook_a")
         stage_runs = StageRunRepository.find({})
@@ -165,7 +166,7 @@ class TestWorkflowNext(unittest.TestCase):
         LocalStageRunRepository.clear()
 
     def test_multiple_transition(self):
-        abstra_json = AbstraJSON.make_empty()
+        abstra_json = AbstraJSON.create()
 
         file = "test_file.py"
 
@@ -180,7 +181,7 @@ class TestWorkflowNext(unittest.TestCase):
         abstra_json.hooks = [hook_a, hook_b, hook_c]
 
         self.api = API()
-        self.api.persist(abstra_json=abstra_json)
+        AbstraJSONRepository.save(abstra_json=abstra_json)
 
         self.client.post("/_hooks/hook_a")
         stage_runs = StageRunRepository.find({})
@@ -204,7 +205,7 @@ class TestWorkflowNext(unittest.TestCase):
         "Could't find a way to test threads as they are currently implemented"
     )
     def test_scripts_multiple_transition(self):
-        abstra_json = AbstraJSON.make_empty()
+        abstra_json = AbstraJSON.create()
 
         file = "test_file.py"
         hello_world_file = "hello_world.py"
@@ -230,7 +231,7 @@ class TestWorkflowNext(unittest.TestCase):
         abstra_json.scripts = [script_b, script_c, script_d]
 
         self.api = API()
-        self.api.persist(abstra_json=abstra_json)
+        AbstraJSONRepository.save(abstra_json=abstra_json)
 
         self.client.post("/_hooks/hook_a")
         stage_runs = StageRunRepository.find({})
