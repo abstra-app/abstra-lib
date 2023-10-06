@@ -1,6 +1,6 @@
 import tempfile, unittest
 from pathlib import Path
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from .fixtures import init_dir, clear_dir
 
 
@@ -12,10 +12,10 @@ class TestWorkspace(unittest.TestCase):
         clear_dir(self.root)
 
     def test_api_update(self):
-        api = API()
+        controller = MainController()
 
-        api.update_workspace({"name": "test-workspace-updated"})
+        controller.update_workspace({"name": "test-workspace-updated"})
 
-        workspace = api.get_workspace()
+        workspace = controller.get_workspace()
 
         self.assertEqual(workspace.name, "test-workspace-updated")

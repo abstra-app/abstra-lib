@@ -1,5 +1,5 @@
 import unittest, pathlib
-from abstra_internals.server.api import API, UnknownNodeTypeError
+from abstra_internals.server.controller import MainController, UnknownNodeTypeError
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     FormJSON,
@@ -46,7 +46,7 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
             pathlib.Path(f"job{i}.py").write_text("print('hello world')")
             pathlib.Path(f"hook{i}.py").write_text("print('hello world')")
             abstra_json.hooks.append(hook)
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
     def tearDown(self) -> None:
@@ -54,17 +54,17 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
 
     def test_accept_empty_deleting(self):
         old_json = AbstraJSONRepository.load()
-        self.api.workflow_delete([])
+        self.controller.workflow_delete([])
         new_json = AbstraJSONRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_deleting(self):
-        self.api.workflow_delete([{"id": "form1", "type": "forms"}])
+        self.controller.workflow_delete([{"id": "form1", "type": "forms"}])
         json = AbstraJSONRepository.load()
         self.assertEqual(json.forms[1].path, "form2")
 
     def test_accept_transition_deleting(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},
@@ -74,13 +74,13 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
             ]
         )
         transition = AbstraJSONRepository.load().forms[1].workflow_transitions[0]
-        self.api.workflow_delete([{"id": transition.id, "type": "transitions"}])
+        self.controller.workflow_delete([{"id": transition.id, "type": "transitions"}])
         json = AbstraJSONRepository.load()
         self.assertEqual(len(json.forms[1].workflow_transitions), 0)
 
     def test_reject_invalid_id(self):
         with self.assertRaises(RuntimeNotFoundError):
-            self.api.workflow_delete(
+            self.controller.workflow_delete(
                 [
                     {
                         "id": "invalid",
@@ -90,7 +90,7 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
             )
 
     def test_delete_transitions_pointing_to_deleted_node(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},
@@ -99,16 +99,16 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
                 }
             ]
         )
-        self.api.workflow_delete([{"id": "form2", "type": "forms"}])
+        self.controller.workflow_delete([{"id": "form2", "type": "forms"}])
         json = AbstraJSONRepository.load()
         self.assertEqual(len(json.forms[1].workflow_transitions), 0)
 
     def test_delete_also_delete_file(self):
         self.assertTrue(pathlib.Path("form1.py").exists())
-        self.api.workflow_delete([{"id": "form1", "type": "forms"}])
+        self.controller.workflow_delete([{"id": "form1", "type": "forms"}])
         self.assertFalse(pathlib.Path("form1.py").exists())
 
     def test_delete_not_break_when_file_not_found(self):
         pathlib.Path("form1.py").unlink()
-        self.api.workflow_delete([{"id": "form1", "type": "forms"}])
+        self.controller.workflow_delete([{"id": "form1", "type": "forms"}])
         self.assertFalse(pathlib.Path("form1.py").exists())

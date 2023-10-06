@@ -1,5 +1,5 @@
 import unittest, pathlib
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.apps import create_app
 from abstra_internals.templates import new_hook_code
@@ -9,8 +9,8 @@ from abstra_internals.repositories.json.classes import AbstraJSONRepository
 class TestHooks(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        api = API()
-        self.client = create_app(api).test_client()
+        controller = MainController()
+        self.client = create_app(controller).test_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -37,7 +37,7 @@ class TestHooks(unittest.TestCase):
         self.assertEqual(file_content, new_hook_code)
 
     def test_renaming_hook_should_change_all_transitions_pointing_to_it(self):
-        api = API()
+        controller = MainController()
 
         source = self.client.post("/_editor/api/forms/").get_json()
         target = self.client.post("/_editor/api/hooks/").get_json()

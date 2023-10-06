@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from .fixtures import init_dir, clear_dir
 from abstra_internals.templates import new_dash_layout
 
@@ -13,13 +13,13 @@ class TestDashes(unittest.TestCase):
         clear_dir(self.root)
 
     def test_api_create(self):
-        api = API()
+        controller = MainController()
 
-        dashes_len = len(api.get_dashes())
+        dashes_len = len(controller.get_dashes())
 
-        dash = api.create_dash()
+        dash = controller.create_dash()
 
-        self.assertEqual(len(api.get_dashes()), dashes_len + 1)
+        self.assertEqual(len(controller.get_dashes()), dashes_len + 1)
 
         self.assertEqual(dash.layout.slot.__dict__, new_dash_layout["slot"])
 
@@ -28,9 +28,9 @@ class TestDashes(unittest.TestCase):
         self.assertTrue(file_path.exists())
 
     def test_api_update(self):
-        api = API()
+        controller = MainController()
 
-        dash = api.create_dash()
+        dash = controller.create_dash()
 
         new_layout = {
             "version": "0.2",
@@ -52,7 +52,7 @@ class TestDashes(unittest.TestCase):
             },
         }
 
-        updated_dash = api.update_runtime(
+        updated_dash = controller.update_runtime(
             dash.path, dict(title="new title", layout=new_layout)
         )
         self.maxDiff = None
@@ -61,13 +61,13 @@ class TestDashes(unittest.TestCase):
 
     def test_updating_file_from_existing_to_non_existing(self):
         # given a dash
-        api = API()
-        dash = api.create_dash()
+        controller = MainController()
+        dash = controller.create_dash()
         old_file = Path(self.root, dash.file)
         new_file = Path(self.root, "non-existing-file.py")
 
         # when updating the file to a non existing file
-        api.update_runtime(dash.path, dict(file="non-existing-file.py"))
+        controller.update_runtime(dash.path, dict(file="non-existing-file.py"))
 
         # then the existing file is renamed
         self.assertFalse(old_file.exists())
@@ -75,15 +75,15 @@ class TestDashes(unittest.TestCase):
 
     def test_updating_file_from_non_existing_to_existing(self):
         # given a dash
-        api = API()
-        dash = api.create_dash()
+        controller = MainController()
+        dash = controller.create_dash()
         old_file = Path(self.root, dash.file)
         new_file = Path(self.root, "existing-file.py")
         old_file.unlink()
         new_file.write_text("print('hello')")
 
         # when updating the file to a non existing file
-        api.update_runtime(dash.path, dict(file="existing-file.py"))
+        controller.update_runtime(dash.path, dict(file="existing-file.py"))
 
         # then just the file property is updated
         self.assertFalse(old_file.exists())

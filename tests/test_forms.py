@@ -1,5 +1,5 @@
 import unittest
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from .fixtures import init_dir, clear_dir
 from abstra.forms import display
 from abstra_internals.execution.execution import NoExecutionFound
@@ -13,23 +13,23 @@ class TestForms(unittest.TestCase):
         clear_dir(self.root)
 
     def updates_across_reloads(self):
-        api = API()
-        form = api.create_form()
+        controller = MainController()
+        form = controller.create_form()
 
-        api.update_runtime(form.path, dict(title="New Title"))
+        controller.update_runtime(form.path, dict(title="New Title"))
 
-        api2 = API()
+        api2 = MainController()
         api2.get_workspace()
         new_form = api2.get_form(form.path)
 
         self.assertEqual(form.title, new_form.title)
 
     def test_raise_exception_on_invalid_propery_update(self):
-        api = API()
-        form = api.create_form()
+        controller = MainController()
+        form = controller.create_form()
 
         with self.assertRaises(Exception):
-            api.update_runtime(
+            controller.update_runtime(
                 form.path, dict(title="New Title", invalid_property="invalid")
             )
 

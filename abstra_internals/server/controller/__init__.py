@@ -1,10 +1,7 @@
 import uuid
-import json
 import flask
 import shutil
-import tempfile
 import webbrowser
-from pathlib import Path
 import concurrent.futures as futures
 from werkzeug.datastructures import FileStorage
 from typing import Any, Dict, List, Optional, Union
@@ -94,7 +91,7 @@ class DoubleTransitionError(Exception):
 
 
 ## TODO: rename to controller
-class API:
+class MainController:
     def __init__(self):
         self.executor = futures.ThreadPoolExecutor()
         AbstraJSONRepository.initialize_on_empty()
@@ -172,7 +169,7 @@ class API:
             if not script:
                 continue
 
-            def run_next(script: ScriptJSON, api: API):
+            def run_next(script: ScriptJSON, api: MainController):
                 execution = ScriptExecution.create_with_stage_run(
                     script, next_stage_run.id
                 )

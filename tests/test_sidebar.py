@@ -1,5 +1,5 @@
 import unittest
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from .fixtures import init_dir, clear_dir
 
 
@@ -11,18 +11,18 @@ class TestSidebar(unittest.TestCase):
         clear_dir(self.root)
 
     def test_starts_empty(self):
-        api = API()
+        controller = MainController()
 
-        workspace = api.get_workspace()
+        workspace = controller.get_workspace()
         self.assertEqual(workspace.__dict__["sidebar"], [])
 
     def test_auto_add_forms(self):
         # given
-        api = API()
+        controller = MainController()
 
         # when
-        form = api.create_form()
-        workspace = api.get_workspace()
+        form = controller.create_form()
+        workspace = controller.get_workspace()
 
         # then
         sidebar_json = workspace.__dict__["sidebar"]
@@ -32,11 +32,11 @@ class TestSidebar(unittest.TestCase):
 
     def test_auto_add_dashes(self):
         # given
-        api = API()
+        controller = MainController()
 
         # when
-        dash = api.create_dash()
-        workspace = api.get_workspace()
+        dash = controller.create_dash()
+        workspace = controller.get_workspace()
 
         # then
         sidebar_json = workspace.__dict__["sidebar"]

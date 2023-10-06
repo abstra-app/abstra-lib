@@ -1,6 +1,6 @@
 import flask, flask_cors
 
-from .api import API
+from .controller import MainController
 from .overloads import overloads
 from .apps.player import get_player_bp
 from ..settings import SettingsController
@@ -12,11 +12,11 @@ def get_cloud_app(root: str):
     SettingsController.set_server_port(None)
 
     overloads()
-    api = API()
+    controller = MainController()
     app = flask.Flask(__name__)
     flask_cors.CORS(app)
 
-    player = get_player_bp(api)
+    player = get_player_bp(controller)
     app.register_blueprint(player)
 
     return app

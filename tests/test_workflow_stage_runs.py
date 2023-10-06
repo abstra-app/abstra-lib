@@ -1,7 +1,7 @@
 from typing import Any, Mapping, List
 import unittest
 from .fixtures import init_dir, clear_dir
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     HookJSON,
@@ -90,8 +90,8 @@ class TestWorkflowNext(unittest.TestCase):
 
     def setUp(self) -> None:
         self.root = init_dir()
-        api = API()
-        self.client = create_app(api).test_client()
+        controller = MainController()
+        self.client = create_app(controller).test_client()
         LocalStageRunRepository.clear()
 
     def tearDown(self) -> None:
@@ -118,7 +118,7 @@ class TestWorkflowNext(unittest.TestCase):
 
         abstra_json.hooks = [hook_a, hook_b]
 
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
         response = self.client.post("/_hooks/hook_a")
@@ -149,7 +149,7 @@ class TestWorkflowNext(unittest.TestCase):
 
         abstra_json.hooks = [hook_a, hook_b]
 
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
         response = self.client.post(f"/_hooks/hook_a")
@@ -180,7 +180,7 @@ class TestWorkflowNext(unittest.TestCase):
 
         abstra_json.hooks = [hook_a, hook_b, hook_c]
 
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
         self.client.post("/_hooks/hook_a")
@@ -230,7 +230,7 @@ class TestWorkflowNext(unittest.TestCase):
         abstra_json.hooks = [hook_a]
         abstra_json.scripts = [script_b, script_c, script_d]
 
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
         self.client.post("/_hooks/hook_a")

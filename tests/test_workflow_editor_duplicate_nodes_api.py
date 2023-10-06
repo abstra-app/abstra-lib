@@ -1,5 +1,5 @@
 import unittest, pathlib
-from abstra_internals.server.api import API, UnknownNodeTypeError
+from abstra_internals.server.controller import MainController
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     FormJSON,
@@ -45,7 +45,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         pathlib.Path("job1.py").write_text("print('hello world')")
         pathlib.Path("hook1.py").write_text("print('hello world')")
         abstra_json.hooks.append(hook)
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
     def tearDown(self) -> None:
@@ -53,12 +53,12 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
 
     def test_accept_empty_duplicate_nodes(self):
         old_json = AbstraJSONRepository.load()
-        self.api.workflow_duplicate_nodes([])
+        self.controller.workflow_duplicate_nodes([])
         new_json = AbstraJSONRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_duplicating(self):
-        self.api.workflow_duplicate_nodes(
+        self.controller.workflow_duplicate_nodes(
             [
                 {
                     "original_id": "form1",
@@ -79,7 +79,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
 
     def test_reject_invalid_node_id(self):
         with self.assertRaises(RuntimeNotFoundError):
-            self.api.workflow_duplicate_nodes(
+            self.controller.workflow_duplicate_nodes(
                 [
                     {
                         "original_id": "invalid",
@@ -93,7 +93,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
 
     def test_accept_duplicating_nodes_with_no_file(self):
         pathlib.Path("job1.py").unlink()
-        self.api.workflow_duplicate_nodes(
+        self.controller.workflow_duplicate_nodes(
             [
                 {
                     "original_id": "job1",
@@ -113,7 +113,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         self.assertFalse(pathlib.Path("job1-copy.py").exists())
 
     def test_duplicating_should_not_maintain_external_transition(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},
@@ -122,7 +122,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 }
             ]
         )
-        self.api.workflow_duplicate_nodes(
+        self.controller.workflow_duplicate_nodes(
             [
                 {
                     "original_id": "form1",
@@ -139,7 +139,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         self.assertEqual(duplicated.workflow_transitions, [])
 
     def test_duplicating_should_maintain_internal_transitions(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},
@@ -148,7 +148,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
                 }
             ]
         )
-        self.api.workflow_duplicate_nodes(
+        self.controller.workflow_duplicate_nodes(
             [
                 {
                     "original_id": "form1",
