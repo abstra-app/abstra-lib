@@ -1,0 +1,2 @@
+import{T as e,A as d}from"./TabPane.deb05916.js";(function(){try{var n=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},t=new Error().stack;t&&(n._sentryDebugIds=n._sentryDebugIds||{},n._sentryDebugIds[t]="fd488654-b524-437d-863d-99b370028b70",n._sentryDebugIdIdentifier="sentry-dbid-fd488654-b524-437d-863d-99b370028b70")}catch{}})();e.TabPane=d;e.install=function(n){return n.component(e.name,e),n.component(d.name,d),n};
+//# sourceMappingURL=index.7145dba7.js.map
