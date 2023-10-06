@@ -3,10 +3,10 @@
 [![Code check](https://github.com/abstra-app/abstra-lib/actions/workflows/code_check.yml/badge.svg)](https://github.com/abstra-app/abstra-lib/actions/workflows/code_check.yml)
 # ✨ Abstra ✨
 
-Abstra is the simplest way to build tools using Python.
+Abstra is a simple and powerful way to build business automation workflows.
 
-It is a complete backoffice engine with:
-- drag'n drop UI builders
+It's a Python-powered backoffice engine with:
+- drag'n drop workflow builder
 - dynamic forms
 - serveless endpoints
 - script schedulers
@@ -17,19 +17,7 @@ It is a complete backoffice engine with:
 - automatic audit logging
 - access control
 
-and much more! 🤯
-
-## 🧩 Drag'n drop app builder for Python.
-
-Dashes is a drag'n drop UI builder that allows you to create customized UIs that interact with your Python variables and functions. This is perfect for creating dashboards, cockpits and admin panels.
-
-![](./images/dashes.png)
-
-## 📝 Scriptable forms
-
-Forms is the quickest way to add transform Python scripts into interactive forms on the web. This is perfect for creating onboarding flows, calculators service order, and more.
-
-![](./images/forms.png)
+and much more! ⚡️
 
 ## 🚦 Getting started
 
@@ -37,22 +25,34 @@ Forms is the quickest way to add transform Python scripts into interactive forms
 
 This package is compatible with Python >= 3.7
 
-```
-pip install abstra --upgrade
-```
-
-Run the CLI server from any directory to edit your app
+To install, run the following:
 
 ```
-abstra serve ./your-app-directory
+pip install abstra
 ```
 
-Deploy with a single command
+Run the CLI server in the directory where you'd like to create your Abstra project. This can be any folder: 
 
 ```
-abstra deploy ./your-app-directory
+abstra serve ./your-project-directory
 ```
 
-## 🛟 Useful link
+## 🧩 Workflow builder for Python
 
-[Site](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io) | [Privacy](./PRIVACY.md)
+Workflows is perfect for automating repetitive processes that require a mix of manual steps and integration between systems.
+
+Visually assemble a process made up of Python-coded steps. All steps share an environment, variables and functions.
+
+![](./images/workflows.png)
+
+## 📝 Scriptable forms
+
+Forms is the quickest way to build interactive user interfaces on the web. Use it to get user input during your Workflow's run, such a request approval or additional data.
+
+Manipulate this input with Python and any desired lib before moving to the next step.
+
+![](./images/forms.png)
+
+## 🛟 Useful links
+
+[Website](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io) | [Privacy](./PRIVACY.md)
