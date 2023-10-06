@@ -1,6 +1,6 @@
 import unittest
-from abstra_internals.server.api import (
-    API,
+from abstra_internals.server.controller import (
+    MainController,
     SelfTransitionError,
     UnknownNodeTypeError,
     TransitionToJobError,
@@ -49,7 +49,7 @@ class TestTransitionsApi(unittest.TestCase):
                 workflow_transitions=[],
             )
             abstra_json.hooks.append(hook)
-        self.api = API()
+        self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
     def tearDown(self) -> None:
@@ -57,12 +57,12 @@ class TestTransitionsApi(unittest.TestCase):
 
     def test_accept_empty_adding(self):
         old_json = AbstraJSONRepository.load()
-        self.api.workflow_add_transition([])
+        self.controller.workflow_add_transition([])
         new_json = AbstraJSONRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_adding(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},
@@ -76,7 +76,7 @@ class TestTransitionsApi(unittest.TestCase):
 
     def test_reject_self_linking(self):
         with self.assertRaises(SelfTransitionError):
-            self.api.workflow_add_transition(
+            self.controller.workflow_add_transition(
                 [
                     {
                         "source": {"type": "forms", "id": "form1"},
@@ -88,7 +88,7 @@ class TestTransitionsApi(unittest.TestCase):
 
     def test_reject_invalid_target_id(self):
         with self.assertRaises(RuntimeNotFoundError):
-            self.api.workflow_add_transition(
+            self.controller.workflow_add_transition(
                 [
                     {
                         "source": {"type": "jobs", "id": "job1"},
@@ -100,7 +100,7 @@ class TestTransitionsApi(unittest.TestCase):
 
     def test_reject_invalid_source_id(self):
         with self.assertRaises(RuntimeNotFoundError):
-            self.api.workflow_add_transition(
+            self.controller.workflow_add_transition(
                 [
                     {
                         "source": {"type": "jobs", "id": "invalid"},
@@ -112,7 +112,7 @@ class TestTransitionsApi(unittest.TestCase):
 
     def test_reject_transition_to_jobs(self):
         with self.assertRaises(TransitionToJobError):
-            self.api.workflow_add_transition(
+            self.controller.workflow_add_transition(
                 [
                     {
                         "source": {"type": "forms", "id": "form1"},
@@ -123,7 +123,7 @@ class TestTransitionsApi(unittest.TestCase):
             )
 
     def test_find_transition(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},
@@ -144,7 +144,7 @@ class TestTransitionsApi(unittest.TestCase):
 
     def test_reject_double_transition(self):
         with self.assertRaises(DoubleTransitionError):
-            self.api.workflow_add_transition(
+            self.controller.workflow_add_transition(
                 [
                     {
                         "source": {"type": "forms", "id": "form1"},
@@ -153,7 +153,7 @@ class TestTransitionsApi(unittest.TestCase):
                     }
                 ]
             )
-            self.api.workflow_add_transition(
+            self.controller.workflow_add_transition(
                 [
                     {
                         "source": {"type": "forms", "id": "form1"},
@@ -164,7 +164,7 @@ class TestTransitionsApi(unittest.TestCase):
             )
 
     def test_save_with_given_id(self):
-        self.api.workflow_add_transition(
+        self.controller.workflow_add_transition(
             [
                 {
                     "source": {"type": "forms", "id": "form1"},

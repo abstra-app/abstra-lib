@@ -1,6 +1,6 @@
 import flask
 from ...execution.execution import RequestData
-from ..api import API
+from ..controller import MainController
 from ...usage import usage
 from ...settings import Settings
 from .utils import send_from_dist
@@ -10,7 +10,7 @@ from ...execution.script_execution import ScriptExecution
 from ...repositories.json.classes import AbstraJSONRepository
 
 
-def get_editor_bp(api: API):
+def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor", __name__)
 
     @bp.route("/", methods=["GET"])
@@ -25,14 +25,14 @@ def get_editor_bp(api: API):
     @bp.route("/api/workspace", methods=["GET"])
     @usage
     def _get_workspace():
-        return api.get_workspace().editor_dto
+        return controller.get_workspace().editor_dto
 
     @bp.route("/api/workspace", methods=["PUT"])
     @usage
     def _update_workspace():
         if not flask.request.json:
             flask.abort(400)
-        workspace = api.update_workspace(flask.request.json)
+        workspace = controller.update_workspace(flask.request.json)
         return workspace.editor_dto
 
     @bp.route("/api/workspace/root-path", methods=["GET"])
@@ -46,30 +46,30 @@ def get_editor_bp(api: API):
         if not flask.request.json:
             flask.abort(400)
         file_path = flask.request.json["path"]
-        api.open_file(file_path, create_if_not_exists=True)
+        controller.open_file(file_path, create_if_not_exists=True)
         return {"success": True}
 
     @bp.route("/api/workspace/check-file", methods=["GET"])
     @usage
     def _check_file():
         file_path = flask.request.args["path"]
-        return {"exists": api.check_file(file_path)}
+        return {"exists": controller.check_file(file_path)}
 
     @bp.route("/api/workspace/deploy", methods=["POST"])
     @usage
     def _deploy():
-        api.deploy()
+        controller.deploy()
         return {"success": True}
 
     @bp.route("/api/forms/", methods=["GET"])
     @usage
     def _get_forms():
-        return [f.editor_dto for f in api.get_forms()]
+        return [f.editor_dto for f in controller.get_forms()]
 
     @bp.route("/api/forms/<path:path>", methods=["GET"])
     @usage
     def _get_form(path: str):
-        form = api.get_form(path)
+        form = controller.get_form(path)
         if not form:
             flask.abort(404)
         return form.editor_dto
@@ -77,13 +77,13 @@ def get_editor_bp(api: API):
     @bp.route("/api/forms/<path:path>", methods=["DELETE"])
     @usage
     def _delete_form(path: str):
-        api.delete_form(path)
+        controller.delete_form(path)
         return {"success": True}
 
     @bp.route("/api/forms/", methods=["POST"])
     @usage
     def _create_form():
-        form = api.create_form()
+        form = controller.create_form()
         return form.editor_dto
 
     @bp.route("/api/forms/<path:path>", methods=["PUT"])
@@ -93,13 +93,13 @@ def get_editor_bp(api: API):
         if not data:
             flask.abort(400)
 
-        form = api.update_runtime(path, data)
+        form = controller.update_runtime(path, data)
         return form.editor_dto if form else None
 
     @bp.route("/api/dashes/<path:path>", methods=["GET"])
     @usage
     def _get_dash(path: str):
-        dash = api.get_dash(path)
+        dash = controller.get_dash(path)
         if not dash:
             flask.abort(404)
         return dash.editor_dto
@@ -107,12 +107,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/dashes/", methods=["GET"])
     @usage
     def _get_dashes():
-        return [f.editor_dto for f in api.get_dashes()]
+        return [f.editor_dto for f in controller.get_dashes()]
 
     @bp.route("/api/dashes/", methods=["POST"])
     @usage
     def _create_dash():
-        dash = api.create_dash()
+        dash = controller.create_dash()
         return dash.editor_dto
 
     @bp.route("/api/dashes/<path:path>", methods=["PUT"])
@@ -122,19 +122,19 @@ def get_editor_bp(api: API):
         if not data:
             flask.abort(400)
 
-        dash = api.update_runtime(path, data)
+        dash = controller.update_runtime(path, data)
         return dash.editor_dto if dash else None
 
     @bp.route("/api/dashes/<path:path>", methods=["DELETE"])
     @usage
     def _delete_dash(path: str):
-        api.delete_dash(path)
+        controller.delete_dash(path)
         return {"success": True}
 
     @bp.route("/api/hooks/<path:path>", methods=["GET"])
     @usage
     def _get_hook(path: str):
-        hook = api.get_hook(path)
+        hook = controller.get_hook(path)
         if not hook:
             flask.abort(404)
         return hook.editor_dto
@@ -142,12 +142,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/hooks/", methods=["GET"])
     @usage
     def _get_hooks():
-        return [f.editor_dto for f in api.get_hooks()]
+        return [f.editor_dto for f in controller.get_hooks()]
 
     @bp.route("/api/hooks/", methods=["POST"])
     @usage
     def _create_hook():
-        hook = api.create_hook()
+        hook = controller.create_hook()
         return hook.editor_dto
 
     @bp.route("/api/hooks/<path:path>", methods=["PUT"])
@@ -157,13 +157,13 @@ def get_editor_bp(api: API):
         if not data:
             flask.abort(400)
 
-        hook = api.update_runtime(path, data)
+        hook = controller.update_runtime(path, data)
         return hook.editor_dto if hook else None
 
     @bp.route("/api/hooks/<path:path>", methods=["DELETE"])
     @usage
     def _delete_hook(path: str):
-        api.delete_hook(path)
+        controller.delete_hook(path)
         return {"success": True}
 
     @bp.route(
@@ -171,7 +171,7 @@ def get_editor_bp(api: API):
     )
     @usage
     def _test_hook(path: str):
-        hook = api.get_hook(path)
+        hook = controller.get_hook(path)
         if not hook:
             flask.abort(404)
 
@@ -190,7 +190,7 @@ def get_editor_bp(api: API):
 
         body, status, headers = execution.get_response()
 
-        api.run_waiting_scripts(execution.stage_run)
+        controller.run_waiting_scripts(execution.stage_run)
 
         return {
             "body": body,
@@ -203,7 +203,7 @@ def get_editor_bp(api: API):
     @bp.route("/api/jobs/<path:identifier>", methods=["GET"])
     @usage
     def _get_job(identifier: str):
-        job = api.get_job(identifier)
+        job = controller.get_job(identifier)
         if not job:
             flask.abort(404)
         return job.editor_dto
@@ -211,12 +211,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/jobs/", methods=["GET"])
     @usage
     def _get_jobs():
-        return [f.editor_dto for f in api.get_jobs()]
+        return [f.editor_dto for f in controller.get_jobs()]
 
     @bp.route("/api/jobs/", methods=["POST"])
     @usage
     def _create_job():
-        job = api.create_job()
+        job = controller.create_job()
         return job.editor_dto
 
     @bp.route("/api/jobs/<path:identifier>", methods=["PUT"])
@@ -226,19 +226,19 @@ def get_editor_bp(api: API):
         if not data:
             flask.abort(400)
 
-        job = api.update_runtime(identifier, data)
+        job = controller.update_runtime(identifier, data)
         return job.editor_dto if job else None
 
     @bp.route("/api/jobs/<path:identifier>", methods=["DELETE"])
     @usage
     def _delete_job(identifier: str):
-        api.delete_job(identifier)
+        controller.delete_job(identifier)
         return {"success": True}
 
     @bp.route("/api/jobs/<path:identifier>/test", methods=["POST"])
     @usage
     def _test_job(identifier: str):
-        job = api.get_job(identifier)
+        job = controller.get_job(identifier)
         if not job:
             flask.abort(404)
 
@@ -255,7 +255,7 @@ def get_editor_bp(api: API):
 
         execution.run_sync()
 
-        api.run_waiting_scripts(execution.stage_run)
+        controller.run_waiting_scripts(execution.stage_run)
 
         return {
             "stdout": "".join(execution.stdout if execution else []),
@@ -265,7 +265,7 @@ def get_editor_bp(api: API):
     @bp.route("/api/scripts/<path:identifier>", methods=["GET"])
     @usage
     def _get_script(identifier: str):
-        script = api.get_script(identifier)
+        script = controller.get_script(identifier)
         if not script:
             flask.abort(404)
         return script.editor_dto
@@ -273,12 +273,12 @@ def get_editor_bp(api: API):
     @bp.route("/api/scripts/", methods=["GET"])
     @usage
     def _get_scripts():
-        return [f.editor_dto for f in api.get_scripts()]
+        return [f.editor_dto for f in controller.get_scripts()]
 
     @bp.route("/api/scripts/", methods=["POST"])
     @usage
     def _create_script():
-        script = api.create_script()
+        script = controller.create_script()
         return script.editor_dto
 
     @bp.route("/api/scripts/<path:identifier>", methods=["PUT"])
@@ -288,35 +288,35 @@ def get_editor_bp(api: API):
         if not data:
             flask.abort(400)
 
-        script = api.update_runtime(identifier, data)
+        script = controller.update_runtime(identifier, data)
         return script.editor_dto if script else None
 
     @bp.route("/api/scripts/<path:identifier>", methods=["DELETE"])
     @usage
     def _delete_script(identifier: str):
-        api.delete_script(identifier)
+        controller.delete_script(identifier)
         return {"success": True}
 
     @bp.route("/api/scripts/<path:path>/test", methods=["POST"])
     @usage
     def _test_script(path: str):
-        script = api.get_script(path)
+        script = controller.get_script(path)
 
         if not script:
             flask.abort(404)
 
-        return api.run_initial_script(script)
+        return controller.run_initial_script(script)
 
     @bp.route("/api/stage_runs", methods=["GET"])
     @usage
     def _get_stage_runs():
-        return api.get_stage_runs()
+        return controller.get_stage_runs()
 
     @bp.route("/api/workflow-editor/initial-data", methods=["GET"])
     @usage
     def _workflow_initial_data():
         try:
-            return api.workflow_initial_data()
+            return controller.workflow_initial_data()
         except Exception as e:
             return str(e), 500
 
@@ -325,7 +325,7 @@ def get_editor_bp(api: API):
     def _workflow_move():
         try:
             payload = flask.request.json
-            api.workflow_move(payload)
+            controller.workflow_move(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -335,7 +335,7 @@ def get_editor_bp(api: API):
     def _workflow_add_nodes():
         try:
             payload = flask.request.json
-            api.workflow_add_nodes(payload)
+            controller.workflow_add_nodes(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -345,7 +345,7 @@ def get_editor_bp(api: API):
     def _workflow_duplicate_nodes():
         try:
             payload = flask.request.json
-            api.workflow_duplicate_nodes(payload)
+            controller.workflow_duplicate_nodes(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -355,7 +355,7 @@ def get_editor_bp(api: API):
     def _workflow_delete():
         try:
             payload = flask.request.json
-            api.workflow_delete(payload)
+            controller.workflow_delete(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -365,7 +365,7 @@ def get_editor_bp(api: API):
     def _workflow_add_transition():
         try:
             payload = flask.request.json
-            api.workflow_add_transition(payload)
+            controller.workflow_add_transition(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -373,7 +373,7 @@ def get_editor_bp(api: API):
     @bp.route("/api/login", methods=["GET"])
     @usage
     def _get_login():
-        return api.get_login()
+        return controller.get_login()
 
     @bp.route("/api/login", methods=["POST"])
     @usage
@@ -382,12 +382,12 @@ def get_editor_bp(api: API):
         if not data:
             flask.abort(400)
 
-        return api.create_login(data["token"])
+        return controller.create_login(data["token"])
 
     @bp.route("/api/login", methods=["DELETE"])
     @usage
     def _delete_login():
-        return api.delete_login()
+        return controller.delete_login()
 
     @bp.route("/api/ai/message", methods=["POST"])
     @usage
@@ -396,7 +396,7 @@ def get_editor_bp(api: API):
         if not body:
             flask.abort(400)
 
-        streamer = api.send_ai_message(body["messages"], body["runtime"])
+        streamer = controller.send_ai_message(body["messages"], body["runtime"])
 
         if streamer is None:
             flask.abort(403)

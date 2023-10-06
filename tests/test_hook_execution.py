@@ -1,6 +1,6 @@
 import unittest
 from .fixtures import init_dir, clear_dir
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from abstra_internals.repositories.json.classes import AbstraJSON, HookJSON
 from abstra_internals.server.apps import create_app
 from abstra_internals.repositories.json.classes import AbstraJSONRepository
@@ -9,7 +9,7 @@ from abstra_internals.repositories.json.classes import AbstraJSONRepository
 class TestHookExecution(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        api = API()
+        controller = MainController()
         abstra_json = AbstraJSON.create()
         file = "initial_hook.py"
         self.root.joinpath(file).write_text("print('hello world')")
@@ -21,7 +21,7 @@ class TestHookExecution(unittest.TestCase):
         )
         abstra_json.hooks.append(hook)
         AbstraJSONRepository.save(abstra_json)
-        self.client = create_app(api).test_client()
+        self.client = create_app(controller).test_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

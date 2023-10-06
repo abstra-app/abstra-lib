@@ -1,6 +1,6 @@
 import unittest
 from .fixtures import init_dir, clear_dir
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from abstra_internals.server.apps import create_app
 from abstra_internals.server.apps.utils import send_from_dist
 
@@ -8,8 +8,8 @@ from abstra_internals.server.apps.utils import send_from_dist
 class TestFileSending(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
-        api = API()
-        self.app = create_app(api)
+        controller = MainController()
+        self.app = create_app(controller)
         self.client = self.app.test_client()
         self.app_context = self.app.app_context()
         self.app_context.push()

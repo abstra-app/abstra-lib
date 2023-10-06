@@ -1,14 +1,14 @@
 import unittest
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.apps.player import get_player_bp
-from abstra_internals.server.api import API
+from abstra_internals.server.controller import MainController
 from abstra_internals.server import get_cloud_app
 
 
 class TestPlayerApi(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        api = API()
+        controller = MainController()
         self.client = get_cloud_app(str(self.root)).test_client()
 
     def tearDown(self) -> None:

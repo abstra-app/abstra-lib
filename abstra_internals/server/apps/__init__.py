@@ -6,17 +6,17 @@ from ..overloads import overloads
 from .editor import get_editor_bp
 from .player import get_player_bp
 from ...settings import Settings
-from ..api import API
+from ..controller import MainController
 
 
-def create_app(api: API) -> flask.Flask:
+def create_app(controller: MainController) -> flask.Flask:
     app = flask.Flask(__name__)
     flask_cors.CORS(app)
 
-    editor = get_editor_bp(api)
+    editor = get_editor_bp(controller)
     app.register_blueprint(editor, url_prefix="/_editor")
 
-    player = get_player_bp(api)
+    player = get_player_bp(controller)
     app.register_blueprint(player)
 
     return app
@@ -27,8 +27,8 @@ def serve_local(debug, use_reloader, load_dotenv):
     os.environ["ABSTRA_SERVER"] = "true"
 
     overloads()
-    api = API()
-    credential = api.get_credentials()
+    controller = MainController()
+    credential = controller.get_credentials()
     if credential:
         os.environ["ABSTRA_API_TOKEN"] = credential
 
@@ -37,7 +37,7 @@ def serve_local(debug, use_reloader, load_dotenv):
         watch_py_root_files()
 
     port = Settings.server_port
-    app = create_app(api)
+    app = create_app(controller)
     threading.Timer(1, lambda: webbrowser.open(f"http://{HOST}:{port}/_editor")).start()
     app.run(
         host=HOST,
