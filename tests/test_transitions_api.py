@@ -3,10 +3,8 @@ from abstra_internals.server.api import (
     API,
     SelfTransitionError,
     UnknownNodeTypeError,
-    NodeNotFoundError,
     TransitionToJobError,
     DoubleTransitionError,
-    _find_transition,
 )
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
@@ -14,6 +12,7 @@ from abstra_internals.repositories.json.classes import (
     JobJSON,
     HookJSON,
     AbstraJSONRepository,
+    RuntimeNotFoundError,
 )
 from .fixtures import init_dir, clear_dir
 
@@ -87,32 +86,8 @@ class TestTransitionsApi(unittest.TestCase):
                 ]
             )
 
-    def test_reject_invalid_target_type(self):
-        with self.assertRaises(UnknownNodeTypeError):
-            self.api.workflow_add_transition(
-                [
-                    {
-                        "source": {"type": "forms", "id": "form1"},
-                        "target": {"type": "invalid", "id": "form1"},
-                        "id": "foo",
-                    }
-                ]
-            )
-
-    def test_reject_invalid_source_type(self):
-        with self.assertRaises(UnknownNodeTypeError):
-            self.api.workflow_add_transition(
-                [
-                    {
-                        "source": {"type": "invalid", "id": "form1"},
-                        "target": {"type": "forms", "id": "form1"},
-                        "id": "foo",
-                    }
-                ]
-            )
-
     def test_reject_invalid_target_id(self):
-        with self.assertRaises(NodeNotFoundError):
+        with self.assertRaises(RuntimeNotFoundError):
             self.api.workflow_add_transition(
                 [
                     {
@@ -124,7 +99,7 @@ class TestTransitionsApi(unittest.TestCase):
             )
 
     def test_reject_invalid_source_id(self):
-        with self.assertRaises(NodeNotFoundError):
+        with self.assertRaises(RuntimeNotFoundError):
             self.api.workflow_add_transition(
                 [
                     {
@@ -158,12 +133,12 @@ class TestTransitionsApi(unittest.TestCase):
             ]
         )
 
-        loaded_json = AbstraJSONRepository.load()
-        loaded_form = loaded_json.forms[1]
+        abstra_json = AbstraJSONRepository.load()
+        loaded_form = abstra_json.forms[1]
         loaded_transition = loaded_form.workflow_transitions[0]
 
         self.assertEqual(
-            _find_transition(loaded_json, "forms", "form1", "forms", "form2"),
+            abstra_json.find_transition("form1", "form2"),
             loaded_transition,
         )
 

@@ -1,11 +1,12 @@
 import unittest, pathlib
-from abstra_internals.server.api import API, UnknownNodeTypeError, NodeNotFoundError
+from abstra_internals.server.api import API, UnknownNodeTypeError
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     FormJSON,
     JobJSON,
     HookJSON,
     AbstraJSONRepository,
+    RuntimeNotFoundError,
 )
 from .fixtures import init_dir, clear_dir
 
@@ -77,19 +78,8 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
         json = AbstraJSONRepository.load()
         self.assertEqual(len(json.forms[1].workflow_transitions), 0)
 
-    def test_reject_invalid_node_type(self):
-        with self.assertRaises(UnknownNodeTypeError):
-            self.api.workflow_delete(
-                [
-                    {
-                        "id": "form1",
-                        "type": "invalid",
-                    }
-                ]
-            )
-
     def test_reject_invalid_id(self):
-        with self.assertRaises(NodeNotFoundError):
+        with self.assertRaises(RuntimeNotFoundError):
             self.api.workflow_delete(
                 [
                     {

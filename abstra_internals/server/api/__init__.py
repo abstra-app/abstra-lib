@@ -50,28 +50,6 @@ from ...repositories.json.classes import (
 )
 
 
-class NodeNotFoundError(Exception):
-    def __init__(self, node_type: str, node_id: str):
-        self.node_type = node_type
-        self.node_id = node_id
-
-    def __str__(self):
-        return f"Node of type {self.node_type} with id {self.node_id} not found"
-
-
-class TransitionNotFoundError(Exception):
-    def __init__(
-        self, source_type: str, source_id: str, target_type: str, target_id: str
-    ):
-        self.source_type = source_type
-        self.source_id = source_id
-        self.target_type = target_type
-        self.target_id = target_id
-
-    def __str__(self):
-        return f"Transition from {self.source_type} with id {self.source_id} to {self.target_type} with id {self.target_id} not found"
-
-
 class UnknownNodeTypeError(Exception):
     def __init__(self, node_type: str):
         self.node_type = node_type
@@ -113,106 +91,6 @@ class DoubleTransitionError(Exception):
 
     def __str__(self):
         return f"You can't add the same transition twice."
-
-
-def _find_node(abstra_json: AbstraJSON, node_type: str, node_id: str):
-    if node_type == "forms":
-        for form in abstra_json.forms:
-            if form.path == node_id:
-                return form
-    elif node_type == "jobs":
-        for job in abstra_json.jobs:
-            if job.identifier == node_id:
-                return job
-    elif node_type == "hooks":
-        for hook in abstra_json.hooks:
-            if hook.path == node_id:
-                return hook
-    elif node_type == "scripts":
-        for script in abstra_json.scripts:
-            if script.path == node_id:
-                return script
-    else:
-        raise UnknownNodeTypeError(node_type)
-    raise NodeNotFoundError(node_type, node_id)
-
-
-def _find_transition_by_id(abstra_json: AbstraJSON, transition_id: str):
-    for node in abstra_json.forms + abstra_json.jobs + abstra_json.hooks:
-        for transition in node.workflow_transitions:
-            if transition.id == transition_id:
-                return transition
-    raise Exception("Transition not found for id ", transition_id)
-
-
-def _find_transition(
-    abstra_json: AbstraJSON,
-    source_type: str,
-    source_id: str,
-    target_type: str,
-    target_id: str,
-    raise_error: bool = True,
-):
-    for node in abstra_json.forms + abstra_json.jobs + abstra_json.hooks:
-        for transition in node.workflow_transitions:
-            if node.runner_type == "form":
-                node_runner_type = "forms"
-            elif node.runner_type == "job":
-                node_runner_type = "jobs"
-            elif node.runner_type == "hook":
-                node_runner_type = "hooks"
-            elif node.runner_type == "script":
-                node_runner_type = "scripts"
-            else:
-                raise UnknownNodeTypeError(node.runner_type)
-            if (
-                transition.target_type == target_type
-                and transition.target_path == target_id
-                and node_runner_type == source_type
-                and node.path == source_id
-            ):
-                return transition
-    if raise_error:
-        raise TransitionNotFoundError(source_type, source_id, target_type, target_id)
-
-
-def _delete_transitions_pointing_to(
-    abstra_json: AbstraJSON,
-    node_type: str,
-    node_id: str,
-):
-    if node_type == "forms":
-        for form in abstra_json.forms:
-            form.workflow_transitions = [
-                t for t in form.workflow_transitions if t.target_path != node_id
-            ]
-    elif node_type == "jobs":
-        for job in abstra_json.jobs:
-            job.workflow_transitions = [
-                t for t in job.workflow_transitions if t.target_path != node_id
-            ]
-    elif node_type == "hooks":
-        for hook in abstra_json.hooks:
-            hook.workflow_transitions = [
-                t for t in hook.workflow_transitions if t.target_path != node_id
-            ]
-
-
-def _delete_transition_by_id(abstra_json: AbstraJSON, transition_id: str):
-    for form in abstra_json.forms:
-        form.workflow_transitions = [
-            t for t in form.workflow_transitions if t.id != transition_id
-        ]
-
-    for job in abstra_json.jobs:
-        job.workflow_transitions = [
-            t for t in job.workflow_transitions if t.id != transition_id
-        ]
-
-    for hook in abstra_json.hooks:
-        hook.workflow_transitions = [
-            t for t in hook.workflow_transitions if t.id != transition_id
-        ]
 
 
 ## TODO: rename to controller
@@ -603,14 +481,14 @@ class API:
     def workflow_move(self, payload):
         abstra_json = AbstraJSONRepository.load()
         for move in payload:
-            node = _find_node(abstra_json, move["type"], move["id"])
+            node = abstra_json.get_workflow_runtime_by_path(move["id"])
             node.workflow_position = move["position"]
         AbstraJSONRepository.save(abstra_json)
 
     def workflow_duplicate_nodes(self, payload):
         abstra_json = AbstraJSONRepository.load()
         for item in payload:
-            node = _find_node(abstra_json, item["type"], item["original_id"])
+            node = abstra_json.get_workflow_runtime_by_path(item["original_id"])
             duplicated = node.duplicate()
             if isinstance(duplicated, FormJSON):
                 duplicated.path = item["new_id"]
@@ -705,10 +583,10 @@ class API:
 
         for item in payload:
             if item["type"] == "transitions":
-                transition = _find_transition_by_id(abstra_json, item["id"])
-                _delete_transition_by_id(abstra_json, transition.id)
+                transition = abstra_json.get_transition(item["id"])
+                abstra_json.delete_transition(transition.id)
             else:
-                node = _find_node(abstra_json, item["type"], item["id"])
+                node = abstra_json.get_workflow_runtime_by_path(item["id"])
                 if Settings.root_path.joinpath(node.file).exists():
                     Settings.root_path.joinpath(node.file).unlink()
                 if isinstance(node, FormJSON):
@@ -723,9 +601,7 @@ class API:
                     abstra_json.hooks = [
                         h for h in abstra_json.hooks if h.path != node.path
                     ]
-                _delete_transitions_pointing_to(
-                    abstra_json=abstra_json, node_type=item["type"], node_id=item["id"]
-                )
+                abstra_json.delete_transition_by_target(item["id"])
         AbstraJSONRepository.save(abstra_json)
 
     def workflow_add_transition(self, payload):
@@ -733,13 +609,9 @@ class API:
             return
         abstra_json = AbstraJSONRepository.load()
         for transition in payload:
-            double_transition = _find_transition(
-                abstra_json,
-                transition["source"]["type"],
+            double_transition = abstra_json.find_transition(
                 transition["source"]["id"],
-                transition["target"]["type"],
                 transition["target"]["id"],
-                raise_error=False,
             )
             if double_transition:
                 raise DoubleTransitionError(
@@ -764,12 +636,10 @@ class API:
                     transition["source"]["type"], transition["source"]["id"]
                 )
 
-            source = _find_node(
-                abstra_json, transition["source"]["type"], transition["source"]["id"]
+            source = abstra_json.get_workflow_runtime_by_path(
+                transition["source"]["id"]
             )
-            _find_node(
-                abstra_json, transition["target"]["type"], transition["target"]["id"]
-            )
+            abstra_json.get_workflow_runtime_by_path(transition["target"]["id"])
             source.workflow_transitions.append(
                 WorkflowTransitionJSON(
                     target_path=transition["target"]["id"],

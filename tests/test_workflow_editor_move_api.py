@@ -1,11 +1,12 @@
 import unittest
-from abstra_internals.server.api import API, UnknownNodeTypeError, NodeNotFoundError
+from abstra_internals.server.api import API, UnknownNodeTypeError
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     FormJSON,
     JobJSON,
     HookJSON,
     AbstraJSONRepository,
+    RuntimeNotFoundError,
 )
 from .fixtures import init_dir, clear_dir
 
@@ -59,14 +60,8 @@ class TestWorkflowEditorMoveApi(unittest.TestCase):
         json = AbstraJSONRepository.load()
         self.assertEqual(json.forms[1].workflow_position, (2, 3))
 
-    def test_reject_invalid_node_type(self):
-        with self.assertRaises(UnknownNodeTypeError):
-            self.api.workflow_move(
-                [{"id": "form1", "type": "invalid", "position": [2, 3]}]
-            )
-
     def test_reject_invalid_id(self):
-        with self.assertRaises(NodeNotFoundError):
+        with self.assertRaises(RuntimeNotFoundError):
             self.api.workflow_move(
                 [{"id": "invalid", "type": "forms", "position": [2, 3]}]
             )

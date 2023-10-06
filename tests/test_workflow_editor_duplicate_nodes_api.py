@@ -1,11 +1,12 @@
 import unittest, pathlib
-from abstra_internals.server.api import API, UnknownNodeTypeError, NodeNotFoundError
+from abstra_internals.server.api import API, UnknownNodeTypeError
 from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     FormJSON,
     JobJSON,
     HookJSON,
     AbstraJSONRepository,
+    RuntimeNotFoundError,
 )
 from .fixtures import init_dir, clear_dir
 
@@ -76,22 +77,8 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         self.assertEqual(json.forms[1].workflow_position, (2, 2))
         self.assertTrue(pathlib.Path("form1-copy.py").exists())
 
-    def test_reject_invalid_node_type(self):
-        with self.assertRaises(UnknownNodeTypeError):
-            self.api.workflow_duplicate_nodes(
-                [
-                    {
-                        "original_id": "form1",
-                        "new_id": "duplicated",
-                        "type": "invalid",
-                        "position": [0, 0],
-                        "title": "Duplicated",
-                    }
-                ]
-            )
-
     def test_reject_invalid_node_id(self):
-        with self.assertRaises(NodeNotFoundError):
+        with self.assertRaises(RuntimeNotFoundError):
             self.api.workflow_duplicate_nodes(
                 [
                     {
