@@ -105,16 +105,7 @@ class MainController:
 
     def get_page_runtime(self, path) -> Union[DashJSON, FormJSON, None]:
         abstra_json = AbstraJSONRepository.load()
-
-        for form in abstra_json.forms:
-            if path == form.path:
-                return form
-
-        for dash in abstra_json.dashes:
-            if path == dash.path:
-                return dash
-
-        return None
+        return abstra_json.get_page_by_path(path)
 
     def open_file(self, file_path: str, create_if_not_exists: bool = False):
         complete_file_path = Settings.root_path.joinpath(file_path)
@@ -136,8 +127,6 @@ class MainController:
         abstra_json.workspace.update(changes, abstra_json.dashes, abstra_json.forms)
         AbstraJSONRepository.save(abstra_json)
         return abstra_json.workspace
-
-    # Script CRUDL
 
     def run_initial_script(self, script: ScriptJSON):
         # This was added to allow script to run without a stage run while testing
@@ -219,8 +208,6 @@ class MainController:
 
         AbstraJSONRepository.save(abstra_json)
 
-    # Forms CRUDL
-
     def create_form(self) -> FormJSON:
         abstra_json = AbstraJSONRepository.load()
 
@@ -252,12 +239,8 @@ class MainController:
 
     def delete_form(self, path: str):
         abstra_json = AbstraJSONRepository.load()
-        forms = abstra_json.forms
-        abstra_json.forms = [f for f in forms if f.path != path]
-
+        abstra_json.delete_runtime(path)
         AbstraJSONRepository.save(abstra_json)
-
-    # Dashes CRUDL
 
     def create_dash(self) -> DashJSON:
         abstra_json = AbstraJSONRepository.load()
@@ -296,12 +279,8 @@ class MainController:
 
     def delete_dash(self, path: str):
         abstra_json = AbstraJSONRepository.load()
-        dashes = abstra_json.dashes
-        abstra_json.dashes = [d for d in dashes if d.path != path]
-
+        abstra_json.delete_runtime(path)
         AbstraJSONRepository.save(abstra_json)
-
-    # Hooks CRUDL
 
     def create_hook(self) -> HookJSON:
         abstract_json = AbstraJSONRepository.load()
@@ -334,12 +313,8 @@ class MainController:
 
     def delete_hook(self, path: str):
         abstra_json = AbstraJSONRepository.load()
-        hooks = abstra_json.hooks
-        abstra_json.hooks = [h for h in hooks if h.path != path]
-
+        abstra_json.delete_runtime(path)
         AbstraJSONRepository.save(abstra_json)
-
-    # Jobs CRUDL
 
     def get_jobs(self):
         abstra_json = AbstraJSONRepository.load()
@@ -382,9 +357,7 @@ class MainController:
 
     def delete_job(self, identifier: str):
         abstra_json = AbstraJSONRepository.load()
-        jobs = abstra_json.jobs
-        abstra_json.jobs = [j for j in jobs if j.identifier != identifier]
-
+        abstra_json.delete_runtime(identifier)
         AbstraJSONRepository.save(abstra_json)
 
     def get_stage_runs(self):
@@ -586,19 +559,7 @@ class MainController:
                 node = abstra_json.get_workflow_runtime_by_path(item["id"])
                 if Settings.root_path.joinpath(node.file).exists():
                     Settings.root_path.joinpath(node.file).unlink()
-                if isinstance(node, FormJSON):
-                    abstra_json.forms = [
-                        f for f in abstra_json.forms if f.path != node.path
-                    ]
-                elif isinstance(node, JobJSON):
-                    abstra_json.jobs = [
-                        j for j in abstra_json.jobs if j.identifier != node.identifier
-                    ]
-                elif isinstance(node, HookJSON):
-                    abstra_json.hooks = [
-                        h for h in abstra_json.hooks if h.path != node.path
-                    ]
-                abstra_json.delete_transition_by_target(item["id"])
+                abstra_json.delete_runtime(node.path)
         AbstraJSONRepository.save(abstra_json)
 
     def workflow_add_transition(self, payload):

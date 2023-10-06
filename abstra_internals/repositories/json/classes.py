@@ -919,6 +919,17 @@ class AbstraJSON:
 
         raise RuntimeNotFoundError(f"Runtime with id '{path}' not found")
 
+    def get_page_by_path(self, path: str) -> Optional[Union[DashJSON, FormJSON]]:
+        for form in self.forms:
+            if form.path == path:
+                return form
+
+        for dash in self.dashes:
+            if dash.path == path:
+                return dash
+
+        return None
+
     def get_transition(self, id: str):
         for runtime in self.workflow_runtimes:
             for transition in runtime.workflow_transitions:
@@ -978,6 +989,20 @@ class AbstraJSON:
         runtime.update(changes)
 
         return runtime
+
+    def delete_runtime(self, id: str):
+        runtime = self.get_runtime_by_path(id)
+        self.delete_transition_by_target(id)
+        if isinstance(runtime, DashJSON):
+            self.dashes = [d for d in self.dashes if d.path != id]
+        elif isinstance(runtime, FormJSON):
+            self.forms = [f for f in self.forms if f.path != id]
+        elif isinstance(runtime, HookJSON):
+            self.hooks = [h for h in self.hooks if h.path != id]
+        elif isinstance(runtime, JobJSON):
+            self.jobs = [j for j in self.jobs if j.identifier != id]
+        elif isinstance(runtime, ScriptJSON):
+            self.scripts = [s for s in self.scripts if s.path != id]
 
     def is_initial(self, runtime_path: str) -> bool:
         runtime = self.get_runtime_by_path(runtime_path)
