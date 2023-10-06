@@ -26,7 +26,7 @@ class FormExecution(LiveExecution):
 
     def handle_failure(self, exception: Exception):
         close_dto = forms_contract.CloseDTO(
-            exit_status=forms_contract.exit_status["generic_exception"],
+            exit_status="GENERIC_EXCEPTION",
             exception=exception.__str__(),
         )
         self.send(forms_contract.CloseMessage(close_dto))

@@ -8,23 +8,24 @@ from .common import (  # exported
     AuthRequireInfoMessage,
 )
 
-exit_status = {
-    "success": "SUCCESS",
-    "lock_acquisition_failed": "LOCK_ACQUISITION_FAILED",
-    "generic_exception": "GENERIC_EXCEPTION",
-}
-
 
 @dataclass
 class CloseDTO:
     exit_status: str
-    exception: typing.Union[str, None] = None
+    exception: typing.Union[str, None]
 
-    def __post_init__(self):
-        if self.exit_status not in exit_status.values():
+    def __init__(self, exit_status: str, exception: typing.Union[str, None] = None):
+        if exit_status not in [
+            "SUCCESS",
+            "LOCK_ACQUISITION_FAILED",
+            "GENERIC_EXCEPTION",
+        ]:
             raise ValueError(
-                f"exit_status must be one of {exit_status.values()}, got {self.exit_status}"
+                f"exit_status must be one of ['SUCCESS', 'LOCK_ACQUISITION_FAILED', 'GENERIC_EXCEPTION'], got {exit_status}"
             )
+
+        self.exit_status = exit_status
+        self.exception = exception
 
 
 class ExecutionIdMessage(Message):
