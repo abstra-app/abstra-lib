@@ -200,6 +200,7 @@ class HookJSON:
     path: str
     title: str
     workflow_transitions: List[WorkflowTransitionJSON]
+    is_initial: bool = False
     enabled: bool = False
     workflow_position: Tuple[float, float] = (0, 0)
 
@@ -215,6 +216,7 @@ class HookJSON:
             "title": self.title,
             "enabled": self.enabled,
             "workflow_position": self.workflow_position,
+            "is_initial": self.is_initial,
             "transitions": [t.__dict__ for t in self.workflow_transitions],
         }
 
@@ -247,6 +249,7 @@ class HookJSON:
             workflow_transitions=[
                 WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
             ],
+            is_initial=data["is_initial"],
         )
 
     def duplicate(self):
@@ -259,6 +262,7 @@ class ScriptJSON:
     title: str
     path: str
     workflow_transitions: List[WorkflowTransitionJSON]
+    is_initial: bool = False
     workflow_position: Tuple[float, float] = (0, 0)
 
     @property
@@ -301,6 +305,7 @@ class ScriptJSON:
             path=data["path"],
             title=data["title"],
             workflow_position=(x, y),
+            is_initial=data["is_initial"],
             workflow_transitions=[
                 WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
             ],
@@ -378,6 +383,7 @@ class FormJSON(SidebarRuntime):
     file: str
     title: str
     workflow_transitions: List[WorkflowTransitionJSON]
+    is_initial: bool = False
     workflow_position: Tuple[float, float] = (0, 0)
     end_message: Optional[str] = None
     auto_start: Optional[bool] = False
@@ -408,6 +414,7 @@ class FormJSON(SidebarRuntime):
             "timeout_message": self.timeout_message,
             "start_button_text": self.start_button_text,
             "restart_button_text": self.restart_button_text,
+            "is_initial": self.is_initial,
         }
 
     @property
@@ -465,6 +472,7 @@ class FormJSON(SidebarRuntime):
             start_button_text=data["start_button_text"],
             restart_button_text=data["restart_button_text"],
             workflow_position=(x, y),
+            is_initial=data["is_initial"],
             workflow_transitions=[
                 WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
             ],
@@ -1073,6 +1081,14 @@ class AbstraJSON:
     @staticmethod
     def from_dict(data: dict):
         data = strict_compatible(data)
+
+        for runtime in data["forms"] + data["hooks"] + data["jobs"] + data["scripts"]:
+            if runtime.get("is_initial") is None:
+                runtime["is_initial"] = True
+            for transition in runtime["transitions"]:
+                for tg_runtime in data["forms"] + data["hooks"] + data["scripts"]:
+                    if tg_runtime["path"] == transition["target_path"]:
+                        tg_runtime["is_initial"] = False
 
         try:
             scripts = [ScriptJSON.from_dict(script) for script in data["scripts"]]
