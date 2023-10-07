@@ -1,4 +1,4 @@
-import sys, uuid
+import sys, uuid, shutil
 from dataclasses import dataclass
 from typing import List, Optional, Union, Any, Dict, Tuple
 import json
@@ -7,7 +7,6 @@ from ...utils import check_is_url
 from ...settings import Settings
 import tempfile
 from .compatibilty import strict_compatible
-
 from ...settings import Settings
 from ...utils import check_is_url
 
@@ -1098,7 +1097,7 @@ class AbstraJSONRepository:
 
         with temp_file.open("w") as f:
             json.dump(abstra_json.__dict__, f, indent=2)
-        temp_file.replace(cls.get_file_path())
+        shutil.move(str(temp_file), cls.get_file_path())
 
     @classmethod
     def load(cls) -> AbstraJSON:
