@@ -389,6 +389,10 @@ def get_editor_bp(controller: MainController):
     def _delete_login():
         return controller.delete_login()
 
+    @bp.route("/api/project-info", methods=["GET"])
+    def _get_project_info():
+        return controller.get_project_info()
+
     @bp.route("/api/ai/message", methods=["POST"])
     @usage
     def _get_next_message():

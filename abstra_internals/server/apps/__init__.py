@@ -28,9 +28,6 @@ def serve_local(debug, use_reloader, load_dotenv):
 
     overloads()
     controller = MainController()
-    credential = controller.get_credentials()
-    if credential:
-        os.environ["ABSTRA_API_TOKEN"] = credential
 
     # TODO: use flask reloader
     if use_reloader:

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
-from ...cloud_api import get_ai_messages, get_auth_info
+from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...repositories.stage_run import StageRun
 from ...repositories import StageRunRepository
 from ...cli.deploy import deploy
@@ -626,6 +626,13 @@ class MainController:
     def delete_login(self):
         delete_credentials()
         return self.get_login()
+
+    # Project
+    def get_project_info(self):
+        headers = resolve_headers()
+        if headers is None:
+            flask.abort(401)
+        return get_project_info(headers)
 
     # AI
     def send_ai_message(self, messages, runtime):
