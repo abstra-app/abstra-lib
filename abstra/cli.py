@@ -26,14 +26,13 @@ class CLI(object):
         workspace_root: str = ".",
         port: int = 3000,
         debug=False,
-        use_reloader=False,
         load_dotenv=True,
     ):
         SettingsController.set_root_path(workspace_root)
         SettingsController.set_server_port(port)
         serve(
             debug=debug,
-            use_reloader=use_reloader,
+            use_reloader=True,
             load_dotenv=load_dotenv,
         )
 
