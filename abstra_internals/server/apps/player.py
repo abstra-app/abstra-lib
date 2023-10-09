@@ -161,14 +161,14 @@ def get_player_bp(controller: MainController):
         if not job.file:
             flask.abort(500)
 
-        def run_job(job):
-            request_data = RequestData(
-                method=flask.request.method,
-                body=flask.request.get_data(as_text=True),
-                headers=flask.request.headers,
-                query_params=flask.request.args,
-            )
+        request_data = RequestData(
+            method=flask.request.method,
+            body=flask.request.get_data(as_text=True),
+            headers=flask.request.headers,
+            query_params=flask.request.args,
+        )
 
+        def run_job(job):
             abstra_json = AbstraJSONRepository.load()
             is_initial = abstra_json.is_initial(path)
 
