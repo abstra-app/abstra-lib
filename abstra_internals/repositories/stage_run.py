@@ -28,6 +28,8 @@ class StageRun:
 
 
 class IStageRunRepository(abc.ABC):
+    valid_keys = ["data", "stage", "assignee", "status", "parent_id"]
+
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
         raise NotImplementedError()
@@ -68,7 +70,7 @@ class LocalStageRunRepository(IStageRunRepository):
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
         for key in filter.keys():
-            if key not in ["data", "stage", "assignee", "status", "parent_id"]:
+            if key not in cls.valid_keys:
                 raise Exception(f"Invalid filter key {key}")
 
         stage = filter.get("stage")
@@ -178,7 +180,7 @@ class ProductionStageRunRepository(IStageRunRepository):
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
         for key in filter.keys():
-            if key not in ["data", "stage", "assignee", "status"]:
+            if key not in cls.valid_keys:
                 raise Exception(f"Invalid filter key {key}")
 
         r = cls._request(
