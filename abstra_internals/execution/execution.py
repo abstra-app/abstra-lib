@@ -171,11 +171,13 @@ class Execution:
             return self.handle_lock_failed()
 
         try:
-            exec(code, namespace, namespace)
+            try:
+                exec(code, namespace, namespace)
+            except SystemExit as e:
+                if e.code != 0:
+                    raise e
+
             self.advance_stage(internal_call=True)
-        except SystemExit:
-            self.set_stage_run_status("finished")
-            return self.handle_success()
         except StageRunEnded:
             self.set_stage_run_status("finished")
             return self.handle_success()
