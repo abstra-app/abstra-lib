@@ -1,4 +1,5 @@
 from typing import Callable, Dict, Union, List, Optional
+import sys
 
 from abstra_internals.widgets.prop_check import validate_widget_props
 from abstra_internals.contract import forms_contract
@@ -96,7 +97,7 @@ class Page(WidgetSchema):
         response: Dict = self.__handle_page_user_events(validate=validate)
 
         if end_program:
-            exit()
+            sys.exit(0)
 
         return PageResponse(
             self.parse_value(response["payload"]),
