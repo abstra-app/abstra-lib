@@ -1,5 +1,4 @@
 import typing
-from abstra_internals.repositories import tables_api_http_client
 
 
 def escape_ref(ref: str):
@@ -7,6 +6,8 @@ def escape_ref(ref: str):
 
 
 def _execute(query: str, params: typing.List):  # private api
+    from abstra_internals.repositories import tables_api_http_client
+
     r = tables_api_http_client.execute(query=query, params=params)
     if not r.ok:
         raise Exception(f"Error executing query {query}: {r.text}")
@@ -29,22 +30,29 @@ def _make_delete_query(table: str, values: dict):
         column_names.append(f'"{column_name}"=${idx+1}')
         values_list.append(values)
     conditions = " AND ".join(column_names)
-    return f"""DELETE FROM "{table}" WHERE {conditions}""", values_list
+    return f"""DELETE FROM "{table}" WHERE {conditions} RETURNING *""", values_list
 
 
 def _make_insert_query(table: str, values: dict):
     table = escape_ref(table)
-    indexes = []
-    column_names = []
-    values_list = []
-    for idx, (column_name, value) in enumerate(values.items()):
-        column_name = escape_ref(column_name)
-        indexes.append("$" + str(idx + 1))
-        column_names.append(f'"{column_name}"')
-        values_list.append(value)
-    indexes_exp = ",".join(indexes)
-    keys_exp = ",".join(column_names)
-    return f"""INSERT INTO "{table}" ({keys_exp}) VALUES ({indexes_exp})""", values_list
+
+    if len(values) == 0:
+        return f"""INSERT INTO "{table}" DEFAULT VALUES RETURNING *""", []
+    else:
+        indexes = []
+        column_names = []
+        values_list = []
+        for idx, (column_name, value) in enumerate(values.items()):
+            column_name = escape_ref(column_name)
+            indexes.append("$" + str(idx + 1))
+            column_names.append(f'"{column_name}"')
+            values_list.append(value)
+        indexes_exp = ",".join(indexes)
+        keys_exp = ",".join(column_names)
+        return (
+            f"""INSERT INTO "{table}" ({keys_exp}) VALUES ({indexes_exp}) RETURNING *""",
+            values_list,
+        )
 
 
 def _make_update_query(table: str, set: dict, where: dict):
@@ -62,7 +70,7 @@ def _make_update_query(table: str, set: dict, where: dict):
     where_column_names.append(f'"{column_name}"=${len(set)+1}')
     where_values_list.append(value)
     return (
-        f"""UPDATE "{table}" SET {set_exp} WHERE {where_column_names[0]}""",
+        f"""UPDATE "{table}" SET {set_exp} WHERE {where_column_names[0]} RETURNING *""",
         set_values_list + where_values_list,
     )
 
@@ -74,7 +82,7 @@ def run(query: str, params: typing.List = []):  # public api
 
 def insert(table: str, values: dict):
     query, params = _make_insert_query(table, values)
-    return _run(query, params)
+    return _run(query, params)[0]
 
 
 def update(table: str, set: dict, where: dict):
