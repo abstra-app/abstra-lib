@@ -1290,6 +1290,14 @@ metadata = {
                     "dashesInitialValue": "\"console.log('Hello World')\"",
                 },
                 {
+                    "argName": "height",
+                    "description": "The widget's height",
+                    "typeName": "int",
+                    "isKwarg": True,
+                    "default": "None",
+                    "formOnly": True,
+                },
+                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -1319,6 +1327,7 @@ metadata = {
                 {"argName": "htmlBody", "typeName": "string"},
                 {"argName": "css", "typeName": "string"},
                 {"argName": "js", "typeName": "string"},
+                {"argName": "height", "typeName": "number"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "fullWidth", "typeName": "boolean"},
             ]

@@ -13,6 +13,7 @@ class CustomInput(Input):
         self.html_body = props.get("html_body", "")
         self.label = props.get("label", "")
         self.html_head = props.get("html_head", "")
+        self.height = props.get("height", 200)
         self.css = props.get("css", "")
         self.js = props.get("js", "")
         self.value = props.get("initial_value", None)
@@ -28,6 +29,7 @@ class CustomInput(Input):
             "label": self.label,
             "value": self.serialize_value(),
             "htmlBody": self.html_body,
+            "height": self.height,
             "htmlHead": self.html_head,
             "css": self.css,
             "js": self.js,

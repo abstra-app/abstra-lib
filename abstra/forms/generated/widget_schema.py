@@ -263,6 +263,7 @@ class WidgetSchema:
                 html_head (str): The HTML head content
                 css (str): The widget's CSS
                 js (str): The widget's JavaScript
+                height (int): The widget's height
                 full_width (bool): Whether the input should use full screen width. Defaults to False.
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
