@@ -180,7 +180,7 @@ class MainController:
         script = ScriptJSON(
             path=str(uuid.uuid4()),
             file=file,
-            title="Untitled Form",
+            title="Untitled Script",
             workflow_transitions=[],
             workflow_position=(0, 0),
         )
