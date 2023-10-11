@@ -5,7 +5,7 @@ import traceback
 import uuid
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Optional
-
+from ..repositories.json.classes import AbstraJSONRepository
 from ..monitoring import LogMessage, log
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
@@ -206,7 +206,12 @@ class Execution:
             else []
         )
 
+        abstra_json = AbstraJSONRepository.load()
         allowed_stages = list([transition.target_path for transition in transitions])
+        allowed_titles = [
+            abstra_json.get_workflow_runtime_by_path(stage).title
+            for stage in allowed_stages
+        ]
 
         if len(allowed_stages) == 0:
             if internal_call:
@@ -220,7 +225,12 @@ class Execution:
                     raise MalformedNextStageRun(stage_run, allowed_stages)
 
                 if stage_run["stage"] not in allowed_stages:
-                    raise InvalidNextStageRun(stage_run["stage"], allowed_stages)
+                    if stage_run["stage"] in allowed_titles:
+                        stage_run["stage"] = allowed_stages[
+                            allowed_titles.index(stage_run["stage"])
+                        ]
+                    else:
+                        raise InvalidNextStageRun(stage_run["stage"], allowed_stages)
 
         default_next_stage_runs = [
             dict(stage=allowed_stage) for allowed_stage in allowed_stages
