@@ -6,9 +6,9 @@ import concurrent.futures as futures
 from werkzeug.datastructures import FileStorage
 from typing import Any, Dict, List, Optional, Union
 
+from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
-from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...repositories.stage_run import StageRun
 from ...repositories import StageRunRepository
 from ...cli.deploy import deploy
@@ -23,6 +23,7 @@ from ...credentials import (
 )
 
 from ...templates import (
+    create_abstraignore,
     new_script_code,
     new_dash_layout,
     new_dash_code,
@@ -33,6 +34,7 @@ from ...templates import (
 
 from ...repositories.json.classes import (
     WorkflowTransitionJSON,
+    AbstraJSONRepository,
     WorkspaceJSON,
     RuntimeJSON,
     ScriptJSON,
@@ -43,7 +45,6 @@ from ...repositories.json.classes import (
     FormJSON,
     HookJSON,
     JobJSON,
-    AbstraJSONRepository,
 )
 
 
@@ -94,7 +95,9 @@ class DoubleTransitionError(Exception):
 class MainController:
     def __init__(self):
         self.executor = futures.ThreadPoolExecutor()
-        AbstraJSONRepository.initialize_on_empty()
+        if not AbstraJSONRepository.exists():
+            AbstraJSONRepository.initialize()
+            create_abstraignore(Settings.root_path)
 
     def deploy(self):
         deploy()

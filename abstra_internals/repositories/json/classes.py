@@ -1,15 +1,12 @@
-import sys, uuid, shutil
-from dataclasses import dataclass
-from typing import List, Optional, Union, Any, Dict, Tuple
-import json
-from pathlib import Path
-from ...utils import check_is_url
-from ...settings import Settings
-import tempfile
-from .compatibilty import strict_compatible
-from ...settings import Settings
-from ...utils import check_is_url
+import sys, uuid, shutil, json, tempfile
 
+from typing import List, Optional, Union, Any, Dict, Tuple
+from dataclasses import dataclass
+from pathlib import Path
+
+from .compatibilty import strict_compatible
+from ...utils import check_is_url
+from ...settings import Settings
 
 RuntimeJSON = Union["FormJSON", "DashJSON", "HookJSON", "JobJSON", "ScriptJSON"]
 WorkflowRuntimeJSON = Union["FormJSON", "HookJSON", "JobJSON", "ScriptJSON"]
@@ -1087,9 +1084,13 @@ class AbstraJSONRepository:
         return Settings.root_path / "abstra.json"
 
     @classmethod
-    def initialize_on_empty(cls):
-        if not cls.get_file_path().exists():
+    def initialize(cls):
+        if not cls.exists():  # double check
             cls.save(AbstraJSON.create())
+
+    @classmethod
+    def exists(cls):
+        return cls.get_file_path().exists()
 
     @classmethod
     def save(cls, abstra_json: AbstraJSON):
