@@ -3,6 +3,8 @@ from .fixtures import init_dir, clear_dir
 from abstra_internals.server.controller import MainController
 from abstra_internals.server.apps import create_app
 from abstra_internals.server.apps.utils import send_from_dist
+from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.widgets.apis import internal_path, get_random_filepath
 
 
 class TestFileSending(unittest.TestCase):
@@ -43,3 +45,24 @@ class TestFileSending(unittest.TestCase):
             self.assertEqual(
                 css_response.headers["Content-Type"], "text/css; charset=utf-8"
             )
+
+    def test_convert_file(self):
+        tmp_file = self.path.joinpath("tmp.txt")
+        tmp_file.write_text("hello world")
+
+        print(tmp_file)
+
+        external_path = convert_file(tmp_file)
+
+        # assert path format like /_files/uuid/filename
+        self.assertTrue(external_path.startswith("/_files/"))
+        self.assertTrue(external_path.endswith("/tmp.txt"))
+
+        # assert file exists in internal path
+        real_path = internal_path(external_path.replace("/_files/", ""))
+        print("real_path", real_path)
+        self.assertTrue(real_path.exists())
+
+    def test_get_random_filepath(self):
+        external_name, _ = get_random_filepath("test.txt")
+        self.assertTrue(external_name.endswith("/test.txt"))

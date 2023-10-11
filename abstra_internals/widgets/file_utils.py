@@ -6,7 +6,9 @@ from typing import Union
 from .apis import upload_file, internal_path
 
 
-def convert_file(file: typing.Union[str, io.BufferedReader, io.TextIOWrapper]) -> str:
+def convert_file(
+    file: typing.Union[str, io.BufferedReader, io.TextIOWrapper, pathlib.Path]
+) -> str:
     if not file:
         return ""
 
@@ -25,7 +27,7 @@ def convert_file(file: typing.Union[str, io.BufferedReader, io.TextIOWrapper]) -
         return upload_file(file)
 
     if isinstance(file, pathlib.Path):
-        return upload_file(open(file, "rb"))
+        return upload_file(file)
 
     # PILImage. TODO: check with isinstance without external dependency
     if hasattr(file, "save"):

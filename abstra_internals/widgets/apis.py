@@ -22,12 +22,15 @@ def get_random_filepath(name=None):
     if name is None:
         name = str(uuid.uuid4())
     else:
-        name = str(uuid.uuid4()) + "_" + Path(name).name
+        name = str(uuid.uuid4()) + "/" + Path(name).name
     path = internal_path(name)
+    path.parent.mkdir(exist_ok=True)
     return name, path
 
 
-def upload_file(file: typing.Union[FileStorage, io.BufferedReader, io.TextIOWrapper]):
+def upload_file(
+    file: typing.Union[FileStorage, io.BufferedReader, io.TextIOWrapper, Path]
+):
     name, path = get_random_filepath(file.name)
 
     if isinstance(file, io.BufferedReader) or isinstance(file, io.TextIOWrapper):
@@ -36,6 +39,10 @@ def upload_file(file: typing.Union[FileStorage, io.BufferedReader, io.TextIOWrap
 
     if isinstance(file, FileStorage):
         file.save(path)
+        return public_path(name)
+
+    if isinstance(file, Path):
+        shutil.copy(file, path)
         return public_path(name)
 
     raise ValueError(f"Cannot upload {type(file)}")
