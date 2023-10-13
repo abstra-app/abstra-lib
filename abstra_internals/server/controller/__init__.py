@@ -472,6 +472,9 @@ class MainController:
             elif isinstance(duplicated, HookJSON):
                 duplicated.path = item["new_id"]
                 abstra_json.hooks.append(duplicated)
+            elif isinstance(duplicated, ScriptJSON):
+                duplicated.path = item["new_id"]
+                abstra_json.scripts.append(duplicated)
 
             duplicated.workflow_transitions = [
                 WorkflowTransitionJSON(
