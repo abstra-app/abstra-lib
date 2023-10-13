@@ -38,10 +38,6 @@ def get_player_bp(controller: MainController):
     def _get_version():
         return BUILD_ID
 
-    @bp.route("/_healthcheck")
-    def _healthcheck():
-        return {"ok": True}
-
     @sock.route("/_socket")
     def websocket(conn: flask_sock.Server):
         request_data = RequestData(
