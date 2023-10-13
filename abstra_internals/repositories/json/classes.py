@@ -129,6 +129,7 @@ class ScriptJSON:
             "file": self.file,
             "path": self.path,
             "title": self.title,
+            "is_initial": self.is_initial,
             "workflow_position": self.workflow_position,
             "transitions": [t.__dict__ for t in self.workflow_transitions],
         }

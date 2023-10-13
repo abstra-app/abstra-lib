@@ -4,6 +4,7 @@ from abstra_internals.repositories.json.classes import (
     AbstraJSON,
     FormJSON,
     JobJSON,
+    ScriptJSON,
     HookJSON,
     AbstraJSONRepository,
     RuntimeNotFoundError,
@@ -21,7 +22,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
             file="form1.py",
             workflow_transitions=[],
             workflow_position=(0, 0),
-            title=f"Form 1",
+            title="Form 1",
         )
         abstra_json.forms.append(form)
         job = JobJSON(
@@ -29,7 +30,7 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
             workflow_transitions=[],
             identifier="job1",
             schedule="* * * * *",
-            title=f"Job 1",
+            title="Job 1",
             workflow_position=(0, 0),
         )
         abstra_json.jobs.append(job)
@@ -37,14 +38,24 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
             file="hook1.py",
             enabled=True,
             path="hook1",
-            title=f"Hook 1",
+            title="Hook 1",
             workflow_position=(0, 0),
             workflow_transitions=[],
         )
+        abstra_json.hooks.append(hook)
+        script = ScriptJSON(
+            file="script1.py",
+            path="script1",
+            is_initial=True,
+            title="Script 1",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        abstra_json.scripts.append(script)
         pathlib.Path("form1.py").write_text("print('hello world')")
         pathlib.Path("job1.py").write_text("print('hello world')")
         pathlib.Path("hook1.py").write_text("print('hello world')")
-        abstra_json.hooks.append(hook)
+        pathlib.Path("script1.py").write_text("print('hello world')")
         self.controller = MainController()
         AbstraJSONRepository.save(abstra_json=abstra_json)
 
@@ -174,3 +185,22 @@ class TestWorkflowEditorDuplicateNodesApi(unittest.TestCase):
         self.assertEqual(
             duplicated.workflow_transitions[0].target_path, "duplicated-hook"
         )
+
+    def test_all_runtimes_can_be_duplicated(self):
+        abstra_json = AbstraJSONRepository.load()
+
+        form1 = abstra_json.get_workflow_runtime_by_path("form1")
+        form2 = form1.duplicate()
+        self.assertEqual(form1, form2)
+
+        job1 = abstra_json.get_workflow_runtime_by_path("job1")
+        job2 = job1.duplicate()
+        self.assertEqual(job1, job2)
+
+        hook1 = abstra_json.get_workflow_runtime_by_path("hook1")
+        hook2 = hook1.duplicate()
+        self.assertEqual(hook1, hook2)
+
+        script1 = abstra_json.get_workflow_runtime_by_path("script1")
+        script2 = script1.duplicate()
+        self.assertEqual(script1, script2)
