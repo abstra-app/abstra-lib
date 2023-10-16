@@ -1,6 +1,6 @@
 import flask, flask_cors, flask_talisman
 
-from .overloads import overloads
+from ..overloads import overloads
 from .controller import MainController
 from .apps.player import get_player_bp
 from ..settings import SettingsController
