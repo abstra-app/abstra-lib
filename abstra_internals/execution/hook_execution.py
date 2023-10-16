@@ -17,6 +17,7 @@ class HookExecution(StaticExecution):
 
     def handle_failure(self, exception: Exception):
         self.context["response"] = self.context.get("response", ("", 500, {}))
+        super().handle_failure(exception)
 
     def handle_lock_failed(self):
         self.context["response"] = self.context.get("response", ("", 409, {}))

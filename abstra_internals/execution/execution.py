@@ -1,15 +1,13 @@
 from __future__ import annotations  # Required for TYPE_CHECKING
-
-import threading
-import traceback
-import uuid
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Optional
+import threading, traceback, uuid
+
 from ..repositories.json.classes import AbstraJSONRepository
-from ..monitoring import LogMessage, log
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
 from ..utils.environment import IS_PREVIEW
+from ..monitoring import LogMessage, log
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import RuntimeJSON
@@ -127,8 +125,8 @@ class Execution:
     def handle_success(self):
         pass
 
-    def handle_failure(self, exception: Exception):
-        pass
+    def handle_failure(self, e: Exception):
+        traceback.print_exc()
 
     def handle_lock_failed(self):
         pass
@@ -182,7 +180,6 @@ class Execution:
             self.set_stage_run_status("finished")
             return self.handle_success()
         except Exception as e:
-            traceback.print_exc()
             self.set_stage_run_status("failed")
             return self.handle_failure(e)
         finally:
