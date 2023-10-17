@@ -1,5 +1,5 @@
 import flask, flask_cors, flask_talisman
-
+from flask_talisman import ALLOW_FROM
 from ..overloads import overloads
 from .controller import MainController
 from .apps.player import get_player_bp
@@ -18,7 +18,12 @@ def get_cloud_app(root: str):
     flask_cors.CORS(app)
 
     if ENABLE_TALISMAN:
-        talisman = flask_talisman.Talisman(app, content_security_policy=None)
+        talisman = flask_talisman.Talisman(
+            app,
+            content_security_policy={"frame-ancestors": ["*"]},
+            frame_options=ALLOW_FROM,
+            frame_options_allow_from="*",
+        )
 
         @app.route("/_healthcheck")
         @talisman(force_https=False)
