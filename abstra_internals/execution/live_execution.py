@@ -1,14 +1,32 @@
 from __future__ import annotations
-import traceback
 from typing import Optional, TYPE_CHECKING, Tuple, Dict, Union
-import flask_sock
-from ..contract import Message, StdioMessage, should_send
-from ..utils import deserialize, serialize
-from .execution import Execution, RequestData, NoExecutionFound
+import traceback, flask_sock
 from simple_websocket.ws import ConnectionClosed
+
+from ..contract import Message, StdioMessage, should_send, common
+from .execution import Execution, RequestData, NoExecutionFound
+from ..utils import deserialize, serialize, decode_jwt
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import DashJSON, FormJSON
+
+
+def get_live_execution_throwable() -> LiveExecution:
+    execution = LiveExecution.get_execution()
+    if not execution:
+        raise NoExecutionFound
+    return execution
+
+
+class AuthResponse:
+    """The response from the authentication process
+
+    Attributes:
+      email (str): The email address of the user
+    """
+
+    def __init__(self, email: str):
+        self.email = email
 
 
 class LiveExecution(Execution):
@@ -79,9 +97,48 @@ class LiveExecution(Execution):
         if self.connected:
             self.close(reason=traceback.format_exc() or None)
 
+    # flows
 
-def get_live_execution_throwable() -> LiveExecution:
-    execution = LiveExecution.get_execution()
-    if not execution:
-        raise NoExecutionFound
-    return execution
+    def receive(self):
+        while True:
+            type, data = self.recv()
+            if type in ["heartbeat", "browser:try-disconnect"]:
+                continue
+
+            return data
+
+    def get_user(self, refresh: bool = False):
+        self.send(common.AuthRequireInfoMessage(refresh=refresh))
+
+        while True:
+            type, data = self.recv()
+            if type != "auth:saved-jwt":
+                continue
+
+            jwt_claims = decode_jwt(data["jwt"])
+            if not jwt_claims:
+                self.send(common.AuthInvalidJWTMessage())
+                continue
+
+            self.send(common.AuthValidJWTMessage())
+            return AuthResponse(jwt_claims["email"])
+
+    def execute_js(self, code: str, context: dict = {}):
+        self.send(common.ExecuteJSRequestMessage(code, context))
+
+        while True:
+            type, data = self.recv()
+            if type != "execute-js:response":
+                continue
+
+            return data.get("value")
+
+    def alert(self, message: str, severity: str):
+        severity = (
+            severity if severity in ["info", "warn", "error", "success"] else "info"
+        )
+        self.send(common.AlertMessage(message, severity))
+
+    def redirect(self, url: str, query_params: dict):
+        query_params = query_params or self.context.get("query_params", {})
+        self.send(common.RedirectMessage(url, query_params))
