@@ -12,12 +12,13 @@ class HookExecution(StaticExecution):
         except UnsetStageRun:
             pass
 
-    def handle_success(self):
+    def handle_success(self) -> str:
         self.context["response"] = self.context.get("response", ("", 200, {}))
+        return super().handle_success()
 
-    def handle_failure(self, exception: Exception):
+    def handle_failure(self, exception: Exception) -> str:
         self.context["response"] = self.context.get("response", ("", 500, {}))
-        super().handle_failure(exception)
+        return super().handle_failure(exception)
 
     def handle_lock_failed(self):
         self.context["response"] = self.context.get("response", ("", 409, {}))
@@ -39,6 +40,7 @@ class HookExecution(StaticExecution):
 
         if len(stage_runs) == 0:
             raise Exception("No stage_run found")
+
         if len(stage_runs) > 1:
             raise Exception("More than one stage_run found")
 

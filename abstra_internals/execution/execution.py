@@ -122,11 +122,12 @@ class Execution:
             )
         )
 
-    def handle_success(self):
-        pass
+    def handle_success(self) -> str:
+        return "finished"
 
-    def handle_failure(self, e: Exception):
+    def handle_failure(self, e: Exception) -> str:
         traceback.print_exc()
+        return "failed"
 
     def handle_lock_failed(self):
         pass
@@ -162,10 +163,11 @@ class Execution:
 
         code = self.runtime_json.file_path.read_text(encoding="utf-8")
         namespace: dict = {}
+        status = "running"
 
         self.setup_context(self.request)
 
-        if self.stage_run and not self.set_stage_run_status("running"):
+        if self.stage_run and not self.set_stage_run_status(status):
             return self.handle_lock_failed()
 
         try:
@@ -177,13 +179,12 @@ class Execution:
 
             self.advance_stage(internal_call=True)
         except StageRunEnded:
-            self.set_stage_run_status("finished")
-            return self.handle_success()
+            status = self.handle_success()
         except Exception as e:
-            self.set_stage_run_status("failed")
-            return self.handle_failure(e)
+            status = self.handle_failure(e)
         finally:
             self.delete()
+            self.set_stage_run_status(status)
 
     def set_stage_run_status(self, status: str) -> bool:
         if not self.stage_run:

@@ -31,6 +31,28 @@ class IStageRunRepository(abc.ABC):
     valid_keys = ["data", "stage", "assignee", "status", "parent_id"]
 
     @classmethod
+    def validate_keys(cls, filter: Dict) -> None:
+        for key in filter.keys():
+            if key not in cls.valid_keys:
+                raise Exception(f"Invalid filter key {key}")
+
+    @classmethod
+    def hydrate_next_dto(cls, parent: StageRun, dtos: List[Dict]) -> List[Dict]:
+        next_dtos = []
+
+        for dto in dtos:
+            stage = dto.get("stage")
+            data = {**parent.data, **dto.get("data", {})}
+            assignee = dto.get("assignee", parent.assignee)
+
+            if not stage:
+                raise Exception("'stage' is required")
+
+            next_dtos.append(dict(stage=stage, data=data, assignee=assignee))
+
+        return next_dtos
+
+    @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
         raise NotImplementedError()
 
@@ -54,6 +76,13 @@ class IStageRunRepository(abc.ABC):
 class LocalStageRunRepository(IStageRunRepository):
     _stage_runs: List[StageRun] = []
 
+    end_status = ["failed", "finished", "abandoned"]
+
+    status_transitions = {
+        "waiting": ["running"],
+        "running": end_status,
+    }
+
     @classmethod
     def clear(cls):
         cls._stage_runs = []
@@ -69,9 +98,7 @@ class LocalStageRunRepository(IStageRunRepository):
 
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
-        for key in filter.keys():
-            if key not in cls.valid_keys:
-                raise Exception(f"Invalid filter key {key}")
+        cls.validate_keys(filter)
 
         stage = filter.get("stage")
         data = filter.get("data")
@@ -108,21 +135,9 @@ class LocalStageRunRepository(IStageRunRepository):
 
     @classmethod
     def create_next(cls, parent: StageRun, dtos: List[Dict]) -> None:
-        for dto in dtos:
-            data = {**parent.data, **dto.get("data", {})}
-            assignee = dto.get("assignee", parent.assignee)
-            stage = dto.get("stage")
-
-            if not stage:
-                raise Exception("'stage' is required")
-
+        for dto in cls.hydrate_next_dto(parent, dtos):
             stage_run = StageRun(
-                id=str(uuid.uuid4()),
-                stage=stage,
-                data=data,
-                assignee=assignee,
-                parent_id=parent.id,
-                status="waiting",
+                id=str(uuid.uuid4()), parent_id=parent.id, status="waiting", **dto
             )
 
             cls._stage_runs.append(stage_run)
@@ -131,12 +146,10 @@ class LocalStageRunRepository(IStageRunRepository):
     def change_state(cls, id: str, status: str) -> bool:
         stage_run = cls.get(id)
 
-        end_states = ["failed", "finished"]
+        if stage_run.status in cls.end_status:
+            return False
 
-        waiting_to_running = stage_run.status == "waiting" and status == "running"
-        running_to_end = stage_run.status == "running" and status in end_states
-
-        if waiting_to_running or running_to_end:
+        if status in cls.status_transitions.get(stage_run.status, []):
             stage_run.status = status
             return True
 
@@ -145,7 +158,14 @@ class LocalStageRunRepository(IStageRunRepository):
 
 class ProductionStageRunRepository(IStageRunRepository):
     @classmethod
-    def _request(cls, method: str, path: str, body: Any = None, params: dict = {}):
+    def _request(
+        cls,
+        method: str,
+        path: str,
+        body: Any = None,
+        params: dict = {},
+        raise_for_status: bool = True,
+    ):
         headers: Mapping[str, str] = {"shared-token": SIDECAR_SHARED_TOKEN}
         r = requests.request(
             method=method,
@@ -154,6 +174,9 @@ class ProductionStageRunRepository(IStageRunRepository):
             json=body,
             params=params,
         )
+
+        if raise_for_status:
+            r.raise_for_status()
 
         return r
 
@@ -171,26 +194,17 @@ class ProductionStageRunRepository(IStageRunRepository):
     @classmethod
     def get(cls, id: str) -> StageRun:
         r = cls._request("GET", path=f"/{id}")
-
-        if not r.ok:
-            raise Exception(r.text)
-
         return cls.create_from_dto(r.json())
 
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
-        for key in filter.keys():
-            if key not in cls.valid_keys:
-                raise Exception(f"Invalid filter key {key}")
+        cls.validate_keys(filter)
 
         r = cls._request(
             "GET",
             path="/",
             params=filter,
         )
-
-        if not r.ok:
-            raise Exception(r.text)
 
         return [cls.create_from_dto(dto) for dto in r.json()]
 
@@ -199,44 +213,24 @@ class ProductionStageRunRepository(IStageRunRepository):
         body = dict(data={}, stage=stage, assignee=assignee)
         r = cls._request("POST", path="/", body=body)
 
-        if not r.ok:
-            raise Exception(r.text)
-
-        dto = r.json()
-
-        return cls.create_from_dto(dto)
+        return cls.create_from_dto(r.json())
 
     @classmethod
     def create_next(cls, parent: StageRun, dtos: List[Dict]) -> None:
         parent_id = parent.id
-        body = []
-
-        for dto in dtos:
-            stage = dto.get("stage")
-            if not stage:
-                raise Exception("'stage' is required")
-
-            body.append(
-                dict(
-                    data={**parent.data, **dto.get("data", {})},
-                    stage=stage,
-                    assignee=dto.get("assignee", parent.assignee),
-                )
-            )
-        r = cls._request("PUT", path=f"/{parent_id}/children", body=body)
-
-        if not r.ok:
-            raise Exception(r.text)
+        next_dtos = cls.hydrate_next_dto(parent, dtos)
+        cls._request("PUT", path=f"/{parent_id}/children", body=next_dtos)
 
     @classmethod
     def change_state(cls, id: str, status: str) -> bool:
-        r = cls._request("PATCH", path=f"/{id}", body={"status": status})
+        r = cls._request(
+            "PATCH", path=f"/{id}", body={"status": status}, raise_for_status=False
+        )
 
         if r.status_code == 409:
             return False
 
-        if not r.ok:
-            raise Exception(r.text)
+        r.raise_for_status()
 
         return True
 
