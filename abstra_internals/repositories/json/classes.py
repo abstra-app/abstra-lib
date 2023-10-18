@@ -255,12 +255,15 @@ class FormJSON(SidebarRuntime):
 
     @property
     def browser_runner_dto(self):
+        allow_restart = self.allow_restart if self.is_initial else False
+
         return {
             "id": self.path,
             "path": self.path,
             "title": self.title,
+            "is_initial": self.is_initial,
             "auto_start": self.auto_start,
-            "allow_restart": self.allow_restart,
+            "allow_restart": allow_restart,
             "end_message": self.end_message,
             "start_message": self.start_message,
             "error_message": self.error_message,
@@ -268,7 +271,6 @@ class FormJSON(SidebarRuntime):
             "timeout_message": self.timeout_message,
             "start_button_text": self.start_button_text,
             "restart_button_text": self.restart_button_text,
-            "is_initial": self.is_initial,
         }
 
     @property
