@@ -198,7 +198,7 @@ class DashRuntime:
 
     def start(self, data):
         # data: { type: client-start, params: PARAMS }
-        self.execution.context["query_params"] = data.get("params", {})
+        self.execution.query_params = data.get("params", {})
         try:
             self.py.execute_initial_code()
             self._compute_and_send_widgets_props()

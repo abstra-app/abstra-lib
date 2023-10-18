@@ -27,4 +27,4 @@ def redirect(url: str, query_params: dict = {}):
 
 def get_query_params() -> dict:
     execution = get_live_execution_throwable()
-    return execution.context.get("query_params", {})
+    return execution.query_params
