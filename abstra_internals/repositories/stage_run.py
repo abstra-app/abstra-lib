@@ -1,11 +1,15 @@
-import abc
-import uuid
-import requests
-
+import abc, copy, uuid, requests
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Type, Mapping, Any
 
 from ..utils.environment import SIDECAR_URL, SIDECAR_SHARED_TOKEN
+
+end_status = ["failed", "finished", "abandoned"]
+
+status_transitions = {
+    "waiting": ["running"],
+    "running": end_status,
+}
 
 
 @dataclass
@@ -23,8 +27,22 @@ class StageRun:
     def __setitem__(self, key, value):
         self.data[key] = value
 
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
+    @property
+    def is_end(self):
+        return self.status in end_status
+
+    @property
+    def is_abandoned(self):
+        return self.status == "abandoned"
+
     def to_dto(self):
-        return self.__dict__
+        return copy.deepcopy(self.__dict__)
+
+    def clone(self):
+        return StageRun(**self.to_dto())
 
 
 class IStageRunRepository(abc.ABC):
@@ -75,13 +93,6 @@ class IStageRunRepository(abc.ABC):
 
 class LocalStageRunRepository(IStageRunRepository):
     _stage_runs: List[StageRun] = []
-
-    end_status = ["failed", "finished", "abandoned"]
-
-    status_transitions = {
-        "waiting": ["running"],
-        "running": end_status,
-    }
 
     @classmethod
     def clear(cls):
@@ -146,10 +157,10 @@ class LocalStageRunRepository(IStageRunRepository):
     def change_state(cls, id: str, status: str) -> bool:
         stage_run = cls.get(id)
 
-        if stage_run.status in cls.end_status:
+        if stage_run.status in end_status:
             return False
 
-        if status in cls.status_transitions.get(stage_run.status, []):
+        if status in status_transitions.get(stage_run.status, []):
             stage_run.status = status
             return True
 

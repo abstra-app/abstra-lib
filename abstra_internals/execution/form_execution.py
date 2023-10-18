@@ -33,8 +33,18 @@ class FormExecution(LiveExecution):
             "connection-closed",
             {"message": "Client went away - probably closed the tab."},
         )
-        if self.stage_run and not self.is_initial:
-            StageRunRepository.create_next(self.stage_run, [self.stage_run.to_dto()])
+
+        if self.stage_run and self.stage_run_freezed and not self.is_initial:
+            StageRunRepository.create_next(
+                self.stage_run,
+                [
+                    dict(
+                        assignee=self.stage_run_freezed.assignee,
+                        stage=self.stage_run_freezed.stage,
+                        data=self.stage_run.data,
+                    )
+                ],
+            )
 
         return "abandoned"
 
