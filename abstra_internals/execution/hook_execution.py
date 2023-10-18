@@ -55,4 +55,4 @@ class HookExecution(StaticExecution):
             request.query_params,
             request.headers,
         )
-        self.init_stage_run(request.query_params.get("stage_run_id"))
+        self.init_stage_run(request.query_params.get(self.abstra_run_key))

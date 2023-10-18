@@ -1,4 +1,4 @@
-import flask_sock
+import flask_sock, typing, copy
 
 from ..repositories import StageRunRepository
 from .live_execution import LiveExecution
@@ -19,9 +19,9 @@ class FormExecution(LiveExecution):
         return data["params"]
 
     def setup_context(self, request: RequestData):
-        self.context["query_params"] = self._wait_start()
+        self.query_params = self._wait_start()
         self.send(forms_contract.ExecutionIdMessage(self.id))
-        self.init_stage_run(self.context["query_params"].get("abstra-run-id"))
+        self.init_stage_run(self.query_params.get(self.abstra_run_key))
 
     def handle_success(self) -> str:
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")

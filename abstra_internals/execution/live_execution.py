@@ -99,6 +99,14 @@ class LiveExecution(Execution):
 
     # flows
 
+    @property
+    def query_params(self) -> Dict:
+        return self.context.get("query_params", {})
+
+    @query_params.setter
+    def query_params(self, value: Dict) -> None:
+        self.context["query_params"] = value
+
     def receive(self):
         while True:
             type, data = self.recv()
@@ -140,5 +148,5 @@ class LiveExecution(Execution):
         self.send(common.AlertMessage(message, severity))
 
     def redirect(self, url: str, query_params: dict):
-        query_params = query_params or self.context.get("query_params", {})
+        query_params = query_params or self.query_params
         self.send(common.RedirectMessage(url, query_params))

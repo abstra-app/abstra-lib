@@ -57,6 +57,7 @@ class UnsetStageRun(Exception):
 
 class Execution:
     type = "execution"
+    abstra_run_key = "abstra-run-id"
     executions: ClassVar[Dict[int, "Execution"]] = {}
 
     id: str
