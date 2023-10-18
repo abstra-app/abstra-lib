@@ -1,5 +1,6 @@
 import flask_sock, typing, copy
 
+from ..repositories.stage_run import StageRun
 from ..repositories import StageRunRepository
 from .live_execution import LiveExecution
 from ..contract import forms_contract
@@ -17,6 +18,33 @@ class FormExecution(LiveExecution):
             return self._wait_start()
 
         return data["params"]
+
+    def _handle_abandoned_middle_form(
+        self, initial_abandoned_stage_run: StageRun, parent_id: str
+    ):
+        child_runs = StageRunRepository.find({"parent_id": parent_id})
+
+        assert len(child_runs) == 1, "Expected 1 child run for abandoned stage run"
+        child_run = child_runs[0]
+
+        assert (
+            child_run.stage == initial_abandoned_stage_run.stage
+        ), "Expected child run to have same stage as initial abandoned stage run"
+        assert (
+            child_run.assignee == initial_abandoned_stage_run.assignee
+        ), "Expected child run to have same assignee as initial abandoned stage run"
+
+        if child_run.is_abandoned:
+            return self._handle_abandoned_middle_form(
+                initial_abandoned_stage_run, child_run.id
+            )
+
+        self.stage_run = child_run
+
+    def init_stage_run(self, id: typing.Optional[str] = None):
+        super().init_stage_run(id)
+        if self.stage_run and not self.is_initial and self.stage_run.is_abandoned:
+            return self._handle_abandoned_middle_form(self.stage_run, self.stage_run.id)
 
     def setup_context(self, request: RequestData):
         self.query_params = self._wait_start()
