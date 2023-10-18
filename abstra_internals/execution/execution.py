@@ -56,14 +56,17 @@ class UnsetStageRun(Exception):
 
 
 class Execution:
-    id: str
     type = "execution"
     executions: ClassVar[Dict[int, "Execution"]] = {}
+
+    id: str
     is_initial: bool
-    stage_run: Optional[StageRun] = None
-    runtime_json: RuntimeJSON
     request: RequestData
     thread: threading.Thread
+    runtime_json: RuntimeJSON
+
+    stage_run_freezed: Optional[StageRun] = None
+    stage_run_draft: Optional[StageRun] = None
 
     @classmethod
     def get_execution(cls) -> Optional["Execution"]:
@@ -137,6 +140,15 @@ class Execution:
 
     def setup_context(self, request: RequestData):
         raise NotImplementedError()
+
+    @property
+    def stage_run(self) -> Optional[StageRun]:
+        return self.stage_run_draft
+
+    @stage_run.setter
+    def stage_run(self, stage_run: StageRun) -> None:
+        self.stage_run_freezed = stage_run
+        self.stage_run_draft = stage_run.clone()
 
     def init_stage_run(self, id: Optional[str] = None) -> None:
         if id:
