@@ -22,6 +22,7 @@ class HookExecution(StaticExecution):
 
     def handle_lock_failed(self):
         self.context["response"] = self.context.get("response", ("", 409, {}))
+        return super().handle_lock_failed()
 
     def get_response(self) -> typing.Tuple[Dict, int, Dict]:
         if "response" not in self.context:

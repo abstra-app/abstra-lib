@@ -1,3 +1,6 @@
+import typing
+
+
 class Message:
     type: str
     data: dict
@@ -64,3 +67,10 @@ class FilesChangedMessage(Message):
 
     def __init__(self):
         super().__init__({})
+
+
+class LockFailedMessage(Message):
+    type = "lock-failed"
+
+    def __init__(self, status: typing.Optional[str]):
+        super().__init__({"status": status})
