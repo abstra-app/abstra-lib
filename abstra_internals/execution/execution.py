@@ -43,6 +43,11 @@ class MalformedNextStageRun(Exception):
         )
 
 
+class StageRunLockFailed(Exception):
+    def __init__(self, status: Optional[str]) -> None:
+        super().__init__(status)
+
+
 class MismatchedStage(Exception):
     pass
 
@@ -134,7 +139,19 @@ class Execution:
         return "failed"
 
     def handle_lock_failed(self):
-        pass
+        stage_run_id = self.stage_run.id if self.stage_run else None
+        stage_run_status = self.stage_run.status if self.stage_run else None
+
+        self.log(
+            "lock-failed",
+            {
+                "execution_id": self.id,
+                "stage": self.runtime_json.path,
+                "stage_run_id": stage_run_id,
+                "stage_run_status": stage_run_status,
+            },
+        )
+        raise StageRunLockFailed(stage_run_status)
 
     def set_stage(self, data: Optional[Dict] = None, assignee: Optional[str] = None):
         raise NotImplementedError("Can only be called from a hook")

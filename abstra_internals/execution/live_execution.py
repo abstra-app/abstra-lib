@@ -3,9 +3,9 @@ from typing import Optional, TYPE_CHECKING, Tuple, Dict, Union
 import traceback, flask_sock
 from simple_websocket.ws import ConnectionClosed
 
-from ..contract import Message, StdioMessage, should_send, common
-from .execution import Execution, RequestData, NoExecutionFound
+from ..contract import should_send, common
 from ..utils import deserialize, serialize, decode_jwt
+from .execution import Execution, RequestData, NoExecutionFound
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import DashJSON, FormJSON
@@ -42,7 +42,7 @@ class LiveExecution(Execution):
         return None
 
     @staticmethod
-    def broadcast(msg: Message):
+    def broadcast(msg: common.Message):
         for e in list(Execution.executions.values()):
             if isinstance(e, LiveExecution) and e.connected and e.closed == False:
                 e.send(msg)
@@ -61,7 +61,7 @@ class LiveExecution(Execution):
 
         super().__init__(runtime_json, is_initial, request, execution_id=execution_id)
 
-    def send(self, msg: Message):
+    def send(self, msg: common.Message):
         self.log(msg.type, msg.data)
 
         if not should_send(msg, self.is_preview):
@@ -86,7 +86,7 @@ class LiveExecution(Execution):
         self.closed = True
 
     def stdio(self, type: str, text: str):
-        self.send(StdioMessage(type, text))
+        self.send(common.StdioMessage(type, text))
         return super().stdio(type, text)
 
     @property
@@ -96,6 +96,11 @@ class LiveExecution(Execution):
     def end(self):
         if self.connected:
             self.close(reason=traceback.format_exc() or None)
+
+    def handle_lock_failed(self):
+        status = self.stage_run.status if self.stage_run else None
+        self.send(common.LockFailedMessage(status))
+        return super().handle_lock_failed()
 
     # flows
 
