@@ -76,7 +76,6 @@ class Page(WidgetSchema):
         for widget in self.widgets:
             if hasattr(widget, "key"):
                 self.__context[widget.key] = widget.value
-                print(widget.key, widget.value)
 
         rendered_page = self.render(context=self.__context)
 
