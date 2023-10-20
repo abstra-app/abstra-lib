@@ -107,6 +107,10 @@ def get_player_bp(controller: MainController):
             return flask.abort(404)
         return send_from_dist(logo_path, dist_folder=Settings.root_path)
 
+    @bp.route("/favicon.ico", methods=["GET"])
+    def _favicon():
+        return _logo()
+
     @bp.route("/_assets/background", methods=["GET"])
     def _background():
         background_path = controller.get_workspace().theme
