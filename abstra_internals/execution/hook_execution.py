@@ -12,12 +12,29 @@ class HookExecution(StaticExecution):
         except UnsetStageRun:
             pass
 
+    def handle_started(self):
+        self.log("started", {"request": self.context["request"]})
+        return super().handle_started()
+
     def handle_success(self) -> str:
         self.context["response"] = self.context.get("response", ("", 200, {}))
+        self.log(
+            "success",
+            {
+                "response": self.context["response"],
+            },
+        )
         return super().handle_success()
 
     def handle_failure(self, exception: Exception) -> str:
         self.context["response"] = self.context.get("response", ("", 500, {}))
+        self.log(
+            "failed",
+            {
+                "response": self.context["response"],
+                "error": str(exception),
+            },
+        )
         return super().handle_failure(exception)
 
     def handle_lock_failed(self):
