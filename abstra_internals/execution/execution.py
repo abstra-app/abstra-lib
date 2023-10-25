@@ -131,6 +131,9 @@ class Execution:
             )
         )
 
+    def handle_started(self):
+        pass
+
     def handle_success(self) -> str:
         return "finished"
 
@@ -200,6 +203,7 @@ class Execution:
         if self.stage_run and not self.set_stage_run_status(status):
             return self.handle_lock_failed()
 
+        self.handle_started()
         try:
             try:
                 exec(code, namespace, namespace)
