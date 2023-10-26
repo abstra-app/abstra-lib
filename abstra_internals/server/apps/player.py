@@ -1,4 +1,4 @@
-import flask, flask_sock, concurrent.futures as futures
+import flask, flask_sock
 
 from ..controller import MainController
 from .auth import get_auth_bp
@@ -11,8 +11,6 @@ from ...repositories.json.classes import AbstraJSONRepository
 
 
 def get_player_bp(controller: MainController):
-    executor = futures.ThreadPoolExecutor()
-
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
 
@@ -177,7 +175,7 @@ def get_player_bp(controller: MainController):
             execution.run_sync()
             controller.run_waiting_scripts(execution.stage_run)
 
-        executor.submit(run_job, job)
+        controller.executor.submit(run_job, job)
 
         return {"status": "running"}
 
