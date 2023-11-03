@@ -370,6 +370,31 @@ def get_editor_bp(controller: MainController):
         except Exception as e:
             return str(e), 500
 
+    @bp.route("/api/requirements", methods=["GET"])
+    @usage
+    def _get_requirements():
+        return controller.get_requirements()
+
+    @bp.route("/api/requirements", methods=["POST"])
+    @usage
+    def _create_requirement():
+        data = flask.request.json
+
+        if not data:
+            flask.abort(400)
+
+        return controller.create_requirement(data["name"], data.get("version"))
+
+    @bp.route("/api/requirements/<name>", methods=["DELETE"])
+    @usage
+    def _delete_requirement(name: str):
+        return controller.delete_requirement(name)
+
+    @bp.route("/api/requirements-recommendations", methods=["GET"])
+    @usage
+    def _get_requirements_recommendation():
+        return controller.get_requirements_recommendations()
+
     @bp.route("/api/login", methods=["GET"])
     @usage
     def _get_login():
