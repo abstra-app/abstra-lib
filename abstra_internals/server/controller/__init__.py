@@ -11,6 +11,7 @@ from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
 from ...repositories.stage_run import StageRun
 from ...repositories import StageRunRepository
+from ...repositories.requirements import RequirementsRepository
 from ...cli.deploy import deploy
 from ...settings import Settings
 from ...utils import random_id
@@ -653,3 +654,23 @@ class MainController:
 
     def get_file(self, path: str):
         return internal_path(path)
+
+    # Requirements
+
+    def get_requirements(self):
+        return RequirementsRepository.load().to_dict()
+
+    def create_requirement(self, name: str, version: Optional[str]):
+        requirements = RequirementsRepository.load()
+        requirements.add(name, version)
+        RequirementsRepository.save(requirements)
+        return requirements.to_dict()
+
+    def delete_requirement(self, name: str):
+        requirements = RequirementsRepository.load()
+        requirements.delete(name)
+        RequirementsRepository.save(requirements)
+        return requirements.to_dict()
+
+    def get_requirements_recommendations(self):
+        return [r.to_dict() for r in RequirementsRepository.get_recommendation()]
