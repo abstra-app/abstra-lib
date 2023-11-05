@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Abstra debugger",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+              "host": "localhost",
+              "port": "${input:abstraDebugPort}"
+            }
+          }
+    ],
+    "inputs": [
+      {
+        "id": "abstraDebugPort",
+        "description": "Debug given by abstra server",
+        "type": "promptString"
+      }
+    ]
+}

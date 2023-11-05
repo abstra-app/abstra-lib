@@ -2,7 +2,8 @@ from __future__ import annotations  # Required for TYPE_CHECKING
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 from dataclasses import dataclass
 import threading, traceback, uuid
-
+import debugpy
+from pathlib import Path
 from ..repositories.json.classes import AbstraJSONRepository
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
@@ -194,8 +195,6 @@ class Execution:
         self.thread_id = threading.get_ident()
         Execution.executions[self.thread_id] = self
 
-        code = self.runtime_json.file_path.read_text(encoding="utf-8")
-        namespace: dict = {}
         status = "running"
 
         self.setup_context(self.request)
@@ -206,7 +205,12 @@ class Execution:
         self.handle_started()
         try:
             try:
-                exec(code, namespace, namespace)
+                from ..server.fs_watcher import reload_modules_from_path
+                from ..settings import Settings
+
+                reload_modules_from_path(Settings.root_path)
+                module_name = self.runtime_json.file[:-3]
+                __import__(module_name)
             except SystemExit as e:
                 if e.code != 0:
                     raise e

@@ -1,9 +1,7 @@
 import fire
-
 from abstra_internals.cli.serve import serve
 from abstra_internals.cli.deploy import deploy
 from abstra_internals.cli.version import check_latest_version
-
 from abstra_internals.settings import SettingsController
 
 
@@ -32,7 +30,6 @@ class CLI(object):
         SettingsController.set_server_port(port)
         serve(
             debug=debug,
-            use_reloader=True,
             load_dotenv=load_dotenv,
         )
 

@@ -7,7 +7,6 @@ from .version import check_latest_version
 
 def serve(
     debug: bool,
-    use_reloader: bool,
     load_dotenv: bool,
 ):
     if not debug:
@@ -19,6 +18,5 @@ def serve(
 
     serve_local(
         debug=debug,
-        use_reloader=use_reloader,
         load_dotenv=load_dotenv,
     )
