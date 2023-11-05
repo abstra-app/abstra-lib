@@ -7,7 +7,7 @@ from ..execution.live_execution import LiveExecution
 from ..contract.common import FilesChangedMessage
 
 
-def __reload_modules_from_path(path: Path):
+def reload_modules_from_path(path: Path):
     for module in list(sys.modules.values()):
         if not (hasattr(module, "__file__") and module.__file__):
             continue
@@ -35,7 +35,7 @@ def __files_changed_polling_loop(path: Path):
                     something_changed = True
 
         if something_changed:
-            __reload_modules_from_path(path)
+            reload_modules_from_path(path)
             LiveExecution.broadcast(FilesChangedMessage())
 
         time.sleep(1)

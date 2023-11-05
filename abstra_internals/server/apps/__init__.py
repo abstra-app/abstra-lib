@@ -22,16 +22,12 @@ def create_app(controller: MainController) -> flask.Flask:
     return app
 
 
-def serve_local(debug, use_reloader, load_dotenv):
+def serve_local(debug, load_dotenv):
     # used to block hackerforms lib from opening
     os.environ["ABSTRA_SERVER"] = "true"
 
     overloads()
     controller = MainController()
-
-    # TODO: use flask reloader
-    if use_reloader:
-        watch_py_root_files()
 
     port = Settings.server_port
     app = create_app(controller)
@@ -40,6 +36,5 @@ def serve_local(debug, use_reloader, load_dotenv):
         host=HOST,
         port=port,
         debug=debug,
-        use_reloader=False,
         load_dotenv=load_dotenv,
     )

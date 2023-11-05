@@ -395,6 +395,16 @@ def get_editor_bp(controller: MainController):
     def _get_requirements_recommendation():
         return controller.get_requirements_recommendations()
 
+    @bp.route("/api/debugger", methods=["GET"])
+    @usage
+    def _get_debugger_status():
+        return controller.get_debugger_status()
+
+    @bp.route("/api/debugger/vscode-launch", methods=["POST"])
+    @usage
+    def _create_vscode_launch():
+        return controller.create_vscode_launch()
+
     @bp.route("/api/login", methods=["GET"])
     @usage
     def _get_login():

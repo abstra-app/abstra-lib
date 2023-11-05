@@ -5,7 +5,12 @@ import webbrowser
 import concurrent.futures as futures
 from werkzeug.datastructures import FileStorage
 from typing import Any, Dict, List, Optional, Union
-
+from ...debugger.vscode import (
+    start_debugger,
+    is_client_connected,
+    is_launch_json_configured,
+    configure_launch_json,
+)
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
@@ -674,3 +679,15 @@ class MainController:
 
     def get_requirements_recommendations(self):
         return [r.to_dict() for r in RequirementsRepository.get_recommendation()]
+
+    # Debugger
+
+    def get_debugger_status(self):
+        return dict(
+            port=start_debugger(),
+            connected=is_client_connected(),
+            is_launch_json_configured=is_launch_json_configured(),
+        )
+
+    def create_vscode_launch(self):
+        return configure_launch_json()
