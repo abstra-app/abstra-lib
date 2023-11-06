@@ -1,6 +1,5 @@
 import os, flask, flask_cors, threading, webbrowser
 
-from ..fs_watcher import watch_py_root_files
 from ..controller import MainController
 from ...utils.environment import HOST
 from ...overloads import overloads

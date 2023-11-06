@@ -2,13 +2,13 @@ from __future__ import annotations  # Required for TYPE_CHECKING
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 from dataclasses import dataclass
 import threading, traceback, uuid
-import debugpy
-from pathlib import Path
+
 from ..repositories.json.classes import AbstraJSONRepository
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
 from ..utils.environment import IS_PREVIEW
 from ..monitoring import LogMessage, log
+from ..modules import import_as_new
 
 if TYPE_CHECKING:
     from ..repositories.json.classes import RuntimeJSON
@@ -205,12 +205,7 @@ class Execution:
         self.handle_started()
         try:
             try:
-                from ..server.fs_watcher import reload_modules_from_path
-                from ..settings import Settings
-
-                reload_modules_from_path(Settings.root_path)
-                module_name = self.runtime_json.file[:-3]
-                __import__(module_name)
+                import_as_new(self.runtime_json.file)
             except SystemExit as e:
                 if e.code != 0:
                     raise e
