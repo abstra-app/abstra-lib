@@ -1,24 +1,11 @@
-import threading, os, time, sys, importlib
+import threading, os, time
 from datetime import datetime
 from pathlib import Path
 
-from ..settings import Settings
 from ..execution.live_execution import LiveExecution
 from ..contract.common import FilesChangedMessage
-
-
-def reload_modules_from_path(path: Path):
-    for module in list(sys.modules.values()):
-        if not (hasattr(module, "__file__") and module.__file__):
-            continue
-
-        module_path = Path(module.__file__)
-        if not module_path.is_file():
-            continue
-
-        if module.__file__.startswith(str(path)):
-            importlib.reload(module)
-            # print(f"Reloaded {module.__name__}")
+from ..modules import reload_modules_from_path
+from ..settings import Settings
 
 
 def __files_changed_polling_loop(path: Path):
