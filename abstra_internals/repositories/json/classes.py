@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .compatibilty import strict_compatible
 from ...utils import check_is_url
+from ...utils.file import traverse_code
 from ...settings import Settings
 
 RuntimeJSON = Union["FormJSON", "DashJSON", "HookJSON", "JobJSON", "ScriptJSON"]
@@ -875,6 +876,13 @@ class AbstraJSON:
     @property
     def workflow_runtimes(self) -> List[WorkflowRuntimeJSON]:
         return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
+
+    @property
+    def project_files(self):
+        for entities in [self.jobs, self.hooks, self.forms, self.dashes, self.scripts]:
+            for entity in entities:
+                for path in traverse_code(Path(entity.file)):
+                    yield path
 
     def get_runtime_by_path(self, path: str) -> Optional[RuntimeJSON]:
         for form in self.forms:
