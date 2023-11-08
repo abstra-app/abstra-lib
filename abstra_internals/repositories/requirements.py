@@ -3,6 +3,8 @@ from typing import List, Optional
 from pathlib import Path
 from tempfile import mkdtemp
 from shutil import move
+
+from .json.classes import AbstraJSONRepository
 from ..settings import Settings
 from importlib_metadata import packages_distributions
 from pkg_resources import get_distribution
@@ -78,7 +80,9 @@ class RequirementsRepository:
     def get_recommendation(cls) -> List[Requirement]:
         imported_modules = set()
 
-        for python_file in Settings.root_path.glob("**/*.py"):
+        abstra_json = AbstraJSONRepository.load()
+
+        for python_file in abstra_json.project_files:
             try:
                 code = python_file.read_text(encoding="utf-8")
                 parsed = ast.parse(code)
