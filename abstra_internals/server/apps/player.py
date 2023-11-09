@@ -1,13 +1,13 @@
 import flask, flask_sock
 
-from ..controller import MainController
 from .auth import get_auth_bp
 from ...settings import Settings
 from .utils import send_from_dist
+from ..controller import MainController
 from ...execution.execution import RequestData
-from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN
-from ...execution import HookExecution, JobExecution, DashExecution, FormExecution
 from ...repositories.json.classes import AbstraJSONRepository
+from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
+from ...execution import HookExecution, JobExecution, DashExecution, FormExecution
 
 
 def get_player_bp(controller: MainController):
@@ -35,6 +35,10 @@ def get_player_bp(controller: MainController):
     @bp.route("/_version", methods=["GET"])
     def _get_version():
         return BUILD_ID
+
+    @bp.route("/_settings", methods=["GET"])
+    def _get_settings():
+        return flask.jsonify({"show_watermark": SHOW_WATERMARK})
 
     @sock.route("/_socket")
     def websocket(conn: flask_sock.Server):
