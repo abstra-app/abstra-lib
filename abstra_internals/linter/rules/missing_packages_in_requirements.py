@@ -18,12 +18,12 @@ class AddMissingPackagesToRequirements(LinterFix):
         RequirementsRepository.save(requirements)
 
 
-class NoMissingPackagesInRequirements(LinterRule):
+class MissingPackagesInRequirements(LinterRule):
     label = "Missing packages in requirements.txt"
     type = "bug"
     description = "\n".join(
         [
-            "The requirements.txt file should not contain packages that are being used in the project.",
+            "The requirements.txt file should contain all packages that are being used in the project.",
         ]
     )
     fixes = [AddMissingPackagesToRequirements()]

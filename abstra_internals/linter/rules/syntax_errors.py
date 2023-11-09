@@ -3,7 +3,7 @@ from ...utils.file import traverse_code
 from ...repositories.json.classes import AbstraJSONRepository
 
 
-class NoSyntaxErrors(LinterRule):
+class SyntaxErrors(LinterRule):
     label = "Syntax errors"
     type = "bug"
     fixes = []

@@ -18,7 +18,7 @@ class AddEnvToAbstraIgnore(LinterFix):
             file.write("\n.env")
 
 
-class NoEnvInBundle(LinterRule):
+class EnvInBundle(LinterRule):
     label = ".env in bundle"
     type = "security"
     description = "\n".join(
