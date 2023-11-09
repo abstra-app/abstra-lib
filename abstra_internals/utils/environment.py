@@ -4,8 +4,9 @@ HOST = os.getenv("ABSTRA_HOST", "localhost")
 DEFAULT_PORT = os.getenv("PORT") or os.getenv("ABSTRA_SERVER_PORT")
 ENABLE_TALISMAN = os.getenv("ABSTRA_ENABLE_TALISMAN", "false").lower() == "true"
 
-IS_PREVIEW = os.getenv("ABSTRA_ENVIRONMENT") != "production"
 BUILD_ID = os.getenv("ABSTRA_BUILD_ID") or "dev"
+IS_PREVIEW = os.getenv("ABSTRA_ENVIRONMENT") != "production"
+SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 
