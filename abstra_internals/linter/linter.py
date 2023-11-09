@@ -15,6 +15,11 @@ class LinterFix:
     def to_dict(self):
         return dict(name=self.name, label=self.label, description=self.description)
 
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, LinterFix):
+            return False
+        return self.name == __value.name
+
 
 class LinterRule:
     label: str
