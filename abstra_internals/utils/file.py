@@ -107,7 +107,9 @@ def _get_file_path_from_relative_module(
     return None
 
 
-def traverse_code(path: Path) -> Generator[Path, None, None]:
+def traverse_code(
+    path: Path, raise_on_syntax_errors=False
+) -> Generator[Path, None, None]:
     yield path
 
     try:
@@ -140,5 +142,6 @@ def traverse_code(path: Path) -> Generator[Path, None, None]:
                     if file_path is not None:
                         yield from traverse_code(file_path)
 
-    except:
-        pass
+    except Exception as e:
+        if raise_on_syntax_errors and isinstance(e, SyntaxError):
+            raise e

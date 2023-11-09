@@ -84,6 +84,8 @@ class RequirementsRepository:
 
         for python_file in abstra_json.project_files:
             try:
+                if not python_file.exists():
+                    continue
                 code = python_file.read_text(encoding="utf-8")
                 parsed = ast.parse(code)
                 for node in parsed.body:

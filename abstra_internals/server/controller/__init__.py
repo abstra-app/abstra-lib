@@ -20,6 +20,7 @@ from ...repositories.requirements import RequirementsRepository
 from ...cli.deploy import deploy
 from ...settings import Settings
 from ...utils import random_id
+from ...linter.rules import rules
 
 from ...credentials import (
     delete_credentials,
@@ -691,3 +692,16 @@ class MainController:
 
     def create_vscode_launch(self):
         return configure_launch_json()
+
+    # Linters
+    def check_linters(self):
+        return [rule.to_dict() for rule in rules]
+
+    def fix_linter(self, rule_name: str, fix_name: str):
+        for rule in rules:
+            if rule.name == rule_name:
+                for fix in rule.fixes:
+                    if fix.name == fix_name:
+                        fix.fix()
+                        return True
+        raise Exception(f"Could not find fix {fix_name} for rule {rule_name}")

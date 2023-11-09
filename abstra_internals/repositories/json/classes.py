@@ -1,6 +1,6 @@
 import sys, uuid, shutil, json, tempfile
 
-from typing import List, Optional, Union, Any, Dict, Tuple
+from typing import List, Optional, Union, Any, Dict, Tuple, Generator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -877,12 +877,16 @@ class AbstraJSON:
     def workflow_runtimes(self) -> List[WorkflowRuntimeJSON]:
         return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
 
-    @property
-    def project_files(self):
+    def iter_entrypoints(self) -> Generator[Path, Any, Any]:
         for entities in [self.jobs, self.hooks, self.forms, self.dashes, self.scripts]:
             for entity in entities:
-                for path in traverse_code(Path(entity.file)):
-                    yield path
+                yield entity.file_path
+
+    @property
+    def project_files(self):
+        for entity_path in self.iter_entrypoints():
+            for path in traverse_code(Path(entity_path)):
+                yield path
 
     def get_runtime_by_path(self, path: str) -> Optional[RuntimeJSON]:
         for form in self.forms:

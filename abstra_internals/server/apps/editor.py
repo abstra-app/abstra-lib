@@ -442,6 +442,17 @@ def get_editor_bp(controller: MainController):
 
         return flask.Response(streamer, mimetype="text/event-stream")
 
+    @bp.route("/api/linters/check", methods=["GET"])
+    @usage
+    def _check_linters():
+        return controller.check_linters()
+
+    @bp.route("/api/linters/fix/<rule_name>/<fix_name>", methods=["POST"])
+    @usage
+    def _fix_linter(rule_name: str, fix_name: str):
+        controller.fix_linter(rule_name, fix_name)
+        return {"success": True}
+
     @bp.route("/<path:filename>", methods=["GET"])
     @usage
     def _spa(filename: str):
