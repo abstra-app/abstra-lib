@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 import time
 from unittest import TestCase
@@ -36,7 +37,7 @@ class TestHotReloadLocalModules(TestCase):
     def test_do_not_update_modules_when_changing_entrypoint(self):
         _create_base_files()
         hook_path = Path("hook.py")
-        first_write = hook_path.stat().st_mtime
+        first_write = datetime.now().timestamp()
 
         first_response = self.client.post("/_hooks/hook")
         self.assertEqual(first_response.status_code, 200)
@@ -56,7 +57,7 @@ class TestHotReloadLocalModules(TestCase):
     def test_update_modules_when_changing_dependencies(self):
         _create_base_files()
         dependency_path = Path("helpers/user.py")
-        first_write = dependency_path.stat().st_mtime
+        first_write = datetime.now().timestamp()
 
         first_response = self.client.post("/_hooks/hook")
         self.assertEqual(first_response.status_code, 200)
