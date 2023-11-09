@@ -156,3 +156,10 @@ class TestTraverseCode(unittest.TestCase):
         self.assertSetEqual(
             set(traverse_code(entrypoint)), set([entrypoint, helper, another_helper])
         )
+
+    def test_raise_syntax_error(self):
+        entrypoint = Path("entrypoint.py")
+        entrypoint.write_text("invalid syntax")
+
+        with self.assertRaises(SyntaxError):
+            list(traverse_code(entrypoint, raise_on_syntax_errors=True))
