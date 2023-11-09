@@ -1,6 +1,7 @@
 import os, flask, flask_cors, threading, webbrowser
 
 from ..controller import MainController
+from ..fs_watcher import watch_py_root_files
 from ...utils.environment import HOST
 from ...overloads import overloads
 from .editor import get_editor_bp
@@ -27,6 +28,8 @@ def serve_local(debug, load_dotenv):
 
     overloads()
     controller = MainController()
+
+    watch_py_root_files()
 
     port = Settings.server_port
     app = create_app(controller)

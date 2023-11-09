@@ -1,5 +1,7 @@
 import uuid, sys, importlib, importlib.util as imp_util
-from pathlib import Path
+
+from .repositories.json.classes import AbstraJSONRepository
+from .utils.file import path2module
 
 
 def import_as_new(name: str):
@@ -14,15 +16,22 @@ def import_as_new(name: str):
     module_spec.loader.exec_module(module)
 
 
-# TODO: make this work with virtualenv
-def reload_modules_from_path(path: Path):
-    for module in list(sys.modules.values()):
-        if not (hasattr(module, "__file__") and module.__file__):
-            continue
+def reload_project_local_modules():
+    abstra_json = AbstraJSONRepository.load()
 
-        module_path = Path(module.__file__)
-        if not module_path.is_file():
-            continue
+    for file in abstra_json.project_local_dependencies:
+        try:
+            if not file.exists():
+                continue
 
-        if module.__file__.startswith(str(path)):
-            importlib.reload(module)
+            module_name = path2module(file)
+            module = sys.modules.get(module_name)
+
+            if module is None:
+                importlib.import_module(module_name)
+            else:
+                importlib.reload(module)
+        except Exception as e:
+            print(f"Could not reload module from {file} with the following error:")
+            print(e)
+            continue
