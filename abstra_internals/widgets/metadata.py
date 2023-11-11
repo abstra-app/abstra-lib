@@ -1,4 +1,118 @@
 metadata = {
+    "camera-input": {
+        "name": "Camera input",
+        "description": "Take a picture with user's camera and upload it",
+        "type": "camera-input",
+        "autoHeight": True,
+        "events": [
+            {
+                "key": "update:value",
+                "description": "Function or expression to be run when the input value changes",
+                "payloadSchema": [],
+            }
+        ],
+        "dashProperties": {
+            "minWidth": 150,
+            "minHeight": 112,
+            "initialWidth": 223,
+            "initialHeight": 112,
+        },
+        "pythonAPI": {
+            "name": "read_camera",
+            "params": [
+                {
+                    "argName": "label",
+                    "description": "The label to display to the user",
+                    "typeName": "str",
+                    "isKwarg": False,
+                    "default": "''",
+                    "dashesInitialValue": '"Upload a file."',
+                },
+                {
+                    "argName": "initial_value",
+                    "description": "The initial value to display to the user. Defaults to None.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "None",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "disabled",
+                    "description": "whether the input is disabled. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                },
+                {
+                    "argName": "required",
+                    "description": 'Whether the input is required or not eg. "this field is required". Defaults to True.',
+                    "typeName": "Union[bool, str]",
+                    "typeDescription": ["bool", "str"],
+                    "isKwarg": True,
+                    "default": "True",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "hint",
+                    "description": "A tooltip displayed to the user. Defaults to None.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "end_program",
+                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "full_width",
+                    "description": "Whether the input should use full screen width. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                    "formOnly": True,
+                },
+                {
+                    "argName": "button_text",
+                    "description": "What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "Next",
+                    "formOnly": True,
+                },
+            ],
+            "returns": [
+                {
+                    "typeName": "FileResponse",
+                    "typeDescription": "A dict containing the picture taken by the user FileResponse(file: TemporaryFile, url: str)",
+                }
+            ],
+        },
+        "brokerAPI": {
+            "params": [
+                {"argName": "label", "typeName": "string"},
+                {"argName": "value", "typeName": ["string"]},
+                {"argName": "key", "typeName": "string"},
+                {"argName": "disabled", "typeName": "boolean"},
+                {"argName": "errors", "typeName": "array"},
+                {"argName": "hint", "typeName": ["string", "null"]},
+                {"argName": "required", "typeName": ["string", "boolean"]},
+                {"argName": "fullWidth", "typeName": "boolean"},
+            ]
+        },
+        "examples": [
+            {
+                "props": {"label": "Take a picture of your ID"},
+                "name": "Basic Example",
+                "description": "The following example demonstrate some of the available functionality for read_camera",
+                "key": "example1",
+                "code": 'from abstra.forms import read_camera\n\nread_camera("Take a picture of your ID")\n',
+            }
+        ],
+    },
     "cards-input": {
         "name": "Card display",
         "description": "Read a text value from the user simple text input",

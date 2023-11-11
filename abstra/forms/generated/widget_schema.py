@@ -68,6 +68,30 @@ class WidgetSchema:
                 output.append(rendered_widget)
         return output
 
+    def read_camera(self, label: str, **kwargs):
+        """Take a picture with user's camera and upload it
+
+        Position Args:
+                label (str): The label to display to the user
+
+        Keyword Args:
+                initial_value (str): The initial value to display to the user. Defaults to None.
+                disabled (bool): whether the input is disabled. Defaults to False.
+                required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
+                hint (str): A tooltip displayed to the user. Defaults to None.
+                end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
+                full_width (bool): Whether the input should use full screen width. Defaults to False.
+                button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
+
+        Returns:
+          A dict containing the picture taken by the user FileResponse(file: TemporaryFile, url: str)
+        """
+
+        key = kwargs.pop("key", label)
+
+        self.widgets.append(CameraInput(key, label, **kwargs))
+        return self
+
     def read_cards(self, label: str, options: list, **kwargs):
         """Read a text value from the user simple text input
 

@@ -2,6 +2,7 @@ from io import BufferedReader, TextIOWrapper
 from typing import Optional, Union, List
 from ..apis import upload_file
 from ..widget_base import OptionalListInput
+from pathlib import Path
 from ..response_types import FileResponse
 
 
@@ -45,7 +46,10 @@ class FileInput(OptionalListInput):
         value: Union[FileResponse, str, BufferedReader, TextIOWrapper]
     ) -> str:
         if isinstance(value, str):
-            return value
+            if Path(value).is_file():
+                return upload_file(open(value))
+            else:
+                return value
         if isinstance(value, FileResponse):
             return value.url
         if isinstance(value, BufferedReader):
