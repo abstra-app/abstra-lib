@@ -23,6 +23,7 @@ from .NpsInput import NpsInput
 from .RatingInput import RatingInput
 from .TextOutput import TextOutput
 from .CheckboxInput import CheckboxInput
+from .CameraInput import CameraInput
 from .CurrencyInput import CurrencyInput
 from .ChecklistInput import ChecklistInput
 from .ImageOutput import ImageOutput

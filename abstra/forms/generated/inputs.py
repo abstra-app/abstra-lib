@@ -8,6 +8,29 @@ def get_single_value(answer: Dict):
     return list(answer.values())[0]
 
 
+def read_camera(label: str, **kwargs):
+    """Take a picture with user's camera and upload it
+
+    Position Args:
+            label (str): The label to display to the user
+
+    Keyword Args:
+            initial_value (str): The initial value to display to the user. Defaults to None.
+            disabled (bool): whether the input is disabled. Defaults to False.
+            required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
+            hint (str): A tooltip displayed to the user. Defaults to None.
+            end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
+            full_width (bool): Whether the input should use full screen width. Defaults to False.
+            button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
+
+    Returns:
+      A dict containing the picture taken by the user FileResponse(file: TemporaryFile, url: str)
+    """
+
+    button_text = kwargs.get("button_text", "i18n_next_action")
+    return get_single_value(Page().read_camera(label, **kwargs).run(button_text))
+
+
 def read_cards(label: str, options: list, **kwargs):
     """Read a text value from the user simple text input
 

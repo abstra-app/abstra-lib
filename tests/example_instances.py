@@ -92,4 +92,5 @@ example_instances = [
         html_head="",
     ),
     RichTextInput("rich-text", "Write your blog post here"),
+    CameraInput("camera", "Take a picture"),
 ]
