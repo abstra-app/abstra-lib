@@ -396,7 +396,6 @@ def get_editor_bp(controller: MainController):
         return controller.get_requirements_recommendations()
 
     @bp.route("/api/debugger", methods=["GET"])
-    @usage
     def _get_debugger_status():
         return controller.get_debugger_status()
 
