@@ -82,7 +82,7 @@ class TransitionToJobError(Exception):
         self.target_id = target_id
 
     def __str__(self):
-        return f"You can't add a transition to a job."
+        return f"You can't add a transition to a job. Use a script instead."
 
 
 class DoubleTransitionError(Exception):
