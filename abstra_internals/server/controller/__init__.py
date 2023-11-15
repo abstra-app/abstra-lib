@@ -700,8 +700,9 @@ class MainController:
     def fix_linter(self, rule_name: str, fix_name: str):
         for rule in rules:
             if rule.name == rule_name:
-                for fix in rule.fixes:
-                    if fix.name == fix_name:
-                        fix.fix()
-                        return True
+                for issue in rule.find_issues():
+                    for fix in issue.fixes:
+                        if fix.name == fix_name:
+                            fix.fix()
+                            return True
         raise Exception(f"Could not find fix {fix_name} for rule {rule_name}")

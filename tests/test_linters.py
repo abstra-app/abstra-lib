@@ -24,7 +24,7 @@ class TestLinters(TestCase):
         rule = EnvInBundle()
         env_file = self.root / ".env"
         self.assertFalse(env_file.exists())
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_env_on_bundle_valid_with_env(self):
         rule = EnvInBundle()
@@ -32,29 +32,29 @@ class TestLinters(TestCase):
         abstraignore_file = self.root / ".abstraignore"
         abstraignore_file.write_text(".env")
         env_file.touch()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def tet_env_on_bundle_invalid_without_abstraignore_file(self):
         env_file = self.root / ".env"
         env_file.touch()
         rule = EnvInBundle()
-        self.assertFalse(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
 
-    def tet_env_on_bundle_invalid_with_abstraignore_file(self):
+    def test_env_on_bundle_invalid_with_abstraignore_file(self):
         env_file = self.root / ".env"
         env_file.touch()
         abstraignore_file = self.root / ".abstraignore"
-        abstraignore_file.write_text(".env")
+        abstraignore_file.touch()
         rule = EnvInBundle()
-        self.assertFalse(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
 
     def test_env_on_bundle_fix(self):
         env_file = self.root / ".env"
         env_file.touch()
         rule = EnvInBundle()
-        self.assertFalse(rule.is_valid())
-        rule.fixes[0].fix()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
+        rule.find_issues()[0].fixes[0].fix()
+        self.assertEqual(len(rule.find_issues()), 0)
         abstraignore_file = self.root / ".abstraignore"
         self.assertTrue(abstraignore_file.exists())
         with abstraignore_file.open("r") as file:
@@ -65,7 +65,7 @@ class TestLinters(TestCase):
         requirements_file = self.root / "requirements.txt"
         self.assertFalse(requirements_file.exists())
         rule = MissingPackagesInRequirements()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_packages_in_requirements_valid_with_packages(self):
         requirements_file = self.root / "requirements.txt"
@@ -76,7 +76,7 @@ class TestLinters(TestCase):
         code = "import pandas"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_packages_in_requirements_invalid_requirements_file(self):
         constroller = MainController()
@@ -84,7 +84,7 @@ class TestLinters(TestCase):
         code = "import pandas"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
-        self.assertFalse(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
 
     def test_missing_packages_in_requirements_invalid_missing_package(self):
         requirements_file = self.root / "requirements.txt"
@@ -94,36 +94,36 @@ class TestLinters(TestCase):
         code = "import pandas"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
-        self.assertFalse(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
 
     def test_syntax_errors_valid_default(self):
         rule = SyntaxErrors()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_valid_empty_file(self):
         script = MainController().create_script()
         script.file_path.touch()
         rule = SyntaxErrors()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_valid_with_content(self):
         script = MainController().create_script()
         script.file_path.write_text("print('hello world')")
         rule = SyntaxErrors()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_invalid_with_syntax_error(self):
         script = MainController().create_script()
         script.file_path.write_text("print('hello world'")
         rule = SyntaxErrors()
-        self.assertFalse(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
         assert rule.error is not None
         assert rule.error.filename is not None
         self.assertEqual(Path(script.file).name, Path(rule.error.filename).name)
 
     def test_missing_entrypoint_valid_default(self):
         rule = MissingEntrypoint()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_entrypoint_valid_with_entrypoint(self):
         controller = MainController()
@@ -132,17 +132,17 @@ class TestLinters(TestCase):
         controller.create_hook()
         controller.create_job()
         rule = MissingEntrypoint()
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_entrypoint_invalid_without_entrypoint(self):
         controller = MainController()
         script = controller.create_script()
         script.file_path.unlink()
         rule = MissingEntrypoint()
-        self.assertFalse(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 1)
 
-        self.assertEqual(rule.fixes, [AddEntrypoint(script)])
+        self.assertEqual(rule.find_issues()[0].fixes[0], AddEntrypoint(script))
 
-        rule.fixes[0].fix()
+        rule.find_issues()[0].fixes[0].fix()
 
-        self.assertTrue(rule.is_valid())
+        self.assertEqual(len(rule.find_issues()), 0)
