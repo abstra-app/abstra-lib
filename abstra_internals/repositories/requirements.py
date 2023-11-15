@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Set
 from pathlib import Path
 from tempfile import mkdtemp
 from shutil import move
@@ -36,6 +36,27 @@ class Requirement:
     @staticmethod
     def from_dict(data: dict):
         return Requirement(name=data["name"], version=data["version"])
+
+
+@dataclass
+class RequirementRecommendation:
+    requirement: Requirement
+    reason_file: Path
+    reason_line: int
+    reason_code: str
+
+    def to_dict(self):
+        return {
+            **self.requirement.to_dict(),
+            "reason_file": str(self.reason_file),
+            "reason_line": self.reason_line,
+            "reason_code": self.reason_code,
+        }
+
+    def __hash__(self) -> int:
+        return hash(
+            f"{self.requirement.to_text()}/{self.reason_file}/{self.reason_line}"
+        )
 
 
 @dataclass
@@ -77,8 +98,8 @@ class RequirementsRepository:
         return Settings.root_path / "requirements.txt"
 
     @classmethod
-    def get_recommendation(cls) -> List[Requirement]:
-        imported_modules = set()
+    def get_recommendation(cls) -> List[RequirementRecommendation]:
+        imported_modules: Set[RequirementRecommendation] = set()
 
         abstra_json = AbstraJSONRepository.load()
 
@@ -95,7 +116,18 @@ class RequirementsRepository:
                             if lib_name is None:
                                 continue
                             for l in lib_name:
-                                imported_modules.add(l)
+                                imported_modules.add(
+                                    RequirementRecommendation(
+                                        requirement=Requirement(
+                                            name=l, version=get_distribution(l).version
+                                        ),
+                                        reason_file=python_file,
+                                        reason_line=node.lineno,
+                                        reason_code=python_file.read_text(
+                                            encoding="utf-8"
+                                        ).splitlines()[node.lineno - 1],
+                                    )
+                                )
                     elif isinstance(node, ast.ImportFrom):
                         if node.module is None:
                             continue
@@ -103,16 +135,27 @@ class RequirementsRepository:
                         if lib_name is None:
                             continue
                         for l in lib_name:
-                            imported_modules.add(l)
+                            imported_modules.add(
+                                RequirementRecommendation(
+                                    requirement=Requirement(
+                                        name=l, version=get_distribution(l).version
+                                    ),
+                                    reason_file=python_file,
+                                    reason_line=node.lineno,
+                                    reason_code=python_file.read_text(
+                                        encoding="utf-8"
+                                    ).splitlines()[node.lineno - 1],
+                                )
+                            )
             except SyntaxError:
                 continue
 
         already_added = set([lib.name for lib in cls.load().libraries])
 
         return [
-            Requirement(name=module, version=get_distribution(module).version)
+            module
             for module in imported_modules
-            if module not in already_added
+            if module.requirement.name not in already_added
         ]
 
     @classmethod

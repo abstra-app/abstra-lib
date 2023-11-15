@@ -442,7 +442,6 @@ def get_editor_bp(controller: MainController):
         return flask.Response(streamer, mimetype="text/event-stream")
 
     @bp.route("/api/linters/check", methods=["GET"])
-    @usage
     def _check_linters():
         return controller.check_linters()
 

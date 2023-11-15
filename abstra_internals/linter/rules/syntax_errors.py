@@ -1,15 +1,35 @@
-from ..linter import LinterRule
+from ..linter import LinterRule, LinterIssue, LinterFix
 from ...utils.file import traverse_code
 from ...repositories.json.classes import AbstraJSONRepository
+from typing import List
+import webbrowser
+from pathlib import Path
+
+
+class OpenBrokenFile(LinterFix):
+    file: Path
+
+    def __init__(self, file: Path) -> None:
+        self.label = f"Open {file}"
+        self.file = file
+
+    def fix(self):
+        webbrowser.open(self.file.absolute().as_uri())
+
+
+class SyntaxErrorFound(LinterIssue):
+    def __init__(self, error: SyntaxError) -> None:
+        self.label = str(error)
+        if error.filename is not None:
+            self.fixes = [OpenBrokenFile(Path(error.filename))]
 
 
 class SyntaxErrors(LinterRule):
     label = "Syntax errors"
     type = "bug"
-    fixes = []
     error = None
 
-    def is_valid(self) -> bool:
+    def find_issues(self) -> List[LinterIssue]:
         abstra_json = AbstraJSONRepository.load()
         for entrypoint in abstra_json.iter_entrypoints():
             try:
@@ -18,8 +38,5 @@ class SyntaxErrors(LinterRule):
             except SyntaxError as e:
                 self.error = e
                 self.error.filename = str(entrypoint)
-                return False
-        return True
-
-    def make_description(self):
-        return str(self.error)
+                return [SyntaxErrorFound(e)]
+        return []
