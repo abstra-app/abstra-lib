@@ -1,4 +1,5 @@
 import pathlib, json
+from pkg_resources import get_distribution
 
 abstraignore = (pathlib.Path(__file__).parent / "abstraignore").read_text()
 new_form_code = (pathlib.Path(__file__).parent / "new_form.py").read_text()

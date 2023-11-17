@@ -87,8 +87,30 @@ class Requirements:
     def add(self, name: str, version: Optional[str] = None):
         self.libraries.append(Requirement(name=name, version=version))
 
+    def update(self, name: str, version: str):
+        self.libraries = [
+            lib if lib.name != name else Requirement(name=name, version=version)
+            for lib in self.libraries
+        ]
+
     def delete(self, name: str):
         self.libraries = [lib for lib in self.libraries if lib.name != name]
+
+    def has(self, lib_name: str, version: Optional[str] = None):
+        for lib in self.libraries:
+            if lib.name == lib_name and (lib.version == version or version is None):
+                return True
+        return False
+
+    def ensure(self, lib_name: str, version: Optional[str] = None):
+        if (
+            self.has(lib_name)
+            and version is not None
+            and not self.has(lib_name, version)
+        ):
+            self.update(lib_name, version)
+        elif not self.has(lib_name):
+            self.add(lib_name, version)
 
 
 @dataclass

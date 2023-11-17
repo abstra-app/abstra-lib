@@ -96,3 +96,74 @@ class TestRequirementsRepository(TestCase):
             requirements.libraries,
             [Requirement(name="foo"), Requirement(name="bar", version="1.0.0")],
         )
+
+    def test_valid_has_without_version(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        self.assertTrue(requirements.has("foo"))
+
+    def test_valid_has_with_version(self):
+        requirements = Requirements(
+            libraries=[Requirement(name="foo", version="1.0.0")]
+        )
+        self.assertTrue(requirements.has("foo", "1.0.0"))
+
+    def test_invalid_has_without_lib(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        self.assertFalse(requirements.has("bar"))
+
+    def test_invalid_has_with_wrong_version(self):
+        requirements = Requirements(
+            libraries=[Requirement(name="foo", version="1.0.0")]
+        )
+        self.assertFalse(requirements.has("foo", "1.0.1"))
+
+    def test_valid_ensure_with_version_from_specified_version(self):
+        requirements = Requirements(
+            libraries=[Requirement(name="foo", version="1.0.0")]
+        )
+        requirements.ensure("foo", "1.0.0")
+        self.assertEqual(
+            requirements.libraries, [Requirement(name="foo", version="1.0.0")]
+        )
+
+    def test_valid_ensure_with_version_from_non_specified_version(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        requirements.ensure("foo", "1.0.1")
+        self.assertEqual(
+            requirements.libraries, [Requirement(name="foo", version="1.0.1")]
+        )
+
+    def test_valid_ensure_without_version_from_specified_version(self):
+        requirements = Requirements(
+            libraries=[Requirement(name="foo", version="1.0.0")]
+        )
+        requirements.ensure("foo")
+        self.assertEqual(
+            requirements.libraries, [Requirement(name="foo", version="1.0.0")]
+        )
+
+    def test_valid_ensure_without_version_from_non_specified_version(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        requirements.ensure("foo")
+        self.assertEqual(requirements.libraries, [Requirement(name="foo")])
+
+    def test_valid_update_with_specified_version(self):
+        requirements = Requirements(
+            libraries=[Requirement(name="foo", version="0.0.0")]
+        )
+        requirements.update("foo", "0.0.1")
+        self.assertEqual(
+            requirements.libraries, [Requirement(name="foo", version="0.0.1")]
+        )
+
+    def test_valid_update_without_specified_version(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        requirements.update("foo", "0.0.1")
+        self.assertEqual(
+            requirements.libraries, [Requirement(name="foo", version="0.0.1")]
+        )
+
+    def test_invalid_update_when_not_found(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        requirements.update("bar", "0.0.1")
+        self.assertEqual(requirements.libraries, [Requirement(name="foo")])
