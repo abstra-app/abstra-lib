@@ -1,12 +1,11 @@
-from abstra_internals.execution.dashes.dash_execution import DashExecution
-from ...repositories.project.project import ProjectRepository
 import flask, flask_sock
 
 from ...settings import Settings
 from ..utils import send_from_dist
 from ...execution.execution import RequestData
-from ...execution import HookExecution, JobExecution, FormExecution
+from ...repositories.project.project import ProjectRepository, JobStage
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
+from ...execution import HookExecution, JobExecution, FormExecution, DashExecution
 
 from ..controller.main import MainController
 from ..controller import auth as auth_controller
@@ -181,11 +180,11 @@ def get_player_bp(controller: MainController):
             query_params=flask.request.args,
         )
 
-        def run_job(job):
+        def run_job(job: JobStage):
             project = ProjectRepository.load()
 
             execution = JobExecution(
-                is_initial=project.is_initial(job.id),
+                is_initial=project.is_initial(job.identifier),
                 request=request_data,
                 runtime_json=job,
             )
