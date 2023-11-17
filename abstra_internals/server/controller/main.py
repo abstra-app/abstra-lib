@@ -30,7 +30,7 @@ from ...credentials import (
 )
 
 from ...templates import (
-    create_abstraignore,
+    ensure_abstraignore,
     new_script_code,
     new_dash_layout,
     new_dash_code,
@@ -104,7 +104,8 @@ class MainController:
         self.executor = futures.ThreadPoolExecutor()
         if not ProjectRepository.exists():
             ProjectRepository.initialize()
-            create_abstraignore(Settings.root_path)
+
+        ensure_abstraignore(Settings.root_path)
 
     def deploy(self):
         deploy()
