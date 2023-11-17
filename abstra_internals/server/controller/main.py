@@ -21,7 +21,7 @@ from ...cli.deploy import deploy
 from ...settings import Settings
 from ...utils import random_id
 from ...linter.rules import rules
-
+from pkg_resources import get_distribution
 from ...credentials import (
     delete_credentials,
     get_credentials,
@@ -104,7 +104,9 @@ class MainController:
         self.executor = futures.ThreadPoolExecutor()
         if not ProjectRepository.exists():
             ProjectRepository.initialize()
-
+        requirements = RequirementsRepository.load()
+        requirements.ensure("abstra", get_distribution("abstra").version)
+        RequirementsRepository.save(requirements)
         ensure_abstraignore(Settings.root_path)
 
     def deploy(self):

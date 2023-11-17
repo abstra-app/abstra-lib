@@ -14,9 +14,10 @@ class TestRequirementsApi(TestCase):
     def tearDown(self) -> None:
         clear_dir(self.root)
 
-    def test_empty_requirements(self):
+    def test_initial_requirements(self):
         requirements = self.client.get("/_editor/api/requirements").get_json()
-        self.assertEqual(requirements, [])
+        self.assertEqual(len(requirements), 1)
+        self.assertEqual(requirements[0]["name"], "abstra")
 
     def test_existing_requirements(self):
         Path("requirements.txt").write_text("foo==1.0.0\nbar\n\n# baz")
@@ -29,7 +30,13 @@ class TestRequirementsApi(TestCase):
     def test_post_requirement(self):
         self.client.post("/_editor/api/requirements", json={"name": "foo"})
         requirements = self.client.get("/_editor/api/requirements").get_json()
-        self.assertEqual(requirements, [{"name": "foo", "version": None}])
+        self.assertEqual(len(requirements), 2)
+        non_abstra_requirements = [
+            requirement
+            for requirement in requirements
+            if requirement["name"] != "abstra"
+        ]
+        self.assertEqual(non_abstra_requirements, [{"name": "foo", "version": None}])
 
         self.assertTrue(Path("requirements.txt").exists())
 
