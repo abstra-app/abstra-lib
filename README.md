@@ -1,10 +1,12 @@
 [![pypi](https://img.shields.io/pypi/v/abstra.svg)](https://pypi.python.org/pypi/abstra)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/abstra.svg)](https://pypi.org/project/abstra/)
+
 # ✨ Abstra ✨
 
 Abstra is a simple and powerful way to build business automation workflows.
 
 It's a Python-powered backoffice engine with:
+
 - drag'n drop workflow builder
 - dynamic forms
 - serveless endpoints
@@ -22,7 +24,7 @@ and much more! ⚡️
 
 [![](./images/getting-started.png)](https://youtu.be/kkTRU8PS8cg)
 
-This package is compatible with Python >= 3.7
+This package is compatible with Python >= 3.8
 
 To install, run the following:
 
@@ -30,7 +32,7 @@ To install, run the following:
 pip install abstra
 ```
 
-Run the CLI server in the directory where you'd like to create your Abstra project. This can be any folder: 
+Run the CLI server in the directory where you'd like to create your Abstra project. This can be any folder:
 
 ```
 abstra serve ./your-project-directory

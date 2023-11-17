@@ -1,4 +1,4 @@
-from ..repositories.json.classes import RuntimeJSON
+from ..repositories.project.project import RuntimeJSON
 from .static_execution import StaticExecution
 from .execution import RequestData
 

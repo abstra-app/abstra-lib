@@ -8,7 +8,7 @@ from ..utils import deserialize, serialize, decode_jwt
 from .execution import Execution, RequestData, NoExecutionFound
 
 if TYPE_CHECKING:
-    from ..repositories.json.classes import DashJSON, FormJSON
+    from ..repositories.project.project import DashJSON, FormStage
 
 
 def get_live_execution_throwable() -> LiveExecution:
@@ -49,7 +49,7 @@ class LiveExecution(Execution):
 
     def __init__(
         self,
-        runtime_json: Union["FormJSON", "DashJSON"],
+        runtime_json: Union["FormStage", "DashJSON"],
         is_initial: bool,
         connection: flask_sock.Server,
         request: RequestData,

@@ -1,17 +1,19 @@
 import unittest
-from .fixtures import init_dir, clear_dir
+
+from abstra_internals.server.apps.local import get_local_app
+from abstra_internals.server.utils import send_from_dist
 from abstra_internals.server.controller import MainController
-from abstra_internals.server.apps import create_app
-from abstra_internals.server.apps.utils import send_from_dist
+from abstra_internals.widgets.apis import get_random_filepath, internal_path
 from abstra_internals.widgets.file_utils import convert_file
-from abstra_internals.widgets.apis import internal_path, get_random_filepath
+
+from .fixtures import clear_dir, init_dir
 
 
 class TestFileSending(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
         controller = MainController()
-        self.app = create_app(controller)
+        self.app = get_local_app(controller)
         self.client = self.app.test_client()
         self.app_context = self.app.app_context()
         self.app_context.push()

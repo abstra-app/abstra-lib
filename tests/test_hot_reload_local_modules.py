@@ -2,12 +2,12 @@ from datetime import datetime
 from pathlib import Path
 import time
 from unittest import TestCase
-from abstra_internals.repositories.json.classes import (
-    AbstraJSON,
-    AbstraJSONRepository,
-    HookJSON,
+from abstra_internals.repositories.project.project import (
+    Project,
+    ProjectRepository,
+    HookStage,
 )
-from abstra_internals.server.apps import create_app
+from abstra_internals.server import get_local_app
 
 from abstra_internals.server.controller import MainController
 from abstra_internals.server.fs_watcher import reload_files_on_change
@@ -19,17 +19,17 @@ class TestHotReloadLocalModules(TestCase):
     def setUp(self):
         self.root = init_dir()
         controller = MainController()
-        self.abstra_json = AbstraJSON.create()
+        self.project = Project.create()
         file = "hook.py"
-        hook = HookJSON(
+        hook = HookStage(
             file=file,
             path="hook",
             title="Hook 1",
             workflow_transitions=[],
         )
-        self.abstra_json.hooks.append(hook)
-        AbstraJSONRepository.save(self.abstra_json)
-        self.client = create_app(controller).test_client()
+        self.project.hooks.append(hook)
+        ProjectRepository.save(self.project)
+        self.client = get_local_app(controller).test_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -45,7 +45,7 @@ class TestHotReloadLocalModules(TestCase):
         time.sleep(0.5)
         hook_path.touch()
 
-        has_reloaded = reload_files_on_change(self.abstra_json, first_write)
+        has_reloaded = reload_files_on_change(self.project, first_write)
         self.assertFalse(has_reloaded)
 
         second_response = self.client.post("/_hooks/hook")
@@ -65,7 +65,7 @@ class TestHotReloadLocalModules(TestCase):
         time.sleep(0.5)
         dependency_path.touch()
 
-        has_reloaded = reload_files_on_change(self.abstra_json, first_write)
+        has_reloaded = reload_files_on_change(self.project, first_write)
         self.assertTrue(has_reloaded)
 
         second_response = self.client.post("/_hooks/hook")

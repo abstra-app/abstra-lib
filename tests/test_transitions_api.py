@@ -6,12 +6,12 @@ from abstra_internals.server.controller import (
     TransitionToJobError,
     DoubleTransitionError,
 )
-from abstra_internals.repositories.json.classes import (
-    AbstraJSON,
-    FormJSON,
-    JobJSON,
-    HookJSON,
-    AbstraJSONRepository,
+from abstra_internals.repositories.project.project import (
+    Project,
+    FormStage,
+    JobStage,
+    HookStage,
+    ProjectRepository,
     RuntimeNotFoundError,
 )
 from .fixtures import init_dir, clear_dir
@@ -21,17 +21,17 @@ class TestTransitionsApi(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
 
-        abstra_json = AbstraJSON.create()
+        project = Project.create()
         for i in range(10):
-            form = FormJSON(
+            form = FormStage(
                 path=f"form{i}",
                 file="foo.py",
                 workflow_transitions=[],
                 workflow_position=(0, 0),
                 title=f"Form {i}",
             )
-            abstra_json.forms.append(form)
-            job = JobJSON(
+            project.forms.append(form)
+            job = JobStage(
                 file="foo.py",
                 workflow_transitions=[],
                 identifier=f"job{i}",
@@ -39,8 +39,8 @@ class TestTransitionsApi(unittest.TestCase):
                 title=f"Job {i}",
                 workflow_position=(0, 0),
             )
-            abstra_json.jobs.append(job)
-            hook = HookJSON(
+            project.jobs.append(job)
+            hook = HookStage(
                 file="foo.py",
                 enabled=True,
                 path=f"hook{i}",
@@ -48,17 +48,17 @@ class TestTransitionsApi(unittest.TestCase):
                 workflow_position=(0, 0),
                 workflow_transitions=[],
             )
-            abstra_json.hooks.append(hook)
+            project.hooks.append(hook)
         self.controller = MainController()
-        AbstraJSONRepository.save(abstra_json=abstra_json)
+        ProjectRepository.save(project=project)
 
     def tearDown(self) -> None:
         clear_dir(self.path)
 
     def test_accept_empty_adding(self):
-        old_json = AbstraJSONRepository.load()
+        old_json = ProjectRepository.load()
         self.controller.workflow_add_transition([])
-        new_json = AbstraJSONRepository.load()
+        new_json = ProjectRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_adding(self):
@@ -71,7 +71,7 @@ class TestTransitionsApi(unittest.TestCase):
                 }
             ]
         )
-        new_json = AbstraJSONRepository.load()
+        new_json = ProjectRepository.load()
         self.assertEqual(new_json.forms[1].workflow_transitions[0].target_path, "form2")
 
     def test_reject_self_linking(self):
@@ -133,12 +133,12 @@ class TestTransitionsApi(unittest.TestCase):
             ]
         )
 
-        abstra_json = AbstraJSONRepository.load()
-        loaded_form = abstra_json.forms[1]
+        project = ProjectRepository.load()
+        loaded_form = project.forms[1]
         loaded_transition = loaded_form.workflow_transitions[0]
 
         self.assertEqual(
-            abstra_json.find_transition("form1", "form2"),
+            project.find_transition("form1", "form2"),
             loaded_transition,
         )
 
@@ -173,5 +173,5 @@ class TestTransitionsApi(unittest.TestCase):
                 }
             ],
         )
-        abstra_json = AbstraJSONRepository.load()
-        self.assertEqual(abstra_json.forms[1].workflow_transitions[0].id, "foo")
+        project = ProjectRepository.load()
+        self.assertEqual(project.forms[1].workflow_transitions[0].id, "foo")

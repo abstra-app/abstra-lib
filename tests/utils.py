@@ -7,7 +7,7 @@ from abstra_internals.execution.execution import RequestData
 from abstra_internals.contract.dashes import ExecutionIdMessage
 from abstra_internals.execution.form_execution import FormExecution
 from abstra_internals.execution.dashes.dash_runtime import DashRuntime
-from abstra_internals.repositories.json.classes import DashJSON, FormJSON
+from abstra_internals.repositories.project.project import DashJSON, FormStage
 from abstra_internals.execution.dashes.dash_execution import DashExecution
 
 overloads()
@@ -61,7 +61,10 @@ def iter_messages(
 
 
 def assert_form(
-    test_case: unittest.TestCase, form_json: FormJSON, msg_list: list, execution_id: str
+    test_case: unittest.TestCase,
+    form_json: FormStage,
+    msg_list: list,
+    execution_id: str,
 ):
     print("asserting form", form_json.file_path)
 

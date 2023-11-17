@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ...contract import dashes_contract as contract
-from ...repositories.json.classes import (
+from ...repositories.project.project import (
     DashJSON,
     DashWidgetJSON,
     SlotJSON,

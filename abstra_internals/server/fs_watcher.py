@@ -1,16 +1,14 @@
 import threading, os, time
 from datetime import datetime
 
-from ..repositories.json.classes import AbstraJSON, AbstraJSONRepository
-from ..execution.live_execution import LiveExecution
 from ..contract.common import FilesChangedMessage
 from ..modules import reload_project_local_modules
+from ..execution.live_execution import LiveExecution
+from ..repositories.project.project import ProjectRepository, Project
 
 
-def _has_local_dependencies_changed(
-    abstra_json: AbstraJSON, last_change: float
-) -> bool:
-    for file in abstra_json.project_local_dependencies:
+def _has_local_dependencies_changed(project: Project, last_change: float) -> bool:
+    for file in project.project_local_dependencies:
         if not file.exists():
             continue
 
@@ -20,8 +18,8 @@ def _has_local_dependencies_changed(
     return False
 
 
-def reload_files_on_change(abstra_json: AbstraJSON, last_change: float):
-    if _has_local_dependencies_changed(abstra_json, last_change):
+def reload_files_on_change(project: Project, last_change: float):
+    if _has_local_dependencies_changed(project, last_change):
         reload_project_local_modules()
         LiveExecution.broadcast(FilesChangedMessage())
         return True
@@ -31,10 +29,10 @@ def reload_files_on_change(abstra_json: AbstraJSON, last_change: float):
 
 def __files_changed_polling_loop():
     last_change = datetime.now().timestamp()
-    abstra_json = AbstraJSONRepository.load()
+    project = ProjectRepository.load()
 
     while True:
-        has_reloaded = reload_files_on_change(abstra_json, last_change)
+        has_reloaded = reload_files_on_change(project, last_change)
         if has_reloaded:
             last_change = datetime.now().timestamp()
 

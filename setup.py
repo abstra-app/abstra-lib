@@ -22,6 +22,7 @@ setup(
     license="MIT",
     version=version,
     description="Abstra Lib",
+    python_requires=">=3.8, <4",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/abstra-app/abstra-lib",

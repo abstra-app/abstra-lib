@@ -1,0 +1,458 @@
+import flask
+from ...usage import usage
+from ...settings import Settings
+from ..utils import send_from_dist
+from ...execution.execution import RequestData
+from ...execution.job_execution import JobExecution
+from ...execution.hook_execution import HookExecution
+from ...repositories.project.project import ProjectRepository
+
+from ..controller.main import MainController
+from ..controller import stage_runs as stage_runs_controller
+
+
+def get_editor_bp(controller: MainController):
+    bp = flask.Blueprint("editor", __name__)
+
+    stage_run_bp = stage_runs_controller.get_editor_bp()
+    bp.register_blueprint(stage_run_bp, url_prefix="/api/stage_runs")
+
+    @bp.route("/", methods=["GET"])
+    @usage
+    def _spa_index():
+        return send_from_dist("editor.html", "editor.html")
+
+    @bp.route("/api/assets/<path:path>", methods=["GET"])
+    def _asset(path):
+        return send_from_dist(path, dist_folder=Settings.root_path)
+
+    @bp.route("/api/workspace", methods=["GET"])
+    @usage
+    def _get_workspace():
+        return controller.get_workspace().editor_dto
+
+    @bp.route("/api/workspace", methods=["PUT"])
+    @usage
+    def _update_workspace():
+        if not flask.request.json:
+            flask.abort(400)
+        workspace = controller.update_workspace(flask.request.json)
+        return workspace.editor_dto
+
+    @bp.route("/api/workspace/root-path", methods=["GET"])
+    @usage
+    def _get_workspace_root_path():
+        return str(Settings.root_path.absolute())
+
+    @bp.route("/api/workspace/open-file", methods=["POST"])
+    @usage
+    def _open_file():
+        if not flask.request.json:
+            flask.abort(400)
+        file_path = flask.request.json["path"]
+        controller.open_file(file_path, create_if_not_exists=True)
+        return {"success": True}
+
+    @bp.route("/api/workspace/check-file", methods=["GET"])
+    @usage
+    def _check_file():
+        file_path = flask.request.args["path"]
+        return {"exists": controller.check_file(file_path)}
+
+    @bp.route("/api/workspace/deploy", methods=["POST"])
+    @usage
+    def _deploy():
+        controller.deploy()
+        return {"success": True}
+
+    @bp.route("/api/forms/", methods=["GET"])
+    @usage
+    def _get_forms():
+        return [f.editor_dto for f in controller.get_forms()]
+
+    @bp.route("/api/forms/<path:path>", methods=["GET"])
+    @usage
+    def _get_form(path: str):
+        form = controller.get_form(path)
+        if not form:
+            flask.abort(404)
+        return form.editor_dto
+
+    @bp.route("/api/forms/<path:path>", methods=["DELETE"])
+    @usage
+    def _delete_form(path: str):
+        controller.delete_form(path)
+        return {"success": True}
+
+    @bp.route("/api/forms/", methods=["POST"])
+    @usage
+    def _create_form():
+        form = controller.create_form()
+        return form.editor_dto
+
+    @bp.route("/api/forms/<path:path>", methods=["PUT"])
+    @usage
+    def _update_form(path: str):
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        form = controller.update_runtime(path, data)
+        return form.editor_dto if form else None
+
+    @bp.route("/api/dashes/<path:path>", methods=["GET"])
+    @usage
+    def _get_dash(path: str):
+        dash = controller.get_dash(path)
+        if not dash:
+            flask.abort(404)
+        return dash.editor_dto
+
+    @bp.route("/api/dashes/", methods=["GET"])
+    @usage
+    def _get_dashes():
+        return [f.editor_dto for f in controller.get_dashes()]
+
+    @bp.route("/api/dashes/", methods=["POST"])
+    @usage
+    def _create_dash():
+        dash = controller.create_dash()
+        return dash.editor_dto
+
+    @bp.route("/api/dashes/<path:path>", methods=["PUT"])
+    @usage
+    def _update_dash(path: str):
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        dash = controller.update_runtime(path, data)
+        return dash.editor_dto if dash else None
+
+    @bp.route("/api/dashes/<path:path>", methods=["DELETE"])
+    @usage
+    def _delete_dash(path: str):
+        controller.delete_dash(path)
+        return {"success": True}
+
+    @bp.route("/api/hooks/<path:id>", methods=["GET"])
+    @usage
+    def _get_hook(id: str):
+        hook = controller.get_hook(id)
+        if not hook:
+            flask.abort(404)
+        return hook.editor_dto
+
+    @bp.route("/api/hooks/", methods=["GET"])
+    @usage
+    def _get_hooks():
+        return [f.editor_dto for f in controller.get_hooks()]
+
+    @bp.route("/api/hooks/", methods=["POST"])
+    @usage
+    def _create_hook():
+        hook = controller.create_hook()
+        return hook.editor_dto
+
+    @bp.route("/api/hooks/<path:id>", methods=["PUT"])
+    @usage
+    def _update_hook(id: str):
+        changes = flask.request.json
+        if not changes:
+            flask.abort(400)
+
+        hook = controller.update_runtime(id, changes)
+        return hook.editor_dto if hook else None
+
+    @bp.route("/api/hooks/<path:id>", methods=["DELETE"])
+    @usage
+    def _delete_hook(id: str):
+        controller.delete_hook(id)
+        return {"success": True}
+
+    @bp.route(
+        "/api/hooks/<path:path>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"]
+    )
+    @usage
+    def _test_hook(path: str):
+        hook = controller.get_hook(path)
+        if not hook:
+            flask.abort(404)
+
+        request_data = RequestData(
+            method=flask.request.method,
+            body=flask.request.get_data(as_text=True),
+            headers=flask.request.headers,
+            query_params=flask.request.args,
+        )
+
+        project = ProjectRepository.load()
+        is_initial = project.is_initial(hook.path)
+        execution = HookExecution(hook, is_initial, request_data)
+
+        execution.run_sync()
+
+        body, status, headers = execution.get_response()
+
+        controller.run_waiting_scripts(execution.stage_run)
+
+        return {
+            "body": body,
+            "status": status,
+            "headers": headers,
+            "stdout": "".join(execution.stdout if execution else []),
+            "stderr": "".join(execution.stderr if execution else []),
+        }
+
+    @bp.route("/api/jobs/<path:id>", methods=["GET"])
+    @usage
+    def _get_job(id: str):
+        job = controller.get_job(id)
+        if not job:
+            flask.abort(404)
+        return job.editor_dto
+
+    @bp.route("/api/jobs/", methods=["GET"])
+    @usage
+    def _get_jobs():
+        return [f.editor_dto for f in controller.get_jobs()]
+
+    @bp.route("/api/jobs/", methods=["POST"])
+    @usage
+    def _create_job():
+        job = controller.create_job()
+        return job.editor_dto
+
+    @bp.route("/api/jobs/<path:id>", methods=["PUT"])
+    @usage
+    def _update_runtime(id: str):
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        job = controller.update_runtime(id, data)
+        return job.editor_dto if job else None
+
+    @bp.route("/api/jobs/<path:id>", methods=["DELETE"])
+    @usage
+    def _delete_job(id: str):
+        controller.delete_job(id)
+        return {"success": True}
+
+    @bp.route("/api/jobs/<path:id>/test", methods=["POST"])
+    @usage
+    def _test_job(id: str):
+        job = controller.get_job(id)
+        if not job:
+            flask.abort(404)
+
+        request_data = RequestData(
+            method=flask.request.method,
+            body=flask.request.get_data(as_text=True),
+            headers=flask.request.headers,
+            query_params=flask.request.args,
+        )
+
+        project = ProjectRepository.load()
+        is_initial = project.is_initial(job.path)
+        execution = JobExecution(job, is_initial, request_data)
+
+        execution.run_sync()
+
+        controller.run_waiting_scripts(execution.stage_run)
+
+        return {
+            "stdout": "".join(execution.stdout if execution else []),
+            "stderr": "".join(execution.stderr if execution else []),
+        }
+
+    @bp.route("/api/scripts/<path:id>", methods=["GET"])
+    @usage
+    def _get_script(id: str):
+        script = controller.get_script(id)
+        if not script:
+            flask.abort(404)
+        return script.editor_dto
+
+    @bp.route("/api/scripts/", methods=["GET"])
+    @usage
+    def _get_scripts():
+        return [f.editor_dto for f in controller.get_scripts()]
+
+    @bp.route("/api/scripts/", methods=["POST"])
+    @usage
+    def _create_script():
+        script = controller.create_script()
+        return script.editor_dto
+
+    @bp.route("/api/scripts/<path:id>", methods=["PUT"])
+    @usage
+    def _update_script(id: str):
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        script = controller.update_runtime(id, data)
+        return script.editor_dto if script else None
+
+    @bp.route("/api/scripts/<path:id>", methods=["DELETE"])
+    @usage
+    def _delete_script(id: str):
+        controller.delete_script(id)
+        return {"success": True}
+
+    @bp.route("/api/scripts/<path:id>/test", methods=["POST"])
+    @usage
+    def _test_script(id: str):
+        script = controller.get_script(id)
+
+        if not script:
+            flask.abort(404)
+
+        return controller.run_initial_script(script)
+
+    @bp.route("/api/workflow-editor/initial-data", methods=["GET"])
+    @usage
+    def _get_workflow_editor_data():
+        try:
+            return controller.workflow_initial_data()
+        except Exception as e:
+            return str(e), 500
+
+    @bp.route("/api/workflow-editor/move", methods=["POST"])
+    @usage
+    def _workflow_move():
+        try:
+            payload = flask.request.json
+            controller.workflow_move(payload)
+            return flask.Response(status=204)
+        except Exception as e:
+            return str(e), 500
+
+    @bp.route("/api/workflow-editor/add-nodes", methods=["POST"])
+    @usage
+    def _bulk_create_stages():
+        try:
+            payload = flask.request.json
+            controller.workflow_add_nodes(payload)
+            return flask.Response(status=204)
+        except Exception as e:
+            return str(e), 500
+
+    @bp.route("/api/workflow-editor/duplicate-nodes", methods=["POST"])
+    @usage
+    def _bulk_duplicate_stages():
+        try:
+            payload = flask.request.json
+            controller.workflow_duplicate_nodes(payload)
+            return flask.Response(status=204)
+        except Exception as e:
+            return str(e), 500
+
+    @bp.route("/api/workflow-editor/delete", methods=["POST"])
+    @usage
+    def _bulk_delete():
+        try:
+            payload = flask.request.json
+            controller.workflow_delete(payload)
+            return flask.Response(status=204)
+        except Exception as e:
+            return str(e), 500
+
+    @bp.route("/api/workflow-editor/add-transition", methods=["POST"])
+    @usage
+    def _bulk_create_transitions():
+        try:
+            payload = flask.request.json
+            controller.workflow_add_transition(payload)
+            return flask.Response(status=204)
+        except Exception as e:
+            return str(e), 500
+
+    @bp.route("/api/requirements", methods=["GET"])
+    @usage
+    def _get_requirements():
+        return controller.get_requirements()
+
+    @bp.route("/api/requirements", methods=["POST"])
+    @usage
+    def _create_requirement():
+        data = flask.request.json
+
+        if not data:
+            flask.abort(400)
+
+        return controller.create_requirement(data["name"], data.get("version"))
+
+    @bp.route("/api/requirements/<name>", methods=["DELETE"])
+    @usage
+    def _delete_requirement(name: str):
+        return controller.delete_requirement(name)
+
+    @bp.route("/api/requirements-recommendations", methods=["GET"])
+    @usage
+    def _get_requirements_recommendation():
+        return controller.get_requirements_recommendations()
+
+    @bp.route("/api/debugger", methods=["GET"])
+    def _get_debugger_status():
+        return controller.get_debugger_status()
+
+    @bp.route("/api/debugger/vscode-launch", methods=["POST"])
+    @usage
+    def _create_vscode_launch():
+        return controller.create_vscode_launch()
+
+    @bp.route("/api/login", methods=["GET"])
+    @usage
+    def _get_login():
+        return controller.get_login()
+
+    @bp.route("/api/login", methods=["POST"])
+    @usage
+    def _create_login():
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+
+        return controller.create_login(data["token"])
+
+    @bp.route("/api/login", methods=["DELETE"])
+    @usage
+    def _delete_login():
+        return controller.delete_login()
+
+    @bp.route("/api/project-info", methods=["GET"])
+    def _get_project_info():
+        return controller.get_project_info()
+
+    @bp.route("/api/ai/message", methods=["POST"])
+    @usage
+    def _get_next_message():
+        body = flask.request.json
+        if not body:
+            flask.abort(400)
+
+        streamer = controller.send_ai_message(body["messages"], body["runtime"])
+
+        if streamer is None:
+            flask.abort(403)
+
+        return flask.Response(streamer, mimetype="text/event-stream")
+
+    @bp.route("/api/linters/check", methods=["GET"])
+    def _check_linters():
+        return controller.check_linters()
+
+    @bp.route("/api/linters/fix/<rule_name>/<fix_name>", methods=["POST"])
+    @usage
+    def _fix_linter(rule_name: str, fix_name: str):
+        controller.fix_linter(rule_name, fix_name)
+        return {"success": True}
+
+    @bp.route("/<path:filename>", methods=["GET"])
+    @usage
+    def _spa(filename: str):
+        return send_from_dist(filename, "editor.html")
+
+    return bp
