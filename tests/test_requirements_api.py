@@ -1,7 +1,7 @@
 from unittest import TestCase
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.controller import MainController
-from abstra_internals.server.apps import create_app
+from abstra_internals.server import get_local_app
 from pathlib import Path
 
 
@@ -9,7 +9,7 @@ class TestRequirementsApi(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         controller = MainController()
-        self.client = create_app(controller).test_client()
+        self.client = get_local_app(controller).test_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

@@ -1,4 +1,4 @@
-from abstra_internals.repositories.json.classes import FormJSON
+from abstra_internals.repositories.project.project import FormStage
 from .utils import assert_form
 import unittest, json, os
 from pathlib import Path
@@ -22,7 +22,7 @@ class TestFormExamples(unittest.TestCase):
         msgs_path = f"./{example_name}/messages.json"
         msgs = json.load(self.base_path.joinpath(msgs_path).open())
         file_path = self.base_path.joinpath(code_path)
-        form_json = FormJSON(
+        form_json = FormStage(
             title="Test Form",
             path="test_form",
             file=file_path.as_posix(),

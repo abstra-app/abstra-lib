@@ -4,7 +4,7 @@ from pathlib import Path
 from tempfile import mkdtemp
 from shutil import move
 
-from .json.classes import AbstraJSONRepository
+from .project.project import ProjectRepository
 from ..settings import Settings
 from importlib_metadata import packages_distributions
 from pkg_resources import get_distribution
@@ -101,9 +101,9 @@ class RequirementsRepository:
     def get_recommendation(cls) -> List[RequirementRecommendation]:
         imported_modules: Set[RequirementRecommendation] = set()
 
-        abstra_json = AbstraJSONRepository.load()
+        project = ProjectRepository.load()
 
-        for python_file in abstra_json.project_files:
+        for python_file in project.project_files:
             try:
                 if not python_file.exists():
                     continue

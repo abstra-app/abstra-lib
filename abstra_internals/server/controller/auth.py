@@ -1,11 +1,10 @@
 import flask
 
-from ..controller import MainController
-from ...utils import endcode_fake_jwt, is_valid_email
+from ...utils import is_valid_email, endcode_fake_jwt
 from ...utils.environment import IS_PREVIEW, AUTHN_URL
 
 
-def get_fake_auth_proviver_bp(controller: MainController):
+def get_fake_auth_proviver_bp():
     bp = flask.Blueprint("fake-provider", __name__)
     emails = {}
 
@@ -47,7 +46,7 @@ def get_fake_auth_proviver_bp(controller: MainController):
     return bp
 
 
-def get_auth_bp(controller: MainController):
+def get_player_bp():
     bp = flask.Blueprint("auth", __name__)
 
     if not IS_PREVIEW and AUTHN_URL:
@@ -56,7 +55,7 @@ def get_auth_bp(controller: MainController):
     else:
         provider = "local"
         authority = f"/_auth"
-        auth_provider_bp = get_fake_auth_proviver_bp(controller)
+        auth_provider_bp = get_fake_auth_proviver_bp()
         bp.register_blueprint(auth_provider_bp)
 
     @bp.route("/config", methods=["GET"])

@@ -1,7 +1,7 @@
 import unittest
 from abstra_internals.server.controller import MainController, UnknownNodeTypeError
 from .fixtures import init_dir, clear_dir
-from abstra_internals.repositories.json.classes import AbstraJSONRepository
+from abstra_internals.repositories.project.project import ProjectRepository
 
 
 class TestWorkflowEditorAddNodesApi(unittest.TestCase):
@@ -13,16 +13,16 @@ class TestWorkflowEditorAddNodesApi(unittest.TestCase):
         clear_dir(self.path)
 
     def test_accept_empty_add_nodes(self):
-        old_json = AbstraJSONRepository.load()
+        old_json = ProjectRepository.load()
         self.controller.workflow_add_nodes([])
-        new_json = AbstraJSONRepository.load()
+        new_json = ProjectRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_adding(self):
         self.controller.workflow_add_nodes(
             [{"id": "form1", "type": "forms", "position": [0, 0], "title": "Form 1"}]
         )
-        json = AbstraJSONRepository.load()
+        json = ProjectRepository.load()
         self.assertEqual(len(json.forms), 1)
         self.assertEqual(json.forms[0].path, "form1")
         self.assertEqual(json.forms[0].workflow_position, (0, 0))

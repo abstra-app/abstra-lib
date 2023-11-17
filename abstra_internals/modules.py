@@ -1,6 +1,6 @@
 import uuid, sys, importlib, importlib.util as imp_util
 
-from .repositories.json.classes import AbstraJSONRepository
+from .repositories.project.project import ProjectRepository
 from .utils.file import path2module
 
 
@@ -17,9 +17,9 @@ def import_as_new(name: str):
 
 
 def reload_project_local_modules():
-    abstra_json = AbstraJSONRepository.load()
+    project = ProjectRepository.load()
 
-    for file in abstra_json.project_local_dependencies:
+    for file in project.project_local_dependencies:
         try:
             if not file.exists():
                 continue

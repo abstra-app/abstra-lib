@@ -1,36 +1,45 @@
+from abstra_internals.execution.dashes.dash_execution import DashExecution
+from ...repositories.project.project import ProjectRepository
 import flask, flask_sock
 
-from .auth import get_auth_bp
 from ...settings import Settings
-from .utils import send_from_dist
-from ..controller import MainController
+from ..utils import send_from_dist
 from ...execution.execution import RequestData
-from ...repositories.json.classes import AbstraJSONRepository
+from ...execution import HookExecution, JobExecution, FormExecution
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
-from ...execution import HookExecution, JobExecution, DashExecution, FormExecution
+
+from ..controller.main import MainController
+from ..controller import auth as auth_controller
+from ..controller import stage_runs as stage_runs_controller
 
 
 def get_player_bp(controller: MainController):
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
 
-    auth_bp = get_auth_bp(controller)
+    auth_bp = auth_controller.get_player_bp()
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
-    @bp.route("/_pages/<path:id_or_path>", methods=["GET"])
-    def get_runner_data(id_or_path):
-        runtime = controller.get_page_runtime(id_or_path)
-        if not runtime:
-            print("404", id_or_path)
+    stage_run_bp = stage_runs_controller.get_player_bp()
+    bp.register_blueprint(stage_run_bp, url_prefix="/_api/stage_runs")
+
+    @bp.route("/_api/workspace", methods=["GET"])
+    def _get_workspace():
+        workspace = controller.get_workspace()
+        return workspace.browser_runner_dto
+
+    @bp.route("/_pages/<string:path>", methods=["GET"])
+    def _get_page(path):
+        page_runtime = controller.get_form(path)
+        if not page_runtime:
             flask.abort(404)
 
-        workspace = controller.get_workspace()
-        res = {}
-        res[runtime.runner_type] = {
-            **runtime.browser_runner_dto,
-            "workspace": workspace.browser_runner_dto,  # TODO: fix this in frontend
+        return {
+            page_runtime.runner_type: {
+                **page_runtime.browser_runner_dto,
+                "workspace": controller.get_workspace().browser_runner_dto,
+            }
         }
-        return res
 
     @bp.route("/_version", methods=["GET"])
     def _get_version():
@@ -41,7 +50,7 @@ def get_player_bp(controller: MainController):
         return flask.jsonify({"show_watermark": SHOW_WATERMARK})
 
     @sock.route("/_socket")
-    def websocket(conn: flask_sock.Server):
+    def _websocket(conn: flask_sock.Server):
         request_data = RequestData(
             query_params=flask.request.args,
             body=flask.request.get_data(as_text=True),
@@ -54,8 +63,8 @@ def get_player_bp(controller: MainController):
             if dash_path is not None:
                 dash = controller.get_dash(dash_path)
 
-                abstra_json = AbstraJSONRepository.load()
-                is_initial = abstra_json.is_initial(dash_path)
+                project = ProjectRepository.load()
+                is_initial = project.is_initial(dash_path)
 
                 if not dash:
                     conn.close(reason=404, message="Not found")
@@ -67,8 +76,8 @@ def get_player_bp(controller: MainController):
             if form_path is not None:
                 form = controller.get_form(form_path)
 
-                abstra_json = AbstraJSONRepository.load()
-                is_initial = abstra_json.is_initial(form_path)
+                project = ProjectRepository.load()
+                is_initial = project.is_initial(form_path)
 
                 if not form:
                     conn.close(reason=404, message="Not found")
@@ -125,6 +134,7 @@ def get_player_bp(controller: MainController):
     @bp.route("/_hooks/<path:path>", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     def hook_runner(path):
         hook = controller.get_hook(path)
+
         if not hook:
             flask.abort(404)
 
@@ -138,17 +148,18 @@ def get_player_bp(controller: MainController):
             method=flask.request.method,
         )
 
-        abstra_json = AbstraJSONRepository.load()
-        is_initial = abstra_json.is_initial(path)
+        project = ProjectRepository.load()
 
-        execution = HookExecution(hook, is_initial, request_data)
+        execution = HookExecution(
+            is_initial=project.is_initial(hook.path),
+            request=request_data,
+            runtime_json=hook,
+        )
 
         execution.run_sync()
-
         controller.run_waiting_scripts(execution.stage_run)
 
         body, status, headers = execution.get_response()
-
         return flask.Response(status=status, headers=headers, response=body)
 
     @bp.route("/_jobs/<path:path>", methods=["POST"])
@@ -171,10 +182,13 @@ def get_player_bp(controller: MainController):
         )
 
         def run_job(job):
-            abstra_json = AbstraJSONRepository.load()
-            is_initial = abstra_json.is_initial(path)
+            project = ProjectRepository.load()
 
-            execution = JobExecution(job, is_initial, request_data)
+            execution = JobExecution(
+                is_initial=project.is_initial(job.id),
+                request=request_data,
+                runtime_json=job,
+            )
 
             execution.run_sync()
             controller.run_waiting_scripts(execution.stage_run)
@@ -182,6 +196,11 @@ def get_player_bp(controller: MainController):
         controller.executor.submit(run_job, job)
 
         return {"status": "running"}
+
+    @bp.route("/", methods=["GET"])
+    def index():
+        res = send_from_dist("player.html", "player.html")
+        return res
 
     @bp.route("/<path:filename>", methods=["GET"])
     def spa(filename: str):

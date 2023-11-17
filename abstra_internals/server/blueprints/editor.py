@@ -1,17 +1,21 @@
 import flask
-from ...execution.execution import RequestData
-from ..controller import MainController
 from ...usage import usage
 from ...settings import Settings
-from .utils import send_from_dist
-from ...execution.hook_execution import HookExecution
+from ..utils import send_from_dist
+from ...execution.execution import RequestData
 from ...execution.job_execution import JobExecution
-from ...execution.script_execution import ScriptExecution
-from ...repositories.json.classes import AbstraJSONRepository
+from ...execution.hook_execution import HookExecution
+from ...repositories.project.project import ProjectRepository
+
+from ..controller.main import MainController
+from ..controller import stage_runs as stage_runs_controller
 
 
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor", __name__)
+
+    stage_run_bp = stage_runs_controller.get_editor_bp()
+    bp.register_blueprint(stage_run_bp, url_prefix="/api/stage_runs")
 
     @bp.route("/", methods=["GET"])
     @usage
@@ -131,10 +135,10 @@ def get_editor_bp(controller: MainController):
         controller.delete_dash(path)
         return {"success": True}
 
-    @bp.route("/api/hooks/<path:path>", methods=["GET"])
+    @bp.route("/api/hooks/<path:id>", methods=["GET"])
     @usage
-    def _get_hook(path: str):
-        hook = controller.get_hook(path)
+    def _get_hook(id: str):
+        hook = controller.get_hook(id)
         if not hook:
             flask.abort(404)
         return hook.editor_dto
@@ -150,20 +154,20 @@ def get_editor_bp(controller: MainController):
         hook = controller.create_hook()
         return hook.editor_dto
 
-    @bp.route("/api/hooks/<path:path>", methods=["PUT"])
+    @bp.route("/api/hooks/<path:id>", methods=["PUT"])
     @usage
-    def _update_hook(path: str):
-        data = flask.request.json
-        if not data:
+    def _update_hook(id: str):
+        changes = flask.request.json
+        if not changes:
             flask.abort(400)
 
-        hook = controller.update_runtime(path, data)
+        hook = controller.update_runtime(id, changes)
         return hook.editor_dto if hook else None
 
-    @bp.route("/api/hooks/<path:path>", methods=["DELETE"])
+    @bp.route("/api/hooks/<path:id>", methods=["DELETE"])
     @usage
-    def _delete_hook(path: str):
-        controller.delete_hook(path)
+    def _delete_hook(id: str):
+        controller.delete_hook(id)
         return {"success": True}
 
     @bp.route(
@@ -182,8 +186,8 @@ def get_editor_bp(controller: MainController):
             query_params=flask.request.args,
         )
 
-        abstra_json = AbstraJSONRepository.load()
-        is_initial = abstra_json.is_initial(hook.path)
+        project = ProjectRepository.load()
+        is_initial = project.is_initial(hook.path)
         execution = HookExecution(hook, is_initial, request_data)
 
         execution.run_sync()
@@ -200,10 +204,10 @@ def get_editor_bp(controller: MainController):
             "stderr": "".join(execution.stderr if execution else []),
         }
 
-    @bp.route("/api/jobs/<path:identifier>", methods=["GET"])
+    @bp.route("/api/jobs/<path:id>", methods=["GET"])
     @usage
-    def _get_job(identifier: str):
-        job = controller.get_job(identifier)
+    def _get_job(id: str):
+        job = controller.get_job(id)
         if not job:
             flask.abort(404)
         return job.editor_dto
@@ -219,26 +223,26 @@ def get_editor_bp(controller: MainController):
         job = controller.create_job()
         return job.editor_dto
 
-    @bp.route("/api/jobs/<path:identifier>", methods=["PUT"])
+    @bp.route("/api/jobs/<path:id>", methods=["PUT"])
     @usage
-    def _update_runtime(identifier: str):
+    def _update_runtime(id: str):
         data = flask.request.json
         if not data:
             flask.abort(400)
 
-        job = controller.update_runtime(identifier, data)
+        job = controller.update_runtime(id, data)
         return job.editor_dto if job else None
 
-    @bp.route("/api/jobs/<path:identifier>", methods=["DELETE"])
+    @bp.route("/api/jobs/<path:id>", methods=["DELETE"])
     @usage
-    def _delete_job(identifier: str):
-        controller.delete_job(identifier)
+    def _delete_job(id: str):
+        controller.delete_job(id)
         return {"success": True}
 
-    @bp.route("/api/jobs/<path:identifier>/test", methods=["POST"])
+    @bp.route("/api/jobs/<path:id>/test", methods=["POST"])
     @usage
-    def _test_job(identifier: str):
-        job = controller.get_job(identifier)
+    def _test_job(id: str):
+        job = controller.get_job(id)
         if not job:
             flask.abort(404)
 
@@ -249,8 +253,8 @@ def get_editor_bp(controller: MainController):
             query_params=flask.request.args,
         )
 
-        abstra_json = AbstraJSONRepository.load()
-        is_initial = abstra_json.is_initial(job.path)
+        project = ProjectRepository.load()
+        is_initial = project.is_initial(job.path)
         execution = JobExecution(job, is_initial, request_data)
 
         execution.run_sync()
@@ -262,10 +266,10 @@ def get_editor_bp(controller: MainController):
             "stderr": "".join(execution.stderr if execution else []),
         }
 
-    @bp.route("/api/scripts/<path:identifier>", methods=["GET"])
+    @bp.route("/api/scripts/<path:id>", methods=["GET"])
     @usage
-    def _get_script(identifier: str):
-        script = controller.get_script(identifier)
+    def _get_script(id: str):
+        script = controller.get_script(id)
         if not script:
             flask.abort(404)
         return script.editor_dto
@@ -281,40 +285,35 @@ def get_editor_bp(controller: MainController):
         script = controller.create_script()
         return script.editor_dto
 
-    @bp.route("/api/scripts/<path:identifier>", methods=["PUT"])
+    @bp.route("/api/scripts/<path:id>", methods=["PUT"])
     @usage
-    def _update_script(identifier: str):
+    def _update_script(id: str):
         data = flask.request.json
         if not data:
             flask.abort(400)
 
-        script = controller.update_runtime(identifier, data)
+        script = controller.update_runtime(id, data)
         return script.editor_dto if script else None
 
-    @bp.route("/api/scripts/<path:identifier>", methods=["DELETE"])
+    @bp.route("/api/scripts/<path:id>", methods=["DELETE"])
     @usage
-    def _delete_script(identifier: str):
-        controller.delete_script(identifier)
+    def _delete_script(id: str):
+        controller.delete_script(id)
         return {"success": True}
 
-    @bp.route("/api/scripts/<path:path>/test", methods=["POST"])
+    @bp.route("/api/scripts/<path:id>/test", methods=["POST"])
     @usage
-    def _test_script(path: str):
-        script = controller.get_script(path)
+    def _test_script(id: str):
+        script = controller.get_script(id)
 
         if not script:
             flask.abort(404)
 
         return controller.run_initial_script(script)
 
-    @bp.route("/api/stage_runs", methods=["GET"])
-    @usage
-    def _get_stage_runs():
-        return controller.get_stage_runs()
-
     @bp.route("/api/workflow-editor/initial-data", methods=["GET"])
     @usage
-    def _workflow_initial_data():
+    def _get_workflow_editor_data():
         try:
             return controller.workflow_initial_data()
         except Exception as e:
@@ -332,7 +331,7 @@ def get_editor_bp(controller: MainController):
 
     @bp.route("/api/workflow-editor/add-nodes", methods=["POST"])
     @usage
-    def _workflow_add_nodes():
+    def _bulk_create_stages():
         try:
             payload = flask.request.json
             controller.workflow_add_nodes(payload)
@@ -342,7 +341,7 @@ def get_editor_bp(controller: MainController):
 
     @bp.route("/api/workflow-editor/duplicate-nodes", methods=["POST"])
     @usage
-    def _workflow_duplicate_nodes():
+    def _bulk_duplicate_stages():
         try:
             payload = flask.request.json
             controller.workflow_duplicate_nodes(payload)
@@ -352,7 +351,7 @@ def get_editor_bp(controller: MainController):
 
     @bp.route("/api/workflow-editor/delete", methods=["POST"])
     @usage
-    def _workflow_delete():
+    def _bulk_delete():
         try:
             payload = flask.request.json
             controller.workflow_delete(payload)
@@ -362,7 +361,7 @@ def get_editor_bp(controller: MainController):
 
     @bp.route("/api/workflow-editor/add-transition", methods=["POST"])
     @usage
-    def _workflow_add_transition():
+    def _bulk_create_transitions():
         try:
             payload = flask.request.json
             controller.workflow_add_transition(payload)

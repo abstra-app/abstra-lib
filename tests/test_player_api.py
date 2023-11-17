@@ -1,7 +1,5 @@
 import unittest
 from .fixtures import init_dir, clear_dir
-from abstra_internals.server.apps.player import get_player_bp
-from abstra_internals.server.controller import MainController
 from abstra_internals.server import get_cloud_app
 
 

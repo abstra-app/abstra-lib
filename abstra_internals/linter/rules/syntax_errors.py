@@ -1,6 +1,6 @@
 from ..linter import LinterRule, LinterIssue, LinterFix
 from ...utils.file import traverse_code
-from ...repositories.json.classes import AbstraJSONRepository
+from ...repositories.project.project import ProjectRepository
 from typing import List
 import webbrowser
 from pathlib import Path
@@ -30,8 +30,8 @@ class SyntaxErrors(LinterRule):
     error = None
 
     def find_issues(self) -> List[LinterIssue]:
-        abstra_json = AbstraJSONRepository.load()
-        for entrypoint in abstra_json.iter_entrypoints():
+        project = ProjectRepository.load()
+        for entrypoint in project.iter_entrypoints():
             try:
                 for _ in traverse_code(entrypoint, raise_on_syntax_errors=True):
                     pass

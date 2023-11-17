@@ -1,27 +1,27 @@
 import unittest
 from .fixtures import init_dir, clear_dir
 from abstra_internals.server.controller import MainController
-from abstra_internals.repositories.json.classes import AbstraJSON, HookJSON
-from abstra_internals.server.apps import create_app
-from abstra_internals.repositories.json.classes import AbstraJSONRepository
+from abstra_internals.repositories.project.project import Project, HookStage
+from abstra_internals.server import get_local_app
+from abstra_internals.repositories.project.project import ProjectRepository
 
 
 class TestHookExecution(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         controller = MainController()
-        abstra_json = AbstraJSON.create()
+        project = Project.create()
         file = "initial_hook.py"
         self.root.joinpath(file).write_text("print('hello world')")
-        hook = HookJSON(
+        hook = HookStage(
             file=file,
             path="initial_hook",
             title="Hook 1",
             workflow_transitions=[],
         )
-        abstra_json.hooks.append(hook)
-        AbstraJSONRepository.save(abstra_json)
-        self.client = create_app(controller).test_client()
+        project.hooks.append(hook)
+        ProjectRepository.save(project)
+        self.client = get_local_app(controller).test_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

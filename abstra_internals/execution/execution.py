@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 from dataclasses import dataclass
 import threading, traceback, uuid
 
-from ..repositories.json.classes import AbstraJSONRepository
+from ..repositories.project.project import ProjectRepository
 from ..repositories import StageRunRepository
 from ..repositories.stage_run import StageRun
 from ..utils.environment import IS_PREVIEW
@@ -11,7 +11,7 @@ from ..monitoring import LogMessage, log
 from ..modules import import_as_new
 
 if TYPE_CHECKING:
-    from ..repositories.json.classes import RuntimeJSON
+    from ..repositories.project.project import RuntimeJSON
 
 
 class NoExecutionFound(Exception):
@@ -237,10 +237,10 @@ class Execution:
             else []
         )
 
-        abstra_json = AbstraJSONRepository.load()
+        project = ProjectRepository.load()
         allowed_stages = list([transition.target_path for transition in transitions])
         allowed_titles = [
-            abstra_json.get_workflow_runtime_by_path(stage).title
+            project.get_workflow_runtime_by_path(stage).title
             for stage in allowed_stages
         ]
 

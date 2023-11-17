@@ -1,33 +1,35 @@
 from ..linter import LinterRule, LinterFix, LinterIssue
-from ...repositories.json.classes import (
-    AbstraJSONRepository,
-    FormJSON,
-    HookJSON,
-    JobJSON,
-    ScriptJSON,
-    WorkflowRuntimeJSON,
+from ...repositories.project.project import (
+    ProjectRepository,
+    FormStage,
+    HookStage,
+    JobStage,
+    ScriptStage,
+    WorkflowStage,
 )
 from typing import Union, List
 from ...templates import new_hook_code, new_job_code, new_script_code, new_form_code
 
 
 class AddEntrypoint(LinterFix):
-    runtime: Union[FormJSON, HookJSON, JobJSON, ScriptJSON]
+    runtime: Union[FormStage, HookStage, JobStage, ScriptStage]
 
-    def __init__(self, runtime: Union[FormJSON, HookJSON, JobJSON, ScriptJSON]) -> None:
+    def __init__(
+        self, runtime: Union[FormStage, HookStage, JobStage, ScriptStage]
+    ) -> None:
         self.runtime = runtime
 
     def make_label(self):
         return f"Create {self.runtime.file}"
 
     def fix(self):
-        if isinstance(self.runtime, FormJSON):
+        if isinstance(self.runtime, FormStage):
             self.runtime.file_path.write_text(new_form_code)
-        elif isinstance(self.runtime, HookJSON):
+        elif isinstance(self.runtime, HookStage):
             self.runtime.file_path.write_text(new_hook_code)
-        elif isinstance(self.runtime, JobJSON):
+        elif isinstance(self.runtime, JobStage):
             self.runtime.file_path.write_text(new_job_code)
-        elif isinstance(self.runtime, ScriptJSON):
+        elif isinstance(self.runtime, ScriptStage):
             self.runtime.file_path.write_text(new_script_code)
         else:
             raise Exception(f"Unknown runtime: {self.runtime}")
@@ -38,7 +40,7 @@ class AddEntrypoint(LinterFix):
 
 
 class NoEntrypointFound(LinterIssue):
-    def __init__(self, runtime: WorkflowRuntimeJSON) -> None:
+    def __init__(self, runtime: WorkflowStage) -> None:
         self.label = f"The {runtime.runner_type} entitled {runtime.title} points to a non-existent file: {runtime.file}"
         self.fixes = [AddEntrypoint(runtime)]
 
@@ -48,21 +50,21 @@ class MissingEntrypoint(LinterRule):
     type = "bug"
 
     def find_issues(self) -> List[LinterIssue]:
-        abstra_json = AbstraJSONRepository.load()
+        project = ProjectRepository.load()
         issues = []
-        for form in abstra_json.forms:
+        for form in project.forms:
             if not form.file_path.exists():
                 issues.append(NoEntrypointFound(form))
 
-        for hook in abstra_json.hooks:
+        for hook in project.hooks:
             if not hook.file_path.exists():
                 issues.append(NoEntrypointFound(hook))
 
-        for job in abstra_json.jobs:
+        for job in project.jobs:
             if not job.file_path.exists():
                 issues.append(NoEntrypointFound(job))
 
-        for script in abstra_json.scripts:
+        for script in project.scripts:
             if not script.file_path.exists():
                 issues.append(NoEntrypointFound(script))
 

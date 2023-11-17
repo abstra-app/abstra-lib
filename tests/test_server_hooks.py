@@ -1,16 +1,16 @@
 import unittest, pathlib
 from abstra_internals.server.controller import MainController
 from .fixtures import init_dir, clear_dir
-from abstra_internals.server.apps import create_app
+from abstra_internals.server import get_local_app
 from abstra_internals.templates import new_hook_code
-from abstra_internals.repositories.json.classes import AbstraJSONRepository
+from abstra_internals.repositories.project.project import ProjectRepository
 
 
 class TestHooks(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         controller = MainController()
-        self.client = create_app(controller).test_client()
+        self.client = get_local_app(controller).test_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -53,9 +53,7 @@ class TestHooks(unittest.TestCase):
             ],
         )
 
-        self.assertEqual(
-            len(AbstraJSONRepository.load().forms[0].workflow_transitions), 1
-        )
+        self.assertEqual(len(ProjectRepository.load().forms[0].workflow_transitions), 1)
 
         self.client.put(
             "/_editor/api/hooks/" + target["path"], json={"path": "new_path"}

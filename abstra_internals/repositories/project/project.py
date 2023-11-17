@@ -9,12 +9,12 @@ from ...utils import check_is_url
 from ...utils.file import traverse_code
 from ...settings import Settings
 
-RuntimeJSON = Union["FormJSON", "DashJSON", "HookJSON", "JobJSON", "ScriptJSON"]
-WorkflowRuntimeJSON = Union["FormJSON", "HookJSON", "JobJSON", "ScriptJSON"]
+RuntimeJSON = Union["FormStage", "DashJSON", "HookStage", "JobStage", "ScriptStage"]
+WorkflowStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
 
 
 @dataclass
-class WorkflowTransitionJSON:
+class WorkflowTransition:
     target_path: str
     target_type: str
     label: str
@@ -34,7 +34,7 @@ class WorkflowTransitionJSON:
 
     @staticmethod
     def from_dict(data: dict):
-        return WorkflowTransitionJSON(
+        return WorkflowTransition(
             target_path=data["target_path"],
             target_type=data["target_type"],
             label=data["label"],
@@ -49,11 +49,11 @@ class SidebarRuntime:
 
 
 @dataclass
-class HookJSON:
+class HookStage:
     file: str
     path: str
     title: str
-    workflow_transitions: List[WorkflowTransitionJSON]
+    workflow_transitions: List[WorkflowTransition]
     is_initial: bool = False
     enabled: bool = False
     workflow_position: Tuple[float, float] = (0, 0)
@@ -94,14 +94,14 @@ class HookJSON:
     @staticmethod
     def from_dict(data: dict):
         x, y = data["workflow_position"]
-        return HookJSON(
+        return HookStage(
             file=data["file"],
             path=data["path"],
             title=data["title"],
             enabled=data["enabled"],
             workflow_position=(x, y),
             workflow_transitions=[
-                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
             is_initial=data["is_initial"],
         )
@@ -111,11 +111,11 @@ class HookJSON:
 
 
 @dataclass
-class ScriptJSON:
+class ScriptStage:
     file: str
     title: str
     path: str
-    workflow_transitions: List[WorkflowTransitionJSON]
+    workflow_transitions: List[WorkflowTransition]
     is_initial: bool = False
     workflow_position: Tuple[float, float] = (0, 0)
 
@@ -155,14 +155,14 @@ class ScriptJSON:
     @staticmethod
     def from_dict(data: Dict):
         x, y = data["workflow_position"]
-        return ScriptJSON(
+        return ScriptStage(
             file=data["file"],
             path=data["path"],
             title=data["title"],
             workflow_position=(x, y),
             is_initial=data["is_initial"],
             workflow_transitions=[
-                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
         )
 
@@ -171,13 +171,13 @@ class ScriptJSON:
 
 
 @dataclass
-class JobJSON:
+class JobStage:
     file: str
     title: str
     identifier: str
     schedule: str
     workflow_position: Tuple[float, float]
-    workflow_transitions: List[WorkflowTransitionJSON]
+    workflow_transitions: List[WorkflowTransition]
 
     @property
     def runner_type(self):
@@ -214,14 +214,14 @@ class JobJSON:
     @staticmethod
     def from_dict(data: Dict):
         x, y = data["workflow_position"]
-        return JobJSON(
+        return JobStage(
             file=data["file"],
             identifier=data["identifier"],
             title=data["title"],
             schedule=data["schedule"],
             workflow_position=(x, y),
             workflow_transitions=[
-                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
         )
 
@@ -234,10 +234,10 @@ class JobJSON:
 
 
 @dataclass
-class FormJSON(SidebarRuntime):
+class FormStage(SidebarRuntime):
     file: str
     title: str
-    workflow_transitions: List[WorkflowTransitionJSON]
+    workflow_transitions: List[WorkflowTransition]
     is_initial: bool = False
     workflow_position: Tuple[float, float] = (0, 0)
     end_message: Optional[str] = None
@@ -315,7 +315,7 @@ class FormJSON(SidebarRuntime):
     @staticmethod
     def from_dict(data: dict):
         x, y = data["workflow_position"]
-        return FormJSON(
+        return FormStage(
             file=data["file"],
             path=data["path"],
             title=data["title"],
@@ -331,7 +331,7 @@ class FormJSON(SidebarRuntime):
             workflow_position=(x, y),
             is_initial=data["is_initial"],
             workflow_transitions=[
-                WorkflowTransitionJSON.from_dict(t) for t in data["transitions"]
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
         )
 
@@ -717,7 +717,7 @@ class SidebarJSON:
     def from_dict(
         sidebar_data: List[dict],
         dashes: List[DashJSON] = [],
-        forms: List[FormJSON] = [],
+        forms: List[FormStage] = [],
     ):
         item_name = lambda path: [s.title for s in [*dashes, *forms] if s.path == path][
             0
@@ -808,7 +808,7 @@ class WorkspaceJSON:
         self,
         changes: Dict[str, Any],
         dashes: List[DashJSON] = [],
-        forms: List[FormJSON] = [],
+        forms: List[FormStage] = [],
     ):
         for attr, value in changes.items():
             if attr == "sidebar":
@@ -817,7 +817,7 @@ class WorkspaceJSON:
                 setattr(self, attr, value)
 
     @staticmethod
-    def from_dict(data: Dict, dashes: List[DashJSON] = [], forms: List[FormJSON] = []):
+    def from_dict(data: Dict, dashes: List[DashJSON] = [], forms: List[FormStage] = []):
         return WorkspaceJSON(
             name=data.get("name", "Untitled Workspace"),
             sidebar=SidebarJSON.from_dict(
@@ -848,14 +848,14 @@ class TransitionNotFoundError(KeyError):
 
 
 @dataclass
-class AbstraJSON:
+class Project:
     version: str
     workspace: WorkspaceJSON
-    scripts: List[ScriptJSON]
+    scripts: List[ScriptStage]
     dashes: List[DashJSON]
-    forms: List[FormJSON]
-    hooks: List[HookJSON]
-    jobs: List[JobJSON]
+    forms: List[FormStage]
+    hooks: List[HookStage]
+    jobs: List[JobStage]
 
     @property
     def __dict__(self):
@@ -874,7 +874,7 @@ class AbstraJSON:
         return [*self.forms, *self.dashes, *self.hooks, *self.jobs]
 
     @property
-    def workflow_runtimes(self) -> List[WorkflowRuntimeJSON]:
+    def workflow_runtimes(self) -> List[WorkflowStage]:
         return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
 
     def iter_entrypoints(self) -> Generator[Path, None, None]:
@@ -916,7 +916,7 @@ class AbstraJSON:
 
         return None
 
-    def get_workflow_runtime_by_path(self, path: str) -> WorkflowRuntimeJSON:
+    def get_workflow_runtime_by_path(self, path: str) -> WorkflowStage:
         for form in self.forms:
             if form.path == path:
                 return form
@@ -935,7 +935,7 @@ class AbstraJSON:
 
         raise RuntimeNotFoundError(f"Runtime with id '{path}' not found")
 
-    def get_page_by_path(self, path: str) -> Optional[Union[DashJSON, FormJSON]]:
+    def get_page_by_path(self, path: str) -> Optional[Union[DashJSON, FormStage]]:
         for form in self.forms:
             if form.path == path:
                 return form
@@ -956,7 +956,7 @@ class AbstraJSON:
 
     def find_transition(
         self, source_id: str, target_id: str
-    ) -> Optional[WorkflowTransitionJSON]:
+    ) -> Optional[WorkflowTransition]:
         runtime = self.get_workflow_runtime_by_path(source_id)
         for transition in runtime.workflow_transitions:
             if transition.target_path == target_id:
@@ -977,7 +977,7 @@ class AbstraJSON:
             ]
 
     def _update_path_refs(self, old_path: str, new_path: str):
-        runtimes: List[Union[FormJSON, HookJSON, JobJSON]] = [
+        runtimes: List[Union[FormStage, HookStage, JobStage]] = [
             *self.forms,
             *self.hooks,
             *self.jobs,
@@ -1011,13 +1011,13 @@ class AbstraJSON:
         self.delete_transition_by_target(id)
         if isinstance(runtime, DashJSON):
             self.dashes = [d for d in self.dashes if d.path != id]
-        elif isinstance(runtime, FormJSON):
+        elif isinstance(runtime, FormStage):
             self.forms = [f for f in self.forms if f.path != id]
-        elif isinstance(runtime, HookJSON):
+        elif isinstance(runtime, HookStage):
             self.hooks = [h for h in self.hooks if h.path != id]
-        elif isinstance(runtime, JobJSON):
+        elif isinstance(runtime, JobStage):
             self.jobs = [j for j in self.jobs if j.identifier != id]
-        elif isinstance(runtime, ScriptJSON):
+        elif isinstance(runtime, ScriptStage):
             self.scripts = [s for s in self.scripts if s.path != id]
 
     def is_initial(self, runtime_path: str) -> bool:
@@ -1046,17 +1046,17 @@ class AbstraJSON:
                         tg_runtime["is_initial"] = False
 
         try:
-            scripts = [ScriptJSON.from_dict(script) for script in data["scripts"]]
+            scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
             dashes = [DashJSON.from_dict(dash) for dash in data["dashes"]]
-            forms = [FormJSON.from_dict(form) for form in data["forms"]]
-            hooks = [HookJSON.from_dict(hook) for hook in data["hooks"]]
-            jobs = [JobJSON.from_dict(job) for job in data["jobs"]]
+            forms = [FormStage.from_dict(form) for form in data["forms"]]
+            hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
+            jobs = [JobStage.from_dict(job) for job in data["jobs"]]
 
             workspace = WorkspaceJSON.from_dict(
                 data["workspace"], dashes=dashes, forms=forms
             )
 
-            return AbstraJSON(
+            return Project(
                 version=data["version"],
                 workspace=workspace,
                 scripts=scripts,
@@ -1074,7 +1074,7 @@ class AbstraJSON:
 
     @staticmethod
     def create():
-        return AbstraJSON(
+        return Project(
             version="0.1",
             workspace=WorkspaceJSON(name="Untitled Workspace", sidebar=SidebarJSON([])),
             forms=[],
@@ -1098,7 +1098,7 @@ def _update_file(
     runtime.file = new_file_relative
 
 
-class AbstraJSONRepository:
+class ProjectRepository:
     @classmethod
     def get_file_path(cls):
         return Settings.root_path / "abstra.json"
@@ -1106,23 +1106,21 @@ class AbstraJSONRepository:
     @classmethod
     def initialize(cls):
         if not cls.exists():  # double check
-            cls.save(AbstraJSON.create())
+            cls.save(Project.create())
 
     @classmethod
     def exists(cls):
         return cls.get_file_path().exists()
 
     @classmethod
-    def save(cls, abstra_json: AbstraJSON):
+    def save(cls, project: Project):
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
         with temp_file.open("w") as f:
-            json.dump(abstra_json.__dict__, f, indent=2)
+            json.dump(project.__dict__, f, indent=2)
         shutil.move(str(temp_file), cls.get_file_path())
 
     @classmethod
-    def load(cls) -> AbstraJSON:
-        abstra_json_content = json.loads(
-            cls.get_file_path().read_text(encoding="utf-8")
-        )
-        return AbstraJSON.from_dict(abstra_json_content)
+    def load(cls) -> Project:
+        project_content = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
+        return Project.from_dict(project_content)
