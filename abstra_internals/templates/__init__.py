@@ -14,5 +14,7 @@ vscode_launch_json = json.load(
 )
 
 
-def create_abstraignore(dir: pathlib.Path):
-    (dir / ".abstraignore").write_text(abstraignore, encoding="utf-8")
+def ensure_abstraignore(dir: pathlib.Path):
+    path = dir / ".abstraignore"
+    if not path.exists():
+        path.write_text(abstraignore, encoding="utf-8")
