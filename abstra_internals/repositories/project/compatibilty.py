@@ -11,9 +11,6 @@ def strict_compatible_missing_entities(data):
     if "forms" not in data:
         data["forms"] = []
 
-    if "dashes" not in data:
-        data["dashes"] = []
-
     if "scripts" not in data:
         data["scripts"] = []
 
@@ -141,10 +138,22 @@ def strict_compatible_remove_dangling_transitions(data: dict):
     return data
 
 
+def strict_compatible_remove_dashes(data: dict):
+    if "dashes" in data:
+        if len(data["dashes"]):
+            raise Exception(
+                "Dashes are not supported in this version of Abstra. Please use v1.17 or lower."
+            )
+        del data["dashes"]
+
+    return data
+
+
 def strict_compatible(data: dict):
     data = strict_compatible_missing_entities(data)
     data = strict_compatible_workflow_positions(data)
     data = strict_compatible_is_initial(data)
     data = strict_compatible_transitions(data)
     data = strict_compatible_remove_dangling_transitions(data)
+    data = strict_compatible_remove_dashes(data)
     return data

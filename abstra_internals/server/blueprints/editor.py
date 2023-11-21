@@ -9,7 +9,6 @@ from ..controller import hooks as hooks_controller
 from ..controller import forms as forms_controller
 from ..controller import login as login_controller
 from ..controller import assets as assets_controller
-from ..controller import dashes as dashes_controller
 from ..controller import scripts as scripts_controller
 from ..controller import linters as linters_controller
 from ..controller import debugger as debugger_controller
@@ -30,9 +29,6 @@ def __get_api_bp(controller: MainController):
 
     forms_bp = forms_controller.get_editor_bp(controller)
     bp.register_blueprint(forms_bp, url_prefix="/forms")
-
-    dashes_bp = dashes_controller.get_editor_bp(controller)
-    bp.register_blueprint(dashes_bp, url_prefix="/dashes")
 
     hooks_bp = hooks_controller.get_editor_bp(controller)
     bp.register_blueprint(hooks_bp, url_prefix="/hooks")

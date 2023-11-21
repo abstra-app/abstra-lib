@@ -4,11 +4,8 @@ from json import loads, dumps
 
 from abstra_internals.overloads import overloads
 from abstra_internals.execution.execution import RequestData
-from abstra_internals.contract.dashes import ExecutionIdMessage
 from abstra_internals.execution.form_execution import FormExecution
-from abstra_internals.execution.dashes.dash_runtime import DashRuntime
-from abstra_internals.repositories.project.project import DashJSON, FormStage
-from abstra_internals.execution.dashes.dash_execution import DashExecution
+from abstra_internals.repositories.project.project import FormStage
 
 overloads()
 
@@ -78,24 +75,3 @@ def assert_form(
 
     for msg in iter_messages(conn, msgs, test_case):
         pass
-
-
-def assert_dash(
-    test_case: unittest.TestCase, dash_json: DashJSON, msg_list: list, execution_id: str
-):
-    msgs = deque(msg_list)
-    browser_msgs = [msg[1] for msg in msg_list if msg[0] == "browser"]
-    conn = MockConnection(browser_msgs=browser_msgs)
-
-    request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
-
-    execution = DashExecution(dash_json, True, conn, request_data, execution_id)  # type: ignore
-
-    # copy of implemetation of DashExecution.run()
-    dash_runtime = DashRuntime(execution=execution, dash_json=dash_json)
-    execution.send(ExecutionIdMessage(execution_id))
-    for _ in iter_messages(conn, msgs, test_case):
-        source = msgs[0][0]
-        if source == "browser":
-            type, data = execution.recv()
-            dash_runtime.handle(type, data)

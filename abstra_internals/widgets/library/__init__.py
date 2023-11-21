@@ -5,7 +5,6 @@ from .ChecklistInput import ChecklistInput
 from .TextOutput import TextOutput
 from .CnpjInput import CnpjInput
 from .CustomInput import CustomInput
-from .KanbanBoardInput import KanbanBoardInput
 from .MultipleChoiceInput import MultipleChoiceInput
 from .PhoneInput import PhoneInput
 from .NpsInput import NpsInput
@@ -21,7 +20,6 @@ from .TagInput import TagInput
 from .EmailInput import EmailInput
 from .PandasOutput import PandasOutput
 from .DateInput import DateInput
-from .ClickInput import ClickInput
 from .IframeOutput import IframeOutput
 from .NumberSliderInput import NumberSliderInput
 from .HtmlOutput import HtmlOutput

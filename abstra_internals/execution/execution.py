@@ -11,7 +11,7 @@ from ..monitoring import LogMessage, log
 from ..modules import import_as_new
 
 if TYPE_CHECKING:
-    from ..repositories.project.project import RuntimeJSON
+    from ..repositories.project.project import WorkflowStage
 
 
 class NoExecutionFound(Exception):
@@ -70,7 +70,7 @@ class Execution:
     is_initial: bool
     request: RequestData
     thread: threading.Thread
-    runtime_json: RuntimeJSON
+    runtime_json: WorkflowStage
 
     stage_run_freezed: Optional[StageRun] = None
     stage_run_draft: Optional[StageRun] = None
@@ -82,7 +82,7 @@ class Execution:
 
     def __init__(
         self,
-        runtime_json: RuntimeJSON,
+        runtime_json: WorkflowStage,
         is_initial: bool,
         request: RequestData,
         execution_id=None,
@@ -231,11 +231,7 @@ class Execution:
         if not self.stage_run:
             raise UnsetStageRun()
 
-        transitions = (
-            self.runtime_json.workflow_transitions  # type: ignore
-            if self.runtime_json.runner_type != "dash"
-            else []
-        )
+        transitions = self.runtime_json.workflow_transitions
 
         project = ProjectRepository.load()
         allowed_stages = list([transition.target_path for transition in transitions])

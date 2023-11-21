@@ -32,8 +32,6 @@ from ...credentials import (
 from ...templates import (
     ensure_abstraignore,
     new_script_code,
-    new_dash_layout,
-    new_dash_code,
     new_form_code,
     new_hook_code,
     new_job_code,
@@ -43,12 +41,10 @@ from ...repositories.project.project import (
     WorkflowTransition,
     ProjectRepository,
     WorkspaceJSON,
-    RuntimeJSON,
+    WorkflowStage,
     ScriptStage,
     Project,
-    LayoutJSON,
     ScriptStage,
-    DashJSON,
     FormStage,
     HookStage,
     JobStage,
@@ -116,9 +112,9 @@ class MainController:
         project = ProjectRepository.load()
         return project.workspace
 
-    def get_page_runtime(self, path) -> Union[DashJSON, FormStage, None]:
+    def get_page_runtime(self, path) -> Optional[FormStage]:
         project = ProjectRepository.load()
-        return project.get_page_by_path(path)
+        return project.get_form_by_path(path)
 
     def open_file(self, file_path: str, create_if_not_exists: bool = False):
         complete_file_path = Settings.root_path.joinpath(file_path)
@@ -137,7 +133,7 @@ class MainController:
 
     def update_workspace(self, changes: Dict[str, Any]):
         project = ProjectRepository.load()
-        project.workspace.update(changes, project.dashes, project.forms)
+        project.workspace.update(changes, project.forms)
         ProjectRepository.save(project)
         return project.workspace
 
@@ -255,46 +251,6 @@ class MainController:
         project.delete_runtime(path)
         ProjectRepository.save(project)
 
-    def create_dash(self) -> DashJSON:
-        project = ProjectRepository.load()
-
-        file_name = f"new_dash_{random_id()}"
-        file = f"{file_name}.py"
-
-        Settings.root_path.joinpath(file).write_text(
-            encoding="utf-8", data=new_dash_code
-        )
-        dash = DashJSON(
-            file=file,
-            path=f"new-dash_{random_id()}",
-            title="Untitled Dash",
-            layout=LayoutJSON.from_dict(new_dash_layout),
-        )
-
-        project.dashes.append(dash)
-
-        ProjectRepository.save(project)
-
-        return dash
-
-    def get_dashes(self) -> List[DashJSON]:
-        project = ProjectRepository.load()
-        return project.dashes
-
-    def get_dash(self, path: str) -> Optional[DashJSON]:
-        project = ProjectRepository.load()
-
-        for dash in project.dashes:
-            if path == dash.path:
-                return dash
-
-        return None
-
-    def delete_dash(self, path: str):
-        project = ProjectRepository.load()
-        project.delete_runtime(path)
-        ProjectRepository.save(project)
-
     def create_hook(self) -> HookStage:
         abstract_json = ProjectRepository.load()
 
@@ -361,7 +317,7 @@ class MainController:
 
         return job
 
-    def update_runtime(self, path: str, changes: Dict[str, Any]) -> RuntimeJSON:
+    def update_runtime(self, path: str, changes: Dict[str, Any]) -> WorkflowStage:
         project = ProjectRepository.load()
         runtime = project.update_runtime(path, changes)
         ProjectRepository.save(project)

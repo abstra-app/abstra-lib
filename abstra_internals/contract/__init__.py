@@ -1,4 +1,3 @@
-from . import dashes as dashes_contract  # exported
 from . import forms as forms_contract  # exported
 from . import common as common_contract  # exported
 from .common import Message, StdioMessage  # exported

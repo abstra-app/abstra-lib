@@ -9,7 +9,6 @@ from ...utils import check_is_url
 from ...utils.file import traverse_code
 from ...settings import Settings
 
-RuntimeJSON = Union["FormStage", "DashJSON", "HookStage", "JobStage", "ScriptStage"]
 WorkflowStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
 
 
@@ -344,353 +343,6 @@ def is_widget(x: Dict[str, Any]):
 
 
 @dataclass
-class DashWidgetJSON:
-    id: str
-    type: str
-    colStart: int
-    colEnd: int
-    rowStart: int
-    rowEnd: int
-    props: Dict[str, str]
-    events: Dict[str, str]
-    variable: Optional[str] = None
-    name: Optional[str] = None
-
-    @property
-    def browser_runner_dto(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "name": self.name,
-            "variable": self.variable,
-            "position": {
-                "colStart": self.colStart,
-                "colEnd": self.colEnd,
-                "rowStart": self.rowStart,
-                "rowEnd": self.rowEnd,
-            },
-            "props": [k for k in self.props.keys()],
-            "events": [k for k in self.events.keys()],
-        }
-
-    @property
-    def editor_dto(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "variable": self.variable,
-            "position": {
-                "colStart": self.colStart,
-                "colEnd": self.colEnd,
-                "rowStart": self.rowStart,
-                "rowEnd": self.rowEnd,
-            },
-            "props": self.props,
-            "events": self.events,
-        }
-
-    @property
-    def __dict__(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "colStart": self.colStart,
-            "colEnd": self.colEnd,
-            "rowStart": self.rowStart,
-            "rowEnd": self.rowEnd,
-            "props": self.props,
-            "events": self.events,
-            "variable": self.variable,
-        }
-
-    def update(self, changes: Dict[str, Any]):
-        if "id" in changes:
-            self.id = changes["id"]
-
-        if "type" in changes:
-            self.type = changes["type"]
-
-        if "variable" in changes:
-            self.variable = changes["variable"]
-
-        if "colStart" in changes:
-            self.colStart = changes["colStart"]
-
-        if "colEnd" in changes:
-            self.colEnd = changes["colEnd"]
-
-        if "rowStart" in changes:
-            self.rowStart = changes["rowStart"]
-
-        if "rowEnd" in changes:
-            self.rowEnd = changes["rowEnd"]
-
-        if "props" in changes:
-            self.props = changes["props"]
-
-        if "events" in changes:
-            self.events = changes["events"]
-
-        if "position" in changes:
-            self.colStart = changes["position"]["colStart"]
-            self.colEnd = changes["position"]["colEnd"]
-            self.rowStart = changes["position"]["rowStart"]
-            self.rowEnd = changes["position"]["rowEnd"]
-
-    @staticmethod
-    def from_dict(obj):
-        if "position" in obj:
-            obj["colStart"] = obj["position"]["colStart"]
-            obj["colEnd"] = obj["position"]["colEnd"]
-            obj["rowStart"] = obj["position"]["rowStart"]
-            obj["rowEnd"] = obj["position"]["rowEnd"]
-            del obj["position"]
-        return DashWidgetJSON(**obj)
-
-
-@dataclass
-class SlottableJSON:
-    id: str
-    type: str
-    row: int
-    height: int
-    order: int
-    props: Dict[str, str]
-    slot: "SlotJSON"
-
-    @property
-    def browser_runner_dto(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "position": {
-                "row": self.row,
-                "height": self.height,
-                "order": self.order,
-            },
-            "props": [k for k in self.props.keys()],
-            "slot": self.slot.browser_runner_dto,
-        }
-
-    @property
-    def editor_dto(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "row": self.row,
-            "height": self.height,
-            "order": self.order,
-            "props": self.props,
-            "slot": self.slot.editor_dto,
-        }
-
-    @property
-    def __dict__(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "position": {
-                "row": self.row,
-                "height": self.height,
-                "order": self.order,
-            },
-            "props": self.props,
-            "slot": self.slot.editor_dto,
-        }
-
-    def update(self, changes: Dict[str, Any]):
-        if "id" in changes:
-            self.id = changes["id"]
-
-        if "type" in changes:
-            self.type = changes["type"]
-
-        if "row" in changes:
-            self.row = changes["row"]
-
-        if "height" in changes:
-            self.height = changes["height"]
-
-        if "order" in changes:
-            self.order = changes["order"]
-
-        if "props" in changes:
-            self.props = changes["props"]
-
-        if "slot" in changes:
-            self.slot.update(changes["slot"])
-
-        if "position" in changes:
-            self.row = changes["position"]["row"]
-            self.height = changes["position"]["height"]
-            self.order = changes["position"]["order"]
-
-    @staticmethod
-    def from_dict(obj):
-        if "position" in obj:
-            obj["row"] = obj["position"]["row"]
-            obj["height"] = obj["position"]["height"]
-            obj["order"] = obj["position"]["order"]
-            del obj["position"]
-        return SlottableJSON(**obj)
-
-
-class SlotJSON:
-    __data: Dict[str, Union[SlottableJSON, DashWidgetJSON]]
-
-    def __init__(self, slot: Dict[str, dict]):
-        self.__data = {}
-        for id, slottable in slot.items():
-            if is_widget(slottable):
-                self.__data[id] = DashWidgetJSON.from_dict(slottable)
-            else:
-                self.__data[id] = SlottableJSON.from_dict(slottable)
-
-    def get(self, id: str):
-        if id in self.__data:
-            return self.__data[id]
-
-    def items(self):
-        return self.__data.items()
-
-    def values(self):
-        return self.__data.values()
-
-    @property
-    def browser_runner_dto(self):
-        return {
-            id: slottable.browser_runner_dto for id, slottable in self.__data.items()
-        }
-
-    @property
-    def editor_dto(self):
-        return {id: slottable.editor_dto for id, slottable in self.__data.items()}
-
-    @property
-    def __dict__(self):
-        return {id: slottable.__dict__ for id, slottable in self.__data.items()}
-
-    def update(self, changes: Dict[str, Any]):
-        for id, slottable in self.__data.items():
-            if id in changes:
-                slottable.update(changes[id])
-
-    @staticmethod
-    def from_dict(data: dict):
-        return SlotJSON(data)
-
-
-@dataclass
-class LayoutJSON:
-    version: str
-    props: Dict[str, str]
-    slot: SlotJSON
-
-    @property
-    def browser_runner_dto(self):
-        if self.version != "0.2":
-            raise ValueError("TODO: convert to 0.2")
-        return {
-            "props": [k for k in self.props.keys()],
-            "version": self.version,
-            "slot": self.slot.browser_runner_dto,
-        }
-
-    @property
-    def editor_dto(self):
-        return {
-            "props": self.props,
-            "version": self.version,
-            "slot": self.slot.editor_dto,
-        }
-
-    @property
-    def __dict__(self):
-        return {
-            "props": self.props,
-            "version": self.version,
-            "slot": self.slot.__dict__,
-        }
-
-    @staticmethod
-    def from_dict(data: dict):
-        return LayoutJSON(
-            version=data["version"],
-            props=data["props"],
-            slot=SlotJSON.from_dict(data["slot"]),
-        )
-
-
-@dataclass
-class DashJSON(SidebarRuntime):
-    file: str
-    layout: LayoutJSON
-
-    @property
-    def runner_type(self):
-        return "dash"
-
-    @property
-    def browser_runner_dto(self):
-        return {
-            "path": self.path,
-            "title": self.title,
-            "layout": self.layout.browser_runner_dto,
-        }
-
-    @property
-    def editor_dto(self):
-        return {
-            "path": self.path,
-            "title": self.title,
-            "layout": self.layout.editor_dto,
-            "file": self.file,
-        }
-
-    @property
-    def __dict__(self):
-        return {
-            "path": self.path,
-            "title": self.title,
-            "layout": self.layout.__dict__,
-            "file": self.file,
-        }
-
-    @property
-    def file_path(self):
-        return Settings.root_path.joinpath(self.file)
-
-    def update(self, changes: Dict[str, Any]):
-        if "path" in changes:
-            self.path = changes["path"]
-            del changes["path"]
-
-        if "title" in changes:
-            self.title = changes["title"]
-            del changes["title"]
-
-        if "layout" in changes:
-            self.layout = LayoutJSON.from_dict(changes["layout"])
-            del changes["layout"]
-
-        if "file" in changes:
-            _update_file(self, changes["file"])
-            del changes["file"]
-
-        if len(changes) > 0:
-            raise Exception("Invalid property update")
-
-    @staticmethod
-    def from_dict(data: dict):
-        return DashJSON(
-            path=data["path"],
-            file=data["file"],
-            title=data["title"],
-            layout=LayoutJSON.from_dict(data["layout"]),
-        )
-
-
-@dataclass
 class SidebarItemJSON:
     id: str
     name: str
@@ -716,15 +368,12 @@ class SidebarJSON:
     @staticmethod
     def from_dict(
         sidebar_data: List[dict],
-        dashes: List[DashJSON] = [],
         forms: List[FormStage] = [],
     ):
-        item_name = lambda path: [s.title for s in [*dashes, *forms] if s.path == path][
-            0
-        ]
+        item_name = lambda path: [s.title for s in [*forms] if s.path == path][0]
         stored_items = []
         for item in sidebar_data:
-            if item["path"] in [d.path for d in dashes] + [f.path for f in forms]:
+            if item["path"] in [f.path for f in forms]:
                 sidebar_item = SidebarItemJSON(
                     id=item["id"],
                     name=item_name(item["path"]),
@@ -733,18 +382,6 @@ class SidebarJSON:
                     visible=item.get("visible"),
                 )
                 stored_items.append(sidebar_item)
-
-        for dash in dashes:
-            if dash.path not in [item.path for item in stored_items]:
-                stored_items.append(
-                    SidebarItemJSON(
-                        id=dash.path,
-                        name=dash.title,
-                        path=dash.path,
-                        type="dash",
-                        visible=False,
-                    )
-                )
 
         for form in forms:
             if form.path not in [item.path for item in stored_items]:
@@ -807,22 +444,20 @@ class WorkspaceJSON:
     def update(
         self,
         changes: Dict[str, Any],
-        dashes: List[DashJSON] = [],
         forms: List[FormStage] = [],
     ):
         for attr, value in changes.items():
             if attr == "sidebar":
-                self.sidebar = SidebarJSON.from_dict(changes["sidebar"], dashes, forms)
+                self.sidebar = SidebarJSON.from_dict(changes["sidebar"], forms)
             else:
                 setattr(self, attr, value)
 
     @staticmethod
-    def from_dict(data: Dict, dashes: List[DashJSON] = [], forms: List[FormStage] = []):
+    def from_dict(data: Dict, forms: List[FormStage] = []):
         return WorkspaceJSON(
             name=data.get("name", "Untitled Workspace"),
             sidebar=SidebarJSON.from_dict(
                 data.get("sidebar", []),
-                dashes=dashes,
                 forms=forms,
             ),
             root=data.get("root"),  # deprecated
@@ -852,7 +487,6 @@ class Project:
     version: str
     workspace: WorkspaceJSON
     scripts: List[ScriptStage]
-    dashes: List[DashJSON]
     forms: List[FormStage]
     hooks: List[HookStage]
     jobs: List[JobStage]
@@ -865,13 +499,8 @@ class Project:
             "jobs": [job.__dict__ for job in self.jobs],
             "hooks": [hook.__dict__ for hook in self.hooks],
             "forms": [form.__dict__ for form in self.forms],
-            "dashes": [dash.__dict__ for dash in self.dashes],
             "scripts": [script.__dict__ for script in self.scripts],
         }
-
-    @property
-    def runtimes(self) -> List[RuntimeJSON]:
-        return [*self.forms, *self.dashes, *self.hooks, *self.jobs]
 
     @property
     def workflow_runtimes(self) -> List[WorkflowStage]:
@@ -893,14 +522,10 @@ class Project:
             if file not in entrypoints:
                 yield file
 
-    def get_runtime_by_path(self, path: str) -> Optional[RuntimeJSON]:
+    def get_runtime_by_path(self, path: str) -> Optional[WorkflowStage]:
         for form in self.forms:
             if form.path == path:
                 return form
-
-        for dash in self.dashes:
-            if dash.path == path:
-                return dash
 
         for hook in self.hooks:
             if hook.path == path:
@@ -935,14 +560,10 @@ class Project:
 
         raise RuntimeNotFoundError(f"Runtime with id '{path}' not found")
 
-    def get_page_by_path(self, path: str) -> Optional[Union[DashJSON, FormStage]]:
+    def get_form_by_path(self, path: str) -> Optional[FormStage]:
         for form in self.forms:
             if form.path == path:
                 return form
-
-        for dash in self.dashes:
-            if dash.path == path:
-                return dash
 
         return None
 
@@ -988,7 +609,7 @@ class Project:
                 if wt.target_path == old_path:
                     wt.target_path = new_path
 
-    def update_runtime(self, path: str, changes: Dict[str, Any]) -> RuntimeJSON:
+    def update_runtime(self, path: str, changes: Dict[str, Any]) -> WorkflowStage:
         new_path = changes.get("path") or changes.get("identifier")
 
         if new_path:
@@ -1009,9 +630,8 @@ class Project:
     def delete_runtime(self, id: str):
         runtime = self.get_runtime_by_path(id)
         self.delete_transition_by_target(id)
-        if isinstance(runtime, DashJSON):
-            self.dashes = [d for d in self.dashes if d.path != id]
-        elif isinstance(runtime, FormStage):
+
+        if isinstance(runtime, FormStage):
             self.forms = [f for f in self.forms if f.path != id]
         elif isinstance(runtime, HookStage):
             self.hooks = [h for h in self.hooks if h.path != id]
@@ -1047,20 +667,16 @@ class Project:
 
         try:
             scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
-            dashes = [DashJSON.from_dict(dash) for dash in data["dashes"]]
             forms = [FormStage.from_dict(form) for form in data["forms"]]
             hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
             jobs = [JobStage.from_dict(job) for job in data["jobs"]]
 
-            workspace = WorkspaceJSON.from_dict(
-                data["workspace"], dashes=dashes, forms=forms
-            )
+            workspace = WorkspaceJSON.from_dict(data["workspace"], forms=forms)
 
             return Project(
                 version=data["version"],
                 workspace=workspace,
                 scripts=scripts,
-                dashes=dashes,
                 forms=forms,
                 hooks=hooks,
                 jobs=jobs,
@@ -1078,7 +694,6 @@ class Project:
             version="0.1",
             workspace=WorkspaceJSON(name="Untitled Workspace", sidebar=SidebarJSON([])),
             forms=[],
-            dashes=[],
             hooks=[],
             jobs=[],
             scripts=[],
@@ -1086,7 +701,7 @@ class Project:
 
 
 def _update_file(
-    runtime: RuntimeJSON,
+    runtime: WorkflowStage,
     new_file_relative: str,
 ):
     old_file = Settings.root_path.joinpath(runtime.file)

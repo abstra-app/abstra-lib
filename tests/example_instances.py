@@ -76,13 +76,8 @@ example_instances = [
         "What are your interests?",
         options=["python", "javascript", "c++"],
     ),
-    KanbanBoardInput(
-        "kanban",
-        label="What are your interests?",
-    ),
     LatexOutput("$$\\frac{1}{2}$$"),
     RatingInput("rating", "How much?", max=10),
-    ClickInput("click", "Click me!"),
     CustomInput(
         "custom",
         "<button id='date-btn'>Get current date</button>",
