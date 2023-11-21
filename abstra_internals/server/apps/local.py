@@ -7,6 +7,7 @@ from ..controller import MainController
 
 def get_local_app(controller: MainController) -> flask.Flask:
     app = flask.Flask(__name__)
+    app.url_map.strict_slashes = False
     flask_cors.CORS(app)
 
     editor = get_editor_bp(controller)

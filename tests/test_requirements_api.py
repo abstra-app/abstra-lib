@@ -50,7 +50,7 @@ class TestRequirementsApi(TestCase):
 
     def test_get_requirements_recommendation(self):
         recommendation = self.client.get(
-            "/_editor/api/requirements-recommendations"
+            "/_editor/api/requirements/recommendations"
         ).get_json()
         self.assertEqual(recommendation, [])
         Path("foo.py").write_text("import pandas as pd")
@@ -58,6 +58,6 @@ class TestRequirementsApi(TestCase):
             '{"version": "0.2", "scripts": [ { "id": "2zp6zc8w739", "file": "foo.py", "path": "2zp6zc8w739", "title": "Script1", "is_initial": false, "workflow_position": [ 726, 312 ], "transitions": [ { "target_path": "1q46aarvny3", "target_type": "forms", "label": "", "id": "49g5pgobohd" } ] } ]}'
         )
         recommendation = self.client.get(
-            "/_editor/api/requirements-recommendations"
+            "/_editor/api/requirements/recommendations"
         ).get_json()
         self.assertEqual(recommendation[0]["name"], "pandas")

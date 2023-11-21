@@ -20,9 +20,9 @@ def get_player_bp(controller: MainController):
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
     stage_run_bp = stage_runs_controller.get_player_bp()
-    bp.register_blueprint(stage_run_bp, url_prefix="/_api/stage_runs")
+    bp.register_blueprint(stage_run_bp, url_prefix="/_stage_runs")
 
-    @bp.route("/_api/workspace", methods=["GET"])
+    @bp.route("/_workspace", methods=["GET"])
     def _get_workspace():
         workspace = controller.get_workspace()
         return workspace.browser_runner_dto

@@ -43,7 +43,7 @@ class TestHooks(unittest.TestCase):
         target = self.client.post("/_editor/api/hooks/").get_json()
 
         res = self.client.post(
-            "/_editor/api/workflow-editor/add-transition",
+            "/_editor/api/workflows/add-transition",
             json=[
                 {
                     "source": {"type": "forms", "id": source["path"]},
@@ -59,7 +59,7 @@ class TestHooks(unittest.TestCase):
             "/_editor/api/hooks/" + target["path"], json={"path": "new_path"}
         )
 
-        data = self.client.get("/_editor/api/workflow-editor/initial-data").get_json()
+        data = self.client.get("/_editor/api/workflows/initial-data").get_json()
 
         forms = [f for f in data if f["type"] == "forms"]
 
