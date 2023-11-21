@@ -8,7 +8,7 @@ def get_fake_auth_proviver_bp():
     bp = flask.Blueprint("fake-provider", __name__)
     emails = {}
 
-    @bp.route("/authenticate", methods=["POST"])
+    @bp.post("/authenticate")
     def _authenticate():
         data = flask.request.get_json(force=True)
         if not data:
@@ -21,7 +21,7 @@ def get_fake_auth_proviver_bp():
         emails[email] = True
         return {"ok": True}
 
-    @bp.route("/verify", methods=["POST"])
+    @bp.post("/verify")
     def _verify():
         data = flask.request.get_json(force=True)
         if not data:
@@ -58,7 +58,7 @@ def get_player_bp():
         auth_provider_bp = get_fake_auth_proviver_bp()
         bp.register_blueprint(auth_provider_bp)
 
-    @bp.route("/config", methods=["GET"])
+    @bp.get("/config")
     def _get_config():
         return {"authority": authority, "provider": provider}
 
