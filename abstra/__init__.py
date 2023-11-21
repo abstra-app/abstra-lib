@@ -1,1 +1,1 @@
-from . import tables, connectors, hooks, dashes
+from . import tables, connectors, hooks

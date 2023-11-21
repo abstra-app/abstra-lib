@@ -3,7 +3,6 @@ metadata = {
         "name": "Camera input",
         "description": "Take a picture with user's camera and upload it",
         "type": "camera-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -11,12 +10,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 150,
-            "minHeight": 112,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_camera",
             "params": [
@@ -26,7 +19,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Upload a file."',
                 },
                 {
                     "argName": "initial_value",
@@ -34,7 +26,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "disabled",
@@ -50,7 +41,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -65,7 +55,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -73,7 +62,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -81,7 +69,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -117,7 +104,6 @@ metadata = {
         "name": "Card display",
         "description": "Read a text value from the user simple text input",
         "type": "cards-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -136,12 +122,6 @@ metadata = {
                 ],
             },
         ],
-        "dashProperties": {
-            "minWidth": 200,
-            "minHeight": 200,
-            "initialWidth": 400,
-            "initialHeight": 350,
-        },
         "pythonAPI": {
             "name": "read_cards",
             "params": [
@@ -151,7 +131,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Card Title"',
                 },
                 {
                     "argName": "options",
@@ -162,7 +141,6 @@ metadata = {
                     ],
                     "isKwarg": False,
                     "default": "None",
-                    "dashesInitialValue": '[\n          {\n            "title": "Option 1",\n            "subtitle": "Subtitle 1",\n            "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg",\n            "description": "option 1 description",\n            "topLeftExtra": "Left 1",\n            "topRightExtra": "Right 1",\n          }\n        ]',
                 },
                 {
                     "argName": "multiple",
@@ -178,7 +156,6 @@ metadata = {
                     "typeDescription": ["list[AbstraCard]"],
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "searchable",
@@ -216,7 +193,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -231,7 +207,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -239,7 +214,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -247,7 +221,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -388,7 +361,6 @@ metadata = {
         "name": "Checkbox",
         "description": "Allow users to select an option by interacting with a checkbox",
         "type": "checkbox-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -396,12 +368,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 32,
-            "initialWidth": 222,
-            "initialHeight": 32,
-        },
         "pythonAPI": {
             "name": "read_checkbox",
             "params": [
@@ -411,7 +377,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Choose your option"',
                 },
                 {
                     "argName": "initial_value",
@@ -419,7 +384,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "disabled",
@@ -435,7 +399,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -450,7 +413,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -458,7 +420,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -466,7 +427,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -533,13 +493,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 32,
-            "initialWidth": 222,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_checklist",
             "params": [
@@ -549,7 +502,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Choose your option"',
                 },
                 {
                     "argName": "options",
@@ -558,7 +510,6 @@ metadata = {
                     "typeDescription": ["list[AbstraOption]"],
                     "isKwarg": False,
                     "default": "None",
-                    "dashesInitialValue": '[\n    {\n      "label": "Option 1",\n      "value": 1,\n    },\n    {\n      "label": "Option 2",\n      "value": 2,\n    },\n  ]',
                 },
                 {
                     "argName": "initial_value",
@@ -566,7 +517,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "disabled",
@@ -582,7 +532,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -597,7 +546,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -605,7 +553,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -613,7 +560,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -702,101 +648,10 @@ metadata = {
             },
         ],
     },
-    "click-input": {
-        "name": "Button",
-        "description": "Buttons allow users to trigger actions.",
-        "type": "click-input",
-        "autoHeight": True,
-        "events": [
-            {
-                "key": "click",
-                "description": "Function or expression to be run when the button is clicked",
-                "payloadSchema": [],
-            }
-        ],
-        "dashOnly": True,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 62,
-            "initialWidth": 140,
-            "initialHeight": 62,
-        },
-        "pythonAPI": {
-            "name": "read_click",
-            "params": [
-                {
-                    "argName": "label",
-                    "description": "The label to display to the user",
-                    "typeName": "str",
-                    "isKwarg": False,
-                    "default": "''",
-                    "dashesInitialValue": '"Click here!"',
-                },
-                {
-                    "argName": "disabled",
-                    "description": "whether the input is disabled. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
-                    "argName": "required",
-                    "description": 'Whether the input is required or not eg. "this field is required". Defaults to True.',
-                    "typeName": "Union[bool, str]",
-                    "typeDescription": ["bool", "str"],
-                    "isKwarg": True,
-                    "default": "True",
-                    "formOnly": True,
-                },
-                {
-                    "argName": "hint",
-                    "description": "A tooltip displayed to the user. Defaults to None.",
-                    "typeName": "str",
-                    "isKwarg": True,
-                    "default": "None",
-                },
-                {
-                    "argName": "full_width",
-                    "description": "Whether the input should use full screen width. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                    "formOnly": True,
-                },
-                {
-                    "argName": "button_text",
-                    "description": "What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.",
-                    "typeName": "str",
-                    "isKwarg": True,
-                    "default": "Next",
-                    "formOnly": True,
-                },
-            ],
-            "returns": [{"typeName": "None", "typeDescription": ""}],
-        },
-        "brokerAPI": {
-            "params": [
-                {"argName": "label", "typeName": "string"},
-                {"argName": "key", "typeName": "string"},
-                {"argName": "disabled", "typeName": "boolean"},
-                {"argName": "errors", "typeName": "array"},
-            ]
-        },
-        "examples": [
-            {
-                "props": {"label": "Send"},
-                "name": "Basic Example",
-                "description": "The following example demonstrate some of the available functionality for read_click",
-                "key": "example1",
-                "code": "",
-            }
-        ],
-    },
     "cnpj-input": {
         "name": "CNPJ input",
         "description": "Allow users to insert a CNPJ number into the app.",
         "type": "cnpj-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -804,12 +659,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 222,
-            "minHeight": 70,
-            "initialWidth": 222,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_cnpj",
             "params": [
@@ -819,7 +668,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Insert your CNPJ here!"',
                 },
                 {
                     "argName": "initial_value",
@@ -828,7 +676,6 @@ metadata = {
                     "typeDescription": ["str (00.000.000/0001-00)"],
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "invalid_message",
@@ -836,7 +683,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -860,7 +706,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -875,7 +720,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -883,7 +727,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -891,7 +734,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -926,7 +768,6 @@ metadata = {
         "name": "Code input",
         "description": "Code input allow users to insert code and reads it.",
         "type": "code-input",
-        "autoHeight": False,
         "events": [
             {
                 "key": "update:value",
@@ -934,12 +775,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 377,
-            "minHeight": 552,
-            "initialWidth": 377,
-            "initialHeight": 552,
-        },
         "pythonAPI": {
             "name": "read_code",
             "params": [
@@ -949,7 +784,6 @@ metadata = {
                     "default": "''",
                     "typeName": "str",
                     "isKwarg": False,
-                    "dashesInitialValue": '"Send your code here!"',
                 },
                 {
                     "argName": "initial_value",
@@ -957,7 +791,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "language",
@@ -980,7 +813,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -995,7 +827,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1003,7 +834,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1011,7 +841,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -1056,13 +885,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 222,
-            "minHeight": 70,
-            "initialWidth": 222,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_cpf",
             "params": [
@@ -1072,7 +894,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Insert your CPF here!"',
                 },
                 {
                     "argName": "initial_value",
@@ -1081,7 +902,6 @@ metadata = {
                     "typeDescription": ["str (000.000.000-00)"],
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "invalid_message",
@@ -1089,7 +909,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -1113,7 +932,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -1128,7 +946,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1136,7 +953,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1144,7 +960,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -1186,13 +1001,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 100,
-            "minHeight": 72,
-            "initialWidth": 300,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_currency",
             "params": [
@@ -1202,7 +1010,6 @@ metadata = {
                     "default": "''",
                     "typeName": "str",
                     "isKwarg": False,
-                    "dashesInitialValue": '"Insert the proper amount."',
                 },
                 {
                     "argName": "initial_value",
@@ -1210,7 +1017,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "0",
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -1254,7 +1060,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -1269,7 +1074,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1277,7 +1081,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1285,7 +1088,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -1330,7 +1132,6 @@ metadata = {
         "type": "custom-input",
         "name": "Custom widget",
         "description": "Widget with customizable UI and behaviour",
-        "autoHeight": False,
         "events": [
             {
                 "key": "custom-event",
@@ -1343,12 +1144,6 @@ metadata = {
                 "payloadSchema": [],
             },
         ],
-        "dashProperties": {
-            "minWidth": 65,
-            "minHeight": 30,
-            "initialWidth": 146,
-            "initialHeight": 32,
-        },
         "pythonAPI": {
             "name": "read_custom",
             "params": [
@@ -1359,7 +1154,6 @@ metadata = {
                     "typeDescription": ["str (HTML snippet)"],
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"<h1>Hello World</h1>"',
                 },
                 {
                     "argName": "initial_value",
@@ -1367,7 +1161,6 @@ metadata = {
                     "typeName": "Any",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "label",
@@ -1383,7 +1176,6 @@ metadata = {
                     "typeDescription": ["str (HTML snippet)"],
                     "isKwarg": True,
                     "default": "''",
-                    "dashesInitialValue": '""',
                 },
                 {
                     "argName": "css",
@@ -1392,7 +1184,6 @@ metadata = {
                     "typeDescription": ["str (CSS snippet)"],
                     "isKwarg": True,
                     "default": "''",
-                    "dashesInitialValue": '"h1 { color: red; }"',
                 },
                 {
                     "argName": "js",
@@ -1401,7 +1192,6 @@ metadata = {
                     "typeDescription": ["str (JavaScript snippet)"],
                     "isKwarg": True,
                     "default": "''",
-                    "dashesInitialValue": "\"console.log('Hello World')\"",
                 },
                 {
                     "argName": "height",
@@ -1409,7 +1199,6 @@ metadata = {
                     "typeName": "int",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1417,7 +1206,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1425,7 +1213,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [{"typeName": "Any", "typeDescription": "The custom response"}],
@@ -1472,13 +1259,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 200,
-            "minHeight": 72,
-            "initialWidth": 300,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_date",
             "params": [
@@ -1488,7 +1268,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Pick a date of your preference."',
                 },
                 {
                     "argName": "initial_value",
@@ -1501,7 +1280,6 @@ metadata = {
                     ],
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "disabled",
@@ -1517,7 +1295,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -1532,7 +1309,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1540,7 +1316,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1548,7 +1323,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -1584,7 +1358,6 @@ metadata = {
         "name": "Dropdown",
         "description": "Allow users to select one or more options by selecting items in a dropdown",
         "type": "dropdown-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -1592,12 +1365,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_dropdown",
             "params": [
@@ -1607,7 +1374,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '""',
                 },
                 {
                     "argName": "options",
@@ -1616,7 +1382,6 @@ metadata = {
                     "typeDescription": ["list[AbstraOption]"],
                     "isKwarg": False,
                     "default": "None",
-                    "dashesInitialValue": '[\n    {\n      "label": "Option 1",\n      "value": 1,\n    },\n    {\n      "label": "Option 2",\n      "value": 2,\n    },\n  ]',
                 },
                 {
                     "argName": "multiple",
@@ -1631,7 +1396,6 @@ metadata = {
                     "typeName": "str or list",
                     "isKwarg": True,
                     "default": "[]",
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -1654,7 +1418,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -1669,7 +1432,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1677,7 +1439,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1685,7 +1446,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -1759,13 +1519,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 220,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_email",
             "params": [
@@ -1775,7 +1528,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Insert your email"',
                 },
                 {
                     "argName": "initial_value",
@@ -1783,7 +1535,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -1813,7 +1564,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -1828,7 +1578,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1836,7 +1585,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1844,7 +1592,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -1879,7 +1626,6 @@ metadata = {
         "name": "File upload area",
         "description": "File upload adds a drop-area for users to upload one or more files",
         "type": "file-input",
-        "autoHeight": False,
         "events": [
             {
                 "key": "update:value",
@@ -1887,12 +1633,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 150,
-            "minHeight": 112,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_file",
             "params": [
@@ -1902,7 +1642,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Upload a file."',
                 },
                 {
                     "argName": "initial_value",
@@ -1910,7 +1649,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "multiple",
@@ -1940,7 +1678,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -1955,7 +1692,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -1963,7 +1699,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -1971,7 +1706,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -2023,13 +1757,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 150,
-            "minHeight": 112,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_image",
             "params": [
@@ -2039,7 +1766,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"Upload"',
                 },
                 {
                     "argName": "initial_value",
@@ -2047,7 +1773,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "multiple",
@@ -2077,7 +1802,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -2092,7 +1816,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -2100,7 +1823,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -2108,7 +1830,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -2142,76 +1863,10 @@ metadata = {
             }
         ],
     },
-    "kanban-board-input": {
-        "name": "Kanban board",
-        "description": "Kanban board",
-        "type": "kanban-board-input",
-        "dashOnly": True,
-        "events": [
-            {
-                "key": "update:value",
-                "description": "Function or expression to be run when the input value changes",
-                "payloadSchema": [],
-            }
-        ],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 300,
-            "minHeight": 500,
-            "initialWidth": 500,
-            "initialHeight": 500,
-        },
-        "pythonAPI": {
-            "name": "read_kanban_board",
-            "params": [
-                {
-                    "argName": "label",
-                    "description": "The label to display to the user",
-                    "typeName": "str",
-                    "isKwarg": False,
-                    "default": None,
-                },
-                {
-                    "argName": "initial_value",
-                    "description": "The initial board state.",
-                    "typeName": "List[KanbanCard]",
-                    "isKwarg": True,
-                    "default": None,
-                    "formOnly": True,
-                },
-                {
-                    "argName": "stages",
-                    "description": "List of stages",
-                    "typeName": "List[KanbanStage]",
-                    "isKwarg": True,
-                    "default": None,
-                    "dashesInitialValue": '["To do", "In progress", "Done"]',
-                },
-            ],
-            "returns": [
-                {
-                    "typeName": "KanbanBoard",
-                    "typeDescription": "Object containing all stages and cards",
-                }
-            ],
-        },
-        "brokerAPI": {
-            "params": [
-                {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "array"},
-                {"argName": "stages", "typeName": "array"},
-                {"argName": "key", "typeName": "string"},
-                {"argName": "disabled", "typeName": "boolean"},
-                {"argName": "errors", "typeName": "array"},
-            ]
-        },
-        "examples": [],
-    },
     "list-input": {
         "name": "List of inputs",
         "description": "Read a list value from the user",
         "type": "list-input",
-        "formOnly": True,
         "events": [
             {
                 "key": "update:value",
@@ -2219,13 +1874,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 146,
-            "minHeight": 32,
-            "initialWidth": 146,
-            "initialHeight": 32,
-        },
         "pythonAPI": {
             "name": "read_list",
             "params": [
@@ -2242,7 +1890,6 @@ metadata = {
                     "typeName": "array",
                     "isKwarg": True,
                     "default": "[]",
-                    "formOnly": True,
                 },
                 {
                     "argName": "min",
@@ -2279,7 +1926,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -2294,7 +1940,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -2302,7 +1947,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -2310,7 +1954,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -2389,13 +2032,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 70,
-            "initialWidth": 223,
-            "initialHeight": 152,
-        },
         "pythonAPI": {
             "name": "read_multiple_choice",
             "params": [
@@ -2405,7 +2041,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Select your choices"',
                 },
                 {
                     "argName": "options",
@@ -2414,7 +2049,6 @@ metadata = {
                     "typeDescription": ["list[AbstraOption]"],
                     "isKwarg": False,
                     "default": "None",
-                    "dashesInitialValue": '[\n    {\n      "label": "Option 1",\n      "value": 1,\n    },\n    {\n      "label": "Option 2",\n      "value": 2,\n    },\n  ]',
                 },
                 {
                     "argName": "multiple",
@@ -2443,7 +2077,6 @@ metadata = {
                     "typeName": "[]",
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "disabled",
@@ -2459,7 +2092,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -2474,7 +2106,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -2482,7 +2113,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -2490,7 +2120,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -2582,13 +2211,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 608,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_nps",
             "params": [
@@ -2598,7 +2220,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Rate us!"',
                 },
                 {
                     "argName": "min",
@@ -2635,7 +2256,6 @@ metadata = {
                     "typeDescription": ["str (nps format)"],
                     "isKwarg": True,
                     "default": "None",
-                    "formOnly": True,
                 },
                 {
                     "argName": "disabled",
@@ -2651,7 +2271,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -2666,7 +2285,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -2674,7 +2292,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -2682,7 +2299,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -2730,13 +2346,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_number",
             "params": [
@@ -2746,7 +2355,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Number"',
                 },
                 {
                     "argName": "initial_value",
@@ -2754,7 +2362,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "0",
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -2791,7 +2398,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -2806,7 +2412,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -2814,7 +2419,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -2822,7 +2426,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -2868,13 +2471,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 30,
-            "initialWidth": 223,
-            "initialHeight": 72,
-        },
         "pythonAPI": {
             "name": "read_number_slider",
             "params": [
@@ -2884,7 +2480,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Select a value!"',
                 },
                 {
                     "argName": "initial_value",
@@ -2892,7 +2487,6 @@ metadata = {
                     "typeName": "float",
                     "isKwarg": True,
                     "default": "0",
-                    "formOnly": True,
                 },
                 {
                     "argName": "min",
@@ -2929,7 +2523,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -2944,7 +2537,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -2952,7 +2544,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -2960,7 +2551,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3006,13 +2596,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 200,
-            "minHeight": 250,
-            "initialWidth": 500,
-            "initialHeight": 500,
-        },
         "pythonAPI": {
             "name": "read_pandas_row_selection",
             "params": [
@@ -3065,7 +2648,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3080,7 +2662,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3088,7 +2669,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3096,7 +2676,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3165,14 +2744,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
         "description": "Password input allow users to enter a password before seen the content.",
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_password",
             "params": [
@@ -3182,7 +2754,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Insert Your password"',
                 },
                 {
                     "argName": "placeholder",
@@ -3272,7 +2843,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3287,7 +2857,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3295,7 +2864,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3303,7 +2871,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3347,7 +2914,6 @@ metadata = {
         "name": "Phone input",
         "description": "Phone input allow users to enter a valid phone number.",
         "type": "phone-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -3355,12 +2921,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 377,
-            "minHeight": 60,
-            "initialWidth": 377,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_phone",
             "params": [
@@ -3370,7 +2930,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Insert a phone number."',
                 },
                 {
                     "argName": "initial_value",
@@ -3381,7 +2940,6 @@ metadata = {
                     ],
                     "isKwarg": True,
                     "default": '{"country_code": "", "national_number": ""}',
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -3411,7 +2969,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3426,7 +2983,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3434,7 +2990,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3442,7 +2997,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3497,13 +3051,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 72,
-        },
         "pythonAPI": {
             "name": "read_rating",
             "params": [
@@ -3513,7 +3060,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Rate us!"',
                 },
                 {
                     "argName": "initial_value",
@@ -3521,7 +3067,6 @@ metadata = {
                     "typeName": "int",
                     "isKwarg": True,
                     "default": "0",
-                    "formOnly": True,
                 },
                 {
                     "argName": "max",
@@ -3552,7 +3097,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3567,7 +3111,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3575,7 +3118,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3583,7 +3125,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3640,13 +3181,6 @@ metadata = {
             }
         ],
         "description": "Rich text input allows users to type and format textual content.",
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 100,
-            "minHeight": 100,
-            "initialWidth": 200,
-            "initialHeight": 150,
-        },
         "pythonAPI": {
             "name": "read_richtext",
             "params": [
@@ -3656,7 +3190,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Insert your rich text here!"',
                 },
                 {
                     "argName": "initial_value",
@@ -3664,7 +3197,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -3687,7 +3219,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3702,7 +3233,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3710,7 +3240,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3718,7 +3247,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3754,7 +3282,6 @@ metadata = {
     "tag-input": {
         "name": "Tag input",
         "type": "tag-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -3763,12 +3290,6 @@ metadata = {
             }
         ],
         "description": "Read a tag value from the user",
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_tag",
             "params": [
@@ -3778,7 +3299,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Insert the desired tags."',
                 },
                 {
                     "argName": "initial_value",
@@ -3787,7 +3307,6 @@ metadata = {
                     "typeDescription": ["list[str]"],
                     "isKwarg": True,
                     "default": "[]",
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -3810,7 +3329,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3825,7 +3343,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3833,7 +3350,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3841,7 +3357,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -3881,7 +3396,6 @@ metadata = {
         "name": "Text input",
         "description": "Text fields allow users to insert plain text.",
         "type": "text-input",
-        "autoHeight": True,
         "events": [
             {
                 "key": "update:value",
@@ -3889,12 +3403,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read",
             "params": [
@@ -3904,7 +3412,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Insert your text here!"',
                 },
                 {
                     "argName": "initial_value",
@@ -3912,7 +3419,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -3942,7 +3448,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -3957,7 +3462,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -3965,7 +3469,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -3973,7 +3476,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -4026,13 +3528,6 @@ metadata = {
             }
         ],
         "description": "Long text input allow users to type longer textual content.",
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 100,
-            "minHeight": 100,
-            "initialWidth": 200,
-            "initialHeight": 150,
-        },
         "pythonAPI": {
             "name": "read_textarea",
             "params": [
@@ -4042,7 +3537,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Insert your text here!"',
                 },
                 {
                     "argName": "initial_value",
@@ -4050,7 +3544,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "placeholder",
@@ -4073,7 +3566,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -4088,7 +3580,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4096,7 +3587,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4104,7 +3594,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -4147,14 +3636,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
         "description": "Read a time value from the user",
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_time",
             "params": [
@@ -4164,7 +3646,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Choose the desired time."',
                 },
                 {
                     "argName": "initial_value",
@@ -4173,7 +3654,6 @@ metadata = {
                     "typeDescription": ["str (HH:MM:SS)", "datetime.time"],
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "format",
@@ -4196,7 +3676,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -4211,7 +3690,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4219,7 +3697,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4227,7 +3704,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -4281,13 +3757,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 120,
-            "minHeight": 60,
-            "initialWidth": 377,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_toggle",
             "params": [
@@ -4297,7 +3766,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Click to confirm the following options"',
                 },
                 {
                     "argName": "on_text",
@@ -4334,7 +3802,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -4349,7 +3816,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4357,7 +3823,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4365,7 +3830,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [{"typeName": "bool", "typeDescription": "The toggle value"}],
@@ -4422,13 +3886,6 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 150,
-            "minHeight": 112,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "read_video",
             "params": [
@@ -4438,7 +3895,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Upload your video"',
                 },
                 {
                     "argName": "initial_value",
@@ -4447,7 +3903,6 @@ metadata = {
                     "typeDescription": ["io.IOBase", "str (filepath)", "str (URL)"],
                     "isKwarg": True,
                     "default": '""',
-                    "formOnly": True,
                 },
                 {
                     "argName": "multiple",
@@ -4477,7 +3932,6 @@ metadata = {
                     "typeDescription": ["bool", "str"],
                     "isKwarg": True,
                     "default": "True",
-                    "formOnly": True,
                 },
                 {
                     "argName": "hint",
@@ -4492,7 +3946,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4500,7 +3953,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4508,7 +3960,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [
@@ -4550,14 +4001,7 @@ metadata = {
         "name": "Download file",
         "description": "Show a button for the user to download a file.",
         "type": "file-output",
-        "autoHeight": True,
         "events": [],
-        "dashProperties": {
-            "minWidth": 65,
-            "minHeight": 30,
-            "initialWidth": 223,
-            "initialHeight": 72,
-        },
         "pythonAPI": {
             "name": "display_file",
             "params": [
@@ -4568,7 +4012,6 @@ metadata = {
                     "typeDescription": ["io.IOBase", "str (filepath)", "str (URL)"],
                     "isKwarg": False,
                     "default": "None",
-                    "dashesInitialValue": '"https://gist.github.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/archive/92200bc0a673d5ce2110aaad4544ed6c4010f687.zip"',
                 },
                 {
                     "argName": "download_text",
@@ -4583,7 +4026,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4591,7 +4033,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4599,7 +4040,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -4629,13 +4069,6 @@ metadata = {
         "description": "Embed HTML to the app.",
         "type": "html-output",
         "events": [],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 65,
-            "minHeight": 30,
-            "initialWidth": 146,
-            "initialHeight": 32,
-        },
         "pythonAPI": {
             "name": "display_html",
             "params": [
@@ -4646,7 +4079,6 @@ metadata = {
                     "typeDescription": ["str (html snippet)"],
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"<div>Hello World</div>"',
                 },
                 {
                     "argName": "end_program",
@@ -4654,7 +4086,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4662,7 +4093,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4670,7 +4100,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -4698,13 +4127,6 @@ metadata = {
         "description": "Embed content using iframe.",
         "type": "iframe-output",
         "events": [],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 377,
-            "minHeight": 100,
-            "initialWidth": 377,
-            "initialHeight": 632,
-        },
         "pythonAPI": {
             "name": "display_iframe",
             "params": [
@@ -4715,7 +4137,6 @@ metadata = {
                     "typeDescription": ["str (URL)", "str (html snippet)"],
                     "isKwarg": False,
                     "default": "''",
-                    "dashesInitialValue": '"<div>Hello World</div>"',
                 },
                 {
                     "argName": "width",
@@ -4739,7 +4160,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4747,7 +4167,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4755,7 +4174,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -4787,13 +4205,6 @@ metadata = {
         "description": "Show an image to the user",
         "type": "image-output",
         "events": [],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 60,
-            "initialWidth": 223,
-            "initialHeight": 312,
-        },
         "pythonAPI": {
             "name": "display_image",
             "params": [
@@ -4804,7 +4215,6 @@ metadata = {
                     "typeDescription": ["io.IOBase", "str (filepath)", "str (URL)"],
                     "isKwarg": False,
                     "default": "None",
-                    "dashesInitialValue": '"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/396px-Mona_Lisa.jpg"',
                 },
                 {
                     "argName": "subtitle",
@@ -4826,7 +4236,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4834,7 +4243,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4842,7 +4250,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -4873,13 +4280,6 @@ metadata = {
         "description": "Show an Latex formula to the user",
         "type": "latex-output",
         "events": [],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 30,
-            "initialWidth": 146,
-            "initialHeight": 32,
-        },
         "pythonAPI": {
             "name": "display_latex",
             "params": [
@@ -4890,7 +4290,6 @@ metadata = {
                     "typeDescription": ["str (latex snippet)"],
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"\\(x^2 + y^2 = z^2\\)"',
                 },
                 {
                     "argName": "end_program",
@@ -4898,7 +4297,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4906,7 +4304,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -4914,7 +4311,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -4949,13 +4345,6 @@ metadata = {
         "description": "Allow users to see and open content from text links.",
         "type": "link-output",
         "events": [],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 30,
-            "initialWidth": 146,
-            "initialHeight": 72,
-        },
         "pythonAPI": {
             "name": "display_link",
             "params": [
@@ -4966,7 +4355,6 @@ metadata = {
                     "typeDescription": ["str (URL)"],
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"https://www.abstracloud.com"',
                 },
                 {
                     "argName": "link_text",
@@ -4988,7 +4376,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -4996,7 +4383,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -5004,7 +4390,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -5034,14 +4419,7 @@ metadata = {
         "name": "Markdown",
         "description": "Show a formatted text to the user",
         "type": "markdown-output",
-        "autoHeight": True,
         "events": [],
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 30,
-            "initialWidth": 146,
-            "initialHeight": 72,
-        },
         "pythonAPI": {
             "name": "display_markdown",
             "params": [
@@ -5052,7 +4430,6 @@ metadata = {
                     "typeDescription": ["str (markdown snippet)"],
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"### Hello World"',
                 },
                 {
                     "argName": "end_program",
@@ -5060,7 +4437,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -5068,7 +4444,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -5076,7 +4451,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -5103,7 +4477,6 @@ metadata = {
         "name": "Table",
         "description": "Display a pandas dataframe to the user",
         "type": "pandas-output",
-        "autoHeight": False,
         "events": [
             {
                 "key": "row-click",
@@ -5133,12 +4506,6 @@ metadata = {
                 ],
             },
         ],
-        "dashProperties": {
-            "minWidth": 200,
-            "minHeight": 250,
-            "initialWidth": 500,
-            "initialHeight": 500,
-        },
         "pythonAPI": {
             "name": "display_pandas",
             "params": [
@@ -5184,7 +4551,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -5192,7 +4558,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -5200,7 +4565,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -5256,13 +4620,6 @@ metadata = {
         "description": "Displays a Plotly figure to the user",
         "type": "plotly-output",
         "events": [],
-        "autoHeight": False,
-        "dashProperties": {
-            "minWidth": 245,
-            "minHeight": 112,
-            "initialWidth": 245,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "display_plotly",
             "params": [
@@ -5286,7 +4643,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -5294,7 +4650,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -5302,7 +4657,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -5334,13 +4688,6 @@ metadata = {
         "description": "Show a progress bar when loading the app.",
         "type": "progress-output",
         "events": [],
-        "autoHeight": True,
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 30,
-            "initialWidth": 300,
-            "initialHeight": 32,
-        },
         "pythonAPI": {
             "name": "display_progress",
             "params": [
@@ -5350,7 +4697,6 @@ metadata = {
                     "typeName": "float",
                     "isKwarg": False,
                     "default": "50",
-                    "dashesInitialValue": "50",
                 },
                 {
                     "argName": "total",
@@ -5358,7 +4704,6 @@ metadata = {
                     "typeName": "float",
                     "isKwarg": False,
                     "default": "100",
-                    "dashesInitialValue": "100",
                 },
                 {
                     "argName": "text",
@@ -5373,7 +4718,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -5381,7 +4725,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -5389,7 +4732,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],
@@ -5423,14 +4765,7 @@ metadata = {
         "name": "Text display",
         "description": '"Text display" adds textual information into the app.',
         "type": "text-output",
-        "autoHeight": True,
         "events": [],
-        "dashProperties": {
-            "minWidth": 60,
-            "minHeight": 30,
-            "initialWidth": 223,
-            "initialHeight": 112,
-        },
         "pythonAPI": {
             "name": "display",
             "params": [
@@ -5440,7 +4775,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": False,
                     "default": None,
-                    "dashesInitialValue": '"Your text here!"',
                 },
                 {
                     "argName": "size",
@@ -5455,7 +4789,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "full_width",
@@ -5463,7 +4796,6 @@ metadata = {
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
-                    "formOnly": True,
                 },
                 {
                     "argName": "button_text",
@@ -5471,7 +4803,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "Next",
-                    "formOnly": True,
                 },
             ],
             "returns": [],

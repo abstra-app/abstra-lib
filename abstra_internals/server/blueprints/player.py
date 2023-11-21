@@ -5,7 +5,7 @@ from ..utils import send_from_dist
 from ...execution.execution import RequestData
 from ...repositories.project.project import ProjectRepository, JobStage
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
-from ...execution import HookExecution, JobExecution, FormExecution, DashExecution
+from ...execution import HookExecution, JobExecution, FormExecution
 
 from ..controller.main import MainController
 from ..controller import auth as auth_controller
@@ -58,19 +58,6 @@ def get_player_bp(controller: MainController):
         )
 
         try:
-            dash_path = flask.request.args.get("dashPath")
-            if dash_path is not None:
-                dash = controller.get_dash(dash_path)
-
-                project = ProjectRepository.load()
-                is_initial = project.is_initial(dash_path)
-
-                if not dash:
-                    conn.close(reason=404, message="Not found")
-                    return
-
-                return DashExecution(dash, is_initial, conn, request_data).run_sync()
-
             form_path = flask.request.args.get("formPath")
             if form_path is not None:
                 form = controller.get_form(form_path)
