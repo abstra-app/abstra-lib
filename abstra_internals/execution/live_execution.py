@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING, Tuple, Dict, Union
+from typing import Optional, TYPE_CHECKING, Tuple, Dict
 import traceback, flask_sock
 from simple_websocket.ws import ConnectionClosed
 
+from ..jwt_auth import UserClaims
 from ..contract import should_send, common
-from ..utils import deserialize, serialize, decode_jwt
+from ..utils import deserialize, serialize
 from .execution import Execution, RequestData, NoExecutionFound
 
 if TYPE_CHECKING:
@@ -16,17 +17,6 @@ def get_live_execution_throwable() -> LiveExecution:
     if not execution:
         raise NoExecutionFound
     return execution
-
-
-class AuthResponse:
-    """The response from the authentication process
-
-    Attributes:
-      email (str): The email address of the user
-    """
-
-    def __init__(self, email: str):
-        self.email = email
 
 
 class LiveExecution(Execution):
@@ -128,13 +118,13 @@ class LiveExecution(Execution):
             if type != "auth:saved-jwt":
                 continue
 
-            jwt_claims = decode_jwt(data["jwt"])
-            if not jwt_claims:
+            claims = UserClaims.from_jwt(data["jwt"])
+            if not claims:
                 self.send(common.AuthInvalidJWTMessage())
                 continue
 
             self.send(common.AuthValidJWTMessage())
-            return AuthResponse(jwt_claims["email"])
+            return claims
 
     def execute_js(self, code: str, context: dict = {}):
         self.send(common.ExecuteJSRequestMessage(code, context))

@@ -76,27 +76,6 @@ def is_valid_email(email):
     return re.match(email_rgexp, email)
 
 
-def decode_jwt(jwt_str: str):
-    try:
-        if PUBLIC_KEY:
-            return jwt.decode(jwt_str, key=PUBLIC_KEY, algorithms=["RS256"])
-        return jwt.decode(jwt_str, options={"verify_signature": False})
-    except Exception as e:
-        print("error decoding jwt", e)
-        return None
-
-
-def endcode_fake_jwt(email: str):
-    return jwt.encode(
-        key="fake",
-        algorithm="HS256",
-        payload={
-            "email": email,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
-        },
-    )
-
-
 def random_id(length=10):
     import random, string
 
