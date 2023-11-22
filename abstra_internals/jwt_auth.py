@@ -28,6 +28,7 @@ def endcode_fake_jwt(email: str):
 @dataclass
 class UserClaims:
     """The response from the authentication process
+
     Attributes:
       email (str): The email address of the user
       claims (dict): The claims from the JWT token

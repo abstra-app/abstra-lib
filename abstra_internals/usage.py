@@ -1,5 +1,4 @@
 import requests, inspect
-from pathlib import Path
 from concurrent import futures
 from typing import Any, Callable, Tuple
 from .credentials import get_credentials
