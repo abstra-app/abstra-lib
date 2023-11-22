@@ -1,7 +1,8 @@
 import unittest
+
+from abstra.forms.page import Page
 from abstra_internals.widgets.library import ListInput
 from abstra.forms.list_item_schema import ListItemSchema
-from abstra.forms.page import Page
 
 default_text_input = {
     "type": "text-input",

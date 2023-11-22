@@ -1,8 +1,9 @@
-from abstra_internals.execution import LiveExecution, Execution
-from threading import get_ident
 import unittest
-from abstra.forms import Page
 from collections import deque
+from threading import get_ident
+
+from abstra.forms import Page
+from abstra_internals.execution import LiveExecution, Execution
 
 
 class MockLiveExecution(LiveExecution):

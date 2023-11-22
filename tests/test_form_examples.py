@@ -1,8 +1,10 @@
-from abstra_internals.repositories.project.project import FormStage
-from .utils import assert_form
-import unittest, json, os
+import unittest, json
 from pathlib import Path
+
+from .utils import assert_form
 from .fixtures import init_dir, clear_dir
+
+from abstra_internals.repositories.project.project import FormStage
 
 
 class TestFormExamples(unittest.TestCase):

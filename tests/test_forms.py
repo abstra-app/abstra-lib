@@ -1,7 +1,9 @@
 import unittest
-from abstra_internals.server.controller import MainController
+
 from .fixtures import init_dir, clear_dir
+
 from abstra.forms import display
+from abstra_internals.server.controller import MainController
 from abstra_internals.execution.execution import NoExecutionFound
 
 
@@ -21,6 +23,9 @@ class TestForms(unittest.TestCase):
         api2 = MainController()
         api2.get_workspace()
         new_form = api2.get_form(form.path)
+
+        if not new_form:
+            self.fail("Form not found")
 
         self.assertEqual(form.title, new_form.title)
 

@@ -1,20 +1,25 @@
+from pathlib import Path
 from unittest import TestCase
+from pkg_resources import get_distribution
+
 from .fixtures import init_dir, clear_dir
+
 from abstra_internals.server.controller import MainController
 from abstra_internals.linter.rules.env_in_bundle import EnvInBundle
 from abstra_internals.linter.rules.syntax_errors import SyntaxErrors
+
 from abstra_internals.linter.rules.missing_packages_in_requirements import (
     MissingPackagesInRequirements,
 )
+
+from abstra_internals.linter.rules.missing_abstra_in_requirements import (
+    MissingAbstraInRequirements,
+)
+
 from abstra_internals.linter.rules.missing_entrypoint import (
     MissingEntrypoint,
     AddEntrypoint,
 )
-from abstra_internals.linter.rules.missing_abstra_in_requirements import (
-    MissingAbstraInRequirements,
-)
-from pathlib import Path
-from pkg_resources import get_distribution
 
 
 class TestLinters(TestCase):

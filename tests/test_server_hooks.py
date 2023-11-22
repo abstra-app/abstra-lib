@@ -1,7 +1,7 @@
 import unittest, pathlib
-from abstra_internals.server.controller import MainController
-from .fixtures import init_dir, clear_dir
-from abstra_internals.server import get_local_app
+
+from .fixtures import init_dir, clear_dir, get_local_client
+
 from abstra_internals.templates import new_hook_code
 from abstra_internals.repositories.project.project import ProjectRepository
 
@@ -9,8 +9,7 @@ from abstra_internals.repositories.project.project import ProjectRepository
 class TestHooks(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        controller = MainController()
-        self.client = get_local_app(controller).test_client()
+        self.client = get_local_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -37,12 +36,10 @@ class TestHooks(unittest.TestCase):
         self.assertEqual(file_content, new_hook_code)
 
     def test_renaming_hook_should_change_all_transitions_pointing_to_it(self):
-        controller = MainController()
-
         source = self.client.post("/_editor/api/forms/").get_json()
         target = self.client.post("/_editor/api/hooks/").get_json()
 
-        res = self.client.post(
+        self.client.post(
             "/_editor/api/workflows/add-transition",
             json=[
                 {

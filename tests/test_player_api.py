@@ -1,12 +1,12 @@
 import unittest
-from .fixtures import init_dir, clear_dir
-from abstra_internals.server import get_cloud_app
+
+from .fixtures import init_dir, clear_dir, get_cloud_client
 
 
 class TestPlayerApi(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        self.client = get_cloud_app(str(self.root)).test_client()
+        self.client = get_cloud_client(self.root)
 
     def tearDown(self) -> None:
         clear_dir(self.root)

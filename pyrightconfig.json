@@ -11,5 +11,5 @@
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
   "pythonVersion": "3.8",
-  "pythonPlatform": "Linux",
+  "pythonPlatform": "Linux"
 }
