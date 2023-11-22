@@ -1,4 +1,4 @@
-import base64, simplejson, jwt, traceback, re, socket, datetime
+import base64, simplejson, traceback, re, socket
 from contextlib import closing
 from traceback import StackSummary
 

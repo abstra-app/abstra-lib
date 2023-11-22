@@ -1,9 +1,10 @@
-from ..linter import LinterRule, LinterIssue, LinterFix
-from ...utils.file import traverse_code
-from ...repositories.project.project import ProjectRepository
-from typing import List
 import webbrowser
+from typing import List
 from pathlib import Path
+
+from ...utils.file import traverse_code
+from ..linter import LinterRule, LinterIssue, LinterFix
+from ...repositories.project.project import ProjectRepository
 
 
 class OpenBrokenFile(LinterFix):

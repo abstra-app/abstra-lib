@@ -3,9 +3,9 @@ import flask, flask_sock
 from ...settings import Settings
 from ..utils import send_from_dist
 from ...execution.execution import RequestData
+from ...execution import HookExecution, JobExecution, FormExecution
 from ...repositories.project.project import ProjectRepository, JobStage
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
-from ...execution import HookExecution, JobExecution, FormExecution
 
 from ..controller.main import MainController
 from ..controller import auth as auth_controller

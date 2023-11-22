@@ -1,4 +1,7 @@
+from typing import Union, List
+
 from ..linter import LinterRule, LinterFix, LinterIssue
+from ...templates import new_hook_code, new_job_code, new_script_code, new_form_code
 from ...repositories.project.project import (
     ProjectRepository,
     FormStage,
@@ -7,11 +10,11 @@ from ...repositories.project.project import (
     ScriptStage,
     WorkflowStage,
 )
-from typing import Union, List
-from ...templates import new_hook_code, new_job_code, new_script_code, new_form_code
 
 
 class AddEntrypoint(LinterFix):
+    label = "Add entrypoint"
+    description = "Creates the .py file for the entrypoint"
     runtime: Union[FormStage, HookStage, JobStage, ScriptStage]
 
     def __init__(

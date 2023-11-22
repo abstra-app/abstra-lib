@@ -1,14 +1,14 @@
-from dataclasses import dataclass
-from typing import List, Optional, Set
+import ast
+from shutil import move
 from pathlib import Path
 from tempfile import mkdtemp
-from shutil import move
-
-from .project.project import ProjectRepository
-from ..settings import Settings
-from importlib_metadata import packages_distributions
+from dataclasses import dataclass
+from typing import List, Optional, Set
 from pkg_resources import get_distribution
-import ast
+from importlib_metadata import packages_distributions
+
+from ..settings import Settings
+from .project.project import ProjectRepository
 
 
 @dataclass

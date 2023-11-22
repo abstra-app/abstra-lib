@@ -1,4 +1,4 @@
-import pkg_resources, os, requests
+import pkg_resources, requests
 from ..utils.environment import IS_PREVIEW
 
 
