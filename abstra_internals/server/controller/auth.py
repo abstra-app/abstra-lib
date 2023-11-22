@@ -1,6 +1,7 @@
 import flask
 
-from ...utils import is_valid_email, endcode_fake_jwt
+from ...utils import is_valid_email
+from ...jwt_auth import endcode_fake_jwt
 from ...utils.environment import IS_PREVIEW, AUTHN_URL
 
 
