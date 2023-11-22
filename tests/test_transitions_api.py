@@ -1,11 +1,14 @@
 import unittest
+
+from .fixtures import init_dir, clear_dir
+
 from abstra_internals.server.controller import (
     MainController,
     SelfTransitionError,
-    UnknownNodeTypeError,
     TransitionToJobError,
     DoubleTransitionError,
 )
+
 from abstra_internals.repositories.project.project import (
     Project,
     FormStage,
@@ -14,7 +17,6 @@ from abstra_internals.repositories.project.project import (
     ProjectRepository,
     RuntimeNotFoundError,
 )
-from .fixtures import init_dir, clear_dir
 
 
 class TestTransitionsApi(unittest.TestCase):

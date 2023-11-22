@@ -1,7 +1,7 @@
 import os, re, pathlib
 from setuptools import setup, find_packages
 
-regex = "^v(\d+\.\d+\.\d+)$"
+regex = r"^v(\d+\.\d+\.\d+)$"
 TAG = os.getenv("TAG", "v0.0.0")
 if not TAG or not re.search(regex, TAG):
     raise ValueError("TAG environment variable must be in the format v1.2.3")

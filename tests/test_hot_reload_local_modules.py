@@ -1,25 +1,23 @@
-from datetime import datetime
-from pathlib import Path
 import time
+from pathlib import Path
+from datetime import datetime
 from unittest import TestCase
+
+from .fixtures import clear_dir, init_dir, get_local_client
+
+from abstra_internals.server.fs_watcher import reload_files_on_change
 from abstra_internals.repositories.project.project import (
-    Project,
     ProjectRepository,
     HookStage,
+    Project,
 )
-from abstra_internals.server import get_local_app
-
-from abstra_internals.server.controller import MainController
-from abstra_internals.server.fs_watcher import reload_files_on_change
-
-from .fixtures import clear_dir, init_dir
 
 
 class TestHotReloadLocalModules(TestCase):
     def setUp(self):
         self.root = init_dir()
-        controller = MainController()
         self.project = Project.create()
+
         file = "hook.py"
         hook = HookStage(
             file=file,
@@ -29,7 +27,8 @@ class TestHotReloadLocalModules(TestCase):
         )
         self.project.hooks.append(hook)
         ProjectRepository.save(self.project)
-        self.client = get_local_app(controller).test_client()
+
+        self.client = get_local_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

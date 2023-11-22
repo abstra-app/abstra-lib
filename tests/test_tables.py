@@ -1,5 +1,6 @@
 import unittest
 from dataclasses import dataclass
+
 from abstra.tables.api import (
     _make_insert_query,
     _make_delete_query,

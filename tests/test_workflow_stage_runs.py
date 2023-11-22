@@ -1,7 +1,11 @@
+import unittest, time
 from typing import Any, Mapping, List
-import unittest
-from .fixtures import init_dir, clear_dir
-from abstra_internals.server.controller import MainController
+
+from .fixtures import init_dir, clear_dir, get_local_client
+
+from abstra_internals.repositories import StageRunRepository
+from abstra_internals.repositories.stage_run import LocalStageRunRepository
+
 from abstra_internals.repositories.project.project import (
     Project,
     HookStage,
@@ -9,11 +13,6 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
     ProjectRepository,
 )
-from abstra_internals.server import get_local_app
-from abstra_internals.repositories import StageRunRepository
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from abstra_internals.execution.execution import Execution
-import time
 
 code_implicit = """
 from abstra.workflows import get_stage
@@ -90,8 +89,7 @@ class TestWorkflowNext(unittest.TestCase):
 
     def setUp(self) -> None:
         self.root = init_dir()
-        controller = MainController()
-        self.client = get_local_app(controller).test_client()
+        self.client = get_local_client()
         LocalStageRunRepository.clear()
 
     def tearDown(self) -> None:
@@ -118,7 +116,6 @@ class TestWorkflowNext(unittest.TestCase):
 
         project.hooks = [hook_a, hook_b]
 
-        self.controller = MainController()
         ProjectRepository.save(project=project)
 
         response = self.client.post("/_hooks/hook_a")
@@ -149,7 +146,6 @@ class TestWorkflowNext(unittest.TestCase):
 
         project.hooks = [hook_a, hook_b]
 
-        self.controller = MainController()
         ProjectRepository.save(project=project)
 
         response = self.client.post(f"/_hooks/hook_a")
@@ -180,7 +176,6 @@ class TestWorkflowNext(unittest.TestCase):
 
         project.hooks = [hook_a, hook_b, hook_c]
 
-        self.controller = MainController()
         ProjectRepository.save(project=project)
 
         self.client.post("/_hooks/hook_a")
@@ -230,7 +225,6 @@ class TestWorkflowNext(unittest.TestCase):
         project.hooks = [hook_a]
         project.scripts = [script_b, script_c, script_d]
 
-        self.controller = MainController()
         ProjectRepository.save(project=project)
 
         self.client.post("/_hooks/hook_a")

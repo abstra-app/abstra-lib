@@ -1,8 +1,9 @@
-import os, json, tempfile, shutil, typing
 from pathlib import Path
-import shutil
+import os, json, tempfile, shutil, typing
 
 from abstra_internals.settings import SettingsController
+from abstra_internals.server.controller import MainController
+from abstra_internals.server import get_local_app, get_cloud_app
 
 abstra_json = {"version": "0.2"}
 
@@ -30,6 +31,17 @@ def init_dir(path: typing.Optional[Path] = None):
         abstra_json_path.write_text(json.dumps(abstra_json))
 
     return path
+
+
+def get_local_client():
+    controller = MainController()
+    app = get_local_app(controller)
+    return app.test_client()
+
+
+def get_cloud_client(root: Path):
+    app = get_cloud_app(str(root))
+    return app.test_client()
 
 
 def clear_dir(path: Path):
