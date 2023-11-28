@@ -12,7 +12,7 @@ def get_editor_bp(controller: MainController):
     @usage
     def _get_workflow_editor_data():
         try:
-            return controller.workflow_initial_data()
+            return controller.get_workflow_editor_data()
         except Exception as e:
             return str(e), 500
 
@@ -31,7 +31,7 @@ def get_editor_bp(controller: MainController):
     def _bulk_create_stages():
         try:
             payload = flask.request.json
-            controller.workflow_add_nodes(payload)
+            controller.bulk_create_stages(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -41,7 +41,7 @@ def get_editor_bp(controller: MainController):
     def _bulk_duplicate_stages():
         try:
             payload = flask.request.json
-            controller.workflow_duplicate_nodes(payload)
+            controller.bulk_duplicate_stages(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -51,7 +51,7 @@ def get_editor_bp(controller: MainController):
     def _bulk_delete():
         try:
             payload = flask.request.json
-            controller.workflow_delete(payload)
+            controller.bulk_delete(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500
@@ -61,7 +61,7 @@ def get_editor_bp(controller: MainController):
     def _bulk_create_transitions():
         try:
             payload = flask.request.json
-            controller.workflow_add_transition(payload)
+            controller.bulk_create_transitions(payload)
             return flask.Response(status=204)
         except Exception as e:
             return str(e), 500

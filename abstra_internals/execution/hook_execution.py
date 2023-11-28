@@ -53,7 +53,7 @@ class HookExecution(StaticExecution):
         assignee: Optional[str] = None,
     ):
         stage_runs = StageRunRepository.find(
-            {"props": props, "assignee": assignee, "stage": self.runtime_json.path}
+            {"props": props, "assignee": assignee, "stage": self.stage.id}
         )
 
         if len(stage_runs) == 0:

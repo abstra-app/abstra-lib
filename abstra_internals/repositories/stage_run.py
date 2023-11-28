@@ -1,4 +1,5 @@
-import abc, copy, uuid, requests
+import copy, uuid, requests
+from datetime import datetime
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Type, Mapping, Any
 
@@ -18,6 +19,7 @@ class StageRun:
     stage: str
     data: dict
     status: str
+    created_at: datetime
     assignee: Optional[str]
     parent_id: Optional[str]
 
@@ -45,13 +47,13 @@ class StageRun:
         return StageRun(**self.to_dto())
 
 
-class IStageRunRepository(abc.ABC):
-    valid_keys = ["data", "stage", "assignee", "status", "parent_id"]
+class StageRunRepository:
+    valid_filter_keys = ["data", "stage", "assignee", "status", "parent_id"]
 
     @classmethod
-    def validate_keys(cls, filter: Dict) -> None:
+    def validate_filter_keys(cls, filter: Dict) -> None:
         for key in filter.keys():
-            if key not in cls.valid_keys:
+            if key not in cls.valid_filter_keys:
                 raise Exception(f"Invalid filter key {key}")
 
     @classmethod
@@ -63,15 +65,16 @@ class IStageRunRepository(abc.ABC):
             data = {**parent.data, **dto.get("data", {})}
             assignee = dto.get("assignee", parent.assignee)
 
-            if not stage:
-                raise Exception("'stage' is required")
-
             next_dtos.append(dict(stage=stage, data=data, assignee=assignee))
 
         return next_dtos
 
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
+        raise NotImplementedError()
+
+    @classmethod
+    def find_leaves(cls, filter: Dict) -> List[StageRun]:
         raise NotImplementedError()
 
     @classmethod
@@ -91,7 +94,7 @@ class IStageRunRepository(abc.ABC):
         raise NotImplementedError()
 
 
-class LocalStageRunRepository(IStageRunRepository):
+class LocalStageRunRepository(StageRunRepository):
     _stage_runs: List[StageRun] = []
 
     @classmethod
@@ -109,7 +112,7 @@ class LocalStageRunRepository(IStageRunRepository):
 
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
-        cls.validate_keys(filter)
+        cls.validate_filter_keys(filter)
 
         stage = filter.get("stage")
         data = filter.get("data")
@@ -130,14 +133,27 @@ class LocalStageRunRepository(IStageRunRepository):
         ]
 
     @classmethod
-    def create_initial(cls, stage: str, assignee: Optional[str] = None) -> StageRun:
+    def find_leaves(cls, filter: Dict) -> List[StageRun]:
+        cls.validate_filter_keys(filter)
+        filter_matches = cls.find(filter)
+        parent_ids = set(u.parent_id for u in cls._stage_runs)
+
+        return [
+            stage_run for stage_run in filter_matches if stage_run.id not in parent_ids
+        ]
+
+    @classmethod
+    def create_initial(
+        cls, stage: str, assignee: Optional[str] = None, data: dict = {}
+    ) -> StageRun:
         stage_run = StageRun(
             id=str(uuid.uuid4()),
             status="waiting",
             stage=stage,
-            data={},
+            data=data,
             assignee=assignee,
             parent_id=None,
+            created_at=datetime.now(),
         )
 
         cls._stage_runs.append(stage_run)
@@ -148,7 +164,11 @@ class LocalStageRunRepository(IStageRunRepository):
     def create_next(cls, parent: StageRun, dtos: List[Dict]) -> None:
         for dto in cls.hydrate_next_dto(parent, dtos):
             stage_run = StageRun(
-                id=str(uuid.uuid4()), parent_id=parent.id, status="waiting", **dto
+                id=str(uuid.uuid4()),
+                parent_id=parent.id,
+                status="waiting",
+                **dto,
+                created_at=datetime.now(),
             )
 
             cls._stage_runs.append(stage_run)
@@ -167,7 +187,7 @@ class LocalStageRunRepository(IStageRunRepository):
         return False
 
 
-class ProductionStageRunRepository(IStageRunRepository):
+class ProductionStageRunRepository(StageRunRepository):
     @classmethod
     def _request(
         cls,
@@ -200,6 +220,7 @@ class ProductionStageRunRepository(IStageRunRepository):
             assignee=dto["assignee"],
             status=dto["status"],
             parent_id=dto["parentId"],
+            created_at=datetime.fromisoformat(dto["createdAt"]),
         )
 
     @classmethod
@@ -209,7 +230,7 @@ class ProductionStageRunRepository(IStageRunRepository):
 
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
-        cls.validate_keys(filter)
+        cls.validate_filter_keys(filter)
 
         r = cls._request(
             "GET",
@@ -246,7 +267,7 @@ class ProductionStageRunRepository(IStageRunRepository):
         return True
 
 
-def get_stage_run_repository() -> Type[IStageRunRepository]:
+def get_stage_run_repository() -> Type[StageRunRepository]:
     if SIDECAR_URL is None:
         return LocalStageRunRepository
     else:

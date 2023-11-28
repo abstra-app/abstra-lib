@@ -4,12 +4,10 @@ from ...settings import Settings
 from ..utils import send_from_dist
 from ...execution.execution import RequestData
 from ...execution import HookExecution, JobExecution, FormExecution
-from ...repositories.project.project import ProjectRepository, JobStage
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
 
 from ..controller.main import MainController
 from ..controller import auth as auth_controller
-from ..controller import stage_runs as stage_runs_controller
 
 
 def get_player_bp(controller: MainController):
@@ -19,9 +17,6 @@ def get_player_bp(controller: MainController):
     auth_bp = auth_controller.get_player_bp()
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
-    stage_run_bp = stage_runs_controller.get_player_bp()
-    bp.register_blueprint(stage_run_bp, url_prefix="/_stage_runs")
-
     @bp.route("/_workspace", methods=["GET"])
     def _get_workspace():
         workspace = controller.get_workspace()
@@ -29,7 +24,7 @@ def get_player_bp(controller: MainController):
 
     @bp.route("/_pages/<string:path>", methods=["GET"])
     def _get_page(path):
-        page_runtime = controller.get_form(path)
+        page_runtime = controller.get_form_by_path(path)
         if not page_runtime:
             flask.abort(404)
 
@@ -58,23 +53,23 @@ def get_player_bp(controller: MainController):
         )
 
         try:
-            form_path = flask.request.args.get("formPath")
-            if form_path is not None:
-                form = controller.get_form(form_path)
+            id = flask.request.args.get("id")
+            if id is None:
+                return conn.close(reason=400, message="No path")
 
-                project = ProjectRepository.load()
-                is_initial = project.is_initial(form_path)
+            form = controller.get_form(id)
+            if not form:
+                return conn.close(reason=404, message="Not found")
 
-                if not form:
-                    conn.close(reason=404, message="Not found")
-                    return
+            execution = FormExecution(
+                is_initial=controller.is_initial(form.id),
+                request=request_data,
+                runtime_json=form,
+                connection=conn,
+            )
 
-                execution = FormExecution(form, is_initial, conn, request_data)
-
-                execution.run_sync()
-
-                controller.run_waiting_scripts(execution.stage_run)
-
+            execution.run_sync()
+            controller.run_waiting_scripts(execution.stage_run)
         finally:
             conn.close(message="Done")
 
@@ -119,7 +114,7 @@ def get_player_bp(controller: MainController):
 
     @bp.route("/_hooks/<path:path>", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     def hook_runner(path):
-        hook = controller.get_hook(path)
+        hook = controller.get_hook_by_path(path)
 
         if not hook:
             flask.abort(404)
@@ -134,10 +129,8 @@ def get_player_bp(controller: MainController):
             method=flask.request.method,
         )
 
-        project = ProjectRepository.load()
-
         execution = HookExecution(
-            is_initial=project.is_initial(hook.path),
+            is_initial=controller.is_initial(hook.id),
             request=request_data,
             runtime_json=hook,
         )
@@ -167,11 +160,9 @@ def get_player_bp(controller: MainController):
             query_params=flask.request.args,
         )
 
-        def run_job(job: JobStage):
-            project = ProjectRepository.load()
-
+        def run_job(job):
             execution = JobExecution(
-                is_initial=project.is_initial(job.identifier),
+                is_initial=controller.is_initial(job.id),
                 request=request_data,
                 runtime_json=job,
             )

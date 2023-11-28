@@ -1,4 +1,5 @@
 import flask
+
 from ...usage import usage
 from ..utils import send_from_dist
 
@@ -8,6 +9,7 @@ from ..controller import jobs as jobs_controller
 from ..controller import hooks as hooks_controller
 from ..controller import forms as forms_controller
 from ..controller import login as login_controller
+from ..controller import kanban as kanban_controller
 from ..controller import assets as assets_controller
 from ..controller import scripts as scripts_controller
 from ..controller import linters as linters_controller
@@ -15,14 +17,25 @@ from ..controller import debugger as debugger_controller
 from ..controller import workspace as workspace_controller
 from ..controller import workflows as workflows_controller
 from ..controller import stage_runs as stage_runs_controller
+from ..controller import transitions as transitions_controller
 from ..controller import requirements as requirements_controller
+from ..controller import visualizations as visualizations_controller
 
 
 def __get_api_bp(controller: MainController):
     bp = flask.Blueprint("editor_api", __name__)
 
+    kanban_bp = kanban_controller.get_editor_bp()
+    bp.register_blueprint(kanban_bp, url_prefix="/kanban")
+
+    visualizations_bp = visualizations_controller.get_editor_bp()
+    bp.register_blueprint(visualizations_bp, url_prefix="/visualizations")
+
     stage_run_bp = stage_runs_controller.get_editor_bp()
     bp.register_blueprint(stage_run_bp, url_prefix="/stage_runs")
+
+    transitions_bp = transitions_controller.get_editor_bp(controller)
+    bp.register_blueprint(transitions_bp, url_prefix="/transitions")
 
     workspace_bp = workspace_controller.get_editor_bp(controller)
     bp.register_blueprint(workspace_bp, url_prefix="/workspace")

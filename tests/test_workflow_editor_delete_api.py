@@ -1,3 +1,4 @@
+import uuid
 import unittest, pathlib
 
 from .fixtures import init_dir, clear_dir
@@ -6,84 +7,96 @@ from abstra_internals.server.controller import MainController
 
 from abstra_internals.repositories.project.project import (
     Project,
-    FormStage,
-    JobStage,
-    HookStage,
     ProjectRepository,
-    RuntimeNotFoundError,
+    StageNotFoundError,
 )
 
 
 class TestWorkflowEditorDeleteApi(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
-
-        project = Project.create()
-        for i in range(10):
-            form = FormStage(
-                path=f"form{i}",
-                file=f"form{i}.py",
-                workflow_transitions=[],
-                workflow_position=(0, 0),
-                title=f"Form {i}",
-            )
-            project.forms.append(form)
-            job = JobStage(
-                file=f"job{i}.py",
-                workflow_transitions=[],
-                identifier=f"job{i}",
-                schedule="* * * * *",
-                title=f"Job {i}",
-                workflow_position=(0, 0),
-            )
-            project.jobs.append(job)
-            hook = HookStage(
-                file=f"hook{i}.py",
-                enabled=True,
-                path=f"hook{i}",
-                title=f"Hook {i}",
-                workflow_position=(0, 0),
-                workflow_transitions=[],
-            )
-            pathlib.Path(f"form{i}.py").write_text("print('hello world')")
-            pathlib.Path(f"job{i}.py").write_text("print('hello world')")
-            pathlib.Path(f"hook{i}.py").write_text("print('hello world')")
-            project.hooks.append(hook)
         self.controller = MainController()
-        ProjectRepository.save(project=project)
+        self.project = Project.create()
+
+        self.form_ids = []
+        self.job_ids = []
+        self.hook_ids = []
+        self.script_ids = []
+
+        for i in range(3):
+            self.form_ids.append(str(uuid.uuid4()))
+            self.job_ids.append(str(uuid.uuid4()))
+            self.hook_ids.append(str(uuid.uuid4()))
+            self.script_ids.append(str(uuid.uuid4()))
+
+            self.controller.bulk_create_stages(
+                [
+                    {
+                        "type": "forms",
+                        "id": self.form_ids[i],
+                        "position": [i, i],
+                        "title": f"Form {i}",
+                    },
+                    {
+                        "type": "jobs",
+                        "id": self.job_ids[i],
+                        "position": [i, i],
+                        "title": f"Job {i}",
+                    },
+                    {
+                        "type": "hooks",
+                        "id": self.hook_ids[i],
+                        "position": [i, i],
+                        "title": f"Hook {i}",
+                    },
+                    {
+                        "type": "scripts",
+                        "id": self.script_ids[i],
+                        "position": [i, i],
+                        "title": f"Script {i}",
+                    },
+                ]
+            )
 
     def tearDown(self) -> None:
         clear_dir(self.path)
 
     def test_accept_empty_deleting(self):
-        old_json = ProjectRepository.load()
-        self.controller.workflow_delete([])
-        new_json = ProjectRepository.load()
-        self.assertEqual(old_json, new_json)
+        old_project = ProjectRepository.load()
+        self.controller.bulk_delete([])
+        new_project = ProjectRepository.load()
+        self.assertEqual(old_project, new_project)
 
     def test_accept_simple_deleting(self):
-        self.controller.workflow_delete([{"id": "form1", "type": "forms"}])
-        json = ProjectRepository.load()
-        self.assertEqual(json.forms[1].path, "form2")
+        self.controller.bulk_delete([{"id": self.form_ids[0], "type": "forms"}])
+        project = ProjectRepository.load()
+        form_ids = [form.id for form in project.forms]
+        self.assertFalse(self.form_ids[0] in form_ids)
 
     def test_accept_transition_deleting(self):
-        self.controller.workflow_add_transition(
+        id = str(uuid.uuid4())
+        self.controller.bulk_create_transitions(
             [
                 {
-                    "source": {"type": "forms", "id": "form1"},
-                    "target": {"type": "forms", "id": "form2"},
-                    "id": "foo",
+                    "id": id,
+                    "source": {"type": "forms", "id": self.form_ids[0]},
+                    "target": {"type": "forms", "id": self.form_ids[1]},
+                    "label": "success",
                 }
             ]
         )
-        transition = ProjectRepository.load().forms[1].workflow_transitions[0]
-        self.controller.workflow_delete([{"id": transition.id, "type": "transitions"}])
-        json = ProjectRepository.load()
-        self.assertEqual(len(json.forms[1].workflow_transitions), 0)
+        self.controller.bulk_delete([{"id": id, "type": "transitions"}])
+        workflow_data = self.controller.get_workflow_editor_data()
+        form = self.controller.get_form(self.form_ids[0])
+
+        if not form:
+            self.fail("Form not found")
+
+        self.assertEqual(len(form.workflow_transitions), 0)
 
     def test_reject_invalid_id(self):
-        with self.assertRaises(RuntimeNotFoundError):
-            self.controller.workflow_delete(
+        with self.assertRaises(StageNotFoundError):
+            self.controller.bulk_delete(
                 [
                     {
                         "id": "invalid",
@@ -93,25 +106,40 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
             )
 
     def test_delete_transitions_pointing_to_deleted_node(self):
-        self.controller.workflow_add_transition(
+        self.controller.bulk_create_transitions(
             [
                 {
-                    "source": {"type": "forms", "id": "form1"},
-                    "target": {"type": "forms", "id": "form2"},
+                    "source": {"type": "forms", "id": self.form_ids[0]},
+                    "target": {"type": "forms", "id": self.form_ids[1]},
+                    "label": "success",
                     "id": "foo",
                 }
             ]
         )
-        self.controller.workflow_delete([{"id": "form2", "type": "forms"}])
-        json = ProjectRepository.load()
-        self.assertEqual(len(json.forms[1].workflow_transitions), 0)
+        self.controller.bulk_delete([{"id": self.form_ids[1], "type": "forms"}])
+        project = ProjectRepository.load()
+        self.assertEqual(len(project.forms[1].workflow_transitions), 0)
 
     def test_delete_also_delete_file(self):
-        self.assertTrue(pathlib.Path("form1.py").exists())
-        self.controller.workflow_delete([{"id": "form1", "type": "forms"}])
-        self.assertFalse(pathlib.Path("form1.py").exists())
+        form = self.controller.get_form(self.form_ids[0])
+
+        if not form:
+            self.fail("Form not found")
+
+        file_name = form.file
+
+        self.assertTrue(pathlib.Path(file_name).exists())
+        self.controller.bulk_delete([{"id": self.form_ids[0], "type": "forms"}])
+        self.assertFalse(pathlib.Path(file_name).exists())
 
     def test_delete_not_break_when_file_not_found(self):
-        pathlib.Path("form1.py").unlink()
-        self.controller.workflow_delete([{"id": "form1", "type": "forms"}])
-        self.assertFalse(pathlib.Path("form1.py").exists())
+        form = self.controller.get_form(self.form_ids[0])
+
+        if not form:
+            self.fail("Form not found")
+
+        file_name = form.file
+
+        pathlib.Path(file_name).unlink()
+        self.controller.bulk_delete([{"id": self.form_ids[0], "type": "forms"}])
+        self.assertFalse(pathlib.Path(file_name).exists())

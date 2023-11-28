@@ -37,7 +37,7 @@ def get_editor_bp(controller: MainController):
         if not data:
             flask.abort(400)
 
-        job = controller.update_runtime(id, data)
+        job = controller.update_stage(id, data)
         return job.editor_dto if job else None
 
     @bp.delete("/<path:id>")
@@ -61,7 +61,7 @@ def get_editor_bp(controller: MainController):
         )
 
         project = ProjectRepository.load()
-        is_initial = project.is_initial(job.path)
+        is_initial = project.is_initial(job)
         execution = JobExecution(job, is_initial, request_data)
 
         execution.run_sync()

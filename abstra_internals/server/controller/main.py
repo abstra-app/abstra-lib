@@ -1,27 +1,27 @@
-import uuid
-import flask
-import shutil
-import webbrowser
-import concurrent.futures as futures
+import flask, shutil, pkgutil, webbrowser, concurrent.futures as futures
+from pkg_resources import get_distribution
 from werkzeug.datastructures import FileStorage
-from typing import Any, Dict, List, Optional, Union
-from ...debugger.vscode import (
-    start_debugger,
-    is_client_connected,
-    is_launch_json_configured,
-    configure_launch_json,
-)
+from typing import Any, Dict, List, Optional
+from pathlib import Path
+
+from ...utils import random_id, path2module, module2path, files_from_directory
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
+from ...repositories.requirements import RequirementsRepository
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
 from ...repositories.stage_run import StageRun
 from ...repositories import StageRunRepository
-from ...repositories.requirements import RequirementsRepository
+from ...linter.rules import rules
 from ...cli.deploy import deploy
 from ...settings import Settings
-from ...utils import random_id
-from ...linter.rules import rules
-from pkg_resources import get_distribution
+
+from ...debugger.vscode import (
+    is_launch_json_configured,
+    configure_launch_json,
+    is_client_connected,
+    start_debugger,
+)
+
 from ...credentials import (
     delete_credentials,
     get_credentials,
@@ -38,9 +38,12 @@ from ...templates import (
 )
 
 from ...repositories.project.project import (
+    StageNotFoundError,
     WorkflowTransition,
     ProjectRepository,
-    WorkspaceJSON,
+    StyleSettings,
+    WorkflowStage,
+    ScriptStage,
     WorkflowStage,
     ScriptStage,
     Project,
@@ -94,7 +97,6 @@ class DoubleTransitionError(Exception):
         return f"You can't add the same transition twice."
 
 
-## TODO: rename to controller
 class MainController:
     def __init__(self):
         self.executor = futures.ThreadPoolExecutor()
@@ -108,15 +110,20 @@ class MainController:
     def deploy(self):
         deploy()
 
-    def get_workspace(self) -> WorkspaceJSON:
+    def get_workspace(self) -> StyleSettings:
         project = ProjectRepository.load()
         return project.workspace
+
+    def init_code_file(self, path: str, code: str):
+        Settings.root_path.joinpath(path).write_text(code, encoding="utf-8")
 
     def get_page_runtime(self, path) -> Optional[FormStage]:
         project = ProjectRepository.load()
         return project.get_form_by_path(path)
 
-    def open_file(self, file_path: str, create_if_not_exists: bool = False):
+    def open_file(self, file_path: str, mode: str, create_if_not_exists: bool = False):
+        if mode == "module" or mode == "package":
+            file_path = str(module2path(file_path, mode == "package"))
         complete_file_path = Settings.root_path.joinpath(file_path)
 
         if (
@@ -131,11 +138,62 @@ class MainController:
     def check_file(self, file_path: str):
         return Settings.root_path.joinpath(file_path).is_file()
 
+    def list_files(self, path: str = ".", mode: str = "file"):
+        parent_path = Settings.root_path.joinpath(path)
+        if mode in ["file", "image", "python-file"]:
+            if mode == "image":
+                allowed_suffixes = [
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                    ".gif",
+                    ".svg",
+                    ".webp",
+                    ".jfif",
+                    ".pjp",
+                    ".pjpeg",
+                ]
+            elif mode == "python-file":
+                allowed_suffixes = [".py"]
+            else:
+                allowed_suffixes = None
+
+            return [
+                dict(
+                    name=str(file.relative_to(parent_path)),
+                    path=str(file.relative_to(Settings.root_path)),
+                    type="file" if file.is_file() else "dir",
+                )
+                for file in files_from_directory(parent_path)
+                if file.is_dir()
+                or not allowed_suffixes
+                or file.suffix in allowed_suffixes
+            ]
+
+        elif mode == "module":
+            return [
+                dict(
+                    name=name,
+                    path=path2module(Path(path).joinpath(name)),
+                    type="package" if ispkg else "module",
+                )
+                for module_finder, name, ispkg in pkgutil.iter_modules(
+                    [str(parent_path)]
+                )
+            ]
+
     def update_workspace(self, changes: Dict[str, Any]):
         project = ProjectRepository.load()
         project.workspace.update(changes, project.forms)
         ProjectRepository.save(project)
         return project.workspace
+
+    def is_initial(self, id: str):
+        project = ProjectRepository.load()
+        stage = project.get_stage(id)
+        if not stage:
+            raise Exception(f"Stage {id} not found")
+        return project.is_initial(stage)
 
     def run_initial_script(self, script: ScriptStage):
         # This was added to allow script to run without a stage run while testing
@@ -178,21 +236,9 @@ class MainController:
 
     def create_script(self) -> ScriptStage:
         project = ProjectRepository.load()
-
-        file_name = f"new_script_{random_id()}"
-        file = f"{file_name}.py"
-        Settings.root_path.joinpath(file).write_text("", encoding="utf-8")
-
-        script = ScriptStage(
-            path=str(uuid.uuid4()),
-            file=file,
-            title="Untitled Script",
-            workflow_transitions=[],
-            workflow_position=(0, 0),
-        )
-
-        project.scripts.append(script)
-
+        script = ScriptStage.create()
+        self.init_code_file(script.file, new_script_code)
+        project.add_stage(script)
         ProjectRepository.save(project)
 
         return script
@@ -203,141 +249,110 @@ class MainController:
 
     def get_script(self, path: str) -> Optional[ScriptStage]:
         project = ProjectRepository.load()
+        return project.get_script(path)
 
-        for script in project.scripts:
-            if path == script.path:
-                return script
-
-        return None
-
-    def delete_script(self, path: str):
+    def delete_script(self, id: str):
         project = ProjectRepository.load()
-        scripts = project.scripts
-        project.scripts = [f for f in scripts if f.path != path]
-
+        project.delete_stage(id)
         ProjectRepository.save(project)
 
     def create_form(self) -> FormStage:
         project = ProjectRepository.load()
-
-        file_name = f"new_form_{random_id()}"
-        file = f"{file_name}.py"
-        Settings.root_path.joinpath(file).write_text(new_form_code, encoding="utf-8")
-        form = FormStage(
-            file=file, path=file_name, title="Untitled Form", workflow_transitions=[]
-        )
-
-        project.forms.append(form)
-
+        form = FormStage.create()
+        self.init_code_file(form.file, new_form_code)
+        project.add_stage(form)
         ProjectRepository.save(project)
-
         return form
 
     def get_forms(self) -> List[FormStage]:
         project = ProjectRepository.load()
         return project.forms
 
-    def get_form(self, path: str) -> Optional[FormStage]:
+    def get_form(self, id: str) -> Optional[FormStage]:
         project = ProjectRepository.load()
+        return project.get_form(id)
 
-        for form in project.forms:
-            if path == form.path:
-                return form
+    def update_transition(self, id: str, changes: Dict[str, Any]):
+        project = ProjectRepository.load()
+        transition = project.update_transition(id, changes)
+        ProjectRepository.save(project)
+        return transition.__dict__
 
-        return None
+    def get_form_by_path(self, path: str) -> Optional[FormStage]:
+        project = ProjectRepository.load()
+        return project.get_form_by_path(path)
 
     def delete_form(self, path: str):
         project = ProjectRepository.load()
-        project.delete_runtime(path)
+        project.delete_stage(path)
         ProjectRepository.save(project)
 
     def create_hook(self) -> HookStage:
-        abstract_json = ProjectRepository.load()
-
-        file_name = f"new_hook_{random_id()}"
-        file = f"{file_name}.py"
-        Settings.root_path.joinpath(file).write_text(new_hook_code, encoding="utf-8")
-        hook = HookStage(
-            file=file, path=file_name, title="Untitled Hook", workflow_transitions=[]
-        )
-
-        abstract_json.hooks.append(hook)
-
-        ProjectRepository.save(abstract_json)
-
+        project = ProjectRepository.load()
+        hook = HookStage.create()
+        self.init_code_file(hook.file, new_hook_code)
+        project.add_stage(hook)
+        ProjectRepository.save(project)
         return hook
+
+    def get_hook(self, id: str) -> Optional[HookStage]:
+        project = ProjectRepository.load()
+        return project.get_hook(id)
 
     def get_hooks(self) -> List[HookStage]:
         project = ProjectRepository.load()
         return project.hooks
 
-    def get_hook(self, path: str) -> Optional[HookStage]:
+    def get_hook_by_path(self, path: str) -> Optional[HookStage]:
         project = ProjectRepository.load()
+        return project.get_hook_by_path(path)
 
-        for hook in project.hooks:
-            if path == hook.path:
-                return hook
-
-        return None
-
-    def delete_hook(self, path: str):
+    def delete_hook(self, id: str) -> None:
         project = ProjectRepository.load()
-        project.delete_runtime(path)
+        project.delete_stage(id)
         ProjectRepository.save(project)
 
-    def get_jobs(self):
+    def get_jobs(self) -> List[JobStage]:
         project = ProjectRepository.load()
         return project.jobs
 
-    def get_job(self, identifier: str):
+    def get_job(self, id: str) -> Optional[JobStage]:
         project = ProjectRepository.load()
-        for job in project.jobs:
-            if identifier == job.identifier:
-                return job
+        stage = project.get_stage(id)
+
+        if isinstance(stage, JobStage):
+            return stage
+
         return None
 
-    def create_job(self):
+    def create_job(self) -> JobStage:
         project = ProjectRepository.load()
-
-        file_name = f"new_job_{random_id()}"
-        file = f"{file_name}.py"
-        Settings.root_path.joinpath(file).write_text(new_job_code, encoding="utf-8")
-        job = JobStage(
-            file=file,
-            identifier=random_id(),
-            schedule="0 * * * *",
-            title="Untitled Job",
-            workflow_position=(0, 0),
-            workflow_transitions=[],
-        )
-
-        project.jobs.append(job)
-
+        job = JobStage.create()
+        self.init_code_file(job.file, new_job_code)
+        project.add_stage(job)
         ProjectRepository.save(project)
-
         return job
 
-    def update_runtime(self, path: str, changes: Dict[str, Any]) -> WorkflowStage:
+    def update_stage(self, id: str, changes: Dict[str, Any]) -> WorkflowStage:
         project = ProjectRepository.load()
-        runtime = project.update_runtime(path, changes)
+        runtime = project.update_stage(id, changes)
         ProjectRepository.save(project)
-
         return runtime
 
-    def delete_job(self, identifier: str):
+    def delete_job(self, id: str):
         project = ProjectRepository.load()
-        project.delete_runtime(identifier)
+        project.delete_stage(id)
         ProjectRepository.save(project)
 
     # workflow visual editor
 
-    def workflow_initial_data(self):
+    def get_workflow_editor_data(self):
         project = ProjectRepository.load()
         result = []
         for job in project.jobs:
             result.append(
                 {
-                    "id": job.identifier,
+                    "id": job.id,
                     "type": "jobs",
                     "label": job.title,
                     "position": job.workflow_position,
@@ -345,7 +360,7 @@ class MainController:
                         {
                             "id": t.id,
                             "label": t.label,
-                            "targetPath": t.target_path,
+                            "targetPath": t.target_id,
                             "targetType": t.target_type,
                         }
                         for t in job.workflow_transitions
@@ -355,7 +370,8 @@ class MainController:
         for form in project.forms:
             result.append(
                 {
-                    "id": form.path,
+                    "id": form.id,
+                    "path": form.path,
                     "type": "forms",
                     "label": form.title,
                     "position": form.workflow_position,
@@ -363,7 +379,7 @@ class MainController:
                         {
                             "id": t.id,
                             "label": t.label,
-                            "targetPath": t.target_path,
+                            "targetPath": t.target_id,
                             "targetType": t.target_type,
                         }
                         for t in form.workflow_transitions
@@ -373,7 +389,8 @@ class MainController:
         for hook in project.hooks:
             result.append(
                 {
-                    "id": hook.path,
+                    "id": hook.id,
+                    "path": hook.path,
                     "type": "hooks",
                     "label": hook.title,
                     "position": hook.workflow_position,
@@ -381,7 +398,7 @@ class MainController:
                         {
                             "id": t.id,
                             "label": t.label,
-                            "targetPath": t.target_path,
+                            "targetPath": t.target_id,
                             "targetType": t.target_type,
                         }
                         for t in hook.workflow_transitions
@@ -391,8 +408,7 @@ class MainController:
         for script in project.scripts:
             result.append(
                 {
-                    "id": script.path,
-                    "path": script.path,
+                    "id": script.id,
                     "type": "scripts",
                     "label": script.title,
                     "position": script.workflow_position,
@@ -400,7 +416,7 @@ class MainController:
                         {
                             "id": t.id,
                             "label": t.label,
-                            "targetPath": t.target_path,
+                            "targetPath": t.target_id,
                             "targetType": t.target_type,
                         }
                         for t in script.workflow_transitions
@@ -413,55 +429,53 @@ class MainController:
     def workflow_move(self, payload):
         project = ProjectRepository.load()
         for move in payload:
-            node = project.get_workflow_runtime_by_path(move["id"])
+            node = project.get_stage(move["id"])
+            if not node:
+                raise StageNotFoundError(f"Stage {move['id']} not found")
             node.workflow_position = move["position"]
         ProjectRepository.save(project)
 
-    def workflow_duplicate_nodes(self, payload):
+    def bulk_duplicate_stages(self, payload):
         project = ProjectRepository.load()
         for item in payload:
-            node = project.get_workflow_runtime_by_path(item["original_id"])
-            duplicated = node.duplicate()
-            if isinstance(duplicated, FormStage):
-                duplicated.path = item["new_id"]
-                project.forms.append(duplicated)
-            elif isinstance(duplicated, JobStage):
-                duplicated.identifier = item["new_id"]
-                project.jobs.append(duplicated)
-            elif isinstance(duplicated, HookStage):
-                duplicated.path = item["new_id"]
-                project.hooks.append(duplicated)
-            elif isinstance(duplicated, ScriptStage):
-                duplicated.path = item["new_id"]
-                project.scripts.append(duplicated)
+            stage = project.get_stage(item["original_id"])
+
+            if not stage:
+                raise StageNotFoundError(f"Stage {item['original_id']} not found")
+            duplicated = stage.duplicate(
+                new_id=item["new_id"], new_position=item["position"]
+            )
+            project.add_stage(duplicated)
 
             duplicated.workflow_transitions = [
                 WorkflowTransition(
-                    target_path=p["new_id"],
+                    target_id=p["new_id"],
                     id=random_id(),
                     label=t.label,
                     target_type=p["type"],
                 )
-                for t in duplicated.workflow_transitions
+                for t in stage.workflow_transitions
                 for p in payload
-                if t.target_path == p["original_id"] and t.target_type == p["type"]
+                if t.target_id == p["original_id"] and t.target_type == p["type"]
             ]
+
             duplicated.title = item["title"]
             duplicated.workflow_position = item["position"]
-            base_file_name = ".".join(node.file.split(".")[:-1])
+            base_file_name = ".".join(stage.file.split(".")[:-1])
             duplicated.file = f"{base_file_name}-copy.py"
-            original_file_path = Settings.root_path.joinpath(node.file)
+            original_file_path = Settings.root_path.joinpath(stage.file)
             duplicated_file_path = Settings.root_path.joinpath(duplicated.file)
             if original_file_path.exists() and not duplicated_file_path.exists():
                 shutil.copy(
-                    Settings.root_path.joinpath(node.file),
+                    Settings.root_path.joinpath(stage.file),
                     Settings.root_path.joinpath(duplicated.file),
                 )
 
         ProjectRepository.save(project)
 
-    def workflow_add_nodes(self, payload):
+    def bulk_create_stages(self, payload):
         project = ProjectRepository.load()
+
         for node in payload:
             node_type = node["type"]
             node_id = node["id"]
@@ -469,51 +483,35 @@ class MainController:
             node_title = node["title"]
 
             if node_type == "jobs":
-                job = JobStage(
-                    file=f"new_job_{node_id}.py",
-                    identifier=node_id,
-                    schedule="0 * * * *",
-                    title=node["title"],
-                    workflow_position=node_position,
-                    workflow_transitions=[],
+                job = JobStage.create(
+                    id=node_id, workflow_position=node_position, title=node_title
                 )
-                project.jobs.append(job)
-                Settings.root_path.joinpath(job.file).write_text(new_job_code)
+                project.add_stage(job)
+                self.init_code_file(job.file, new_job_code)
             elif node_type == "forms":
-                form = FormStage(
-                    file=f"new_form_{node_id}.py",
-                    path=node_id,
-                    title=node["title"],
-                    workflow_position=node_position,
-                    workflow_transitions=[],
+                form = FormStage.create(
+                    id=node_id, workflow_position=node_position, title=node_title
                 )
-                project.forms.append(form)
-                Settings.root_path.joinpath(form.file).write_text(new_form_code)
+                project.add_stage(form)
+                self.init_code_file(form.file, new_form_code)
             elif node_type == "hooks":
-                hook = HookStage(
-                    file=f"new_hook_{node_id}.py",
-                    path=node_id,
-                    title=node["title"],
-                    workflow_position=node_position,
-                    workflow_transitions=[],
+                hook = HookStage.create(
+                    id=node_id, workflow_position=node_position, title=node_title
                 )
-                project.hooks.append(hook)
-                Settings.root_path.joinpath(hook.file).write_text(new_hook_code)
+                project.add_stage(hook)
+                self.init_code_file(hook.file, new_hook_code)
             elif node_type == "scripts":
-                script = ScriptStage(
-                    file=f"new_script_{node_id}.py",
-                    path=node_id,
-                    title=node["title"],
-                    workflow_position=node_position,
-                    workflow_transitions=[],
+                script = ScriptStage.create(
+                    id=node_id, workflow_position=node_position, title=node_title
                 )
-                project.scripts.append(script)
-                Settings.root_path.joinpath(script.file).write_text(new_script_code)
+                project.add_stage(script)
+                self.init_code_file(script.file, new_script_code)
             else:
                 raise UnknownNodeTypeError(node_type)
+
         ProjectRepository.save(project)
 
-    def workflow_delete(self, payload):
+    def bulk_delete(self, payload):
         project = ProjectRepository.load()
 
         for item in payload:
@@ -521,16 +519,23 @@ class MainController:
                 transition = project.get_transition(item["id"])
                 project.delete_transition(transition.id)
             else:
-                node = project.get_workflow_runtime_by_path(item["id"])
-                if Settings.root_path.joinpath(node.file).exists():
-                    Settings.root_path.joinpath(node.file).unlink()
-                project.delete_runtime(node.path)
+                stage = project.get_stage(item["id"])
+                if not stage:
+                    raise StageNotFoundError(f"Stage {item['id']} not found")
+
+                if Settings.root_path.joinpath(stage.file).exists():
+                    Settings.root_path.joinpath(stage.file).unlink()
+
+                project.delete_stage(stage.id)
+
         ProjectRepository.save(project)
 
-    def workflow_add_transition(self, payload):
+    def bulk_create_transitions(self, payload):
         if len(payload) == 0:
             return
+
         project = ProjectRepository.load()
+
         for transition in payload:
             double_transition = project.find_transition(
                 transition["source"]["id"],
@@ -559,13 +564,20 @@ class MainController:
                     transition["source"]["type"], transition["source"]["id"]
                 )
 
-            source = project.get_workflow_runtime_by_path(transition["source"]["id"])
-            project.get_workflow_runtime_by_path(transition["target"]["id"])
+            source = project.get_stage(transition["source"]["id"])
+            target = project.get_stage(transition["target"]["id"])
+
+            if not source:
+                raise Exception(f"Source {transition['source']['id']} not found")
+
+            if not target:
+                raise Exception(f"Target {transition['target']['id']} not found")
+
             source.workflow_transitions.append(
                 WorkflowTransition(
-                    target_path=transition["target"]["id"],
+                    target_id=transition["target"]["id"],
                     id=transition["id"],
-                    label="",
+                    label=transition["label"],
                     target_type=transition["target"]["type"],
                 )
             )

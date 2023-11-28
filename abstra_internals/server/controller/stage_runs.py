@@ -6,10 +6,10 @@ from ...repositories import StageRunRepository
 
 
 class StageRunsController:
-    def get_stage_runs(self, stage_id: Optional[str] = None):
+    def get_stage_runs(self, stage: Optional[str] = None):
         return [
             stage_run.to_dto()
-            for stage_run in StageRunRepository.find(dict(stage=stage_id))
+            for stage_run in StageRunRepository.find_leaves(dict(stage=stage))
         ]
 
 
@@ -20,15 +20,7 @@ def get_editor_bp():
     @bp.get("/")
     @usage
     def _get_stage_runs():
-        return controller.get_stage_runs()
-
-    return bp
-
-
-def get_player_bp():
-    controller = StageRunsController()
-    bp = flask.Blueprint("player_stage_runs", __name__)
-
-    # TODO in v2
+        stage = flask.request.args.get("stage")
+        return controller.get_stage_runs(stage)
 
     return bp

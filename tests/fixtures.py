@@ -1,11 +1,10 @@
 from pathlib import Path
 import os, json, tempfile, shutil, typing
+from abstra_internals.repositories.project.project import ProjectRepository
 
 from abstra_internals.settings import SettingsController
 from abstra_internals.server.controller import MainController
 from abstra_internals.server import get_local_app, get_cloud_app
-
-abstra_json = {"version": "0.2"}
 
 
 def rm_tree(pth: Path):
@@ -23,12 +22,7 @@ def rm_tree(pth: Path):
 def init_dir(path: typing.Optional[Path] = None):
     path = path or Path(tempfile.mkdtemp())
     SettingsController.set_root_path(path.as_posix())
-
-    abstra_json_path = path / "abstra.json"
-    path.mkdir(exist_ok=True)
-
-    if not abstra_json_path.exists():
-        abstra_json_path.write_text(json.dumps(abstra_json))
+    ProjectRepository.initialize()
 
     return path
 

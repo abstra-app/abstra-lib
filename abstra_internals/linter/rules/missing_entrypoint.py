@@ -4,10 +4,10 @@ from ..linter import LinterRule, LinterFix, LinterIssue
 from ...templates import new_hook_code, new_job_code, new_script_code, new_form_code
 from ...repositories.project.project import (
     ProjectRepository,
+    ScriptStage,
     FormStage,
     HookStage,
     JobStage,
-    ScriptStage,
     WorkflowStage,
 )
 
@@ -39,7 +39,7 @@ class AddEntrypoint(LinterFix):
 
     @property
     def name(self):
-        return f"{self.__class__.__name__}:{self.runtime.__class__.__name__}:{self.runtime.path}"
+        return f"{self.__class__.__name__}:{self.runtime.__class__.__name__}:{self.runtime.id}"
 
 
 class NoEntrypointFound(LinterIssue):

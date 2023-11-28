@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
-from datetime import datetime
 from unittest import TestCase
+from datetime import datetime
 
 from .fixtures import clear_dir, init_dir, get_local_client
 
@@ -20,10 +20,12 @@ class TestHotReloadLocalModules(TestCase):
 
         file = "hook.py"
         hook = HookStage(
+            id="hook1",
             file=file,
             path="hook",
             title="Hook 1",
             workflow_transitions=[],
+            workflow_position=(0, 0),
         )
         self.project.hooks.append(hook)
         ProjectRepository.save(self.project)
