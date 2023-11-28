@@ -1,31 +1,28 @@
 import sys, uuid, shutil, json, tempfile
-
 from typing import Generator, List, Optional, Union, Any, Dict, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 
-from .compatibilty import strict_compatible
-from ...utils import check_is_url
 from ...utils.file import traverse_code
+from ...utils import check_is_url
 from ...settings import Settings
+from . import json_migrations
 
 WorkflowStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
+PathableStage = Union["FormStage", "HookStage"]
 
 
 @dataclass
 class WorkflowTransition:
-    target_path: str
+    id: str
+    target_id: str
     target_type: str
     label: str
-    id: str
-
-    def __post_init__(self):
-        self.id = str(uuid.uuid4()) if self.id is None else self.id
 
     @property
     def __dict__(self):
         return {
-            "target_path": self.target_path,
+            "target_id": self.target_id,
             "target_type": self.target_type,
             "label": self.label,
             "id": self.id,
@@ -34,7 +31,7 @@ class WorkflowTransition:
     @staticmethod
     def from_dict(data: dict):
         return WorkflowTransition(
-            target_path=data["target_path"],
+            target_id=data["target_id"],
             target_type=data["target_type"],
             label=data["label"],
             id=data["id"],
@@ -42,28 +39,67 @@ class WorkflowTransition:
 
 
 @dataclass
-class SidebarRuntime:
-    title: str
-    path: str
-
-
-@dataclass
 class HookStage:
+    id: str
     file: str
     path: str
     title: str
     workflow_transitions: List[WorkflowTransition]
-    is_initial: bool = False
+    workflow_position: Tuple[float, float]
+    is_initial: bool = True
     enabled: bool = False
-    workflow_position: Tuple[float, float] = (0, 0)
+
+    @staticmethod
+    def from_dict(dto: dict):
+        x, y = dto["workflow_position"]
+        return HookStage(
+            id=dto["id"],
+            file=dto["file"],
+            path=dto["path"],
+            title=dto["title"],
+            enabled=dto["enabled"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in dto["transitions"]
+            ],
+            is_initial=dto["is_initial"],
+        )
+
+    @staticmethod
+    def create(
+        id: Union[str, None] = None,
+        workflow_position: Tuple[int, int] = (0, 0),
+        title: str = "Untitled Hook",
+    ):
+        _id: str = id or str(uuid.uuid4())
+        return HookStage(
+            id=_id,
+            file=f"new_hook_{_id[:8]}.py",
+            path=f"new_hook_{_id[:8]}",
+            title=title,
+            is_initial=True,
+            workflow_transitions=[],
+            workflow_position=workflow_position,
+        )
 
     @property
     def runner_type(self):
         return "hook"
 
     @property
+    def admin_dto(self):
+        return {
+            "title": self.title,
+            "id": self.id,
+            "path": self.path,
+            "type": "hook",
+            "is_initial": self.is_initial,
+        }
+
+    @property
     def __dict__(self):
         return {
+            "id": self.id,
             "file": self.file,
             "path": self.path,
             "title": self.title,
@@ -90,44 +126,74 @@ class HookStage:
             else:
                 raise Exception(f"Cannot update {attr} of hook")
 
-    @staticmethod
-    def from_dict(data: dict):
-        x, y = data["workflow_position"]
-        return HookStage(
-            file=data["file"],
-            path=data["path"],
-            title=data["title"],
-            enabled=data["enabled"],
-            workflow_position=(x, y),
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
-            is_initial=data["is_initial"],
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
+        return self.from_dict(
+            {
+                **self.__dict__,
+                "id": new_id,
+                "workflow_position": new_position,
+                "transitions": [],
+            }
         )
-
-    def duplicate(self):
-        return self.from_dict(self.__dict__)
 
 
 @dataclass
 class ScriptStage:
+    id: str
     file: str
     title: str
-    path: str
     workflow_transitions: List[WorkflowTransition]
-    is_initial: bool = False
-    workflow_position: Tuple[float, float] = (0, 0)
+    workflow_position: Tuple[float, float]
+    is_initial: bool = True
+
+    @staticmethod
+    def create(
+        id: Union[str, None] = None,
+        workflow_position: Tuple[int, int] = (0, 0),
+        title: str = "Untitled Script",
+    ):
+        _id = id or str(uuid.uuid4())
+        return ScriptStage(
+            id=_id,
+            file=f"new_script_{_id[:8]}.py",
+            title=title,
+            is_initial=True,
+            workflow_transitions=[],
+            workflow_position=workflow_position,
+        )
+
+    @staticmethod
+    def from_dict(data: Dict):
+        x, y = data["workflow_position"]
+        return ScriptStage(
+            id=data["id"],
+            file=data["file"],
+            title=data["title"],
+            workflow_position=(x, y),
+            is_initial=data["is_initial"],
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
 
     @property
     def runner_type(self):
         return "script"
 
     @property
+    def admin_dto(self):
+        return {
+            "title": self.title,
+            "id": self.id,
+            "type": "script",
+            "is_initial": self.is_initial,
+        }
+
+    @property
     def __dict__(self):
         return {
-            "id": self.path,
+            "id": self.id,
             "file": self.file,
-            "path": self.path,
             "title": self.title,
             "is_initial": self.is_initial,
             "workflow_position": self.workflow_position,
@@ -151,42 +217,69 @@ class ScriptStage:
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
-    @staticmethod
-    def from_dict(data: Dict):
-        x, y = data["workflow_position"]
-        return ScriptStage(
-            file=data["file"],
-            path=data["path"],
-            title=data["title"],
-            workflow_position=(x, y),
-            is_initial=data["is_initial"],
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
+    def duplicate(self, new_id: str, new_position: Tuple[int, int]):
+        return self.from_dict(
+            {
+                **self.__dict__,
+                "id": new_id,
+                "workflow_position": new_position,
+                "transitions": [],
+            }
         )
-
-    def duplicate(self):
-        return self.from_dict(self.__dict__)
 
 
 @dataclass
 class JobStage:
+    id: str
     file: str
     title: str
-    identifier: str
     schedule: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
+
+    @staticmethod
+    def create(
+        id: Union[str, None] = None,
+        workflow_position: Tuple[int, int] = (0, 0),
+        title: str = "Untitled Job",
+    ):
+        _id = id or str(uuid.uuid4())
+        return JobStage(
+            id=_id,
+            file=f"new_job_{_id[:8]}.py",
+            title=title,
+            schedule="* * * * *",
+            workflow_position=workflow_position,
+            workflow_transitions=[],
+        )
+
+    @staticmethod
+    def from_dict(data: Dict):
+        x, y = data["workflow_position"]
+        return JobStage(
+            file=data["file"],
+            id=data["id"],
+            title=data["title"],
+            schedule=data["schedule"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
 
     @property
     def runner_type(self):
         return "job"
 
     @property
+    def admin_dto(self):
+        return {"title": self.title, "id": self.id, "type": "job", "is_initial": True}
+
+    @property
     def __dict__(self):
         return {
+            "id": self.id,
             "file": self.file,
-            "identifier": self.identifier,
             "title": self.title,
             "schedule": self.schedule,
             "workflow_position": self.workflow_position,
@@ -210,35 +303,26 @@ class JobStage:
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
-    @staticmethod
-    def from_dict(data: Dict):
-        x, y = data["workflow_position"]
-        return JobStage(
-            file=data["file"],
-            identifier=data["identifier"],
-            title=data["title"],
-            schedule=data["schedule"],
-            workflow_position=(x, y),
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
+    def duplicate(self, new_id: str, new_position: Tuple[int, int]):
+        return self.from_dict(
+            {
+                **self.__dict__,
+                "id": new_id,
+                "workflow_position": new_position,
+                "transitions": [],
+            }
         )
-
-    def duplicate(self):
-        return self.from_dict(self.__dict__)
-
-    @property
-    def path(self):
-        return self.identifier
 
 
 @dataclass
-class FormStage(SidebarRuntime):
+class FormStage:
+    id: str
     file: str
     title: str
+    path: str
     workflow_transitions: List[WorkflowTransition]
-    is_initial: bool = False
-    workflow_position: Tuple[float, float] = (0, 0)
+    workflow_position: Tuple[float, float]
+    is_initial: bool = True
     end_message: Optional[str] = None
     auto_start: Optional[bool] = False
     start_message: Optional[str] = None
@@ -249,16 +333,67 @@ class FormStage(SidebarRuntime):
     start_button_text: Optional[str] = None
     restart_button_text: Optional[str] = None
 
+    @staticmethod
+    def create(
+        id: Union[str, None] = None,
+        workflow_position: Tuple[int, int] = (0, 0),
+        title: str = "Untitled Form",
+    ):
+        _id = id or str(uuid.uuid4())
+        return FormStage(
+            id=_id,
+            file=f"new_form_{_id[:8]}.py",
+            path=f"new_form_{_id[:8]}",
+            title=title,
+            is_initial=True,
+            workflow_transitions=[],
+            workflow_position=workflow_position,
+        )
+
+    @staticmethod
+    def from_dict(data: dict):
+        x, y = data["workflow_position"]
+        return FormStage(
+            id=data["id"],
+            file=data["file"],
+            path=data["path"],
+            title=data["title"],
+            end_message=data["end_message"],
+            auto_start=data["auto_start"],
+            start_message=data["start_message"],
+            error_message=data["error_message"],
+            welcome_title=data["welcome_title"],
+            allow_restart=data["allow_restart"],
+            timeout_message=data["timeout_message"],
+            start_button_text=data["start_button_text"],
+            restart_button_text=data["restart_button_text"],
+            workflow_position=(x, y),
+            is_initial=data["is_initial"],
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
+
     @property
     def runner_type(self):
         return "form"
+
+    @property
+    def admin_dto(self):
+        return {
+            "title": self.title,
+            "id": self.id,
+            "path": self.path,
+            "type": "form",
+            "is_initial": self.is_initial,
+        }
 
     @property
     def browser_runner_dto(self):
         allow_restart = self.allow_restart if self.is_initial else False
 
         return {
-            "id": self.path,
+            "id": self.id,
             "path": self.path,
             "title": self.title,
             "is_initial": self.is_initial,
@@ -311,39 +446,19 @@ class FormStage(SidebarRuntime):
             else:
                 raise Exception(f"Cannot update {attr} of form")
 
-    @staticmethod
-    def from_dict(data: dict):
-        x, y = data["workflow_position"]
-        return FormStage(
-            file=data["file"],
-            path=data["path"],
-            title=data["title"],
-            end_message=data["end_message"],
-            auto_start=data["auto_start"],
-            start_message=data["start_message"],
-            error_message=data["error_message"],
-            welcome_title=data["welcome_title"],
-            allow_restart=data["allow_restart"],
-            timeout_message=data["timeout_message"],
-            start_button_text=data["start_button_text"],
-            restart_button_text=data["restart_button_text"],
-            workflow_position=(x, y),
-            is_initial=data["is_initial"],
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
+    def duplicate(self, new_id: str, new_position: Tuple[int, int]):
+        return self.from_dict(
+            {
+                **self.__dict__,
+                "id": new_id,
+                "workflow_position": new_position,
+                "transitions": [],
+            }
         )
-
-    def duplicate(self):
-        return self.from_dict(self.__dict__)
-
-
-def is_widget(x: Dict[str, Any]):
-    return "slot" not in x
 
 
 @dataclass
-class SidebarItemJSON:
+class SidebarItem:
     id: str
     name: str
     path: str
@@ -362,19 +477,22 @@ class SidebarItemJSON:
 
 
 @dataclass
-class SidebarJSON:
-    items: List[SidebarItemJSON]
+class Sidebar:
+    items: List[SidebarItem]
 
     @staticmethod
     def from_dict(
         sidebar_data: List[dict],
         forms: List[FormStage] = [],
     ):
-        item_name = lambda path: [s.title for s in [*forms] if s.path == path][0]
+        item_name = lambda path: [s.title for s in forms if s.path == path][0]
         stored_items = []
+
+        initial_forms = [f for f in forms if f.is_initial]
+
         for item in sidebar_data:
-            if item["path"] in [f.path for f in forms]:
-                sidebar_item = SidebarItemJSON(
+            if item["path"] in [f.path for f in initial_forms]:
+                sidebar_item = SidebarItem(
                     id=item["id"],
                     name=item_name(item["path"]),
                     path=item["path"],
@@ -383,10 +501,10 @@ class SidebarJSON:
                 )
                 stored_items.append(sidebar_item)
 
-        for form in forms:
+        for form in initial_forms:
             if form.path not in [item.path for item in stored_items]:
                 stored_items.append(
-                    SidebarItemJSON(
+                    SidebarItem(
                         id=form.path,
                         name=form.title,
                         path=form.path,
@@ -394,7 +512,7 @@ class SidebarJSON:
                         visible=False,
                     )
                 )
-        return SidebarJSON(items=stored_items)
+        return Sidebar(items=stored_items)
 
     @property
     def __dict__(self):
@@ -402,10 +520,9 @@ class SidebarJSON:
 
 
 @dataclass
-class WorkspaceJSON:
+class StyleSettings:
     name: str
-    sidebar: SidebarJSON
-    root: Optional[str] = None  # deprecated
+    sidebar: Sidebar
     theme: Optional[str] = None
     logo_url: Optional[str] = None
     brand_name: Optional[str] = None
@@ -416,15 +533,15 @@ class WorkspaceJSON:
     @property
     def __dict__(self):
         return {
+            "id": None,
             "name": self.name,
-            "sidebar": self.sidebar.__dict__,
-            "root": self.root,  # deprecated
             "theme": self.theme,
             "logo_url": self.logo_url,
             "brand_name": self.brand_name,
             "main_color": self.main_color,
-            "font_family": self.font_family,
             "font_color": self.font_color,
+            "font_family": self.font_family,
+            "sidebar": self.sidebar.__dict__,
         }
 
     @property
@@ -448,25 +565,21 @@ class WorkspaceJSON:
     ):
         for attr, value in changes.items():
             if attr == "sidebar":
-                self.sidebar = SidebarJSON.from_dict(changes["sidebar"], forms)
+                self.sidebar = Sidebar.from_dict(changes["sidebar"], forms)
             else:
                 setattr(self, attr, value)
 
     @staticmethod
     def from_dict(data: Dict, forms: List[FormStage] = []):
-        return WorkspaceJSON(
+        return StyleSettings(
+            sidebar=Sidebar.from_dict(data.get("sidebar", []), forms=forms),
             name=data.get("name", "Untitled Workspace"),
-            sidebar=SidebarJSON.from_dict(
-                data.get("sidebar", []),
-                forms=forms,
-            ),
-            root=data.get("root"),  # deprecated
-            theme=data.get("theme"),
-            logo_url=data.get("logo_url"),
+            font_family=data.get("font_family"),
             brand_name=data.get("brand_name"),
             main_color=data.get("main_color"),
-            font_family=data.get("font_family"),
             font_color=data.get("font_color"),
+            logo_url=data.get("logo_url"),
+            theme=data.get("theme"),
         )
 
 
@@ -474,7 +587,7 @@ class PathConflictError(Exception):
     pass
 
 
-class RuntimeNotFoundError(KeyError):
+class StageNotFoundError(KeyError):
     pass
 
 
@@ -483,9 +596,58 @@ class TransitionNotFoundError(KeyError):
 
 
 @dataclass
+class VisualizationItem:
+    name: str
+    type: str
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, VisualizationItem):
+            return False
+        return self.name == __value.name and self.type == __value.type
+
+    @staticmethod
+    def from_dict(data: dict):
+        return VisualizationItem(
+            name=data["name"],
+            type=data["type"],
+        )
+
+    @property
+    def __dict__(self):
+        return {
+            "name": self.name,
+            "type": self.type,
+        }
+
+
+@dataclass
+class VisualizationSettings:
+    items: List[VisualizationItem]
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, VisualizationSettings):
+            return False
+        return self.items == __value.items
+
+    @staticmethod
+    def create():
+        return VisualizationSettings([])
+
+    @staticmethod
+    def from_dict(data: list):
+        return VisualizationSettings(
+            items=[VisualizationItem.from_dict(item) for item in data]
+        )
+
+    @property
+    def __dict__(self):
+        return [item.__dict__ for item in self.items]
+
+
+@dataclass
 class Project:
-    version: str
-    workspace: WorkspaceJSON
+    workspace: StyleSettings
+    visualization: VisualizationSettings
     scripts: List[ScriptStage]
     forms: List[FormStage]
     hooks: List[HookStage]
@@ -494,8 +656,8 @@ class Project:
     @property
     def __dict__(self):
         return {
-            "version": self.version,
             "workspace": self.workspace.__dict__,
+            "visualization": self.visualization.__dict__,
             "jobs": [job.__dict__ for job in self.jobs],
             "hooks": [hook.__dict__ for hook in self.hooks],
             "forms": [form.__dict__ for form in self.forms],
@@ -503,11 +665,263 @@ class Project:
         }
 
     @property
-    def workflow_runtimes(self) -> List[WorkflowStage]:
+    def stages(self) -> List[WorkflowStage]:
+        return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
+
+    def add_stage(self, stage: WorkflowStage):
+        if isinstance(stage, FormStage):
+            self.forms.append(stage)
+        elif isinstance(stage, HookStage):
+            self.hooks.append(stage)
+        elif isinstance(stage, JobStage):
+            self.jobs.append(stage)
+        elif isinstance(stage, ScriptStage):
+            self.scripts.append(stage)
+        else:
+            raise Exception(f"Cannot add stage of type {type(stage)}")
+
+    def get_stage(self, id: str) -> Optional[WorkflowStage]:
+        for stage in self.stages:
+            if stage.id == id:
+                return stage
+
+        return None
+
+    def get_stage_raises(self, id: str) -> WorkflowStage:
+        stage = self.get_stage(id)
+        if not stage:
+            raise StageNotFoundError(f"Stage with id '{id}' not found")
+        return stage
+
+    def get_form(self, id: str) -> Optional[FormStage]:
+        for form in self.forms:
+            if form.id == id:
+                return form
+
+        return None
+
+    def get_hook(self, id: str) -> Optional[HookStage]:
+        for hook in self.hooks:
+            if hook.id == id:
+                return hook
+
+        return None
+
+    def get_job(self, id: str) -> Optional[JobStage]:
+        for job in self.jobs:
+            if job.id == id:
+                return job
+
+        return None
+
+    def get_script(self, id: str) -> Optional[ScriptStage]:
+        for script in self.scripts:
+            if script.id == id:
+                return script
+
+        return None
+
+    def get_hook_by_path(self, path: str) -> Optional[HookStage]:
+        for hook in self.hooks:
+            if hook.path == path:
+                return hook
+
+        return None
+
+    def get_form_by_path(self, path: str) -> Optional[FormStage]:
+        for form in self.forms:
+            if form.path == path:
+                return form
+
+    def get_stage_by_path(self, path: str) -> Optional[WorkflowStage]:
+        for form in self.forms:
+            if form.path == path:
+                return form
+
+        for hook in self.hooks:
+            if hook.path == path:
+                return hook
+
+        return None
+
+    def get_initial_stages(self) -> List[WorkflowStage]:
+        return [r for r in self.stages if self.is_initial(r)]
+
+    def get_transition(self, id: str) -> WorkflowTransition:
+        for stage in self.stages:
+            for transition in stage.workflow_transitions:
+                if transition.id == id:
+                    return transition
+
+        raise TransitionNotFoundError(f"Transition with id '{id}' not found")
+
+    def update_transition(self, id: str, changes: Dict[str, Any]) -> WorkflowTransition:
+        transition = self.get_transition(id)
+        transition.label = changes.get("label", transition.label)
+        return transition
+
+    def follow_transition(
+        self, start_stage: str, transition_label: str
+    ) -> WorkflowStage:
+        stage = self.get_stage(start_stage)
+
+        if not stage:
+            raise StageNotFoundError(f"stage with id '{start_stage}' not found")
+
+        for transition in stage.workflow_transitions:
+            if transition.label == transition_label:
+                stage = self.get_stage(transition.target_id)
+
+                if not stage:
+                    raise StageNotFoundError(
+                        f"stage with id '{transition.target_id}' not found"
+                    )
+
+                return stage
+
+        raise TransitionNotFoundError(
+            f"Transition with label '{transition_label}' not found"
+        )
+
+    def find_transition(
+        self, source_id: str, target_id: str
+    ) -> Optional[WorkflowTransition]:
+        stage = self.get_stage(source_id)
+
+        if not stage:
+            raise StageNotFoundError(f"stage with id '{source_id}' not found")
+
+        for transition in stage.workflow_transitions:
+            if transition.target_id == target_id:
+                return transition
+
+        return None
+
+    def delete_transition(self, id: str):
+        for stage in self.stages:
+            stage.workflow_transitions = [
+                t for t in stage.workflow_transitions if t.id != id
+            ]
+
+    def delete_transition_by_target(self, target_id: str):
+        for stage in self.stages:
+            stage.workflow_transitions = [
+                t for t in stage.workflow_transitions if t.target_id != target_id
+            ]
+
+    def update_path(self, stage: PathableStage, new_path: str):
+        old_path = stage.path
+
+        if self.get_stage_by_path(new_path):
+            raise PathConflictError(f"Path {new_path} already exists")
+
+        all_stages: List[Union[FormStage, HookStage, JobStage]] = [
+            *self.forms,
+            *self.hooks,
+            *self.jobs,
+        ]
+
+        for _ in all_stages:
+            for transition in stage.workflow_transitions:
+                if transition.target_id == old_path:
+                    transition.target_id = new_path
+
+        stage.path = new_path
+
+    def update_stage(self, id: str, changes: Dict[str, Any]) -> WorkflowStage:
+        stage = self.get_stage(id)
+        new_path = changes.get("path")
+
+        if not stage:
+            raise Exception(f"Stage with id {id} not found")
+
+        if new_path:
+            if not isinstance(stage, FormStage) and not isinstance(stage, HookStage):
+                raise Exception(
+                    f"Stage with id {id} is a {type(stage)} does not have a path"
+                )
+
+            self.update_path(stage, new_path)
+
+        stage.update(changes)
+
+        return stage
+
+    def delete_stage(self, id: str):
+        stage = self.get_stage(id)
+        self.delete_transition_by_target(id)
+        if isinstance(stage, FormStage):
+            self.forms = [f for f in self.forms if f.id != id]
+        elif isinstance(stage, HookStage):
+            self.hooks = [h for h in self.hooks if h.id != id]
+        elif isinstance(stage, JobStage):
+            self.jobs = [j for j in self.jobs if j.id != id]
+        elif isinstance(stage, ScriptStage):
+            self.scripts = [s for s in self.scripts if s.id != id]
+
+    def is_initial(self, target_stage: WorkflowStage) -> bool:
+        for stage in self.stages:
+            for wt in stage.workflow_transitions:
+                if wt.target_id == target_stage.id:
+                    return False
+
+        return True
+
+    @staticmethod
+    def from_dict(data: dict):
+        non_only_initial_stages = data["forms"] + data["hooks"] + data["scripts"]
+        stages = data["jobs"] + non_only_initial_stages
+
+        for stage in stages:
+            if stage.get("is_initial") is None:
+                stage["is_initial"] = True
+            for transition in stage["transitions"]:
+                for tg_stage in non_only_initial_stages:
+                    if tg_stage["id"] == transition["target_id"]:
+                        tg_stage["is_initial"] = False
+
+        try:
+            scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
+            visualization = VisualizationSettings.from_dict(data["visualization"])
+            forms = [FormStage.from_dict(form) for form in data["forms"]]
+            hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
+            jobs = [JobStage.from_dict(job) for job in data["jobs"]]
+
+            workspace = StyleSettings.from_dict(data["workspace"], forms=forms)
+
+            return Project(
+                visualization=visualization,
+                workspace=workspace,
+                scripts=scripts,
+                forms=forms,
+                hooks=hooks,
+                jobs=jobs,
+            )
+
+        except TypeError as e:
+            print("Error: incompatible abstra.json file.")
+            import traceback
+
+            traceback.print_exc()
+            sys.exit(1)
+
+    @staticmethod
+    def create():
+        return Project(
+            workspace=StyleSettings(name="Untitled Workspace", sidebar=Sidebar([])),
+            visualization=VisualizationSettings.create(),
+            scripts=[],
+            forms=[],
+            hooks=[],
+            jobs=[],
+        )
+
+    @property
+    def workflow_stages(self) -> List[WorkflowStage]:
         return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
 
     def iter_entrypoints(self) -> Generator[Path, None, None]:
-        for runtime in self.workflow_runtimes:
+        for runtime in self.workflow_stages:
             yield Path(runtime.file)
 
     @property
@@ -522,195 +936,18 @@ class Project:
             if file not in entrypoints:
                 yield file
 
-    def get_runtime_by_path(self, path: str) -> Optional[WorkflowStage]:
-        for form in self.forms:
-            if form.path == path:
-                return form
-
-        for hook in self.hooks:
-            if hook.path == path:
-                return hook
-
-        for job in self.jobs:
-            if job.identifier == path:
-                return job
-
-        for script in self.scripts:
-            if script.path == path:
-                return script
-
-        return None
-
-    def get_workflow_runtime_by_path(self, path: str) -> WorkflowStage:
-        for form in self.forms:
-            if form.path == path:
-                return form
-
-        for job in self.jobs:
-            if job.identifier == path:
-                return job
-
-        for hook in self.hooks:
-            if hook.path == path:
-                return hook
-
-        for script in self.scripts:
-            if script.path == path:
-                return script
-
-        raise RuntimeNotFoundError(f"Runtime with id '{path}' not found")
-
-    def get_form_by_path(self, path: str) -> Optional[FormStage]:
-        for form in self.forms:
-            if form.path == path:
-                return form
-
-        return None
-
-    def get_transition(self, id: str):
-        for runtime in self.workflow_runtimes:
-            for transition in runtime.workflow_transitions:
-                if transition.id == id:
-                    return transition
-
-        raise TransitionNotFoundError(f"Transition with id '{id}' not found")
-
-    def find_transition(
-        self, source_id: str, target_id: str
-    ) -> Optional[WorkflowTransition]:
-        runtime = self.get_workflow_runtime_by_path(source_id)
-        for transition in runtime.workflow_transitions:
-            if transition.target_path == target_id:
-                return transition
-
-        return None
-
-    def delete_transition(self, id: str):
-        for runtime in self.workflow_runtimes:
-            runtime.workflow_transitions = [
-                t for t in runtime.workflow_transitions if t.id != id
-            ]
-
-    def delete_transition_by_target(self, target_id: str):
-        for runtime in self.workflow_runtimes:
-            runtime.workflow_transitions = [
-                t for t in runtime.workflow_transitions if t.target_path != target_id
-            ]
-
-    def _update_path_refs(self, old_path: str, new_path: str):
-        runtimes: List[Union[FormStage, HookStage, JobStage]] = [
-            *self.forms,
-            *self.hooks,
-            *self.jobs,
-        ]
-
-        for runtime in runtimes:
-            for wt in runtime.workflow_transitions:
-                if wt.target_path == old_path:
-                    wt.target_path = new_path
-
-    def update_runtime(self, path: str, changes: Dict[str, Any]) -> WorkflowStage:
-        new_path = changes.get("path") or changes.get("identifier")
-
-        if new_path:
-            if self.get_runtime_by_path(new_path):
-                raise PathConflictError(f"Path {path} already exists")
-
-            self._update_path_refs(path, changes["path"])
-
-        runtime = self.get_runtime_by_path(path)
-
-        if not runtime:
-            raise Exception(f"Runtime {path} not found")
-
-        runtime.update(changes)
-
-        return runtime
-
-    def delete_runtime(self, id: str):
-        runtime = self.get_runtime_by_path(id)
-        self.delete_transition_by_target(id)
-
-        if isinstance(runtime, FormStage):
-            self.forms = [f for f in self.forms if f.path != id]
-        elif isinstance(runtime, HookStage):
-            self.hooks = [h for h in self.hooks if h.path != id]
-        elif isinstance(runtime, JobStage):
-            self.jobs = [j for j in self.jobs if j.identifier != id]
-        elif isinstance(runtime, ScriptStage):
-            self.scripts = [s for s in self.scripts if s.path != id]
-
-    def is_initial(self, runtime_path: str) -> bool:
-        runtime = self.get_runtime_by_path(runtime_path)
-
-        if not runtime:
-            raise Exception(f"Runtime {runtime_path} not found")
-
-        for runtime in self.workflow_runtimes:
-            for wt in runtime.workflow_transitions:
-                if wt.target_path == runtime_path:
-                    return False
-
-        return True
-
-    @staticmethod
-    def from_dict(data: dict):
-        data = strict_compatible(data)
-
-        for runtime in data["forms"] + data["hooks"] + data["jobs"] + data["scripts"]:
-            if runtime.get("is_initial") is None:
-                runtime["is_initial"] = True
-            for transition in runtime["transitions"]:
-                for tg_runtime in data["forms"] + data["hooks"] + data["scripts"]:
-                    if tg_runtime["path"] == transition["target_path"]:
-                        tg_runtime["is_initial"] = False
-
-        try:
-            scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
-            forms = [FormStage.from_dict(form) for form in data["forms"]]
-            hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
-            jobs = [JobStage.from_dict(job) for job in data["jobs"]]
-
-            workspace = WorkspaceJSON.from_dict(data["workspace"], forms=forms)
-
-            return Project(
-                version=data["version"],
-                workspace=workspace,
-                scripts=scripts,
-                forms=forms,
-                hooks=hooks,
-                jobs=jobs,
-            )
-        except TypeError as e:
-            print("Error: incompatible abstra.json file.")
-            import traceback
-
-            traceback.print_exc()
-            sys.exit(1)
-
-    @staticmethod
-    def create():
-        return Project(
-            version="0.1",
-            workspace=WorkspaceJSON(name="Untitled Workspace", sidebar=SidebarJSON([])),
-            forms=[],
-            hooks=[],
-            jobs=[],
-            scripts=[],
-        )
-
 
 def _update_file(
-    runtime: WorkflowStage,
+    stage: WorkflowStage,
     new_file_relative: str,
 ):
-    old_file = Settings.root_path.joinpath(runtime.file)
+    old_file = Settings.root_path.joinpath(stage.file)
     new_file = Settings.root_path.joinpath(new_file_relative)
 
     if old_file.exists() and not new_file.exists():
         old_file.rename(new_file)
 
-    runtime.file = new_file_relative
+    stage.file = new_file_relative
 
 
 class ProjectRepository:
@@ -731,11 +968,25 @@ class ProjectRepository:
     def save(cls, project: Project):
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
+        project_data = project.__dict__
+        project_data["version"] = json_migrations.get_latest_version()
+
         with temp_file.open("w") as f:
-            json.dump(project.__dict__, f, indent=2)
+            json.dump(project_data, f, indent=2)
+
         shutil.move(str(temp_file), cls.get_file_path())
 
     @classmethod
     def load(cls) -> Project:
-        project_content = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
-        return Project.from_dict(project_content)
+        data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
+
+        initial_version = data.get("version")
+        migrated_data = json_migrations.migrate(
+            data,
+            Settings.root_path,
+        )
+
+        if migrated_data["version"] != initial_version:
+            cls.save(Project.from_dict(migrated_data))
+
+        return Project.from_dict(migrated_data)

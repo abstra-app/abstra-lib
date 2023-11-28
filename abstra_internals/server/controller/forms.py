@@ -40,7 +40,7 @@ def get_editor_bp(controller: MainController):
         if not data:
             flask.abort(400)
 
-        form = controller.update_runtime(path, data)
+        form = controller.update_stage(path, data)
         return form.editor_dto if form else None
 
     return bp

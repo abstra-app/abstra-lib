@@ -70,7 +70,6 @@ class WMetadata:
     name: str
     description: str
     type: str
-    autoHeight: bool
     events: typing.List[WEvents]
     pythonAPI: WPythonAPI
     brokerAPI: WBrokerAPI

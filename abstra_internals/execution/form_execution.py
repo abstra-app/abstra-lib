@@ -1,13 +1,151 @@
-import flask_sock, typing, copy
+from __future__ import annotations
 
+from simple_websocket.ws import ConnectionClosed
+import flask_sock, typing, traceback
+
+from .execution import Execution, RequestData, NoExecutionFound
+from ..contract import should_send, forms_contract
 from ..repositories.stage_run import StageRun
 from ..repositories import StageRunRepository
-from .live_execution import LiveExecution
+from ..utils import deserialize, serialize
 from ..contract import forms_contract
-from .execution import RequestData
+from ..jwt_auth import UserClaims
 
 
-class FormExecution(LiveExecution):
+if typing.TYPE_CHECKING:
+    from ..repositories.project.project import FormStage
+
+
+class FormExecution(Execution):
+    type = "execution"
+    _connection: flask_sock.Server
+
+    @staticmethod
+    def get_execution() -> typing.Optional["FormExecution"]:
+        execution = Execution.get_execution()
+        if isinstance(execution, FormExecution):
+            return execution
+
+        return None
+
+    @staticmethod
+    def broadcast(msg: forms_contract.Message):
+        for e in list(Execution.executions.values()):
+            if isinstance(e, FormExecution) and e.connected and e.closed == False:
+                e.send(msg)
+
+    def __init__(
+        self,
+        runtime_json: "FormStage",
+        is_initial: bool,
+        connection: flask_sock.Server,
+        request: RequestData,
+        execution_id=None,
+    ):
+        self._connection = connection
+        if execution_id is not None:
+            self.id = execution_id
+
+        super().__init__(runtime_json, is_initial, request, execution_id=execution_id)
+
+    def send(self, msg: forms_contract.Message):
+        self.log(msg.type, msg.data)
+
+        if not should_send(msg, self.is_preview):
+            return
+
+        str_data = serialize(msg.to_json(self.is_preview))
+        self._connection.send(str_data)
+
+    def recv(self) -> typing.Tuple[str, typing.Dict]:
+        try:
+            str_data = self._connection.receive()
+        except ConnectionClosed:
+            self.close()
+            return "close", {}
+
+        data = deserialize(str_data)
+        self.log(data["type"], data)
+        return data["type"], data
+
+    def close(self, reason: typing.Optional[str] = ""):
+        self._connection.close(message=reason)
+        self.closed = True
+
+    def stdio(self, type: str, text: str):
+        self.send(forms_contract.StdioMessage(type, text))
+        return super().stdio(type, text)
+
+    @property
+    def connected(self) -> bool:
+        return self._connection.connected
+
+    def end(self):
+        if self.connected:
+            self.close(reason=traceback.format_exc() or None)
+
+    def handle_lock_failed(self):
+        status = self.stage_run.status if self.stage_run else None
+        self.send(forms_contract.LockFailedMessage(status))
+        return super().handle_lock_failed()
+
+    # flows
+
+    @property
+    def query_params(self) -> typing.Dict:
+        return self.context.get("query_params", {})
+
+    @query_params.setter
+    def query_params(self, value: typing.Dict) -> None:
+        self.context["query_params"] = value
+
+    def receive(self):
+        while True:
+            type, data = self.recv()
+            if type in ["heartbeat", "browser:try-disconnect"]:
+                continue
+
+            return data
+
+    def get_user(self, refresh: bool = False):
+        # TODO: store/cache this
+        self.send(forms_contract.AuthRequireInfoMessage(refresh=refresh))
+
+        while True:
+            type, data = self.recv()
+            if type != "auth:saved-jwt":
+                continue
+
+            claims = UserClaims.from_jwt(data["jwt"])
+            if not claims:
+                self.send(forms_contract.AuthInvalidJWTMessage())
+                continue
+
+            self.send(forms_contract.AuthValidJWTMessage())
+            return claims
+
+    def execute_js(self, code: str, context: dict = {}):
+        self.send(forms_contract.ExecuteJSRequestMessage(code, context))
+
+        while True:
+            type, data = self.recv()
+            if type != "execute-js:response":
+                continue
+
+            return data.get("value")
+
+    def alert(self, message: str, severity: str):
+        severity = (
+            severity if severity in ["info", "warn", "error", "success"] else "info"
+        )
+        self.send(forms_contract.AlertMessage(message, severity))
+
+    def redirect(self, url: str, query_params: dict):
+        query_params = query_params or self.query_params
+        self.send(forms_contract.RedirectMessage(url, query_params))
+
+    # forms
+
     def _wait_start(self):
         type = None
         data = None
@@ -109,3 +247,10 @@ class FormExecution(LiveExecution):
 
     def handle_finish(self):
         self.close()
+
+
+def get_form_execution_throwable() -> FormExecution:
+    execution = FormExecution.get_execution()
+    if not execution:
+        raise NoExecutionFound()
+    return execution

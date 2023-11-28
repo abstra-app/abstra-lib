@@ -6,7 +6,7 @@ from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller import MainController, UnknownNodeTypeError
 
 
-class TestWorkflowEditorAddNodesApi(unittest.TestCase):
+class TestBulkCreateStages(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
         self.controller = MainController()
@@ -16,23 +16,24 @@ class TestWorkflowEditorAddNodesApi(unittest.TestCase):
 
     def test_accept_empty_add_nodes(self):
         old_json = ProjectRepository.load()
-        self.controller.workflow_add_nodes([])
+        self.controller.bulk_create_stages([])
         new_json = ProjectRepository.load()
         self.assertEqual(old_json, new_json)
 
     def test_accept_simple_adding(self):
-        self.controller.workflow_add_nodes(
+        self.controller.bulk_create_stages(
             [{"id": "form1", "type": "forms", "position": [0, 0], "title": "Form 1"}]
         )
-        json = ProjectRepository.load()
-        self.assertEqual(len(json.forms), 1)
-        self.assertEqual(json.forms[0].path, "form1")
-        self.assertEqual(json.forms[0].workflow_position, (0, 0))
-        self.assertTrue(self.path.joinpath(json.forms[0].file).exists())
+        project = ProjectRepository.load()
+        self.assertEqual(len(project.forms), 1)
+        self.assertEqual(project.forms[0].title, "Form 1")
+        self.assertEqual(project.forms[0].id, "form1")
+        self.assertEqual(project.forms[0].workflow_position, (0, 0))
+        self.assertTrue(self.path.joinpath(project.forms[0].file).exists())
 
     def test_reject_invalid_node_type(self):
         with self.assertRaises(UnknownNodeTypeError):
-            self.controller.workflow_add_nodes(
+            self.controller.bulk_create_stages(
                 [
                     {
                         "id": "form1",

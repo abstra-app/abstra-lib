@@ -37,7 +37,7 @@ def get_editor_bp(controller: MainController):
         if not changes:
             flask.abort(400)
 
-        hook = controller.update_runtime(id, changes)
+        hook = controller.update_stage(id, changes)
         return hook.editor_dto if hook else None
 
     @bp.route("/<path:id>", methods=["DELETE"])
@@ -46,10 +46,10 @@ def get_editor_bp(controller: MainController):
         controller.delete_hook(id)
         return {"success": True}
 
-    @bp.route("/<path:path>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
+    @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     @usage
-    def _test_hook(path: str):
-        hook = controller.get_hook(path)
+    def _test_hook(id: str):
+        hook = controller.get_hook(id)
         if not hook:
             flask.abort(404)
 
@@ -61,7 +61,7 @@ def get_editor_bp(controller: MainController):
         )
 
         project = ProjectRepository.load()
-        is_initial = project.is_initial(hook.path)
+        is_initial = project.is_initial(hook)
         execution = HookExecution(hook, is_initial, request_data)
 
         execution.run_sync()

@@ -1,9 +1,9 @@
 import threading, os, time
 from datetime import datetime
 
-from ..contract.common import FilesChangedMessage
+from ..contract.forms import FilesChangedMessage
 from ..modules import reload_project_local_modules
-from ..execution.live_execution import LiveExecution
+from ..execution.form_execution import FormExecution
 from ..repositories.project.project import ProjectRepository, Project
 
 
@@ -21,7 +21,7 @@ def _has_local_dependencies_changed(project: Project, last_change: float) -> boo
 def reload_files_on_change(project: Project, last_change: float):
     if _has_local_dependencies_changed(project, last_change):
         reload_project_local_modules()
-        LiveExecution.broadcast(FilesChangedMessage())
+        FormExecution.broadcast(FilesChangedMessage())
         return True
     else:
         return False

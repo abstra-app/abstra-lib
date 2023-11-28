@@ -3,10 +3,10 @@ from collections import deque
 from threading import get_ident
 
 from abstra.forms import Page
-from abstra_internals.execution import LiveExecution, Execution
+from abstra_internals.execution import FormExecution, Execution
 
 
-class MockLiveExecution(LiveExecution):
+class MockFormExecution(FormExecution):
     def __init__(self):
         self.browser_messages = deque([])
         self.python_messages = deque([])
@@ -23,7 +23,7 @@ class MockLiveExecution(LiveExecution):
 
 class TestReactive(unittest.TestCase):
     def setUp(self):
-        self.mock = MockLiveExecution()
+        self.mock = MockFormExecution()
         Execution.executions[get_ident()] = self.mock
 
     def test_rendering_with_static_part_initial_value(self):

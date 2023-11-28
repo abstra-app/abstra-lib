@@ -1,8 +1,8 @@
 import base64, simplejson, traceback, re, socket
-from contextlib import closing
 from traceback import StackSummary
+from contextlib import closing
 
-from .environment import PUBLIC_KEY
+from .file import *
 
 email_rgexp = r"""^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$"""
 

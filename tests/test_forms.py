@@ -18,7 +18,7 @@ class TestForms(unittest.TestCase):
         controller = MainController()
         form = controller.create_form()
 
-        controller.update_runtime(form.path, dict(title="New Title"))
+        controller.update_stage(form.path, dict(title="New Title"))
 
         api2 = MainController()
         api2.get_workspace()
@@ -34,7 +34,7 @@ class TestForms(unittest.TestCase):
         form = controller.create_form()
 
         with self.assertRaises(Exception):
-            controller.update_runtime(
+            controller.update_stage(
                 form.path, dict(title="New Title", invalid_property="invalid")
             )
 

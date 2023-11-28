@@ -38,7 +38,7 @@ def should_ignore(ignored_paths, _path: Path):
     return False
 
 
-def files_from_directory(directory):
+def files_from_directory(directory: Path):
     ignored = [*get_ignore_files(directory), *get_ignore_files(Path.cwd())]
     paths = filter(
         lambda p: p.is_file() and not should_ignore(ignored, p.relative_to(directory)),

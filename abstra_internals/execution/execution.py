@@ -1,7 +1,7 @@
 from __future__ import annotations  # Required for TYPE_CHECKING
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 from dataclasses import dataclass
-import threading, traceback, uuid
+import threading, traceback, uuid, copy
 
 from ..repositories.project.project import ProjectRepository
 from ..repositories import StageRunRepository
@@ -27,38 +27,48 @@ class RequestData:
     query_params: Dict[str, str]
 
 
-class TransitionNotSpecified(Exception):
-    def __init__(self):
-        super().__init__("No transitions were specified for this stage")
-
-
-class InvalidNextStageRun(Exception):
-    def __init__(self, target, allowed):
-        super().__init__(f"Target stage {target} not in allowed stages: {allowed}")
-
-
-class MalformedNextStageRun(Exception):
-    def __init__(self, next_abuble, allowed):
-        super().__init__(
-            f"Multiple next stages are possible ({allowed}) but 'stage' is not specified in {next_abuble}"
-        )
-
-
 class StageRunLockFailed(Exception):
     def __init__(self, status: Optional[str]) -> None:
         super().__init__(status)
 
 
-class MismatchedStage(Exception):
-    pass
-
-
-class StageRunEnded(Exception):
+class InvalidStageRunId(Exception):
     pass
 
 
 class UnsetStageRun(Exception):
     pass
+
+
+@dataclass
+class WorkflowThread:
+    _label: str
+    _data: dict
+    _assignee: Optional[str]
+    _allowed_transitions: List[str]
+
+    def set_transition(self, name: str):
+        if name not in self._allowed_transitions:
+            raise Exception(
+                f"Transition '{name}' not found in {self._allowed_transitions}"
+            )
+
+        self._label = name
+
+    def get_data(self) -> dict:
+        return self._data
+
+    def get_assignee(self) -> Optional[str]:
+        return self._assignee
+
+    def set_data(self, key: str, value: Any):
+        self._data[key] = value
+
+    def set_assignee(self, assignee: str):
+        self._assignee = assignee
+
+    def _clone(self) -> "WorkflowThread":
+        return copy.deepcopy(self)
 
 
 class Execution:
@@ -70,10 +80,11 @@ class Execution:
     is_initial: bool
     request: RequestData
     thread: threading.Thread
-    runtime_json: WorkflowStage
+    stage: WorkflowStage
 
     stage_run_freezed: Optional[StageRun] = None
     stage_run_draft: Optional[StageRun] = None
+    workflow_threads: List[WorkflowThread]
 
     @classmethod
     def get_execution(cls) -> Optional["Execution"]:
@@ -100,7 +111,12 @@ class Execution:
         self.stderr: List[str] = []
         self.stdout: List[str] = []
         self.context: Dict = {}
-        self.runtime_json = runtime_json
+        self.stage = runtime_json
+        self.next_stage_runs = []
+
+    @property
+    def is_preview(self) -> bool:
+        return IS_PREVIEW
 
     def run_async(self):
         self.thread.start()
@@ -108,10 +124,6 @@ class Execution:
     def run_sync(self):
         self.thread.start()
         self.thread.join()
-
-    @property
-    def is_preview(self) -> bool:
-        return IS_PREVIEW
 
     def stdio(self, type: str, text: str):
         if type == "stderr":
@@ -127,8 +139,8 @@ class Execution:
                 event=event,
                 payload=payload,
                 executionId=self.id,
-                runtime_type=self.runtime_json.runner_type,
-                runtime_name=self.runtime_json.path,
+                runtime_type=self.stage.runner_type,
+                runtime_name=self.stage.title,
             )
         )
 
@@ -150,14 +162,16 @@ class Execution:
             "lock-failed",
             {
                 "execution_id": self.id,
-                "stage": self.runtime_json.path,
+                "stage": self.stage.id,
                 "stage_run_id": stage_run_id,
                 "stage_run_status": stage_run_status,
             },
         )
         raise StageRunLockFailed(stage_run_status)
 
-    def set_stage(self, data: Optional[Dict] = None, assignee: Optional[str] = None):
+    def set_stage(
+        self, data: Optional[Dict] = None, assignee: Optional[str] = None
+    ) -> None:
         raise NotImplementedError("Can only be called from a hook")
 
     def setup_context(self, request: RequestData):
@@ -171,24 +185,39 @@ class Execution:
     def stage_run(self, stage_run: StageRun) -> None:
         self.stage_run_freezed = stage_run
         self.stage_run_draft = stage_run.clone()
+        self.init_workflow_threads()
 
-    def init_stage_run(self, id: Optional[str] = None) -> None:
-        if id:
-            stage_run = StageRunRepository.get(id)
-            if stage_run.stage == self.runtime_json.path:
+    def init_workflow_threads(self) -> None:
+        if not self.stage_run:
+            raise UnsetStageRun()
+
+        allowed_transitions = [t.label for t in self.stage.workflow_transitions]
+        self.workflow_threads = []
+        if len(allowed_transitions) > 0:
+            self.workflow_threads = [
+                WorkflowThread(
+                    _label=allowed_transitions[0],
+                    _data=self.stage_run.data,
+                    _assignee=self.stage_run.assignee,
+                    _allowed_transitions=allowed_transitions,
+                )
+            ]
+
+    def init_stage_run(self, stage_run_id: Optional[str] = None) -> None:
+        if stage_run_id:
+            stage_run = StageRunRepository.get(stage_run_id)
+            if stage_run.stage == self.stage.id:
                 self.stage_run = stage_run
                 return
             else:
-                raise MismatchedStage()
+                raise InvalidStageRunId()
 
         if self.is_initial:
-            self.stage_run = StageRunRepository.create_initial(
-                stage=self.runtime_json.path, assignee=None
-            )
+            self.stage_run = StageRunRepository.create_initial(stage=self.stage.id)
             return
 
         raise UnsetStageRun(
-            f"This Task is in the middle of a workflow, but no Task Instance run was specified"
+            f"This Stage is in the middle of a workflow, but no Step was specified"
         )
 
     def _run(self) -> None:
@@ -196,22 +225,19 @@ class Execution:
         Execution.executions[self.thread_id] = self
 
         status = "running"
-
         self.setup_context(self.request)
-
         if self.stage_run and not self.set_stage_run_status(status):
             return self.handle_lock_failed()
 
         self.handle_started()
         try:
             try:
-                import_as_new(self.runtime_json.file)
+                import_as_new(self.stage.file)
             except SystemExit as e:
-                if e.code != 0:
+                if e.code is not None and e.code != 0:
                     raise e
 
-            self.advance_stage(internal_call=True)
-        except StageRunEnded:
+            self.create_next_stage_runs()
             status = self.handle_success()
         except Exception as e:
             status = self.handle_failure(e)
@@ -225,51 +251,50 @@ class Execution:
 
         return StageRunRepository.change_state(self.stage_run.id, status)
 
-    def advance_stage(
-        self, next_stage_runs: Optional[List[dict]] = None, internal_call: bool = False
-    ):
+    def set_transition(self, transition_label: str) -> None:
+        for transition in self.workflow_threads:
+            transition.set_transition(transition_label)
+
+    def set_next_assignee(self, assignee: str) -> None:
+        for transition in self.workflow_threads:
+            transition._assignee = assignee
+
+    def set_next_data(self, key: str, value: Any) -> None:
+        for transition in self.workflow_threads:
+            transition._data[key] = value
+
+    def split_workflow_thread(self, count: int) -> List[WorkflowThread]:
+        if count <= 0:
+            raise Exception("Count must be greater than 0")
+
+        if len(self.workflow_threads) != 1:
+            raise Exception("Thread was already splitted. You can't call this twice")
+
+        transition = self.workflow_threads[0]
+
+        for _ in range(count - 1):
+            self.workflow_threads.append(transition._clone())
+
+        return self.workflow_threads
+
+    def create_next_stage_runs(self) -> None:
         if not self.stage_run:
             raise UnsetStageRun()
 
-        transitions = self.runtime_json.workflow_transitions
+        project = ProjectRepository.load()  # TODO: inject this
 
-        project = ProjectRepository.load()
-        allowed_stages = list([transition.target_path for transition in transitions])
-        allowed_titles = [
-            project.get_workflow_runtime_by_path(stage).title
-            for stage in allowed_stages
+        next_stage_runs_dtos = [
+            dict(
+                stage=project.follow_transition(self.stage.id, t._label).id,
+                data=t._data,
+                assignee=t._assignee,
+            )
+            for t in self.workflow_threads
         ]
 
-        if len(allowed_stages) == 0:
-            if internal_call:
-                raise StageRunEnded()
-            else:
-                raise TransitionNotSpecified()
+        StageRunRepository.create_next(self.stage_run, next_stage_runs_dtos)
 
-        if next_stage_runs:
-            for stage_run in next_stage_runs:
-                if "stage" not in stage_run and len(allowed_stages) > 1:
-                    raise MalformedNextStageRun(stage_run, allowed_stages)
-
-                if stage_run["stage"] not in allowed_stages:
-                    if stage_run["stage"] in allowed_titles:
-                        stage_run["stage"] = allowed_stages[
-                            allowed_titles.index(stage_run["stage"])
-                        ]
-                    else:
-                        raise InvalidNextStageRun(stage_run["stage"], allowed_stages)
-
-        default_next_stage_runs = [
-            dict(stage=allowed_stage) for allowed_stage in allowed_stages
-        ]
-
-        dtos = next_stage_runs or default_next_stage_runs
-
-        StageRunRepository.create_next(self.stage_run, dtos)
-
-        raise StageRunEnded()
-
-    def delete(self):
+    def delete(self) -> None:
         del Execution.executions[self.thread_id]
 
 

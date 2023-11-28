@@ -34,7 +34,7 @@ def get_editor_bp(controller: MainController):
         if not data:
             flask.abort(400)
 
-        script = controller.update_runtime(id, data)
+        script = controller.update_stage(id, data)
         return script.editor_dto if script else None
 
     @bp.delete("/<path:id>")

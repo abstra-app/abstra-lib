@@ -25,10 +25,12 @@ class TestFormExamples(unittest.TestCase):
         msgs = json.load(self.base_path.joinpath(msgs_path).open())
         file_path = self.base_path.joinpath(code_path)
         form_json = FormStage(
+            id="test_form",
             title="Test Form",
             path="test_form",
             file=file_path.as_posix(),
             workflow_transitions=[],
+            workflow_position=(0, 0),
         )
         assert_form(self, form_json, msgs, execution_id="execution-id")
 

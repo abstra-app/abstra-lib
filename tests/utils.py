@@ -63,14 +63,18 @@ def assert_form(
     msg_list: list,
     execution_id: str,
 ):
-    print("asserting form", form_json.file_path)
-
     msgs: typing.Deque[list] = deque(msg_list)
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     conn = MockConnection(browser_msgs)
 
     request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
-    execution = FormExecution(form_json, True, conn, request_data, execution_id)  # type: ignore
+    execution = FormExecution(
+        runtime_json=form_json,
+        is_initial=True,
+        connection=conn,  # type: ignore
+        request=request_data,
+        execution_id=execution_id,
+    )  # type: ignore
     execution.run_async()
 
     for msg in iter_messages(conn, msgs, test_case):

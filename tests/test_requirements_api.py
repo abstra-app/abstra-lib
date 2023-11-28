@@ -1,6 +1,8 @@
 from pathlib import Path
 from unittest import TestCase
 
+from abstra_internals.server.controller.main import MainController
+
 from .fixtures import init_dir, clear_dir, get_local_client
 
 
@@ -8,6 +10,7 @@ class TestRequirementsApi(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.client = get_local_client()
+        self.controller = MainController()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -51,10 +54,11 @@ class TestRequirementsApi(TestCase):
             "/_editor/api/requirements/recommendations"
         ).get_json()
         self.assertEqual(recommendation, [])
-        Path("foo.py").write_text("import pandas as pd")
-        Path("abstra.json").write_text(
-            '{"version": "0.2", "scripts": [ { "id": "2zp6zc8w739", "file": "foo.py", "path": "2zp6zc8w739", "title": "Script1", "is_initial": false, "workflow_position": [ 726, 312 ], "transitions": [ { "target_path": "1q46aarvny3", "target_type": "forms", "label": "", "id": "49g5pgobohd" } ] } ]}'
-        )
+
+        script = self.controller.create_script()
+
+        Path(script.file_path).write_text("import pandas as pd")
+
         recommendation = self.client.get(
             "/_editor/api/requirements/recommendations"
         ).get_json()
