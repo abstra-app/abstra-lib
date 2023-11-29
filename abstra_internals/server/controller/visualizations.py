@@ -9,6 +9,7 @@ from ...repositories.project.project import (
 
 class VisualizationsController:
     def get_visualizations(self):
+        raise NotImplemented()
         project = ProjectRepository.load()
         return [
             dict(
@@ -19,6 +20,7 @@ class VisualizationsController:
         ]
 
     def put_visualizations(self, visualizations: list):
+        raise NotImplemented()
         project = ProjectRepository.load()
         project.visualization = VisualizationSettings(
             items=[

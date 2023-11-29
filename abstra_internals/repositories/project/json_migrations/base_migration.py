@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 class Migration:
     warnings: List[str]
+    _data: dict
 
     @staticmethod
     def target_version() -> str:
@@ -19,17 +20,19 @@ class Migration:
 
     @property
     def data(self) -> dict:
-        raise NotImplementedError
+        if not self._data:
+            raise ValueError("Data is not set")
+        return self._data
 
     @data.setter
-    def data(self, data: dict):
-        self.data = data
+    def data(self, value: dict) -> None:
+        self._data = value
 
     def _migrate(self) -> None:
         raise NotImplementedError
 
     def _bump_version(self) -> None:
-        self.data["version"] = self.target_version
+        self.data["version"] = self.target_version()
 
     def apply(self) -> None:
         self._migrate()

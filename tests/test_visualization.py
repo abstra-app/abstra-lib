@@ -1,6 +1,9 @@
 from json import dump
 from pathlib import Path
 from unittest import TestCase
+import unittest
+
+from pytest import skip
 
 from .fixtures import init_dir, clear_dir
 
@@ -21,10 +24,12 @@ class TestVisualization(TestCase):
     def tearDown(self) -> None:
         clear_dir(self.root)
 
+    @unittest.skip("Removed for now")
     def test_loads_correctly_from_empty_json(self):
         project = ProjectRepository.load()
         self.assertEqual(project.visualization, VisualizationSettings.create())
 
+    @unittest.skip("Removed for now")
     def test_loads_correctly_from_json_content(self):
         visualizations = [{"name": "foo", "type": "text"}]
         VisualizationsController().put_visualizations(visualizations)
@@ -34,6 +39,7 @@ class TestVisualization(TestCase):
             project.visualization.items[0], VisualizationItem(name="foo", type="text")
         )
 
+    @unittest.skip("Removed for now")
     def test_generates_correct_dict(self):
         project = ProjectRepository.load()
 
