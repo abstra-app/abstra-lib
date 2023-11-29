@@ -1,8 +1,21 @@
 import typing
+import json
+from datetime import datetime, date
 
 
 def escape_ref(ref: str):
     return ref.replace('"', '""')
+
+
+def serialize(value: typing.Any):
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    if isinstance(value, (dict, list, tuple)):
+        return json.dumps(value)
+    if isinstance(value, set):
+        return json.dumps(list(value))
+
+    return value
 
 
 def _execute(query: str, params: typing.List):  # private api
@@ -25,10 +38,10 @@ def _make_delete_query(table: str, values: dict):
     table = escape_ref(table)
     column_names = []
     values_list = []
-    for idx, (column_name, values) in enumerate(values.items()):
+    for idx, (column_name, value) in enumerate(values.items()):
         column_name = escape_ref(column_name)
         column_names.append(f'"{column_name}"=${idx+1}')
-        values_list.append(values)
+        values_list.append(serialize(value))
     conditions = " AND ".join(column_names)
     return f"""DELETE FROM "{table}" WHERE {conditions} RETURNING *""", values_list
 
@@ -46,7 +59,7 @@ def _make_insert_query(table: str, values: dict):
             column_name = escape_ref(column_name)
             indexes.append("$" + str(idx + 1))
             column_names.append(f'"{column_name}"')
-            values_list.append(value)
+            values_list.append(serialize(value))
         indexes_exp = ",".join(indexes)
         keys_exp = ",".join(column_names)
         return (
@@ -62,13 +75,13 @@ def _make_update_query(table: str, set: dict, where: dict):
     for idx, (column_name, value) in enumerate(set.items()):
         column_name = escape_ref(column_name)
         set_column_names.append(f'"{column_name}"=${idx+1}')
-        set_values_list.append(value)
+        set_values_list.append(serialize(value))
     set_exp = ", ".join(set_column_names)
     where_column_names = []
     where_values_list = []
     (column_name, value) = list(where.items())[0]
     where_column_names.append(f'"{column_name}"=${len(set)+1}')
-    where_values_list.append(value)
+    where_values_list.append(serialize(value))
     return (
         f"""UPDATE "{table}" SET {set_exp} WHERE {where_column_names[0]} RETURNING *""",
         set_values_list + where_values_list,

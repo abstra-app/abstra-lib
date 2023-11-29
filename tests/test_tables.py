@@ -1,5 +1,6 @@
 import unittest
 from dataclasses import dataclass
+from datetime import datetime
 
 from abstra.tables.api import (
     _make_insert_query,
@@ -40,6 +41,37 @@ class TestTables(unittest.TestCase):
         query, params = _make_insert_query(table="foo", values={"bar": "baz"})
         self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
         self.assertEqual(params, ["baz"])
+
+    def test_insert_datetime(self):
+        query, params = _make_insert_query(
+            table="foo", values={"bar": datetime(2001, 1, 1, 10, 10, 10, 0)}
+        )
+        self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
+        self.assertEqual(params, ["2001-01-01T10:10:10"])
+
+    def test_insert_dict(self):
+        query, params = _make_insert_query(
+            table="foo", values={"bar": {"bar": 1, "foo": "expected"}}
+        )
+        self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
+        self.assertEqual(params, ["""{"bar": 1, "foo": "expected"}"""])
+
+    def test_insert_list(self):
+        query, params = _make_insert_query(table="foo", values={"bar": [1, 2, 3, 4]})
+        self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
+        self.assertEqual(params, ["""[1, 2, 3, 4]"""])
+
+    def test_insert_set(self):
+        query, params = _make_insert_query(
+            table="foo", values={"bar": set([1, 2, 3, 4])}
+        )
+        self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
+        self.assertEqual(params, ["""[1, 2, 3, 4]"""])
+
+    def test_insert_tuples(self):
+        query, params = _make_insert_query(table="foo", values={"bar": (1, 2, 3, 4)})
+        self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
+        self.assertEqual(params, ["""[1, 2, 3, 4]"""])
 
     def test_insert_default_values(self):
         query, params = _make_insert_query(table="foo", values={})
