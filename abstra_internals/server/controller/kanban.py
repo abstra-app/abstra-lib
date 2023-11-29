@@ -115,6 +115,7 @@ class KanbanController:
         self.project_repository = project_repository
 
     def stage_run_content(self, stage_run: StageRun):
+        raise NotImplemented()
         visualization = self.project_repository.load().visualization
         visualization_defined_data = [
             StageCardContentItem(

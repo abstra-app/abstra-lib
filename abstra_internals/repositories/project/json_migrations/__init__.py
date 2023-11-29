@@ -27,7 +27,7 @@ def migrate(data: dict, path: Path):
         raise KeyError("Missing 'version' key in data")
 
     next_migration = next(
-        (m for m in MIGRATIONS if m.source_version == data["version"]), None
+        (m for m in MIGRATIONS if m.source_version() == data["version"]), None
     )
 
     if not next_migration:
@@ -61,7 +61,7 @@ def migrate(data: dict, path: Path):
         print(f"Upgrade to version {data['version']} complete.")
 
         next_migration = next_migration = next(
-            (m for m in MIGRATIONS if m.source_version == data["version"]), None
+            (m for m in MIGRATIONS if m.source_version() == data["version"]), None
         )
 
     print("Your abstra.json is up to date ✅")

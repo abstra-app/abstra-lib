@@ -647,7 +647,6 @@ class VisualizationSettings:
 @dataclass
 class Project:
     workspace: StyleSettings
-    visualization: VisualizationSettings
     scripts: List[ScriptStage]
     forms: List[FormStage]
     hooks: List[HookStage]
@@ -657,7 +656,6 @@ class Project:
     def __dict__(self):
         return {
             "workspace": self.workspace.__dict__,
-            "visualization": self.visualization.__dict__,
             "jobs": [job.__dict__ for job in self.jobs],
             "hooks": [hook.__dict__ for hook in self.hooks],
             "forms": [form.__dict__ for form in self.forms],
@@ -882,7 +880,6 @@ class Project:
 
         try:
             scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
-            visualization = VisualizationSettings.from_dict(data["visualization"])
             forms = [FormStage.from_dict(form) for form in data["forms"]]
             hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
             jobs = [JobStage.from_dict(job) for job in data["jobs"]]
@@ -890,7 +887,6 @@ class Project:
             workspace = StyleSettings.from_dict(data["workspace"], forms=forms)
 
             return Project(
-                visualization=visualization,
                 workspace=workspace,
                 scripts=scripts,
                 forms=forms,
@@ -909,7 +905,6 @@ class Project:
     def create():
         return Project(
             workspace=StyleSettings(name="Untitled Workspace", sidebar=Sidebar([])),
-            visualization=VisualizationSettings.create(),
             scripts=[],
             forms=[],
             hooks=[],
