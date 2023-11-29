@@ -7,7 +7,6 @@ class ScriptExecution(StaticExecution):
     @staticmethod
     def create_with_stage_run(runtime_json: WorkflowStage, stage_run_id: str):
         execution = ScriptExecution(runtime_json, is_initial=False)
-        execution.init_stage_run(stage_run_id)
         return execution
 
     def __init__(self, runtime_json: WorkflowStage, is_initial: bool):
@@ -21,6 +20,4 @@ class ScriptExecution(StaticExecution):
         super().__init__(runtime_json, is_initial, request)
 
     def setup_context(self, request: RequestData):
-        # TODO: This was added to allow script to run without a stage run on tests
-        if self.stage_run is None:
-            super().init_stage_run()
+        pass

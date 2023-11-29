@@ -51,6 +51,6 @@ def get_editor_bp(controller: MainController):
         if not script:
             flask.abort(404)
 
-        return controller.run_initial_script(script)
+        return controller.run_script(script)
 
     return bp

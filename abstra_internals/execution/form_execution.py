@@ -5,8 +5,6 @@ import flask_sock, typing, traceback
 
 from .execution import Execution, RequestData, NoExecutionFound
 from ..contract import should_send, forms_contract
-from ..repositories.stage_run import StageRun
-from ..repositories import StageRunRepository
 from ..utils import deserialize, serialize
 from ..contract import forms_contract
 from ..jwt_auth import UserClaims
@@ -84,13 +82,6 @@ class FormExecution(Execution):
         if self.connected:
             self.close(reason=traceback.format_exc() or None)
 
-    def handle_lock_failed(self):
-        status = self.stage_run.status if self.stage_run else None
-        self.send(forms_contract.LockFailedMessage(status))
-        return super().handle_lock_failed()
-
-    # flows
-
     @property
     def query_params(self) -> typing.Dict:
         return self.context.get("query_params", {})
@@ -157,64 +148,23 @@ class FormExecution(Execution):
 
         return data["params"]
 
-    def _handle_abandoned_middle_form(
-        self, initial_abandoned_stage_run: StageRun, parent_id: str
-    ):
-        child_runs = StageRunRepository.find({"parent_id": parent_id})
-
-        assert len(child_runs) == 1, "Expected 1 child run for abandoned stage run"
-        child_run = child_runs[0]
-
-        assert (
-            child_run.stage == initial_abandoned_stage_run.stage
-        ), "Expected child run to have same stage as initial abandoned stage run"
-        assert (
-            child_run.assignee == initial_abandoned_stage_run.assignee
-        ), "Expected child run to have same assignee as initial abandoned stage run"
-
-        if child_run.is_abandoned:
-            return self._handle_abandoned_middle_form(
-                initial_abandoned_stage_run, child_run.id
-            )
-
-        self.stage_run = child_run
-
-    def init_stage_run(self, id: typing.Optional[str] = None):
-        super().init_stage_run(id)
-        if self.stage_run and not self.is_initial and self.stage_run.is_abandoned:
-            return self._handle_abandoned_middle_form(self.stage_run, self.stage_run.id)
-
-    def setup_context(self, request: RequestData):
+    def setup_context(self, request: RequestData) -> None:
         self.query_params = self._wait_start()
         self.send(forms_contract.ExecutionIdMessage(self.id))
-        self.init_stage_run(self.query_params.get(self.abstra_run_key))
 
-    def handle_success(self) -> str:
+    def handle_success(self) -> None:
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
         self.send(forms_contract.CloseMessage(close_dto))
-        return super().handle_success()
 
-    def _handle_ws_exception_1001(self, exception: flask_sock.ConnectionClosed) -> str:
+    def _handle_ws_exception_1001(self, exception: flask_sock.ConnectionClosed) -> None:
         self.log(
             "connection-closed",
             {"message": "Client went away - probably closed the tab."},
         )
 
-        if self.stage_run and self.stage_run_freezed and not self.is_initial:
-            StageRunRepository.create_next(
-                self.stage_run,
-                [
-                    dict(
-                        assignee=self.stage_run_freezed.assignee,
-                        stage=self.stage_run_freezed.stage,
-                        data=self.stage_run.data,
-                    )
-                ],
-            )
-
-        return "abandoned"
-
-    def _handle_ws_exception_other(self, exception: flask_sock.ConnectionClosed) -> str:
+    def _handle_ws_exception_other(
+        self, exception: flask_sock.ConnectionClosed
+    ) -> None:
         self.log(
             "connection-closed",
             {
@@ -222,9 +172,8 @@ class FormExecution(Execution):
                 "reason": exception.reason,
             },
         )
-        return super().handle_failure(exception)
 
-    def _handle_ws_exception(self, exception: flask_sock.ConnectionClosed) -> str:
+    def _handle_ws_exception(self, exception: flask_sock.ConnectionClosed) -> None:
         if exception.reason == 1000:
             return super().handle_success()  # missing advanve steps?
 
@@ -233,9 +182,9 @@ class FormExecution(Execution):
 
         return self._handle_ws_exception_other(exception)
 
-    def handle_failure(self, exception: Exception) -> str:
+    def handle_failure(self, exception: Exception) -> None:
         if isinstance(exception, flask_sock.ConnectionClosed):
-            return self._handle_ws_exception(exception)
+            self._handle_ws_exception(exception)
 
         close_dto = forms_contract.CloseDTO(
             exit_status="GENERIC_EXCEPTION",

@@ -69,7 +69,6 @@ def get_player_bp(controller: MainController):
             )
 
             execution.run_sync()
-            controller.run_waiting_scripts(execution.stage_run)
         finally:
             conn.close(message="Done")
 
@@ -136,7 +135,6 @@ def get_player_bp(controller: MainController):
         )
 
         execution.run_sync()
-        controller.run_waiting_scripts(execution.stage_run)
 
         body, status, headers = execution.get_response()
         return flask.Response(status=status, headers=headers, response=body)
@@ -168,7 +166,6 @@ def get_player_bp(controller: MainController):
             )
 
             execution.run_sync()
-            controller.run_waiting_scripts(execution.stage_run)
 
         controller.executor.submit(run_job, job)
 
