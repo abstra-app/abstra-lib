@@ -195,44 +195,15 @@ class MainController:
             raise Exception(f"Stage {id} not found")
         return project.is_initial(stage)
 
-    def run_initial_script(self, script: ScriptStage):
-        # This was added to allow script to run without a stage run while testing
+    def run_script(self, script: ScriptStage):
         execution = ScriptExecution(script, True)
 
         execution.run_sync()
-
-        self.run_waiting_scripts(execution.stage_run)
 
         return {
             "stdout": "".join(execution.stdout if execution else []),
             "stderr": "".join(execution.stderr if execution else []),
         }
-
-    def run_waiting_scripts(self, parent_stage_run: Optional[StageRun]):
-        if not parent_stage_run:
-            return
-
-        next_stage_runs = StageRunRepository.find(
-            {"parent_id": parent_stage_run.id, "status": "waiting"}
-        )
-
-        if len(next_stage_runs) == 0:
-            return
-
-        for next_stage_run in next_stage_runs:
-            script = self.get_script(next_stage_run.stage)
-
-            if not script:
-                continue
-
-            def run_next(script: ScriptStage, api: MainController):
-                execution = ScriptExecution.create_with_stage_run(
-                    script, next_stage_run.id
-                )
-                execution.run_sync()
-                api.run_waiting_scripts(execution.stage_run)
-
-            self.executor.submit(run_next, script, self)
 
     def create_script(self) -> ScriptStage:
         project = ProjectRepository.load()

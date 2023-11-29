@@ -66,8 +66,6 @@ def get_editor_bp(controller: MainController):
 
         execution.run_sync()
 
-        controller.run_waiting_scripts(execution.stage_run)
-
         return {
             "stdout": "".join(execution.stdout if execution else []),
             "stderr": "".join(execution.stderr if execution else []),

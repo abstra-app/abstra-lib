@@ -68,8 +68,6 @@ def get_editor_bp(controller: MainController):
 
         body, status, headers = execution.get_response()
 
-        controller.run_waiting_scripts(execution.stage_run)
-
         return {
             "body": body,
             "status": status,
