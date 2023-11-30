@@ -171,6 +171,13 @@ def get_player_bp(controller: MainController):
 
         return {"status": "running"}
 
+    @bp.delete("/_executions/<string:execution_id>")
+    def abort_execution(execution_id):
+        if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
+            flask.abort(401)
+        controller.abort_execution(execution_id)
+        return {"status": "deleted"}
+
     @bp.route("/", methods=["GET"])
     def index():
         res = send_from_dist("player.html", "player.html")

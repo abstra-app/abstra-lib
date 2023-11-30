@@ -19,8 +19,8 @@ class FormExecution(Execution):
     _connection: flask_sock.Server
 
     @staticmethod
-    def get_execution() -> typing.Optional["FormExecution"]:
-        execution = Execution.get_execution()
+    def get_current_execution() -> typing.Optional["FormExecution"]:
+        execution = Execution.get_current_execution()
         if isinstance(execution, FormExecution):
             return execution
 
@@ -199,7 +199,7 @@ class FormExecution(Execution):
 
 
 def get_form_execution_throwable() -> FormExecution:
-    execution = FormExecution.get_execution()
+    execution = FormExecution.get_current_execution()
     if not execution:
         raise NoExecutionFound()
     return execution

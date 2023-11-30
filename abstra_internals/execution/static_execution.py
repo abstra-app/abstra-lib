@@ -7,8 +7,8 @@ class StaticExecution(Execution):
     type = "static-execution"
 
     @staticmethod
-    def get_execution() -> typing.Optional["StaticExecution"]:
-        execution = Execution.get_execution()
+    def get_current_execution() -> typing.Optional["StaticExecution"]:
+        execution = Execution.get_current_execution()
         if isinstance(execution, StaticExecution):
             return execution
 
@@ -20,7 +20,7 @@ class StaticExecution(Execution):
 
 
 def get_static_execution_throwable() -> StaticExecution:
-    execution = StaticExecution.get_execution()
+    execution = StaticExecution.get_current_execution()
     if not execution:
         raise NoExecutionFound()
     return execution
