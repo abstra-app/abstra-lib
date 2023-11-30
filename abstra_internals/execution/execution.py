@@ -8,8 +8,12 @@ import uuid
 from ..utils.environment import IS_PREVIEW
 from ..monitoring import LogMessage, log
 from ..modules import import_as_new
+from ..monitoring import LogMessage, log
+from ..utils.environment import IS_PREVIEW
+from .stoppable_thread import StoppableThread
 
 if TYPE_CHECKING:
+    import sys
     from ..repositories.project.project import WorkflowStage
 
 
@@ -34,10 +38,17 @@ class Execution:
     id: str
     is_initial: bool
     request: RequestData
-    thread: threading.Thread
+    thread: StoppableThread
 
     @classmethod
-    def get_execution(cls) -> Optional["Execution"]:
+    def get_execution_by_id(cls, execution_id: str) -> Optional["Execution"]:
+        for execution in cls.executions.values():
+            if execution.id == execution_id:
+                return execution
+        return None
+
+    @classmethod
+    def get_current_execution(cls) -> Optional["Execution"]:
         thread_id = threading.get_ident()
         return cls.executions.get(thread_id)
 
@@ -55,7 +66,7 @@ class Execution:
 
         self.is_initial = is_initial
 
-        self.thread = threading.Thread(target=self._run, args=())
+        self.thread = StoppableThread(target=self._run, args=())
         self.request = request
 
         self.stderr: List[str] = []
@@ -69,6 +80,9 @@ class Execution:
 
     def run_async(self):
         self.thread.start()
+
+    def stop(self):
+        self.thread.kill()
 
     def run_sync(self):
         self.thread.start()
@@ -111,6 +125,7 @@ class Execution:
 
         self.setup_context(self.request)
         self.handle_started()
+
         try:
             try:
                 import_as_new(self.stage.file)
@@ -127,8 +142,8 @@ class Execution:
         del Execution.executions[self.thread_id]
 
 
-def get_execution_throwable() -> Execution:
-    execution = Execution.get_execution()
+def get_current_execution_throwable() -> Execution:
+    execution = Execution.get_current_execution()
     if not execution:
         raise NoExecutionFound()
     return execution

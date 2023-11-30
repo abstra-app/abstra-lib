@@ -1,0 +1,41 @@
+import inspect
+import sys
+import threading
+
+
+class StoppableThread(threading.Thread):
+    def __init__(self, *args, **keywords):
+        threading.Thread.__init__(self, *args, **keywords)
+        self.killed = False
+
+    def is_debugging(self) -> bool:
+        for frame in inspect.stack():
+            if frame[1].endswith("pydev_monkey.py"):
+                return True
+        return False
+
+    def start(self):
+        self.__run_backup = self.run
+        self.run = self.__run
+        threading.Thread.start(self)
+
+    def __run(self):
+        if not self.is_debugging():
+            sys.settrace(self.globaltrace)
+        self.__run_backup()
+        self.run = self.__run_backup
+
+    def globaltrace(self, frame, event, arg):
+        if event == "call":
+            return self.localtrace
+        else:
+            return None
+
+    def localtrace(self, frame, event, arg):
+        if self.killed:
+            if event == "line":
+                raise SystemExit()
+        return self.localtrace
+
+    def kill(self):
+        self.killed = True

@@ -8,7 +8,7 @@ _og_stderr_write = sys.stderr.write
 def writeWraper(type, write, text: str):
     try:
         write(text)
-        execution = Execution.get_execution()
+        execution = Execution.get_current_execution()
         if execution and text.strip() != "":
             execution.stdio(type, text)
     finally:

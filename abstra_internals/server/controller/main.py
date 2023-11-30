@@ -9,6 +9,7 @@ from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...repositories.requirements import RequirementsRepository
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
+from ...execution.execution import Execution
 from ...linter.rules import rules
 from ...cli.deploy import deploy
 from ...settings import Settings
@@ -610,6 +611,11 @@ class MainController:
 
     def get_requirements_recommendations(self):
         return [r.to_dict() for r in RequirementsRepository.get_recommendation()]
+
+    def abort_execution(self, id: str):
+        execution = Execution.get_execution_by_id(id)
+        if execution:
+            execution.stop()
 
     # Debugger
 
