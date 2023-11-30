@@ -1,7 +1,6 @@
 import flask
 
 from ...usage import usage
-from ...settings import Settings
 from .main import MainController
 
 

@@ -1,14 +1,10 @@
-from json import dump
-from pathlib import Path
 from unittest import TestCase
 import unittest
 
-from pytest import skip
 
 from .fixtures import init_dir, clear_dir
 
 from abstra_internals.server.controller.visualizations import VisualizationsController
-from abstra_internals.server.controller import visualizations
 from abstra_internals.repositories.project.project import (
     ProjectRepository,
     VisualizationSettings,
@@ -41,7 +37,7 @@ class TestVisualization(TestCase):
 
     @unittest.skip("Removed for now")
     def test_generates_correct_dict(self):
-        project = ProjectRepository.load()
+        ProjectRepository.load()
 
         self.controller.put_visualizations([{"name": "foo", "type": "text"}])
 

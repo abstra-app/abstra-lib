@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from .settings import Settings
 from .utils.file import CREDENTIALS_FILE
 

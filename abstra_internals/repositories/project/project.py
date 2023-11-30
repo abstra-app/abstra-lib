@@ -894,7 +894,7 @@ class Project:
                 jobs=jobs,
             )
 
-        except TypeError as e:
+        except TypeError:
             print("Error: incompatible abstra.json file.")
             import traceback
 
