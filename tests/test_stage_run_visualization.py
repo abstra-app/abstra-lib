@@ -1,8 +1,6 @@
 from unittest import TestCase
 import unittest
 
-from pytest import skip
-import pytest
 
 from .fixtures import init_dir, clear_dir
 

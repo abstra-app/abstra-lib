@@ -1,6 +1,5 @@
 import flask
 
-from ...usage import usage
 from ...settings import Settings
 from .main import MainController
 from ..utils import send_from_dist

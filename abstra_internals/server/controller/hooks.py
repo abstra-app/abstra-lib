@@ -1,7 +1,6 @@
 import flask
 
 from ...usage import usage
-from ...settings import Settings
 from .main import MainController
 from ...execution.execution import RequestData
 from ...execution.hook_execution import HookExecution

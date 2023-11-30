@@ -82,7 +82,7 @@ def processVariants(partial):
     global variant_attributes
     try:
         variant_attributes = partial["attr_list"]
-        variants = partial["var_list"]
+        partial["var_list"]
     except:
         print("couldn't save variants")
 

@@ -1,8 +1,7 @@
 import typing
-from typing import Dict, Optional, Union
+from typing import Dict
 from .execution import RequestData
 from .static_execution import StaticExecution
-from ..repositories import StageRunRepository
 
 
 class HookExecution(StaticExecution):

@@ -9,8 +9,6 @@ from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...repositories.requirements import RequirementsRepository
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.script_execution import ScriptExecution
-from ...repositories.stage_run import StageRun
-from ...repositories import StageRunRepository
 from ...linter.rules import rules
 from ...cli.deploy import deploy
 from ...settings import Settings
@@ -46,7 +44,6 @@ from ...repositories.project.project import (
     ScriptStage,
     WorkflowStage,
     ScriptStage,
-    Project,
     ScriptStage,
     FormStage,
     HookStage,

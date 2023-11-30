@@ -14,13 +14,13 @@ class TestLocalStepsRepository(unittest.TestCase):
 
     def test_create(self):
         rep = LocalStageRunRepository()
-        stage_run = rep.create_initial("stage1")
+        rep.create_initial("stage1")
         stage_runs = rep.find({})
         self.assertEqual(len(stage_runs), 1)
 
     def test_leaves_simple(self):
         rep = LocalStageRunRepository()
-        stage_run = rep.create_initial("stage1")
+        rep.create_initial("stage1")
         stage_runs = rep.find_leaves({})
         self.assertEqual(len(stage_runs), 1)
 
@@ -28,7 +28,7 @@ class TestLocalStepsRepository(unittest.TestCase):
         repository = LocalStageRunRepository()
 
         wfs1_stage1 = repository.create_initial("stage1")
-        wfs2_stage1 = repository.create_initial("stage1")
+        repository.create_initial("stage1")
         repository.create_next(wfs1_stage1, [{"stage": "stage2"}])
         wfs1_stage2 = repository.find({"parent_id": wfs1_stage1.id})
         self.assertEqual(len(wfs1_stage2), 1)

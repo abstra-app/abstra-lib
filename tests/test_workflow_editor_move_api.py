@@ -68,7 +68,7 @@ class TestWorkflowEditorMoveApi(unittest.TestCase):
         self.controller.workflow_move(
             [{"id": self.form_ids[0], "type": "forms", "position": [2, 3]}]
         )
-        project = ProjectRepository.load()
+        ProjectRepository.load()
         form = self.controller.get_form(self.form_ids[0])
 
         if form is None:

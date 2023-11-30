@@ -15,5 +15,5 @@ def _overload_plotly_show():
 
         renderers["abstra-forms"] = FormsRenderer()
         renderers.default = "abstra-forms"
-    except Exception as e:
+    except Exception:
         pass

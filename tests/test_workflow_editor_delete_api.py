@@ -86,7 +86,7 @@ class TestWorkflowEditorDeleteApi(unittest.TestCase):
             ]
         )
         self.controller.bulk_delete([{"id": id, "type": "transitions"}])
-        workflow_data = self.controller.get_workflow_editor_data()
+        self.controller.get_workflow_editor_data()
         form = self.controller.get_form(self.form_ids[0])
 
         if not form:

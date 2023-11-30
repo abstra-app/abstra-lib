@@ -28,7 +28,7 @@ def async_log(msg: LogMessage):
         return
     try:
         requests.post(LOG_SERVICE_URL, json=msg.json())
-    except Exception as e:
+    except Exception:
         pass  # TODO: handle this
 
 

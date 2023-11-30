@@ -1,11 +1,10 @@
 from __future__ import annotations  # Required for TYPE_CHECKING
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 from dataclasses import dataclass
-import threading, traceback, uuid, copy
+import threading
+import traceback
+import uuid
 
-from ..repositories.project.project import ProjectRepository
-from ..repositories import StageRunRepository
-from ..repositories.stage_run import StageRun
 from ..utils.environment import IS_PREVIEW
 from ..monitoring import LogMessage, log
 from ..modules import import_as_new
