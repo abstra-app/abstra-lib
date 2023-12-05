@@ -124,6 +124,8 @@ class RequirementsRepository:
         imported_modules: Set[RequirementRecommendation] = set()
 
         project = ProjectRepository.load()
+        package_dist = packages_distributions()
+        visited_set = set()
 
         for python_file in project.project_files:
             try:
@@ -134,7 +136,10 @@ class RequirementsRepository:
                 for node in parsed.body:
                     if isinstance(node, ast.Import):
                         for alias in node.names:
-                            lib_name = packages_distributions().get(alias.name)
+                            if alias.name in visited_set:
+                                continue
+                            visited_set.add(alias.name)
+                            lib_name = package_dist.get(alias.name)
                             if lib_name is None:
                                 continue
                             for l in lib_name:
@@ -150,10 +155,11 @@ class RequirementsRepository:
                                         ).splitlines()[node.lineno - 1],
                                     )
                                 )
-                    elif isinstance(node, ast.ImportFrom):
-                        if node.module is None:
+                    if isinstance(node, ast.ImportFrom):
+                        if node.module is None or node.module in visited_set:
                             continue
-                        lib_name = packages_distributions().get(node.module)
+                        visited_set.add(node.module)
+                        lib_name = package_dist.get(node.module)
                         if lib_name is None:
                             continue
                         for l in lib_name:
