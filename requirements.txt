@@ -17,3 +17,4 @@ Werkzeug==2.2.3
 setuptools
 importlib_metadata
 debugpy
+python-dotenv==1.0.0
