@@ -5,15 +5,12 @@ import threading
 import traceback
 import uuid
 
-from ..utils.environment import IS_PREVIEW
-from ..monitoring import LogMessage, log
 from ..modules import import_as_new
 from ..monitoring import LogMessage, log
 from ..utils.environment import IS_PREVIEW
 from .stoppable_thread import StoppableThread
 
 if TYPE_CHECKING:
-    import sys
     from ..repositories.project.project import WorkflowStage
 
 
