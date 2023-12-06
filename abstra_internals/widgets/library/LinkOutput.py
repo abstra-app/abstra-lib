@@ -13,7 +13,7 @@ class LinkOutput(Output):
         self.same_tab = props.get("same_tab", False)
         self.full_width = props.get("full_width", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "linkText": self.link_text,

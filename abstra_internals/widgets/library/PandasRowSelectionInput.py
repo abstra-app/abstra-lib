@@ -46,7 +46,7 @@ class PandasRowSelectionInput(OptionalListInput):
         del serialized["schema"]["pandas_version"]
         return serialized
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

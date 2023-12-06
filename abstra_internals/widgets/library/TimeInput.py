@@ -1,6 +1,6 @@
 import datetime, re
 from ..widget_base import Input
-from typing import Optional, Union
+from typing import Optional
 
 
 class TimeInput(Input):
@@ -20,7 +20,7 @@ class TimeInput(Input):
         self.format = props.get("format", "24hs")
         self.disabled = props.get("disabled", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

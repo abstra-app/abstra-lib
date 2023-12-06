@@ -17,16 +17,16 @@ class HookExecution(StaticExecution):
             },
         )
 
-    def handle_failure(self, exception: Exception) -> None:
+    def handle_failure(self, e: Exception) -> None:
         self.context["response"] = self.context.get("response", ("", 500, {}))
         self.log(
             "failed",
             {
                 "response": self.context["response"],
-                "error": str(exception),
+                "error": str(e),
             },
         )
-        return super().handle_failure(exception)
+        return super().handle_failure(e)
 
     def get_response(self) -> typing.Tuple[Dict, int, Dict]:
         if "response" not in self.context:

@@ -1,5 +1,4 @@
 from ..widget_base import Input
-from typing import Optional, Union
 from ..response_types import PhoneResponse
 import re
 
@@ -26,7 +25,7 @@ class PhoneInput(Input):
             "invalid_message", "i18n_error_invalid_phone_number"
         )
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

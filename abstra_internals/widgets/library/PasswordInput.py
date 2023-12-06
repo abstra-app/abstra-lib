@@ -27,7 +27,7 @@ class PasswordInput(Input):
         self.value = ""
         self.secret = True
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "value": self.serialize_value(),
             "type": self.type,

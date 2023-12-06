@@ -41,8 +41,8 @@ class ListInput(Input):
     def validators(self):
         return super().validators + [self._validate_list_min_max]
 
-    def render(self, context: dict):
-        schemas = [schema.render(context) for schema in self.schemas]
+    def render(self, ctx: dict):
+        schemas = [schema.render(ctx) for schema in self.schemas]
         return {
             "type": self.type,
             "key": self.key,
@@ -71,9 +71,9 @@ class ListInput(Input):
             schema.set_values(value_item)
         self.schemas = self.schemas[: len(value)]
 
-    def parse_value(self, values) -> List:
+    def parse_value(self, value) -> List:
         parsed_values = []
-        for index, value in enumerate(values or self.empty_value):
+        for index, value in enumerate(value or self.empty_value):
             if index >= len(self.schemas):
                 schema = self.item_schema.copy()
                 value = schema.parse_value(value or {})

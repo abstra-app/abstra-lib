@@ -15,7 +15,7 @@ class FileOutput(Output):
         self.download_text = props.get("download_text", "Download")
         self.full_width = props.get("full_width", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "fileUrl": self.file,

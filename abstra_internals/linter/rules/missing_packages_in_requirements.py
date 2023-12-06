@@ -3,7 +3,7 @@ from ...repositories.requirements import (
     RequirementsRepository,
     RequirementRecommendation,
 )
-from typing import List
+from typing import List, Sequence
 
 
 class AddMissingPackagesToRequirements(LinterFix):
@@ -38,7 +38,7 @@ class MissingPackagesInRequirements(LinterRule):
     label = "All imported packages should be in requirements.txt"
     type = "bug"
 
-    def find_issues(self) -> List[PackageNotInRequirementsFound]:
+    def find_issues(self) -> Sequence[LinterIssue]:
         recommendations = RequirementsRepository.get_recommendation()
         issues = [
             PackageNotInRequirementsFound(recommendation)

@@ -36,7 +36,7 @@ class CurrencyInput(Input):
     def validators(self):
         return super().validators + [self._validate_number_min_max]
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

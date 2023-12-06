@@ -12,7 +12,7 @@ class TextOutput(Output):
         self.size = props.get("size", "medium")
         self.full_width = props.get("full_width", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "text": self.text,

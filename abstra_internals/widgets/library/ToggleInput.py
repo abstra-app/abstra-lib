@@ -1,4 +1,3 @@
-from typing import Optional, Union
 from ..widget_base import Input
 
 
@@ -23,7 +22,7 @@ class ToggleInput(Input):
     def is_value_unset(self):
         return False
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

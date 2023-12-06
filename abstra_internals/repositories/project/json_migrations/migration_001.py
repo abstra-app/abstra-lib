@@ -4,8 +4,6 @@ from .base_migration import Migration
 
 
 class Migration001(Migration):
-    data: dict
-
     @staticmethod
     def target_version() -> str:
         return "1.0"

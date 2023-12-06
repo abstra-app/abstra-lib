@@ -33,7 +33,7 @@ class PandasOutput(Output):
         del serialized["schema"]["pandas_version"]
         return serialized
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "table": self.serialize_table(),

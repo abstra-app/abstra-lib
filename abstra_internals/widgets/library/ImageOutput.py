@@ -16,7 +16,7 @@ class ImageOutput(Output):
         self.full_width = props.get("full_width", False)
         self.label = props.get("label", "")
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "imageUrl": self.image,
