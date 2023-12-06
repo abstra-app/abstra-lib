@@ -8,8 +8,8 @@ def _overload_plotly_show():
         from plotly.io._base_renderers import ExternalRenderer
 
         class FormsRenderer(ExternalRenderer):
-            def render(self, fig_dict):
-                fig = Figure(data=fig_dict)
+            def render(self, fig):
+                fig = Figure(data=fig)
                 display_plotly(fig)
                 return {}
 

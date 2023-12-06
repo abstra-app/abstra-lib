@@ -26,7 +26,7 @@ class PlotlyOutput(Output):
             return json.loads(fig_json)
         return json.loads(self.fig.to_json())
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "figure": self.serialize_figure(),

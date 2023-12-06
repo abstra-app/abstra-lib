@@ -6,8 +6,8 @@ from .execution import Execution, NoExecutionFound
 class StaticExecution(Execution):
     type = "static-execution"
 
-    @staticmethod
-    def get_current_execution() -> typing.Optional["StaticExecution"]:
+    @classmethod
+    def get_current_execution(cls) -> typing.Optional["StaticExecution"]:
         execution = Execution.get_current_execution()
         if isinstance(execution, StaticExecution):
             return execution

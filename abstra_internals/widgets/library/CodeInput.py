@@ -18,7 +18,7 @@ class CodeInput(Input):
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

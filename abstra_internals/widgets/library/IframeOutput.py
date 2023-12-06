@@ -19,7 +19,7 @@ class IframeOutput(Output):
         self.height = props.get("height", "600")
         self.full_width = props.get("full_width", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "url": self.url,

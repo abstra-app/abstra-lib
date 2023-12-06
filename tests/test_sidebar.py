@@ -16,7 +16,7 @@ class TestSidebar(unittest.TestCase):
         controller = MainController()
 
         workspace = controller.get_workspace()
-        self.assertEqual(workspace.__dict__["sidebar"], [])
+        self.assertEqual(workspace.as_dict["sidebar"], [])
 
     def test_auto_add_forms(self):
         # given
@@ -27,7 +27,7 @@ class TestSidebar(unittest.TestCase):
         workspace = controller.get_workspace()
 
         # then
-        sidebar_json = workspace.__dict__["sidebar"]
+        sidebar_json = workspace.as_dict["sidebar"]
         self.assertEqual(len(sidebar_json), 1)
         item = dict(name=form.title, path=form.path, type="form", visible=False)
         self.assertEqual({**sidebar_json[0], **item}, sidebar_json[0])

@@ -25,7 +25,7 @@ class DropdownInput(OptionalListInput):
         self.empty_value = [] if self.multiple else None
         self.value = props.get("initial_value", self.empty_value)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

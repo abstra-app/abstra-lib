@@ -1,6 +1,6 @@
 import datetime, time, re
 from ..widget_base import Input
-from typing import Union, Optional
+from typing import Optional
 
 
 class DateInput(Input):
@@ -19,7 +19,7 @@ class DateInput(Input):
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

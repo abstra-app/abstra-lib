@@ -19,7 +19,7 @@ class CpfInput(Input):
         self.disabled = props.get("disabled", False)
         self.invalid_message = props.get("invalid_message", "i18n_error_invalid_cpf")
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence
 
 
 class LinterFix:
@@ -40,7 +40,7 @@ class LinterRule:
     label: str
     type: str
 
-    def find_issues(self) -> List[LinterIssue]:
+    def find_issues(self) -> Sequence[LinterIssue]:
         raise NotImplementedError
 
     @property

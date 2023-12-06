@@ -12,10 +12,10 @@ class Reactive(Input):
     def has_errors(self):
         return self.page.has_errors() if self.page else False
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         payload = {}
         payload.update(self.value)
-        payload.update(context)
+        payload.update(ctx)
         self.page = self.callback(payload)
         if self.page is None:
             return []
@@ -24,9 +24,9 @@ class Reactive(Input):
             self.page.set_values(self.value)
             self.page.set_errors()
 
-        return self.page.render(context)
+        return self.page.render(ctx)
 
-    def set_value(self, value):
+    def set_value(self, value, set_errors=False):
         self.value = value
         if hasattr(self, "page") and self.page:
             self.page.set_values(value)

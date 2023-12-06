@@ -22,7 +22,7 @@ class CustomInput(Input):
     def serialize_value(self) -> Any:
         return self.value
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

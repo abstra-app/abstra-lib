@@ -20,7 +20,7 @@ class WorkflowTransition:
     label: str
 
     @property
-    def __dict__(self):
+    def as_dict(self) -> dict:
         return {
             "target_id": self.target_id,
             "target_type": self.target_type,
@@ -97,7 +97,7 @@ class HookStage:
         }
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
             "id": self.id,
             "file": self.file,
@@ -106,12 +106,12 @@ class HookStage:
             "enabled": self.enabled,
             "workflow_position": self.workflow_position,
             "is_initial": self.is_initial,
-            "transitions": [t.__dict__ for t in self.workflow_transitions],
+            "transitions": [t.as_dict for t in self.workflow_transitions],
         }
 
     @property
     def editor_dto(self):
-        return self.__dict__
+        return self.as_dict
 
     @property
     def file_path(self):
@@ -129,7 +129,7 @@ class HookStage:
     def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
         return self.from_dict(
             {
-                **self.__dict__,
+                **self.as_dict,
                 "id": new_id,
                 "workflow_position": new_position,
                 "transitions": [],
@@ -190,19 +190,19 @@ class ScriptStage:
         }
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
             "id": self.id,
             "file": self.file,
             "title": self.title,
             "is_initial": self.is_initial,
             "workflow_position": self.workflow_position,
-            "transitions": [t.__dict__ for t in self.workflow_transitions],
+            "transitions": [t.as_dict for t in self.workflow_transitions],
         }
 
     @property
     def editor_dto(self):
-        return self.__dict__
+        return self.as_dict
 
     @property
     def file_path(self):
@@ -220,7 +220,7 @@ class ScriptStage:
     def duplicate(self, new_id: str, new_position: Tuple[int, int]):
         return self.from_dict(
             {
-                **self.__dict__,
+                **self.as_dict,
                 "id": new_id,
                 "workflow_position": new_position,
                 "transitions": [],
@@ -276,19 +276,19 @@ class JobStage:
         return {"title": self.title, "id": self.id, "type": "job", "is_initial": True}
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
             "id": self.id,
             "file": self.file,
             "title": self.title,
             "schedule": self.schedule,
             "workflow_position": self.workflow_position,
-            "transitions": [t.__dict__ for t in self.workflow_transitions],
+            "transitions": [t.as_dict for t in self.workflow_transitions],
         }
 
     @property
     def editor_dto(self):
-        return self.__dict__
+        return self.as_dict
 
     @property
     def file_path(self):
@@ -306,7 +306,7 @@ class JobStage:
     def duplicate(self, new_id: str, new_position: Tuple[int, int]):
         return self.from_dict(
             {
-                **self.__dict__,
+                **self.as_dict,
                 "id": new_id,
                 "workflow_position": new_position,
                 "transitions": [],
@@ -414,11 +414,11 @@ class FormStage:
             **self.browser_runner_dto,
             "file": self.file,
             "workflow_position": self.workflow_position,
-            "transitions": [t.__dict__ for t in self.workflow_transitions],
+            "transitions": [t.as_dict for t in self.workflow_transitions],
         }
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return self.editor_dto
 
     @property
@@ -449,7 +449,7 @@ class FormStage:
     def duplicate(self, new_id: str, new_position: Tuple[int, int]):
         return self.from_dict(
             {
-                **self.__dict__,
+                **self.as_dict,
                 "id": new_id,
                 "workflow_position": new_position,
                 "transitions": [],
@@ -466,7 +466,7 @@ class SidebarItem:
     visible: Optional[bool]
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
             "id": self.id,
             "name": self.name,
@@ -515,8 +515,8 @@ class Sidebar:
         return Sidebar(items=stored_items)
 
     @property
-    def __dict__(self):
-        return [item.__dict__ for item in self.items]
+    def as_dict(self):
+        return [item.as_dict for item in self.items]
 
 
 @dataclass
@@ -531,7 +531,7 @@ class StyleSettings:
     font_color: Optional[str] = None
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
             "id": None,
             "name": self.name,
@@ -541,7 +541,7 @@ class StyleSettings:
             "main_color": self.main_color,
             "font_color": self.font_color,
             "font_family": self.font_family,
-            "sidebar": self.sidebar.__dict__,
+            "sidebar": self.sidebar.as_dict,
         }
 
     @property
@@ -552,11 +552,11 @@ class StyleSettings:
             logo_url = "/_assets/logo"
         else:
             logo_url = None
-        return {**self.__dict__, "logo_url": logo_url}
+        return {**self.as_dict, "logo_url": logo_url}
 
     @property
     def editor_dto(self):
-        return self.__dict__
+        return self.as_dict
 
     def update(
         self,
@@ -613,7 +613,7 @@ class VisualizationItem:
         )
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
             "name": self.name,
             "type": self.type,
@@ -640,8 +640,8 @@ class VisualizationSettings:
         )
 
     @property
-    def __dict__(self):
-        return [item.__dict__ for item in self.items]
+    def as_dict(self):
+        return [item.as_dict for item in self.items]
 
 
 @dataclass
@@ -653,13 +653,13 @@ class Project:
     jobs: List[JobStage]
 
     @property
-    def __dict__(self):
+    def as_dict(self):
         return {
-            "workspace": self.workspace.__dict__,
-            "jobs": [job.__dict__ for job in self.jobs],
-            "hooks": [hook.__dict__ for hook in self.hooks],
-            "forms": [form.__dict__ for form in self.forms],
-            "scripts": [script.__dict__ for script in self.scripts],
+            "workspace": self.workspace.as_dict,
+            "jobs": [job.as_dict for job in self.jobs],
+            "hooks": [hook.as_dict for hook in self.hooks],
+            "forms": [form.as_dict for form in self.forms],
+            "scripts": [script.as_dict for script in self.scripts],
         }
 
     @property
@@ -963,7 +963,7 @@ class ProjectRepository:
     def save(cls, project: Project):
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
-        project_data = project.__dict__
+        project_data = project.as_dict
         project_data["version"] = json_migrations.get_latest_version()
 
         with temp_file.open("w") as f:

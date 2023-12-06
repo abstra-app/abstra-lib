@@ -18,8 +18,8 @@ class FormExecution(Execution):
     type = "execution"
     _connection: flask_sock.Server
 
-    @staticmethod
-    def get_current_execution() -> typing.Optional["FormExecution"]:
+    @classmethod
+    def get_current_execution(cls) -> typing.Optional["FormExecution"]:
         execution = Execution.get_current_execution()
         if isinstance(execution, FormExecution):
             return execution
@@ -182,17 +182,17 @@ class FormExecution(Execution):
 
         return self._handle_ws_exception_other(exception)
 
-    def handle_failure(self, exception: Exception) -> None:
-        if isinstance(exception, flask_sock.ConnectionClosed):
-            self._handle_ws_exception(exception)
+    def handle_failure(self, e: Exception) -> None:
+        if isinstance(e, flask_sock.ConnectionClosed):
+            self._handle_ws_exception(e)
 
         close_dto = forms_contract.CloseDTO(
             exit_status="GENERIC_EXCEPTION",
-            exception=exception.__str__(),
+            exception=e.__str__(),
         )
         self.send(forms_contract.CloseMessage(close_dto))
 
-        return super().handle_failure(exception)
+        return super().handle_failure(e)
 
     def handle_finish(self):
         self.close()

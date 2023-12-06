@@ -19,7 +19,7 @@ class RatingInput(Input):
         self.char = props.get("char", "⭐️")
         self.disabled = props.get("disabled", False)
 
-    def render(self, context: dict):
+    def render(self, ctx: dict):
         return {
             "type": self.type,
             "key": self.key,

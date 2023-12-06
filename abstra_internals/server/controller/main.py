@@ -245,7 +245,7 @@ class MainController:
         project = ProjectRepository.load()
         transition = project.update_transition(id, changes)
         ProjectRepository.save(project)
-        return transition.__dict__
+        return transition.as_dict
 
     def get_form_by_path(self, path: str) -> Optional[FormStage]:
         project = ProjectRepository.load()
