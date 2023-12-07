@@ -1,6 +1,7 @@
 import flask
 
 from ...usage import usage
+from ..utils import is_it_true
 from .main import MainController
 from ...execution.execution import RequestData
 from ...execution.hook_execution import HookExecution
@@ -42,7 +43,10 @@ def get_editor_bp(controller: MainController):
     @bp.route("/<path:id>", methods=["DELETE"])
     @usage
     def _delete_hook(id: str):
-        controller.delete_hook(id)
+        remove_file = flask.request.args.get(
+            "remove_file", default=False, type=is_it_true
+        )
+        controller.delete_hook(id, remove_file)
         return {"success": True}
 
     @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
