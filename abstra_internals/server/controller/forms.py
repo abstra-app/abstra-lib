@@ -1,5 +1,6 @@
 import flask
 
+from ..utils import is_it_true
 from ...usage import usage
 from .main import MainController
 
@@ -23,7 +24,10 @@ def get_editor_bp(controller: MainController):
     @bp.delete("/<path:path>")
     @usage
     def _delete_form(path: str):
-        controller.delete_form(path)
+        remove_file = flask.request.args.get(
+            "remove_file", default=False, type=is_it_true
+        )
+        controller.delete_form(path, remove_file)
         return {"success": True}
 
     @bp.post("/")

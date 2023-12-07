@@ -220,9 +220,9 @@ class MainController:
         project = ProjectRepository.load()
         return project.get_script(path)
 
-    def delete_script(self, id: str):
+    def delete_script(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
-        project.delete_stage(id)
+        project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
     def create_form(self) -> FormStage:
@@ -251,9 +251,9 @@ class MainController:
         project = ProjectRepository.load()
         return project.get_form_by_path(path)
 
-    def delete_form(self, path: str):
+    def delete_form(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
-        project.delete_stage(path)
+        project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
     def create_hook(self) -> HookStage:
@@ -276,9 +276,9 @@ class MainController:
         project = ProjectRepository.load()
         return project.get_hook_by_path(path)
 
-    def delete_hook(self, id: str) -> None:
+    def delete_hook(self, id: str, remove_file: bool = False) -> None:
         project = ProjectRepository.load()
-        project.delete_stage(id)
+        project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
     def get_jobs(self) -> List[JobStage]:
@@ -308,9 +308,9 @@ class MainController:
         ProjectRepository.save(project)
         return runtime
 
-    def delete_job(self, id: str):
+    def delete_job(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
-        project.delete_stage(id)
+        project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
     # workflow visual editor
@@ -480,7 +480,7 @@ class MainController:
 
         ProjectRepository.save(project)
 
-    def bulk_delete(self, payload):
+    def bulk_delete(self, payload, remove_file: bool = False):
         project = ProjectRepository.load()
 
         for item in payload:
@@ -495,7 +495,7 @@ class MainController:
                 if Settings.root_path.joinpath(stage.file).exists():
                     Settings.root_path.joinpath(stage.file).unlink()
 
-                project.delete_stage(stage.id)
+                project.delete_stage(stage.id, remove_file)
 
         ProjectRepository.save(project)
 

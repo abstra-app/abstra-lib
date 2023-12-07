@@ -2,6 +2,7 @@ import flask
 
 from ...usage import usage
 from .main import MainController
+from ..utils import is_it_true
 
 
 def get_editor_bp(controller: MainController):
@@ -39,7 +40,10 @@ def get_editor_bp(controller: MainController):
     @bp.delete("/<path:id>")
     @usage
     def _delete_script(id: str):
-        controller.delete_script(id)
+        remove_file = flask.request.args.get(
+            "remove_file", default=False, type=is_it_true
+        )
+        controller.delete_script(id, remove_file)
         return {"success": True}
 
     @bp.post("/<path:id>/test")

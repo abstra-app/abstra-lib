@@ -5,6 +5,7 @@ from .main import MainController
 from ...execution.execution import RequestData
 from ...execution.job_execution import JobExecution
 from ...repositories.project.project import ProjectRepository
+from ..utils import is_it_true
 
 
 def get_editor_bp(controller: MainController):
@@ -42,7 +43,10 @@ def get_editor_bp(controller: MainController):
     @bp.delete("/<path:id>")
     @usage
     def _delete_job(id: str):
-        controller.delete_job(id)
+        remove_file = flask.request.args.get(
+            "remove_file", default=False, type=is_it_true
+        )
+        controller.delete_job(id, remove_file)
         return {"success": True}
 
     @bp.post("/<path:id>/test")

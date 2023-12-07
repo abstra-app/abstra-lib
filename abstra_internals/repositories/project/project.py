@@ -1,4 +1,4 @@
-import sys, uuid, shutil, json, tempfile
+import sys, uuid, shutil, json, tempfile, os
 from typing import Generator, List, Optional, Union, Any, Dict, Tuple
 from dataclasses import dataclass
 from pathlib import Path
@@ -845,9 +845,12 @@ class Project:
 
         return stage
 
-    def delete_stage(self, id: str):
+    def delete_stage(self, id: str, remove_file: bool = False):
         stage = self.get_stage(id)
+        if stage is None:
+            return
         self.delete_transition_by_target(id)
+
         if isinstance(stage, FormStage):
             self.forms = [f for f in self.forms if f.id != id]
         elif isinstance(stage, HookStage):
@@ -856,6 +859,11 @@ class Project:
             self.jobs = [j for j in self.jobs if j.id != id]
         elif isinstance(stage, ScriptStage):
             self.scripts = [s for s in self.scripts if s.id != id]
+
+        if remove_file:
+            path = Settings.root_path.joinpath(stage.file)
+            if path.exists():
+                os.remove(path.absolute())
 
     def is_initial(self, target_stage: WorkflowStage) -> bool:
         for stage in self.stages:
