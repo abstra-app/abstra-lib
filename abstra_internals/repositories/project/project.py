@@ -3,6 +3,8 @@ from typing import Generator, List, Optional, Union, Any, Dict, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 
+from abstra_internals.utils.format import normalize_path
+
 from ...utils.file import traverse_code
 from ...utils import check_is_url
 from ...settings import Settings
@@ -119,10 +121,12 @@ class HookStage:
 
     def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
-            if attr in ["path", "title", "enabled"]:
+            if attr in ["title", "enabled"]:
                 setattr(self, attr, value)
             elif attr == "file":
                 _update_file(self, value)
+            elif attr == "path":
+                setattr(self, attr, normalize_path(value))
             else:
                 raise Exception(f"Cannot update {attr} of hook")
 
@@ -428,7 +432,6 @@ class FormStage:
     def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr in [
-                "path",
                 "title",
                 "end_message",
                 "auto_start",
@@ -443,6 +446,8 @@ class FormStage:
                 setattr(self, attr, value)
             elif attr == "file":
                 _update_file(self, value)
+            elif attr == "path":
+                setattr(self, attr, normalize_path(value))
             else:
                 raise Exception(f"Cannot update {attr} of form")
 
@@ -839,7 +844,8 @@ class Project:
                     f"Stage with id {id} is a {type(stage)} does not have a path"
                 )
 
-            self.update_path(stage, new_path)
+            normalized_path = normalize_path(new_path)
+            self.update_path(stage, normalized_path)
 
         stage.update(changes)
 
