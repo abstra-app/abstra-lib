@@ -1711,7 +1711,7 @@ metadata = {
             "returns": [
                 {
                     "typeName": "Union[FileResponse, List[FileResponse]]",
-                    "typeDescription": "A dict containing the file uploaded by the user FileResponse(file: TemporaryFile, url: str, content: bytes) or a list of FileResponses in case of multiple flag set as True. ⚠️ The url expires after 48 hours",
+                    "typeDescription": "A dictionary contains the file uploaded by the user, represented as FileResponse(file: TemporaryFile, content: bytes). If the multiple flag is set as True, it might contain a list of FileResponses.",
                 }
             ],
         },
@@ -1743,6 +1743,20 @@ metadata = {
                 "description": "This example shows how to save a file to a directory on Files",
                 "key": "example2",
                 "code": 'from abstra.forms import read_file\nimport shutil, os\n\nfile_response = read_file("Upload your file")\n\ndestination_dir = "foo/bar/"\n# Creates directory if it does not exist\nos.makedirs(destination_dir, exist_ok=True)\n\n# Copies file to destination directory\nshutil.copy(file_response.file.name, destination_dir + file_response.name)\n',
+            },
+            {
+                "props": {"label": "Upload your file"},
+                "name": "Renaming in File Upload",
+                "description": "This example demonstrates how to upload, rename, and save a user file in a persistent directory.",
+                "key": "example3",
+                "code": 'from abstra.forms import read_file\nfrom abstra.common import get_persistent_dir\nfrom pathlib import Path\n\nf = read_file("Upload your file.json")\n\n# Get file extension\nextension = Path(f.filename).suffix\n\n# if extension is not .json, raise an error\nif extension != ".json":\n    raise ValueError("File must be a .json file")\n\n# if the extension is the expected, saves the file to a persistent directory\nget_persistent_dir().joinpath("keys.json").write_bytes(f.file.read())\n',
+            },
+            {
+                "props": {"label": "Upload your file"},
+                "name": "Preserving Filename in File Upload",
+                "description": "This example demonstrates how to read a user-uploaded file and save it to a specific persistent directory, preserving its original name.",
+                "key": "example4",
+                "code": 'from abstra.forms import read_file\nfrom abstra.common import get_persistent_dir\nfrom pathlib import Path\n\nf = read_file("Upload your file")\n\n# Get the original filename\noriginal_filename = Path(f.filename).name\n\n# Saves the file to a persistent directory\nget_persistent_dir().joinpath(original_filename).write_bytes(f.file.read())\n',
             },
         ],
     },

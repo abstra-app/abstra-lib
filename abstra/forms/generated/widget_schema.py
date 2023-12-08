@@ -396,7 +396,7 @@ class WidgetSchema:
                 button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 
         Returns:
-          A dict containing the file uploaded by the user FileResponse(file: TemporaryFile, url: str, content: bytes) or a list of FileResponses in case of multiple flag set as True. ⚠️ The url expires after 48 hours
+          A dictionary contains the file uploaded by the user, represented as FileResponse(file: TemporaryFile, content: bytes). If the multiple flag is set as True, it might contain a list of FileResponses.
         """
 
         key = kwargs.pop("key", label)
