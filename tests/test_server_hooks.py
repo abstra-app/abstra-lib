@@ -25,7 +25,7 @@ class TestHooks(unittest.TestCase):
         self.client.put("/_editor/api/hooks/" + hook["id"], json={"path": "new_path"})
         hooks = self.client.get("/_editor/api/hooks/").get_json()
         self.assertEqual(len(hooks), 1)
-        self.assertEqual(hooks[0]["path"], "new_path")
+        self.assertEqual(hooks[0]["path"], "new-path")
 
     def test_create_hook_with_right_template(self):
         hook = self.client.post("/_editor/api/hooks/").get_json()

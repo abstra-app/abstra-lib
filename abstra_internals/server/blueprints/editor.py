@@ -20,6 +20,7 @@ from ..controller import stage_runs as stage_runs_controller
 from ..controller import transitions as transitions_controller
 from ..controller import requirements as requirements_controller
 from ..controller import visualizations as visualizations_controller
+from ..controller import utils as utils_controller
 
 
 def __get_api_bp(controller: MainController):
@@ -72,6 +73,9 @@ def __get_api_bp(controller: MainController):
 
     assets_bp = assets_controller.get_editor_bp(controller)
     bp.register_blueprint(assets_bp, url_prefix="/assets")
+
+    utils_bp = utils_controller.get_editor_bp()
+    bp.register_blueprint(utils_bp, url_prefix="/utils")
 
     return bp
 
