@@ -24,7 +24,9 @@ def _upload_file(url: str, file_path: pathlib.Path):
 def deploy():
     headers = resolve_headers()
     if not headers:
-        print("No API token found. Please login with `abstra login`")
+        print(
+            "No project credentials found. Please run `abstra serve` and login via the web interface."
+        )
         return
 
     data = create_build(headers)
