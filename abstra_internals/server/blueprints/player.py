@@ -17,12 +17,12 @@ def get_player_bp(controller: MainController):
     auth_bp = auth_controller.get_player_bp()
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
-    @bp.route("/_workspace", methods=["GET"])
+    @bp.get("/_workspace")
     def _get_workspace():
         workspace = controller.get_workspace()
         return workspace.browser_runner_dto
 
-    @bp.route("/_pages/<string:path>", methods=["GET"])
+    @bp.get("/_pages/<string:path>")
     def _get_page(path):
         page_runtime = controller.get_form_by_path(path)
         if not page_runtime:
@@ -35,11 +35,11 @@ def get_player_bp(controller: MainController):
             }
         }
 
-    @bp.route("/_version", methods=["GET"])
+    @bp.get("/_version")
     def _get_version():
         return BUILD_ID
 
-    @bp.route("/_settings", methods=["GET"])
+    @bp.get("/_settings")
     def _get_settings():
         return flask.jsonify({"show_watermark": SHOW_WATERMARK})
 
@@ -72,7 +72,7 @@ def get_player_bp(controller: MainController):
         finally:
             conn.close(message="Done")
 
-    @bp.route("/_files", methods=["PUT"])
+    @bp.put("/_files")
     def _upload_file():
         files = flask.request.files
         filename = flask.request.form.get("filename")
@@ -87,22 +87,22 @@ def get_player_bp(controller: MainController):
             paths.append(controller.save_file(file, filename))
         return paths
 
-    @bp.route("/_files/<path:path>", methods=["GET"])
+    @bp.get("/_files/<path:path>")
     def _get_file(path):
         return flask.send_file(controller.get_file(path))
 
-    @bp.route("/_assets/logo", methods=["GET"])
+    @bp.get("/_assets/logo")
     def _logo():
         logo_path = controller.get_workspace().logo_url
         if not logo_path:
             return flask.abort(404)
         return send_from_dist(logo_path, dist_folder=Settings.root_path)
 
-    @bp.route("/favicon.ico", methods=["GET"])
+    @bp.get("/favicon.ico")
     def _favicon():
         return _logo()
 
-    @bp.route("/_assets/background", methods=["GET"])
+    @bp.get("/_assets/background")
     def _background():
         background_path = controller.get_workspace().theme
 
@@ -139,7 +139,17 @@ def get_player_bp(controller: MainController):
         body, status, headers = execution.get_response()
         return flask.Response(status=status, headers=headers, response=body)
 
-    @bp.route("/_jobs/<path:path>", methods=["POST"])
+    @bp.get("/_jobs")
+    def list_jobs():
+        if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
+            flask.abort(401)
+
+        jobs = controller.get_jobs()
+
+        # used by sidecar - DO NOT CHANGE CONTRACT
+        return [{"id": job.id, "schedule": job.schedule} for job in jobs]
+
+    @bp.post("/_jobs/<path:path>")
     def job_runner(path):
         if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
             flask.abort(401)
@@ -178,12 +188,12 @@ def get_player_bp(controller: MainController):
         controller.abort_execution(execution_id)
         return {"status": "deleted"}
 
-    @bp.route("/", methods=["GET"])
+    @bp.get("/")
     def index():
         res = send_from_dist("player.html", "player.html")
         return res
 
-    @bp.route("/<path:filename>", methods=["GET"])
+    @bp.get("/<path:filename>")
     def spa(filename: str):
         res = send_from_dist(filename, "player.html")
         return res
