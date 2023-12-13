@@ -28,6 +28,8 @@ class CardsInput(OptionalListInput):
         self.multiple = props.get("multiple", False)
         self.empty_value = [] if self.multiple else None
         self.value = props.get("initial_value", self.empty_value)
+        self.min = props.get("min", None)
+        self.max = props.get("max", None)
 
     def render(self, ctx: dict):
         return {
@@ -45,6 +47,8 @@ class CardsInput(OptionalListInput):
             "layout": self.layout,
             "disabled": self.disabled,
             "errors": self.errors,
+            "min": self.min,
+            "max": self.max,
         }
 
     def serialize_value(self) -> Union[List, Any]:
