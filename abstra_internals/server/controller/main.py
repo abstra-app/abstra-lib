@@ -106,6 +106,18 @@ class MainController:
         ensure_abstraignore(Settings.root_path)
 
     def deploy(self):
+        rules = self.check_linters()
+
+        issues = []
+        for rule in rules:
+            if type(rule["issues"]) == list:
+                issues += rule["issues"]
+
+        if len(issues) > 0:
+            raise Exception(
+                "Please fix all linter issues before deploying your project."
+            )
+
         deploy()
 
     def get_workspace(self) -> StyleSettings:
@@ -630,7 +642,7 @@ class MainController:
         return configure_launch_json()
 
     # Linters
-    def check_linters(self):
+    def check_linters(self) -> List[Dict[str, Any]]:
         return [rule.to_dict() for rule in rules]
 
     def fix_linter(self, rule_name: str, fix_name: str):
