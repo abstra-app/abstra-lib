@@ -33,7 +33,14 @@ def get_editor_bp(controller: MainController):
     @bp.post("/")
     @usage
     def _create_form():
-        form = controller.create_form()
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+        title = data.get("title")
+        file = data.get("file")
+        if not title or not file:
+            flask.abort(400)
+        form = controller.create_form(title, file)
         return form.editor_dto
 
     @bp.put("/<path:path>")

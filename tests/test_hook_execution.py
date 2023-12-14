@@ -9,7 +9,7 @@ class TestHookExecution(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         controller = MainController()
-        self.hook = controller.create_hook()
+        self.hook = controller.create_hook("New hook", "hook.py")
         self.client = get_local_client()
 
     def tearDown(self) -> None:

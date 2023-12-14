@@ -215,9 +215,9 @@ class MainController:
             "stderr": "".join(execution.stderr if execution else []),
         }
 
-    def create_script(self) -> ScriptStage:
+    def create_script(self, title: str, file: str) -> ScriptStage:
         project = ProjectRepository.load()
-        script = ScriptStage.create()
+        script = ScriptStage.create(title, file)
         self.init_code_file(script.file, new_script_code)
         project.add_stage(script)
         ProjectRepository.save(project)
@@ -237,9 +237,9 @@ class MainController:
         project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
-    def create_form(self) -> FormStage:
+    def create_form(self, title: str, file: str) -> FormStage:
         project = ProjectRepository.load()
-        form = FormStage.create()
+        form = FormStage.create(title, file)
         self.init_code_file(form.file, new_form_code)
         project.add_stage(form)
         ProjectRepository.save(project)
@@ -268,9 +268,9 @@ class MainController:
         project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
-    def create_hook(self) -> HookStage:
+    def create_hook(self, title: str, file: str) -> HookStage:
         project = ProjectRepository.load()
-        hook = HookStage.create()
+        hook = HookStage.create(title, file)
         self.init_code_file(hook.file, new_hook_code)
         project.add_stage(hook)
         ProjectRepository.save(project)
@@ -306,9 +306,9 @@ class MainController:
 
         return None
 
-    def create_job(self) -> JobStage:
+    def create_job(self, title: str, file: str) -> JobStage:
         project = ProjectRepository.load()
-        job = JobStage.create()
+        job = JobStage.create(title, file)
         self.init_code_file(job.file, new_job_code)
         project.add_stage(job)
         ProjectRepository.save(project)
@@ -451,44 +451,6 @@ class MainController:
                     Settings.root_path.joinpath(stage.file),
                     Settings.root_path.joinpath(duplicated.file),
                 )
-
-        ProjectRepository.save(project)
-
-    def bulk_create_stages(self, payload):
-        project = ProjectRepository.load()
-
-        for node in payload:
-            node_type = node["type"]
-            node_id = node["id"]
-            node_position = node["position"]
-            node_title = node["title"]
-
-            if node_type == "jobs":
-                job = JobStage.create(
-                    id=node_id, workflow_position=node_position, title=node_title
-                )
-                project.add_stage(job)
-                self.init_code_file(job.file, new_job_code)
-            elif node_type == "forms":
-                form = FormStage.create(
-                    id=node_id, workflow_position=node_position, title=node_title
-                )
-                project.add_stage(form)
-                self.init_code_file(form.file, new_form_code)
-            elif node_type == "hooks":
-                hook = HookStage.create(
-                    id=node_id, workflow_position=node_position, title=node_title
-                )
-                project.add_stage(hook)
-                self.init_code_file(hook.file, new_hook_code)
-            elif node_type == "scripts":
-                script = ScriptStage.create(
-                    id=node_id, workflow_position=node_position, title=node_title
-                )
-                project.add_stage(script)
-                self.init_code_file(script.file, new_script_code)
-            else:
-                raise UnknownNodeTypeError(node_type)
 
         ProjectRepository.save(project)
 

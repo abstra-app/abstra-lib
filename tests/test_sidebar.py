@@ -23,7 +23,7 @@ class TestSidebar(unittest.TestCase):
         controller = MainController()
 
         # when
-        form = controller.create_form()
+        form = controller.create_form("New form", "form.py")
         workspace = controller.get_workspace()
 
         # then

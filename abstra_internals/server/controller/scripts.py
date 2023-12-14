@@ -24,7 +24,14 @@ def get_editor_bp(controller: MainController):
     @bp.post("/")
     @usage
     def _create_script():
-        script = controller.create_script()
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+        title = data.get("title")
+        file = data.get("file")
+        if not title or not file:
+            flask.abort(400)
+        script = controller.create_script(title, file)
         return script.editor_dto
 
     @bp.put("/<path:id>")

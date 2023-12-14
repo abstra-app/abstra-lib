@@ -18,14 +18,14 @@ class TestWorkspace(unittest.TestCase):
         controller = MainController()
         forms = controller.get_forms()
         self.assertEqual(forms, [])
-        controller.create_form()
+        controller.create_form("New form", "form.py")
 
     def test_start_at_relative_new_deep_dir(self):
         self.root = init_dir(Path.cwd() / "relative-non-new-dir" / "deep" / "dir")
         controller = MainController()
         forms = controller.get_forms()
         self.assertEqual(forms, [])
-        controller.create_form()
+        controller.create_form("New form", "form.py")
 
     def test_start_at_absolute_new_dir(self):
         self.root = init_dir(
@@ -34,7 +34,7 @@ class TestWorkspace(unittest.TestCase):
         controller = MainController()
         forms = controller.get_forms()
         self.assertEqual(forms, [])
-        controller.create_form()
+        controller.create_form("New form", "form.py")
 
     def test_start_at_absolute_new_deep_dir(self):
         self.root = init_dir(
@@ -47,7 +47,7 @@ class TestWorkspace(unittest.TestCase):
         controller = MainController()
         forms = controller.get_forms()
         self.assertEqual(forms, [])
-        controller.create_form()
+        controller.create_form("New form", "form.py")
 
     def test_start_at_absolute_new_deep_dir_ending_with_slash(self):
         self.root = init_dir(
@@ -58,4 +58,4 @@ class TestWorkspace(unittest.TestCase):
         controller = MainController()
         forms = controller.get_forms()
         self.assertEqual(forms, [])
-        controller.create_form()
+        controller.create_form("New form", "form.py")
