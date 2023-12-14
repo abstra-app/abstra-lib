@@ -55,7 +55,7 @@ class TestRequirementsApi(TestCase):
         ).get_json()
         self.assertEqual(recommendation, [])
 
-        script = self.controller.create_script()
+        script = self.controller.create_script("New script", "script.py")
 
         Path(script.file_path).write_text("import pandas as pd")
 

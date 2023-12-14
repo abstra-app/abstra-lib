@@ -27,7 +27,14 @@ def get_editor_bp(controller: MainController):
     @bp.route("/", methods=["POST"])
     @usage
     def _create_hook():
-        hook = controller.create_hook()
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+        title = data.get("title")
+        file = data.get("file")
+        if not title or not file:
+            flask.abort(400)
+        hook = controller.create_hook(title, file)
         return hook.editor_dto
 
     @bp.route("/<path:id>", methods=["PUT"])

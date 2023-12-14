@@ -81,7 +81,7 @@ class TestLinters(TestCase):
         requirements_file.touch()
         requirements_file.write_text("pandas==1.0.0")
         constroller = MainController()
-        script = constroller.create_script()
+        script = constroller.create_script("New script", "script.py")
         code = "import pandas"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
@@ -89,7 +89,7 @@ class TestLinters(TestCase):
 
     def test_missing_packages_in_requirements_invalid_requirements_file(self):
         constroller = MainController()
-        script = constroller.create_script()
+        script = constroller.create_script("New script", "script.py")
         code = "import pandas"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
@@ -99,7 +99,7 @@ class TestLinters(TestCase):
         requirements_file = self.root / "requirements.txt"
         requirements_file.touch()
         constroller = MainController()
-        script = constroller.create_script()
+        script = constroller.create_script("New script", "script.py")
         code = "import pandas"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
@@ -110,19 +110,19 @@ class TestLinters(TestCase):
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_valid_empty_file(self):
-        script = MainController().create_script()
+        script = MainController().create_script("New script", "script.py")
         script.file_path.touch()
         rule = SyntaxErrors()
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_valid_with_content(self):
-        script = MainController().create_script()
+        script = MainController().create_script("New script", "script.py")
         script.file_path.write_text("print('hello world')")
         rule = SyntaxErrors()
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_invalid_with_syntax_error(self):
-        script = MainController().create_script()
+        script = MainController().create_script("New script", "script.py")
         script.file_path.write_text("print('hello world'")
         rule = SyntaxErrors()
         self.assertEqual(len(rule.find_issues()), 1)
@@ -136,16 +136,16 @@ class TestLinters(TestCase):
 
     def test_missing_entrypoint_valid_with_entrypoint(self):
         controller = MainController()
-        controller.create_script()
-        controller.create_form()
-        controller.create_hook()
-        controller.create_job()
+        controller.create_script("New script", "script.py")
+        controller.create_form("New form", "form.py")
+        controller.create_hook("New hook", "hook.py")
+        controller.create_job("New job", "job.py")
         rule = MissingEntrypoint()
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_entrypoint_invalid_without_entrypoint(self):
         controller = MainController()
-        script = controller.create_script()
+        script = controller.create_script("New script", "script.py")
         script.file_path.unlink()
         rule = MissingEntrypoint()
         self.assertEqual(len(rule.find_issues()), 1)

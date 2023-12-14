@@ -69,15 +69,16 @@ class HookStage:
 
     @staticmethod
     def create(
+        title: str,
+        file: str,
         id: Union[str, None] = None,
         workflow_position: Tuple[int, int] = (0, 0),
-        title: str = "Untitled Hook",
     ):
         _id: str = id or str(uuid.uuid4())
         return HookStage(
             id=_id,
-            file=f"new_hook_{_id[:8]}.py",
-            path=f"new_hook_{_id[:8]}",
+            file=file,
+            path=file[:-3],
             title=title,
             is_initial=True,
             workflow_transitions=[],
@@ -152,14 +153,15 @@ class ScriptStage:
 
     @staticmethod
     def create(
+        title: str,
+        file: str,
         id: Union[str, None] = None,
         workflow_position: Tuple[int, int] = (0, 0),
-        title: str = "Untitled Script",
     ):
         _id = id or str(uuid.uuid4())
         return ScriptStage(
             id=_id,
-            file=f"new_script_{_id[:8]}.py",
+            file=file,
             title=title,
             is_initial=True,
             workflow_transitions=[],
@@ -243,14 +245,15 @@ class JobStage:
 
     @staticmethod
     def create(
+        title: str,
+        file: str,
         id: Union[str, None] = None,
         workflow_position: Tuple[int, int] = (0, 0),
-        title: str = "Untitled Job",
     ):
         _id = id or str(uuid.uuid4())
         return JobStage(
             id=_id,
-            file=f"new_job_{_id[:8]}.py",
+            file=file,
             title=title,
             schedule="* * * * *",
             workflow_position=workflow_position,
@@ -339,15 +342,16 @@ class FormStage:
 
     @staticmethod
     def create(
+        title: str,
+        file: str,
         id: Union[str, None] = None,
         workflow_position: Tuple[int, int] = (0, 0),
-        title: str = "Untitled Form",
     ):
         _id = id or str(uuid.uuid4())
         return FormStage(
             id=_id,
-            file=f"new_form_{_id[:8]}.py",
-            path=f"new_form_{_id[:8]}",
+            file=file,
+            path=file[:-3],
             title=title,
             is_initial=True,
             workflow_transitions=[],

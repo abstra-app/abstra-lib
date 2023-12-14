@@ -16,7 +16,7 @@ class TestForms(unittest.TestCase):
 
     def updates_across_reloads(self):
         controller = MainController()
-        form = controller.create_form()
+        form = controller.create_form("New form", "form.py")
 
         controller.update_stage(form.path, dict(title="New Title"))
 
@@ -31,7 +31,7 @@ class TestForms(unittest.TestCase):
 
     def test_raise_exception_on_invalid_propery_update(self):
         controller = MainController()
-        form = controller.create_form()
+        form = controller.create_form("New form", "form.py")
 
         with self.assertRaises(Exception):
             controller.update_stage(

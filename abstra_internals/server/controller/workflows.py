@@ -25,16 +25,6 @@ def get_editor_bp(controller: MainController):
         except Exception as e:
             return str(e), 500
 
-    @bp.post("/add-nodes")
-    @usage
-    def _bulk_create_stages():
-        try:
-            payload = flask.request.json
-            controller.bulk_create_stages(payload)
-            return flask.Response(status=204)
-        except Exception as e:
-            return str(e), 500
-
     @bp.post("/duplicate-nodes")
     @usage
     def _bulk_duplicate_stages():
