@@ -1,15 +1,14 @@
-from ..repositories.project.project import WorkflowStage
+from ..repositories.project.project import ActionStage
 from .static_execution import StaticExecution
 from .execution import RequestData
 
 
 class ScriptExecution(StaticExecution):
-    @staticmethod
-    def create_with_stage_run(runtime_json: WorkflowStage, stage_run_id: str):
-        execution = ScriptExecution(runtime_json, is_initial=False)
-        return execution
+    stage_run_id: str
 
-    def __init__(self, runtime_json: WorkflowStage, is_initial: bool):
+    def __init__(self, stage: ActionStage, stage_run_id: str):
+        self.stage_run_id = stage_run_id
+
         request = RequestData(
             headers={},
             body="",
@@ -17,7 +16,7 @@ class ScriptExecution(StaticExecution):
             query_params={},
         )
 
-        super().__init__(runtime_json, is_initial, request)
+        super().__init__(stage=stage, is_initial=False, request=request)
 
     def setup_context(self, request: RequestData):
-        pass
+        self.init_stage_run(self.stage_run_id)

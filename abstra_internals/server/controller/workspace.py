@@ -4,6 +4,13 @@ from ...usage import usage
 from ...settings import Settings
 from .main import MainController
 
+from ...templates import (
+    new_script_code,
+    new_form_code,
+    new_hook_code,
+    new_job_code,
+)
+
 
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_workspace", __name__)
@@ -33,8 +40,28 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
         file_path = flask.request.json["path"]
         mode = flask.request.json.get("mode", "file")
-
         controller.open_file(file_path, create_if_not_exists=True, mode=mode)
+        return {"success": True}
+
+    @bp.post("/init-file")
+    @usage
+    def _init_file():
+        if not flask.request.json:
+            flask.abort(400)
+        file_path = flask.request.json["path"]
+        type = flask.request.json["type"]
+        mode = flask.request.json.get("mode", "file")
+        if type == "scripts":
+            controller.init_code_file(file_path, new_script_code)
+        elif type == "forms":
+            controller.init_code_file(file_path, new_form_code)
+        elif type == "hooks":
+            controller.init_code_file(file_path, new_hook_code)
+        elif type == "jobs":
+            controller.init_code_file(file_path, new_job_code)
+        else:
+            flask.abort(400)
+        controller.open_file(file_path, create_if_not_exists=False, mode=mode)
         return {"success": True}
 
     @bp.get("/check-file")

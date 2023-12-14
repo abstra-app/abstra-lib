@@ -1,7 +1,5 @@
 import unittest, pathlib
-
 from .fixtures import init_dir, clear_dir, get_local_client
-
 from abstra_internals.templates import new_hook_code
 
 
@@ -37,3 +35,7 @@ class TestHooks(unittest.TestCase):
         ).get_json()
         file_content = pathlib.Path(hook["file"]).read_text()
         self.assertEqual(file_content, new_hook_code)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -13,21 +13,21 @@ def get_editor_bp(controller: MainController):
     def _get_forms():
         return [f.editor_dto for f in controller.get_forms()]
 
-    @bp.get("/<path:path>")
+    @bp.get("/<path:id>")
     @usage
-    def _get_form(path: str):
-        form = controller.get_form(path)
+    def _get_form(id: str):
+        form = controller.get_form(id)
         if not form:
             flask.abort(404)
         return form.editor_dto
 
-    @bp.delete("/<path:path>")
+    @bp.delete("/<path:id>")
     @usage
-    def _delete_form(path: str):
+    def _delete_form(id: str):
         remove_file = flask.request.args.get(
             "remove_file", default=False, type=is_it_true
         )
-        controller.delete_form(path, remove_file)
+        controller.delete_form(id, remove_file)
         return {"success": True}
 
     @bp.post("/")
@@ -43,14 +43,14 @@ def get_editor_bp(controller: MainController):
         form = controller.create_form(title, file)
         return form.editor_dto
 
-    @bp.put("/<path:path>")
+    @bp.put("/<path:id>")
     @usage
-    def _update_form(path: str):
+    def _update_form(id: str):
         data = flask.request.json
         if not data:
             flask.abort(400)
 
-        form = controller.update_stage(path, data)
+        form = controller.update_stage(id, data)
         return form.editor_dto if form else None
 
     return bp

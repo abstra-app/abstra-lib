@@ -1,14 +1,19 @@
 import typing
 from typing import Dict
+
 from .execution import RequestData
+from typing import Dict, Optional, Union
+from ..repositories import StageRunRepository
 from .static_execution import StaticExecution
+from .execution import UnsetStageRun, RequestData
 
 
 class HookExecution(StaticExecution):
-    def handle_started(self) -> None:
+    def handle_started(self):
         self.log("started", {"request": self.context["request"]})
+        return super().handle_started()
 
-    def handle_success(self) -> None:
+    def handle_success(self) -> str:
         self.context["response"] = self.context.get("response", ("", 200, {}))
         self.log(
             "success",
@@ -16,8 +21,9 @@ class HookExecution(StaticExecution):
                 "response": self.context["response"],
             },
         )
+        return super().handle_success()
 
-    def handle_failure(self, e: Exception) -> None:
+    def handle_failure(self, e: Exception) -> str:
         self.context["response"] = self.context.get("response", ("", 500, {}))
         self.log(
             "failed",
@@ -28,15 +34,21 @@ class HookExecution(StaticExecution):
         )
         return super().handle_failure(e)
 
+    def handle_lock_failed(self):
+        self.context["response"] = self.context.get("response", ("", 409, {}))
+        return super().handle_lock_failed()
+
     def get_response(self) -> typing.Tuple[Dict, int, Dict]:
         if "response" not in self.context:
             raise Exception("No response found")
 
         return self.context["response"]
 
-    def setup_context(self, request: RequestData) -> None:
+    def setup_context(self, request: RequestData):
         self.context["request"] = (
             request.body,
             request.query_params,
             request.headers,
         )
+
+        self.init_stage_run(request.query_params.get(self.abstra_run_key))

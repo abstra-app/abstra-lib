@@ -17,7 +17,6 @@ from ..controller import debugger as debugger_controller
 from ..controller import workspace as workspace_controller
 from ..controller import workflows as workflows_controller
 from ..controller import stage_runs as stage_runs_controller
-from ..controller import transitions as transitions_controller
 from ..controller import requirements as requirements_controller
 from ..controller import visualizations as visualizations_controller
 from ..controller import utils as utils_controller
@@ -34,9 +33,6 @@ def __get_api_bp(controller: MainController):
 
     stage_run_bp = stage_runs_controller.get_editor_bp()
     bp.register_blueprint(stage_run_bp, url_prefix="/stage_runs")
-
-    transitions_bp = transitions_controller.get_editor_bp(controller)
-    bp.register_blueprint(transitions_bp, url_prefix="/transitions")
 
     workspace_bp = workspace_controller.get_editor_bp(controller)
     bp.register_blueprint(workspace_bp, url_prefix="/workspace")
@@ -92,7 +88,6 @@ def get_editor_bp(controller: MainController):
         return send_from_dist("editor.html", "editor.html")
 
     @bp.get("/<path:filename>")
-    @usage
     def _spa(filename: str):
         return send_from_dist(filename, "editor.html")
 

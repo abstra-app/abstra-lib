@@ -1,14 +1,13 @@
-import flask, shutil, pkgutil, webbrowser, concurrent.futures as futures
-from pkg_resources import get_distribution
 from werkzeug.datastructures import FileStorage
 from typing import Any, Dict, List, Optional
+from pkg_resources import get_distribution
+import flask, pkgutil, webbrowser
 from pathlib import Path
 
-from ...utils import random_id, path2module, module2path, files_from_directory
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
+from ...utils import path2module, module2path, files_from_directory
 from ...repositories.requirements import RequirementsRepository
 from ...widgets.apis import get_random_filepath, internal_path
-from ...execution.script_execution import ScriptExecution
 from ...execution.execution import Execution
 from ...linter.rules import rules
 from ...cli.deploy import deploy
@@ -37,13 +36,10 @@ from ...templates import (
 )
 
 from ...repositories.project.project import (
-    StageNotFoundError,
-    WorkflowTransition,
     ProjectRepository,
     StyleSettings,
-    WorkflowStage,
+    ActionStage,
     ScriptStage,
-    WorkflowStage,
     ScriptStage,
     ScriptStage,
     FormStage,
@@ -97,7 +93,6 @@ class DoubleTransitionError(Exception):
 
 class MainController:
     def __init__(self):
-        self.executor = futures.ThreadPoolExecutor()
         if not ProjectRepository.exists():
             ProjectRepository.initialize()
         requirements = RequirementsRepository.load()
@@ -200,20 +195,10 @@ class MainController:
 
     def is_initial(self, id: str):
         project = ProjectRepository.load()
-        stage = project.get_stage(id)
+        stage = project.get_action(id)
         if not stage:
             raise Exception(f"Stage {id} not found")
         return project.is_initial(stage)
-
-    def run_script(self, script: ScriptStage):
-        execution = ScriptExecution(script, True)
-
-        execution.run_sync()
-
-        return {
-            "stdout": "".join(execution.stdout if execution else []),
-            "stderr": "".join(execution.stderr if execution else []),
-        }
 
     def create_script(self, title: str, file: str) -> ScriptStage:
         project = ProjectRepository.load()
@@ -228,9 +213,9 @@ class MainController:
         project = ProjectRepository.load()
         return project.scripts
 
-    def get_script(self, path: str) -> Optional[ScriptStage]:
+    def get_script(self, id: str) -> Optional[ScriptStage]:
         project = ProjectRepository.load()
-        return project.get_script(path)
+        return project.get_script(id)
 
     def delete_script(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
@@ -252,12 +237,6 @@ class MainController:
     def get_form(self, id: str) -> Optional[FormStage]:
         project = ProjectRepository.load()
         return project.get_form(id)
-
-    def update_transition(self, id: str, changes: Dict[str, Any]):
-        project = ProjectRepository.load()
-        transition = project.update_transition(id, changes)
-        ProjectRepository.save(project)
-        return transition.as_dict
 
     def get_form_by_path(self, path: str) -> Optional[FormStage]:
         project = ProjectRepository.load()
@@ -314,7 +293,7 @@ class MainController:
         ProjectRepository.save(project)
         return job
 
-    def update_stage(self, id: str, changes: Dict[str, Any]) -> WorkflowStage:
+    def update_stage(self, id: str, changes: Dict[str, Any]) -> ActionStage:
         project = ProjectRepository.load()
         runtime = project.update_stage(id, changes)
         ProjectRepository.save(project)
@@ -325,209 +304,7 @@ class MainController:
         project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
 
-    # workflow visual editor
-
-    def get_workflow_editor_data(self):
-        project = ProjectRepository.load()
-        result = []
-        for job in project.jobs:
-            result.append(
-                {
-                    "id": job.id,
-                    "type": "jobs",
-                    "label": job.title,
-                    "position": job.workflow_position,
-                    "transitions": [
-                        {
-                            "id": t.id,
-                            "label": t.label,
-                            "targetPath": t.target_id,
-                            "targetType": t.target_type,
-                        }
-                        for t in job.workflow_transitions
-                    ],
-                }
-            )
-        for form in project.forms:
-            result.append(
-                {
-                    "id": form.id,
-                    "path": form.path,
-                    "type": "forms",
-                    "label": form.title,
-                    "position": form.workflow_position,
-                    "transitions": [
-                        {
-                            "id": t.id,
-                            "label": t.label,
-                            "targetPath": t.target_id,
-                            "targetType": t.target_type,
-                        }
-                        for t in form.workflow_transitions
-                    ],
-                }
-            )
-        for hook in project.hooks:
-            result.append(
-                {
-                    "id": hook.id,
-                    "path": hook.path,
-                    "type": "hooks",
-                    "label": hook.title,
-                    "position": hook.workflow_position,
-                    "transitions": [
-                        {
-                            "id": t.id,
-                            "label": t.label,
-                            "targetPath": t.target_id,
-                            "targetType": t.target_type,
-                        }
-                        for t in hook.workflow_transitions
-                    ],
-                }
-            )
-        for script in project.scripts:
-            result.append(
-                {
-                    "id": script.id,
-                    "type": "scripts",
-                    "label": script.title,
-                    "position": script.workflow_position,
-                    "transitions": [
-                        {
-                            "id": t.id,
-                            "label": t.label,
-                            "targetPath": t.target_id,
-                            "targetType": t.target_type,
-                        }
-                        for t in script.workflow_transitions
-                    ],
-                }
-            )
-
-        return result
-
-    def workflow_move(self, payload):
-        project = ProjectRepository.load()
-        for move in payload:
-            node = project.get_stage(move["id"])
-            if not node:
-                raise StageNotFoundError(f"Stage {move['id']} not found")
-            node.workflow_position = move["position"]
-        ProjectRepository.save(project)
-
-    def bulk_duplicate_stages(self, payload):
-        project = ProjectRepository.load()
-        for item in payload:
-            stage = project.get_stage(item["original_id"])
-
-            if not stage:
-                raise StageNotFoundError(f"Stage {item['original_id']} not found")
-            duplicated = stage.duplicate(
-                new_id=item["new_id"], new_position=item["position"]
-            )
-            project.add_stage(duplicated)
-
-            duplicated.workflow_transitions = [
-                WorkflowTransition(
-                    target_id=p["new_id"],
-                    id=random_id(),
-                    label=t.label,
-                    target_type=p["type"],
-                )
-                for t in stage.workflow_transitions
-                for p in payload
-                if t.target_id == p["original_id"] and t.target_type == p["type"]
-            ]
-
-            duplicated.title = item["title"]
-            duplicated.workflow_position = item["position"]
-            base_file_name = ".".join(stage.file.split(".")[:-1])
-            duplicated.file = f"{base_file_name}-copy.py"
-            original_file_path = Settings.root_path.joinpath(stage.file)
-            duplicated_file_path = Settings.root_path.joinpath(duplicated.file)
-            if original_file_path.exists() and not duplicated_file_path.exists():
-                shutil.copy(
-                    Settings.root_path.joinpath(stage.file),
-                    Settings.root_path.joinpath(duplicated.file),
-                )
-
-        ProjectRepository.save(project)
-
-    def bulk_delete(self, payload, remove_file: bool = False):
-        project = ProjectRepository.load()
-
-        for item in payload:
-            if item["type"] == "transitions":
-                transition = project.get_transition(item["id"])
-                project.delete_transition(transition.id)
-            else:
-                stage = project.get_stage(item["id"])
-                if not stage:
-                    raise StageNotFoundError(f"Stage {item['id']} not found")
-
-                if Settings.root_path.joinpath(stage.file).exists():
-                    Settings.root_path.joinpath(stage.file).unlink()
-
-                project.delete_stage(stage.id, remove_file)
-
-        ProjectRepository.save(project)
-
-    def bulk_create_transitions(self, payload):
-        if len(payload) == 0:
-            return
-
-        project = ProjectRepository.load()
-
-        for transition in payload:
-            double_transition = project.find_transition(
-                transition["source"]["id"],
-                transition["target"]["id"],
-            )
-            if double_transition:
-                raise DoubleTransitionError(
-                    transition["source"]["type"],
-                    transition["source"]["id"],
-                    transition["target"]["type"],
-                    transition["target"]["id"],
-                )
-
-            if transition["target"]["type"] == "jobs":
-                raise TransitionToJobError(
-                    transition["source"]["type"],
-                    transition["source"]["id"],
-                    transition["target"]["type"],
-                    transition["target"]["id"],
-                )
-            if (
-                transition["source"]["type"] == transition["target"]["type"]
-                and transition["source"]["id"] == transition["target"]["id"]
-            ):
-                raise SelfTransitionError(
-                    transition["source"]["type"], transition["source"]["id"]
-                )
-
-            source = project.get_stage(transition["source"]["id"])
-            target = project.get_stage(transition["target"]["id"])
-
-            if not source:
-                raise Exception(f"Source {transition['source']['id']} not found")
-
-            if not target:
-                raise Exception(f"Target {transition['target']['id']} not found")
-
-            source.workflow_transitions.append(
-                WorkflowTransition(
-                    target_id=transition["target"]["id"],
-                    id=transition["id"],
-                    label=transition["label"],
-                    target_type=transition["target"]["type"],
-                )
-            )
-        ProjectRepository.save(project)
-
     # Login
-
     def get_credentials(self):
         return get_credentials()
 
@@ -589,10 +366,10 @@ class MainController:
     def abort_execution(self, id: str):
         execution = Execution.get_execution_by_id(id)
         if execution:
-            execution.stop()
+            # execution.stop()
+            pass
 
     # Debugger
-
     def get_debugger_status(self):
         return dict(
             port=start_debugger(),

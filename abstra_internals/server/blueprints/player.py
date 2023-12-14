@@ -7,6 +7,7 @@ from ...execution import HookExecution, JobExecution, FormExecution
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
 
 from ..controller.main import MainController
+from ..workflow_engine import workflow_engine
 from ..controller import auth as auth_controller
 
 
@@ -29,7 +30,7 @@ def get_player_bp(controller: MainController):
             flask.abort(404)
 
         return {
-            page_runtime.runner_type: {
+            page_runtime.type_name: {
                 **page_runtime.browser_runner_dto,
                 "workspace": controller.get_workspace().browser_runner_dto,
             }
@@ -64,11 +65,12 @@ def get_player_bp(controller: MainController):
             execution = FormExecution(
                 is_initial=controller.is_initial(form.id),
                 request=request_data,
-                runtime_json=form,
                 connection=conn,
+                stage=form,
             )
 
-            execution.run_sync()
+            execution.run()
+            workflow_engine.notify_ran(execution)
         finally:
             conn.close(message="Done")
 
@@ -131,10 +133,11 @@ def get_player_bp(controller: MainController):
         execution = HookExecution(
             is_initial=controller.is_initial(hook.id),
             request=request_data,
-            runtime_json=hook,
+            stage=hook,
         )
 
-        execution.run_sync()
+        execution.run()
+        workflow_engine.notify_ran(execution)
 
         body, status, headers = execution.get_response()
         return flask.Response(status=status, headers=headers, response=body)
@@ -149,36 +152,19 @@ def get_player_bp(controller: MainController):
         # used by sidecar - DO NOT CHANGE CONTRACT
         return [{"id": job.id, "schedule": job.schedule} for job in jobs]
 
-    @bp.post("/_jobs/<path:path>")
-    def job_runner(path):
+    @bp.post("/_jobs/<path:id>")
+    def job_runner(id):
         if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
             flask.abort(401)
 
-        job = controller.get_job(path)
+        job = controller.get_job(id)
         if not job:
             flask.abort(404)
 
         if not job.file:
             flask.abort(500)
 
-        request_data = RequestData(
-            method=flask.request.method,
-            body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
-            query_params=flask.request.args,
-        )
-
-        def run_job(job):
-            execution = JobExecution(
-                is_initial=controller.is_initial(job.id),
-                request=request_data,
-                runtime_json=job,
-            )
-
-            execution.run_sync()
-
-        controller.executor.submit(run_job, job)
-
+        workflow_engine.run_job(job)
         return {"status": "running"}
 
     @bp.delete("/_executions/<string:execution_id>")

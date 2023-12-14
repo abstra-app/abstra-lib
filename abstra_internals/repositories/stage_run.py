@@ -3,6 +3,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Type, Mapping, Any
 
+from ..utils import real_datetime_fromisoformat
 from ..utils.environment import SIDECAR_URL, SIDECAR_SHARED_TOKEN
 
 end_status = ["failed", "finished", "abandoned"]
@@ -20,7 +21,6 @@ class StageRun:
     data: dict
     status: str
     created_at: datetime
-    assignee: Optional[str]
     parent_id: Optional[str]
 
     def __getitem__(self, key):
@@ -48,7 +48,7 @@ class StageRun:
 
 
 class StageRunRepository:
-    valid_filter_keys = ["data", "stage", "assignee", "status", "parent_id"]
+    valid_filter_keys = ["data", "stage", "status", "parent_id"]
 
     @classmethod
     def validate_filter_keys(cls, filter: Dict) -> None:
@@ -63,9 +63,7 @@ class StageRunRepository:
         for dto in dtos:
             stage = dto.get("stage")
             data = {**parent.data, **dto.get("data", {})}
-            assignee = dto.get("assignee", parent.assignee)
-
-            next_dtos.append(dict(stage=stage, data=data, assignee=assignee))
+            next_dtos.append(dict(stage=stage, data=data))
 
         return next_dtos
 
@@ -86,11 +84,11 @@ class StageRunRepository:
         raise NotImplementedError()
 
     @classmethod
-    def create_initial(cls, stage: str, assignee: Optional[str] = None) -> StageRun:
+    def create_initial(cls, stage: str) -> StageRun:
         raise NotImplementedError()
 
     @classmethod
-    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> None:
+    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         raise NotImplementedError()
 
 
@@ -116,7 +114,6 @@ class LocalStageRunRepository(StageRunRepository):
 
         stage = filter.get("stage")
         data = filter.get("data")
-        assignee = filter.get("assignee")
         status = filter.get("status")
         parent_id = filter.get("parent_id")
 
@@ -126,7 +123,6 @@ class LocalStageRunRepository(StageRunRepository):
             if (
                 (not stage or stage_run.stage == stage)
                 and (not data or stage_run.data == data)
-                and (not assignee or stage_run.assignee == assignee)
                 and (not status or stage_run.status == status)
                 and (not parent_id or stage_run.parent_id == parent_id)
             )
@@ -143,15 +139,12 @@ class LocalStageRunRepository(StageRunRepository):
         ]
 
     @classmethod
-    def create_initial(
-        cls, stage: str, assignee: Optional[str] = None, data: dict = {}
-    ) -> StageRun:
+    def create_initial(cls, stage: str, data: dict = {}) -> StageRun:
         stage_run = StageRun(
             id=str(uuid.uuid4()),
             status="waiting",
             stage=stage,
             data=data,
-            assignee=assignee,
             parent_id=None,
             created_at=datetime.now(),
         )
@@ -161,7 +154,8 @@ class LocalStageRunRepository(StageRunRepository):
         return stage_run
 
     @classmethod
-    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> None:
+    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
+        created = []
         for dto in cls.hydrate_next_dto(parent, dtos):
             stage_run = StageRun(
                 id=str(uuid.uuid4()),
@@ -170,8 +164,9 @@ class LocalStageRunRepository(StageRunRepository):
                 **dto,
                 created_at=datetime.now(),
             )
-
+            created.append(stage_run)
             cls._stage_runs.append(stage_run)
+        return created
 
     @classmethod
     def change_state(cls, id: str, status: str) -> bool:
@@ -217,10 +212,9 @@ class ProductionStageRunRepository(StageRunRepository):
             id=dto["id"],
             stage=dto["stage"],
             data=dto["data"],
-            assignee=dto["assignee"],
             status=dto["status"],
             parent_id=dto["parentId"],
-            created_at=datetime.fromisoformat(dto["createdAt"]),
+            created_at=real_datetime_fromisoformat(dto["createdAt"]),
         )
 
     @classmethod
@@ -231,27 +225,24 @@ class ProductionStageRunRepository(StageRunRepository):
     @classmethod
     def find(cls, filter: Dict) -> List[StageRun]:
         cls.validate_filter_keys(filter)
-
-        r = cls._request(
-            "GET",
-            path="/",
-            params=filter,
-        )
-
+        r = cls._request("GET", path="/", params=filter)
         return [cls.create_from_dto(dto) for dto in r.json()]
 
     @classmethod
-    def create_initial(cls, stage: str, assignee: Optional[str] = None) -> StageRun:
-        body = dict(data={}, stage=stage, assignee=assignee)
+    def create_initial(cls, stage: str) -> StageRun:
+        body = dict(data={}, stage=stage)
         r = cls._request("POST", path="/", body=body)
-
         return cls.create_from_dto(r.json())
 
     @classmethod
-    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> None:
+    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
+        if len(dtos) == 0:
+            return []
+
         parent_id = parent.id
         next_dtos = cls.hydrate_next_dto(parent, dtos)
-        cls._request("PUT", path=f"/{parent_id}/children", body=next_dtos)
+        r = cls._request("PUT", path=f"/{parent_id}/children", body=next_dtos)
+        return [cls.create_from_dto(dto) for dto in r.json()]
 
     @classmethod
     def change_state(cls, id: str, status: str) -> bool:
