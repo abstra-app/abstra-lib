@@ -1,6 +1,4 @@
-from unittest import TestCase
-import unittest
-
+from unittest import TestCase, skip
 
 from .fixtures import init_dir, clear_dir
 
@@ -25,7 +23,6 @@ class TestStageRunVisualization(TestCase):
         clear_dir(self.root)
         LocalStageRunRepository().clear()
 
-    @unittest.skip("Removed for now")
     def test_alphabetical_order(self):
         kanban_controller = KanbanController(LocalStageRunRepository, ProjectRepository)
 
@@ -43,7 +40,6 @@ class TestStageRunVisualization(TestCase):
             ],
         )
 
-    @unittest.skip("Removed for now")
     def test_preference_for_listed_keys(self):
         project = ProjectRepository.load()
         project.visualization.items.append(

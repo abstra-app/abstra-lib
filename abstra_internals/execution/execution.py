@@ -1,17 +1,13 @@
-from __future__ import annotations  # Required for TYPE_CHECKING
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
+import copy, threading, traceback, uuid
 from dataclasses import dataclass
-import threading
-import traceback
-import uuid
+from typing import Any, ClassVar, Dict, List, Optional
 
 from ..modules import import_as_new
 from ..monitoring import LogMessage, log
 from ..utils.environment import IS_PREVIEW
-from .stoppable_thread import StoppableThread
-
-if TYPE_CHECKING:
-    from ..repositories.project.project import WorkflowStage
+from ..repositories import StageRunRepository
+from ..repositories.stage_run import StageRun
+from ..repositories.project.project import ActionStage
 
 
 class NoExecutionFound(Exception):
@@ -27,6 +23,19 @@ class RequestData:
     query_params: Dict[str, str]
 
 
+class StageRunLockFailed(Exception):
+    def __init__(self, status: Optional[str]) -> None:
+        super().__init__(status)
+
+
+class InvalidStageRunId(Exception):
+    pass
+
+
+class UnsetStageRun(Exception):
+    pass
+
+
 class Execution:
     type = "execution"
     abstra_run_key = "abstra-run-id"
@@ -34,8 +43,12 @@ class Execution:
 
     id: str
     is_initial: bool
+    status = "waiting"
+    stage: ActionStage
     request: RequestData
-    thread: StoppableThread
+
+    stage_run_draft: Optional[StageRun] = None
+    stage_run_freezed: Optional[StageRun] = None
 
     @classmethod
     def get_execution_by_id(cls, execution_id: str) -> Optional["Execution"]:
@@ -51,39 +64,24 @@ class Execution:
 
     def __init__(
         self,
-        runtime_json: WorkflowStage,
+        stage: ActionStage,
         is_initial: bool,
         request: RequestData,
         execution_id=None,
     ):
-        if execution_id:
-            self.id = execution_id
-        else:
-            self.id = uuid.uuid4().__str__()
-
-        self.is_initial = is_initial
-
-        self.thread = StoppableThread(target=self._run, args=())
-        self.request = request
-
         self.stderr: List[str] = []
         self.stdout: List[str] = []
         self.context: Dict = {}
-        self.stage = runtime_json
+        self.request = request
+        self.stage = stage
+        self.is_initial = is_initial
+        self.thread_id = threading.get_ident()
+        Execution.executions[self.thread_id] = self
+        self.id = execution_id or uuid.uuid4().__str__()
 
     @property
     def is_preview(self) -> bool:
         return IS_PREVIEW
-
-    def run_async(self):
-        self.thread.start()
-
-    def stop(self):
-        self.thread.kill()
-
-    def run_sync(self):
-        self.thread.start()
-        self.thread.join()
 
     def stdio(self, type: str, text: str):
         if type == "stderr":
@@ -99,29 +97,71 @@ class Execution:
                 event=event,
                 payload=payload,
                 executionId=self.id,
-                runtime_type=self.stage.runner_type,
+                runtime_type=self.stage.type_name,
                 runtime_name=self.stage.title,
             )
         )
 
-    def handle_started(self) -> None:
-        pass
+    def handle_started(self) -> str:
+        return "running"
 
-    def handle_success(self) -> None:
-        pass
+    def handle_success(self) -> str:
+        return "finished"
 
-    def handle_failure(self, e: Exception) -> None:
+    def handle_failure(self, e: Exception) -> str:
         traceback.print_exc()
+        return "failed"
+
+    def handle_lock_failed(self):
+        stage_run_id = self.stage_run.id if self.stage_run else None
+        stage_run_status = self.stage_run.status if self.stage_run else None
+
+        self.log(
+            "lock-failed",
+            {
+                "execution_id": self.id,
+                "stage": self.stage.id,
+                "stage_run_id": stage_run_id,
+                "stage_run_status": stage_run_status,
+            },
+        )
+        raise StageRunLockFailed(stage_run_status)
 
     def setup_context(self, request: RequestData):
         raise NotImplementedError()
 
-    def _run(self) -> None:
-        self.thread_id = threading.get_ident()
-        Execution.executions[self.thread_id] = self
+    @property
+    def stage_run(self) -> Optional[StageRun]:
+        return self.stage_run_draft
 
+    @stage_run.setter
+    def stage_run(self, stage_run: StageRun) -> None:
+        self.stage_run_freezed = stage_run
+        self.stage_run_draft = stage_run.clone()
+
+    def init_stage_run(self, stage_run_id: Optional[str] = None) -> None:
+        if stage_run_id:
+            stage_run = StageRunRepository.get(stage_run_id)
+            if stage_run.stage == self.stage.id:
+                self.stage_run = stage_run
+                return
+            else:
+                raise InvalidStageRunId()
+
+        if self.is_initial:
+            self.stage_run = StageRunRepository.create_initial(stage=self.stage.id)
+            return
+
+        raise UnsetStageRun(
+            f"This Stage is in the middle of a workflow, but no Step was specified"
+        )
+
+    def run(self) -> None:
         self.setup_context(self.request)
-        self.handle_started()
+        self.status = self.handle_started()
+
+        if self.stage_run and not self.set_stage_run_status():
+            return self.handle_lock_failed()
 
         try:
             try:
@@ -129,13 +169,21 @@ class Execution:
             except SystemExit as e:
                 if e.code is not None and e.code != 0:
                     raise e
-            self.handle_success()
-        except Exception as e:
-            self.handle_failure(e)
-        finally:
-            self.delete()
 
-    def delete(self) -> None:
+            self.status = self.handle_success()
+        except Exception as e:
+            self.status = self.handle_failure(e)
+        finally:
+            self.unbind()
+            self.set_stage_run_status()
+
+    def set_stage_run_status(self) -> bool:
+        if not self.stage_run:
+            return False
+
+        return StageRunRepository.change_state(self.stage_run.id, self.status)
+
+    def unbind(self) -> None:
         del Execution.executions[self.thread_id]
 
 

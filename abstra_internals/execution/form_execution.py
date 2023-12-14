@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # required for type check
 
 from simple_websocket.ws import ConnectionClosed
 import flask_sock, typing, traceback
@@ -34,7 +34,7 @@ class FormExecution(Execution):
 
     def __init__(
         self,
-        runtime_json: "FormStage",
+        stage: "FormStage",
         is_initial: bool,
         connection: flask_sock.Server,
         request: RequestData,
@@ -44,7 +44,7 @@ class FormExecution(Execution):
         if execution_id is not None:
             self.id = execution_id
 
-        super().__init__(runtime_json, is_initial, request, execution_id=execution_id)
+        super().__init__(stage, is_initial, request, execution_id=execution_id)
 
     def send(self, msg: forms_contract.Message):
         self.log(msg.type, msg.data)
@@ -81,6 +81,13 @@ class FormExecution(Execution):
     def end(self):
         if self.connected:
             self.close(reason=traceback.format_exc() or None)
+
+    def handle_lock_failed(self):
+        status = self.stage_run.status if self.stage_run else None
+        self.send(forms_contract.LockFailedMessage(status))
+        return super().handle_lock_failed()
+
+    # flows
 
     @property
     def query_params(self) -> typing.Dict:
@@ -148,23 +155,29 @@ class FormExecution(Execution):
 
         return data["params"]
 
-    def setup_context(self, request: RequestData) -> None:
+    def setup_context(self, request: RequestData):
         self.query_params = self._wait_start()
         self.send(forms_contract.ExecutionIdMessage(self.id))
+        self.init_stage_run(self.query_params.get(self.abstra_run_key))
 
-    def handle_success(self) -> None:
+    def handle_success(self) -> str:
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
         self.send(forms_contract.CloseMessage(close_dto))
+        return super().handle_success()
 
-    def _handle_ws_exception_1001(self, exception: flask_sock.ConnectionClosed) -> None:
+    def _handle_ws_exception_1001(self, exception: flask_sock.ConnectionClosed) -> str:
         self.log(
             "connection-closed",
             {"message": "Client went away - probably closed the tab."},
         )
 
-    def _handle_ws_exception_other(
-        self, exception: flask_sock.ConnectionClosed
-    ) -> None:
+        if self.stage_run and self.stage_run_freezed and not self.is_initial:
+            # TODO: create a children waiting
+            pass
+
+        return "abandoned"
+
+    def _handle_ws_exception_other(self, exception: flask_sock.ConnectionClosed) -> str:
         self.log(
             "connection-closed",
             {
@@ -172,8 +185,9 @@ class FormExecution(Execution):
                 "reason": exception.reason,
             },
         )
+        return super().handle_failure(exception)
 
-    def _handle_ws_exception(self, exception: flask_sock.ConnectionClosed) -> None:
+    def _handle_ws_exception(self, exception: flask_sock.ConnectionClosed) -> str:
         if exception.reason == 1000:
             return super().handle_success()  # missing advanve steps?
 
@@ -182,9 +196,9 @@ class FormExecution(Execution):
 
         return self._handle_ws_exception_other(exception)
 
-    def handle_failure(self, e: Exception) -> None:
+    def handle_failure(self, e: Exception) -> str:
         if isinstance(e, flask_sock.ConnectionClosed):
-            self._handle_ws_exception(e)
+            return self._handle_ws_exception(e)
 
         close_dto = forms_contract.CloseDTO(
             exit_status="GENERIC_EXCEPTION",

@@ -1,8 +1,7 @@
-import requests, typing, concurrent.futures as futures, dataclasses
+import requests, typing, dataclasses
 
 from .utils.environment import LOG_SERVICE_URL
-
-executor = futures.ThreadPoolExecutor()
+from .threaded import threaded
 
 
 @dataclasses.dataclass
@@ -23,16 +22,11 @@ class LogMessage:
         )
 
 
-def async_log(msg: LogMessage):
+@threaded
+def log(msg: LogMessage):
     if not LOG_SERVICE_URL:
         return
     try:
         requests.post(LOG_SERVICE_URL, json=msg.json())
     except Exception:
         pass  # TODO: handle this
-
-
-def log(msg: LogMessage):
-    if not LOG_SERVICE_URL:
-        return
-    executor.submit(async_log, msg)

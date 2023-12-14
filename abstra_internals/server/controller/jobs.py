@@ -2,6 +2,7 @@ import flask
 
 from ...usage import usage
 from .main import MainController
+from ..workflow_engine import workflow_engine
 from ...execution.execution import RequestData
 from ...execution.job_execution import JobExecution
 from ...repositories.project.project import ProjectRepository
@@ -63,18 +64,9 @@ def get_editor_bp(controller: MainController):
         if not job:
             flask.abort(404)
 
-        request_data = RequestData(
-            method=flask.request.method,
-            body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
-            query_params=flask.request.args,
-        )
-
-        project = ProjectRepository.load()
-        is_initial = project.is_initial(job)
-        execution = JobExecution(job, is_initial, request_data)
-
-        execution.run_sync()
+        execution = JobExecution(job)
+        execution.run()
+        workflow_engine.notify_ran(execution)
 
         return {
             "stdout": "".join(execution.stdout if execution else []),

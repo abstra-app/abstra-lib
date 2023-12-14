@@ -1,17 +1,22 @@
-import sys, uuid, shutil, json, tempfile, os
-from typing import Generator, List, Optional, Union, Any, Dict, Tuple
+from typing import Generator, List, Optional, Union, Any, Dict, Tuple, Literal
+import sys
+import uuid
+import shutil
+import json
+import tempfile
+import os
 from dataclasses import dataclass
 from pathlib import Path
-
-from abstra_internals.utils.format import normalize_path
-
+from ...utils.format import normalize_path
 from ...utils.file import traverse_code
 from ...utils import check_is_url
 from ...settings import Settings
 from . import json_migrations
 
-WorkflowStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
-PathableStage = Union["FormStage", "HookStage"]
+ServedStage = Union["FormStage", "HookStage"]
+ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
+ControlStage = Union["IteratorStage", "ConditionStage"]
+WorkflowStage = Union[ActionStage, ControlStage]
 
 
 @dataclass
@@ -19,25 +24,46 @@ class WorkflowTransition:
     id: str
     target_id: str
     target_type: str
-    label: str
+    type: str
+    condition_value: Optional[str] = None
+
+    def __post_init__(self):
+        self.id = str(uuid.uuid4()) if self.id is None else self.id
 
     @property
     def as_dict(self) -> dict:
         return {
             "target_id": self.target_id,
             "target_type": self.target_type,
-            "label": self.label,
+            "type": self.type,
             "id": self.id,
+            "condition_value": self.condition_value,
         }
 
     @staticmethod
     def from_dict(data: dict):
+        if "type" not in data:
+            raise Exception("Transition type is required")
         return WorkflowTransition(
             target_id=data["target_id"],
             target_type=data["target_type"],
-            label=data["label"],
+            type=data["type"],
             id=data["id"],
+            condition_value=data.get("condition_value"),
         )
+
+    @staticmethod
+    def default_type(source_type: Literal["form", "hook", "job", "script"]):
+        if source_type == "form":
+            return "forms:finished"
+        elif source_type == "hook":
+            return "hooks:finished"
+        elif source_type == "job":
+            return "jobs:finished"
+        elif source_type == "script":
+            return "scripts:finished"
+        else:
+            raise Exception(f"Invalid source type {source_type}")
 
 
 @dataclass
@@ -86,7 +112,7 @@ class HookStage:
         )
 
     @property
-    def runner_type(self):
+    def type_name(self):
         return "hook"
 
     @property
@@ -183,7 +209,7 @@ class ScriptStage:
         )
 
     @property
-    def runner_type(self):
+    def type_name(self):
         return "script"
 
     @property
@@ -275,7 +301,7 @@ class JobStage:
         )
 
     @property
-    def runner_type(self):
+    def type_name(self):
         return "job"
 
     @property
@@ -383,7 +409,7 @@ class FormStage:
         )
 
     @property
-    def runner_type(self):
+    def type_name(self):
         return "form"
 
     @property
@@ -494,7 +520,9 @@ class Sidebar:
         sidebar_data: List[dict],
         forms: List[FormStage] = [],
     ):
-        item_name = lambda path: [s.title for s in forms if s.path == path][0]
+        def item_name(path):
+            return [s.title for s in forms if s.path == path][0]
+
         stored_items = []
 
         initial_forms = [f for f in forms if f.is_initial]
@@ -654,26 +682,118 @@ class VisualizationSettings:
 
 
 @dataclass
+class IteratorStage:
+    id: str
+    title: str
+    variable_name: str
+    workflow_position: Tuple[float, float]
+    workflow_transitions: List[WorkflowTransition]
+    type_name: str = "iterator"
+
+    @property
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "variable_name": self.variable_name,
+            "workflow_position": self.workflow_position,
+            "transitions": [t.as_dict for t in self.workflow_transitions],
+        }
+
+    @staticmethod
+    def from_dict(data: dict):
+        x, y = data["workflow_position"]
+        return IteratorStage(
+            id=data["id"],
+            title=data["title"],
+            variable_name=data["variable_name"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
+
+
+@dataclass
+class ConditionStage:
+    id: str
+    title: str
+    variable_name: str
+    workflow_position: Tuple[float, float]
+    workflow_transitions: List[WorkflowTransition]
+    type_name: str = "condition"
+
+    @property
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "variable_name": self.variable_name,
+            "workflow_position": self.workflow_position,
+            "transitions": [t.as_dict for t in self.workflow_transitions],
+        }
+
+    @staticmethod
+    def from_dict(data: dict):
+        x, y = data["workflow_position"]
+        return ConditionStage(
+            id=data["id"],
+            title=data["title"],
+            variable_name=data["variable_name"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
+
+
+@dataclass
 class Project:
     workspace: StyleSettings
+    visualization: VisualizationSettings
     scripts: List[ScriptStage]
     forms: List[FormStage]
     hooks: List[HookStage]
     jobs: List[JobStage]
+    iterators: List[IteratorStage]
+    conditions: List[ConditionStage]
 
     @property
     def as_dict(self):
         return {
             "workspace": self.workspace.as_dict,
+            "visualization": self.visualization.as_dict,
             "jobs": [job.as_dict for job in self.jobs],
             "hooks": [hook.as_dict for hook in self.hooks],
             "forms": [form.as_dict for form in self.forms],
             "scripts": [script.as_dict for script in self.scripts],
+            "iterators": [i.as_dict for i in self.iterators],
+            "conditions": [c.as_dict for c in self.conditions],
         }
 
     @property
-    def stages(self) -> List[WorkflowStage]:
+    def actions(self) -> List[ActionStage]:
         return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
+
+    @property
+    def workflow_stages(self) -> List[WorkflowStage]:
+        return [*self.actions, *self.iterators, *self.conditions]
+
+    def iter_entrypoints(self) -> Generator[Path, None, None]:
+        for runtime in self.actions:
+            yield Path(runtime.file)
+
+    @property
+    def project_files(self) -> Generator[Path, None, None]:
+        for entrypoint in self.iter_entrypoints():
+            yield from traverse_code(entrypoint)
+
+    @property
+    def project_local_dependencies(self) -> Generator[Path, None, None]:
+        entrypoints = list(self.iter_entrypoints())
+        for file in self.project_files:
+            if file not in entrypoints:
+                yield file
 
     def add_stage(self, stage: WorkflowStage):
         if isinstance(stage, FormStage):
@@ -684,11 +804,15 @@ class Project:
             self.jobs.append(stage)
         elif isinstance(stage, ScriptStage):
             self.scripts.append(stage)
+        elif isinstance(stage, IteratorStage):
+            self.iterators.append(stage)
+        elif isinstance(stage, ConditionStage):
+            self.conditions.append(stage)
         else:
             raise Exception(f"Cannot add stage of type {type(stage)}")
 
     def get_stage(self, id: str) -> Optional[WorkflowStage]:
-        for stage in self.stages:
+        for stage in self.workflow_stages:
             if stage.id == id:
                 return stage
 
@@ -696,6 +820,19 @@ class Project:
 
     def get_stage_raises(self, id: str) -> WorkflowStage:
         stage = self.get_stage(id)
+        if not stage:
+            raise StageNotFoundError(f"Stage with id '{id}' not found")
+        return stage
+
+    def get_action(self, id: str) -> Optional[ActionStage]:
+        for stage in self.actions:
+            if stage.id == id:
+                return stage
+
+        return None
+
+    def get_action_raises(self, id: str) -> ActionStage:
+        stage = self.get_action(id)
         if not stage:
             raise StageNotFoundError(f"Stage with id '{id}' not found")
         return stage
@@ -740,7 +877,7 @@ class Project:
             if form.path == path:
                 return form
 
-    def get_stage_by_path(self, path: str) -> Optional[WorkflowStage]:
+    def get_stage_by_path(self, path: str) -> Optional[ActionStage]:
         for form in self.forms:
             if form.path == path:
                 return form
@@ -751,72 +888,16 @@ class Project:
 
         return None
 
-    def get_initial_stages(self) -> List[WorkflowStage]:
-        return [r for r in self.stages if self.is_initial(r)]
-
-    def get_transition(self, id: str) -> WorkflowTransition:
-        for stage in self.stages:
-            for transition in stage.workflow_transitions:
-                if transition.id == id:
-                    return transition
-
-        raise TransitionNotFoundError(f"Transition with id '{id}' not found")
-
-    def update_transition(self, id: str, changes: Dict[str, Any]) -> WorkflowTransition:
-        transition = self.get_transition(id)
-        transition.label = changes.get("label", transition.label)
-        return transition
-
-    def follow_transition(
-        self, start_stage: str, transition_label: str
-    ) -> WorkflowStage:
-        stage = self.get_stage(start_stage)
-
-        if not stage:
-            raise StageNotFoundError(f"stage with id '{start_stage}' not found")
-
-        for transition in stage.workflow_transitions:
-            if transition.label == transition_label:
-                stage = self.get_stage(transition.target_id)
-
-                if not stage:
-                    raise StageNotFoundError(
-                        f"stage with id '{transition.target_id}' not found"
-                    )
-
-                return stage
-
-        raise TransitionNotFoundError(
-            f"Transition with label '{transition_label}' not found"
-        )
-
-    def find_transition(
-        self, source_id: str, target_id: str
-    ) -> Optional[WorkflowTransition]:
-        stage = self.get_stage(source_id)
-
-        if not stage:
-            raise StageNotFoundError(f"stage with id '{source_id}' not found")
-
-        for transition in stage.workflow_transitions:
-            if transition.target_id == target_id:
-                return transition
-
-        return None
-
-    def delete_transition(self, id: str):
-        for stage in self.stages:
-            stage.workflow_transitions = [
-                t for t in stage.workflow_transitions if t.id != id
-            ]
+    def get_initial_stages(self) -> List[ActionStage]:
+        return [r for r in self.actions if self.is_initial(r)]
 
     def delete_transition_by_target(self, target_id: str):
-        for stage in self.stages:
+        for stage in self.workflow_stages:
             stage.workflow_transitions = [
                 t for t in stage.workflow_transitions if t.target_id != target_id
             ]
 
-    def update_path(self, stage: PathableStage, new_path: str):
+    def update_path(self, stage: ServedStage, new_path: str):
         old_path = stage.path
 
         if self.get_stage_by_path(new_path):
@@ -835,8 +916,8 @@ class Project:
 
         stage.path = new_path
 
-    def update_stage(self, id: str, changes: Dict[str, Any]) -> WorkflowStage:
-        stage = self.get_stage(id)
+    def update_stage(self, id: str, changes: Dict[str, Any]) -> ActionStage:
+        stage = self.get_action(id)
         new_path = changes.get("path")
 
         if not stage:
@@ -856,27 +937,24 @@ class Project:
         return stage
 
     def delete_stage(self, id: str, remove_file: bool = False):
-        stage = self.get_stage(id)
-        if stage is None:
-            return
         self.delete_transition_by_target(id)
-
-        if isinstance(stage, FormStage):
-            self.forms = [f for f in self.forms if f.id != id]
-        elif isinstance(stage, HookStage):
-            self.hooks = [h for h in self.hooks if h.id != id]
-        elif isinstance(stage, JobStage):
-            self.jobs = [j for j in self.jobs if j.id != id]
-        elif isinstance(stage, ScriptStage):
-            self.scripts = [s for s in self.scripts if s.id != id]
+        self.forms = [f for f in self.forms if f.id != id]
+        self.hooks = [h for h in self.hooks if h.id != id]
+        self.jobs = [j for j in self.jobs if j.id != id]
+        self.scripts = [s for s in self.scripts if s.id != id]
+        self.iterators = [i for i in self.iterators if i.id != id]
+        self.conditions = [c for c in self.conditions if c.id != id]
 
         if remove_file:
+            stage = self.get_action(id)
+            if not stage:
+                return
             path = Settings.root_path.joinpath(stage.file)
             if path.exists():
                 os.remove(path.absolute())
 
-    def is_initial(self, target_stage: WorkflowStage) -> bool:
-        for stage in self.stages:
+    def is_initial(self, target_stage: ActionStage) -> bool:
+        for stage in self.workflow_stages:
             for wt in stage.workflow_transitions:
                 if wt.target_id == target_stage.id:
                     return False
@@ -889,8 +967,12 @@ class Project:
         stages = data["jobs"] + non_only_initial_stages
 
         for stage in stages:
-            if stage.get("is_initial") is None:
-                stage["is_initial"] = True
+            initial = True
+            for st in stages:
+                for wt in st.get("transitions"):
+                    if wt.get("target_id") == stage.get("id"):
+                        initial = False
+            stage["is_initial"] = initial
             for transition in stage["transitions"]:
                 for tg_stage in non_only_initial_stages:
                     if tg_stage["id"] == transition["target_id"]:
@@ -901,18 +983,24 @@ class Project:
             forms = [FormStage.from_dict(form) for form in data["forms"]]
             hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
             jobs = [JobStage.from_dict(job) for job in data["jobs"]]
+            iterators = [IteratorStage.from_dict(i) for i in data["iterators"]]
+            conditions = [ConditionStage.from_dict(c) for c in data["conditions"]]
+            visualization = VisualizationSettings.from_dict(data["visualization"])
 
             workspace = StyleSettings.from_dict(data["workspace"], forms=forms)
 
             return Project(
                 workspace=workspace,
+                visualization=visualization,
                 scripts=scripts,
                 forms=forms,
                 hooks=hooks,
                 jobs=jobs,
+                iterators=iterators,
+                conditions=conditions,
             )
 
-        except TypeError:
+        except Exception:
             print("Error: incompatible abstra.json file.")
             import traceback
 
@@ -923,35 +1011,18 @@ class Project:
     def create():
         return Project(
             workspace=StyleSettings(name="Untitled Workspace", sidebar=Sidebar([])),
+            visualization=VisualizationSettings.create(),
             scripts=[],
             forms=[],
             hooks=[],
             jobs=[],
+            iterators=[],
+            conditions=[],
         )
-
-    @property
-    def workflow_stages(self) -> List[WorkflowStage]:
-        return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
-
-    def iter_entrypoints(self) -> Generator[Path, None, None]:
-        for runtime in self.workflow_stages:
-            yield Path(runtime.file)
-
-    @property
-    def project_files(self) -> Generator[Path, None, None]:
-        for entrypoint in self.iter_entrypoints():
-            yield from traverse_code(entrypoint)
-
-    @property
-    def project_local_dependencies(self) -> Generator[Path, None, None]:
-        entrypoints = list(self.iter_entrypoints())
-        for file in self.project_files:
-            if file not in entrypoints:
-                yield file
 
 
 def _update_file(
-    stage: WorkflowStage,
+    stage: ActionStage,
     new_file_relative: str,
 ):
     old_file = Settings.root_path.joinpath(stage.file)
@@ -982,12 +1053,14 @@ class ProjectRepository:
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
         project_data = project.as_dict
+
         project_data["version"] = json_migrations.get_latest_version()
 
         with temp_file.open("w") as f:
             json.dump(project_data, f, indent=2)
 
         shutil.move(str(temp_file), cls.get_file_path())
+        Path.rmdir(temp_file.parent)
 
     @classmethod
     def load(cls) -> Project:

@@ -3,6 +3,7 @@ import flask
 from ...usage import usage
 from ..utils import is_it_true
 from .main import MainController
+from ..workflow_engine import workflow_engine
 from ...execution.execution import RequestData
 from ...execution.hook_execution import HookExecution
 from ...repositories.project.project import ProjectRepository
@@ -74,9 +75,9 @@ def get_editor_bp(controller: MainController):
         is_initial = project.is_initial(hook)
         execution = HookExecution(hook, is_initial, request_data)
 
-        execution.run_sync()
-
+        execution.run()
         body, status, headers = execution.get_response()
+        workflow_engine.notify_ran(execution)
 
         return {
             "body": body,

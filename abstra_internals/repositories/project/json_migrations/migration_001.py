@@ -112,29 +112,52 @@ class Migration001(Migration):
             if "id" not in script:
                 script["id"] = str(uuid.uuid4())
 
+    def _get_id_by_path(self, path: str) -> dict:
+        for form in self.data["forms"]:
+            if form["path"] == path:
+                return form["id"]
+
+        for hook in self.data["hooks"]:
+            if hook["path"] == path:
+                return hook["id"]
+
+        for script in self.data["scripts"]:
+            if script["path"] == path:
+                return script["id"]
+
+        raise Exception(f"Could not find entity with path {path}")
+
     def _transition_paths_to_ids(self) -> None:
         for form in self.data["forms"]:
             for transition in form["transitions"]:
                 if "target_id" not in transition:
-                    transition["target_id"] = transition["target_path"]
+                    transition["target_id"] = self._get_id_by_path(
+                        transition["target_path"]
+                    )
                     del transition["target_path"]
 
         for job in self.data["jobs"]:
             for transition in job["transitions"]:
                 if "target_id" not in transition:
-                    transition["target_id"] = transition["target_path"]
+                    transition["target_id"] = self._get_id_by_path(
+                        transition["target_path"]
+                    )
                     del transition["target_path"]
 
         for hook in self.data["hooks"]:
             for transition in hook["transitions"]:
                 if "target_id" not in transition:
-                    transition["target_id"] = transition["target_path"]
+                    transition["target_id"] = self._get_id_by_path(
+                        transition["target_path"]
+                    )
                     del transition["target_path"]
 
         for script in self.data["scripts"]:
             for transition in script["transitions"]:
                 if "target_id" not in transition:
-                    transition["target_id"] = transition["target_path"]
+                    transition["target_id"] = self._get_id_by_path(
+                        transition["target_path"]
+                    )
                     del transition["target_path"]
 
     def _migrate(self) -> None:
@@ -142,8 +165,8 @@ class Migration001(Migration):
         self._add_workflow_positions()
         self._remove_is_initial()
         self._add_workflow_transitions()
-        self._transition_paths_to_ids()
         self._add_visualization_settings()
         self._remove_dashes()
         self._add_ids()
+        self._transition_paths_to_ids()
         self._bump_version()

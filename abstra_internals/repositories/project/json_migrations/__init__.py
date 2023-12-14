@@ -5,11 +5,10 @@ from typing import List, Type
 
 from .base_migration import Migration
 from .migration_001 import Migration001
+from .migration_002 import Migration002
 
 
-MIGRATIONS: List[Type[Migration]] = [
-    Migration001,
-]
+MIGRATIONS: List[Type[Migration]] = [Migration001, Migration002]
 
 
 def get_latest_version() -> str:
@@ -24,7 +23,7 @@ def create_backup(data: dict, location: Path, filename: str):
 
 def migrate(data: dict, path: Path):
     if "version" not in data:
-        raise KeyError("Missing 'version' key in data")
+        data["version"] = "0.1"
 
     next_migration = next(
         (m for m in MIGRATIONS if m.source_version() == data["version"]), None

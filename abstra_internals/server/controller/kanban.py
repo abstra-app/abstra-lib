@@ -1,7 +1,7 @@
 import flask
 from datetime import datetime
 from dataclasses import dataclass
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Type, Sequence
 
 from ...repositories.project.project import (
     ProjectRepository,
@@ -39,7 +39,6 @@ class StageRunCard:
     created_at: datetime
     status: str
     content: StageCardContent
-    assignee: Optional[str] = None
 
     def to_dict(self) -> dict:
         return dict(
@@ -47,7 +46,6 @@ class StageRunCard:
             created_at=self.created_at,
             status=self.status,
             content=[item.to_dict() for item in self.content],
-            assignee=self.assignee,
         )
 
 
@@ -63,7 +61,7 @@ class ColumnStage:
     def create(stage: WorkflowStage) -> "ColumnStage":
         return ColumnStage(
             id=stage.id,
-            type=stage.runner_type,
+            type=stage.type_name,
             title=stage.title,
             path=stage.path if isinstance(stage, FormStage) else None,
             can_be_started=isinstance(stage, FormStage) and stage.is_initial,
@@ -115,7 +113,6 @@ class KanbanController:
         self.project_repository = project_repository
 
     def stage_run_content(self, stage_run: StageRun):
-        raise NotImplemented()
         visualization = self.project_repository.load().visualization
         visualization_defined_data = [
             StageCardContentItem(
@@ -135,7 +132,7 @@ class KanbanController:
 
     def _get_next_stages(
         self, previous_stage: Optional[str] = None
-    ) -> List[WorkflowStage]:
+    ) -> Sequence[WorkflowStage]:
         project = ProjectRepository.load()
         if previous_stage:
             origin = project.get_stage(previous_stage)
@@ -179,7 +176,6 @@ class KanbanController:
                         StageRunCard(
                             id=stage_run.id,
                             status=stage_run.status,
-                            assignee=stage_run.assignee,
                             created_at=stage_run.created_at,
                             content=self.stage_run_content(stage_run),
                         )

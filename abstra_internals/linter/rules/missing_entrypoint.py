@@ -8,7 +8,7 @@ from ...repositories.project.project import (
     FormStage,
     HookStage,
     JobStage,
-    WorkflowStage,
+    ActionStage,
 )
 
 
@@ -43,8 +43,8 @@ class AddEntrypoint(LinterFix):
 
 
 class NoEntrypointFound(LinterIssue):
-    def __init__(self, runtime: WorkflowStage) -> None:
-        self.label = f"The {runtime.runner_type} entitled {runtime.title} points to a non-existent file: {runtime.file}"
+    def __init__(self, runtime: ActionStage) -> None:
+        self.label = f"The {runtime.type_name} entitled {runtime.title} points to a non-existent file: {runtime.file}"
         self.fixes = [AddEntrypoint(runtime)]
 
 

@@ -2,6 +2,8 @@ import flask
 
 from ...usage import usage
 from .main import MainController
+from ..workflow_engine import workflow_engine
+from ...execution.script_execution import ScriptExecution
 from ..utils import is_it_true
 
 
@@ -57,10 +59,18 @@ def get_editor_bp(controller: MainController):
     @usage
     def _test_script(id: str):
         script = controller.get_script(id)
+        stage_run_id = flask.request.args.get("stage_run_id")
 
-        if not script:
+        if not script or not stage_run_id:
             flask.abort(404)
 
-        return controller.run_script(script)
+        execution = ScriptExecution(script, stage_run_id)
+        execution.run()
+        workflow_engine.notify_ran(execution)
+
+        return {
+            "stdout": "".join(execution.stdout if execution else []),
+            "stderr": "".join(execution.stderr if execution else []),
+        }
 
     return bp

@@ -6,6 +6,7 @@ from abstra_internals.overloads import overloads
 from abstra_internals.execution.execution import RequestData
 from abstra_internals.execution.form_execution import FormExecution
 from abstra_internals.repositories.project.project import FormStage
+from abstra_internals.execution.stoppable_thread import StoppableThread
 
 overloads()
 
@@ -69,13 +70,15 @@ def assert_form(
 
     request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
     execution = FormExecution(
-        runtime_json=form_json,
+        stage=form_json,
         is_initial=True,
         connection=conn,  # type: ignore
         request=request_data,
         execution_id=execution_id,
     )  # type: ignore
-    execution.run_async()
+
+    thread = StoppableThread(target=execution.run, args=())
+    thread.start()
 
     for msg in iter_messages(conn, msgs, test_case):
         pass
