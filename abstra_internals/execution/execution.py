@@ -24,7 +24,7 @@ class RequestData:
     query_params: Dict[str, str]
 
 
-class StageRunLockFailed(Exception):
+class LockFailedMessage(Exception):
     def __init__(self, status: Optional[str]) -> None:
         super().__init__(status)
 
@@ -124,7 +124,7 @@ class Execution:
         traceback.print_exc()
         return "failed"
 
-    def handle_lock_failed(self):
+    def handle_lock_failed(self) -> None:
         stage_run_id = self.stage_run.id if self.stage_run else None
         stage_run_status = self.stage_run.status if self.stage_run else None
 
@@ -137,7 +137,7 @@ class Execution:
                 "stage_run_status": stage_run_status,
             },
         )
-        raise StageRunLockFailed(stage_run_status)
+        raise LockFailedMessage(stage_run_status)
 
     def setup_context(self, request: RequestData):
         raise NotImplementedError()

@@ -34,7 +34,7 @@ class HookExecution(StaticExecution):
         )
         return super().handle_failure(e)
 
-    def handle_lock_failed(self):
+    def handle_lock_failed(self) -> None:
         self.context["response"] = self.context.get("response", ("", 409, {}))
         return super().handle_lock_failed()
 

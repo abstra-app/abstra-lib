@@ -82,10 +82,15 @@ class FormExecution(Execution):
         if self.connected:
             self.close(reason=traceback.format_exc() or None)
 
-    def handle_lock_failed(self):
+    def handle_lock_failed(self) -> None:
         status = self.stage_run.status if self.stage_run else None
         self.send(forms_contract.LockFailedMessage(status))
-        return super().handle_lock_failed()
+
+        try:
+            return super().handle_lock_failed()
+        except:
+            # Forms should ignore this exception as the error is shown in the UI
+            pass
 
     # flows
 
@@ -201,7 +206,7 @@ class FormExecution(Execution):
             return self._handle_ws_exception(e)
 
         close_dto = forms_contract.CloseDTO(
-            exit_status="GENERIC_EXCEPTION",
+            exit_status="EXCEPTION",
             exception=e.__str__(),
         )
         self.send(forms_contract.CloseMessage(close_dto))
