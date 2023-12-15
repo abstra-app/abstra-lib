@@ -9,6 +9,7 @@ GIT_FOLDER = ".git"
 ABSTRA_FOLDER = ".abstra"
 ABSTRA_IGNORE = ".abstraignore"
 CREDENTIALS_FILE = ".abstra/credentials"
+LOCAL_LOG_FOLDER = ".abstra/logs"
 
 
 def get_ignore_files(dir: Path):

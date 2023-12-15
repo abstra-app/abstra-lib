@@ -1,7 +1,8 @@
-import copy, threading, traceback, uuid
+import threading, traceback, uuid
 from dataclasses import dataclass
 from typing import Any, ClassVar, Dict, List, Optional
 
+from ..local_log import LocalLogMessage, append_to_or_create_log_file
 from ..modules import import_as_new
 from ..monitoring import LogMessage, log
 from ..utils.environment import IS_PREVIEW
@@ -88,6 +89,17 @@ class Execution:
             self.stderr.append(text)
         elif type == "stdout":
             self.stdout.append(text)
+        if self.is_preview:
+            append_to_or_create_log_file(
+                LocalLogMessage(
+                    event=type,
+                    payload={"log": text},
+                    execution_id=self.id,
+                    stage_run_id=self.stage_run.id if self.stage_run else None,
+                    runtime_type=self.stage.type_name,
+                    runtime_id=self.stage.id,
+                )
+            )
 
     def log(self, event: str, payload: Any):
         if event == "heartbeat":
@@ -181,7 +193,7 @@ class Execution:
         if not self.stage_run:
             return False
 
-        return StageRunRepository.change_state(self.stage_run.id, self.status)
+        return StageRunRepository.change_state(self.stage_run.id, self.status, self.id)
 
     def unbind(self) -> None:
         del Execution.executions[self.thread_id]
