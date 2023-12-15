@@ -22,6 +22,7 @@ class StageRun:
     status: str
     created_at: datetime
     parent_id: Optional[str]
+    execution_id: Optional[str] = None
 
     def __getitem__(self, key):
         return self.data.get(key)
@@ -80,7 +81,9 @@ class StageRunRepository:
         raise NotImplementedError()
 
     @classmethod
-    def change_state(cls, id: str, status: str) -> bool:
+    def change_state(
+        cls, id: str, status: str, execution_id: Optional[str] = None
+    ) -> bool:
         raise NotImplementedError()
 
     @classmethod
@@ -169,8 +172,13 @@ class LocalStageRunRepository(StageRunRepository):
         return created
 
     @classmethod
-    def change_state(cls, id: str, status: str) -> bool:
+    def change_state(
+        cls, id: str, status: str, execution_id: Optional[str] = None
+    ) -> bool:
         stage_run = cls.get(id)
+
+        if not stage_run.execution_id and execution_id is not None:
+            stage_run.execution_id = execution_id
 
         if stage_run.status in end_status:
             return False
@@ -245,7 +253,9 @@ class ProductionStageRunRepository(StageRunRepository):
         return [cls.create_from_dto(dto) for dto in r.json()]
 
     @classmethod
-    def change_state(cls, id: str, status: str) -> bool:
+    def change_state(
+        cls, id: str, status: str, execution_id: Optional[str] = None
+    ) -> bool:
         r = cls._request(
             "PATCH", path=f"/{id}", body={"status": status}, raise_for_status=False
         )

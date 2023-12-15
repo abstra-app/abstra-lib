@@ -1,7 +1,9 @@
 import flask
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, List, Optional, Type, Sequence
+
+from ...local_log import LocalLogMessage, get_local_logs
 
 from ...repositories.project.project import (
     ProjectRepository,
@@ -39,6 +41,7 @@ class StageRunCard:
     created_at: datetime
     status: str
     content: StageCardContent
+    logs: List[LocalLogMessage] = field(default_factory=lambda: [])
 
     def to_dict(self) -> dict:
         return dict(
@@ -46,6 +49,7 @@ class StageRunCard:
             created_at=self.created_at,
             status=self.status,
             content=[item.to_dict() for item in self.content],
+            logs=[log.json() for log in self.logs],
         )
 
 
@@ -178,6 +182,7 @@ class KanbanController:
                             status=stage_run.status,
                             created_at=stage_run.created_at,
                             content=self.stage_run_content(stage_run),
+                            logs=get_local_logs(stage_run.execution_id),
                         )
                         for stage_run in self.stage_run_repository.find_leaves(
                             {"stage": selected_stage}
