@@ -5,6 +5,9 @@ DEFAULT_PORT = os.getenv("PORT") or os.getenv("ABSTRA_SERVER_PORT")
 ENABLE_TALISMAN = os.getenv("ABSTRA_ENABLE_TALISMAN", "false").lower() == "true"
 
 BUILD_ID = os.getenv("ABSTRA_BUILD_ID") or "dev"
+PROJECT_ID = os.getenv("ABSTRA_PROJECT_ID") or "dev-project-id"
+CLIENT_ID = os.getenv("ABSTRA_CLIENT_ID") or "dev-client-id"
+
 IS_PREVIEW = os.getenv("ABSTRA_ENVIRONMENT") != "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 
