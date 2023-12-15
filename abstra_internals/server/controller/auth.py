@@ -2,7 +2,7 @@ import flask
 
 from ...utils import is_valid_email
 from ...jwt_auth import endcode_fake_jwt
-from ...utils.environment import IS_PREVIEW, AUTHN_URL
+from ...utils.environment import IS_PREVIEW, AUTHN_URL, CLIENT_ID, PROJECT_ID
 
 
 def get_fake_auth_proviver_bp():
@@ -61,6 +61,11 @@ def get_player_bp():
 
     @bp.get("/config")
     def _get_config():
-        return {"authority": authority, "provider": provider}
+        return {
+            "authority": authority,
+            "provider": provider,
+            "clientId": CLIENT_ID,
+            "projectId": PROJECT_ID,
+        }
 
     return bp
