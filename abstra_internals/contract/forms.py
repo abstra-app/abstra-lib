@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import typing
+from typing import Optional, Union, List, Dict, Literal
 
 
 class Message:
@@ -71,29 +71,16 @@ class FilesChangedMessage(Message):
 
 
 class LockFailedMessage(Message):
-    type = "lock-failed"
+    type = "stage-run:lock-failed"
 
-    def __init__(self, status: typing.Optional[str]):
+    def __init__(self, status: Optional[str]):
         super().__init__({"status": status})
 
 
 @dataclass
 class CloseDTO:
-    exit_status: str
-    exception: typing.Union[str, None]
-
-    def __init__(self, exit_status: str, exception: typing.Union[str, None] = None):
-        if exit_status not in [
-            "SUCCESS",
-            "LOCK_ACQUISITION_FAILED",
-            "GENERIC_EXCEPTION",
-        ]:
-            raise ValueError(
-                f"exit_status must be one of ['SUCCESS', 'LOCK_ACQUISITION_FAILED', 'GENERIC_EXCEPTION'], got {exit_status}"
-            )
-
-        self.exit_status = exit_status
-        self.exception = exception
+    exit_status: Literal["SUCCESS", "EXCEPTION"]
+    exception: Optional[Union[str, None]] = None
 
 
 class ExecutionIdMessage(Message):
@@ -115,7 +102,7 @@ class CloseMessage(Message):
 class FormUpdateMessage(Message):
     type = "form-update"
 
-    def __init__(self, widgets: typing.List, validation: typing.Dict, event_seq: int):
+    def __init__(self, widgets: List, validation: Dict, event_seq: int):
         super().__init__(
             {
                 "widgets": widgets,
@@ -130,11 +117,11 @@ class FormMessage(Message):
 
     def __init__(
         self,
-        widgets: typing.List,
-        actions: typing.List,
+        widgets: List,
+        actions: List,
         end_program: bool,
         reactive_polling_interval: int,
-        steps: typing.List,
+        steps: List,
     ):
         super().__init__(
             {
