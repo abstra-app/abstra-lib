@@ -33,7 +33,9 @@ def get_auth_info(headers: dict) -> dict:
 def get_ai_messages(messages, runtime, headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/messages"
     body = {"messages": messages, "runtime": runtime}
-    return requests.post(url, headers=headers, json=body, stream=True).iter_content()
+    return requests.post(url, headers=headers, json=body, stream=True).iter_content(
+        chunk_size=None
+    )
 
 
 def get_project_info(headers):
