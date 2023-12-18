@@ -10,6 +10,7 @@ from ...repositories.project.project import (
     HookStage,
     ScriptStage,
     WorkflowTransition,
+    WorkflowStage,
 )
 from ...usage import usage
 from .main import MainController, UnknownNodeTypeError
@@ -29,23 +30,36 @@ class StageDTO(TypedDict):
     props: Dict[str, Optional[str]]
 
 
+def make_stage_dto(stage: WorkflowStage) -> StageDTO:
+    filename = None
+    if isinstance(stage, (HookStage, ScriptStage, FormStage, JobStage)):
+        filename = stage.file
+    variable_name = None
+    if isinstance(stage, (IteratorStage, ConditionStage)):
+        variable_name = stage.variable_name
+    path = None
+    if isinstance(stage, (FormStage, HookStage)):
+        path = stage.path
+    return StageDTO(
+        id=stage.id,
+        type=stage.type_name + "s",
+        title=stage.title,
+        position=dict(
+            x=stage.workflow_position[0],
+            y=stage.workflow_position[1],
+        ),
+        props={
+            "filename": filename,
+            "variableName": variable_name,
+            "path": path,
+        },
+    )
+
+
 def _make_workflow_dto(project: Project):
     stages = []
     for stage in project.workflow_stages:
-        stage_dto = StageDTO(
-            id=stage.id,
-            type=stage.type_name + "s",
-            title=stage.title,
-            position=dict(
-                x=stage.workflow_position[0],
-                y=stage.workflow_position[1],
-            ),
-            props={
-                "filename": None,
-                "variableName": None,
-                "path": None,
-            },
-        )
+        stage_dto = make_stage_dto(stage)
 
         if isinstance(stage, IteratorStage) or isinstance(stage, ConditionStage):
             stage_dto["props"]["variableName"] = stage.variable_name
