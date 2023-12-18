@@ -140,6 +140,9 @@ class MainController:
 
         webbrowser.open(complete_file_path.absolute().as_uri())
 
+    def read_file(self, file: str):
+        return Settings.root_path.joinpath(file).read_text(encoding="utf-8")
+
     def check_file(self, file_path: str):
         return Settings.root_path.joinpath(file_path).is_file()
 

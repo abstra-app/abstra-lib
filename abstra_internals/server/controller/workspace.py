@@ -64,6 +64,15 @@ def get_editor_bp(controller: MainController):
         controller.open_file(file_path, create_if_not_exists=False, mode=mode)
         return {"success": True}
 
+    @bp.get("/read-file")
+    @usage
+    def _read_file():
+        file = flask.request.args.get("file")
+        if not file:
+            flask.abort(400)
+
+        return controller.read_file(file)
+
     @bp.get("/check-file")
     @usage
     def _check_file():
