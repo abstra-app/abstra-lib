@@ -1,6 +1,6 @@
 import copy, uuid, requests
 from datetime import datetime
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Optional, List, Dict, Type, Mapping, Any
 
 from ..utils import real_datetime_fromisoformat
@@ -73,6 +73,10 @@ class StageRunRepository:
         raise NotImplementedError()
 
     @classmethod
+    def find_ancestors(cls, id: str) -> List[StageRun]:
+        raise NotImplementedError()
+
+    @classmethod
     def find_leaves(cls, filter: Dict) -> List[StageRun]:
         raise NotImplementedError()
 
@@ -130,6 +134,16 @@ class LocalStageRunRepository(StageRunRepository):
                 and (not parent_id or stage_run.parent_id == parent_id)
             )
         ]
+
+    @classmethod
+    def find_ancestors(cls, id: str) -> List[StageRun]:
+        ancestors = []
+        stage_run = cls.get(id)
+        ancestors.append(stage_run)
+        while stage_run.parent_id is not None:
+            stage_run = cls.get(stage_run.parent_id)
+            ancestors.insert(0, stage_run)
+        return ancestors
 
     @classmethod
     def find_leaves(cls, filter: Dict) -> List[StageRun]:
@@ -234,6 +248,11 @@ class ProductionStageRunRepository(StageRunRepository):
     def find(cls, filter: Dict) -> List[StageRun]:
         cls.validate_filter_keys(filter)
         r = cls._request("GET", path="/", params=filter)
+        return [cls.create_from_dto(dto) for dto in r.json()]
+
+    @classmethod
+    def find_ancestors(cls, id: str) -> List[StageRun]:
+        r = cls._request("GET", path=f"/{id}/ancestors")
         return [cls.create_from_dto(dto) for dto in r.json()]
 
     @classmethod
