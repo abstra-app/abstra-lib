@@ -80,7 +80,7 @@ class LockFailedMessage(Message):
 @dataclass
 class CloseDTO:
     exit_status: Literal["SUCCESS", "EXCEPTION"]
-    exception: Optional[Union[str, None]] = None
+    exception: Optional[Union[Exception, None]] = None
 
 
 class ExecutionIdMessage(Message):
@@ -92,11 +92,12 @@ class ExecutionIdMessage(Message):
 
 class CloseMessage(Message):
     type = "program:end"
+    close_dto: CloseDTO
 
     def __init__(self, close_dto: CloseDTO):
-        super().__init__(
-            {"exitStatus": close_dto.exit_status, "exception": close_dto.exception}
-        )
+        self.close_dto = close_dto
+        exc = str(close_dto.exception) if close_dto.exception else None
+        super().__init__({"exitStatus": close_dto.exit_status, "exception": exc})
 
 
 class FormUpdateMessage(Message):

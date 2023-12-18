@@ -1,13 +1,15 @@
 from __future__ import annotations  # required for type check
 
 from simple_websocket.ws import ConnectionClosed
-import flask_sock, typing, traceback
+import flask_sock, typing, traceback, inspect
 
 from .execution import Execution, RequestData, NoExecutionFound
 from ..contract import should_send, forms_contract
 from ..utils import deserialize, serialize
 from ..contract import forms_contract
 from ..jwt_auth import UserClaims
+
+from ..utils.debug import make_debug_data
 
 
 if typing.TYPE_CHECKING:
@@ -17,6 +19,7 @@ if typing.TYPE_CHECKING:
 class FormExecution(Execution):
     type = "execution"
     _connection: flask_sock.Server
+    debug_enabled = True
 
     @classmethod
     def get_current_execution(cls) -> typing.Optional["FormExecution"]:
@@ -51,7 +54,12 @@ class FormExecution(Execution):
 
         if not should_send(msg, self.is_preview):
             return
-
+        if self.debug_enabled:
+            if isinstance(msg, forms_contract.CloseMessage) and msg.close_dto.exception:
+                debug = make_debug_data(msg.close_dto.exception)
+            else:
+                debug = make_debug_data(inspect.stack())
+            msg.data = {**msg.data, **debug}
         str_data = serialize(msg.to_json(self.is_preview))
         self._connection.send(str_data)
 
@@ -207,7 +215,7 @@ class FormExecution(Execution):
 
         close_dto = forms_contract.CloseDTO(
             exit_status="EXCEPTION",
-            exception=e.__str__(),
+            exception=e,
         )
         self.send(forms_contract.CloseMessage(close_dto))
 
