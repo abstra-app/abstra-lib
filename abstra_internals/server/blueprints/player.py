@@ -2,13 +2,12 @@ import flask, flask_sock
 
 from ...settings import Settings
 from ..utils import send_from_dist
-from ...execution.execution import RequestData
-from ...execution import HookExecution, JobExecution, FormExecution
-from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
-
 from ..controller.main import MainController
 from ..workflow_engine import workflow_engine
+from ...execution.execution import RequestData
 from ..controller import auth as auth_controller
+from ...execution import HookExecution, FormExecution
+from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
 
 
 def get_player_bp(controller: MainController):

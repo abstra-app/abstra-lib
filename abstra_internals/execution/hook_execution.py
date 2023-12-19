@@ -1,11 +1,7 @@
-import typing
-from typing import Dict
+from typing import Dict, Tuple
 
 from .execution import RequestData
-from typing import Dict, Optional, Union
-from ..repositories import StageRunRepository
 from .static_execution import StaticExecution
-from .execution import UnsetStageRun, RequestData
 
 
 class HookExecution(StaticExecution):
@@ -38,7 +34,7 @@ class HookExecution(StaticExecution):
         self.context["response"] = self.context.get("response", ("", 409, {}))
         return super().handle_lock_failed()
 
-    def get_response(self) -> typing.Tuple[Dict, int, Dict]:
+    def get_response(self) -> Tuple[Dict, int, Dict]:
         if "response" not in self.context:
             raise Exception("No response found")
 

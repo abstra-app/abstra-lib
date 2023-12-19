@@ -268,6 +268,7 @@ class JobStage:
     schedule: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
+    is_initial = True
 
     @staticmethod
     def create(
