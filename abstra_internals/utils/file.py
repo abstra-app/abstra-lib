@@ -2,7 +2,7 @@ import ast
 import fnmatch, re
 import os
 from pathlib import Path
-from typing import Generator, Union
+from typing import Generator, Optional, Union
 
 
 GIT_FOLDER = ".git"
@@ -108,6 +108,42 @@ def _get_file_path_from_relative_module(
     return None
 
 
+def _get_file_path_depending_on_node_level(
+    node_level: int, module: str, path_parent: Path
+) -> Optional[Path]:
+    return (
+        _get_file_path_from_relative_module(module, path_parent)
+        if node_level > 0
+        else _get_file_path_from_absolute_module(module)
+    )
+
+
+def _get_file_path(
+    node_level: int,
+    module: Optional[str],
+    alias_name: str,
+    path_parent: Path,
+) -> Optional[Path]:
+    prefix = "." * (node_level)
+    has_module = module is not None and module != ""
+
+    # Check if it's importing a file
+    module_name = f"{module}." if has_module else ""
+    relative_module = f"{prefix}{module_name}{alias_name}"
+    file_path = _get_file_path_depending_on_node_level(
+        node_level, relative_module, path_parent
+    )
+
+    # Check if it's importing an entity from a file
+    if file_path is None:
+        relative_module = f"{prefix}{module if has_module else ''}"
+        file_path = _get_file_path_depending_on_node_level(
+            node_level, relative_module, path_parent
+        )
+
+    return file_path
+
+
 def traverse_code(
     path: Path, raise_on_syntax_errors=False
 ) -> Generator[Path, None, None]:
@@ -126,18 +162,9 @@ def traverse_code(
                         yield from traverse_code(file_path)
 
             if isinstance(node, ast.ImportFrom):
-                prefix = "." * (node.level)
-                module_name = f"{node.module}." if node.module is not None else ""
-
                 for alias in node.names:
-                    relative_module = f"{prefix}{module_name}{alias.name}"
-
-                    file_path = (
-                        _get_file_path_from_relative_module(
-                            relative_module, path.parent
-                        )
-                        if node.level > 0
-                        else _get_file_path_from_absolute_module(relative_module)
+                    file_path = _get_file_path(
+                        node.level, node.module, alias.name, path.parent
                     )
 
                     if file_path is not None:

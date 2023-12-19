@@ -164,3 +164,65 @@ class TestTraverseCode(unittest.TestCase):
 
         with self.assertRaises(SyntaxError):
             list(traverse_code(entrypoint, raise_on_syntax_errors=True))
+
+    def test_from_import_with_method(self):
+        module = Path("module.py")
+        module.write_text("def method(): pass")
+
+        entrypoint = Path("entrypoint.py")
+        entrypoint.write_text("from module import method")
+
+        self.assertSetEqual(set(traverse_code(entrypoint)), set([entrypoint, module]))
+
+    def test_from_import_with_class(self):
+        module = Path("module.py")
+        module.write_text("class Class: pass")
+
+        entrypoint = Path("entrypoint.py")
+        entrypoint.write_text("from module import Class")
+
+        self.assertSetEqual(set(traverse_code(entrypoint)), set([entrypoint, module]))
+
+    def test_from_import_with_multiple_methods(self):
+        module = Path("module.py")
+        module.write_text("def method_a(): pass\ndef method_b(): pass")
+
+        entrypoint = Path("entrypoint.py")
+        entrypoint.write_text("from module import method_a, method_b")
+
+        self.assertSetEqual(set(traverse_code(entrypoint)), set([entrypoint, module]))
+
+    def test_from_import_with_nested_module_importing_methods(self):
+        module = Path("module")
+        module.mkdir()
+
+        submodule = module.joinpath("submodule.py")
+        submodule.write_text("def method(): pass")
+
+        entrypoint = Path("entrypoint.py")
+        entrypoint.write_text("from module.submodule import method")
+
+        self.assertSetEqual(
+            set(traverse_code(entrypoint)), set([entrypoint, submodule])
+        )
+
+    def test_from_import_with_relative_import_importing_methods(self):
+        module = Path("module")
+        module.mkdir()
+
+        submodule = module.joinpath("submodule")
+        submodule.mkdir()
+
+        helper = submodule.joinpath("helper.py")
+        # module name is module.submodule
+        helper.write_text("from ...module.submodule.another_helper import some_method")
+
+        another_helper = submodule.joinpath("another_helper.py")
+        another_helper.write_text("def some_method(): pass")
+
+        entrypoint = Path("entrypoint.py")
+        entrypoint.write_text("from module.submodule import helper")
+
+        self.assertSetEqual(
+            set(traverse_code(entrypoint)), set([entrypoint, helper, another_helper])
+        )
