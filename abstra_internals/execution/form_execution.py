@@ -6,10 +6,9 @@ import flask_sock, typing, traceback, inspect
 from .execution import Execution, RequestData, NoExecutionFound
 from ..contract import should_send, forms_contract
 from ..utils import deserialize, serialize
+from ..utils.debug import make_debug_data
 from ..contract import forms_contract
 from ..jwt_auth import UserClaims
-
-from ..utils.debug import make_debug_data
 
 
 if typing.TYPE_CHECKING:
@@ -157,19 +156,18 @@ class FormExecution(Execution):
 
     # forms
 
-    def _wait_start(self):
+    def _recv_start(self):
         type = None
         data = None
 
         type, data = self.recv()
-
         if type != "start":
-            return self._wait_start()
+            return self._recv_start()
 
         return data["params"]
 
     def setup_context(self, request: RequestData):
-        self.query_params = self._wait_start()
+        self.query_params = self._recv_start()
         self.send(forms_contract.ExecutionIdMessage(self.id))
         self.init_stage_run(self.query_params.get(self.abstra_run_key))
 
@@ -183,11 +181,6 @@ class FormExecution(Execution):
             "connection-closed",
             {"message": "Client went away - probably closed the tab."},
         )
-
-        if self.stage_run and self.stage_run_freezed and not self.is_initial:
-            # TODO: create a children waiting
-            pass
-
         return "abandoned"
 
     def _handle_ws_exception_other(self, exception: flask_sock.ConnectionClosed) -> str:

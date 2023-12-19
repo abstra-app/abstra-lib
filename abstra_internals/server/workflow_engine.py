@@ -8,9 +8,9 @@ from ..repositories.stage_run import StageRun
 from ..threaded import threaded
 
 from ..repositories.project.project import (
+    ActionStage,
     ProjectRepository,
     ConditionStage,
-    WorkflowStage,
     IteratorStage,
     ControlStage,
     ScriptStage,
@@ -36,7 +36,7 @@ class WorkflowEngine:
         stage_run = execution.stage_run
 
         transition_type = f"{stage.type_name}s:{status}"
-        next_stage_run_dtos = execution_strategy(stage, stage_run, transition_type)
+        next_stage_run_dtos = action_strategy(stage, stage_run, transition_type)
         self.pub(stage_run, next_stage_run_dtos)
 
     def pub(self, parent_stage_run: StageRun, stage_run_dtos: List[Dict]):
@@ -118,7 +118,10 @@ def iterator_strategy(
     ]
 
 
-def execution_strategy(stage: WorkflowStage, stage_run: StageRun, transition_type: str):
+def action_strategy(stage: ActionStage, stage_run: StageRun, transition_type: str):
+    if transition_type == "forms:abandoned" and not stage.is_initial:
+        return [dict(stage=stage_run.stage, data=stage_run.data)]
+
     next_stage_ids = [
         t.target_id for t in stage.workflow_transitions if t.type == transition_type
     ]

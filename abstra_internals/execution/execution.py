@@ -151,28 +151,46 @@ class Execution:
         self.stage_run_freezed = stage_run
         self.stage_run_draft = stage_run.clone()
 
+    def get_not_abandoned_stage_run(self, stage_run: StageRun) -> StageRun:
+        if stage_run.status != "abandoned":
+            return stage_run
+
+        next_matches = StageRunRepository.find(
+            {"parent_id": stage_run.id, "stage": self.stage.id}
+        )
+
+        assert (
+            len(next_matches) == 1
+        ), "Internal error: abandoned stage run does not have exactly one child"
+
+        return self.get_not_abandoned_stage_run(next_matches[0])
+
     def init_stage_run(self, stage_run_id: Optional[str] = None) -> None:
         if stage_run_id:
             stage_run = StageRunRepository.get(stage_run_id)
+            self.stage_run = self.get_not_abandoned_stage_run(stage_run)
+
             if stage_run.stage == self.stage.id:
                 self.stage_run = stage_run
                 return
-            else:
-                raise InvalidStageRunId()
+
+            raise InvalidStageRunId()
 
         if self.is_initial:
             self.stage_run = StageRunRepository.create_initial(stage=self.stage.id)
             return
 
         raise UnsetStageRun(
-            f"This Stage is in the middle of a workflow, but no Step was specified"
+            f"This Stage is in the middle of a workflow, but no StageRun was specified"
         )
 
     def run(self) -> None:
         self.setup_context(self.request)
         self.status = self.handle_started()
 
-        if self.stage_run and not self.set_stage_run_status():
+        lock_held = self.set_stage_run_status()
+
+        if self.stage_run and not lock_held:
             return self.handle_lock_failed()
 
         try:
