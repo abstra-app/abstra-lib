@@ -98,7 +98,7 @@ class Page(WidgetSchema):
             reactive_polling_interval=reactive_polling_interval,
             steps_info=steps_info,
         )
-        response: Dict = self.__handle_page_user_events(validate=validate)
+        response: Dict = self.__handle_page_user_events(validate_func=validate)
 
         if end_program:
             sys.exit(0)
@@ -108,7 +108,7 @@ class Page(WidgetSchema):
             response.get("action"),
         )
 
-    def __handle_page_user_events(self, **kwargs):
+    def __handle_page_user_events(self, validate_func: Optional[Callable]):
         while True:
             response = receive()
 
@@ -118,20 +118,22 @@ class Page(WidgetSchema):
             if response.get("action") == "i18n_back_action":
                 break
 
+            # TODO: Refactor validation to use values instead of payload
+            parsed_payload = self.parse_value(response["payload"])
+            validation_result = self._get_validation_result(
+                validation=validate_func, payload=parsed_payload
+            )
+
             if response["type"] != "user-event":
                 self.set_errors()
-                if not self.has_errors():
+                if not self.has_errors() and validation_result.get("status"):
                     break
 
             rendered_page = self.render(self.__context)
 
-            # TODO: Refactor validation to use values instead of payload
-            parsed_payload = self.parse_value(response["payload"])
             self.__send_form_update_message(
                 widgets=rendered_page,
-                validation=self.__build_validation_object(
-                    validation=kwargs.get("validate"), payload=parsed_payload
-                ),
+                validation=validation_result,
                 event_seq=response["seq"],
             )
 
@@ -161,7 +163,9 @@ class Page(WidgetSchema):
         self.set_values(parsed_values)
         self.__context.update(parsed_values)
 
-    def __build_validation_object(self, validation, payload):
+    def _get_validation_result(
+        self, validation, payload
+    ) -> forms_contract.ValidationResult:
         # TODO: Refactor this to use widget.get_value() instead of payload
         validation_status = True
         validation_message = ""
@@ -196,7 +200,7 @@ class Page(WidgetSchema):
         )
 
     def __send_form_update_message(
-        self, widgets: list, validation: dict, event_seq: int
+        self, widgets: list, validation: forms_contract.ValidationResult, event_seq: int
     ):
         send(
             forms_contract.FormUpdateMessage(
