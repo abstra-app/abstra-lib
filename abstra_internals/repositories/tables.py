@@ -1,14 +1,14 @@
 import requests, typing, abc
 
 from ..credentials import resolve_headers
-from ..utils.environment import TABLES_EXECUTE_URL, LOCAL_TABLES_EXECUTE_URL
+from ..utils.environment import SIDECAR_URL, CLOUD_API_CLI_URL, SIDECAR_HEADERS
 
 
 class TablesApiHttpClient(abc.ABC):
     execute_url: str
 
-    def __init__(self, execute_url: str) -> None:
-        self.execute_url = execute_url
+    def __init__(self, base_url: str) -> None:
+        self.execute_url = f"{base_url}/tables/execute"
 
     def execute(self, query: str, params: typing.List) -> requests.Response:
         raise NotImplementedError()
@@ -17,7 +17,7 @@ class TablesApiHttpClient(abc.ABC):
 class ProductionTablesApiHttpClient(TablesApiHttpClient):
     def execute(self, query: str, params: typing.List) -> requests.Response:
         body = {"query": query, "params": params}
-        return requests.post(self.execute_url, json=body)
+        return requests.post(self.execute_url, headers=SIDECAR_HEADERS, json=body)
 
 
 class LocalTablesApiHttpClient(TablesApiHttpClient):
@@ -30,7 +30,7 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
 
 
 def tables_api_http_client_factory() -> TablesApiHttpClient:
-    if TABLES_EXECUTE_URL is None:
-        return LocalTablesApiHttpClient(LOCAL_TABLES_EXECUTE_URL)
+    if SIDECAR_URL is None:
+        return LocalTablesApiHttpClient(CLOUD_API_CLI_URL)
     else:
-        return ProductionTablesApiHttpClient(TABLES_EXECUTE_URL)
+        return ProductionTablesApiHttpClient(SIDECAR_URL)

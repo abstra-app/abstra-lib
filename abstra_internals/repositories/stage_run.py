@@ -4,7 +4,7 @@ from pydantic.dataclasses import dataclass
 from typing import Optional, List, Dict, Type, Mapping, Any
 
 from ..utils import real_datetime_fromisoformat
-from ..utils.environment import SIDECAR_URL, SIDECAR_SHARED_TOKEN
+from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS
 
 end_status = ["failed", "finished", "abandoned"]
 
@@ -214,7 +214,7 @@ class ProductionStageRunRepository(StageRunRepository):
         params: dict = {},
         raise_for_status: bool = True,
     ):
-        headers: Mapping[str, str] = {"shared-token": SIDECAR_SHARED_TOKEN}
+        headers: Mapping[str, str] = SIDECAR_HEADERS
         r = requests.request(
             method=method,
             url=f"{SIDECAR_URL}/stage-runs{path}",

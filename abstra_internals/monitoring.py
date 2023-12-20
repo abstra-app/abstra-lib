@@ -1,22 +1,22 @@
 import requests, typing, dataclasses
 
-from .utils.environment import LOG_SERVICE_URL
 from .threaded import threaded
+from .utils.environment import SIDECAR_URL, SIDECAR_HEADERS
 
 
 @dataclasses.dataclass
 class LogMessage:
     event: str
     executionId: str
-    payload: typing.Dict[str, str]
     runtime_type: str
     runtime_name: str
+    payload: typing.Dict[str, str]
 
     def json(self):
         return dict(
             event=str(self.event),
-            executionId=str(self.executionId),
             payload=dict(self.payload),
+            executionId=str(self.executionId),
             runtimeType=str(self.runtime_type),
             runtimeName=str(self.runtime_name),
         )
@@ -24,9 +24,9 @@ class LogMessage:
 
 @threaded
 def log(msg: LogMessage):
-    if not LOG_SERVICE_URL:
+    if not SIDECAR_URL:
         return
     try:
-        requests.post(LOG_SERVICE_URL, json=msg.json())
+        requests.post(f"{SIDECAR_URL}/log", headers=SIDECAR_HEADERS, json=msg.json())
     except Exception:
         pass  # TODO: handle this
