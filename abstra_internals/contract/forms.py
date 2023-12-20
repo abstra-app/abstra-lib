@@ -1,5 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, Union, List, Dict, Literal
+from typing import Optional, Union, List, Literal, TypedDict
+
+
+class ValidationResult(TypedDict):
+    status: bool
+    message: str
 
 
 class Message:
@@ -103,7 +108,7 @@ class CloseMessage(Message):
 class FormUpdateMessage(Message):
     type = "form-update"
 
-    def __init__(self, widgets: List, validation: Dict, event_seq: int):
+    def __init__(self, widgets: List, validation: ValidationResult, event_seq: int):
         super().__init__(
             {
                 "widgets": widgets,
