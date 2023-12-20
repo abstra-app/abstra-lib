@@ -3,12 +3,13 @@ from typing import Any, Callable, Tuple
 
 from .threaded import threaded
 from .credentials import get_credentials
+from .utils.environment import CLOUD_API_CLI_URL
 from .utils import get_package_version, get_local_user_id
 
 
 @threaded
 def send_usage(data, header):
-    api_url = "http://cloud-api.abstra.cloud/cli/editor/usage"
+    api_url = f"{CLOUD_API_CLI_URL}/editor/usage"
     requests.post(api_url, json=data, headers=header)
 
 

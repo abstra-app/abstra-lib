@@ -12,17 +12,13 @@ IS_PREVIEW = os.getenv("ABSTRA_ENVIRONMENT") != "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
+CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 
-LOCAL_CONNECTORS_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/connectors/execute"
-CONNECTORS_EXECUTE_URL = os.getenv("ABSTRA_CONNECTORS_EXECUTE_URL")
-
-LOCAL_TABLES_EXECUTE_URL = "https://cloud-api.abstra.cloud/cli/tables/execute"
-TABLES_EXECUTE_URL = os.getenv("ABSTRA_TABLES_EXECUTE_URL")
-
-SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
-LOG_SERVICE_URL = os.getenv("ABSTRA_LOG_SERVICE_URL")
 PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
-SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
+FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
 AUTHN_URL = os.getenv("ABSTRA_AUTHN_URL")
 
-FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
+
+SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
+SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
+SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
