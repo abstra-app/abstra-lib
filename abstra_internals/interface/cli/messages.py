@@ -1,8 +1,8 @@
 import sys
 from colorama import Fore, Style
 
-from ..settings import Settings
-from ..utils.environment import HOST
+from ...settings import Settings
+from ...utils.environment import HOST
 
 
 def serve_message():

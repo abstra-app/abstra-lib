@@ -2,11 +2,13 @@ import unittest
 from dataclasses import dataclass
 from datetime import datetime
 
-from abstra.tables.api import (
-    _make_insert_query,
-    _make_delete_query,
-    _make_update_query,
+from abstra.tables import (
     insert,
+)
+from abstra_internals.interface.sdk.tables.api import (
+    _make_insert_query,
+    _make_update_query,
+    _make_delete_query,
 )
 import abstra_internals.repositories as repositories
 

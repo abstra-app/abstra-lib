@@ -1,4 +1,4 @@
-from .api import (
+from abstra_internals.interface.sdk.tables.api import (
     run,
     query_df,
     TablesExecutionError,
@@ -7,4 +7,4 @@ from .api import (
     delete,
     update_by_id,
     delete_by_id,
-)  # exported
+)

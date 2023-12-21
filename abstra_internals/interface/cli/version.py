@@ -1,5 +1,5 @@
 import pkg_resources, requests
-from ..utils.environment import IS_PREVIEW
+from ...utils.environment import IS_PREVIEW
 
 
 def check_latest_version(package_name="abstra"):

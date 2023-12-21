@@ -1,13 +1,13 @@
 import logging, os, threading, webbrowser
 
-from ..settings import Settings
-from ..overloads import overloads
-from ..server import get_local_app
+from ...settings import Settings
+from ...overloads import overloads
+from ...server import get_local_app
 from .messages import serve_message
-from ..utils.environment import HOST
+from ...utils.environment import HOST
 from .version import check_latest_version
-from ..server.controller import MainController
-from ..server.fs_watcher import watch_py_root_files
+from ...server.controller import MainController
+from ...server.fs_watcher import watch_py_root_files
 
 
 def serve(

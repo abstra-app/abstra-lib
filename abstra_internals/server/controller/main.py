@@ -10,7 +10,7 @@ from ...repositories.requirements import RequirementsRepository
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.execution import Execution
 from ...linter.rules import rules
-from ...cli.deploy import deploy
+from ...interface.cli.deploy import deploy
 from ...settings import Settings
 
 from ...debugger.vscode import (
