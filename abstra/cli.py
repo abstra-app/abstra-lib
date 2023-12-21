@@ -1,7 +1,7 @@
 import fire
-from abstra_internals.cli.serve import serve
-from abstra_internals.cli.deploy import deploy
-from abstra_internals.cli.version import check_latest_version
+from abstra_internals.interface.cli.serve import serve
+from abstra_internals.interface.cli.deploy import deploy
+from abstra_internals.interface.cli.version import check_latest_version
 from abstra_internals.settings import SettingsController
 
 
