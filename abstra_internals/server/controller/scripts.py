@@ -33,7 +33,8 @@ def get_editor_bp(controller: MainController):
         file = data.get("file")
         if not title or not file:
             flask.abort(400)
-        script = controller.create_script(title, file)
+        workflow_position = data.get("position", (0, 0))
+        script = controller.create_script(title, file, workflow_position)
         return script.editor_dto
 
     @bp.put("/<path:id>")
