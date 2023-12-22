@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import traceback
 from ..settings import Settings
 
-Frames = typing.Union[typing.List[inspect.FrameInfo], Exception, None]
+Frames = typing.Union[typing.List[inspect.FrameInfo], Exception]
 
 
 def representations(locals: typing.Dict):
@@ -49,9 +49,7 @@ def make_debug_data(frames_or_exception: Frames):
         ).stack
     else:
         frames = frames_or_exception
-    root_path = Settings.root_path
-    if not frames:
-        return {}
+    root_path = str(Settings.root_path)
     return {
         "debug": {
             "stack": [
@@ -59,7 +57,7 @@ def make_debug_data(frames_or_exception: Frames):
                 if isinstance(info, inspect.FrameInfo)
                 else _make_debug_item_from_stack(info)
                 for info in (frames)
-                if str(root_path) in info.filename
+                if root_path in info.filename
             ]
         }
     }
@@ -69,4 +67,4 @@ def make_debug_data(frames_or_exception: Frames):
 class CloseDTO:
     exit_code: typing.Union[int, None] = None
     exception: typing.Union[str, None] = None
-    frames: Frames = None
+    frames: typing.Optional[Frames] = None
