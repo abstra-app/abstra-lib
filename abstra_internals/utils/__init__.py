@@ -2,10 +2,8 @@ import base64, simplejson, traceback, re, socket
 from traceback import StackSummary
 from contextlib import closing
 from datetime import datetime
-
 from .file import *
-
-email_rgexp = r"""^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$"""
+from .email import *
 
 
 def serialize(obj):
@@ -42,39 +40,6 @@ def parse_value(cls, value):
 def serialize_value(cls, value):
     revert = get_staticmethod(cls, "__serialize_value")
     return revert(value) if revert else value
-
-
-def filter_object(object, filter_func):
-    filtered = {}
-    for key, value in object.items():
-        if filter_func(value):
-            filtered[key] = value
-    return filtered
-
-
-def prepate_traceback(tb: StackSummary):
-    for i, stack in enumerate(tb):
-        if stack.filename == "<string>":
-            return [{"line": x.lineno, "filename": x.filename} for x in tb[i:]]
-    else:
-        return []
-
-
-def formated_traceback_error_message(e: Exception, main_file="<string>"):
-    files = [
-        re.sub(r"<string>", main_file, f)
-        for f in traceback.format_tb(e.__traceback__)
-        if "abstra_server" not in f
-    ]
-    formated_error = "\n".join(files)
-    formated_error += re.sub(r"<string>", main_file, str(e))
-    return formated_error
-
-
-def is_valid_email(email):
-    if not isinstance(email, str):
-        return False
-    return re.match(email_rgexp, email)
 
 
 def random_id(length=10):

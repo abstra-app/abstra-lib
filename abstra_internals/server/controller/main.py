@@ -15,6 +15,8 @@ from ...settings import Settings
 
 from ...debugger.vscode import (
     is_launch_json_configured,
+    is_settings_json_set,
+    configure_settings_json,
     configure_launch_json,
     is_client_connected,
     start_debugger,
@@ -385,11 +387,13 @@ class MainController:
         return dict(
             port=start_debugger(),
             connected=is_client_connected(),
-            is_launch_json_configured=is_launch_json_configured(),
+            is_launch_json_configured=is_launch_json_configured()
+            and is_settings_json_set(),
         )
 
     def create_vscode_launch(self):
-        return configure_launch_json()
+        configure_launch_json()
+        configure_settings_json()
 
     # Linters
     def check_linters(self) -> List[Dict[str, Any]]:
