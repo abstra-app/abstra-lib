@@ -5,7 +5,7 @@ from datetime import datetime
 from abstra.tables import (
     insert,
 )
-from abstra_internals.interface.sdk.tables.api import (
+from .api import (
     _make_insert_query,
     _make_update_query,
     _make_delete_query,

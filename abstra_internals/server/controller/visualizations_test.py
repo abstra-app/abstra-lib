@@ -1,18 +1,14 @@
-from json import dump
-from pathlib import Path
-from unittest import TestCase, skip
-
-from .fixtures import init_dir, clear_dir
-
-from abstra_internals.server.controller.visualizations import VisualizationsController
-from abstra_internals.repositories.project.project import (
+from unittest import TestCase
+from tests.fixtures import init_dir, clear_dir
+from .visualizations import VisualizationsController
+from ...repositories.project.project import (
     ProjectRepository,
     VisualizationSettings,
     VisualizationItem,
 )
 
 
-class TestVisualization(TestCase):
+class VisualizationsTest(TestCase):
     def setUp(self):
         self.controller = VisualizationsController()
         self.root = init_dir()

@@ -1,6 +1,5 @@
 from unittest import TestCase
-
-from abstra_internals.repositories.requirements import Requirement, Requirements
+from .requirements import Requirement, Requirements
 
 
 class TestRequirementsRepository(TestCase):

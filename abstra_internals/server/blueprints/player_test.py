@@ -1,6 +1,6 @@
 import unittest
 
-from .fixtures import init_dir, clear_dir, get_cloud_client
+from tests.fixtures import init_dir, clear_dir, get_cloud_client
 
 
 class TestPlayerApi(unittest.TestCase):

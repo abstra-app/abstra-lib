@@ -1,10 +1,9 @@
 import unittest
 from typing import Optional
+from .validate import check_type, validate_json
 
-from abstra_internals.utils.validate import check_type, validate_json
 
-
-class TestValidateUtils(unittest.TestCase):
+class ValidateTest(unittest.TestCase):
     def test_check_basic_types(self):
         self.assertEqual(check_type("string", str), True)
         self.assertEqual(check_type(19, int), True)

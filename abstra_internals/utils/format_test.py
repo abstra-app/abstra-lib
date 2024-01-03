@@ -1,9 +1,8 @@
-import unittest
+from unittest import TestCase
+from .format import normalize_path
 
-from abstra_internals.utils.format import normalize_path
 
-
-class TestFormatUtils(unittest.TestCase):
+class NormalizePathTest(TestCase):
     def test_uppercase_letters(self):
         self.assertEqual(normalize_path("HelLo"), "hello")
 

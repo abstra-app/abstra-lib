@@ -1,11 +1,34 @@
 import unittest
+from pathlib import Path
+from .file import module2path, path2module, files_from_directory
+from tests.fixtures import init_dir, clear_dir
 
-from .fixtures import init_dir, clear_dir
 
-from abstra_internals.utils.file import files_from_directory
+class Module2PathTest(unittest.TestCase):
+    def test_module2path_module(self):
+        module = "a.b.c"
+        path = module2path(module, False)
+        self.assertEqual(path, Path("a", "b", "c.py"))
+
+    def test_module2path_package(self):
+        module = "a.b.c"
+        path = module2path(module, True)
+        self.assertEqual(path, Path("a", "b", "c", "__init__.py"))
 
 
-class TestListing(unittest.TestCase):
+class Path2ModuleTest(unittest.TestCase):
+    def test_path2module_module(self):
+        path = Path("a", "b", "c.py")
+        module = path2module(path)
+        self.assertEqual(module, "a.b.c")
+
+    def test_path2module_package(self):
+        path = Path("a", "b", "c", "__init__.py")
+        module = path2module(path)
+        self.assertEqual(module, "a.b.c")
+
+
+class FilesFromDirectoryTest(unittest.TestCase):
     def add_file(self, name, content, path=None):
         filepath = (path or self.path).joinpath(name)
         filepath.write_text(content, encoding="utf-8")

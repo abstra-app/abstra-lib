@@ -1,4 +1,5 @@
 import pkg_resources, requests
+from ...utils import get_package_version
 from ...utils.environment import IS_PREVIEW
 
 
@@ -7,7 +8,7 @@ def check_latest_version(package_name="abstra"):
         return
 
     try:
-        current_version = pkg_resources.get_distribution(package_name).version
+        current_version = get_package_version(package_name)
         response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
         latest_version = response.json()["info"]["version"]
 

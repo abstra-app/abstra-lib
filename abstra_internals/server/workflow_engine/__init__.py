@@ -1,14 +1,12 @@
 from typing import Type, List, Dict
-
-from ..repositories.stage_run import get_stage_run_repository, StageRunRepository
-from ..execution.execution import Execution, UnsetStageRun
-from ..execution.script_execution import ScriptExecution
-from ..execution.job_execution import JobExecution
-from ..repositories.stage_run import StageRun
-from ..threaded import threaded
-
-from ..repositories.project.project import (
-    ActionStage,
+from .strategies import condition_strategy, action_strategy, iterator_strategy
+from ...repositories.stage_run import get_stage_run_repository, StageRunRepository
+from ...execution.execution import Execution, UnsetStageRun
+from ...execution.script_execution import ScriptExecution
+from ...execution.job_execution import JobExecution
+from ...repositories.stage_run import StageRun
+from ...threaded import threaded
+from ...repositories.project.project import (
     ProjectRepository,
     ConditionStage,
     IteratorStage,
@@ -81,52 +79,6 @@ class WorkflowEngine:
 
         if isinstance(stage, (ConditionStage, IteratorStage)):
             return self.run_control(stage, stage_run)
-
-
-def condition_strategy(
-    stage: ConditionStage,
-    stage_run: StageRun,
-    transition_type="conditions:patterMatched",
-):
-    variable_value = stage_run.data.get(stage.variable_name)
-
-    next_stage_ids = [
-        t.target_id
-        for t in stage.workflow_transitions
-        if t.type == transition_type and t.condition_value == variable_value
-    ]
-
-    return [dict(stage=stage_id, data=stage_run.data) for stage_id in next_stage_ids]
-
-
-def iterator_strategy(
-    stage: IteratorStage, stage_run: StageRun, transition_type="iterators:each"
-):
-    variable_value = stage_run.data.get(stage.variable_name)
-
-    if not isinstance(variable_value, list):
-        return []
-
-    next_stage_ids = [
-        t.target_id for t in stage.workflow_transitions if t.type == transition_type
-    ]
-
-    return [
-        dict(stage=stage_id, data={"item": item})
-        for item in variable_value
-        for stage_id in next_stage_ids
-    ]
-
-
-def action_strategy(stage: ActionStage, stage_run: StageRun, transition_type: str):
-    if transition_type == "forms:abandoned" and not stage.is_initial:
-        return [dict(stage=stage_run.stage, data=stage_run.data)]
-
-    next_stage_ids = [
-        t.target_id for t in stage.workflow_transitions if t.type == transition_type
-    ]
-
-    return [dict(stage=stage_id, data=stage_run.data) for stage_id in next_stage_ids]
 
 
 def factory():
