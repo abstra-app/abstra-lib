@@ -48,3 +48,16 @@ class TestLocalStageRunRepository(TestCase):
     def test_find_ancestors_when_not_found(self):
         with self.assertRaises(Exception):
             LocalStageRunRepository.find_ancestors("not_found")
+
+    def test_fork(self):
+        parent = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
+        child = LocalStageRunRepository.create_next(
+            parent, [dict(stage="foo", data=dict(b=3, c=4))]
+        )[0]
+        clone = LocalStageRunRepository.fork(child)
+        self.assertNotEqual(clone.id, child.id)
+        self.assertEqual(clone.status, "waiting")
+        self.assertEqual(clone.data, child.data)
+        self.assertEqual(clone.stage, child.stage)
+        self.assertEqual(clone.parent_id, child.parent_id)
+        self.assertEqual(clone.execution_id, None)

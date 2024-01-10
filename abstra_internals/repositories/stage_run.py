@@ -47,6 +47,12 @@ class StageRun:
     def clone(self):
         return StageRun(**self.to_dto())
 
+    def clone_to_waiting(self):
+        new_stage_run = self.clone()
+        new_stage_run.id = str(uuid.uuid4())
+        new_stage_run.status = "waiting"
+        return new_stage_run
+
 
 class StageRunRepository:
     valid_filter_keys = ["data", "stage", "status", "parent_id"]
@@ -96,6 +102,10 @@ class StageRunRepository:
 
     @classmethod
     def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
+        raise NotImplementedError()
+
+    @classmethod
+    def fork(cls, stage_run: StageRun) -> StageRun:
         raise NotImplementedError()
 
 
@@ -202,6 +212,15 @@ class LocalStageRunRepository(StageRunRepository):
             return True
 
         return False
+
+    @classmethod
+    def fork(cls, stage_run: StageRun) -> StageRun:
+        if stage_run.parent_id == None:
+            return cls.create_initial(stage_run.stage, stage_run.data)
+        parent_stage_run = cls.get(stage_run.parent_id)
+        new_stage_run_dto = stage_run.clone_to_waiting().to_dto()
+        stage_runs = cls.create_next(parent_stage_run, [new_stage_run_dto])
+        return stage_runs[0]
 
 
 class ProductionStageRunRepository(StageRunRepository):

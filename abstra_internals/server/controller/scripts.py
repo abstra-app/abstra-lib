@@ -60,10 +60,13 @@ def get_editor_bp(controller: MainController):
     @usage
     def _test_script(id: str):
         script = controller.get_script(id)
-        stage_run_id = flask.request.args.get("stage_run_id")
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+        stage_run_id = data.get("stage_run_id")
 
         if not script or not stage_run_id:
-            flask.abort(404)
+            flask.abort(400)
 
         execution = ScriptExecution(script, stage_run_id)
         execution.run()
