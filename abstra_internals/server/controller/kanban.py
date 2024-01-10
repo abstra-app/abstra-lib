@@ -220,7 +220,7 @@ def get_editor_bp():
     @bp.get("/logs/<stage_run_id>")
     def _get_ancestor_logs(stage_run_id: str):
         def stage_from_run(stage_run: StageRun):
-            stage = project_repository.load().get_action_raises(stage_run.stage)
+            stage = project_repository.load().get_stage_raises(stage_run.stage)
             return make_stage_dto(stage)
 
         return [
