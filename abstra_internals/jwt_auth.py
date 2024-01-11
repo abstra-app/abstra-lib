@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import jwt, datetime, typing
 from .utils import is_valid_email
-from .utils.environment import PUBLIC_KEY
+from .utils.environment import PUBLIC_KEY, PROJECT_ID
 
 
 def decode_jwt(jwt_str: str):
@@ -48,6 +48,10 @@ class UserClaims:
 
         email = claims.get("email")
         if not is_valid_email(email):
+            return None
+
+        project_id = claims.get("aud")
+        if project_id != PROJECT_ID:
             return None
 
         return cls(claims)
