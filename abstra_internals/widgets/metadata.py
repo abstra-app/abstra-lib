@@ -3050,7 +3050,7 @@ metadata = {
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_phone",
                 "key": "example1",
-                "code": 'from abstra.forms import read_pandas_row_selection\n\nphone = read_phone("What is your phone number?")\nnumber = phone.raw  # eg: 5521999999999\nmasked = phone.masked  # eg: +55 (21) 99999-9999\n',
+                "code": 'from abstra.forms import read_phone\n\nphone = read_phone("What is your phone number?")\nnumber = phone.raw  # eg: 5521999999999\nmasked = phone.masked  # eg: +55 (21) 99999-9999\n',
             }
         ],
     },
@@ -3756,7 +3756,7 @@ metadata = {
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_time",
                 "key": "example1",
-                "code": 'from abstra.forms import read\n\nans = read_time("Select a time below")\n# ans = 00:00:00\n',
+                "code": 'from abstra.forms import read_time\n\nans = read_time("Select a time below")\n# ans = 00:00:00\n',
             }
         ],
     },
