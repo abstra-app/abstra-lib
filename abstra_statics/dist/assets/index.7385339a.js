@@ -1,2 +1,0 @@
-import{C as n,A as t}from"./index.b1c76a00.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},o=new Error().stack;o&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[o]="4202c328-035e-4b7f-b370-d443686cb801",e._sentryDebugIdIdentifier="sentry-dbid-4202c328-035e-4b7f-b370-d443686cb801")}catch{}})();n.Panel=t;n.install=function(e){return e.component(n.name,n),e.component(t.name,t),e};
-//# sourceMappingURL=index.7385339a.js.map
