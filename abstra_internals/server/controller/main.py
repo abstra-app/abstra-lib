@@ -143,6 +143,9 @@ class MainController:
         webbrowser.open(complete_file_path.absolute().as_uri())
 
     def read_file(self, file: str):
+        file_path = Settings.root_path.joinpath(file)
+        if not file_path.is_file():
+            return None
         return Settings.root_path.joinpath(file).read_text(encoding="utf-8")
 
     def check_file(self, file_path: str):
@@ -308,7 +311,19 @@ class MainController:
 
     def update_stage(self, id: str, changes: Dict[str, Any]) -> ActionStage:
         project = ProjectRepository.load()
-        runtime = project.update_stage(id, changes)
+        stage = project.get_action(id)
+
+        if not stage:
+            raise Exception(f"Stage with id {id} not found")
+
+        code_content = changes.get("code_content")
+        if code_content:
+            Settings.root_path.joinpath(stage.file_path).write_text(
+                code_content, encoding="utf-8"
+            )
+            del changes["code_content"]
+
+        runtime = project.update_stage(stage, changes)
         ProjectRepository.save(project)
         return runtime
 

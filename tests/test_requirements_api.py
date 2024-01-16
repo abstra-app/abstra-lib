@@ -47,7 +47,7 @@ class TestRequirementsApi(TestCase):
         requirements = self.client.get("/_editor/api/requirements").get_json()
         self.assertEqual(requirements, [{"name": "bar", "version": None}])
         self.assertTrue(Path("requirements.txt").exists())
-        self.assertEqual(Path("requirements.txt").read_text(), "bar")
+        self.assertEqual(Path("requirements.txt").read_text(encoding="utf-8"), "bar")
 
     def test_get_requirements_recommendation(self):
         recommendation = self.client.get(
