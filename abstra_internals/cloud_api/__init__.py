@@ -1,7 +1,7 @@
 import requests
 from ..contracts_generated import (
     CloudApiCliBuildCreateResponse,
-    CloudApiAuthInfo,
+    CloudApiCliAuthInfoResponse,
     CloudApiCliUserGetResponse,
 )
 from ..utils.environment import CLOUD_API_ENDPOINT
@@ -26,7 +26,7 @@ def get_auth_info(headers: dict) -> dict:
     except:
         return {"logged": False, "reason": "CONNECTION_ERROR"}
     if response.ok:
-        response_data = CloudApiAuthInfo(**response.json())
+        response_data = CloudApiCliAuthInfoResponse(**response.json())
         return {
             "logged": True,
             "author_id": response_data.authorId,
