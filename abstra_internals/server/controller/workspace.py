@@ -71,7 +71,10 @@ def get_editor_bp(controller: MainController):
         if not file:
             flask.abort(400)
 
-        return controller.read_file(file)
+        content = controller.read_file(file)
+        if content is None:
+            flask.abort(404)
+        return content
 
     @bp.get("/check-file")
     @usage

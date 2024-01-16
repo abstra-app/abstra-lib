@@ -33,7 +33,7 @@ class TestHooks(unittest.TestCase):
         hook = self.client.post(
             "/_editor/api/hooks/", json={"title": "New hook", "file": "hook.py"}
         ).get_json()
-        file_content = pathlib.Path(hook["file"]).read_text()
+        file_content = pathlib.Path(hook["file"]).read_text(encoding="utf-8")
         self.assertEqual(file_content, new_hook_code)
 
 
