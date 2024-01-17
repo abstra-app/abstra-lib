@@ -1,16 +1,19 @@
 import unittest
 from dataclasses import dataclass
 from datetime import datetime
-
 from abstra.tables import (
     insert,
 )
 from .api import (
+    _make_select_query,
     _make_insert_query,
     _make_update_query,
     _make_delete_query,
+    _make_row_dict,
 )
 import abstra_internals.repositories as repositories
+from abstra_internals.interface.sdk.forms.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.step import StepsResponse
 
 
 @dataclass
@@ -39,6 +42,49 @@ repositories.tables_api_http_client = MockTablesApi()
 
 
 class TestTables(unittest.TestCase):
+    def test_select(self):
+        query, params = _make_select_query(table="foo")
+        self.assertEqual(query, 'SELECT * FROM "foo"')
+        self.assertEqual(params, [])
+
+    def test_select_all_params(self):
+        query, params = _make_select_query(
+            table="foo", where={"bar": "baz"}, order_by="bar", limit=10, offset=0
+        )
+        self.assertEqual(
+            query,
+            'SELECT * FROM "foo" WHERE "bar"=$1 ORDER BY "bar" ASC LIMIT 10 OFFSET 0',
+        )
+        self.assertEqual(params, ["baz"])
+
+    def test_select_and(self):
+        query, params = _make_select_query(
+            table="fruits", where={"tangerina": 123456, "melancia": 888}
+        )
+        self.assertEqual(
+            query,
+            'SELECT * FROM "fruits" WHERE "tangerina"=$1 AND "melancia"=$2',
+        )
+        self.assertEqual(params, [123456, 888])
+
+    def test_select_order_desc(self):
+        query, params = _make_select_query(
+            table="fruits", order_by="tangerina", order_desc=True
+        )
+        self.assertEqual(
+            query,
+            'SELECT * FROM "fruits" ORDER BY "tangerina" DESC',
+        )
+        self.assertEqual(params, [])
+
+    def test_select_crashes_with_non_numeric_limit(self):
+        with self.assertRaises(Exception):
+            _make_select_query(table="foo", limit="a")  # type: ignore
+
+    def test_select_crashes_with_non_numeric_offset(self):
+        with self.assertRaises(Exception):
+            _make_select_query(table="foo", offset="a")  # type: ignore
+
     def test_insert(self):
         query, params = _make_insert_query(table="foo", values={"bar": "baz"})
         self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
@@ -134,3 +180,31 @@ class TestTables(unittest.TestCase):
             table="fruits", values={"tangerina": "123456"}
         )
         self.assertEqual(query, query2)
+
+
+class TestMakeRowDict(unittest.TestCase):
+    def test_dict(self):
+        row = _make_row_dict({"bar": "baz", "car": "cat"})
+        self.assertEqual(row, {"bar": "baz", "car": "cat"})
+
+    def test_dataclass(self):
+        @dataclass
+        class Foo:
+            bar: str
+            car: str
+
+        row = _make_row_dict(Foo(bar="baz", car="cat"))
+        self.assertEqual(row, {"bar": "baz", "car": "cat"})
+
+    def test_page_response(self):
+        row = _make_row_dict(PageResponse({"bar": "baz", "car": "cat"}, None))
+        self.assertEqual(row, {"bar": "baz", "car": "cat"})
+
+    def test_step_response(self):
+        pr1 = PageResponse({"a": "1", "b": 2}, None)
+        pr2 = PageResponse({"b": "3", "c": 4}, None)
+        steps_response = StepsResponse()
+        steps_response.append(pr1)
+        steps_response.append(pr2)
+        row = _make_row_dict(steps_response)
+        self.assertEqual(row, {"a": "1", "b": "3", "c": 4})
