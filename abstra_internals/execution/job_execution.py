@@ -1,10 +1,19 @@
+from typing import Optional
 from ..repositories.project.project import JobStage
-from .static_execution import StaticExecution
-from .execution import RequestData
+from .execution import Execution, RequestData
+from ..repositories.execution_logs import ExecutionLogsRepository
+from ..repositories.execution import ExecutionRepository
+from ..repositories.stage_run import StageRunRepository
 
 
-class JobExecution(StaticExecution):
-    def __init__(self, stage: JobStage):
+class JobExecution(Execution):
+    def __init__(
+        self,
+        stage: JobStage,
+        stage_run_repository: StageRunRepository,
+        execution_repository: ExecutionRepository,
+        execution_logs_repository: ExecutionLogsRepository,
+    ):
         request = RequestData(
             headers={},
             body="",
@@ -12,19 +21,26 @@ class JobExecution(StaticExecution):
             query_params={},
         )
 
-        super().__init__(stage=stage, is_initial=True, request=request)
+        super().__init__(
+            stage=stage,
+            is_initial=True,
+            request=request,
+            execution_repository=execution_repository,
+            execution_logs_repository=execution_logs_repository,
+            stage_run_repository=stage_run_repository,
+        )
 
-    def setup_context(self, request: RequestData):
-        self.init_stage_run()
+    def handle_start(self) -> None:
+        pass
 
-    def handle_started(self):
-        self.log("started", {})
-        return super().handle_started()
+    def handle_success(self) -> None:
+        pass
 
-    def handle_success(self) -> str:
-        self.log("success", {})
-        return super().handle_success()
+    def handle_failure(self, e: Exception) -> None:
+        pass
 
-    def handle_failure(self, e: Exception) -> str:
-        self.log("failed", {"error": str(e)})
-        return super().handle_failure(e)
+    def handle_lock_failed(self) -> None:
+        pass
+
+    def received_stage_run_id(self) -> Optional[str]:
+        return None

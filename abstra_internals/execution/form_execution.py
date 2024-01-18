@@ -1,27 +1,34 @@
 from __future__ import annotations  # required for type check
+import datetime
 
 from simple_websocket.ws import ConnectionClosed
-import flask_sock, typing, traceback, inspect
+import flask_sock, traceback, inspect
+from typing import Literal, Optional, Dict, TYPE_CHECKING, Tuple
+import traceback
 
-from .execution import Execution, RequestData, NoExecutionFound
-from ..contract import should_send, forms_contract
+from .execution import ABSTRA_RUN_KEY, Execution, RequestData, NoExecutionFound
+from ..contract import forms_contract
 from ..utils import deserialize, serialize
 from ..utils.debug import make_debug_data
 from ..contract import forms_contract
 from ..jwt_auth import UserClaims
+from ..repositories.execution_logs import FormEventLogEntry
+from ..repositories.execution import ExecutionRepository
+from ..repositories.execution_logs import ExecutionLogsRepository
+from ..repositories.stage_run import StageRunRepository
+from ..utils.environment import IS_PRODUCTION
 
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from ..repositories.project.project import FormStage
 
 
 class FormExecution(Execution):
-    type = "execution"
     _connection: flask_sock.Server
     debug_enabled = True
 
     @classmethod
-    def get_current_execution(cls) -> typing.Optional["FormExecution"]:
+    def get_current_execution(cls) -> Optional["FormExecution"]:
         execution = Execution.get_current_execution()
         if isinstance(execution, FormExecution):
             return execution
@@ -40,29 +47,61 @@ class FormExecution(Execution):
         is_initial: bool,
         connection: flask_sock.Server,
         request: RequestData,
+        stage_run_repository: StageRunRepository,
+        execution_repository: ExecutionRepository,
+        execution_logs_repository: ExecutionLogsRepository,
         execution_id=None,
     ):
         self._connection = connection
         if execution_id is not None:
             self.id = execution_id
 
-        super().__init__(stage, is_initial, request, execution_id=execution_id)
+        super().__init__(
+            stage,
+            is_initial,
+            request,
+            stage_run_repository=stage_run_repository,
+            execution_repository=execution_repository,
+            execution_logs_repository=execution_logs_repository,
+            execution_id=execution_id,
+        )
+
+    @property
+    def connected(self) -> bool:
+        return self._connection.connected
+
+    def log_form_message(self, type: str, payload: dict):
+        self.execution_logs_repository.save(
+            FormEventLogEntry(
+                execution_id=self.id,
+                created_at=datetime.datetime.now(),
+                event="form-message",
+                payload={
+                    "messageType": type,
+                    "messagePayload": payload,
+                },
+                sequence=self.log_count,
+            )
+        )
 
     def send(self, msg: forms_contract.Message):
-        self.log(msg.type, msg.data)
+        self.log_form_message(msg.type, msg.data)
 
-        if not should_send(msg, self.is_preview):
+        skip_sending = isinstance(msg, forms_contract.StdioMessage) and IS_PRODUCTION
+        if skip_sending:
             return
+
         if self.debug_enabled:
             if isinstance(msg, forms_contract.CloseMessage) and msg.close_dto.exception:
                 debug = make_debug_data(msg.close_dto.exception)
             else:
                 debug = make_debug_data(inspect.stack())
             msg.data = {**msg.data, **debug}
-        str_data = serialize(msg.to_json(self.is_preview))
+
+        str_data = serialize(msg.to_json())
         self._connection.send(str_data)
 
-    def recv(self) -> typing.Tuple[str, typing.Dict]:
+    def recv(self) -> Tuple[str, Dict]:
         try:
             str_data = self._connection.receive()
         except ConnectionClosed:
@@ -70,20 +109,17 @@ class FormExecution(Execution):
             return "close", {}
 
         data = deserialize(str_data)
-        self.log(data["type"], data)
+
+        self.log_form_message(data["type"], data)
         return data["type"], data
 
-    def close(self, reason: typing.Optional[str] = ""):
+    def close(self, reason: Optional[str] = ""):
         self._connection.close(message=reason)
         self.closed = True
 
-    def stdio(self, type: str, text: str):
-        self.send(forms_contract.StdioMessage(type, text))
-        return super().stdio(type, text)
-
-    @property
-    def connected(self) -> bool:
-        return self._connection.connected
+    def stdio(self, event: Literal["stderr", "stdout"], text: str) -> None:
+        self.send(forms_contract.StdioMessage(event, text))
+        return super().stdio(event, text)
 
     def end(self):
         if self.connected:
@@ -93,21 +129,11 @@ class FormExecution(Execution):
         status = self.stage_run.status if self.stage_run else None
         self.send(forms_contract.LockFailedMessage(status))
 
-        try:
-            return super().handle_lock_failed()
-        except:
-            # Forms should ignore this exception as the error is shown in the UI
-            pass
-
     # flows
 
     @property
-    def query_params(self) -> typing.Dict:
-        return self.context.get("query_params", {})
-
-    @query_params.setter
-    def query_params(self, value: typing.Dict) -> None:
-        self.context["query_params"] = value
+    def query_params(self) -> Dict:
+        return self.context.request.query_params
 
     def receive(self):
         while True:
@@ -166,45 +192,29 @@ class FormExecution(Execution):
 
         return data["params"]
 
-    def setup_context(self, request: RequestData):
-        self.query_params = self._recv_start()
-        self.send(forms_contract.ExecutionIdMessage(self.id))
-        self.init_stage_run(self.query_params.get(self.abstra_run_key))
+    def received_stage_run_id(self) -> Optional[str]:
+        return self.context.request.query_params.get(ABSTRA_RUN_KEY)
 
-    def handle_success(self) -> str:
+    def handle_start(self) -> None:
+        self.context.request.query_params = self._recv_start()
+        self.send(forms_contract.ExecutionIdMessage(self.id))
+
+    def handle_success(self) -> None:
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
         self.send(forms_contract.CloseMessage(close_dto))
-        return super().handle_success()
+        self.close()
 
-    def _handle_ws_exception_1001(self, exception: flask_sock.ConnectionClosed) -> str:
-        self.log(
-            "connection-closed",
-            {"message": "Client went away - probably closed the tab."},
+    def handle_failure(self, e: Exception) -> None:
+        self.send(
+            forms_contract.StdioMessage(
+                "stderr",
+                "".join(
+                    traceback.format_exception(
+                        etype=type(e), value=e, tb=e.__traceback__
+                    ),
+                ),
+            )
         )
-        return "abandoned"
-
-    def _handle_ws_exception_other(self, exception: flask_sock.ConnectionClosed) -> str:
-        self.log(
-            "connection-closed",
-            {
-                "message": f"[ERROR] Connection closed with code {exception.reason}: {exception.message}\n",
-                "reason": exception.reason,
-            },
-        )
-        return super().handle_failure(exception)
-
-    def _handle_ws_exception(self, exception: flask_sock.ConnectionClosed) -> str:
-        if exception.reason == 1000:
-            return super().handle_success()  # missing advanve steps?
-
-        if exception.reason == 1001:
-            return self._handle_ws_exception_1001(exception)
-
-        return self._handle_ws_exception_other(exception)
-
-    def handle_failure(self, e: Exception) -> str:
-        if isinstance(e, flask_sock.ConnectionClosed):
-            return self._handle_ws_exception(e)
 
         close_dto = forms_contract.CloseDTO(
             exit_status="EXCEPTION",
@@ -212,10 +222,29 @@ class FormExecution(Execution):
         )
         self.send(forms_contract.CloseMessage(close_dto))
 
-        return super().handle_failure(e)
+    def attempt_handle_exception(self, e: Exception) -> bool:
+        NORMAL_CLOSURE = 1000
+        GOING_AWAY = 1001
 
-    def handle_finish(self):
-        self.close()
+        if not isinstance(e, flask_sock.ConnectionClosed):
+            return False
+
+        if e.reason == NORMAL_CLOSURE:
+            return True
+
+        if e.reason == GOING_AWAY:
+            self.status = "abandoned"
+            return True
+
+        self.log_form_message(
+            "connection-closed",
+            {
+                "message": f"[ERROR] Connection closed with code {e.reason}: {e.message}\n",
+                "reason": e.reason,
+            },
+        )
+
+        return False
 
 
 def get_form_execution_throwable() -> FormExecution:

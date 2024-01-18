@@ -3,58 +3,90 @@ from abstra_internals.repositories.stage_run import LocalStageRunRepository
 
 
 class TestLocalStageRunRepository(TestCase):
+    def setUp(self) -> None:
+        self.repository = LocalStageRunRepository()
+
+    def test_starts_empty(self):
+        stage_runs = self.repository.find({})
+        self.assertEqual(len(stage_runs), 0)
+
+    def test_create(self):
+        self.repository.create_initial("stage1")
+        stage_runs = self.repository.find({})
+        self.assertEqual(len(stage_runs), 1)
+
     def test_new_initial(self):
-        s = LocalStageRunRepository.create_initial("foo")
+        s = self.repository.create_initial("foo")
         self.assertEqual(s.data, {})
         self.assertEqual(s.status, "waiting")
         self.assertEqual(s.stage, "foo")
 
     def test_new_child(self):
-        parent = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
-        child = LocalStageRunRepository.create_next(
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
         self.assertEqual(child.data, {"a": 1, "b": 3, "c": 4})
 
     def test_find_ancestors_when_child(self):
-        parent = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
-        child = LocalStageRunRepository.create_next(
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        self.assertEqual(
-            LocalStageRunRepository.find_ancestors(child.id), [parent, child]
-        )
+        self.assertEqual(self.repository.find_ancestors(child.id), [parent, child])
 
     def test_find_ancestors_when_initial(self):
-        initial = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
-        self.assertEqual(LocalStageRunRepository.find_ancestors(initial.id), [initial])
+        initial = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        self.assertEqual(self.repository.find_ancestors(initial.id), [initial])
 
     def test_find_ancestors_when_forked(self):
-        parent = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
-        child1, child2 = LocalStageRunRepository.create_next(
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child1, child2 = self.repository.create_next(
             parent,
             [
                 dict(stage="foo", data=dict(b=3, c=4)),
                 dict(stage="foo", data=dict(b=5, c=6)),
             ],
         )
-        self.assertEqual(
-            LocalStageRunRepository.find_ancestors(child1.id), [parent, child1]
-        )
-        self.assertEqual(
-            LocalStageRunRepository.find_ancestors(child2.id), [parent, child2]
-        )
+        self.assertEqual(self.repository.find_ancestors(child1.id), [parent, child1])
+        self.assertEqual(self.repository.find_ancestors(child2.id), [parent, child2])
 
     def test_find_ancestors_when_not_found(self):
         with self.assertRaises(Exception):
-            LocalStageRunRepository.find_ancestors("not_found")
+            self.repository.find_ancestors("not_found")
+
+    def test_leaves_simple(self):
+        self.repository.create_initial("stage1")
+        stage_runs = self.repository.find_leaves({})
+        self.assertEqual(len(stage_runs), 1)
+
+    def test_leaves(self):
+        repository = self.repository
+
+        wfs1_stage1 = repository.create_initial("stage1")
+        repository.create_initial("stage1")
+        repository.create_next(wfs1_stage1, [{"stage": "stage2"}])
+        wfs1_stage2 = repository.find({"parent_id": wfs1_stage1.id})
+        self.assertEqual(len(wfs1_stage2), 1)
+        repository.create_next(wfs1_stage2[0], [{"stage": "stage3"}])
+        repository.create_next(wfs1_stage2[0], [{"stage": "stage3"}])
+        all_stage_runs = repository.find({})
+        self.assertEqual(len(all_stage_runs), 5)
+        leaves = repository.find_leaves({})
+        self.assertEqual(len(leaves), 3)
+        leaves_stage1 = repository.find_leaves({"stage": "stage1"})
+        self.assertEqual(len(leaves_stage1), 1)
+        leaves_stage2 = repository.find_leaves({"stage": "stage2"})
+        self.assertEqual(len(leaves_stage2), 0)
+        leaves_stage3 = repository.find_leaves({"stage": "stage3"})
+        self.assertEqual(len(leaves_stage3), 2)
 
     def test_fork(self):
-        parent = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
-        child = LocalStageRunRepository.create_next(
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        clone = LocalStageRunRepository.fork(child)
+        clone = self.repository.fork(child)
         self.assertNotEqual(clone.id, child.id)
         self.assertEqual(clone.status, "waiting")
         self.assertEqual(clone.data, child.data)

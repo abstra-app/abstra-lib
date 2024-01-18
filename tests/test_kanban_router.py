@@ -1,13 +1,16 @@
 from unittest import TestCase
+
+from abstra_internals.utils.datetime import to_utc_iso_string
 from .fixtures import init_dir, clear_dir, get_local_client
 from abstra_internals.repositories.project.project import ProjectRepository, HookStage
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
+from abstra_internals.repositories import stage_run_repository
 
 
 class TestKanbanRouter(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.client = get_local_client()
+        self.stage_run_repository = stage_run_repository
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -18,7 +21,7 @@ class TestKanbanRouter(TestCase):
         stage = HookStage.create(title="test", file="test.py")
         project.add_stage(stage)
         ProjectRepository.save(project)
-        initial = LocalStageRunRepository.create_initial(stage.id)
+        initial = self.stage_run_repository.create_initial(stage.id)
         res = self.client.get("/_editor/api/kanban/logs/" + initial.id)
         self.assertEqual(res.status_code, 200)
         assert res.json is not None
@@ -41,7 +44,7 @@ class TestKanbanRouter(TestCase):
         stage = HookStage.create(title="test", file="test.py")
         project.add_stage(stage)
         ProjectRepository.save(project)
-        stage_run = LocalStageRunRepository.create_initial(stage.id)
+        stage_run = self.stage_run_repository.create_initial(stage.id)
         res = self.client.post(
             "/_editor/api/kanban", json=dict(selected_stages_ids=[stage_run.stage])
         )
@@ -61,7 +64,7 @@ class TestKanbanRouter(TestCase):
                         "stage_run_cards": [
                             {
                                 "content": [],
-                                "created_at": stage_run.created_at.isoformat(),
+                                "created_at": to_utc_iso_string(stage_run.created_at),
                                 "id": stage_run.id,
                                 "status": "waiting",
                             }

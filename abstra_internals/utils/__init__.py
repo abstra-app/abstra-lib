@@ -93,8 +93,3 @@ def get_free_port(default_port: int) -> int:
     raise Exception(
         f"Could not find a free port in the range {range_start}-{range_end}"
     )
-
-
-def real_datetime_fromisoformat(date_str: str) -> datetime:
-    # datetime.fromisoformat does not work on python<=3.9
-    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")

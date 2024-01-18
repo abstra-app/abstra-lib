@@ -1,50 +1,33 @@
-from typing import Dict, Tuple
-
-from .execution import RequestData
-from .static_execution import StaticExecution
+from typing import Optional
+from .execution import ABSTRA_RUN_KEY, Execution, ResponseData
 
 
-class HookExecution(StaticExecution):
-    def handle_started(self):
-        self.log("started", {"request": self.context["request"]})
-        return super().handle_started()
+class HookExecution(Execution):
+    @staticmethod
+    def get_current_hook_execution() -> "HookExecution":
+        execution = Execution.get_current_execution()
+        if isinstance(execution, HookExecution):
+            return execution
 
-    def handle_success(self) -> str:
-        self.context["response"] = self.context.get("response", ("", 200, {}))
-        self.log(
-            "success",
-            {
-                "response": self.context["response"],
-            },
-        )
-        return super().handle_success()
+        raise Exception("No hook execution found")
 
-    def handle_failure(self, e: Exception) -> str:
-        self.context["response"] = self.context.get("response", ("", 500, {}))
-        self.log(
-            "failed",
-            {
-                "response": self.context["response"],
-                "error": str(e),
-            },
-        )
-        return super().handle_failure(e)
+    def handle_start(self) -> None:
+        pass
+
+    def handle_success(self) -> None:
+        self.context.response = self.context.response or ("", 200, {})
+
+    def handle_failure(self, e: Exception) -> None:
+        self.context.response = self.context.response or ("", 500, {})
 
     def handle_lock_failed(self) -> None:
-        self.context["response"] = self.context.get("response", ("", 409, {}))
-        return super().handle_lock_failed()
+        self.context.response = self.context.response or ("", 409, {})
 
-    def get_response(self) -> Tuple[Dict, int, Dict]:
-        if "response" not in self.context:
-            raise Exception("No response found")
+    def get_response(self) -> ResponseData:
+        if self.context.response is None:
+            raise Exception("No response set")
 
-        return self.context["response"]
+        return self.context.response
 
-    def setup_context(self, request: RequestData):
-        self.context["request"] = (
-            request.body,
-            request.query_params,
-            request.headers,
-        )
-
-        self.init_stage_run(request.query_params.get(self.abstra_run_key))
+    def received_stage_run_id(self) -> Optional[str]:
+        return self.context.request.query_params.get(ABSTRA_RUN_KEY)

@@ -8,8 +8,9 @@ from abstra_internals.repositories.project.project import ProjectRepository
 class TestKanbanController(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        self.repository = LocalStageRunRepository()
         self.controller = KanbanController(
-            stage_run_repository=LocalStageRunRepository,
+            stage_run_repository=self.repository,
             project_repository=ProjectRepository,
         )
 
@@ -18,8 +19,8 @@ class TestKanbanController(TestCase):
         del self.controller
 
     def test_ancestors_logs(self):
-        parent = LocalStageRunRepository.create_initial("parent", {"a": 1, "b": 2})
-        child = LocalStageRunRepository.create_next(
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
         logs = self.controller.get_ancestor_logs(child.id)

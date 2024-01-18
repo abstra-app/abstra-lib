@@ -12,6 +12,14 @@ from ...execution.execution import Execution
 from ...linter.rules import rules
 from ...interface.cli.deploy import deploy
 from ...settings import Settings
+from ...repositories import (
+    stage_run_repository,
+    execution_logs_repository,
+    execution_repository,
+)
+from ...repositories.execution import ExecutionRepository
+from ...repositories.execution_logs import ExecutionLogsRepository
+from ...repositories.stage_run import StageRunRepository
 
 from ...debugger.vscode import (
     is_launch_json_configured,
@@ -94,6 +102,10 @@ class DoubleTransitionError(Exception):
 
 
 class MainController:
+    stage_run_repository: StageRunRepository
+    execution_repository: ExecutionRepository
+    execution_logs_repository: ExecutionLogsRepository
+
     def __init__(self):
         if not ProjectRepository.exists():
             ProjectRepository.initialize()
@@ -101,6 +113,10 @@ class MainController:
         requirements.ensure("abstra", get_distribution("abstra").version)
         RequirementsRepository.save(requirements)
         ensure_abstraignore(Settings.root_path)
+
+        self.stage_run_repository = stage_run_repository
+        self.execution_repository = execution_repository
+        self.execution_logs_repository = execution_logs_repository
 
     def deploy(self):
         rules = self.check_linters()

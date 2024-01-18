@@ -8,6 +8,9 @@ from abstra_internals.repositories.project.project import (
 
 
 class ConditionStrategyTest(TestCase):
+    def setUp(self) -> None:
+        self.repository = LocalStageRunRepository()
+
     def test_not_match_when_no_transitions(self):
         stage = ConditionStage(
             id="1",
@@ -16,9 +19,8 @@ class ConditionStrategyTest(TestCase):
             workflow_position=(0, 0),
             workflow_transitions=[],
         )
-        stage_run = LocalStageRunRepository.create_initial(
-            stage="1", data={"foo": "bar"}
-        )
+
+        stage_run = self.repository.create_initial(stage="1", data={"foo": "bar"})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -38,7 +40,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={})
+        stage_run = self.repository.create_initial(stage="1", data={})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -58,9 +60,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(
-            stage="1", data={"foo": "bar"}
-        )
+        stage_run = self.repository.create_initial(stage="1", data={"foo": "bar"})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": "bar"})])
 
@@ -80,7 +80,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={"foo": 1})
+        stage_run = self.repository.create_initial(stage="1", data={"foo": 1})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": 1})])
 
@@ -100,7 +100,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={})
+        stage_run = self.repository.create_initial(stage="1", data={})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={})])
 
@@ -120,9 +120,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(
-            stage="1", data={"foo": None}
-        )
+        stage_run = self.repository.create_initial(stage="1", data={"foo": None})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": None})])
 
@@ -142,9 +140,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(
-            stage="1", data={"foo": None}
-        )
+        stage_run = self.repository.create_initial(stage="1", data={"foo": None})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": None})])
 
@@ -164,7 +160,7 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={})
+        stage_run = self.repository.create_initial(stage="1", data={})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={})])
 
@@ -184,6 +180,6 @@ class ConditionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={"foo": ""})
+        stage_run = self.repository.create_initial(stage="1", data={"foo": ""})
         result = condition_strategy(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": ""})])

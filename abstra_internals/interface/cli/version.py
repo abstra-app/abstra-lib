@@ -1,10 +1,10 @@
 import pkg_resources, requests
+from ...utils.environment import IS_PRODUCTION
 from ...utils import get_package_version
-from ...utils.environment import IS_PREVIEW
 
 
 def check_latest_version(package_name="abstra"):
-    if not IS_PREVIEW:
+    if IS_PRODUCTION:
         return
 
     try:

@@ -1,7 +1,7 @@
 import flask, flask_cors, flask_talisman
 from flask_talisman import ALLOW_FROM
 
-from ...overloads import overloads
+from ...stdio_monkey_patch import override_stdio
 from ..controller import MainController
 from ...settings import SettingsController
 from ..blueprints.player import get_player_bp
@@ -12,7 +12,7 @@ def get_cloud_app(root: str):
     SettingsController.set_root_path(root)
     SettingsController.set_server_port(None)
 
-    overloads()
+    override_stdio(print_exceptions=True)
     controller = MainController()
     app = flask.Flask(__name__)
     flask_cors.CORS(app)

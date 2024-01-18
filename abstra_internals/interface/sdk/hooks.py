@@ -1,6 +1,7 @@
 import json
 from io import BytesIO
-from abstra_internals.execution.static_execution import get_static_execution_throwable
+
+from abstra_internals.execution import HookExecution
 
 
 def _app_json_parse(body: str):
@@ -17,9 +18,9 @@ def _multipart_form_parse(body: str, headers: dict):
 
 
 def get_raw_request():
-    execution = get_static_execution_throwable()
-    raw, args, headers = execution.context.get("request", (None, None, None))
-    return raw, args, headers
+    execution = HookExecution.get_current_hook_execution()
+    request = execution.context.request
+    return request.body, request.query_params, request.headers
 
 
 def get_request():
@@ -36,8 +37,8 @@ def get_request():
 
 
 def send_response(body="", status_code=200, headers={}):
-    execution = get_static_execution_throwable()
-    execution.context["response"] = (body, status_code, headers)
+    execution = HookExecution.get_current_hook_execution()
+    execution.context.response = (body, status_code, headers)
 
 
 def send_json(data={}, status_code=200, headers={}):
