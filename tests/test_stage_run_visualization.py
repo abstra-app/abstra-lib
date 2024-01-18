@@ -1,4 +1,4 @@
-from unittest import TestCase, skip
+from unittest import TestCase
 
 from .fixtures import init_dir, clear_dir
 
@@ -18,19 +18,19 @@ from abstra_internals.server.controller.kanban import (
 class TestStageRunVisualization(TestCase):
     def setUp(self):
         self.root = init_dir()
+        self.repository = LocalStageRunRepository()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
-        LocalStageRunRepository().clear()
 
     def test_alphabetical_order(self):
-        kanban_controller = KanbanController(LocalStageRunRepository, ProjectRepository)
+        kanban_controller = KanbanController(self.repository, ProjectRepository)
 
         data = {
             "foo": "bar",
             "baz": "qux",
         }
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data=data)
+        stage_run = self.repository.create_initial(stage="1", data=data)
 
         self.assertEqual(
             kanban_controller.stage_run_content(stage_run),
@@ -50,13 +50,13 @@ class TestStageRunVisualization(TestCase):
         )
         ProjectRepository.save(project)
 
-        kanban_controller = KanbanController(LocalStageRunRepository, ProjectRepository)
+        kanban_controller = KanbanController(self.repository, ProjectRepository)
 
         data = {
             "foo": "bar",
             "baz": "qux",
         }
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data=data)
+        stage_run = self.repository.create_initial(stage="1", data=data)
 
         self.assertEqual(
             kanban_controller.stage_run_content(stage_run),

@@ -1,9 +1,10 @@
+from abc import ABC, abstractmethod
 import copy, uuid, requests
 from datetime import datetime
 from pydantic.dataclasses import dataclass
-from typing import Optional, List, Dict, Type, Mapping, Any
+from typing import Optional, List, Dict, Mapping, Any
 
-from ..utils import real_datetime_fromisoformat
+from ..utils.datetime import from_utc_iso_string
 from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS
 
 end_status = ["failed", "finished", "abandoned"]
@@ -54,17 +55,15 @@ class StageRun:
         return new_stage_run
 
 
-class StageRunRepository:
+class StageRunRepository(ABC):
     valid_filter_keys = ["data", "stage", "status", "parent_id"]
 
-    @classmethod
-    def validate_filter_keys(cls, filter: Dict) -> None:
+    def validate_filter_keys(self, filter: Dict) -> None:
         for key in filter.keys():
-            if key not in cls.valid_filter_keys:
+            if key not in self.valid_filter_keys:
                 raise Exception(f"Invalid filter key {key}")
 
-    @classmethod
-    def hydrate_next_dto(cls, parent: StageRun, dtos: List[Dict]) -> List[Dict]:
+    def hydrate_next_dto(self, parent: StageRun, dtos: List[Dict]) -> List[Dict]:
         next_dtos = []
 
         for dto in dtos:
@@ -74,60 +73,61 @@ class StageRunRepository:
 
         return next_dtos
 
-    @classmethod
-    def find(cls, filter: Dict) -> List[StageRun]:
+    @abstractmethod
+    def find(self, filter: Dict) -> List[StageRun]:
         raise NotImplementedError()
 
-    @classmethod
-    def find_ancestors(cls, id: str) -> List[StageRun]:
+    @abstractmethod
+    def find_ancestors(self, id: str) -> List[StageRun]:
         raise NotImplementedError()
 
-    @classmethod
-    def find_leaves(cls, filter: Dict) -> List[StageRun]:
+    @abstractmethod
+    def find_leaves(self, filter: Dict) -> List[StageRun]:
         raise NotImplementedError()
 
-    @classmethod
-    def get(cls, id: str) -> StageRun:
+    @abstractmethod
+    def get(self, id: str) -> StageRun:
         raise NotImplementedError()
 
-    @classmethod
+    @abstractmethod
     def change_state(
-        cls, id: str, status: str, execution_id: Optional[str] = None
+        self, id: str, status: str, execution_id: Optional[str] = None
     ) -> bool:
         raise NotImplementedError()
 
-    @classmethod
-    def create_initial(cls, stage: str) -> StageRun:
+    @abstractmethod
+    def create_initial(self, stage: str, data: dict = {}) -> StageRun:
         raise NotImplementedError()
 
-    @classmethod
-    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
+    @abstractmethod
+    def create_next(self, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         raise NotImplementedError()
 
-    @classmethod
-    def fork(cls, stage_run: StageRun) -> StageRun:
+    @abstractmethod
+    def fork(self, stage_run: StageRun) -> StageRun:
         raise NotImplementedError()
 
 
 class LocalStageRunRepository(StageRunRepository):
-    _stage_runs: List[StageRun] = []
+    _stage_runs: List[StageRun]
 
-    @classmethod
-    def clear(cls):
-        cls._stage_runs = []
-        cls._locks = []
+    def __init__(self):
+        self._stage_runs = []
+        self._locks = []
 
-    @classmethod
-    def get(cls, id: str) -> StageRun:
-        for stage_run in cls._stage_runs:
+    def clear(self):
+        self._stage_runs = []
+        self._locks = []
+
+    def get(self, id: str) -> StageRun:
+        for stage_run in self._stage_runs:
             if stage_run.id == id:
                 return stage_run
 
         raise Exception(f"StageRun with id {id} not found")
 
-    @classmethod
-    def find(cls, filter: Dict) -> List[StageRun]:
-        cls.validate_filter_keys(filter)
+    def find(self, filter: Dict) -> List[StageRun]:
+        self.validate_filter_keys(filter)
 
         stage = filter.get("stage")
         data = filter.get("data")
@@ -136,7 +136,7 @@ class LocalStageRunRepository(StageRunRepository):
 
         return [
             stage_run
-            for stage_run in cls._stage_runs
+            for stage_run in self._stage_runs
             if (
                 (not stage or stage_run.stage == stage)
                 and (not data or stage_run.data == data)
@@ -145,28 +145,25 @@ class LocalStageRunRepository(StageRunRepository):
             )
         ]
 
-    @classmethod
-    def find_ancestors(cls, id: str) -> List[StageRun]:
+    def find_ancestors(self, id: str) -> List[StageRun]:
         ancestors = []
-        stage_run = cls.get(id)
+        stage_run = self.get(id)
         ancestors.append(stage_run)
         while stage_run.parent_id is not None:
-            stage_run = cls.get(stage_run.parent_id)
+            stage_run = self.get(stage_run.parent_id)
             ancestors.insert(0, stage_run)
         return ancestors
 
-    @classmethod
-    def find_leaves(cls, filter: Dict) -> List[StageRun]:
-        cls.validate_filter_keys(filter)
-        filter_matches = cls.find(filter)
-        parent_ids = set(u.parent_id for u in cls._stage_runs)
+    def find_leaves(self, filter: Dict) -> List[StageRun]:
+        self.validate_filter_keys(filter)
+        filter_matches = self.find(filter)
+        parent_ids = set(u.parent_id for u in self._stage_runs)
 
         return [
             stage_run for stage_run in filter_matches if stage_run.id not in parent_ids
         ]
 
-    @classmethod
-    def create_initial(cls, stage: str, data: dict = {}) -> StageRun:
+    def create_initial(self, stage: str, data: dict = {}) -> StageRun:
         stage_run = StageRun(
             id=str(uuid.uuid4()),
             status="waiting",
@@ -176,14 +173,13 @@ class LocalStageRunRepository(StageRunRepository):
             created_at=datetime.now(),
         )
 
-        cls._stage_runs.append(stage_run)
+        self._stage_runs.append(stage_run)
 
         return stage_run
 
-    @classmethod
-    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
+    def create_next(self, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         created = []
-        for dto in cls.hydrate_next_dto(parent, dtos):
+        for dto in self.hydrate_next_dto(parent, dtos):
             stage_run = StageRun(
                 id=str(uuid.uuid4()),
                 parent_id=parent.id,
@@ -192,14 +188,13 @@ class LocalStageRunRepository(StageRunRepository):
                 created_at=datetime.now(),
             )
             created.append(stage_run)
-            cls._stage_runs.append(stage_run)
+            self._stage_runs.append(stage_run)
         return created
 
-    @classmethod
     def change_state(
-        cls, id: str, status: str, execution_id: Optional[str] = None
+        self, id: str, status: str, execution_id: Optional[str] = None
     ) -> bool:
-        stage_run = cls.get(id)
+        stage_run = self.get(id)
 
         if not stage_run.execution_id and execution_id is not None:
             stage_run.execution_id = execution_id
@@ -213,20 +208,18 @@ class LocalStageRunRepository(StageRunRepository):
 
         return False
 
-    @classmethod
-    def fork(cls, stage_run: StageRun) -> StageRun:
+    def fork(self, stage_run: StageRun) -> StageRun:
         if stage_run.parent_id == None:
-            return cls.create_initial(stage_run.stage, stage_run.data)
-        parent_stage_run = cls.get(stage_run.parent_id)
+            return self.create_initial(stage_run.stage, stage_run.data)
+        parent_stage_run = self.get(stage_run.parent_id)
         new_stage_run_dto = stage_run.clone_to_waiting().to_dto()
-        stage_runs = cls.create_next(parent_stage_run, [new_stage_run_dto])
+        stage_runs = self.create_next(parent_stage_run, [new_stage_run_dto])
         return stage_runs[0]
 
 
-class ProductionStageRunRepository(StageRunRepository):
-    @classmethod
+class RemoteStageRunRepository(StageRunRepository):
     def _request(
-        cls,
+        self,
         method: str,
         path: str,
         body: Any = None,
@@ -255,46 +248,40 @@ class ProductionStageRunRepository(StageRunRepository):
             data=dto["data"],
             status=dto["status"],
             parent_id=dto["parentId"],
-            created_at=real_datetime_fromisoformat(dto["createdAt"]),
+            created_at=from_utc_iso_string(dto["createdAt"]),
         )
 
-    @classmethod
-    def get(cls, id: str) -> StageRun:
-        r = cls._request("GET", path=f"/{id}")
-        return cls.create_from_dto(r.json())
+    def get(self, id: str) -> StageRun:
+        r = self._request("GET", path=f"/{id}")
+        return self.create_from_dto(r.json())
 
-    @classmethod
-    def find(cls, filter: Dict) -> List[StageRun]:
-        cls.validate_filter_keys(filter)
-        r = cls._request("GET", path="/", params=filter)
-        return [cls.create_from_dto(dto) for dto in r.json()]
+    def find(self, filter: Dict) -> List[StageRun]:
+        self.validate_filter_keys(filter)
+        r = self._request("GET", path="/", params=filter)
+        return [self.create_from_dto(dto) for dto in r.json()]
 
-    @classmethod
-    def find_ancestors(cls, id: str) -> List[StageRun]:
-        r = cls._request("GET", path=f"/{id}/ancestors")
-        return [cls.create_from_dto(dto) for dto in r.json()]
+    def find_ancestors(self, id: str) -> List[StageRun]:
+        r = self._request("GET", path=f"/{id}/ancestors")
+        return [self.create_from_dto(dto) for dto in r.json()]
 
-    @classmethod
-    def create_initial(cls, stage: str) -> StageRun:
+    def create_initial(self, stage: str, data: dict = {}) -> StageRun:
         body = dict(data={}, stage=stage)
-        r = cls._request("POST", path="/", body=body)
-        return cls.create_from_dto(r.json())
+        r = self._request("POST", path="/", body=body)
+        return self.create_from_dto(r.json())
 
-    @classmethod
-    def create_next(cls, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
+    def create_next(self, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         if len(dtos) == 0:
             return []
 
         parent_id = parent.id
-        next_dtos = cls.hydrate_next_dto(parent, dtos)
-        r = cls._request("PUT", path=f"/{parent_id}/children", body=next_dtos)
-        return [cls.create_from_dto(dto) for dto in r.json()]
+        next_dtos = self.hydrate_next_dto(parent, dtos)
+        r = self._request("PUT", path=f"/{parent_id}/children", body=next_dtos)
+        return [self.create_from_dto(dto) for dto in r.json()]
 
-    @classmethod
     def change_state(
-        cls, id: str, status: str, execution_id: Optional[str] = None
+        self, id: str, status: str, execution_id: Optional[str] = None
     ) -> bool:
-        r = cls._request(
+        r = self._request(
             "PATCH", path=f"/{id}", body={"status": status}, raise_for_status=False
         )
 
@@ -305,9 +292,15 @@ class ProductionStageRunRepository(StageRunRepository):
 
         return True
 
+    def find_leaves(self, filter: Dict) -> List[StageRun]:
+        raise NotImplementedError()
 
-def get_stage_run_repository() -> Type[StageRunRepository]:
+    def fork(self, stage_run: StageRun) -> StageRun:
+        raise NotImplementedError()
+
+
+def stage_run_repository_factory() -> StageRunRepository:
     if SIDECAR_URL is None:
-        return LocalStageRunRepository
+        return LocalStageRunRepository()
     else:
-        return ProductionStageRunRepository
+        return RemoteStageRunRepository()

@@ -2,13 +2,13 @@ import queue, typing, unittest
 from collections import deque
 from json import loads, dumps
 
-from abstra_internals.overloads import overloads
+from abstra_internals.stdio_monkey_patch import override_stdio
 from abstra_internals.execution.execution import RequestData
 from abstra_internals.execution.form_execution import FormExecution
 from abstra_internals.repositories.project.project import FormStage
 from abstra_internals.execution.stoppable_thread import StoppableThread
 
-overloads()
+override_stdio(print_exceptions=True)
 
 
 class MockConnection:

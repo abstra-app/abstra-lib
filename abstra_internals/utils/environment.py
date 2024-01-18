@@ -8,7 +8,7 @@ BUILD_ID = os.getenv("ABSTRA_BUILD_ID") or "dev"
 PROJECT_ID = os.getenv("ABSTRA_PROJECT_ID") or "dev-project-id"
 CLIENT_ID = os.getenv("ABSTRA_CLIENT_ID") or "dev-client-id"
 
-IS_PREVIEW = os.getenv("ABSTRA_ENVIRONMENT") != "production"
+IS_PRODUCTION = os.getenv("ABSTRA_ENVIRONMENT") == "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
@@ -22,3 +22,5 @@ AUTHN_URL = os.getenv("ABSTRA_AUTHN_URL")
 SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
+WORKER_UUID = lambda: os.getenv("ABSTRA_WORKER_UUID")  # Runtime set
+SERVER_UUID = lambda: os.getenv("ABSTRA_SERVER_UUID")  # Runtime set

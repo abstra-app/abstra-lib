@@ -1,6 +1,5 @@
 from unittest import TestCase
 from .iterator import iterator_strategy
-from unittest import TestCase
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.repositories.project.project import (
     IteratorStage,
@@ -9,6 +8,9 @@ from abstra_internals.repositories.project.project import (
 
 
 class IteratorStrategyTest(TestCase):
+    def setUp(self) -> None:
+        self.repository = LocalStageRunRepository()
+
     def test_simple_foreach(self):
         stage = IteratorStage(
             id="s1",
@@ -25,9 +27,7 @@ class IteratorStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(
-            stage="s1", data={"foo": [1, 2, 3]}
-        )
+        stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
         result = iterator_strategy(stage, stage_run)
         self.assertEqual(
             result,
@@ -54,7 +54,7 @@ class IteratorStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="s1", data={"foo": 1})
+        stage_run = self.repository.create_initial(stage="s1", data={"foo": 1})
         result = iterator_strategy(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -74,6 +74,6 @@ class IteratorStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="s1", data={})
+        stage_run = self.repository.create_initial(stage="s1", data={})
         result = iterator_strategy(stage, stage_run)
         self.assertEqual(result, [])

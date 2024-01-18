@@ -66,6 +66,9 @@ def get_player_bp(controller: MainController):
                 request=request_data,
                 connection=conn,
                 stage=form,
+                execution_logs_repository=controller.execution_logs_repository,
+                execution_repository=controller.execution_repository,
+                stage_run_repository=controller.stage_run_repository,
             )
 
             execution.run()
@@ -133,6 +136,9 @@ def get_player_bp(controller: MainController):
             is_initial=controller.is_initial(hook.id),
             request=request_data,
             stage=hook,
+            execution_logs_repository=controller.execution_logs_repository,
+            execution_repository=controller.execution_repository,
+            stage_run_repository=controller.stage_run_repository,
         )
 
         execution.run()

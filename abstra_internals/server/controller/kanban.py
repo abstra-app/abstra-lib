@@ -1,8 +1,10 @@
+from abstra_internals.utils.datetime import (
+    to_utc_iso_string,
+)
 import flask
 from datetime import datetime
 from pydantic.dataclasses import dataclass
 from typing import Any, List, Optional, Type, Sequence, Tuple
-from ...local_log import LocalLogMessage, get_local_logs
 from .workflows import make_stage_dto
 from ...repositories.project.project import (
     ProjectRepository,
@@ -10,10 +12,17 @@ from ...repositories.project.project import (
     FormStage,
 )
 from ...repositories.stage_run import (
-    get_stage_run_repository,
     StageRunRepository,
     StageRun,
 )
+
+from ...repositories.execution_logs import (
+    LogEntry,
+    StdioLogEntry,
+    UnhandledExceptionLogEntry,
+)
+
+from ...repositories import stage_run_repository, execution_logs_repository
 
 
 @dataclass
@@ -43,7 +52,7 @@ class StageRunCard:
     def to_dict(self) -> dict:
         return dict(
             id=self.id,
-            created_at=self.created_at.isoformat(),
+            created_at=to_utc_iso_string(self.created_at),
             status=self.status,
             content=[item.to_dict() for item in self.content],
         )
@@ -106,7 +115,7 @@ class KanbanData:
 class KanbanController:
     def __init__(
         self,
-        stage_run_repository: Type[StageRunRepository],
+        stage_run_repository: StageRunRepository,
         project_repository: Type[ProjectRepository],
     ) -> None:
         self.stage_run_repository = stage_run_repository
@@ -196,16 +205,21 @@ class KanbanController:
 
     def get_ancestor_logs(
         self, stage_run_id: str
-    ) -> List[Tuple[StageRun, List[LocalLogMessage]]]:
+    ) -> List[Tuple[StageRun, List[LogEntry]]]:
         ancestors = self.stage_run_repository.find_ancestors(stage_run_id)
         return [
-            (ancestor, get_local_logs(ancestor.execution_id)) for ancestor in ancestors
+            (
+                ancestor,
+                execution_logs_repository.get(execution_id=ancestor.execution_id)
+                if ancestor.execution_id
+                else [],
+            )
+            for ancestor in ancestors
         ]
 
 
 def get_editor_bp():
     project_repository = ProjectRepository
-    stage_run_repository = get_stage_run_repository()
 
     controller = KanbanController(stage_run_repository, project_repository)
     bp = flask.Blueprint("kanban", __name__)
@@ -227,7 +241,19 @@ def get_editor_bp():
             {
                 "stage": stage_from_run(stage_run),
                 "stage_run": stage_run.to_dto(),
-                "logs": [log.json() for log in logs],
+                "logs": [
+                    dict(
+                        event=log.event,
+                        payload=log.payload,
+                        createdAt=to_utc_iso_string(log.created_at),
+                    )
+                    for log in logs
+                    if (
+                        isinstance(log, StdioLogEntry)
+                        or isinstance(log, UnhandledExceptionLogEntry)
+                    )
+                    and log.payload["text"].strip() != ""
+                ],
             }
             for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
         ]

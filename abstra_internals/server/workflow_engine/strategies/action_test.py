@@ -9,6 +9,9 @@ from abstra_internals.repositories.project.project import (
 
 
 class ActionStrategyTest(TestCase):
+    def setUp(self) -> None:
+        self.repository = LocalStageRunRepository()
+
     def test_advances_when_finished(self):
         stage = JobStage(
             id="1",
@@ -25,7 +28,7 @@ class ActionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={})
+        stage_run = self.repository.create_initial(stage="1", data={})
         result = action_strategy(stage, stage_run, "jobs:finished")
         self.assertEqual(result, [dict(stage="target_id", data={})])
 
@@ -46,6 +49,6 @@ class ActionStrategyTest(TestCase):
                 )
             ],
         )
-        stage_run = LocalStageRunRepository.create_initial(stage="1", data={})
+        stage_run = self.repository.create_initial(stage="1", data={})
         result = action_strategy(stage, stage_run, "forms:abandoned")
         self.assertEqual(result, [dict(stage="1", data={})])

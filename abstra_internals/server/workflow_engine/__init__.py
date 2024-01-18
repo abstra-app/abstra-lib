@@ -1,6 +1,23 @@
 from typing import Type, List, Dict
+
+from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+
+from ...repositories.stage_run import StageRunRepository
+from ...execution.execution import Execution, UnsetStageRun
+from ...execution.script_execution import ScriptExecution
+from ...execution.job_execution import JobExecution
+from ...repositories.stage_run import StageRun
+from ...threaded import threaded
+
+from ...repositories import (
+    stage_run_repository,
+    execution_repository,
+    execution_logs_repository,
+)
+
 from .strategies import condition_strategy, action_strategy, iterator_strategy
-from ...repositories.stage_run import get_stage_run_repository, StageRunRepository
+from ...repositories.stage_run import StageRunRepository
 from ...execution.execution import Execution, UnsetStageRun
 from ...execution.script_execution import ScriptExecution
 from ...execution.job_execution import JobExecution
@@ -13,12 +30,20 @@ from ...repositories.project.project import (
     ControlStage,
     ScriptStage,
     JobStage,
+    ActionStage,
 )
 
 
 class WorkflowEngine:
-    def __init__(self, stage_run_repo: Type[StageRunRepository]):
+    def __init__(
+        self,
+        stage_run_repo: StageRunRepository,
+        execution_repository: ExecutionRepository,
+        execution_logs_repository: ExecutionLogsRepository,
+    ):
         self.stage_run_repo = stage_run_repo
+        self.execution_repository = execution_repository
+        self.execution_logs_repository = execution_logs_repository
 
     def get_stage(self, id: str):
         # TODO: inject this
@@ -45,13 +70,24 @@ class WorkflowEngine:
 
     @threaded
     def run_job(self, stage: JobStage):
-        execution = JobExecution(stage)
+        execution = JobExecution(
+            stage,
+            stage_run_repository=self.stage_run_repo,
+            execution_repository=self.execution_repository,
+            execution_logs_repository=self.execution_logs_repository,
+        )
         execution.run()
         self.notify_ran(execution)
 
     @threaded
     def run_script(self, stage: ScriptStage, stage_run: StageRun):
-        execution = ScriptExecution(stage, stage_run.id)
+        execution = ScriptExecution(
+            stage,
+            stage_run_id=stage_run.id,
+            stage_run_repository=self.stage_run_repo,
+            execution_repository=self.execution_repository,
+            execution_logs_repository=self.execution_logs_repository,
+        )
         execution.run()
         self.notify_ran(execution)
 
@@ -82,7 +118,9 @@ class WorkflowEngine:
 
 
 def factory():
-    return WorkflowEngine(get_stage_run_repository())
+    return WorkflowEngine(
+        stage_run_repository, execution_repository, execution_logs_repository
+    )
 
 
 workflow_engine = factory()

@@ -7,6 +7,15 @@ from ..workflow_engine import workflow_engine
 from ...execution.execution import RequestData
 from ...execution.hook_execution import HookExecution
 from ...repositories.project.project import ProjectRepository
+from abstra_internals.repositories import (
+    stage_run_repository,
+    execution_logs_repository,
+    execution_repository,
+)
+
+from abstra_internals.repositories.execution_logs import (
+    FormEventLogEntry,
+)
 
 
 def get_editor_bp(controller: MainController):
@@ -74,18 +83,43 @@ def get_editor_bp(controller: MainController):
 
         project = ProjectRepository.load()
         is_initial = project.is_initial(hook)
-        execution = HookExecution(hook, is_initial, request_data)
+        execution = HookExecution(
+            hook,
+            is_initial,
+            request_data,
+            execution_repository=execution_repository,
+            execution_logs_repository=execution_logs_repository,
+            stage_run_repository=stage_run_repository,
+        )
 
         execution.run()
         body, status, headers = execution.get_response()
         workflow_engine.notify_ran(execution)
 
+        stdout: str = ""
+        stderr: str = ""
+
+        for entry in execution_logs_repository.get(execution.id):
+            if isinstance(entry, FormEventLogEntry):
+                continue
+
+            text = entry.payload.get("text")
+            if not text:
+                continue
+
+            if entry.event == "stdout":
+                stdout += text
+            elif entry.event == "stderr":
+                stderr += text
+            elif entry.event == "unhandled-exception":
+                stderr += text
+
         return {
             "body": body,
             "status": status,
             "headers": headers,
-            "stdout": "".join(execution.stdout if execution else []),
-            "stderr": "".join(execution.stderr if execution else []),
+            "stdout": stdout,
+            "stderr": stderr,
         }
 
     return bp

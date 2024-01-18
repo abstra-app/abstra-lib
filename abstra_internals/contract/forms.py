@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Union, List, Literal, TypedDict
+from typing import Optional, Union, List, Literal, TypedDict, Dict
 
 
 class ValidationResult(TypedDict):
@@ -7,21 +7,48 @@ class ValidationResult(TypedDict):
     message: str
 
 
+BrowserMessageTypes = Literal[
+    "browser:try-disconnect",
+    "auth:saved-jwt",
+    "user-event",
+    "form-response",
+]
+
+PythonMessageType = Literal[
+    "stdout",
+    "stderr",
+    "auth:require-info",
+    "auth:invalid-jwt",
+    "auth:valid-jwt",
+    "redirect",
+    "alert",
+    "execute-js:request",
+    "files:changed",
+    "stage-run:lock-failed",
+    "execution-id",
+    "program:end",
+    "form-update",
+    "form",
+]
+
+MessageType = Union[BrowserMessageTypes, PythonMessageType]
+
+
 class Message:
-    type: str
+    type: PythonMessageType
     data: dict
 
-    def __init__(self, data: dict):
+    def __init__(self, data: Dict):
         self.data = data
 
-    def to_json(self, is_preview: bool):
+    def to_json(self) -> Dict[str, Union[str, dict]]:
         return {"type": self.type, **self.data}
 
 
 class StdioMessage(Message):
-    type = "stdio"
+    type: PythonMessageType
 
-    def __init__(self, type: str, log: str):
+    def __init__(self, type: Literal["stdout", "stderr"], log: str):
         super().__init__({"log": log})
         self.type = type
 

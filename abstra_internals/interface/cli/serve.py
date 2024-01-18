@@ -1,7 +1,7 @@
 import logging, os, threading, webbrowser
 
 from ...settings import Settings
-from ...overloads import overloads
+from ...stdio_monkey_patch import override_stdio
 from ...server import get_local_app
 from .messages import serve_message
 from ...utils.environment import HOST
@@ -24,7 +24,7 @@ def serve(
     # used to block hackerforms lib from opening
     os.environ["ABSTRA_SERVER"] = "true"
 
-    overloads()
+    override_stdio(print_exceptions=False)
     controller = MainController()
 
     watch_py_root_files()

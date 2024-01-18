@@ -2,7 +2,7 @@ import flask
 
 from ...utils import is_valid_email
 from ...jwt_auth import endcode_fake_jwt
-from ...utils.environment import IS_PREVIEW, AUTHN_URL, CLIENT_ID, PROJECT_ID
+from ...utils.environment import IS_PRODUCTION, AUTHN_URL, CLIENT_ID, PROJECT_ID
 
 
 def get_fake_auth_proviver_bp():
@@ -50,7 +50,7 @@ def get_fake_auth_proviver_bp():
 def get_player_bp():
     bp = flask.Blueprint("auth", __name__)
 
-    if not IS_PREVIEW and AUTHN_URL:
+    if IS_PRODUCTION and AUTHN_URL:
         provider = "abstra"
         authority = AUTHN_URL
     else:
