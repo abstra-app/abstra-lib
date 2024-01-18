@@ -1,8 +1,9 @@
-import datetime, threading, traceback, uuid
+import datetime, threading, uuid
 
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import ClassVar, Dict, Literal, Optional, Tuple, Union, Any
+from abstra_internals.compatibility import compat_traceback
 
 from abstra_internals.utils.datetime import to_utc_iso_string
 
@@ -184,9 +185,7 @@ class Execution:
                 execution_id=self.id,
                 payload={
                     "text": "".join(
-                        traceback.format_exception(
-                            etype=type(e), value=e, tb=e.__traceback__
-                        ),
+                        compat_traceback.format_exception(e),
                     ),
                 },
                 sequence=self.log_count,
