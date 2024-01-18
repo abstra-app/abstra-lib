@@ -1,7 +1,7 @@
 import flask
 from typing import Optional
 from ...repositories.stage_run import StageRunRepository
-from ...repositories import stage_run_repository_factory
+from ...repositories import stage_run_repository
 
 from ...usage import usage
 
@@ -26,7 +26,6 @@ class StageRunsController:
 
 def get_editor_bp():
     bp = flask.Blueprint("editor_stage_runs", __name__)
-    stage_run_repository = stage_run_repository_factory()
     controller = StageRunsController(stage_run_repository)
 
     @bp.get("/")
