@@ -18,7 +18,7 @@ PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
 FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
 AUTHN_URL = os.getenv("ABSTRA_AUTHN_URL")
 
-
+# gunicorn.conf.py imports this variables, do not move them
 SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")

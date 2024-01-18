@@ -6,6 +6,9 @@ import flask_sock, traceback, inspect
 from typing import Literal, Optional, Dict, TYPE_CHECKING, Tuple
 import traceback
 
+from abstra_internals.compatibility import compat_traceback
+
+
 from .execution import ABSTRA_RUN_KEY, Execution, RequestData, NoExecutionFound
 from ..contract import forms_contract
 from ..utils import deserialize, serialize
@@ -209,9 +212,7 @@ class FormExecution(Execution):
             forms_contract.StdioMessage(
                 "stderr",
                 "".join(
-                    traceback.format_exception(
-                        etype=type(e), value=e, tb=e.__traceback__
-                    ),
+                    compat_traceback.format_exception(e),
                 ),
             )
         )
