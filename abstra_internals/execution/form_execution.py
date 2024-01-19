@@ -179,8 +179,8 @@ class FormExecution(Execution):
         )
         self.send(forms_contract.AlertMessage(message, severity))
 
-    def redirect(self, url: str, query_params: dict):
-        query_params = query_params or self.query_params
+    def redirect(self, url: str, query_params: Optional[dict] = None):
+        query_params = query_params if query_params is not None else self.query_params
         self.send(forms_contract.RedirectMessage(url, query_params))
 
     # forms
