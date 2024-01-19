@@ -1,28 +1,22 @@
+import jwt, typing
 from dataclasses import dataclass
-import jwt, datetime, typing
 from .utils import is_valid_email
-from .utils.environment import PUBLIC_KEY
+from .utils.environment import PUBLIC_KEY, PROJECT_ID
 
 
 def decode_jwt(jwt_str: str):
     try:
         if PUBLIC_KEY:
-            return jwt.decode(jwt_str, key=PUBLIC_KEY, algorithms=["RS256"])
-        return jwt.decode(jwt_str, options={"verify_signature": False})
+            return jwt.decode(
+                jwt_str, key=PUBLIC_KEY, algorithms=["RS256"], audience=PROJECT_ID
+            )
+        return jwt.decode(
+            jwt_str, options={"verify_signature": False}, audience=PROJECT_ID
+        )
+
     except Exception as e:
         print("error decoding jwt", e)
         return None
-
-
-def endcode_fake_jwt(email: str):
-    return jwt.encode(
-        key="fake",
-        algorithm="HS256",
-        payload={
-            "email": email,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
-        },
-    )
 
 
 @dataclass

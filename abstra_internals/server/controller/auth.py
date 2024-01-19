@@ -1,13 +1,12 @@
 import flask
 
+
 from ...utils import is_valid_email
-from ...jwt_auth import endcode_fake_jwt
-from ...utils.environment import IS_PRODUCTION, AUTHN_URL, CLIENT_ID, PROJECT_ID
+from ...repositories import authn_repository
 
 
-def get_fake_auth_proviver_bp():
-    bp = flask.Blueprint("fake-provider", __name__)
-    emails = {}
+def get_player_bp():
+    bp = flask.Blueprint("auth", __name__)
 
     @bp.post("/authenticate")
     def _authenticate():
@@ -19,7 +18,10 @@ def get_fake_auth_proviver_bp():
         if not email or not is_valid_email(email):
             return flask.abort(400)
 
-        emails[email] = True
+        ok = authn_repository.authenticate(email)
+        if not ok:
+            return flask.abort(400)
+
         return {"ok": True}
 
     @bp.post("/verify")
@@ -33,39 +35,10 @@ def get_fake_auth_proviver_bp():
         if not email or not token:
             return flask.abort(400)
 
-        if token == "000000":
-            # for testing purposes
+        jwt = authn_repository.verify(email, token)
+        if not jwt:
             return flask.abort(404)
 
-        verified = emails.pop(email, False)
-        if not verified:
-            return flask.abort(404)
-
-        jwt = endcode_fake_jwt(email)
         return {"jwt": jwt}
-
-    return bp
-
-
-def get_player_bp():
-    bp = flask.Blueprint("auth", __name__)
-
-    if IS_PRODUCTION and AUTHN_URL:
-        provider = "abstra"
-        authority = AUTHN_URL
-    else:
-        provider = "local"
-        authority = f"/_auth"
-        auth_provider_bp = get_fake_auth_proviver_bp()
-        bp.register_blueprint(auth_provider_bp)
-
-    @bp.get("/config")
-    def _get_config():
-        return {
-            "authority": authority,
-            "provider": provider,
-            "clientId": CLIENT_ID,
-            "projectId": PROJECT_ID,
-        }
 
     return bp

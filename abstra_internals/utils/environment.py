@@ -6,7 +6,6 @@ ENABLE_TALISMAN = os.getenv("ABSTRA_ENABLE_TALISMAN", "false").lower() == "true"
 
 BUILD_ID = os.getenv("ABSTRA_BUILD_ID") or "dev"
 PROJECT_ID = os.getenv("ABSTRA_PROJECT_ID") or "dev-project-id"
-CLIENT_ID = os.getenv("ABSTRA_CLIENT_ID") or "dev-client-id"
 
 IS_PRODUCTION = os.getenv("ABSTRA_ENVIRONMENT") == "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
@@ -16,7 +15,6 @@ CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 
 PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
 FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
-AUTHN_URL = os.getenv("ABSTRA_AUTHN_URL")
 
 # gunicorn.conf.py imports this variables, do not move them
 SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
