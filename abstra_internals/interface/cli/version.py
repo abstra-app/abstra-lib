@@ -3,13 +3,18 @@ from ...utils.environment import IS_PRODUCTION
 from ...utils import get_package_version
 
 
+TIMEOUT = 5
+
+
 def check_latest_version(package_name="abstra"):
     if IS_PRODUCTION:
         return
 
     try:
         current_version = get_package_version(package_name)
-        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
+        response = requests.get(
+            f"https://pypi.org/pypi/{package_name}/json", timeout=TIMEOUT
+        )
         latest_version = response.json()["info"]["version"]
 
         if current_version == latest_version:
