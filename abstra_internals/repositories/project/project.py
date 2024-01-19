@@ -132,7 +132,6 @@ class HookStage:
             "file": self.file,
             "path": self.path,
             "title": self.title,
-            "code_content": _safe_read_code_content(self.file_path),
             "enabled": self.enabled,
             "workflow_position": self.workflow_position,
             "is_initial": self.is_initial,
@@ -228,7 +227,6 @@ class ScriptStage:
             "id": self.id,
             "file": self.file,
             "title": self.title,
-            "code_content": _safe_read_code_content(self.file_path),
             "is_initial": self.is_initial,
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
@@ -317,7 +315,6 @@ class JobStage:
             "id": self.id,
             "file": self.file,
             "title": self.title,
-            "code_content": _safe_read_code_content(self.file_path),
             "schedule": self.schedule,
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
@@ -434,7 +431,6 @@ class FormStage:
             "id": self.id,
             "path": self.path,
             "title": self.title,
-            "code_content": _safe_read_code_content(self.file_path),
             "is_initial": self.is_initial,
             "auto_start": self.auto_start,
             "allow_restart": allow_restart,
@@ -1033,13 +1029,6 @@ def _update_file(
         old_file.rename(new_file)
 
     stage.file = new_file_relative
-
-
-def _safe_read_code_content(file_path: Path) -> Optional[str]:
-    if file_path.exists():
-        return file_path.read_text(encoding="utf-8")
-    else:
-        return None
 
 
 class ProjectRepository:
