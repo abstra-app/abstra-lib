@@ -1,3 +1,4 @@
+from typing import Optional
 from abstra_internals.constants import get_persistent_dir  # exported
 from abstra_internals.execution.form_execution import get_form_execution_throwable
 
@@ -17,7 +18,7 @@ def alert(message: str, severity: str = "info"):
     return execution.alert(message, severity)
 
 
-def redirect(url: str, query_params: dict = {}):
+def redirect(url: str, query_params: Optional[dict] = None):
     execution = get_form_execution_throwable()
     return execution.redirect(url, query_params)
 
