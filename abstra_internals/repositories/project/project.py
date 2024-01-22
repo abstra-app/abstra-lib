@@ -934,14 +934,6 @@ class Project:
         return stage
 
     def delete_stage(self, id: str, remove_file: bool = False):
-        self.delete_transition_by_target(id)
-        self.forms = [f for f in self.forms if f.id != id]
-        self.hooks = [h for h in self.hooks if h.id != id]
-        self.jobs = [j for j in self.jobs if j.id != id]
-        self.scripts = [s for s in self.scripts if s.id != id]
-        self.iterators = [i for i in self.iterators if i.id != id]
-        self.conditions = [c for c in self.conditions if c.id != id]
-
         if remove_file:
             stage = self.get_action(id)
             if not stage:
@@ -949,6 +941,14 @@ class Project:
             path = Settings.root_path.joinpath(stage.file)
             if path.exists():
                 os.remove(path.absolute())
+
+        self.delete_transition_by_target(id)
+        self.forms = [f for f in self.forms if f.id != id]
+        self.hooks = [h for h in self.hooks if h.id != id]
+        self.jobs = [j for j in self.jobs if j.id != id]
+        self.scripts = [s for s in self.scripts if s.id != id]
+        self.iterators = [i for i in self.iterators if i.id != id]
+        self.conditions = [c for c in self.conditions if c.id != id]
 
     def is_initial(self, target_stage: ActionStage) -> bool:
         for stage in self.workflow_stages:
