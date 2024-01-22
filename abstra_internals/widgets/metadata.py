@@ -2636,10 +2636,10 @@ metadata = {
                 },
                 {
                     "argName": "multiple",
-                    "description": "Whether the user will be allowed to select multiple rows. Defaults to True.",
+                    "description": "Whether the user will be allowed to select multiple rows. Defaults to False.",
                     "typeName": "bool",
                     "isKwarg": True,
-                    "default": "True",
+                    "default": "False",
                 },
                 {
                     "argName": "initial_value",
