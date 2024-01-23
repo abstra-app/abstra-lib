@@ -519,6 +519,20 @@ metadata = {
                     "default": "None",
                 },
                 {
+                    "argName": "min",
+                    "description": "The minimum number of items that must be selected. Defaults to 0.",
+                    "typeName": "int",
+                    "isKwarg": True,
+                    "default": "0",
+                },
+                {
+                    "argName": "max",
+                    "description": "The maximum number of items that can be selected. Defaults to the number of options.",
+                    "typeName": "int",
+                    "isKwarg": True,
+                    "default": "len(options)",
+                },
+                {
                     "argName": "disabled",
                     "description": "whether the input is disabled. Defaults to False.",
                     "typeName": "bool",
