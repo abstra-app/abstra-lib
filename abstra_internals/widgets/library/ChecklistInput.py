@@ -20,9 +20,24 @@ class ChecklistInput(Input):
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
+        self.min = props.get("min", 0)
+        self.max = props.get("max", len(self.options))
 
     def is_value_unset(self):
         return False
+
+    def _validate_required(self) -> List[str]:
+        if not self.required and len(self.value) == 0:
+            return []
+        errors = []
+        if len(self.value) < self.min:
+            if len(self.options) == 1:
+                errors.append("i18n_error_required_field")
+            else:
+                errors.append("i18n_error_min_list")
+        if len(self.value) > self.max:
+            errors.append("i18n_error_max_list")
+        return errors
 
     def render(self, ctx: dict):
         return {
@@ -36,6 +51,8 @@ class ChecklistInput(Input):
             "fullWidth": self.full_width,
             "disabled": self.disabled,
             "errors": self.errors,
+            "min": self.min,
+            "max": self.max,
         }
 
     def serialize_value(self) -> list:

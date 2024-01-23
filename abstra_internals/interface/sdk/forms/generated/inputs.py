@@ -93,6 +93,8 @@ def read_checklist(label: str, options: list, **kwargs):
 
     Keyword Args:
             initial_value (str): The initial value to display to the user. Defaults to None.
+            min (int): The minimum number of items that must be selected. Defaults to 0.
+            max (int): The maximum number of items that can be selected. Defaults to the number of options.
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
