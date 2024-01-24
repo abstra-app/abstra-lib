@@ -74,6 +74,11 @@ class FormExecution(Execution):
         return self._connection.connected
 
     def log_form_message(self, type: str, payload: dict):
+        blocklist = ["auth:saved-jwt", "heartbeat"]
+
+        if type in blocklist:
+            return
+
         self.execution_logs_repository.save(
             FormEventLogEntry(
                 execution_id=self.id,
