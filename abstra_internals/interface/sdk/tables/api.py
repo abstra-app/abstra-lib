@@ -67,7 +67,7 @@ def _make_select_query(
     table = quoted_identifier(table)
     column_names = []
     values_list = []
-    if where is None:
+    if where is None or len(where) == 0:
         where_exp = ""
     else:
         for idx, (column_name, value) in enumerate(where.items()):
@@ -154,6 +154,8 @@ def _make_row_dict(data: typing.Any) -> typing.Dict[str, typing.Any]:
         return data.acc
     elif isinstance(data, dict):
         return data
+    elif data is None:
+        return {}
     raise Exception(f"Invalid data type: {type(data)}")
 
 

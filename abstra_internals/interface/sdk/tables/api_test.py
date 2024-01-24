@@ -208,3 +208,7 @@ class TestMakeRowDict(unittest.TestCase):
         steps_response.append(pr2)
         row = _make_row_dict(steps_response)
         self.assertEqual(row, {"a": "1", "b": "3", "c": 4})
+
+    def test_none(self):
+        row = _make_row_dict(None)
+        self.assertEqual(row, {})
