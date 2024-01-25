@@ -42,6 +42,9 @@ def _run(query: str, params: typing.List):  # private api
 
 
 def _make_delete_query(table: str, values: dict):
+    if len(values) == 0:
+        raise Exception("Delete query must have at least one where clause")
+
     table = escape_ref(table)
     column_names = []
     values_list = []
@@ -125,6 +128,11 @@ def _make_insert_query(table: str, values: dict):
 
 
 def _make_update_query(table: str, set: dict, where: dict):
+    if len(set) == 0:
+        raise Exception("Update query must set at least one property")
+    if len(where) == 0:
+        raise Exception("Update query must have at least one where clause")
+
     table = escape_ref(table)
     set_column_names = []
     set_values_list = []

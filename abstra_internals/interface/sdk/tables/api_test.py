@@ -147,6 +147,14 @@ class TestTables(unittest.TestCase):
         )
         self.assertEqual(params, ["baz", "cat", 1])
 
+    def test_update_without_where(self):
+        with self.assertRaises(Exception):
+            _make_update_query(table="foo", set={"bar": "baz"}, where={})
+
+    def test_update_without_set(self):
+        with self.assertRaises(Exception):
+            _make_update_query(table="foo", set={}, where={"id": 1})
+
     def test_delete(self):
         query, params = _make_delete_query(table="foo", values={"id": 1})
         self.assertEqual(query, 'DELETE FROM "foo" WHERE "id"=$1 RETURNING *')
@@ -180,6 +188,10 @@ class TestTables(unittest.TestCase):
             table="fruits", values={"tangerina": "123456"}
         )
         self.assertEqual(query, query2)
+
+    def test_delete_without_values(self):
+        with self.assertRaises(Exception):
+            _make_delete_query(table="foo", values={})
 
 
 class TestMakeRowDict(unittest.TestCase):
