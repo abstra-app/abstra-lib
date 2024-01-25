@@ -565,7 +565,7 @@ def read_phone(label: str, **kwargs):
 
     Keyword Args:
             initial_value (dict): The initial value to display to the user. It contains two keys: 'country_code' (string with optional + sign or number) and 'national_number' (str). Ex: {'country_code': '55', 'national_number': '21999990000'}.
-            placeholder (str): The placeholder text to display to the user. Defaults to "".
+            placeholder (str): The placeholder text to display in the national number input. Defaults to "".
             invalid_message (str): The message to display when the input is invalid
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.

@@ -2982,7 +2982,7 @@ metadata = {
                 },
                 {
                     "argName": "placeholder",
-                    "description": 'The placeholder text to display to the user. Defaults to "".',
+                    "description": 'The placeholder text to display in the national number input. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '""',
