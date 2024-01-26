@@ -24,13 +24,15 @@ class MismatchedPythonPath:
     pass
 
 
-def check_settings_json() -> Union[
-    EverythingSet,
-    NoSettingsJson,
-    InvalidSettingsJson,
-    MissingPythonPath,
-    MismatchedPythonPath,
-]:
+def check_settings_json() -> (
+    Union[
+        EverythingSet,
+        NoSettingsJson,
+        InvalidSettingsJson,
+        MissingPythonPath,
+        MismatchedPythonPath,
+    ]
+):
     settings_json_file = Settings.root_path.joinpath(".vscode/settings.json")
     if not settings_json_file.exists():
         return NoSettingsJson()
