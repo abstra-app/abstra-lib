@@ -31,7 +31,7 @@ def deploy():
 
     data = create_build(headers)
     url = data.url
-    build_id = data.buildId
+    build_id = data.build_id
 
     zip_path = _generate_zip_file()
     _upload_file(url=url, file_path=zip_path)
