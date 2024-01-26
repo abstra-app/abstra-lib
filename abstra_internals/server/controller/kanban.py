@@ -210,9 +210,11 @@ class KanbanController:
         return [
             (
                 ancestor,
-                execution_logs_repository.get(execution_id=ancestor.execution_id)
-                if ancestor.execution_id
-                else [],
+                (
+                    execution_logs_repository.get(execution_id=ancestor.execution_id)
+                    if ancestor.execution_id
+                    else []
+                ),
             )
             for ancestor in ancestors
         ]

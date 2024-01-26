@@ -8,6 +8,7 @@ from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame
 
 
 class WidgetSchema:
+
     def __init__(self):
         self.widgets: List = []
 

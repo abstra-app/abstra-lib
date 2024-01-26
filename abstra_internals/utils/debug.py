@@ -53,9 +53,11 @@ def make_debug_data(frames_or_exception: Frames):
     return {
         "debug": {
             "stack": [
-                _make_debug_item_from_info(info)
-                if isinstance(info, inspect.FrameInfo)
-                else _make_debug_item_from_stack(info)
+                (
+                    _make_debug_item_from_info(info)
+                    if isinstance(info, inspect.FrameInfo)
+                    else _make_debug_item_from_stack(info)
+                )
                 for info in (frames)
                 if root_path in info.filename
             ]
