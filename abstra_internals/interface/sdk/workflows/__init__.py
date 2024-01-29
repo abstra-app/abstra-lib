@@ -1,6 +1,15 @@
+import json
 from typing import Optional
 
 from ....execution.execution import UnsetStageRun, get_current_execution_throwable
+
+
+def is_json_serializable(value):
+    try:
+        json.dumps(value)
+        return True
+    except TypeError:
+        return False
 
 
 def get_data(key: Optional[str] = None):
@@ -12,6 +21,8 @@ def get_data(key: Optional[str] = None):
 
 
 def set_data(key, value):
+    if not is_json_serializable(value):
+        raise TypeError(f"{key} is not JSON serializable")
     execution = get_current_execution_throwable()
     stage_run = execution.stage_run
     if not stage_run:
