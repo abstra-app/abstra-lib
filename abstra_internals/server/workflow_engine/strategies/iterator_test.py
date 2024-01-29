@@ -1,10 +1,8 @@
 from unittest import TestCase
+
+from ....repositories.project.project import IteratorStage, WorkflowTransition
+from ....repositories.stage_run import LocalStageRunRepository
 from .iterator import iterator_strategy
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from abstra_internals.repositories.project.project import (
-    IteratorStage,
-    WorkflowTransition,
-)
 
 
 class IteratorStrategyTest(TestCase):

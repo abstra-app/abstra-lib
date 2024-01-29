@@ -1,7 +1,8 @@
-import typing
 import json
-from datetime import datetime, date
+import typing
 from dataclasses import is_dataclass
+from datetime import date, datetime
+
 from ..forms.page_response import PageResponse
 from ..forms.step import StepsResponse
 
@@ -26,7 +27,7 @@ def serialize(value: typing.Any):
 
 
 def _execute(query: str, params: typing.List):  # private api
-    from abstra_internals.repositories import tables_api_http_client
+    from ....repositories import tables_api_http_client
 
     r = tables_api_http_client.execute(query=query, params=params)
     if not r.ok:

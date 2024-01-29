@@ -1,8 +1,8 @@
 import sys
 from typing import Callable, Literal
 
-from abstra_internals.stdio_skip_request import ESCAPE_STRING
 from .execution.execution import Execution
+from .stdio_skip_request import ESCAPE_STRING
 
 _og_stdout_write = sys.stdout.write
 _og_stderr_write = sys.stderr.write

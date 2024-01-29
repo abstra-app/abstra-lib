@@ -1,10 +1,8 @@
 from unittest import TestCase
+
+from ....repositories.project.project import ConditionStage, WorkflowTransition
+from ....repositories.stage_run import LocalStageRunRepository
 from .condition import condition_strategy
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from abstra_internals.repositories.project.project import (
-    ConditionStage,
-    WorkflowTransition,
-)
 
 
 class ConditionStrategyTest(TestCase):

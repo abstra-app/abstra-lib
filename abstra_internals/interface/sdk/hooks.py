@@ -1,7 +1,7 @@
 import json
 from io import BytesIO
 
-from abstra_internals.execution import HookExecution
+from ...execution import HookExecution
 
 
 def _app_json_parse(body: str):
@@ -9,7 +9,7 @@ def _app_json_parse(body: str):
 
 
 def _multipart_form_parse(body: str, headers: dict):
-    from multipart import MultipartParser, to_bytes, parse_options_header
+    from multipart import MultipartParser, parse_options_header, to_bytes
 
     _, options = parse_options_header(headers["Content-Type"])
     boundary = options["boundary"].encode("utf-8")
