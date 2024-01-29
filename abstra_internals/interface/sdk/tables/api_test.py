@@ -1,19 +1,20 @@
 import unittest
 from dataclasses import dataclass
 from datetime import datetime
-from abstra.tables import (
-    insert,
-)
-from .api import (
-    _make_select_query,
-    _make_insert_query,
-    _make_update_query,
-    _make_delete_query,
-    _make_row_dict,
-)
+
 import abstra_internals.repositories as repositories
-from abstra_internals.interface.sdk.forms.page_response import PageResponse
-from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra.tables import insert
+from tests.fixtures import clear_dir, init_dir
+
+from ....interface.sdk.forms.page_response import PageResponse
+from ....interface.sdk.forms.step import StepsResponse
+from .api import (
+    _make_delete_query,
+    _make_insert_query,
+    _make_row_dict,
+    _make_select_query,
+    _make_update_query,
+)
 
 
 @dataclass
@@ -42,6 +43,12 @@ repositories.tables_api_http_client = MockTablesApi()
 
 
 class TestTables(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = init_dir()
+
+    def tearDown(self) -> None:
+        clear_dir(self.root)
+
     def test_select(self):
         query, params = _make_select_query(table="foo")
         self.assertEqual(query, 'SELECT * FROM "foo"')

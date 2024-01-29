@@ -1,8 +1,6 @@
 from typing import Optional
-from abstra_internals.execution.execution import (
-    UnsetStageRun,
-    get_current_execution_throwable,
-)
+
+from ....execution.execution import UnsetStageRun, get_current_execution_throwable
 
 
 def get_data(key: Optional[str] = None):

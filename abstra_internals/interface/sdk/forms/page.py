@@ -1,12 +1,11 @@
-from typing import Callable, Dict, Union, List, Optional
 import sys
+from typing import Callable, Dict, List, Optional, Union
 
-from abstra_internals.widgets.prop_check import validate_widget_props
-from abstra_internals.contract import forms_contract
-
+from ....contract import forms_contract
+from ....widgets.prop_check import validate_widget_props
+from .connection import receive, send
 from .generated.widget_schema import WidgetSchema
 from .page_response import PageResponse
-from .connection import send, receive
 from .reactive import Reactive
 
 

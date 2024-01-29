@@ -1,9 +1,9 @@
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
-from abstra_internals.server.controller import MainController
-from .missing_packages_in_requirements import (
-    MissingPackagesInRequirements,
-)
+
+from tests.fixtures import clear_dir, init_dir
+
+from ...server.controller import MainController
+from .missing_packages_in_requirements import MissingPackagesInRequirements
 
 
 class MissingPackagesInRequirementsTest(TestCase):

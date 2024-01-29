@@ -1,7 +1,9 @@
 from unittest import TestCase
+
 from pkg_resources import get_distribution
-from tests.fixtures import init_dir, clear_dir
-from abstra_internals.server.controller import MainController
+from tests.fixtures import clear_dir, init_dir
+
+from ...server.controller import MainController
 from .missing_abstra_in_requirements import MissingAbstraInRequirements
 
 

@@ -3,23 +3,13 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Union,
-)
-from abstra_internals.stdio_skip_request import safe_print
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import requests
 from pydantic.dataclasses import dataclass
-from abstra_internals.utils.datetime import (
-    from_utc_iso_string,
-    to_utc_iso_string,
-)
 
+from ..stdio_skip_request import safe_print
+from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.file import LOCAL_LOG_FOLDER
 
