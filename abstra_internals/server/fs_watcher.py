@@ -29,9 +29,9 @@ def reload_files_on_change(project: Project, last_change: float):
 
 def __files_changed_polling_loop():
     last_change = datetime.now().timestamp()
-    project = ProjectRepository.load()
 
     while True:
+        project = ProjectRepository.load()
         has_reloaded = reload_files_on_change(project, last_change)
         if has_reloaded:
             last_change = datetime.now().timestamp()
