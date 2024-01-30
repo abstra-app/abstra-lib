@@ -1,5 +1,7 @@
 import sys
+from .env_masker import GLOBAL_MASKER
 from typing import Callable, Literal
+from .utils.environment import IS_PRODUCTION
 
 from .execution.execution import Execution
 from .stdio_skip_request import ESCAPE_STRING
@@ -14,8 +16,10 @@ def writeWraper(
     text: str,
     print_exceptions: bool,
 ):
+    if IS_PRODUCTION:
+        text = GLOBAL_MASKER.mask(str(text))
     try:
-        write(str(text))
+        write(text)
         skip_sending = text.startswith(ESCAPE_STRING)
         execution = Execution.get_current_execution()
 
