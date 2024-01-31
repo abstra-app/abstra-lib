@@ -1,11 +1,10 @@
 import unittest
 from dataclasses import dataclass
 from datetime import datetime
-
+from uuid import UUID
 import abstra_internals.repositories as repositories
 from abstra.tables import insert
 from tests.fixtures import clear_dir, init_dir
-
 from ....interface.sdk.forms.page_response import PageResponse
 from ....interface.sdk.forms.step import StepsResponse
 from .api import (
@@ -14,6 +13,7 @@ from .api import (
     _make_row_dict,
     _make_select_query,
     _make_update_query,
+    serialize,
 )
 
 
@@ -231,3 +231,29 @@ class TestMakeRowDict(unittest.TestCase):
     def test_none(self):
         row = _make_row_dict(None)
         self.assertEqual(row, {})
+
+
+class TestSerialize(unittest.TestCase):
+    def test_datetime(self):
+        value = datetime(2001, 1, 1, 10, 10, 10, 0)
+        self.assertEqual(serialize(value), "2001-01-01T10:10:10")
+
+    def test_set(self):
+        value = set([1, 2, 3, 4])
+        self.assertEqual(serialize(value), "[1, 2, 3, 4]")
+
+    def test_list(self):
+        value = [1, 2, 3, 4]
+        self.assertEqual(serialize(value), "[1, 2, 3, 4]")
+
+    def test_dict(self):
+        value = {"bar": 1, "foo": "expected"}
+        self.assertEqual(serialize(value), """{"bar": 1, "foo": "expected"}""")
+
+    def test_tuple(self):
+        value = (1, 2, 3, 4)
+        self.assertEqual(serialize(value), "[1, 2, 3, 4]")
+
+    def test_uuid(self):
+        value = UUID("12345678-1234-5678-1234-567812345678")
+        self.assertEqual(serialize(value), "12345678-1234-5678-1234-567812345678")

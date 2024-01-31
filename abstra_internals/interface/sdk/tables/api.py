@@ -2,7 +2,7 @@ import json
 import typing
 from dataclasses import is_dataclass
 from datetime import date, datetime
-
+from uuid import UUID
 from ..forms.page_response import PageResponse
 from ..forms.step import StepsResponse
 
@@ -22,6 +22,8 @@ def serialize(value: typing.Any):
         return json.dumps(value)
     if isinstance(value, set):
         return json.dumps(list(value))
+    if isinstance(value, UUID):
+        return str(value)
 
     return value
 
