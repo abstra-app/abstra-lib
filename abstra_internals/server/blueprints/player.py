@@ -6,6 +6,9 @@ from ..controller.main import MainController
 from ..workflow_engine import workflow_engine
 from ...execution.execution import RequestData
 from ..controller import auth as auth_controller
+from ..controller import users as user_controller
+from ..controller import kanban as kanban_controller
+from ..controller import visualizations as visualizations_controller
 from ...execution import HookExecution, FormExecution
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
 
@@ -16,6 +19,15 @@ def get_player_bp(controller: MainController):
 
     auth_bp = auth_controller.get_player_bp()
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
+
+    user_bp = user_controller.get_player_bp()
+    bp.register_blueprint(user_bp, url_prefix="/_user")
+
+    kanban_bp = kanban_controller.get_player_bp()
+    bp.register_blueprint(kanban_bp, url_prefix="/_kanban")
+
+    visuvisualizations_bp = visualizations_controller.get_player_bp()
+    bp.register_blueprint(visuvisualizations_bp, url_prefix="/_visualizations")
 
     @bp.get("/_workspace")
     def _get_workspace():

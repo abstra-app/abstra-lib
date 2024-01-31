@@ -1,8 +1,25 @@
 from datetime import datetime
+from pydantic.dataclasses import dataclass
+from typing import Any, List, Optional, Type, Sequence, Tuple
+from .workflows import make_stage_dto
+from ...repositories.project.project import (
+    ProjectRepository,
+    WorkflowStage,
+    FormStage,
+)
+from ...repositories.stage_run import (
+    StageRunRepository,
+    StageRun,
+    GetStageRunByQueryFilter,
+    Pagination,
+    stage_run_repository_factory,
+)
+
+from ...repositories.members import members_repository_factory
+from ..guards.role_guard import RoleGuardFactory
 from typing import Any, List, Optional, Sequence, Tuple, Type
 
 import flask
-from pydantic.dataclasses import dataclass
 
 from ...repositories import execution_logs_repository, stage_run_repository
 from ...repositories.execution_logs import (
@@ -14,6 +31,63 @@ from ...repositories.project.project import FormStage, ProjectRepository, Workfl
 from ...repositories.stage_run import StageRun, StageRunRepository
 from ...utils.datetime import to_utc_iso_string
 from .workflows import make_stage_dto
+
+
+@dataclass
+class DataRequestSelection:
+    stage_id: str
+    limit: int
+    offset: int
+
+    @staticmethod
+    def from_dict(data: dict) -> "DataRequestSelection":
+        return DataRequestSelection(
+            stage_id=data["stage_id"],
+            offset=data.get("offset", 0),
+            limit=data.get("limit", 10),
+        )
+
+    def to_dict(self) -> dict:
+        return dict(stage_id=self.stage_id, offset=self.offset, limit=self.limit)
+
+
+@dataclass
+class DataRequestFilter:
+    status: Optional[str]
+    asignee: Optional[str]
+    data: Optional[dict]
+
+    @staticmethod
+    def from_dict(data: dict) -> "DataRequestFilter":
+        return DataRequestFilter(
+            status=data.get("status", None),
+            asignee=data.get("asignee", None),
+            data=data.get("data", None),
+        )
+
+    def to_dict(self) -> dict:
+        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
+
+
+@dataclass
+class DataRequest:
+    selection: List[DataRequestSelection]
+    filter: DataRequestFilter
+
+    @staticmethod
+    def from_dict(data: dict) -> "DataRequest":
+        return DataRequest(
+            selection=[
+                DataRequestSelection.from_dict(s) for s in data.get("selection", [])
+            ],
+            filter=DataRequestFilter.from_dict(data.get("filter", {})),
+        )
+
+    def to_dict(self) -> dict:
+        return dict(
+            selection=[s.to_dict() for s in self.selection],
+            filter=self.filter.to_dict(),
+        )
 
 
 @dataclass
@@ -82,12 +156,14 @@ class KanbanColumn:
     selected_stage: ColumnStage
     stage_run_cards: List[StageRunCard]
     stages: List[ColumnStage]
+    total_count: int
 
     def to_dict(self) -> dict:
         return dict(
             selected_stage=self.selected_stage.to_dict(),
             stage_run_cards=[card.to_dict() for card in self.stage_run_cards],
             stages=[stage.to_dict() for stage in self.stages],
+            total_count=self.total_count,
         )
 
 
@@ -157,42 +233,54 @@ class KanbanController:
         else:
             return self._get_next_stages(selected_stages_ids[column_idx - 1])
 
-    def get_data(self, selected_stages_ids: List[str]) -> KanbanData:
+    def get_data(self, request: DataRequest) -> KanbanData:
         project = self.project_repository.load()
 
-        return KanbanData(
-            columns=[
-                KanbanColumn(
-                    selected_stage=ColumnStage.create(
-                        project.get_stage_raises(selected_stage)
-                    ),
-                    stages=[
-                        ColumnStage.create(s)
-                        for s in self._get_column_stages(
-                            selected_stages_ids, column_idx
-                        )
-                    ],
-                    stage_run_cards=[
-                        StageRunCard(
-                            id=stage_run.id,
-                            status=stage_run.status,
-                            created_at=stage_run.created_at,
-                            content=self.stage_run_content(stage_run),
-                        )
-                        for stage_run in self.stage_run_repository.find_leaves(
-                            {"stage": selected_stage}
-                        )
-                    ],
+        selected_stage_ids = [s.stage_id for s in request.selection]
+        columns: List[KanbanColumn] = []
+        for column_idx, selection in enumerate(request.selection):
+            request_filter = GetStageRunByQueryFilter.from_dict(
+                data=request.filter.to_dict()
+            )
+            request_filter.stage = selection.stage_id
+            paginated_response = self.stage_run_repository.find_leaves(
+                filter=request_filter,
+                pagination=Pagination(limit=selection.limit, offset=selection.offset),
+            )
+            stage_run_cards = [
+                StageRunCard(
+                    id=stage_run.id,
+                    status=stage_run.status,
+                    created_at=stage_run.created_at,
+                    content=self.stage_run_content(stage_run),
                 )
-                for column_idx, selected_stage in enumerate(selected_stages_ids)
-            ],
-            next_stage_options=[
+                for stage_run in paginated_response.stage_runs
+            ]
+            stages = [
                 ColumnStage.create(s)
-                for s in self._get_column_stages(
-                    selected_stages_ids, len(selected_stages_ids)
+                for s in self._get_column_stages(selected_stage_ids, column_idx)
+            ]
+            selected_stage_run = ColumnStage.create(
+                project.get_stage_raises(selection.stage_id)
+            )
+
+            columns.append(
+                KanbanColumn(
+                    selected_stage=selected_stage_run,
+                    stage_run_cards=stage_run_cards,
+                    stages=stages,
+                    total_count=paginated_response.total_count,
                 )
-            ],
-        )
+            )
+
+        next_stage_options = [
+            ColumnStage.create(s)
+            for s in self._get_column_stages(
+                selected_stage_ids, len(selected_stage_ids)
+            )
+        ]
+
+        return KanbanData(columns=columns, next_stage_options=next_stage_options)
 
     def get_ancestor_logs(
         self, stage_run_id: str
@@ -221,8 +309,8 @@ def get_editor_bp():
     def _get_kanban():
         if flask.request.json is None:
             flask.abort(400)
-        selected_stages_ids = flask.request.json.get("selected_stages_ids", [])
-        return controller.get_data(selected_stages_ids).to_dict()
+        req = DataRequest.from_dict(flask.request.json)
+        return controller.get_data(req).to_dict()
 
     @bp.get("/logs/<stage_run_id>")
     def _get_ancestor_logs(stage_run_id: str):
@@ -247,6 +335,43 @@ def get_editor_bp():
                     )
                     and log.payload["text"].strip() != ""
                 ],
+            }
+            for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
+        ]
+
+    return bp
+
+
+def get_player_bp():
+    project_repository = ProjectRepository
+    stage_run_repository = stage_run_repository_factory()
+
+    members_repository = members_repository_factory()
+    guard = RoleGuardFactory(members_repository)
+
+    controller = KanbanController(stage_run_repository, project_repository)
+    bp = flask.Blueprint("kanban", __name__)
+
+    @bp.post("/")
+    @guard.requires("workflow_viewer")
+    def _get_kanban():
+        if flask.request.json is None:
+            flask.abort(400)
+        req = DataRequest.from_dict(flask.request.json)
+        return controller.get_data(req).to_dict()
+
+    @bp.get("/logs/<stage_run_id>")
+    @guard.requires("workflow_viewer")
+    def _get_ancestor_logs(stage_run_id: str):
+        def stage_from_run(stage_run: StageRun):
+            stage = project_repository.load().get_stage_raises(stage_run.stage)
+            return make_stage_dto(stage)
+
+        return [
+            {
+                "stage": stage_from_run(stage_run),
+                "stage_run": stage_run.to_dto(),
+                "logs": [log for log in logs],
             }
             for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
         ]

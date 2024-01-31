@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
-import copy, uuid, requests
+import copy
 from datetime import datetime
+from typing import Any, Dict, List, Mapping, Optional
+import uuid
+
+from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
-from typing import Optional, List, Dict, Mapping, Any
+import requests
 
 from ..utils.datetime import from_utc_iso_string
-from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS
+from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 end_status = ["failed", "finished", "abandoned"]
 
@@ -16,14 +20,80 @@ status_transitions = {
 
 
 @dataclass
+class Pagination:
+    limit: int
+    offset: int
+
+    @staticmethod
+    def from_dict(data: dict) -> "Pagination":
+        return Pagination(
+            limit=data.get("limit", 0),
+            offset=data.get("offset", 10),
+        )
+
+    def to_dict(self) -> dict:
+        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
+
+
+@dataclass
+class PaginatedListResponse:
+    stage_runs: List["StageRun"]
+    total_count: int
+
+    @staticmethod
+    def from_dict(data: dict) -> "PaginatedListResponse":
+        return PaginatedListResponse(
+            stage_runs=[StageRun.from_dict(dto) for dto in data.get("stageRuns", [])],
+            total_count=data.get("totalCount", 0),
+        )
+
+    def to_dict(self) -> dict:
+        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
+
+
+@dataclass
+class GetStageRunByQueryFilter:
+    stage: Optional[str] = None
+    assignee: Optional[str] = None
+    parent_id: Optional[str] = None
+    status: Optional[str] = None
+    data: Optional[Dict] = None
+
+    @staticmethod
+    def from_dict(data: dict) -> "GetStageRunByQueryFilter":
+        return GetStageRunByQueryFilter(
+            stage=data.get("stage", None),
+            assignee=data.get("assignee", None),
+            parent_id=data.get("parent_id", None),
+            status=data.get("status", None),
+            data=data.get("data", None),
+        )
+
+    def to_dict(self) -> dict:
+        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
+
+
+@dataclass(config=ConfigDict(populate_by_name=True))
 class StageRun:
     id: str
     stage: str
     data: dict
     status: str
-    created_at: datetime
-    parent_id: Optional[str]
-    execution_id: Optional[str] = None
+    created_at: datetime = Field(serialization_alias="createdAt")
+    parent_id: Optional[str] = Field(default=None, serialization_alias="parentId")
+    execution_id: Optional[str] = Field(default=None, serialization_alias="executionId")
+
+    @staticmethod
+    def from_dict(data: dict) -> "StageRun":
+        return StageRun(
+            id=data["id"],
+            stage=data["stage"],
+            data=data["data"],
+            status=data["status"],
+            parent_id=data.get("parentId"),
+            execution_id=data.get("executionId"),
+            created_at=from_utc_iso_string(data["createdAt"]),
+        )
 
     def __getitem__(self, key):
         return self.data.get(key)
@@ -74,7 +144,7 @@ class StageRunRepository(ABC):
         return next_dtos
 
     @abstractmethod
-    def find(self, filter: Dict) -> List[StageRun]:
+    def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -82,7 +152,9 @@ class StageRunRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def find_leaves(self, filter: Dict) -> List[StageRun]:
+    def find_leaves(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ) -> PaginatedListResponse:
         raise NotImplementedError()
 
     @abstractmethod
@@ -126,22 +198,15 @@ class LocalStageRunRepository(StageRunRepository):
 
         raise Exception(f"StageRun with id {id} not found")
 
-    def find(self, filter: Dict) -> List[StageRun]:
-        self.validate_filter_keys(filter)
-
-        stage = filter.get("stage")
-        data = filter.get("data")
-        status = filter.get("status")
-        parent_id = filter.get("parent_id")
-
+    def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
         return [
             stage_run
             for stage_run in self._stage_runs
             if (
-                (not stage or stage_run.stage == stage)
-                and (not data or stage_run.data == data)
-                and (not status or stage_run.status == status)
-                and (not parent_id or stage_run.parent_id == parent_id)
+                (not filter.stage or stage_run.stage == filter.stage)
+                and (not filter.data or stage_run.data == filter.data)
+                and (not filter.status or stage_run.status == filter.status)
+                and (not filter.parent_id or stage_run.parent_id == filter.parent_id)
             )
         ]
 
@@ -154,14 +219,29 @@ class LocalStageRunRepository(StageRunRepository):
             ancestors.insert(0, stage_run)
         return ancestors
 
-    def find_leaves(self, filter: Dict) -> List[StageRun]:
-        self.validate_filter_keys(filter)
+    def find_leaves(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ) -> PaginatedListResponse:
         filter_matches = self.find(filter)
         parent_ids = set(u.parent_id for u in self._stage_runs)
 
-        return [
-            stage_run for stage_run in filter_matches if stage_run.id not in parent_ids
-        ]
+        leaves = sorted(
+            [
+                stage_run
+                for stage_run in filter_matches
+                if stage_run.id not in parent_ids
+            ],
+            key=lambda x: x.created_at,
+        )
+
+        total_count = len(leaves)
+        if pagination.offset >= total_count:
+            return PaginatedListResponse(stage_runs=[], total_count=total_count)
+
+        return PaginatedListResponse(
+            stage_runs=leaves[pagination.offset : pagination.limit],
+            total_count=total_count,
+        )
 
     def create_initial(self, stage: str, data: dict = {}) -> StageRun:
         stage_run = StageRun(
@@ -247,7 +327,8 @@ class RemoteStageRunRepository(StageRunRepository):
             stage=dto["stage"],
             data=dto["data"],
             status=dto["status"],
-            parent_id=dto["parentId"],
+            parent_id=dto.get("parentId"),
+            execution_id=dto.get("executionId"),
             created_at=from_utc_iso_string(dto["createdAt"]),
         )
 
@@ -255,9 +336,8 @@ class RemoteStageRunRepository(StageRunRepository):
         r = self._request("GET", path=f"/{id}")
         return self.create_from_dto(r.json())
 
-    def find(self, filter: Dict) -> List[StageRun]:
-        self.validate_filter_keys(filter)
-        r = self._request("GET", path="/", params=filter)
+    def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
+        r = self._request("GET", path="/", params=filter.to_dict())
         return [self.create_from_dto(dto) for dto in r.json()]
 
     def find_ancestors(self, id: str) -> List[StageRun]:
@@ -292,8 +372,19 @@ class RemoteStageRunRepository(StageRunRepository):
 
         return True
 
-    def find_leaves(self, filter: Dict) -> List[StageRun]:
-        raise NotImplementedError()
+    def find_leaves(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ) -> PaginatedListResponse:
+        r = self._request(
+            "GET",
+            path=f"/leaves",
+            params={**filter.to_dict(), **pagination.to_dict()},
+            raise_for_status=False,
+        )
+
+        r.raise_for_status()
+
+        return PaginatedListResponse.from_dict(r.json())
 
     def fork(self, stage_run: StageRun) -> StageRun:
         raise NotImplementedError()
