@@ -1,5 +1,5 @@
 from ..widget_base import OptionalListInput
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict
 
 
 class DropdownInput(OptionalListInput):
@@ -41,9 +41,9 @@ class DropdownInput(OptionalListInput):
             "errors": self.errors,
         }
 
-    def serialize_value(self) -> Union[List, Any]:
+    def serialize_value(self) -> List:
         if isinstance(self.value, list):
             return self.value
-        if not self.value:
+        if self.value is None:
             return []
         return [self.value]
