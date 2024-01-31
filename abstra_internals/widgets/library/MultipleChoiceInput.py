@@ -46,6 +46,6 @@ class MultipleChoiceInput(OptionalListInput):
     def serialize_value(self) -> List[Any]:
         if isinstance(self.value, list):
             return self.value
-        if not self.value:
+        if self.value is None:
             return []
         return [self.value]
