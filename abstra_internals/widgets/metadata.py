@@ -1494,9 +1494,9 @@ metadata = {
                         "typeName": ["string", "object"],
                         "properties": [
                             {
-                                "argName": "key",
+                                "argName": "label",
                                 "typeName": "string",
-                                "description": "The key of the option on the returning object",
+                                "description": "The label of the option on the returning object",
                             },
                             {
                                 "argName": "value",
