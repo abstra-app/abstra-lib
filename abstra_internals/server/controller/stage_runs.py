@@ -1,6 +1,10 @@
 import flask
 from typing import Optional
-from ...repositories.stage_run import StageRunRepository
+from ...repositories.stage_run import (
+    StageRunRepository,
+    GetStageRunByQueryFilter,
+    Pagination,
+)
 from ...repositories import stage_run_repository
 
 from ...usage import usage
@@ -13,10 +17,12 @@ class StageRunsController:
     ) -> None:
         self.stage_run_repository = stage_run_repository
 
-    def get_stage_runs(self, stage: Optional[str] = None):
+    def get_stage_runs(self, filter: GetStageRunByQueryFilter, pagination: Pagination):
         return [
             stage_run.to_dto()
-            for stage_run in self.stage_run_repository.find_leaves(dict(stage=stage))
+            for stage_run in self.stage_run_repository.find_leaves(
+                filter=filter, pagination=pagination
+            ).stage_runs
         ]
 
     def fork(self, stage_run_id: str):
@@ -31,8 +37,9 @@ def get_editor_bp():
     @bp.get("/")
     @usage
     def _get_stage_runs():
-        stage = flask.request.args.get("stage")
-        return controller.get_stage_runs(stage)
+        filter = GetStageRunByQueryFilter.from_dict(flask.request.args)
+        pagination = Pagination.from_dict(flask.request.args)
+        return controller.get_stage_runs(filter, pagination)
 
     @bp.post("/fork")
     def _fork():

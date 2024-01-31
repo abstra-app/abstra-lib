@@ -49,3 +49,14 @@ def get_editor_bp():
         return controller.put_visualizations(visualizations)
 
     return bp
+
+
+def get_player_bp():
+    controller = VisualizationsController()
+    bp = flask.Blueprint("player_visualizations_runs", __name__)
+
+    @bp.get("/")
+    def _get_visualizations():
+        return controller.get_visualizations()
+
+    return bp

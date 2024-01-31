@@ -1,5 +1,9 @@
 from unittest import TestCase
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
+from abstra_internals.repositories.stage_run import (
+    LocalStageRunRepository,
+    GetStageRunByQueryFilter,
+    Pagination,
+)
 
 
 class TestLocalStageRunRepository(TestCase):
@@ -7,12 +11,12 @@ class TestLocalStageRunRepository(TestCase):
         self.repository = LocalStageRunRepository()
 
     def test_starts_empty(self):
-        stage_runs = self.repository.find({})
+        stage_runs = self.repository.find(GetStageRunByQueryFilter.from_dict({}))
         self.assertEqual(len(stage_runs), 0)
 
     def test_create(self):
         self.repository.create_initial("stage1")
-        stage_runs = self.repository.find({})
+        stage_runs = self.repository.find(GetStageRunByQueryFilter.from_dict({}))
         self.assertEqual(len(stage_runs), 1)
 
     def test_new_initial(self):
@@ -57,29 +61,47 @@ class TestLocalStageRunRepository(TestCase):
 
     def test_leaves_simple(self):
         self.repository.create_initial("stage1")
-        stage_runs = self.repository.find_leaves({})
-        self.assertEqual(len(stage_runs), 1)
+        pagination = Pagination(limit=10, offset=0)
+        stage_runs = self.repository.find_leaves(
+            GetStageRunByQueryFilter.from_dict({}), pagination
+        )
+        self.assertEqual(len(stage_runs.stage_runs), 1)
 
     def test_leaves(self):
         repository = self.repository
 
+        pagination = Pagination(limit=10, offset=0)
+
         wfs1_stage1 = repository.create_initial("stage1")
         repository.create_initial("stage1")
         repository.create_next(wfs1_stage1, [{"stage": "stage2"}])
-        wfs1_stage2 = repository.find({"parent_id": wfs1_stage1.id})
+        wfs1_stage2 = repository.find(
+            GetStageRunByQueryFilter.from_dict({"parent_id": wfs1_stage1.id})
+        )
         self.assertEqual(len(wfs1_stage2), 1)
         repository.create_next(wfs1_stage2[0], [{"stage": "stage3"}])
         repository.create_next(wfs1_stage2[0], [{"stage": "stage3"}])
-        all_stage_runs = repository.find({})
+        all_stage_runs = repository.find(GetStageRunByQueryFilter.from_dict({}))
         self.assertEqual(len(all_stage_runs), 5)
-        leaves = repository.find_leaves({})
-        self.assertEqual(len(leaves), 3)
-        leaves_stage1 = repository.find_leaves({"stage": "stage1"})
-        self.assertEqual(len(leaves_stage1), 1)
-        leaves_stage2 = repository.find_leaves({"stage": "stage2"})
-        self.assertEqual(len(leaves_stage2), 0)
-        leaves_stage3 = repository.find_leaves({"stage": "stage3"})
-        self.assertEqual(len(leaves_stage3), 2)
+        leaves = repository.find_leaves(
+            GetStageRunByQueryFilter.from_dict({}), pagination=pagination
+        )
+        self.assertEqual(len(leaves.stage_runs), 3)
+        leaves_stage1 = repository.find_leaves(
+            GetStageRunByQueryFilter.from_dict({"stage": "stage1"}),
+            pagination=pagination,
+        )
+        self.assertEqual(len(leaves_stage1.stage_runs), 1)
+        leaves_stage2 = repository.find_leaves(
+            GetStageRunByQueryFilter.from_dict({"stage": "stage2"}),
+            pagination=pagination,
+        )
+        self.assertEqual(len(leaves_stage2.stage_runs), 0)
+        leaves_stage3 = repository.find_leaves(
+            GetStageRunByQueryFilter.from_dict({"stage": "stage3"}),
+            pagination=pagination,
+        )
+        self.assertEqual(len(leaves_stage3.stage_runs), 2)
 
     def test_fork(self):
         parent = self.repository.create_initial("parent", {"a": 1, "b": 2})

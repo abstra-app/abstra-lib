@@ -7,7 +7,19 @@ from typing import Any, ClassVar, Dict, Literal, Optional, Tuple, Union
 
 from ..compatibility import compat_traceback
 from ..modules import import_as_new
-from ..repositories.execution import ExecutionDTO, ExecutionRepository, ExecutionStatus
+from ..repositories.project.project import ActionStage
+from ..repositories.stage_run import (
+    StageRun,
+    StageRunRepository,
+    GetStageRunByQueryFilter,
+)
+
+from ..repositories.execution import (
+    ExecutionRepository,
+    ExecutionStatus,
+    ExecutionDTO,
+)
+
 from ..repositories.execution_logs import (
     ExecutionLogsRepository,
     StdioLogEntry,
@@ -191,9 +203,11 @@ class Execution:
         if stage_run.status != "abandoned":
             return stage_run
 
-        next_matches = self.stage_run_repository.find(
-            {"parent_id": stage_run.id, "stage": self.stage.id}
-        )
+        filter = GetStageRunByQueryFilter()
+        filter.parent_id = stage_run.id
+        filter.stage = self.stage.id
+
+        next_matches = self.stage_run_repository.find(filter)
 
         assert (
             len(next_matches) == 1
