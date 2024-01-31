@@ -1,11 +1,16 @@
 from unittest import TestCase
 
-from ....repositories.project.project import FormStage, JobStage, WorkflowTransition
-from ....repositories.stage_run import LocalStageRunRepository
-from .action import action_strategy
+from ...repositories.project.project import (
+    FormStage,
+    JobStage,
+    NotificationTrigger,
+    WorkflowTransition,
+)
+from ...repositories.stage_run import LocalStageRunRepository
+from . import workflow_engine
 
 
-class ActionStrategyTest(TestCase):
+class ActionTransitionsTest(TestCase):
     def setUp(self) -> None:
         self.repository = LocalStageRunRepository()
 
@@ -26,7 +31,9 @@ class ActionStrategyTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="1", data={})
-        result = action_strategy(stage, stage_run, "jobs:finished")
+        result = workflow_engine._follow_action_transitions(
+            stage, stage_run, "jobs:finished"
+        )
         self.assertEqual(result, [dict(stage="target_id", data={})])
 
     def test_stays_when_abandoned(self):
@@ -45,7 +52,13 @@ class ActionStrategyTest(TestCase):
                     type="jobs:finished",
                 )
             ],
+            notification_trigger=NotificationTrigger(
+                variable_name="foo",
+                enabled=False,
+            ),
         )
         stage_run = self.repository.create_initial(stage="1", data={})
-        result = action_strategy(stage, stage_run, "forms:abandoned")
+        result = workflow_engine._follow_action_transitions(
+            stage, stage_run, "forms:abandoned"
+        )
         self.assertEqual(result, [dict(stage="1", data={})])

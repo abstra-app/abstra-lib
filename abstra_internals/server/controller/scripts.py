@@ -1,18 +1,16 @@
 import flask
 
-from abstra_internals.repositories import (
-    stage_run_repository,
-    execution_repository,
-    execution_logs_repository,
-)
-from ...usage import usage
-from .main import MainController
-from ..workflow_engine import workflow_engine
 from ...execution.script_execution import ScriptExecution
-from ..utils import is_it_true
-from abstra_internals.repositories.execution_logs import (
-    FormEventLogEntry,
+from ...repositories import (
+    execution_logs_repository,
+    execution_repository,
+    stage_run_repository,
 )
+from ...repositories.execution_logs import FormEventLogEntry
+from ...usage import usage
+from ..utils import is_it_true
+from ..workflow_engine import workflow_engine
+from .main import MainController
 
 
 def get_editor_bp(controller: MainController):
@@ -85,7 +83,7 @@ def get_editor_bp(controller: MainController):
         )
 
         execution.run()
-        workflow_engine.notify_ran(execution)
+        workflow_engine.handle_execution_end(execution)
 
         stdout: str = ""
         stderr: str = ""

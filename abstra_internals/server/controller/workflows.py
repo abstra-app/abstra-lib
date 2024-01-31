@@ -3,6 +3,7 @@ import flask
 from ...repositories.project.project import (
     ConditionStage,
     IteratorStage,
+    NotificationTrigger,
     Project,
     ProjectRepository,
     FormStage,
@@ -134,6 +135,10 @@ def update_workflow(workflow_state_dto: dict):
                 workflow_position=(
                     stage_dto["position"]["x"],
                     stage_dto["position"]["y"],
+                ),
+                notification_trigger=NotificationTrigger(
+                    variable_name="assignee_emails",
+                    enabled=False,
                 ),
             )
             project.forms.append(stage)

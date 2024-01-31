@@ -1,11 +1,11 @@
 from unittest import TestCase
 
-from ....repositories.project.project import IteratorStage, WorkflowTransition
-from ....repositories.stage_run import LocalStageRunRepository
-from .iterator import iterator_strategy
+from ...repositories.project.project import IteratorStage, WorkflowTransition
+from ...repositories.stage_run import LocalStageRunRepository
+from . import workflow_engine
 
 
-class IteratorStrategyTest(TestCase):
+class IteratorTransitionsTest(TestCase):
     def setUp(self) -> None:
         self.repository = LocalStageRunRepository()
 
@@ -26,7 +26,7 @@ class IteratorStrategyTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
-        result = iterator_strategy(stage, stage_run)
+        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(
             result,
             [
@@ -53,7 +53,7 @@ class IteratorStrategyTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={"foo": 1})
-        result = iterator_strategy(stage, stage_run)
+        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
     def test_empty_when_not_found(self):
@@ -73,5 +73,5 @@ class IteratorStrategyTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={})
-        result = iterator_strategy(stage, stage_run)
+        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])

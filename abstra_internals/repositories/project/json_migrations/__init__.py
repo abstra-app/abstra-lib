@@ -7,9 +7,15 @@ from .base_migration import Migration
 from .migration_001 import Migration001
 from .migration_002 import Migration002
 from .migration_003 import Migration003
+from .migration_004 import Migration004
 
 
-MIGRATIONS: List[Type[Migration]] = [Migration001, Migration002, Migration003]
+MIGRATIONS: List[Type[Migration]] = [
+    Migration001,
+    Migration002,
+    Migration003,
+    Migration004,
+]
 
 
 def get_latest_version() -> str:

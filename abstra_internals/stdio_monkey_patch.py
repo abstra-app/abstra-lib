@@ -19,12 +19,20 @@ def writeWraper(
     if IS_PRODUCTION:
         text = GLOBAL_MASKER.mask(str(text))
     try:
-        write(text)
         skip_sending = text.startswith(ESCAPE_STRING)
         execution = Execution.get_current_execution()
 
+        output: str = str(text)
+
         if execution and not skip_sending:
+            output = (
+                f"[RUN {execution.id.split(sep='-')[0]}] {output}"
+                if output.strip()
+                else output
+            )
             execution.stdio(type, text)
+
+        write(output)
     except Exception as e:
         if print_exceptions:
             write(f"[WRITE_WRAPPER] ERROR: {str(e)}\n\n")

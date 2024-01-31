@@ -91,7 +91,7 @@ def get_editor_bp(controller: MainController):
 
         execution.run()
         body, status, headers = execution.get_response()
-        workflow_engine.notify_ran(execution)
+        workflow_engine.handle_execution_end(execution)
 
         stdout: str = ""
         stderr: str = ""

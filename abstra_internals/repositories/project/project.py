@@ -1,22 +1,52 @@
-from typing import Generator, List, Optional, Union, Any, Dict, Tuple, Literal
-import sys
-import uuid
-import shutil
 import json
-import tempfile
 import os
-from dataclasses import dataclass
+import shutil
+import sys
+import tempfile
+import uuid
+from pydantic.dataclasses import dataclass
 from pathlib import Path
-from ...utils.format import normalize_path
-from ...utils.file import traverse_code
-from ...utils import check_is_url
+from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
+
 from ...settings import Settings
+from ...utils import check_is_url
+from ...utils.file import traverse_code
+from ...utils.format import normalize_path
 from . import json_migrations
+
 
 ServedStage = Union["FormStage", "HookStage"]
 ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
 ControlStage = Union["IteratorStage", "ConditionStage"]
 WorkflowStage = Union[ActionStage, ControlStage]
+
+
+@dataclass
+class NotificationTrigger:
+    variable_name: str
+    enabled: bool
+
+    def validate_email(self, email: str) -> bool:
+        return type(email) == str and "@" in email
+
+    def get_validated_recipients(self, thread_data: Dict[str, Any]) -> List[str]:
+        raw_value = thread_data.get(self.variable_name)
+
+        if not raw_value:
+            return []
+
+        emails: List[str] = []
+
+        if isinstance(raw_value, str):
+            emails.append(raw_value)
+
+        if isinstance(raw_value, list):
+            emails = raw_value
+
+        return [email for email in emails if self.validate_email(email)]
+
+    def to_dto(self) -> Optional[Dict[str, Any]]:
+        return {"variable_name": self.variable_name, "enabled": self.enabled}
 
 
 @dataclass
@@ -29,6 +59,19 @@ class WorkflowTransition:
 
     def __post_init__(self):
         self.id = str(uuid.uuid4()) if self.id is None else self.id
+
+    def matches(self, variable_value):
+        if self.type != "conditions:patternMatched":
+            return False
+        if type(variable_value) == int or type(variable_value) == float:
+            return self.condition_value == str(variable_value)
+        if type(variable_value) == str:
+            return self.condition_value == variable_value
+        elif variable_value is None:
+            return self.condition_value is None or self.condition_value == ""
+        else:
+            print(f"Unknown type {type(variable_value)} for variable_value")
+        return False
 
     @property
     def as_dict(self) -> dict:
@@ -247,7 +290,7 @@ class ScriptStage:
             elif attr == "file":
                 _update_file(self, value)
             else:
-                raise Exception(f"Cannot update {attr} of job")
+                raise Exception(f"Cannot update {attr} of script")
 
     def duplicate(self, new_id: str, new_position: Tuple[int, int]):
         return self.from_dict(
@@ -356,6 +399,7 @@ class FormStage:
     path: str
     workflow_transitions: List[WorkflowTransition]
     workflow_position: Tuple[float, float]
+    notification_trigger: NotificationTrigger
     is_initial: bool = True
     end_message: Optional[str] = None
     auto_start: Optional[bool] = False
@@ -383,6 +427,9 @@ class FormStage:
             is_initial=True,
             workflow_transitions=[],
             workflow_position=workflow_position,
+            notification_trigger=NotificationTrigger(
+                variable_name="assignee_emails", enabled=False
+            ),
         )
 
     @staticmethod
@@ -407,6 +454,10 @@ class FormStage:
             workflow_transitions=[
                 WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
+            notification_trigger=NotificationTrigger(
+                variable_name=data["notification_trigger"]["variable_name"],
+                enabled=data["notification_trigger"]["enabled"],
+            ),
         )
 
     @property
@@ -450,6 +501,9 @@ class FormStage:
             "file": self.file,
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
+            "notification_trigger": self.notification_trigger.to_dto()
+            if self.notification_trigger
+            else None,
         }
 
     @property
@@ -479,6 +533,10 @@ class FormStage:
                 _update_file(self, value)
             elif attr == "path":
                 setattr(self, attr, normalize_path(value))
+            elif attr == "notification_trigger":
+                self.notification_trigger = NotificationTrigger(
+                    variable_name=value["variable_name"], enabled=value["enabled"]
+                )
             else:
                 raise Exception(f"Cannot update {attr} of form")
 

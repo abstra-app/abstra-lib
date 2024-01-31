@@ -84,7 +84,7 @@ def get_player_bp(controller: MainController):
             )
 
             execution.run()
-            workflow_engine.notify_ran(execution)
+            workflow_engine.handle_execution_end(execution)
         finally:
             conn.close(message="Done")
 
@@ -154,7 +154,7 @@ def get_player_bp(controller: MainController):
         )
 
         execution.run()
-        workflow_engine.notify_ran(execution)
+        workflow_engine.handle_execution_end(execution)
 
         body, status, headers = execution.get_response()
         return flask.Response(status=status, headers=headers, response=body)
