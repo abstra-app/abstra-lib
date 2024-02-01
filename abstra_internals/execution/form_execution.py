@@ -228,6 +228,7 @@ class FormExecution(Execution):
     def attempt_handle_exception(self, e: Exception) -> bool:
         NORMAL_CLOSURE = 1000
         GOING_AWAY = 1001
+        NO_STATUS = 1005
 
         if not isinstance(e, flask_sock.ConnectionClosed):
             return False
@@ -235,14 +236,14 @@ class FormExecution(Execution):
         if e.reason == NORMAL_CLOSURE:
             return True
 
-        if e.reason == GOING_AWAY:
+        if e.reason == GOING_AWAY or e.reason == NO_STATUS:
             self.status = "abandoned"
             return True
 
         self.log_form_message(
             "connection-closed",
             {
-                "message": f"[ERROR] Connection closed with code {e.reason}: {e.message}\n",
+                "message": f"[ERROR] Unhandled connection closed with code {e.reason}: {e.message}\n",
                 "reason": e.reason,
             },
         )
