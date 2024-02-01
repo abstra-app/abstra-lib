@@ -15,6 +15,6 @@ class Migration003(Migration):
         hooks = self.data.get("hooks", [])
         jobs = self.data.get("jobs", [])
         scripts = self.data.get("scripts", [])
-        for runtime in [forms, hooks, jobs, scripts]:
-            if "code_content" in runtime:
-                del runtime["code_content"]
+        for stage in [forms, hooks, jobs, scripts]:
+            if "code_content" in stage:
+                del stage["code_content"]

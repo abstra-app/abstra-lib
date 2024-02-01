@@ -36,13 +36,13 @@ def get_player_bp(controller: MainController):
 
     @bp.get("/_pages/<string:path>")
     def _get_page(path):
-        page_runtime = controller.get_form_by_path(path)
-        if not page_runtime:
+        form = controller.get_form_by_path(path)
+        if not form:
             flask.abort(404)
 
         return {
-            page_runtime.type_name: {
-                **page_runtime.browser_runner_dto,
+            form.type_name: {
+                **form.browser_runner_dto,
                 "workspace": controller.get_workspace().browser_runner_dto,
             }
         }

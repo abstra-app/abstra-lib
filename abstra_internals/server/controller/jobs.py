@@ -45,7 +45,7 @@ def get_editor_bp(controller: MainController):
 
     @bp.put("/<path:id>")
     @usage
-    def _update_runtime(id: str):
+    def _update_stage(id: str):
         data = flask.request.json
         if not data:
             flask.abort(400)

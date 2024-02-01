@@ -20,5 +20,5 @@ FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
 SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
-WORKER_UUID = lambda: os.getenv("ABSTRA_WORKER_UUID")  # Runtime set
-SERVER_UUID = lambda: os.getenv("ABSTRA_SERVER_UUID")  # Runtime set
+WORKER_UUID = lambda: os.getenv("ABSTRA_WORKER_UUID")  # Set during runtime
+SERVER_UUID = lambda: os.getenv("ABSTRA_SERVER_UUID")  # Set during runtime

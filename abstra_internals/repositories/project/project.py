@@ -501,9 +501,11 @@ class FormStage:
             "file": self.file,
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
-            "notification_trigger": self.notification_trigger.to_dto()
-            if self.notification_trigger
-            else None,
+            "notification_trigger": (
+                self.notification_trigger.to_dto()
+                if self.notification_trigger
+                else None
+            ),
         }
 
     @property
@@ -839,8 +841,8 @@ class Project:
         return [*self.actions, *self.iterators, *self.conditions]
 
     def iter_entrypoints(self) -> Generator[Path, None, None]:
-        for runtime in self.actions:
-            yield Path(runtime.file)
+        for stage in self.actions:
+            yield Path(stage.file)
 
     @property
     def project_files(self) -> Generator[Path, None, None]:

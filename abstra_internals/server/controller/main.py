@@ -140,10 +140,6 @@ class MainController:
     def init_code_file(self, path: str, code: str):
         Settings.root_path.joinpath(path).write_text(code, encoding="utf-8")
 
-    def get_page_runtime(self, path) -> Optional[FormStage]:
-        project = ProjectRepository.load()
-        return project.get_form_by_path(path)
-
     def open_file(self, file_path: str, mode: str, create_if_not_exists: bool = False):
         if mode == "module" or mode == "package":
             file_path = str(module2path(file_path, mode == "package"))
@@ -339,9 +335,9 @@ class MainController:
             )
             del changes["code_content"]
 
-        runtime = project.update_stage(stage, changes)
+        stage = project.update_stage(stage, changes)
         ProjectRepository.save(project)
-        return runtime
+        return stage
 
     def delete_job(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
@@ -374,9 +370,9 @@ class MainController:
         return get_project_info(headers)
 
     # AI
-    def send_ai_message(self, messages, runtime):
+    def send_ai_message(self, messages, stage):
         headers = resolve_headers() or {}
-        yield from get_ai_messages(messages, runtime, headers)
+        yield from get_ai_messages(messages, stage, headers)
 
     # files
     def save_file(self, file: FileStorage, filename: str):
