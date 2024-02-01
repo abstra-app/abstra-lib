@@ -35,9 +35,9 @@ def get_auth_info(headers: dict) -> dict:
         return {"logged": False, "reason": "INVALID_API_TOKEN"}
 
 
-def get_ai_messages(messages, runtime, headers: dict):
+def get_ai_messages(messages, stage, headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/messages"
-    body = {"messages": messages, "runtime": runtime}
+    body = {"messages": messages, "runtime": stage}
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
         chunk_size=None
     )

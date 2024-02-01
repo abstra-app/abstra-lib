@@ -15,37 +15,39 @@ from ...repositories.project.project import (
 class AddEntrypoint(LinterFix):
     label = "Add entrypoint"
     description = "Creates the .py file for the entrypoint"
-    runtime: Union[FormStage, HookStage, JobStage, ScriptStage]
+    stage: Union[FormStage, HookStage, JobStage, ScriptStage]
 
     def __init__(
-        self, runtime: Union[FormStage, HookStage, JobStage, ScriptStage]
+        self, stage: Union[FormStage, HookStage, JobStage, ScriptStage]
     ) -> None:
-        self.runtime = runtime
+        self.stage = stage
 
     def make_label(self):
-        return f"Create {self.runtime.file}"
+        return f"Create {self.stage.file}"
 
     def fix(self):
-        if isinstance(self.runtime, FormStage):
-            self.runtime.file_path.write_text(new_form_code)
-        elif isinstance(self.runtime, HookStage):
-            self.runtime.file_path.write_text(new_hook_code)
-        elif isinstance(self.runtime, JobStage):
-            self.runtime.file_path.write_text(new_job_code)
-        elif isinstance(self.runtime, ScriptStage):
-            self.runtime.file_path.write_text(new_script_code)
+        if isinstance(self.stage, FormStage):
+            self.stage.file_path.write_text(new_form_code)
+        elif isinstance(self.stage, HookStage):
+            self.stage.file_path.write_text(new_hook_code)
+        elif isinstance(self.stage, JobStage):
+            self.stage.file_path.write_text(new_job_code)
+        elif isinstance(self.stage, ScriptStage):
+            self.stage.file_path.write_text(new_script_code)
         else:
-            raise Exception(f"Unknown runtime: {self.runtime}")
+            raise Exception(f"Unknown stage: {self.stage}")
 
     @property
     def name(self):
-        return f"{self.__class__.__name__}:{self.runtime.__class__.__name__}:{self.runtime.id}"
+        return (
+            f"{self.__class__.__name__}:{self.stage.__class__.__name__}:{self.stage.id}"
+        )
 
 
 class NoEntrypointFound(LinterIssue):
-    def __init__(self, runtime: ActionStage) -> None:
-        self.label = f"The {runtime.type_name} entitled {runtime.title} points to a non-existent file: {runtime.file}"
-        self.fixes = [AddEntrypoint(runtime)]
+    def __init__(self, stage: ActionStage) -> None:
+        self.label = f"The {stage.type_name} entitled {stage.title} points to a non-existent file: {stage.file}"
+        self.fixes = [AddEntrypoint(stage)]
 
 
 class MissingEntrypoint(LinterRule):

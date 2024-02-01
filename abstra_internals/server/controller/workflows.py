@@ -216,7 +216,7 @@ def update_workflow(workflow_state_dto: dict):
         else:
             raise UnknownNodeTypeError(stage_dto["type"])
 
-    # Delete removed runtimes
+    # Delete removed stages
     for stage in project.workflow_stages:
         if stage.id not in [s["id"] for s in workflow_state_dto["stages"]]:
             project.delete_stage(stage.id)
