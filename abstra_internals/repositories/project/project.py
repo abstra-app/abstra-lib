@@ -821,6 +821,24 @@ class Project:
 
     @property
     def as_dict(self):
+        target_stages = set()
+        for stage in (
+            self.jobs
+            + self.forms
+            + self.scripts
+            + self.hooks
+            + self.conditions
+            + self.iterators
+        ):
+            for transition in stage.workflow_transitions:
+                target_stages.add(transition.target_id)
+
+        for stage in self.jobs + self.forms + self.scripts + self.hooks:
+            if stage.id in target_stages:
+                stage.is_initial = False
+            else:
+                stage.is_initial = True
+
         return {
             "workspace": self.workspace.as_dict,
             "visualization": self.visualization.as_dict,
@@ -1020,20 +1038,20 @@ class Project:
 
     @staticmethod
     def from_dict(data: dict):
-        non_only_initial_stages = data["forms"] + data["hooks"] + data["scripts"]
-        stages = data["jobs"] + non_only_initial_stages
+        target_stages = set()
+        control_keys = ["conditions", "iterators"]
+        stage_keys = ["forms", "hooks", "scripts", "jobs"]
+        for key in stage_keys + control_keys:
+            for stage in data[key]:
+                for transition in stage.get("transitions", []):
+                    target_stages.add(transition.get("target_id"))
 
-        for stage in stages:
-            initial = True
-            for st in stages:
-                for wt in st.get("transitions"):
-                    if wt.get("target_id") == stage.get("id"):
-                        initial = False
-            stage["is_initial"] = initial
-            for transition in stage["transitions"]:
-                for tg_stage in non_only_initial_stages:
-                    if tg_stage["id"] == transition["target_id"]:
-                        tg_stage["is_initial"] = False
+        for key in stage_keys:
+            for index, stage in enumerate(data[key]):
+                if stage["id"] in target_stages:
+                    data[key][index]["is_initial"] = False
+                else:
+                    data[key][index]["is_initial"] = True
 
         try:
             scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
