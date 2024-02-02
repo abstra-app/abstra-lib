@@ -113,10 +113,18 @@ class StageRun:
         return self.status == "abandoned"
 
     def to_dto(self):
-        return copy.deepcopy(self.__dict__)
+        return {
+            "id": self.id,
+            "stage": self.stage,
+            "data": self.data,
+            "status": self.status,
+            "parentId": self.parent_id,
+            "executionId": self.execution_id,
+            "createdAt": self.created_at.isoformat(),
+        }
 
     def clone(self):
-        return StageRun(**self.to_dto())
+        return StageRun(**copy.deepcopy(self.__dict__))
 
     def clone_to_waiting(self):
         new_stage_run = self.clone()
