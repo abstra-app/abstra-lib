@@ -184,12 +184,20 @@ class KanbanController:
         self,
         stage_run_repository: StageRunRepository,
         project_repository: Type[ProjectRepository],
+        read_only: bool = False,
     ) -> None:
         self.stage_run_repository = stage_run_repository
         self.project_repository = project_repository
+        self.read_only = read_only
+        self.initial_project = self.project_repository.load()
+
+    def _get_project(self):
+        if self.read_only:
+            return self.initial_project
+        return self.project_repository.load()
 
     def stage_run_content(self, stage_run: StageRun):
-        visualization = self.project_repository.load().visualization
+        visualization = self._get_project().visualization
         visualization_defined_data = [
             StageCardContentItem(
                 key=v.name,
@@ -209,15 +217,14 @@ class KanbanController:
     def _get_next_stages(
         self, previous_stage: Optional[str] = None
     ) -> Sequence[WorkflowStage]:
-        project = ProjectRepository.load()
         if previous_stage:
-            origin = project.get_stage(previous_stage)
+            origin = self._get_project().get_stage(previous_stage)
             if not origin:
                 raise Exception(f"Stage {previous_stage} not found")
 
             next_stages = []
             for next_stage in origin.workflow_transitions:
-                stage = project.get_stage(next_stage.target_id)
+                stage = self._get_project().get_stage(next_stage.target_id)
                 if not stage:
                     raise Exception(f"Stage {next_stage.target_id} not found")
                 next_stages.append(stage)
@@ -225,7 +232,7 @@ class KanbanController:
             return next_stages
 
         else:
-            return project.get_initial_stages()
+            return self._get_project().get_initial_stages()
 
     def _get_column_stages(self, selected_stages_ids: List[str], column_idx: int):
         if column_idx == 0:
@@ -234,11 +241,15 @@ class KanbanController:
             return self._get_next_stages(selected_stages_ids[column_idx - 1])
 
     def get_data(self, request: DataRequest) -> KanbanData:
-        project = self.project_repository.load()
-
         selected_stage_ids = [s.stage_id for s in request.selection]
+        non_selected_stages_column = [
+            ColumnStage.create(c)
+            for c in self._get_project().workflow_stages
+            if c.id not in selected_stage_ids
+        ]
+
         columns: List[KanbanColumn] = []
-        for column_idx, selection in enumerate(request.selection):
+        for selection in request.selection:
             request_filter = GetStageRunByQueryFilter.from_dict(
                 data=request.filter.to_dict()
             )
@@ -256,31 +267,22 @@ class KanbanController:
                 )
                 for stage_run in paginated_response.stage_runs
             ]
-            stages = [
-                ColumnStage.create(s)
-                for s in self._get_column_stages(selected_stage_ids, column_idx)
-            ]
             selected_stage_run = ColumnStage.create(
-                project.get_stage_raises(selection.stage_id)
+                self._get_project().get_stage_raises(selection.stage_id)
             )
 
             columns.append(
                 KanbanColumn(
                     selected_stage=selected_stage_run,
                     stage_run_cards=stage_run_cards,
-                    stages=stages,
+                    stages=non_selected_stages_column + [selected_stage_run],
                     total_count=paginated_response.total_count,
                 )
             )
 
-        next_stage_options = [
-            ColumnStage.create(s)
-            for s in self._get_column_stages(
-                selected_stage_ids, len(selected_stage_ids)
-            )
-        ]
-
-        return KanbanData(columns=columns, next_stage_options=next_stage_options)
+        return KanbanData(
+            columns=columns, next_stage_options=non_selected_stages_column
+        )
 
     def get_ancestor_logs(
         self, stage_run_id: str
@@ -349,7 +351,9 @@ def get_player_bp():
     members_repository = members_repository_factory()
     guard = RoleGuardFactory(members_repository)
 
-    controller = KanbanController(stage_run_repository, project_repository)
+    controller = KanbanController(
+        stage_run_repository, project_repository, read_only=True
+    )
     bp = flask.Blueprint("kanban", __name__)
 
     @bp.post("/")

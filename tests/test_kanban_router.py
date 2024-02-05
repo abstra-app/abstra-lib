@@ -110,11 +110,11 @@ class TestKanbanRouter(TestCase):
 
     def test_data_with_trasitions(self):
         project = ProjectRepository.load()
-        stage = HookStage.create(title="test", file="test.py")
+        hook = HookStage.create(title="test", file="test.py")
 
         script = ScriptStage.create(title="script", file="script.py")
 
-        stage.workflow_transitions = [
+        hook.workflow_transitions = [
             WorkflowTransition(
                 id="qualquer",
                 target_id=script.id,
@@ -125,10 +125,10 @@ class TestKanbanRouter(TestCase):
         ]
 
         project.add_stage(script)
-        project.add_stage(stage)
+        project.add_stage(hook)
 
         ProjectRepository.save(project)
-        stage_run = self.stage_run_repository.create_initial(stage.id)
+        stage_run = self.stage_run_repository.create_initial(hook.id)
         res = self.client.post(
             "/_editor/api/kanban",
             json=DataRequest(
@@ -136,7 +136,7 @@ class TestKanbanRouter(TestCase):
                 selection=[
                     DataRequestSelection.from_dict(
                         {
-                            "stage_id": stage.id,
+                            "stage_id": hook.id,
                         }
                     )
                 ],
@@ -151,7 +151,7 @@ class TestKanbanRouter(TestCase):
                     {
                         "selected_stage": {
                             "can_be_started": False,
-                            "id": stage.id,
+                            "id": hook.id,
                             "path": None,
                             "title": "test",
                             "type": "hook",
@@ -167,7 +167,14 @@ class TestKanbanRouter(TestCase):
                         "stages": [
                             {
                                 "can_be_started": False,
-                                "id": stage.id,
+                                "id": script.id,
+                                "path": None,
+                                "title": "script",
+                                "type": "script",
+                            },
+                            {
+                                "can_be_started": False,
+                                "id": hook.id,
                                 "path": None,
                                 "title": "test",
                                 "type": "hook",
