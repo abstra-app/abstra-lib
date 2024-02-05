@@ -134,3 +134,72 @@ class ProjectTests(TestCase):
             self.fail("script is null")
 
         self.assertFalse(read_script.is_initial)
+
+    def test_graph_dependencies(self):
+        project = Project.create()
+
+        form1 = FormStage(
+            id="form1",
+            path="form1",
+            title="form1",
+            file="form1.py",
+            workflow_position=(0.0, 0.0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+        )
+
+        form2 = FormStage(
+            id="form2",
+            path="form2",
+            title="form2",
+            file="form2.py",
+            workflow_position=(0.0, 0.0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+        )
+
+        script = ScriptStage(
+            file="script.py",
+            id="script",
+            is_initial=True,
+            title="script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+
+        form1.workflow_transitions.append(
+            WorkflowTransition(
+                id="1",
+                target_id=form2.id,
+                target_type=form2.type_name,
+                type=WorkflowTransition.default_type(form1.type_name),
+            )
+        )
+
+        form1.workflow_transitions.append(
+            WorkflowTransition(
+                id="2",
+                target_id=script.id,
+                target_type=script.type_name,
+                type=WorkflowTransition.default_type(form1.type_name),
+            )
+        )
+
+        project = ProjectRepository.load()
+
+        project.add_stage(form1)
+        project.add_stage(form2)
+        project.add_stage(script)
+
+        ProjectRepository.save(project)
+
+        p = ProjectRepository.load()
+
+        self.assertEqual(p.get_next_stages_ids(form1.id), [form2.id, script.id])
+        self.assertEqual(p.get_next_stages_ids(form2.id), [])
+
+        self.assertEqual(p.get_previous_stages_ids(form2.id), [form1.id])

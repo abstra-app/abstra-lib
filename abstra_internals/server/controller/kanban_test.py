@@ -112,22 +112,8 @@ class KanbanTests(TestCase):
             KanbanData(
                 columns=[
                     KanbanColumn(
-                        selected_stage=ColumnStage(
-                            id="job",
-                            title="Job",
-                            path=None,
-                            can_be_started=False,
-                            type="job",
-                        ),
-                        stages=[
-                            ColumnStage(
-                                id="job",
-                                title="Job",
-                                path=None,
-                                can_be_started=False,
-                                type="job",
-                            )
-                        ],
+                        selected_stage=ColumnStage.create(job),
+                        stages=[ColumnStage.create(job)],
                         stage_run_cards=[],
                         total_count=0,
                     )
@@ -199,7 +185,11 @@ class KanbanTests(TestCase):
             data,
             KanbanData(
                 columns=[],
-                next_stage_options=[ColumnStage.create(job)],
+                next_stage_options=[
+                    ColumnStage.create(job),
+                    ColumnStage.create(script),
+                    ColumnStage.create(condition),
+                ],
             ),
         )
 
@@ -273,27 +263,20 @@ class KanbanTests(TestCase):
             KanbanData(
                 columns=[
                     KanbanColumn(
-                        selected_stage=ColumnStage(
-                            id="job",
-                            title="Job",
-                            path=None,
-                            can_be_started=False,
-                            type="job",
-                        ),
+                        selected_stage=ColumnStage.create(job),
                         stages=[
-                            ColumnStage(
-                                id="job",
-                                title="Job",
-                                path=None,
-                                can_be_started=False,
-                                type="job",
-                            )
+                            ColumnStage.create(script),
+                            ColumnStage.create(condition),
+                            ColumnStage.create(job),
                         ],
                         stage_run_cards=[],
                         total_count=0,
                     )
                 ],
-                next_stage_options=[ColumnStage.create(condition)],
+                next_stage_options=[
+                    ColumnStage.create(script),
+                    ColumnStage.create(condition),
+                ],
             ),
         )
 
@@ -372,41 +355,19 @@ class KanbanTests(TestCase):
             KanbanData(
                 columns=[
                     KanbanColumn(
-                        selected_stage=ColumnStage(
-                            id="job",
-                            title="Job",
-                            path=None,
-                            can_be_started=False,
-                            type="job",
-                        ),
+                        selected_stage=ColumnStage.create(job),
                         stages=[
-                            ColumnStage(
-                                id="job",
-                                title="Job",
-                                path=None,
-                                can_be_started=False,
-                                type="job",
-                            )
+                            ColumnStage.create(script),
+                            ColumnStage.create(job),
                         ],
                         stage_run_cards=[],
                         total_count=0,
                     ),
                     KanbanColumn(
-                        selected_stage=ColumnStage(
-                            id="condition",
-                            title="Condition",
-                            path=None,
-                            can_be_started=False,
-                            type="condition",
-                        ),
+                        selected_stage=ColumnStage.create(condition),
                         stages=[
-                            ColumnStage(
-                                id="condition",
-                                title="Condition",
-                                path=None,
-                                can_be_started=False,
-                                type="condition",
-                            )
+                            ColumnStage.create(script),
+                            ColumnStage.create(condition),
                         ],
                         stage_run_cards=[],
                         total_count=0,
@@ -500,6 +461,8 @@ class KanbanTests(TestCase):
                 next_stage_options=[
                     ColumnStage.create(job1),
                     ColumnStage.create(job2),
+                    ColumnStage.create(script),
+                    ColumnStage.create(condition),
                 ],
             ),
         )
@@ -596,54 +559,28 @@ class KanbanTests(TestCase):
             KanbanData(
                 columns=[
                     KanbanColumn(
-                        selected_stage=ColumnStage(
-                            id="job1",
-                            title="Job1",
-                            path=None,
-                            can_be_started=False,
-                            type="job",
-                        ),
+                        selected_stage=ColumnStage.create(job1),
                         stages=[
-                            ColumnStage(
-                                id="job1",
-                                title="Job1",
-                                path=None,
-                                can_be_started=False,
-                                type="job",
-                            ),
-                            ColumnStage(
-                                id="job2",
-                                title="Job2",
-                                path=None,
-                                can_be_started=False,
-                                type="job",
-                            ),
+                            ColumnStage.create(job2),
+                            ColumnStage.create(script),
+                            ColumnStage.create(job1),
                         ],
                         stage_run_cards=[],
                         total_count=0,
                     ),
                     KanbanColumn(
-                        selected_stage=ColumnStage(
-                            id="condition",
-                            title="Condition",
-                            path=None,
-                            can_be_started=False,
-                            type="condition",
-                        ),
+                        selected_stage=ColumnStage.create(condition),
                         stages=[
-                            ColumnStage(
-                                id="condition",
-                                title="Condition",
-                                path=None,
-                                can_be_started=False,
-                                type="condition",
-                            )
+                            ColumnStage.create(job2),
+                            ColumnStage.create(script),
+                            ColumnStage.create(condition),
                         ],
                         stage_run_cards=[],
                         total_count=0,
                     ),
                 ],
                 next_stage_options=[
+                    ColumnStage.create(job2),
                     ColumnStage.create(script),
                 ],
             ),

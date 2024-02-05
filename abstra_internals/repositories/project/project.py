@@ -4,6 +4,7 @@ import shutil
 import sys
 import tempfile
 import uuid
+from abstra_internals.utils.graph import Edge, Graph, Node
 from pydantic.dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
@@ -819,17 +820,12 @@ class Project:
     iterators: List[IteratorStage]
     conditions: List[ConditionStage]
 
+    _graph: Graph
+
     @property
     def as_dict(self):
         target_stages = set()
-        for stage in (
-            self.jobs
-            + self.forms
-            + self.scripts
-            + self.hooks
-            + self.conditions
-            + self.iterators
-        ):
+        for stage in self.workflow_stages:
             for transition in stage.workflow_transitions:
                 target_stages.add(transition.target_id)
 
@@ -873,6 +869,15 @@ class Project:
         for file in self.project_files:
             if file not in entrypoints:
                 yield file
+
+    def get_next_stages_ids(self, id: str) -> List[str]:
+        return [node.id for node in self._graph.next_to(id)]
+
+    def get_previous_stages_ids(self, id: str) -> List[str]:
+        return [node.id for node in self._graph.previous_to(id)]
+
+    def is_initial(self, target_stage: ActionStage) -> bool:
+        return len(self._graph.previous_to(target_stage.id)) == 0
 
     def add_stage(self, stage: WorkflowStage):
         if isinstance(stage, FormStage):
@@ -1028,23 +1033,23 @@ class Project:
         self.iterators = [i for i in self.iterators if i.id != id]
         self.conditions = [c for c in self.conditions if c.id != id]
 
-    def is_initial(self, target_stage: ActionStage) -> bool:
-        for stage in self.workflow_stages:
-            for wt in stage.workflow_transitions:
-                if wt.target_id == target_stage.id:
-                    return False
-
-        return True
-
     @staticmethod
     def from_dict(data: dict):
         target_stages = set()
+        nodes = []
+        edges = []
+
         control_keys = ["conditions", "iterators"]
         stage_keys = ["forms", "hooks", "scripts", "jobs"]
+
         for key in stage_keys + control_keys:
             for stage in data[key]:
+                nodes.append(Node(id=stage["id"]))
                 for transition in stage.get("transitions", []):
                     target_stages.add(transition.get("target_id"))
+                    edges.append(
+                        Edge(source_id=stage["id"], target_id=transition["target_id"])
+                    )
 
         for key in stage_keys:
             for index, stage in enumerate(data[key]):
@@ -1073,6 +1078,7 @@ class Project:
                 jobs=jobs,
                 iterators=iterators,
                 conditions=conditions,
+                _graph=Graph.from_primitives(nodes=nodes, edges=edges),
             )
 
         except Exception:
@@ -1093,6 +1099,7 @@ class Project:
             jobs=[],
             iterators=[],
             conditions=[],
+            _graph=Graph.from_primitives([], []),
         )
 
 
