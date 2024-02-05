@@ -7,7 +7,7 @@ from ...utils import get_package_version
 
 
 CACHED_VERSION_FILE = ".abstra/cached_versions"
-EXPIRE_PERIOD = 60 * 60 * 24  # 1 day
+EXPIRE_PERIOD = 60 * 60 * 4  # 4 hours
 TIMEOUT = 5
 
 
@@ -19,13 +19,22 @@ def check_latest_version(package_name="abstra"):
         current_version = get_package_version(package_name)
         latest_version = _get_cached_latest_version(package_name)
 
-        if current_version == latest_version:
-            print(f"Abstra Editor is up to date (version {current_version}).")
-        else:
+        highest_version = (
+            _get_highest_version(current_version, latest_version)
+            if isinstance(current_version, str)
+            else latest_version
+        )
+
+        if highest_version == latest_version:
             print(
                 f"A new version of Abstra Editor is available. Latest version is {latest_version}, but you have {current_version}."
             )
             print(f"Please run 'pip install {package_name} --upgrade' to update.")
+        else:
+            print(f"Abstra Editor is up to date (version {current_version}).")
+
+            if isinstance(current_version, str) and highest_version == current_version:
+                _update_cached_latest_version(package_name, current_version)
 
     except pkg_resources.DistributionNotFound:
         print(f"{package_name} is not installed.")
@@ -36,7 +45,7 @@ def check_latest_version(package_name="abstra"):
     print("\n")
 
 
-def _get_cached_latest_version(package_name="abstra"):
+def _get_cached_latest_version(package_name="abstra") -> str:
     cached_file = Path(CACHED_VERSION_FILE) / f"{package_name}.json"
 
     if cached_file.exists():
@@ -63,6 +72,14 @@ def _get_cached_latest_version(package_name="abstra"):
     )
     latest_version = response.json()["info"]["version"]
 
+    _update_cached_latest_version(package_name, latest_version)
+
+    return latest_version
+
+
+def _update_cached_latest_version(package_name, latest_version: str):
+    cached_file = Path(CACHED_VERSION_FILE) / f"{package_name}.json"
+
     if not cached_file.parent.exists():
         cached_file.parent.mkdir(parents=True)
 
@@ -75,4 +92,18 @@ def _get_cached_latest_version(package_name="abstra"):
             f,
         )
 
-    return latest_version
+
+def _get_highest_version(first_version: str, second_version: str):
+    first_version_array = first_version.split(".")
+    second_version_array = second_version.split(".")
+
+    if (len(first_version_array) != 3) or (len(second_version_array) != 3):
+        return None
+
+    for i in range(3):
+        if int(first_version_array[i]) > int(second_version_array[i]):
+            return first_version
+        elif int(first_version_array[i]) < int(second_version_array[i]):
+            return second_version
+
+    return None
