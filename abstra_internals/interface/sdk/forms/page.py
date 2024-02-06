@@ -123,7 +123,7 @@ class Page(WidgetSchema):
                 validation=validate_func, payload=parsed_payload
             )
 
-            if response["type"] != "user-event":
+            if response["type"] != "form:user-event":
                 self.set_errors()
                 if not self.has_errors() and validation_result.get("status"):
                     break
@@ -189,7 +189,7 @@ class Page(WidgetSchema):
         steps_info,
     ):
         send(
-            forms_contract.FormMessage(
+            forms_contract.FormRenderPageMessage(
                 widgets=widgets,
                 actions=actions,
                 end_program=end_program,
@@ -202,7 +202,7 @@ class Page(WidgetSchema):
         self, widgets: list, validation: forms_contract.ValidationResult, event_seq: int
     ):
         send(
-            forms_contract.FormUpdateMessage(
+            forms_contract.FormUpdatePageMessage(
                 widgets=widgets,
                 validation=validation,
                 event_seq=event_seq,

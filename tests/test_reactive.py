@@ -28,7 +28,7 @@ class TestReactive(unittest.TestCase):
 
     def test_rendering_with_static_part_initial_value(self):
         self.mock.add_browser_message(
-            {"type": "form-response", "payload": {"a": "1", "b": "2"}}
+            {"type": "form:page-response", "payload": {"a": "1", "b": "2"}}
         )
 
         def render(partial):

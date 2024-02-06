@@ -11,5 +11,4 @@ from abstra_internals.interface.sdk.common import (
     redirect,
     get_user,
     get_query_params,
-    alert,
 )

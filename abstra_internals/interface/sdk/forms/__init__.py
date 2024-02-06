@@ -1,5 +1,5 @@
 from ....proxy import ReadOnlyProxyDict
-from ..common import alert, execute_js, get_query_params, get_user, redirect  # exported
+from ..common import execute_js, get_query_params, get_user, redirect  # exported
 from .generated.inputs import *
 from .generated.outputs import *
 from .list_item_schema import ListItemSchema  # exported

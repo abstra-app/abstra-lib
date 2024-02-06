@@ -14,11 +14,6 @@ def execute_js(code: str, context: dict = {}):
     return execution.execute_js(code, context=context)
 
 
-def alert(message: str, severity: str = "info"):
-    execution = get_form_execution_throwable()
-    return execution.alert(message, severity)
-
-
 def redirect(url: str, query_params: Optional[dict] = None):
     execution = get_form_execution_throwable()
     return execution.redirect(url, query_params)
