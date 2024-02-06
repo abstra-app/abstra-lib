@@ -9,14 +9,14 @@
   [
     "python",
     {
-      "type": "execution-id",
+      "type": "execution:started",
       "executionId": "execution-id"
     }
   ],
   [
     "python",
     {
-      "type": "form",
+      "type": "form:render-page",
       "widgets": [
         {
           "type": "text-input",
@@ -45,7 +45,9 @@
           "errors": []
         }
       ],
-      "actions": ["i18n_next_action"],
+      "actions": [
+        "i18n_next_action"
+      ],
       "endProgram": false,
       "reactivePollingInterval": 0,
       "steps": null
@@ -54,8 +56,11 @@
   [
     "browser",
     {
-      "type": "form-response",
-      "payload": { "What is your name?": "", "What is your last name?": "" },
+      "type": "form:page-response",
+      "payload": {
+        "What is your name?": "",
+        "What is your last name?": ""
+      },
       "action": "i18n_next_action",
       "secrets": [],
       "seq": 0
@@ -78,7 +83,9 @@
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["i18n_error_required_field"]
+          "errors": [
+            "i18n_error_required_field"
+          ]
         },
         {
           "type": "text-input",
@@ -91,10 +98,15 @@
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["i18n_error_required_field"]
+          "errors": [
+            "i18n_error_required_field"
+          ]
         }
       ],
-      "validation": { "status": true, "message": "" }
+      "validation": {
+        "status": true,
+        "message": ""
+      }
     }
   ]
 ]

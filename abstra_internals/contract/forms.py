@@ -8,27 +8,28 @@ class ValidationResult(TypedDict):
 
 
 BrowserMessageTypes = Literal[
-    "browser:try-disconnect",
+    "execution:start",
     "auth:saved-jwt",
-    "user-event",
-    "form-response",
+    "form:user-event",
+    "form:page-response",
+    "execute-js:response",
+    "debug:close-attempt",
 ]
 
 PythonMessageType = Literal[
-    "stdout",
-    "stderr",
+    "execution:lock-failed",
+    "execution:started",
+    "execution:ended",
+    "execution:stdout",
+    "execution:stderr",
+    "form:update-page",
+    "form:render-page",
     "auth:require-info",
     "auth:invalid-jwt",
     "auth:valid-jwt",
-    "redirect",
-    "alert",
+    "redirect:request",
     "execute-js:request",
-    "files:changed",
-    "stage-run:lock-failed",
-    "execution-id",
-    "program:end",
-    "form-update",
-    "form",
+    "env:files-changed",
 ]
 
 MessageType = Union[BrowserMessageTypes, PythonMessageType]
@@ -45,12 +46,12 @@ class Message:
         return {"type": self.type, **self.data}
 
 
-class StdioMessage(Message):
+class ExecutionStdioMessage(Message):
     type: PythonMessageType
 
     def __init__(self, type: Literal["stdout", "stderr"], log: str):
         super().__init__({"log": log})
-        self.type = type
+        self.type = "execution:stdout" if type == "stdout" else "execution:stderr"
 
 
 class AuthRequireInfoMessage(Message):
@@ -74,18 +75,11 @@ class AuthValidJWTMessage(Message):
         super().__init__({})
 
 
-class RedirectMessage(Message):
-    type = "redirect"
+class RedirectRequestMessage(Message):
+    type = "redirect:request"
 
     def __init__(self, url: str, query_params: dict):
         super().__init__({"url": url, "queryParams": query_params})
-
-
-class AlertMessage(Message):
-    type = "alert"
-
-    def __init__(self, message: str, severity: str):
-        super().__init__({"message": message, "severity": severity})
 
 
 class ExecuteJSRequestMessage(Message):
@@ -96,14 +90,14 @@ class ExecuteJSRequestMessage(Message):
 
 
 class FilesChangedMessage(Message):
-    type = "files:changed"
+    type = "env:files-changed"
 
     def __init__(self):
         super().__init__({})
 
 
-class LockFailedMessage(Message):
-    type = "stage-run:lock-failed"
+class ExecutionLockFailedMessage(Message):
+    type = "execution:lock-failed"
 
     def __init__(self, status: Optional[str]):
         super().__init__({"status": status})
@@ -115,16 +109,15 @@ class CloseDTO:
     exception: Optional[Union[Exception, None]] = None
 
 
-class ExecutionIdMessage(Message):
-    type = "execution-id"
+class ExecutionStartedMessage(Message):
+    type = "execution:started"
 
     def __init__(self, execution_id: str):
         super().__init__({"executionId": execution_id})
 
 
-class CloseMessage(Message):
-    type = "program:end"
-    close_dto: CloseDTO
+class ExecutionEndedMessage(Message):
+    type = "execution:ended"
 
     def __init__(self, close_dto: CloseDTO):
         self.close_dto = close_dto
@@ -132,8 +125,8 @@ class CloseMessage(Message):
         super().__init__({"exitStatus": close_dto.exit_status, "exception": exc})
 
 
-class FormUpdateMessage(Message):
-    type = "form-update"
+class FormUpdatePageMessage(Message):
+    type = "form:update-page"
 
     def __init__(self, widgets: List, validation: ValidationResult, event_seq: int):
         super().__init__(
@@ -145,8 +138,8 @@ class FormUpdateMessage(Message):
         )
 
 
-class FormMessage(Message):
-    type = "form"
+class FormRenderPageMessage(Message):
+    type = "form:render-page"
 
     def __init__(
         self,

@@ -9,14 +9,14 @@
   [
     "python",
     {
-      "type": "execution-id",
+      "type": "execution:started",
       "executionId": "execution-id"
     }
   ],
   [
     "python",
     {
-      "type": "form",
+      "type": "form:render-page",
       "widgets": [
         {
           "type": "text-input",
@@ -45,7 +45,9 @@
           "errors": []
         }
       ],
-      "actions": ["i18n_next_action"],
+      "actions": [
+        "i18n_next_action"
+      ],
       "endProgram": false,
       "reactivePollingInterval": 0,
       "steps": null
@@ -54,8 +56,11 @@
   [
     "browser",
     {
-      "type": "user-event",
-      "payload": { "What is your name?": "a", "What is your last name?": "" },
+      "type": "form:user-event",
+      "payload": {
+        "What is your name?": "a",
+        "What is your last name?": ""
+      },
       "seq": 0
     }
   ],
@@ -91,15 +96,21 @@
           "errors": []
         }
       ],
-      "validation": { "status": true, "message": "" },
+      "validation": {
+        "status": true,
+        "message": ""
+      },
       "seq": 0
     }
   ],
   [
     "browser",
     {
-      "type": "user-event",
-      "payload": { "What is your name?": "", "What is your last name?": "" },
+      "type": "form:user-event",
+      "payload": {
+        "What is your name?": "",
+        "What is your last name?": ""
+      },
       "seq": 1
     }
   ],
@@ -120,7 +131,9 @@
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["i18n_error_required_field"]
+          "errors": [
+            "i18n_error_required_field"
+          ]
         },
         {
           "type": "text-input",
@@ -136,14 +149,20 @@
           "errors": []
         }
       ],
-      "validation": { "status": true, "message": "" }
+      "validation": {
+        "status": true,
+        "message": ""
+      }
     }
   ],
   [
     "browser",
     {
-      "type": "user-event",
-      "payload": { "What is your name?": "", "What is your last name?": "a" },
+      "type": "form:user-event",
+      "payload": {
+        "What is your name?": "",
+        "What is your last name?": "a"
+      },
       "seq": 2
     }
   ],
@@ -164,7 +183,9 @@
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["i18n_error_required_field"]
+          "errors": [
+            "i18n_error_required_field"
+          ]
         },
         {
           "type": "text-input",
@@ -180,14 +201,20 @@
           "errors": []
         }
       ],
-      "validation": { "status": true, "message": "" }
+      "validation": {
+        "status": true,
+        "message": ""
+      }
     }
   ],
   [
     "browser",
     {
-      "type": "user-event",
-      "payload": { "What is your name?": "", "What is your last name?": "" },
+      "type": "form:user-event",
+      "payload": {
+        "What is your name?": "",
+        "What is your last name?": ""
+      },
       "seq": 3
     }
   ],
@@ -208,7 +235,9 @@
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["i18n_error_required_field"]
+          "errors": [
+            "i18n_error_required_field"
+          ]
         },
         {
           "type": "text-input",
@@ -221,10 +250,15 @@
           "fullWidth": false,
           "mask": null,
           "disabled": false,
-          "errors": ["i18n_error_required_field"]
+          "errors": [
+            "i18n_error_required_field"
+          ]
         }
       ],
-      "validation": { "status": true, "message": "" }
+      "validation": {
+        "status": true,
+        "message": ""
+      }
     }
   ]
 ]

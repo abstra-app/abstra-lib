@@ -71,7 +71,7 @@ class FormExecution(Execution):
         return self._connection.connected
 
     def log_form_message(self, type: str, payload: dict):
-        blocklist = ["auth:saved-jwt", "heartbeat"]
+        blocklist = ["auth:saved-jwt", "execution:heartbeat"]
 
         if type in blocklist:
             return
@@ -92,12 +92,17 @@ class FormExecution(Execution):
     def send(self, msg: forms_contract.Message):
         self.log_form_message(msg.type, msg.data)
 
-        skip_sending = isinstance(msg, forms_contract.StdioMessage) and IS_PRODUCTION
+        skip_sending = (
+            isinstance(msg, forms_contract.ExecutionStdioMessage) and IS_PRODUCTION
+        )
         if skip_sending:
             return
 
         if self.debug_enabled:
-            if isinstance(msg, forms_contract.CloseMessage) and msg.close_dto.exception:
+            if (
+                isinstance(msg, forms_contract.ExecutionEndedMessage)
+                and msg.close_dto.exception
+            ):
                 debug = make_debug_data(msg.close_dto.exception)
             else:
                 debug = make_debug_data(inspect.stack())
@@ -123,18 +128,12 @@ class FormExecution(Execution):
         self.closed = True
 
     def stdio(self, event: Literal["stderr", "stdout"], text: str) -> None:
-        self.send(forms_contract.StdioMessage(event, text))
+        self.send(forms_contract.ExecutionStdioMessage(event, text))
         return super().stdio(event, text)
-
-    def end(self):
-        if self.connected:
-            self.close(reason=traceback.format_exc() or None)
 
     def handle_lock_failed(self) -> None:
         status = self.stage_run.status if self.stage_run else None
-        self.send(forms_contract.LockFailedMessage(status))
-
-    # flows
+        self.send(forms_contract.ExecutionLockFailedMessage(status))
 
     @property
     def query_params(self) -> Dict:
@@ -143,7 +142,7 @@ class FormExecution(Execution):
     def receive(self):
         while True:
             type, data = self.recv()
-            if type in ["heartbeat", "browser:try-disconnect"]:
+            if type in ["execution:heartbeat", "debug:close-attempt"]:
                 continue
 
             return data
@@ -175,24 +174,16 @@ class FormExecution(Execution):
 
             return data.get("value")
 
-    def alert(self, message: str, severity: str):
-        severity = (
-            severity if severity in ["info", "warn", "error", "success"] else "info"
-        )
-        self.send(forms_contract.AlertMessage(message, severity))
-
     def redirect(self, url: str, query_params: Optional[dict] = None):
         query_params = query_params if query_params is not None else self.query_params
-        self.send(forms_contract.RedirectMessage(url, query_params))
-
-    # forms
+        self.send(forms_contract.RedirectRequestMessage(url, query_params))
 
     def _recv_start(self):
         type = None
         data = None
 
         type, data = self.recv()
-        if type != "start":
+        if type != "execution:start":
             return self._recv_start()
 
         return data["params"]
@@ -202,16 +193,16 @@ class FormExecution(Execution):
 
     def handle_start(self) -> None:
         self.context.request.query_params = self._recv_start()
-        self.send(forms_contract.ExecutionIdMessage(self.id))
+        self.send(forms_contract.ExecutionStartedMessage(self.id))
 
     def handle_success(self) -> None:
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
-        self.send(forms_contract.CloseMessage(close_dto))
+        self.send(forms_contract.ExecutionEndedMessage(close_dto))
         self.close()
 
     def handle_failure(self, e: Exception) -> None:
         self.send(
-            forms_contract.StdioMessage(
+            forms_contract.ExecutionStdioMessage(
                 "stderr",
                 "".join(
                     compat_traceback.format_exception(e),
@@ -223,7 +214,7 @@ class FormExecution(Execution):
             exit_status="EXCEPTION",
             exception=e,
         )
-        self.send(forms_contract.CloseMessage(close_dto))
+        self.send(forms_contract.ExecutionEndedMessage(close_dto))
 
     def attempt_handle_exception(self, e: Exception) -> bool:
         NORMAL_CLOSURE = 1000

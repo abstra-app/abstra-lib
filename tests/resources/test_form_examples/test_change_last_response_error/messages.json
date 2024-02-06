@@ -9,14 +9,14 @@
     [
         "python",
         {
-            "type": "execution-id",
+            "type": "execution:started",
             "executionId": "execution-id"
         }
     ],
     [
         "python",
         {
-            "type": "form",
+            "type": "form:render-page",
             "widgets": [
                 {
                     "type": "multiple-choice-input",
@@ -57,7 +57,7 @@
     [
         "browser",
         {
-            "type": "user-event",
+            "type": "form:user-event",
             "payload": {
                 "whatodo": [
                     "doA"
@@ -108,7 +108,7 @@
     [
         "browser",
         {
-            "type": "form-response",
+            "type": "form:page-response",
             "payload": {
                 "whatodo": [
                     "doA"
@@ -122,7 +122,7 @@
     [
         "python",
         {
-            "type": "form",
+            "type": "form:render-page",
             "widgets": [
                 {
                     "type": "text-output",
@@ -159,7 +159,7 @@
     [
         "browser",
         {
-            "type": "user-event",
+            "type": "form:user-event",
             "payload": {
                 "Enter things for A": "a"
             },
@@ -201,7 +201,7 @@
     [
         "browser",
         {
-            "type": "form-response",
+            "type": "form:page-response",
             "payload": {
                 "Enter things for A": "a"
             },
@@ -213,7 +213,7 @@
     [
         "python",
         {
-            "type": "form",
+            "type": "form:render-page",
             "widgets": [
                 {
                     "type": "multiple-choice-input",
@@ -256,7 +256,7 @@
     [
         "browser",
         {
-            "type": "user-event",
+            "type": "form:user-event",
             "payload": {
                 "whatodo": [
                     "doB"
@@ -307,7 +307,7 @@
     [
         "browser",
         {
-            "type": "form-response",
+            "type": "form:page-response",
             "payload": {
                 "whatodo": [
                     "doB"
@@ -321,7 +321,7 @@
     [
         "python",
         {
-            "type": "form",
+            "type": "form:render-page",
             "widgets": [
                 {
                     "type": "text-output",
