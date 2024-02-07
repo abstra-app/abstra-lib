@@ -27,8 +27,8 @@ class Pagination:
     @staticmethod
     def from_dict(data: dict) -> "Pagination":
         return Pagination(
-            limit=data.get("limit", 0),
-            offset=data.get("offset", 10),
+            limit=data.get("limit", 10),
+            offset=data.get("offset", 0),
         )
 
     def to_dict(self) -> dict:

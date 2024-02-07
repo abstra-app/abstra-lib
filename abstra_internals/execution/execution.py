@@ -5,13 +5,13 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, ClassVar, Dict, Literal, Optional, Tuple, Union
 
+from .stage_run_manager import StageRunManager
+
 from ..compatibility import compat_traceback
 from ..modules import import_as_new
 from ..repositories.project.project import ActionStage
 from ..repositories.stage_run import (
     StageRun,
-    StageRunRepository,
-    GetStageRunByQueryFilter,
 )
 
 from ..repositories.execution import (
@@ -26,21 +26,13 @@ from ..repositories.execution_logs import (
     UnhandledExceptionLogEntry,
 )
 from ..repositories.project.project import ActionStage
-from ..repositories.stage_run import StageRun, StageRunRepository
+from ..repositories.stage_run import StageRun
 from ..utils.datetime import to_utc_iso_string
 
 
 class NoExecutionFound(Exception):
     def __str__(self) -> str:
         return "No execution found. If you are running this locally, make sure you are running it with `abstra serve`. For more information, see https://docs.abstra.io"
-
-
-class InvalidStageRunId(Exception):
-    pass
-
-
-class UnsetStageRun(Exception):
-    pass
 
 
 ABSTRA_RUN_KEY = "abstra-run-id"
@@ -96,7 +88,7 @@ class Execution:
     stage: ActionStage
     context: ExecutionContext
 
-    stage_run_repository: StageRunRepository
+    stage_run_manager: StageRunManager
     execution_repository: ExecutionRepository
     execution_logs_repository: ExecutionLogsRepository
 
@@ -127,7 +119,7 @@ class Execution:
         stage: ActionStage,
         is_initial: bool,
         request: RequestData,
-        stage_run_repository: StageRunRepository,
+        stage_run_manager: StageRunManager,
         execution_repository: ExecutionRepository,
         execution_logs_repository: ExecutionLogsRepository,
         execution_id: Optional[str] = None,
@@ -145,7 +137,7 @@ class Execution:
         )
         Execution.executions[self.thread_id] = self
 
-        self.stage_run_repository = stage_run_repository
+        self.stage_run_manager = stage_run_manager
         self.execution_repository = execution_repository
         self.execution_logs_repository = execution_logs_repository
 
@@ -199,46 +191,9 @@ class Execution:
             )
         )
 
-    def get_not_abandoned_stage_run(self, stage_run: StageRun) -> StageRun:
-        if stage_run.status != "abandoned":
-            return stage_run
-
-        filter = GetStageRunByQueryFilter()
-        filter.parent_id = stage_run.id
-        filter.stage = self.stage.id
-
-        next_matches = self.stage_run_repository.find(filter)
-
-        assert (
-            len(next_matches) == 1
-        ), "Internal error: abandoned stage run does not have exactly one child"
-
-        return self.get_not_abandoned_stage_run(next_matches[0])
-
     @abstractmethod
     def received_stage_run_id(self) -> Optional[str]:
         raise NotImplementedError()
-
-    def init_stage_run(self) -> None:
-        stage_run_id = self.received_stage_run_id()
-
-        if stage_run_id:
-            stage_run = self.stage_run_repository.get(stage_run_id)
-            self.stage_run = self.get_not_abandoned_stage_run(stage_run)
-
-            if stage_run.stage == self.stage.id:
-                self.stage_run = stage_run
-                return
-
-            raise InvalidStageRunId()
-
-        if self.is_initial:
-            self.stage_run = self.stage_run_repository.create_initial(
-                stage=self.stage.id
-            )
-            return
-
-        raise UnsetStageRun()
 
     @abstractmethod
     def handle_start(self) -> None:
@@ -263,7 +218,8 @@ class Execution:
         self.status = "running"
         self.execution_repository.create(self.to_dto())
         self.handle_start()
-        self.init_stage_run()
+        stage_run_id = self.received_stage_run_id()
+        self.stage_run = self.stage_run_manager.init_stage_run(self.stage, stage_run_id)
 
         lock_held = self.set_stage_run_status()
 
@@ -297,7 +253,7 @@ class Execution:
         if not self.stage_run or not self.status:
             return False
 
-        return self.stage_run_repository.change_state(
+        return self.stage_run_manager.change_state(
             self.stage_run.id, self.status, self.id
         )
 

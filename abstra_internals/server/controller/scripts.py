@@ -1,11 +1,17 @@
 import flask
+import json
 
 from ...execution.script_execution import ScriptExecution
+from ...execution.stage_run_manager import (
+    DetachedStageRunManager,
+    AttachedStageRunManager,
+)
 from ...repositories import (
     execution_logs_repository,
     execution_repository,
     stage_run_repository,
 )
+from ...repositories.stage_run import stage_run_repository_factory
 from ...repositories.execution_logs import FormEventLogEntry
 from ...usage import usage
 from ..utils import is_it_true
@@ -66,6 +72,46 @@ def get_editor_bp(controller: MainController):
     @usage
     def _test_script(id: str):
         script = controller.get_script(id)
+        if not script:
+            flask.abort(400)
+
+        data = json.loads(controller.read_test_data())
+
+        tmp_stage_run_repository = stage_run_repository_factory()
+        stage_run_manager = DetachedStageRunManager(tmp_stage_run_repository, data=data)
+        execution = ScriptExecution(
+            stage=script,
+            stage_run_id="",
+            stage_run_manager=stage_run_manager,
+            execution_repository=execution_repository,
+            execution_logs_repository=execution_logs_repository,
+        )
+
+        execution.run()
+
+        stdout: str = ""
+        stderr: str = ""
+        for entry in execution_logs_repository.get(execution.id):
+            if isinstance(entry, FormEventLogEntry):
+                continue
+
+            text = entry.payload.get("text")
+            if not text:
+                continue
+
+            if entry.event == "stdout":
+                stdout += text
+            elif entry.event == "stderr":
+                stderr += text
+            elif entry.event == "unhandled-exception":
+                stderr += text
+
+        return {"stdout": stdout, "stderr": stderr}
+
+    @bp.post("/<path:id>/run")
+    @usage
+    def _run_script(id: str):
+        script = controller.get_script(id)
         data = flask.request.json
         if not data:
             flask.abort(400)
@@ -74,10 +120,12 @@ def get_editor_bp(controller: MainController):
         if not script or not stage_run_id:
             flask.abort(400)
 
+        stage_run_manager = AttachedStageRunManager(stage_run_repository)
+
         execution = ScriptExecution(
             stage=script,
             stage_run_id=stage_run_id,
-            stage_run_repository=stage_run_repository,
+            stage_run_manager=stage_run_manager,
             execution_repository=execution_repository,
             execution_logs_repository=execution_logs_repository,
         )

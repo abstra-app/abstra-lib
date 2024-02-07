@@ -1,6 +1,6 @@
 import unittest
 from typing import Optional
-from .validate import check_type, validate_json
+from .validate import check_type, validate_json_typing, validate_json
 
 
 class ValidateTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class ValidateTest(unittest.TestCase):
         self.assertEqual(check_type(19, Optional[str]), False)
         self.assertEqual(check_type("string", Optional[int]), False)
 
-    def test_validate_json(self):
+    def test_validate_json_typing(self):
         json = dict(
             string="string",
             another_string=None,
@@ -40,7 +40,9 @@ class ValidateTest(unittest.TestCase):
         }
         expected_validated_json = json
 
-        self.assertEqual(validate_json(json, expected_types), expected_validated_json)
+        self.assertEqual(
+            validate_json_typing(json, expected_types), expected_validated_json
+        )
 
     def test_filter_out_unexpected_fields(self):
         json = dict(
@@ -54,7 +56,9 @@ class ValidateTest(unittest.TestCase):
             prop1="prop1",
         )
 
-        self.assertEqual(validate_json(json, expected_types), expected_validated_json)
+        self.assertEqual(
+            validate_json_typing(json, expected_types), expected_validated_json
+        )
 
     def test_filter_out_fields_with_wrong_type(self):
         json = dict(
@@ -69,7 +73,9 @@ class ValidateTest(unittest.TestCase):
             string="string",
         )
 
-        self.assertEqual(validate_json(json, expected_types), expected_validated_json)
+        self.assertEqual(
+            validate_json_typing(json, expected_types), expected_validated_json
+        )
 
     def test_do_not_create_expected_fields(self):
         json = dict(
@@ -83,4 +89,12 @@ class ValidateTest(unittest.TestCase):
             prop1="prop1",
         )
 
-        self.assertEqual(validate_json(json, expected_types), expected_validated_json)
+        self.assertEqual(
+            validate_json_typing(json, expected_types), expected_validated_json
+        )
+
+    def test_validate_json(self):
+        self.assertEqual(validate_json('{"valid": "json"}'), True)
+        self.assertEqual(validate_json('{"invalid": "json"'), False)
+        self.assertEqual(validate_json("invalid"), False)
+        self.assertEqual(validate_json(""), False)

@@ -3,7 +3,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from pkg_resources import get_distribution
 import flask, pkgutil, webbrowser
 from pathlib import Path
+import json
 
+from ...utils.validate import validate_json
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...utils import path2module, module2path, files_from_directory
 from ...repositories.requirements import RequirementsRepository
@@ -266,6 +268,19 @@ class MainController:
         project = ProjectRepository.load()
         return project.get_form_by_path(path)
 
+    def write_test_data(self, data: str) -> None:
+        if not validate_json(data):
+            raise Exception("Invalid JSON")
+        test_file = Settings.root_path / ".abstra" / "test_data.json"
+        test_file.write_text(data, encoding="utf-8")
+
+    def read_test_data(self) -> str:
+        test_file = Settings.root_path / ".abstra" / "test_data.json"
+        if not test_file.is_file():
+            return "{}"
+        json_content = json.loads(test_file.read_text(encoding="utf-8"))
+        return json.dumps(json_content, indent=4)
+
     def delete_form(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
         project.delete_stage(id, remove_file)
@@ -334,6 +349,11 @@ class MainController:
                 code_content, encoding="utf-8"
             )
             del changes["code_content"]
+
+        test_data = changes.get("test_data")
+        if test_data:
+            self.write_test_data(test_data)
+            del changes["test_data"]
 
         stage = project.update_stage(stage, changes)
         ProjectRepository.save(project)
