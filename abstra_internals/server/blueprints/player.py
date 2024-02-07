@@ -1,4 +1,5 @@
 import flask, flask_sock
+import json
 
 from ...settings import Settings
 from ..utils import send_from_dist
@@ -11,6 +12,11 @@ from ..controller import kanban as kanban_controller
 from ..controller import visualizations as visualizations_controller
 from ...execution import HookExecution, FormExecution
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
+from ...execution.stage_run_manager import (
+    AttachedStageRunManager,
+    DetachedStageRunManager,
+)
+from ...repositories import stage_run_repository_factory
 
 
 def get_player_bp(controller: MainController):
@@ -73,6 +79,7 @@ def get_player_bp(controller: MainController):
             if not form:
                 return conn.close(reason=404, message="Not found")
 
+            stage_run_manager = AttachedStageRunManager(controller.stage_run_repository)
             execution = FormExecution(
                 is_initial=controller.is_initial(form.id),
                 request=request_data,
@@ -80,11 +87,47 @@ def get_player_bp(controller: MainController):
                 stage=form,
                 execution_logs_repository=controller.execution_logs_repository,
                 execution_repository=controller.execution_repository,
-                stage_run_repository=controller.stage_run_repository,
+                stage_run_manager=stage_run_manager,
             )
 
             execution.run()
             workflow_engine.handle_execution_end(execution)
+        finally:
+            conn.close(message="Done")
+
+    @sock.route("/_socket/test")
+    def _websocket_test(conn: flask_sock.Server):
+        request_data = RequestData(
+            query_params=flask.request.args,
+            body=flask.request.get_data(as_text=True),
+            headers=flask.request.headers,
+            method=flask.request.method,
+        )
+
+        data = json.loads(controller.read_test_data())
+
+        try:
+            id = flask.request.args.get("id")
+            if id is None:
+                return conn.close(reason=400, message="No path")
+
+            form = controller.get_form(id)
+            if not form:
+                return conn.close(reason=404, message="Not found")
+
+            stage_run_repository = stage_run_repository_factory()
+            stage_run_manager = DetachedStageRunManager(stage_run_repository, data=data)
+            execution = FormExecution(
+                is_initial=controller.is_initial(form.id),
+                request=request_data,
+                connection=conn,
+                stage=form,
+                execution_logs_repository=controller.execution_logs_repository,
+                execution_repository=controller.execution_repository,
+                stage_run_manager=stage_run_manager,
+            )
+
+            execution.run()
         finally:
             conn.close(message="Done")
 
@@ -144,13 +187,14 @@ def get_player_bp(controller: MainController):
             method=flask.request.method,
         )
 
+        stage_run_manager = AttachedStageRunManager(controller.stage_run_repository)
         execution = HookExecution(
             is_initial=controller.is_initial(hook.id),
             request=request_data,
             stage=hook,
             execution_logs_repository=controller.execution_logs_repository,
             execution_repository=controller.execution_repository,
-            stage_run_repository=controller.stage_run_repository,
+            stage_run_manager=stage_run_manager,
         )
 
         execution.run()

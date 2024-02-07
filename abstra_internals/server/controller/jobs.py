@@ -1,6 +1,9 @@
 import flask
 
 from ...execution.job_execution import JobExecution
+from ...execution.stage_run_manager import (
+    AttachedStageRunManager,
+)
 from ...repositories import (
     execution_logs_repository,
     execution_repository,
@@ -69,9 +72,11 @@ def get_editor_bp(controller: MainController):
         if not job:
             flask.abort(404)
 
+        stage_run_manager = AttachedStageRunManager(stage_run_repository)
+
         execution = JobExecution(
             job,
-            stage_run_repository=stage_run_repository,
+            stage_run_manager=stage_run_manager,
             execution_logs_repository=execution_logs_repository,
             execution_repository=execution_repository,
         )

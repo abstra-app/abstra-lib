@@ -13,7 +13,7 @@ from ..contract import forms_contract
 from ..jwt_auth import UserClaims
 from ..repositories.execution import ExecutionRepository
 from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
-from ..repositories.stage_run import StageRunRepository
+from .stage_run_manager import StageRunManager
 from ..utils import deserialize, serialize
 from ..utils.debug import make_debug_data
 from ..utils.environment import IS_PRODUCTION
@@ -47,7 +47,7 @@ class FormExecution(Execution):
         is_initial: bool,
         connection: flask_sock.Server,
         request: RequestData,
-        stage_run_repository: StageRunRepository,
+        stage_run_manager: StageRunManager,
         execution_repository: ExecutionRepository,
         execution_logs_repository: ExecutionLogsRepository,
         execution_id=None,
@@ -60,7 +60,7 @@ class FormExecution(Execution):
             stage,
             is_initial,
             request,
-            stage_run_repository=stage_run_repository,
+            stage_run_manager=stage_run_manager,
             execution_repository=execution_repository,
             execution_logs_repository=execution_logs_repository,
             execution_id=execution_id,

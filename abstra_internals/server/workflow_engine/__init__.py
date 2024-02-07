@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
-from ...execution.execution import Execution, UnsetStageRun
+from ...execution.execution import Execution
+from ...execution.stage_run_manager import UnsetStageRun
 from ...execution.job_execution import JobExecution
 from ...execution.script_execution import ScriptExecution
 from ...repositories import (
@@ -9,6 +10,7 @@ from ...repositories import (
     notification_repository,
     stage_run_repository,
 )
+from ...execution.stage_run_manager import AttachedStageRunManager
 from ...repositories.execution import ExecutionRepository
 from ...repositories.execution_logs import ExecutionLogsRepository
 from ...repositories.notifications import NotificationRepository
@@ -39,6 +41,7 @@ class WorkflowEngine:
         self.execution_repository = execution_repository
         self.execution_logs_repository = execution_logs_repository
         self.notification_repository = notification_repository
+        self.stage_run_manager = AttachedStageRunManager(stage_run_repo)
 
     def handle_execution_end(self, execution: Execution):
         if not execution.stage_run:
@@ -158,7 +161,7 @@ class WorkflowEngine:
     def run_job(self, stage: JobStage):
         execution = JobExecution(
             stage,
-            stage_run_repository=self.stage_run_repo,
+            stage_run_manager=self.stage_run_manager,
             execution_repository=self.execution_repository,
             execution_logs_repository=self.execution_logs_repository,
         )
@@ -170,7 +173,7 @@ class WorkflowEngine:
         execution = ScriptExecution(
             stage,
             stage_run_id=stage_run.id,
-            stage_run_repository=self.stage_run_repo,
+            stage_run_manager=self.stage_run_manager,
             execution_repository=self.execution_repository,
             execution_logs_repository=self.execution_logs_repository,
         )

@@ -3,7 +3,7 @@ from ..repositories.project.project import ScriptStage
 from .execution import Execution, RequestData
 from ..repositories.execution_logs import ExecutionLogsRepository
 from ..repositories.execution import ExecutionRepository
-from ..repositories.stage_run import StageRunRepository
+from .stage_run_manager import StageRunManager
 
 
 class ScriptExecution(Execution):
@@ -13,7 +13,7 @@ class ScriptExecution(Execution):
         self,
         stage: ScriptStage,
         stage_run_id: str,
-        stage_run_repository: StageRunRepository,
+        stage_run_manager: StageRunManager,
         execution_repository: ExecutionRepository,
         execution_logs_repository: ExecutionLogsRepository,
     ):
@@ -32,7 +32,7 @@ class ScriptExecution(Execution):
             request=request,
             execution_repository=execution_repository,
             execution_logs_repository=execution_logs_repository,
-            stage_run_repository=stage_run_repository,
+            stage_run_manager=stage_run_manager,
         )
 
     def handle_start(self) -> None:

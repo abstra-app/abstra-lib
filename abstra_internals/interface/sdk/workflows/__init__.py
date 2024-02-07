@@ -1,7 +1,8 @@
 import json
 from typing import Optional
 from ....utils.json import to_json_serializable
-from ....execution.execution import UnsetStageRun, get_current_execution_throwable
+from ....execution.execution import get_current_execution_throwable
+from ....execution.stage_run_manager import UnsetStageRun
 
 
 def is_json_serializable(value):

@@ -3,14 +3,14 @@ from ..repositories.project.project import JobStage
 from .execution import Execution, RequestData
 from ..repositories.execution_logs import ExecutionLogsRepository
 from ..repositories.execution import ExecutionRepository
-from ..repositories.stage_run import StageRunRepository
+from .stage_run_manager import StageRunManager
 
 
 class JobExecution(Execution):
     def __init__(
         self,
         stage: JobStage,
-        stage_run_repository: StageRunRepository,
+        stage_run_manager: StageRunManager,
         execution_repository: ExecutionRepository,
         execution_logs_repository: ExecutionLogsRepository,
     ):
@@ -27,7 +27,7 @@ class JobExecution(Execution):
             request=request,
             execution_repository=execution_repository,
             execution_logs_repository=execution_logs_repository,
-            stage_run_repository=stage_run_repository,
+            stage_run_manager=stage_run_manager,
         )
 
     def handle_start(self) -> None:

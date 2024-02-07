@@ -1,5 +1,5 @@
 import flask
-
+import json
 from ...usage import usage
 from ...settings import Settings
 from .main import MainController
@@ -10,6 +10,8 @@ from ...templates import (
     new_hook_code,
     new_job_code,
 )
+
+from ...utils.validate import validate_json
 
 
 def get_editor_bp(controller: MainController):
@@ -84,6 +86,11 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
 
         return {"exists": controller.check_file(file_path)}
+
+    @bp.get("/read-test-data")
+    @usage
+    def _read_test_data():
+        return controller.read_test_data()
 
     @bp.get("/files")
     @usage
