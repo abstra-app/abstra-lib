@@ -37,7 +37,7 @@ class PackageVersionManager:
 
             version_status = compare_versions(self.current_version, self.latest_version)
 
-            if version_status is "latest-is-outdated":
+            if version_status == "latest-is-outdated":
                 _update_cached_latest_version(self.package_name, self.current_version)
 
             return version_status
@@ -55,9 +55,9 @@ class PackageVersionManager:
     def get_status_message(self) -> str:
         status = self.get_version_status()
 
-        if status is "up-to-date" or status is "latest-is-outdated":
+        if status == "up-to-date" or status == "latest-is-outdated":
             return f"{self.package_display_name} is up to date (version {self.current_version}).\n"
-        elif status is "out-of-date":
+        elif status == "out-of-date":
             return f"A new version of {self.package_display_name} is available. Latest version is {self.latest_version}, but you have {self.current_version}.\nPlease run 'pip install {self.package_name} --upgrade' to update.\n"
         else:
             return ""
