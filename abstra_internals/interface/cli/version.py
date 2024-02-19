@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 import pkg_resources, requests
 from ...utils.environment import IS_PRODUCTION
 from ...utils import get_package_version
@@ -11,38 +12,63 @@ EXPIRE_PERIOD = 60 * 60 * 4  # 4 hours
 TIMEOUT = 5
 
 
-def check_latest_version(package_name="abstra"):
-    if IS_PRODUCTION:
-        return
+version_status = Literal["up-to-date", "out-of-date", "latest-is-outdated", "unknown"]
 
-    try:
-        current_version = get_package_version(package_name)
-        latest_version = _get_cached_latest_version(package_name)
 
-        highest_version = (
-            _get_highest_version(current_version, latest_version)
-            if isinstance(current_version, str)
-            else latest_version
+class PackageVersionManager:
+    def __init__(self, package_name: str) -> None:
+        self.package_name = package_name
+        self.package_display_name = (
+            package_name if package_name != "abstra" else "Abstra Editor"
         )
+        self.current_version = get_package_version(package_name)
+        self.latest_version = self.get_latest_version()
 
-        if highest_version == latest_version:
+    def get_latest_version(self) -> str:
+        return _get_cached_latest_version(self.package_name)
+
+    def get_version_status(self) -> version_status:
+        if IS_PRODUCTION:
+            return "unknown"
+
+        try:
+            if not isinstance(self.current_version, str):
+                return "unknown"
+
+            version_status = compare_versions(self.current_version, self.latest_version)
+
+            if version_status is "latest-is-outdated":
+                _update_cached_latest_version(self.package_name, self.current_version)
+
+            return version_status
+
+        except pkg_resources.DistributionNotFound:
+            print(f"{self.package_name} is not installed.\n")
+            return "unknown"
+
+        except requests.exceptions.RequestException:
             print(
-                f"A new version of Abstra Editor is available. Latest version is {latest_version}, but you have {current_version}."
+                f"Unable to fetch version information for {self.package_name} from PyPI.\n"
             )
-            print(f"Please run 'pip install {package_name} --upgrade' to update.")
+            return "unknown"
+
+    def get_status_message(self) -> str:
+        status = self.get_version_status()
+
+        if status is "up-to-date" or status is "latest-is-outdated":
+            return f"{self.package_display_name} is up to date (version {self.current_version}).\n"
+        elif status is "out-of-date":
+            return f"A new version of {self.package_display_name} is available. Latest version is {self.latest_version}, but you have {self.current_version}.\nPlease run 'pip install {self.package_name} --upgrade' to update.\n"
         else:
-            print(f"Abstra Editor is up to date (version {current_version}).")
+            return ""
 
-            if isinstance(current_version, str) and highest_version == current_version:
-                _update_cached_latest_version(package_name, current_version)
+    def print_status_message(self):
+        print(self.get_status_message())
 
-    except pkg_resources.DistributionNotFound:
-        print(f"{package_name} is not installed.")
 
-    except requests.exceptions.RequestException:
-        print(f"Unable to fetch version information for {package_name} from PyPI.")
-
-    print("\n")
+def check_latest_version(package_name="abstra"):
+    package_version = PackageVersionManager(package_name)
+    package_version.print_status_message()
 
 
 def _get_cached_latest_version(package_name="abstra") -> str:
@@ -93,17 +119,17 @@ def _update_cached_latest_version(package_name, latest_version: str):
         )
 
 
-def _get_highest_version(first_version: str, second_version: str):
-    first_version_array = first_version.split(".")
-    second_version_array = second_version.split(".")
+def compare_versions(current: str, latest: str) -> version_status:
+    current_version_array = current.split(".")
+    latest_version_array = latest.split(".")
 
-    if (len(first_version_array) != 3) or (len(second_version_array) != 3):
-        return None
+    if (len(current_version_array) != 3) or (len(latest_version_array) != 3):
+        return "unknown"
 
-    for i in range(3):
-        if int(first_version_array[i]) > int(second_version_array[i]):
-            return first_version
-        elif int(first_version_array[i]) < int(second_version_array[i]):
-            return second_version
+    for i in range(len(current_version_array)):
+        if int(current_version_array[i]) > int(latest_version_array[i]):
+            return "latest-is-outdated"
+        elif int(current_version_array[i]) < int(latest_version_array[i]):
+            return "out-of-date"
 
-    return None
+    return "up-to-date"
