@@ -48,7 +48,7 @@ def random_id(length=10):
     return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
-def get_package_version(package_name):
+def get_package_version(package_name) -> Optional[str]:
     import pkg_resources
 
     try:
