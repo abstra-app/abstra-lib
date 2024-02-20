@@ -3,9 +3,9 @@
 
 # ✨ Abstra ✨
 
-Abstra is a simple and powerful way to build business automation workflows.
+Abstra is a simple way to build business processes in Python, with no engineering overhead and complexity.
 
-It's a Python-powered backoffice engine with:
+It's a powerful backoffice engine with:
 
 - drag'n drop workflow builder
 - dynamic forms
@@ -40,20 +40,22 @@ abstra serve ./your-project-directory
 
 ## 🧩 Workflow builder for Python
 
-Workflows is perfect for automating repetitive processes that require a mix of manual steps and integration between systems.
 
-Visually assemble a process made up of Python-coded steps. All steps share an environment, variables and functions.
+Use Workflows to automate processes that require a mix of manual steps and integrations between systems.
+
+A Workflow is made up of Python-coded steps, which are then assembled visually in the editor. All steps share an environment, and can share variables and functions.
+
 
 ![](./images/workflows.png)
 
 ## 📝 Scriptable forms
 
-Forms is the quickest way to build interactive user interfaces on the web. Use it to get user input during your Workflow's run, such a request approval or additional data.
+Forms are Python scripts that allow for user interaction. They are the quickest way to build interactive UIs on the web.
 
-Manipulate this input with Python and any desired lib before moving to the next step.
+With a Form, you can collect user input and use Python code to work with that information however you need. Some examples are making calculations with specialized libs, generating documents and graphs, and sending it to other systems via Requests.
 
 ![](./images/forms.png)
 
 ## 🛟 Useful links
 
-[Website](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io) | [Privacy](./PRIVACY.md)
+[Website](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io) | [Youtube](https://www.youtube.com/playlist?list=PLFPJgKA6K86ZdAHZ3aPWsrZHX_7jJ3Cc9) | [Privacy](./PRIVACY.md)
