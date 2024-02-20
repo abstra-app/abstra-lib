@@ -95,8 +95,8 @@ def get_player_bp(controller: MainController):
         finally:
             conn.close(message="Done")
 
-    @sock.route("/_socket/test")
-    def _websocket_test(conn: flask_sock.Server):
+    @sock.route("/_socket/detached")
+    def _websocket_detached(conn: flask_sock.Server):
         request_data = RequestData(
             query_params=flask.request.args,
             body=flask.request.get_data(as_text=True),
