@@ -1,13 +1,13 @@
 import flask
-from typing import Optional
+
+from ...repositories import stage_run_repository
+from ...usage import usage
+
 from ...repositories.stage_run import (
-    StageRunRepository,
     GetStageRunByQueryFilter,
+    StageRunRepository,
     Pagination,
 )
-from ...repositories import stage_run_repository
-
-from ...usage import usage
 
 
 class StageRunsController:
@@ -42,6 +42,7 @@ def get_editor_bp():
         return controller.get_stage_runs(filter, pagination)
 
     @bp.post("/fork")
+    @usage
     def _fork():
         data = flask.request.json
         if not data:

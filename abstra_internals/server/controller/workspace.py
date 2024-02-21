@@ -66,8 +66,8 @@ def get_editor_bp(controller: MainController):
         controller.open_file(file_path, create_if_not_exists=False, mode=mode)
         return {"success": True}
 
+    # 1s pooling in this route
     @bp.get("/read-file")
-    @usage
     def _read_file():
         file = flask.request.args.get("file")
         if not file:
@@ -78,8 +78,8 @@ def get_editor_bp(controller: MainController):
             flask.abort(404)
         return content
 
+    # 1s pooling in this route
     @bp.get("/check-file")
-    @usage
     def _check_file():
         file_path = flask.request.args.get("path")
         if not file_path:

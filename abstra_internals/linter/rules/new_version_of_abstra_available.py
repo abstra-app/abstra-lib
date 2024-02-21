@@ -7,7 +7,7 @@ from ..linter import LinterRule, LinterIssue
 class NewVersionOfAbstraAvailableFound(LinterIssue):
     def __init__(self) -> None:
         package_version = PackageVersionManager("abstra")
-        self.label = f"Latest version is {package_version.latest_version}, but you have {package_version.current_version}.\nPlease run 'pip install {package_version.package_name} --upgrade' to update."
+        self.label = f"Latest version is {package_version.cached_latest_version}, but you have {package_version.current_local_version}.\nPlease run 'pip install {package_version.package_name} --upgrade' to update."
         self.fixes = []
 
 

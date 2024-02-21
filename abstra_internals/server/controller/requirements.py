@@ -1,16 +1,15 @@
 import flask
-
+from ...repositories import requirements_repository
 from ...usage import usage
-from .main import MainController
 
 
-def get_editor_bp(controller: MainController):
+def get_editor_bp():
     bp = flask.Blueprint("editor_requirements", __name__)
 
+    # 1s pooling in this route
     @bp.get("/")
-    @usage
     def _get_requirements():
-        return controller.get_requirements()
+        return requirements_repository.load().to_dict()
 
     @bp.post("/")
     @usage
@@ -20,16 +19,25 @@ def get_editor_bp(controller: MainController):
         if not data:
             flask.abort(400)
 
-        return controller.create_requirement(data["name"], data.get("version"))
+        name = data["name"]
+        version = data.get("version")
+
+        requirements = requirements_repository.load()
+        requirements.add(name, version)
+        requirements_repository.save(requirements)
+        return requirements.to_dict()
 
     @bp.delete("/<name>")
     @usage
     def _delete_requirement(name: str):
-        return controller.delete_requirement(name)
+        requirements = requirements_repository.load()
+        requirements.delete(name)
+        requirements_repository.save(requirements)
+        return requirements.to_dict()
 
+    # 1s pooling in this route
     @bp.get("/recommendations")
-    @usage
     def _get_requirements_recommendation():
-        return controller.get_requirements_recommendations()
+        return [r.to_dict() for r in requirements_repository.get_recommendation()]
 
     return bp

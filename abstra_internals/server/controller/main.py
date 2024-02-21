@@ -1,20 +1,23 @@
 from werkzeug.datastructures import FileStorage
 from typing import Any, Dict, List, Optional, Tuple
-from pkg_resources import get_distribution
+import pkg_resources
 import flask, pkgutil, webbrowser
 from pathlib import Path
 import json
-
+from ...contracts_generated import (
+    AbstraLibApiEditorLintersCheckResponse,
+    AbstraLibApiEditorLintersRule,
+)
 from ...utils.validate import validate_json
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...utils import path2module, module2path, files_from_directory
-from ...repositories.requirements import RequirementsRepository
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.execution import Execution
 from ...linter.rules import rules
 from ...interface.cli.deploy import deploy
 from ...settings import Settings
 from ...repositories import (
+    requirements_repository,
     stage_run_repository,
     execution_logs_repository,
     execution_repository,
@@ -111,9 +114,9 @@ class MainController:
     def __init__(self):
         if not ProjectRepository.exists():
             ProjectRepository.initialize()
-        requirements = RequirementsRepository.load()
-        requirements.ensure("abstra", get_distribution("abstra").version)
-        RequirementsRepository.save(requirements)
+        requirements = requirements_repository.load()
+        requirements.ensure("abstra", pkg_resources.get_distribution("abstra").version)
+        requirements_repository.save(requirements)
         ensure_abstraignore(Settings.root_path)
 
         self.stage_run_repository = stage_run_repository
@@ -125,8 +128,7 @@ class MainController:
 
         issues = []
         for rule in rules:
-            if type(rule["issues"]) == list:
-                issues += rule["issues"]
+            issues += rule.issues
 
         if len(issues) > 0:
             raise Exception(
@@ -147,11 +149,7 @@ class MainController:
             file_path = str(module2path(file_path, mode == "package"))
         complete_file_path = Settings.root_path.joinpath(file_path)
 
-        if (
-            create_if_not_exists
-            and file_path.endswith(".py")
-            and not complete_file_path.is_file()
-        ):
+        if create_if_not_exists and not complete_file_path.is_file():
             complete_file_path.touch()
 
         webbrowser.open(complete_file_path.absolute().as_uri())
@@ -278,8 +276,7 @@ class MainController:
         test_file = Settings.root_path / ".abstra" / "test_data.json"
         if not test_file.is_file():
             return "{}"
-        json_content = json.loads(test_file.read_text(encoding="utf-8"))
-        return json.dumps(json_content, indent=4)
+        return test_file.read_text(encoding="utf-8")
 
     def delete_form(self, id: str, remove_file: bool = False):
         project = ProjectRepository.load()
@@ -403,26 +400,6 @@ class MainController:
     def get_file(self, path: str):
         return internal_path(path)
 
-    # Requirements
-
-    def get_requirements(self):
-        return RequirementsRepository.load().to_dict()
-
-    def create_requirement(self, name: str, version: Optional[str]):
-        requirements = RequirementsRepository.load()
-        requirements.add(name, version)
-        RequirementsRepository.save(requirements)
-        return requirements.to_dict()
-
-    def delete_requirement(self, name: str):
-        requirements = RequirementsRepository.load()
-        requirements.delete(name)
-        RequirementsRepository.save(requirements)
-        return requirements.to_dict()
-
-    def get_requirements_recommendations(self):
-        return [r.to_dict() for r in RequirementsRepository.get_recommendation()]
-
     def abort_execution(self, id: str):
         execution = Execution.get_execution_by_id(id)
         if execution:
@@ -443,8 +420,10 @@ class MainController:
         configure_settings_json()
 
     # Linters
-    def check_linters(self) -> List[Dict[str, Any]]:
-        return [rule.to_dict() for rule in rules]
+    def check_linters(self) -> AbstraLibApiEditorLintersCheckResponse:
+        return [
+            AbstraLibApiEditorLintersRule.from_dict(rule.to_dict()) for rule in rules
+        ]
 
     def fix_linter(self, rule_name: str, fix_name: str):
         for rule in rules:

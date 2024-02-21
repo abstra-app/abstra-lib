@@ -1,10 +1,22 @@
 from unittest import TestCase
-
-from pkg_resources import get_distribution
+import pkg_resources
+from pkg_resources import get_distribution as gd
 from tests.fixtures import clear_dir, init_dir
-
 from ...server.controller import MainController
-from .missing_abstra_in_requirements import MissingAbstraInRequirements
+from .missing_abstra_in_requirements import (
+    MissingAbstraInRequirements,
+    AbstraVersionInRequirementsIsBehindInstalled,
+)
+
+
+def mock_get_distribution(name):
+    if name == "abstra":
+        return pkg_resources.Distribution(project_name="abstra", version="1.0.0")
+    else:
+        return gd(name)
+
+
+pkg_resources.get_distribution = mock_get_distribution
 
 
 class MissingAbstraInRequirementsTest(TestCase):
@@ -22,14 +34,16 @@ class MissingAbstraInRequirementsTest(TestCase):
     def test_missing_abstra_in_requirements_valid_with_requirements(self):
         rule = MissingAbstraInRequirements()
         requirements_txt = self.root / "requirements.txt"
-        requirements_txt.write_text(f"abstra=={get_distribution('abstra').version}")
+        requirements_txt.write_text(f"abstra==1.0.0")
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_abstra_in_requirements_invalid_with_different_version(self):
         rule = MissingAbstraInRequirements()
         requirements_txt = self.root / "requirements.txt"
         requirements_txt.write_text(f"abstra==0.0.1")
-        self.assertEqual(len(rule.find_issues()), 1)
+        issues = rule.find_issues()
+        self.assertEqual(len(issues), 1)
+        self.assertIsInstance(issues[0], AbstraVersionInRequirementsIsBehindInstalled)
 
     def test_missing_abstra_in_requirements_invalid_without_requirements(self):
         rule = MissingAbstraInRequirements()
@@ -44,4 +58,4 @@ class MissingAbstraInRequirementsTest(TestCase):
         self.assertTrue(requirements_txt.exists())
         with requirements_txt.open("r") as file:
             content = file.read()
-            self.assertTrue(f"abstra=={get_distribution('abstra').version}" in content)
+            self.assertTrue(f"abstra==1.0.0" in content)

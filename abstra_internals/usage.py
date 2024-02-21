@@ -2,9 +2,10 @@ import requests, inspect
 from typing import Any, Callable, Tuple
 
 from .threaded import threaded
+from .utils import get_local_user_id
 from .credentials import get_credentials
 from .utils.environment import CLOUD_API_CLI_URL
-from .utils import get_package_version, get_local_user_id
+from .utils.packages import get_local_package_version
 
 
 @threaded
@@ -21,7 +22,7 @@ def usage(func: Callable[..., Any]) -> Callable[..., Any]:
         metric_data = {
             "userId": get_local_user_id(),
             "payload": {**arg_values, **kwargs, **{"event": func.__name__}},
-            "abstraVersion": get_package_version("abstra"),
+            "abstraVersion": str(get_local_package_version()),
         }
 
         headers = {"apiKey": get_credentials()}

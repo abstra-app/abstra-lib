@@ -1,8 +1,8 @@
-import inspect, typing
+import inspect, typing, traceback
 from types import TracebackType
 from dataclasses import dataclass
-import traceback
-from ..settings import Settings
+
+from .settings import Settings
 
 Frames = typing.Union[typing.List[inspect.FrameInfo], Exception]
 
