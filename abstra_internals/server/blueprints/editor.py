@@ -19,6 +19,7 @@ from ..controller import workflows as workflows_controller
 from ..controller import stage_runs as stage_runs_controller
 from ..controller import requirements as requirements_controller
 from ..controller import visualizations as visualizations_controller
+from ..controller import env_vars as envvars_controller
 
 
 def __get_api_bp(controller: MainController):
@@ -51,7 +52,7 @@ def __get_api_bp(controller: MainController):
     workflows_bp = workflows_controller.get_editor_bp(controller)
     bp.register_blueprint(workflows_bp, url_prefix="/workflows")
 
-    requirements_bp = requirements_controller.get_editor_bp(controller)
+    requirements_bp = requirements_controller.get_editor_bp()
     bp.register_blueprint(requirements_bp, url_prefix="/requirements")
 
     debugger_bp = debugger_controller.get_editor_bp(controller)
@@ -68,6 +69,9 @@ def __get_api_bp(controller: MainController):
 
     assets_bp = assets_controller.get_editor_bp(controller)
     bp.register_blueprint(assets_bp, url_prefix="/assets")
+
+    envvars_bp = envvars_controller.get_editor_bp()
+    bp.register_blueprint(envvars_bp, url_prefix="/env-vars")
 
     return bp
 

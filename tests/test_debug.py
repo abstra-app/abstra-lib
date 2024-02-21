@@ -1,7 +1,7 @@
 from unittest import TestCase, mock
 from pathlib import Path
 from abstra_internals.settings import Settings
-from abstra_internals.utils.debug import make_debug_data
+from abstra_internals.debug import make_debug_data
 from inspect import stack
 from .resources.make_debug.module import func
 

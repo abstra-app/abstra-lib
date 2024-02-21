@@ -307,6 +307,7 @@ def get_editor_bp():
     controller = KanbanController(stage_run_repository, project_repository)
     bp = flask.Blueprint("kanban", __name__)
 
+    # 1s pooling in this route
     @bp.post("/")
     def _get_kanban():
         if flask.request.json is None:
@@ -314,6 +315,7 @@ def get_editor_bp():
         req = DataRequest.from_dict(flask.request.json)
         return controller.get_data(req).to_dict()
 
+    # 1s pooling in this route
     @bp.get("/logs/<stage_run_id>")
     def _get_ancestor_logs(stage_run_id: str):
         def stage_from_run(stage_run: StageRun):

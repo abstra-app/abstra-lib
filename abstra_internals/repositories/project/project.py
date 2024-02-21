@@ -13,6 +13,7 @@ from ...settings import Settings
 from ...utils import check_is_url
 from ...utils.file import traverse_code
 from ...utils.format import normalize_path
+from ...utils.string import to_kebab_case
 from . import json_migrations
 
 
@@ -148,7 +149,7 @@ class HookStage:
         return HookStage(
             id=_id,
             file=file,
-            path=file[:-3],
+            path=to_kebab_case(file[:-3]),
             title=title,
             is_initial=True,
             workflow_transitions=[],
@@ -423,7 +424,7 @@ class FormStage:
         return FormStage(
             id=_id,
             file=file,
-            path=file[:-3],
+            path=to_kebab_case(file[:-3]),
             title=title,
             is_initial=True,
             workflow_transitions=[],
@@ -604,7 +605,7 @@ class Sidebar:
             if form.path not in [item.path for item in stored_items]:
                 stored_items.append(
                     SidebarItem(
-                        id=form.path,
+                        id=form.id,
                         name=form.title,
                         path=form.path,
                         type="form",

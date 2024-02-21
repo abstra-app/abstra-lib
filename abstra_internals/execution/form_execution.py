@@ -1,23 +1,19 @@
 from __future__ import annotations  # required for type check
 
-import datetime
-import inspect
-import traceback
+import datetime, inspect, flask_sock
+from simple_websocket.ws import ConnectionClosed
 from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
-import flask_sock
-from simple_websocket.ws import ConnectionClosed
-
-from ..compatibility import compat_traceback
-from ..contract import forms_contract
 from ..jwt_auth import UserClaims
-from ..repositories.execution import ExecutionRepository
-from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
-from .stage_run_manager import StageRunManager
+from ..debug import make_debug_data
+from ..contract import forms_contract
 from ..utils import deserialize, serialize
-from ..utils.debug import make_debug_data
+from ..compatibility import compat_traceback
 from ..utils.environment import IS_PRODUCTION
+from .stage_run_manager import StageRunManager
+from ..repositories.execution import ExecutionRepository
 from .execution import ABSTRA_RUN_KEY, Execution, NoExecutionFound, RequestData
+from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
 
 if TYPE_CHECKING:
     from ..repositories.project.project import FormStage

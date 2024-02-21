@@ -3,10 +3,9 @@ from shutil import move
 from pathlib import Path
 from tempfile import mkdtemp
 from dataclasses import dataclass
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Dict
 from pkg_resources import get_distribution
 from importlib_metadata import packages_distributions
-
 from ..settings import Settings
 from .project.project import ProjectRepository
 
@@ -36,6 +35,9 @@ class Requirement:
     @staticmethod
     def from_dict(data: dict):
         return Requirement(name=data["name"], version=data["version"])
+
+    def __hash__(self) -> int:
+        return hash(f"{self.name}/{self.version}")
 
 
 @dataclass
@@ -96,6 +98,11 @@ class Requirements:
     def delete(self, name: str):
         self.libraries = [lib for lib in self.libraries if lib.name != name]
 
+    def delete_duplicates(self, name: str, version: Optional[str]):
+        self.libraries = [
+            lib for lib in self.libraries if lib.name != name or lib.version != version
+        ]
+
     def has(self, lib_name: str, version: Optional[str] = None):
         for lib in self.libraries:
             if lib.name == lib_name and (lib.version == version or version is None):
@@ -111,6 +118,21 @@ class Requirements:
             self.update(lib_name, version)
         elif not self.has(lib_name):
             self.add(lib_name, version)
+
+    def get(self, lib_name: str):
+        for lib in self.libraries:
+            if lib.name == lib_name:
+                return lib.version
+        return None
+
+    def get_duplicates(self) -> Dict[str, List[Requirement]]:
+        duplicates = {}
+        for lib in self.libraries:
+            if not isinstance(duplicates.get(lib.name), list):
+                duplicates[lib.name] = [lib]
+            else:
+                duplicates[lib.name].append(lib)
+        return {k: v for k, v in duplicates.items() if len(v) > 1}
 
 
 @dataclass

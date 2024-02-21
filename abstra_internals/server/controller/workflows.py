@@ -247,8 +247,8 @@ def update_workflow(workflow_state_dto: dict):
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_workflows", __name__)
 
+    # 1s pooling in this route
     @bp.get("/")
-    @usage
     def _load_workflow():
         try:
             return get_workflow()

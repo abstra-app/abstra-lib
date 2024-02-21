@@ -5,6 +5,9 @@ from .missing_packages_in_requirements import MissingPackagesInRequirements
 from .syntax_errors import SyntaxErrors
 from .missing_entrypoint import MissingEntrypoint
 from .missing_abstra_in_requirements import MissingAbstraInRequirements
+from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
+from .missing_env import MissingEnv
+from .unset_get_data import UnsetGetData
 from .new_version_of_abstra_available import NewVersionOfAbstraAvailable
 
 rules: List[LinterRule] = [
@@ -13,5 +16,8 @@ rules: List[LinterRule] = [
     SyntaxErrors(),
     MissingEntrypoint(),
     MissingAbstraInRequirements(),
+    DuplicatePackagesInRequirements(),
+    MissingEnv(),
+    UnsetGetData(),
     NewVersionOfAbstraAvailable(),
 ]
