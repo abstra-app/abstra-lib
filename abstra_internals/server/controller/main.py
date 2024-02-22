@@ -3,17 +3,13 @@ from typing import Any, Dict, List, Optional, Tuple
 import pkg_resources
 import flask, pkgutil, webbrowser
 from pathlib import Path
-import json
-from ...contracts_generated import (
-    AbstraLibApiEditorLintersCheckResponse,
-    AbstraLibApiEditorLintersRule,
-)
+
+from abstra_internals.server.controller.linters import check_linters
 from ...utils.validate import validate_json
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...utils import path2module, module2path, files_from_directory
 from ...widgets.apis import get_random_filepath, internal_path
 from ...execution.execution import Execution
-from ...linter.rules import rules
 from ...interface.cli.deploy import deploy
 from ...settings import Settings
 from ...repositories import (
@@ -124,7 +120,7 @@ class MainController:
         self.execution_logs_repository = execution_logs_repository
 
     def deploy(self):
-        rules = self.check_linters()
+        rules = check_linters()
 
         issues = []
         for rule in rules:
@@ -418,19 +414,3 @@ class MainController:
     def create_vscode_launch(self):
         configure_launch_json()
         configure_settings_json()
-
-    # Linters
-    def check_linters(self) -> AbstraLibApiEditorLintersCheckResponse:
-        return [
-            AbstraLibApiEditorLintersRule.from_dict(rule.to_dict()) for rule in rules
-        ]
-
-    def fix_linter(self, rule_name: str, fix_name: str):
-        for rule in rules:
-            if rule.name == rule_name:
-                for issue in rule.find_issues():
-                    for fix in issue.fixes:
-                        if fix.name == fix_name:
-                            fix.fix()
-                            return True
-        raise Exception(f"Could not find fix {fix_name} for rule {rule_name}")
