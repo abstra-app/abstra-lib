@@ -3,7 +3,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 from ....contract import forms_contract
 from ....widgets.prop_check import validate_widget_props
-from .connection import receive, send
+from .connection import close, receive, send
 from .generated.widget_schema import WidgetSchema
 from .page_response import PageResponse
 from .reactive import Reactive
@@ -81,7 +81,7 @@ class Page(WidgetSchema):
         self.__check_widget_props(rendered_page)
 
         if self.__is_progress_screen():
-            self.__send_form_message(
+            self.__send_mount_page_message(
                 widgets=rendered_page,
                 actions=[],
                 end_program=end_program,
@@ -90,7 +90,7 @@ class Page(WidgetSchema):
             )
             return PageResponse({}, "")
 
-        self.__send_form_message(
+        self.__send_mount_page_message(
             widgets=rendered_page,
             actions=self.__actions_property(actions, end_program),
             end_program=end_program,
@@ -100,6 +100,7 @@ class Page(WidgetSchema):
         response: Dict = self.__handle_page_user_events(validate_func=validate)
 
         if end_program:
+            close()
             sys.exit(0)
 
         return PageResponse(
@@ -180,7 +181,7 @@ class Page(WidgetSchema):
 
         return {"status": validation_status, "message": validation_message}
 
-    def __send_form_message(
+    def __send_mount_page_message(
         self,
         widgets: list,
         actions: list,
@@ -189,7 +190,7 @@ class Page(WidgetSchema):
         steps_info,
     ):
         send(
-            forms_contract.FormRenderPageMessage(
+            forms_contract.FormMountPageMessage(
                 widgets=widgets,
                 actions=actions,
                 end_program=end_program,

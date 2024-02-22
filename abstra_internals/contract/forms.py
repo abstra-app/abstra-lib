@@ -23,7 +23,7 @@ PythonMessageType = Literal[
     "execution:stdout",
     "execution:stderr",
     "form:update-page",
-    "form:render-page",
+    "form:mount-page",
     "auth:require-info",
     "auth:invalid-jwt",
     "auth:valid-jwt",
@@ -138,8 +138,8 @@ class FormUpdatePageMessage(Message):
         )
 
 
-class FormRenderPageMessage(Message):
-    type = "form:render-page"
+class FormMountPageMessage(Message):
+    type = "form:mount-page"
 
     def __init__(
         self,

@@ -16,7 +16,7 @@
     [
         "python",
         {
-            "type": "form:render-page",
+            "type": "form:mount-page",
             "widgets": [
                 {
                     "type": "multiple-choice-input",
@@ -122,7 +122,7 @@
     [
         "python",
         {
-            "type": "form:render-page",
+            "type": "form:mount-page",
             "widgets": [
                 {
                     "type": "text-output",
@@ -213,7 +213,7 @@
     [
         "python",
         {
-            "type": "form:render-page",
+            "type": "form:mount-page",
             "widgets": [
                 {
                     "type": "multiple-choice-input",
@@ -321,7 +321,7 @@
     [
         "python",
         {
-            "type": "form:render-page",
+            "type": "form:mount-page",
             "widgets": [
                 {
                     "type": "text-output",

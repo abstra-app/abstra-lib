@@ -16,7 +16,7 @@
   [
     "python",
     {
-      "type": "form:render-page",
+      "type": "form:mount-page",
       "widgets": [
         {
           "type": "text-input",
