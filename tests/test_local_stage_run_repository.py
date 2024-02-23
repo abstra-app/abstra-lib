@@ -111,7 +111,7 @@ class TestLocalStageRunRepository(TestCase):
         clone = self.repository.fork(child)
         self.assertNotEqual(clone.id, child.id)
         self.assertEqual(clone.status, "waiting")
-        self.assertEqual(clone.data, child.data)
+        self.assertEqual(clone.data, parent.data)
         self.assertEqual(clone.stage, child.stage)
         self.assertEqual(clone.parent_id, child.parent_id)
         self.assertEqual(clone.execution_id, None)

@@ -225,6 +225,13 @@ class FormExecution(Execution):
 
         if e.reason == GOING_AWAY or e.reason == NO_STATUS:
             self.status = "abandoned"
+            if self.stage_run:
+                parent_data = (
+                    self.stage_run_manager.get(self.stage_run.parent_id).data
+                    if self.stage_run.parent_id
+                    else {}
+                )
+                self.stage_run_manager.update_data(self.stage_run.id, parent_data)
             return True
 
         self.log_form_message(

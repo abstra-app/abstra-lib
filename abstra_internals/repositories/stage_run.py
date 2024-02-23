@@ -187,6 +187,10 @@ class StageRunRepository(ABC):
     def fork(self, stage_run: StageRun) -> StageRun:
         raise NotImplementedError()
 
+    @abstractmethod
+    def update_data(self, stage_run_id: str, data: dict) -> bool:
+        raise NotImplementedError()
+
 
 class LocalStageRunRepository(StageRunRepository):
     _stage_runs: List[StageRun]
@@ -298,11 +302,18 @@ class LocalStageRunRepository(StageRunRepository):
 
     def fork(self, stage_run: StageRun) -> StageRun:
         if stage_run.parent_id == None:
-            return self.create_initial(stage_run.stage, stage_run.data)
+            return self.create_initial(stage_run.stage, {})
         parent_stage_run = self.get(stage_run.parent_id)
-        new_stage_run_dto = stage_run.clone_to_waiting().to_dto()
+        new_stage_run = stage_run.clone_to_waiting()
+        new_stage_run.data = parent_stage_run.data
+        new_stage_run_dto = new_stage_run.to_dto()
         stage_runs = self.create_next(parent_stage_run, [new_stage_run_dto])
         return stage_runs[0]
+
+    def update_data(self, stage_run_id: str, data: dict) -> bool:
+        stage_run = self.get(stage_run_id)
+        stage_run.data = data
+        return True
 
 
 class RemoteStageRunRepository(StageRunRepository):
@@ -396,6 +407,15 @@ class RemoteStageRunRepository(StageRunRepository):
 
     def fork(self, stage_run: StageRun) -> StageRun:
         raise NotImplementedError()
+
+    def update_data(self, stage_run_id: str, data: dict) -> bool:
+        r = self._request("PATCH", path=f"/{stage_run_id}", body={"data": data})
+        if r.status_code == 409:
+            return False
+
+        r.raise_for_status()
+
+        return True
 
 
 def stage_run_repository_factory() -> StageRunRepository:
