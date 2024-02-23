@@ -14,7 +14,7 @@ class UnsetDataFound(LinterIssue):
 
 class UnsetGetData(LinterRule):
     label: str = "Undefined get data"
-    type: str = "bug"
+    type: str = "info"
 
     def find_issues(self) -> List[LinterIssue]:
         project = ProjectRepository.load()
@@ -31,21 +31,23 @@ class UnsetGetData(LinterRule):
 
                 if get_data_calls is not None:
                     for function_call in get_data_calls:
-                        for arg in function_call:
-                            if isinstance(arg, ast.Constant) and isinstance(
-                                arg.value, str
+                        if len(function_call) > 0:
+                            key_arg = function_call[0]
+                            if isinstance(key_arg, ast.Constant) and isinstance(
+                                key_arg.value, str
                             ):
-                                data_gets.setdefault(arg.value, set()).add(
-                                    (python_file, arg.lineno)
+                                data_gets.setdefault(key_arg.value, set()).add(
+                                    (python_file, key_arg.lineno)
                                 )
                 if set_data_calls is not None:
                     for function_call in set_data_calls:
-                        for arg in function_call:
-                            if isinstance(arg, ast.Constant) and isinstance(
-                                arg.value, str
+                        if len(function_call) > 0:
+                            key_arg = function_call[0]
+                            if isinstance(key_arg, ast.Constant) and isinstance(
+                                key_arg.value, str
                             ):
-                                data_sets.setdefault(arg.value, set()).add(
-                                    (python_file, arg.lineno)
+                                data_sets.setdefault(key_arg.value, set()).add(
+                                    (python_file, key_arg.lineno)
                                 )
             except SyntaxError:
                 continue
