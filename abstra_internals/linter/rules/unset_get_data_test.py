@@ -20,9 +20,7 @@ class UnsetGetDataTest(TestCase):
         project = ProjectRepository.load()
         code_path = self.root / "test.py"
         code_path.write_text(
-            "\n".join(
-                ["from abstra_internals.workflows import get_data", "get_data('test')"]
-            )
+            "\n".join(["from abstra.workflows import get_data", "get_data('test')"])
         )
         script = ScriptStage(
             id="test",
@@ -35,3 +33,68 @@ class UnsetGetDataTest(TestCase):
         project.add_stage(script)
         ProjectRepository.save(project)
         self.assertEqual(len(rule.find_issues()), 1)
+
+    def test_unset_get_data_invalid_with_relative_import(self):
+        rule = UnsetGetData()
+        project = ProjectRepository.load()
+        code_path = self.root / "test.py"
+        code_path.write_text(
+            "\n".join(["import abstra.workflows as aw", "aw.get_data('test')"])
+        )
+        script = ScriptStage(
+            id="test",
+            file=str(code_path),
+            title="Test",
+            is_initial=False,
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(script)
+        ProjectRepository.save(project)
+        self.assertEqual(len(rule.find_issues()), 1)
+
+    def test_unset_get_data_valid_with_use_in_different_files_with_relative_import(
+        self,
+    ):
+        rule = UnsetGetData()
+        project = ProjectRepository.load()
+        setter_file = self.root / "setter.py"
+        setter_file.write_text(
+            "\n".join(
+                [
+                    "import abstra.workflows as aw",
+                    "aw.set_data('test', 1)",
+                ]
+            )
+        )
+        setter_script = ScriptStage(
+            id="test",
+            file=str(setter_file),
+            title="Test",
+            is_initial=False,
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(setter_script)
+
+        getter_file = self.root / "getter.py"
+        getter_file.write_text(
+            "\n".join(
+                [
+                    "from abstra.workflows import get_data",
+                    "get_data('test')",
+                ]
+            )
+        )
+        getter_script = ScriptStage(
+            id="test",
+            file=str(getter_file),
+            title="Test",
+            is_initial=False,
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(getter_script)
+
+        ProjectRepository.save(project)
+        self.assertEqual(len(rule.find_issues()), 0)
