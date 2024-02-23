@@ -124,7 +124,8 @@ class MainController:
 
         issues = []
         for rule in rules:
-            issues += rule.issues
+            if rule.type in ["error", "security", "bug"]:
+                issues += rule.issues
 
         if len(issues) > 0:
             raise Exception(
