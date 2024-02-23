@@ -63,6 +63,10 @@ class StageRunManager(ABC):
     ) -> StageRun:
         raise NotImplementedError()
 
+    @abstractmethod
+    def update_data(self, stage_run_id: str, data: dict) -> None:
+        raise NotImplementedError()
+
 
 class AttachedStageRunManager(StageRunManager):
     stage_run_repository: StageRunRepository
@@ -90,6 +94,9 @@ class AttachedStageRunManager(StageRunManager):
 
         raise UnsetStageRun()
 
+    def update_data(self, stage_run_id: str, data: dict) -> None:
+        self.stage_run_repository.update_data(stage_run_id, data)
+
 
 class DetachedStageRunManager(StageRunManager):
     stage_run_repository: StageRunRepository
@@ -107,3 +114,6 @@ class DetachedStageRunManager(StageRunManager):
         self, stage: ActionStage, stage_run_id: Optional[str]
     ) -> StageRun:
         return self.stage_run_repository.create_initial(stage=stage.id, data=self.data)
+
+    def update_data(self, stage_run_id: str, data: dict) -> None:
+        pass

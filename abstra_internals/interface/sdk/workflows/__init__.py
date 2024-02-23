@@ -30,3 +30,4 @@ def set_data(key, value):
     if not stage_run:
         raise UnsetStageRun()
     stage_run.data[key] = value
+    execution.stage_run_manager.update_data(stage_run.id, stage_run.data)
