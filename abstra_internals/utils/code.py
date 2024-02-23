@@ -12,7 +12,7 @@ class UsageVisitor(ast.NodeVisitor):
 
     def visit_Import(self, node: ast.Import):
         for alias in node.names:
-            if alias.name == self.package_path[0] and self.object_name:
+            if alias.name == ".".join(self.package_path) and self.object_name:
                 self.alias = alias.asname or alias.name
         self.generic_visit(node)
 

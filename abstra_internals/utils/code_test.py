@@ -128,6 +128,20 @@ getenv("FOO_BAR")
         assert isinstance(result[0][0], ast.Constant)
         assert result[0][0].value == "FOO_BAR"
 
+    def test_nested_import_with_alias(self):
+        code = """
+import abstra.workflows as aw
+
+aw.get_data("FOO_BAR")
+"""
+        result = function_called_args(code, ["abstra", "workflows"], "get_data")
+        assert result is not None
+        assert len(result) == 1
+        assert isinstance(result[0], list)
+        assert len(result[0]) == 1
+        assert isinstance(result[0][0], ast.Constant)
+        assert result[0][0].value == "FOO_BAR"
+
 
 class TestSubscriptCalledArgs(unittest.TestCase):
     def test_import_direct_subscript(self):
