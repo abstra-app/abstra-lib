@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Literal, Optional, Union
 import requests
 from pydantic.dataclasses import dataclass
 
-from ..stdio_skip_request import safe_print
 from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.file import LOCAL_LOG_FOLDER

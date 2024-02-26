@@ -10,8 +10,3 @@ def send(message: Message):
 def receive():
     execution = get_form_execution_throwable()
     return execution.receive()
-
-
-def close():
-    execution = get_form_execution_throwable()
-    return execution.close()
