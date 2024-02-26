@@ -3,7 +3,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 from ....contract import forms_contract
 from ....widgets.prop_check import validate_widget_props
-from .connection import close, receive, send
+from .connection import receive, send
 from .generated.widget_schema import WidgetSchema
 from .page_response import PageResponse
 from .reactive import Reactive
@@ -97,11 +97,11 @@ class Page(WidgetSchema):
             reactive_polling_interval=reactive_polling_interval,
             steps_info=steps_info,
         )
-        response: Dict = self.__handle_page_user_events(validate_func=validate)
 
         if end_program:
-            close()
             sys.exit(0)
+
+        response: Dict = self.__handle_page_user_events(validate_func=validate)
 
         return PageResponse(
             self.parse_value(response["payload"]),
