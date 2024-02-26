@@ -214,20 +214,24 @@ class Execution:
     def attempt_handle_exception(self, e: Exception) -> bool:
         return False
 
+    def set_stage_run(self, stage_run_id):
+        self.stage_run = self.stage_run_manager.init_stage_run(self.stage, stage_run_id)
+
+        lock_held = self.set_stage_run_status()
+        if self.stage_run and not lock_held:
+            self.status = "lock-failed"
+            self.handle_lock_failed()
+            self.save()
+
     def run(self) -> None:
         self.status = "running"
         self.execution_repository.create(self.to_dto())
         self.handle_start()
         stage_run_id = self.received_stage_run_id()
-        self.stage_run = self.stage_run_manager.init_stage_run(self.stage, stage_run_id)
-
-        lock_held = self.set_stage_run_status()
-
-        if self.stage_run and not lock_held:
-            self.status = "lock-failed"
-            self.handle_lock_failed()
-            self.save()
-            return
+        if stage_run_id or self.stage.is_initial:
+            self.set_stage_run(stage_run_id)
+            if self.status == "lock-failed":
+                return
 
         try:
             try:
