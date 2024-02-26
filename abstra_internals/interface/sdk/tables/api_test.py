@@ -54,6 +54,11 @@ class TestTables(unittest.TestCase):
         self.assertEqual(query, 'SELECT * FROM "foo"')
         self.assertEqual(params, [])
 
+    def test_select_with_none(self):
+        query, params = _make_select_query(table="foo", where={"bar": None, "baz": 1})
+        self.assertEqual(query, 'SELECT * FROM "foo" WHERE "bar" IS NULL AND "baz"=$1')
+        self.assertEqual(params, [1])
+
     def test_select_all_params(self):
         query, params = _make_select_query(
             table="foo", where={"bar": "baz"}, order_by="bar", limit=10, offset=0
@@ -145,6 +150,24 @@ class TestTables(unittest.TestCase):
         self.assertEqual(params, ["baz", 1])
         self.assertEqual(params, ["baz", 1])
 
+    def test_update_with_none_in_where(self):
+        query, params = _make_update_query(
+            table="foo", set={"a": "b"}, where={"c": None, "d": 1}
+        )
+        self.assertEqual(
+            query, 'UPDATE "foo" SET "a"=$1 WHERE "c" IS NULL AND "d"=$2 RETURNING *'
+        )
+        self.assertEqual(params, ["b", 1])
+
+    def test_update_with_multiple_where_conditions(self):
+        query, params = _make_update_query(
+            table="foo", set={"bar": "baz"}, where={"id": 1, "name": "foo"}
+        )
+        self.assertEqual(
+            query, 'UPDATE "foo" SET "bar"=$1 WHERE "id"=$2 AND "name"=$3 RETURNING *'
+        )
+        self.assertEqual(params, ["baz", 1, "foo"])
+
     def test_update_two_items(self):
         query, params = _make_update_query(
             table="foo", set={"bar": "baz", "car": "cat"}, where={"id": 1}
@@ -165,6 +188,13 @@ class TestTables(unittest.TestCase):
     def test_delete(self):
         query, params = _make_delete_query(table="foo", values={"id": 1})
         self.assertEqual(query, 'DELETE FROM "foo" WHERE "id"=$1 RETURNING *')
+        self.assertEqual(params, [1])
+
+    def test_delete_with_none(self):
+        query, params = _make_delete_query(table="foo", values={"bar": None, "baz": 1})
+        self.assertEqual(
+            query, 'DELETE FROM "foo" WHERE "bar" IS NULL AND "baz"=$1 RETURNING *'
+        )
         self.assertEqual(params, [1])
 
     def test_delete_and(self):
