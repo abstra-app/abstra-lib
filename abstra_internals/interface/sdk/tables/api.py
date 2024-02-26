@@ -51,10 +51,13 @@ def _make_delete_query(table: str, values: dict):
     table = escape_ref(table)
     column_names = []
     values_list = []
-    for idx, (column_name, value) in enumerate(values.items()):
+    for column_name, value in values.items():
         column_name = escape_ref(column_name)
-        column_names.append(f'"{column_name}"=${idx+1}')
-        values_list.append(serialize(value))
+        if value is None:
+            column_names.append(f'"{column_name}" IS NULL')
+        else:
+            column_names.append(f'"{column_name}"=${len(values_list)+1}')
+            values_list.append(serialize(value))
     conditions = " AND ".join(column_names)
     return f"""DELETE FROM "{table}" WHERE {conditions} RETURNING *""", values_list
 
@@ -76,10 +79,13 @@ def _make_select_query(
     if where is None or len(where) == 0:
         where_exp = ""
     else:
-        for idx, (column_name, value) in enumerate(where.items()):
+        for column_name, value in where.items():
             column_name = quoted_identifier(column_name)
-            column_names.append(f"{column_name}=${idx+1}")
-            values_list.append(serialize(value))
+            if value is None:
+                column_names.append(f"{column_name} IS NULL")
+            else:
+                column_names.append(f"{column_name}=${len(values_list)+1}")
+                values_list.append(serialize(value))
         conditions = " AND ".join(column_names)
         where_exp = f"WHERE {conditions}"
 
@@ -139,18 +145,27 @@ def _make_update_query(table: str, set: dict, where: dict):
     table = escape_ref(table)
     set_column_names = []
     set_values_list = []
-    for idx, (column_name, value) in enumerate(set.items()):
+    for column_name, value in set.items():
         column_name = escape_ref(column_name)
-        set_column_names.append(f'"{column_name}"=${idx+1}')
+        set_column_names.append(f'"{column_name}"=${len(set_values_list)+1}')
         set_values_list.append(serialize(value))
     set_exp = ", ".join(set_column_names)
+
     where_column_names = []
     where_values_list = []
-    (column_name, value) = list(where.items())[0]
-    where_column_names.append(f'"{column_name}"=${len(set)+1}')
-    where_values_list.append(serialize(value))
+    for column_name, value in where.items():
+        column_name = escape_ref(column_name)
+        if value is None:
+            where_column_names.append(f'"{column_name}" IS NULL')
+        else:
+            where_column_names.append(
+                f'"{column_name}"=${len(set_values_list)+len(where_values_list)+1}'
+            )
+            where_values_list.append(serialize(value))
+    where_exp = " AND ".join(where_column_names)
+
     return (
-        f"""UPDATE "{table}" SET {set_exp} WHERE {where_column_names[0]} RETURNING *""",
+        f"""UPDATE "{table}" SET {set_exp} WHERE {where_exp} RETURNING *""",
         set_values_list + where_values_list,
     )
 
