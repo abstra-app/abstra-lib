@@ -3,6 +3,7 @@ import copy
 from datetime import datetime
 from typing import Any, Dict, List, Mapping, Optional
 import uuid
+import json
 
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
@@ -216,11 +217,17 @@ class LocalStageRunRepository(StageRunRepository):
             for stage_run in self._stage_runs
             if (
                 (not filter.stage or stage_run.stage == filter.stage)
-                and (not filter.data or stage_run.data == filter.data)
+                and (not filter.data or self._compare_data(stage_run.data, filter.data))
                 and (not filter.status or stage_run.status == filter.status)
                 and (not filter.parent_id or stage_run.parent_id == filter.parent_id)
             )
         ]
+
+    def _compare_data(self, data: dict, filter: dict) -> bool:
+        filtered_data = {k: v for k, v in data.items() if k in filter}
+        return json.dumps(filtered_data, sort_keys=True) == json.dumps(
+            filter, sort_keys=True
+        )
 
     def find_ancestors(self, id: str) -> List[StageRun]:
         ancestors = []

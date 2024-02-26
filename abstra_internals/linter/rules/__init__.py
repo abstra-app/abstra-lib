@@ -9,6 +9,7 @@ from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
 from .missing_env import MissingEnv
 from .new_version_of_abstra_available import NewVersionOfAbstraAvailable
 from .unset_get_data import UnsetGetData
+from .unset_match_thread import UnsetMatchThread
 
 rules: List[LinterRule] = [
     EnvInBundle(),
@@ -20,4 +21,5 @@ rules: List[LinterRule] = [
     MissingEnv(),
     NewVersionOfAbstraAvailable(),
     UnsetGetData(),
+    UnsetMatchThread(),
 ]
