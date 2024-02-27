@@ -224,3 +224,7 @@ class RequirementsRepository:
             return Requirements.from_text(requirements_content)
         else:
             return Requirements(libraries=[])
+
+
+def requirements_repository_factory() -> RequirementsRepository:
+    return RequirementsRepository()
