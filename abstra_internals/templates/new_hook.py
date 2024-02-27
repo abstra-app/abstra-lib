@@ -1,12 +1,14 @@
 import abstra.hooks as ah
+import abstra.workflows as aw
 
-"""
-Abstra hooks are the simplest way to build endpoints for your workflows.
-"""
-
+# Use Abstra Hooks to create Python endpoints
 body, query, headers = ah.get_request()
 
-print("Hook ran!")
-print("Received request body:", body)
+print("⚙️ Hook is running... received body:", body)
 
-ah.send_json({"message": "Hello world!"})
+# You can store data in the current thread,
+# so it will be available in the next stages
+aw.set_data("hook_data", body)
+
+# You can send a response back to the client after doing some processing
+ah.send_json({"message": "A message from the hook!"})
