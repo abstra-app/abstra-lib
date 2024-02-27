@@ -1,18 +1,14 @@
 import abstra.forms as af
+import abstra.workflows as aw
 
-"""
-Abstra forms are the simplest way to build user interfaces for your workflows.
-"""
+# With Abstra Forms, it's easy to build user interfaces
+name = af.read("👋 Hello there! What is your name?")
 
-name = af.read("Hello there! What is your name?")
-af.display(f"Hello {name}!")
+# You can store data in the current thread,
+# so it will be available in the next stages
+aw.set_data("name", name)
 
+# Different kinds of input and output widgets are available
+af.display(f"🎉 Welcome, {name}!")
 
-ans = af.read_multiple_choice("Are you familiar with Abstra?", ["Yes", "No"])
-
-if ans == "Yes":
-    af.display("Great! Have fun!")
-else:
-    af.display_link(
-        "https://docs.abstra.io/forms/overview", link_text="Check out the docs!"
-    )
+af.display_markdown("Check out our [docs](https://docs.abstra.io/forms/overview) 📚")
