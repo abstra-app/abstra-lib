@@ -19,5 +19,5 @@ importlib_metadata
 debugpy
 python-dotenv==1.0.0
 unidecode==1.3.7
-pydantic
+pydantic~=2.0.0
 packaging
