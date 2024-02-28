@@ -318,28 +318,25 @@ def get_editor_bp():
     # 1s pooling in this route
     @bp.get("/logs/<stage_run_id>")
     def _get_ancestor_logs(stage_run_id: str):
-        def stage_from_run(stage_run: StageRun):
-            stage = project_repository.load().get_stage_raises(stage_run.stage)
-            return make_stage_dto(stage)
+        project = project_repository.load()
+
+        def player_log_filter(log: LogEntry):
+            return (
+                isinstance(log, StdioLogEntry)
+                or isinstance(log, UnhandledExceptionLogEntry)
+            ) and log.payload["text"].strip() != ""
+
+        def entry_from_run(stage_run: StageRun, logs: List[LogEntry]):
+            stage = project.get_stage(stage_run.stage)
+
+            return {
+                "stage_run": stage_run.to_dto(),
+                "stage": make_stage_dto(stage) if stage else None,
+                "logs": [log.to_dto() for log in logs if player_log_filter(log)],
+            }
 
         return [
-            {
-                "stage": stage_from_run(stage_run),
-                "stage_run": stage_run.to_dto(),
-                "logs": [
-                    dict(
-                        event=log.event,
-                        payload=log.payload,
-                        createdAt=to_utc_iso_string(log.created_at),
-                    )
-                    for log in logs
-                    if (
-                        isinstance(log, StdioLogEntry)
-                        or isinstance(log, UnhandledExceptionLogEntry)
-                    )
-                    and log.payload["text"].strip() != ""
-                ],
-            }
+            entry_from_run(stage_run, logs)
             for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
         ]
 
@@ -369,16 +366,19 @@ def get_player_bp():
     @bp.get("/logs/<stage_run_id>")
     @guard.requires("workflow_viewer")
     def _get_ancestor_logs(stage_run_id: str):
-        def stage_from_run(stage_run: StageRun):
-            stage = project_repository.load().get_stage_raises(stage_run.stage)
-            return make_stage_dto(stage)
+        project = project_repository.load()
+
+        def entry_from_run(stage_run: StageRun, logs: List[LogEntry]):
+            stage = project.get_stage(stage_run.stage)
+
+            return {
+                "stage_run": stage_run.to_dto(),
+                "stage": make_stage_dto(stage) if stage else None,
+                "logs": [log.to_dto() for log in logs],
+            }
 
         return [
-            {
-                "stage": stage_from_run(stage_run),
-                "stage_run": stage_run.to_dto(),
-                "logs": [log for log in logs],
-            }
+            entry_from_run(stage_run, logs)
             for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
         ]
 
