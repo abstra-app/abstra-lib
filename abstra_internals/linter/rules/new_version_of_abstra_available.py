@@ -12,7 +12,7 @@ class NewVersionOfAbstraAvailableFound(LinterIssue):
 
 
 class NewVersionOfAbstraAvailable(LinterRule):
-    label = "A new version of Abstra Editor is available. "
+    label = "A new version of Abstra Editor is available"
     type = "info"
 
     def find_issues(self) -> List[LinterIssue]:
