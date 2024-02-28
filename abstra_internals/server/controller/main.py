@@ -5,6 +5,7 @@ import flask, pkgutil, webbrowser
 from pathlib import Path
 
 from abstra_internals.server.controller.linters import check_linters
+from ...utils.dot_abstra import TEST_DATA_FILE
 from ...utils.validate import validate_json
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...utils import path2module, module2path, files_from_directory
@@ -266,11 +267,11 @@ class MainController:
     def write_test_data(self, data: str) -> None:
         if not validate_json(data):
             raise Exception("Invalid JSON")
-        test_file = Settings.root_path / ".abstra" / "test_data.json"
+        test_file = Settings.root_path / TEST_DATA_FILE
         test_file.write_text(data, encoding="utf-8")
 
     def read_test_data(self) -> str:
-        test_file = Settings.root_path / ".abstra" / "test_data.json"
+        test_file = Settings.root_path / TEST_DATA_FILE
         if not test_file.is_file():
             return "{}"
         return test_file.read_text(encoding="utf-8")

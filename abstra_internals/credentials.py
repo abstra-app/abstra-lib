@@ -1,6 +1,6 @@
 import os
 from .settings import Settings
-from .utils.file import CREDENTIALS_FILE
+from .utils.dot_abstra import CREDENTIALS_FILE
 
 
 def get_credentials():

@@ -4,19 +4,18 @@ import os
 from pathlib import Path
 from typing import Generator, Optional, Union
 
+from .dot_abstra import DOT_ABSTRA_FOLDER_NAME
+
 
 GIT_FOLDER = ".git"
-ABSTRA_FOLDER = ".abstra"
 ABSTRA_IGNORE = ".abstraignore"
-CREDENTIALS_FILE = ".abstra/credentials"
-LOCAL_LOG_FOLDER = ".abstra/logs"
 
 
 def get_ignore_files(dir: Path):
     GITIGNORE = dir.joinpath(".gitignore")
     IGNOREFILE = dir.joinpath(ABSTRA_IGNORE)
     git_path = dir.joinpath(GIT_FOLDER)
-    abstra_path = dir.joinpath(ABSTRA_FOLDER)
+    abstra_path = dir.joinpath(DOT_ABSTRA_FOLDER_NAME)
     ignored = [IGNOREFILE.name, GITIGNORE.name, abstra_path.name, git_path.name]
 
     if IGNOREFILE.exists():

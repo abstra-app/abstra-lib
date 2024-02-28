@@ -10,7 +10,7 @@ from pydantic.dataclasses import dataclass
 
 from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
-from ..utils.file import LOCAL_LOG_FOLDER
+from ..utils.dot_abstra import LOCAL_LOGS_FOLDER
 
 
 class LogEntryFactory:
@@ -126,7 +126,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
         if not execution_id:
             return
 
-        log_file = Path(LOCAL_LOG_FOLDER) / f"{execution_id}.log"
+        log_file = Path(LOCAL_LOGS_FOLDER) / f"{execution_id}.log"
 
         if not log_file.parent.exists():
             log_file.parent.mkdir(parents=True)
@@ -139,7 +139,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
         execution_id: str,
         event: Optional[LogEvent] = None,
     ) -> List[LogEntry]:
-        log_file = Path(LOCAL_LOG_FOLDER) / f"{execution_id}.log"
+        log_file = Path(LOCAL_LOGS_FOLDER) / f"{execution_id}.log"
 
         if not log_file.exists():
             return []
