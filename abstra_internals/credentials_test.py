@@ -1,5 +1,6 @@
 import unittest
 import os
+from .utils.dot_abstra import CREDENTIALS_FILE, DOT_ABSTRA_FOLDER_NAME
 from tests.fixtures import init_dir, clear_dir
 from .credentials import (
     delete_credentials,
@@ -22,8 +23,8 @@ class CredentialsTest(unittest.TestCase):
         self.assertIsNone(get_credentials())
 
     def test_get_credentials_when_file(self):
-        self.root.joinpath(".abstra").mkdir(exist_ok=True)
-        self.root.joinpath(".abstra", "credentials").write_text("test")
+        self.root.joinpath(DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
+        self.root.joinpath(CREDENTIALS_FILE).write_text("test")
         self.assertEqual(get_credentials(), "test")
 
     def test_get_credentials_when_env(self):

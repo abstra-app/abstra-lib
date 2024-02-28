@@ -1,5 +1,7 @@
 import unittest
 from pathlib import Path
+
+from .dot_abstra import DOT_ABSTRA_FOLDER_NAME
 from .file import module2path, path2module, files_from_directory
 from tests.fixtures import init_dir, clear_dir
 
@@ -91,7 +93,7 @@ class FilesFromDirectoryTest(unittest.TestCase):
         self.assertSamePaths(files, [tracked, self.abstra_json_path])
 
     def test_ignore_abstra_folder(self):
-        abstra = self.add_folder(".abstra")
+        abstra = self.add_folder(DOT_ABSTRA_FOLDER_NAME)
         self.add_file("credentials", "SECRET", path=abstra)
         files = files_from_directory(self.path)
         self.assertSamePaths(files, [self.abstra_json_path])

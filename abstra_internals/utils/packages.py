@@ -3,8 +3,9 @@ from pathlib import Path
 from datetime import datetime
 from packaging.version import Version
 
+from .dot_abstra import CACHED_VERSIONS_DIR
 
-CACHED_VERSIONS_DIR = ".abstra/cached_versions"
+
 EXPIRE_PERIOD = 60 * 60 * 4  # 4 hours
 TIMEOUT = 5
 
