@@ -8,12 +8,12 @@ from ...utils.code import function_called_args
 
 class UnsetDataFound(LinterIssue):
     def __init__(self, key: str, path: Path, lineno: int):
-        self.label = f"Unset data found: '{key}' in {path}:{lineno}"
+        self.label = f"There is a call to get_data('{key}') in {path}:{lineno}, but no corresponding set_data call was found."
         self.fixes = []
 
 
 class UnsetGetData(LinterRule):
-    label: str = "Undefined get data"
+    label: str = "Possibly undefined get data"
     type: str = "info"
 
     def find_issues(self) -> List[LinterIssue]:
