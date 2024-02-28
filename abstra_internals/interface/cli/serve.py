@@ -8,6 +8,7 @@ from ...utils.environment import HOST
 from .version import check_latest_version
 from ...server.controller import MainController
 from ...server.fs_watcher import watch_py_root_files
+from ...repositories.project.project import ProjectRepository
 
 
 def serve(
@@ -25,6 +26,8 @@ def serve(
     os.environ["ABSTRA_SERVER"] = "true"
 
     override_stdio(print_exceptions=False)
+    ProjectRepository().migrate_config_file()
+
     controller = MainController()
 
     watch_py_root_files()
