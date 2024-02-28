@@ -1146,10 +1146,10 @@ class ProjectRepository:
         Path.rmdir(temp_file.parent)
 
     @classmethod
-    def load(cls) -> Project:
+    def migrate_config_file(cls):
         data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
-
         initial_version = data.get("version")
+
         migrated_data = json_migrations.migrate(
             data,
             Settings.root_path,
@@ -1158,4 +1158,8 @@ class ProjectRepository:
         if migrated_data["version"] != initial_version:
             cls.save(Project.from_dict(migrated_data))
 
-        return Project.from_dict(migrated_data)
+    @classmethod
+    def load(cls) -> Project:
+        data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
+
+        return Project.from_dict(data)

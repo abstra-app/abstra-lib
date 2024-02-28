@@ -42,4 +42,4 @@ def __files_changed_polling_loop():
 
 
 def watch_py_root_files():
-    threading.Thread(target=lambda: __files_changed_polling_loop()).start()
+    threading.Thread(target=lambda: __files_changed_polling_loop(), daemon=True).start()
