@@ -109,8 +109,8 @@ class MainController:
     execution_logs_repository: ExecutionLogsRepository
 
     def __init__(self):
-        if not ProjectRepository.exists():
-            ProjectRepository.initialize()
+        ProjectRepository.initialize_or_migrate()
+
         requirements = requirements_repository.load()
         requirements.ensure("abstra", pkg_resources.get_distribution("abstra").version)
         requirements_repository.save(requirements)

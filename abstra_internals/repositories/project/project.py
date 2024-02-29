@@ -1147,6 +1147,8 @@ class ProjectRepository:
 
     @classmethod
     def migrate_config_file(cls):
+        if not cls.exists():
+            return
         data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
         initial_version = data.get("version")
 
@@ -1163,3 +1165,10 @@ class ProjectRepository:
         data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
 
         return Project.from_dict(data)
+
+    @classmethod
+    def initialize_or_migrate(cls):
+        if not cls.exists():
+            cls.initialize()
+        else:
+            cls.migrate_config_file()
