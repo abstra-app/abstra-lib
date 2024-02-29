@@ -3,6 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Type
 
+from ....utils.dot_abstra import CONFIG_FILE_BACKUPS
+
 from .base_migration import Migration
 from .migration_001 import Migration001
 from .migration_002 import Migration002
@@ -23,9 +25,11 @@ def get_latest_version() -> str:
 
 
 def create_backup(data: dict, location: Path, filename: str):
-    backup_path = os.path.join(location, filename)
+    backup_path = os.path.join(location, CONFIG_FILE_BACKUPS, filename)
+    Path(backup_path).parent.mkdir(parents=True, exist_ok=True)
     with open(backup_path, "w") as file:
         json.dump(data, file)
+        return f"{CONFIG_FILE_BACKUPS}/{filename}"
 
 
 def migrate(data: dict, path: Path):
@@ -43,8 +47,8 @@ def migrate(data: dict, path: Path):
 
     try:
         filename = f"abstra_{datetime.now().strftime('%Y%m%d%H%M%S')}.json.backup"
-        create_backup(data, path, filename)
-        print(f"Backup file created: {filename}")
+        backup_path = create_backup(data, path, filename)
+        print(f"Backup file created: {backup_path}")
     except Exception as e:
         print(f"Failed to create backup file: {e}")
         raise
