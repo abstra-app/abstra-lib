@@ -26,9 +26,9 @@ def serve(
     os.environ["ABSTRA_SERVER"] = "true"
 
     override_stdio(print_exceptions=False)
-    ProjectRepository().migrate_config_file()
 
     controller = MainController()
+    ProjectRepository().migrate_config_file()
 
     watch_py_root_files()
 
