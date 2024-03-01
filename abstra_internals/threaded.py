@@ -1,10 +1,8 @@
-from concurrent import futures
-
-executor = futures.ThreadPoolExecutor()
+from threading import Thread
 
 
 def threaded(func):
     def wrapper(*args, **kwargs):
-        return executor.submit(func, *args, **kwargs)
+        return Thread(name=func.__name__, target=func, args=args, kwargs=kwargs).start()
 
     return wrapper

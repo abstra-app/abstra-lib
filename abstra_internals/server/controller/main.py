@@ -416,3 +416,4 @@ class MainController:
     def create_vscode_launch(self):
         configure_launch_json()
         configure_settings_json()
+        return {"status": "ok"}

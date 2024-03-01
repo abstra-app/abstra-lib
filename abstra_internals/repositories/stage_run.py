@@ -1,13 +1,9 @@
-from abc import ABC, abstractmethod
-import copy
+import copy, uuid, json, requests
 from datetime import datetime
-from typing import Any, Dict, List, Mapping, Optional
-import uuid
-import json
-
+from abc import ABC, abstractmethod
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
-import requests
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 from ..utils.datetime import from_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
@@ -54,7 +50,7 @@ class PaginatedListResponse:
 
 @dataclass
 class GetStageRunByQueryFilter:
-    stage: Optional[str] = None
+    stage: Optional[Union[str, List[str]]] = None
     assignee: Optional[str] = None
     parent_id: Optional[str] = None
     status: Optional[str] = None
@@ -212,16 +208,29 @@ class LocalStageRunRepository(StageRunRepository):
         raise Exception(f"StageRun with id {id} not found")
 
     def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
-        return [
-            stage_run
-            for stage_run in self._stage_runs
-            if (
-                (not filter.stage or stage_run.stage == filter.stage)
-                and (not filter.data or self._compare_data(stage_run.data, filter.data))
-                and (not filter.status or stage_run.status == filter.status)
-                and (not filter.parent_id or stage_run.parent_id == filter.parent_id)
-            )
-        ]
+        results: List[StageRun] = []
+
+        for stage_run in self._stage_runs:
+            if filter.stage:
+                if isinstance(filter.stage, list):
+                    if stage_run.stage not in filter.stage:
+                        continue
+                else:
+                    if stage_run.stage != filter.stage:
+                        continue
+
+            if filter.data and not self._compare_data(stage_run.data, filter.data):
+                continue
+
+            if filter.status and stage_run.status != filter.status:
+                continue
+
+            if filter.parent_id and stage_run.parent_id != filter.parent_id:
+                continue
+
+            results.append(stage_run)
+
+        return results
 
     def _compare_data(self, data: dict, filter: dict) -> bool:
         filtered_data = {k: v for k, v in data.items() if k in filter}

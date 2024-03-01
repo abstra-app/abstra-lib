@@ -1,18 +1,15 @@
 import flask, flask_cors, flask_talisman
 from flask_talisman import ALLOW_FROM
 
-from ...stdio_monkey_patch import override_stdio
+from ...cloud_init import cloud_setup
 from ..controller import MainController
-from ...settings import SettingsController
 from ..blueprints.player import get_player_bp
 from ...utils.environment import ENABLE_TALISMAN
 
 
 def get_cloud_app(root: str):
-    SettingsController.set_root_path(root)
-    SettingsController.set_server_port(None)
+    cloud_setup(root)
 
-    override_stdio(print_exceptions=True)
     controller = MainController()
     app = flask.Flask(__name__)
     flask_cors.CORS(app)
