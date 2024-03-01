@@ -1,13 +1,12 @@
 import threading, os, time
 from datetime import datetime
-
 from ..contract.forms import FilesChangedMessage
 from ..modules import reload_project_local_modules
 from ..execution.form_execution import FormExecution
 from ..repositories.project.project import ProjectRepository, Project
 
 
-def _has_local_dependencies_changed(project: Project, last_change: float) -> bool:
+def has_local_dependencies_changed(project: Project, last_change: float) -> bool:
     for file in project.project_local_dependencies:
         if not file.exists():
             continue
@@ -19,7 +18,7 @@ def _has_local_dependencies_changed(project: Project, last_change: float) -> boo
 
 
 def reload_files_on_change(project: Project, last_change: float):
-    if _has_local_dependencies_changed(project, last_change):
+    if has_local_dependencies_changed(project, last_change):
         reload_project_local_modules()
         FormExecution.broadcast(FilesChangedMessage())
         return True
@@ -27,7 +26,7 @@ def reload_files_on_change(project: Project, last_change: float):
         return False
 
 
-def __files_changed_polling_loop():
+def files_changed_polling_loop():
     last_change = datetime.now().timestamp()
 
     while True:
@@ -42,4 +41,6 @@ def __files_changed_polling_loop():
 
 
 def watch_py_root_files():
-    threading.Thread(target=lambda: __files_changed_polling_loop(), daemon=True).start()
+    threading.Thread(
+        name="file_watcher", target=files_changed_polling_loop, daemon=True
+    ).start()
