@@ -23,10 +23,14 @@ class UnsetGetData(LinterRule):
         for python_file in project.project_files:
             try:
                 get_data_calls = function_called_args(
-                    python_file.read_text(), ["abstra", "workflows"], "get_data"
+                    python_file.read_text(encoding="utf-8"),
+                    ["abstra", "workflows"],
+                    "get_data",
                 )
                 set_data_calls = function_called_args(
-                    python_file.read_text(), ["abstra", "workflows"], "set_data"
+                    python_file.read_text(encoding="utf-8"),
+                    ["abstra", "workflows"],
+                    "set_data",
                 )
 
                 if get_data_calls is not None:

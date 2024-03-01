@@ -23,10 +23,14 @@ class UnsetMatchThread(LinterRule):
         for python_file in project.project_files:
             try:
                 match_thread_calls = function_called_args(
-                    python_file.read_text(), ["abstra", "workflows"], "match_thread"
+                    python_file.read_text(encoding="utf-8"),
+                    ["abstra", "workflows"],
+                    "match_thread",
                 )
                 set_data_calls = function_called_args(
-                    python_file.read_text(), ["abstra", "workflows"], "set_data"
+                    python_file.read_text(encoding="utf-8"),
+                    ["abstra", "workflows"],
+                    "set_data",
                 )
 
                 if match_thread_calls is not None:
