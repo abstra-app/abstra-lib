@@ -35,7 +35,9 @@ class KanbanTests(TestCase):
             )
         )
 
-        self.assertEqual(data, KanbanData(columns=[], next_stage_options=[]))
+        self.assertEqual(
+            data, KanbanData(columns=[], next_stage_options=[], not_found_stages=[])
+        )
 
     def test_get_data_single_stage_no_selection(self):
         project = ProjectRepository.load()
@@ -73,6 +75,7 @@ class KanbanTests(TestCase):
                         type="job",
                     )
                 ],
+                not_found_stages=[],
             ),
         )
 
@@ -119,6 +122,7 @@ class KanbanTests(TestCase):
                     )
                 ],
                 next_stage_options=[],
+                not_found_stages=[],
             ),
         )
 
@@ -190,6 +194,7 @@ class KanbanTests(TestCase):
                     ColumnStage.create(script),
                     ColumnStage.create(condition),
                 ],
+                not_found_stages=[],
             ),
         )
 
@@ -277,6 +282,7 @@ class KanbanTests(TestCase):
                     ColumnStage.create(script),
                     ColumnStage.create(condition),
                 ],
+                not_found_stages=[],
             ),
         )
 
@@ -374,6 +380,7 @@ class KanbanTests(TestCase):
                     ),
                 ],
                 next_stage_options=[ColumnStage.create(script)],
+                not_found_stages=[],
             ),
         )
 
@@ -464,6 +471,7 @@ class KanbanTests(TestCase):
                     ColumnStage.create(script),
                     ColumnStage.create(condition),
                 ],
+                not_found_stages=[],
             ),
         )
 
@@ -583,5 +591,36 @@ class KanbanTests(TestCase):
                     ColumnStage.create(job2),
                     ColumnStage.create(script),
                 ],
+                not_found_stages=[],
+            ),
+        )
+
+    def test_return_not_found_stages(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [
+                        {
+                            "stage_id": "script",
+                            "limit": 10,
+                            "offset": 0,
+                        }
+                    ],
+                    "filter": {},
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[],
+                next_stage_options=[],
+                not_found_stages=["script"],
             ),
         )

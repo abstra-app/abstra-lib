@@ -104,6 +104,7 @@ class TestKanbanRouter(TestCase):
                     }
                 ],
                 "next_stage_options": [],
+                "not_found_stages": [],
             },
             res.json,
         )
@@ -192,6 +193,7 @@ class TestKanbanRouter(TestCase):
                         "type": "script",
                     }
                 ],
+                "not_found_stages": [],
             },
             res.json,
         )
