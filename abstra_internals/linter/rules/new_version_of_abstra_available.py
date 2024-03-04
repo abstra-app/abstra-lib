@@ -1,14 +1,25 @@
 from typing import List
+import webbrowser
 
 from abstra_internals.interface.cli.version import PackageVersionManager, VersionStatus
-from ..linter import LinterRule, LinterIssue
+from ..linter import LinterFix, LinterRule, LinterIssue
+
+RELEASE_NOTES_URL = "https://github.com/abstra-app/abstra-lib/releases"
+
+
+class OpenChangeLog(LinterFix):
+    def __init__(self) -> None:
+        self.label = "Open the release notes"
+
+    def fix(self):
+        webbrowser.open(RELEASE_NOTES_URL)
 
 
 class NewVersionOfAbstraAvailableFound(LinterIssue):
     def __init__(self) -> None:
         package_version = PackageVersionManager("abstra")
         self.label = f"Latest version is {package_version.cached_latest_version}, but you have {package_version.current_local_version}.\nPlease run 'pip install {package_version.package_name} --upgrade' to update."
-        self.fixes = []
+        self.fixes = [OpenChangeLog()]
 
 
 class NewVersionOfAbstraAvailable(LinterRule):
