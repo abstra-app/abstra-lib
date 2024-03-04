@@ -171,11 +171,13 @@ class KanbanColumn:
 class KanbanData:
     columns: List[KanbanColumn]
     next_stage_options: List[ColumnStage]
+    not_found_stages: List[str]
 
     def to_dict(self) -> dict:
         return dict(
             columns=[column.to_dict() for column in self.columns],
             next_stage_options=[option.to_dict() for option in self.next_stage_options],
+            not_found_stages=self.not_found_stages,
         )
 
 
@@ -241,6 +243,7 @@ class KanbanController:
             return self._get_next_stages(selected_stages_ids[column_idx - 1])
 
     def get_data(self, request: DataRequest) -> KanbanData:
+        stages_not_found = []
         selected_stage_ids = [s.stage_id for s in request.selection]
         non_selected_stages_column = [
             ColumnStage.create(c)
@@ -267,9 +270,11 @@ class KanbanController:
                 )
                 for stage_run in paginated_response.stage_runs
             ]
-            selected_stage_run = ColumnStage.create(
-                self._get_project().get_stage_raises(selection.stage_id)
-            )
+            selected_stage = self._get_project().get_stage(selection.stage_id)
+            if not selected_stage:
+                stages_not_found.append(selection.stage_id)
+                continue
+            selected_stage_run = ColumnStage.create(selected_stage)
 
             columns.append(
                 KanbanColumn(
@@ -281,7 +286,9 @@ class KanbanController:
             )
 
         return KanbanData(
-            columns=columns, next_stage_options=non_selected_stages_column
+            columns=columns,
+            next_stage_options=non_selected_stages_column,
+            not_found_stages=stages_not_found,
         )
 
     def get_ancestor_logs(
