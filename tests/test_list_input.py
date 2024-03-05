@@ -1,8 +1,8 @@
 import unittest
+from unittest.mock import ANY
 
-from abstra.forms import Page
+from abstra.forms import ListItemSchema, Page
 from abstra_internals.widgets.library import ListInput
-from abstra.forms import ListItemSchema
 
 default_text_input = {
     "type": "text-input",
@@ -58,59 +58,60 @@ class TestListInput(unittest.TestCase):
             [dict(foo="bar")],
         )
 
-    # def test_add_item(self):
-    #     schema = ListItemSchema().reactive(lambda _: Page().read("foo"))
+    @unittest.skip("TODO: Known issue")
+    def test_add_item(self):
+        schema = ListItemSchema().reactive(lambda _: Page().read("foo"))
 
-    #     page = Page().reactive(lambda _: Page().read_list(schema, key="list"))
+        page = Page().reactive(lambda _: Page().read_list(schema, key="list"))
 
-    #     page.set_values(dict(list=[dict(list=[None])]))
+        page.set_values(dict(list=[dict(list=[None])]))
 
-    #     # page -> reactive -> list -> schema
-    #     self.assertEqual(
-    #         schema.render({}),
-    #         [default_text_input],
-    #     )
+        # page -> reactive -> list -> schema
+        self.assertEqual(
+            schema.render({}),
+            [default_text_input],
+        )
 
-    #     self.assertEqual(
-    #         page.widgets[0].value,
-    #         dict(list=[dict(list=[None])]),
-    #     )
+        self.assertEqual(
+            page.widgets[0].value,
+            dict(list=[dict(list=[None])]),
+        )
 
-    #     self.assertEqual(
-    #         page.render({}),
-    #         [
-    #             {
-    #                 "type": "list-input",
-    #                 "key": "list",
-    #                 "hint": None,
-    #                 "errors": [],
-    #                 "min": 0,
-    #                 "max": None,
-    #                 "addButtonText": "+",
-    #                 "fullWidth": False,
-    #                 "required": True,
-    #                 "disabled": False,
-    #                 "value": [{"foo": ""}],
-    #                 "schemas": [
-    #                     [
-    #                         {
-    #                             "type": "text-input",
-    #                             "key": "foo",
-    #                             "label": "foo",
-    #                             "value": "",
-    #                             "placeholder": "",
-    #                             "required": True,
-    #                             "hint": None,
-    #                             "fullWidth": False,
-    #                             "mask": None,
-    #                             "disabled": False,
-    #                             "errors": [],
-    #                         }
-    #                     ]
-    #                 ],
-    #             }
-    #         ],
-    #     )
+        self.assertEqual(
+            page.render({}),
+            [
+                {
+                    "type": "list-input",
+                    "key": "list",
+                    "hint": None,
+                    "errors": [],
+                    "min": 0,
+                    "max": None,
+                    "addButtonText": "+",
+                    "fullWidth": False,
+                    "required": True,
+                    "disabled": False,
+                    "value": [{"foo": ""}],
+                    "schemas": [
+                        [
+                            {
+                                "type": "text-input",
+                                "key": "foo",
+                                "label": "foo",
+                                "value": "",
+                                "placeholder": "",
+                                "required": True,
+                                "hint": None,
+                                "fullWidth": False,
+                                "mask": None,
+                                "disabled": False,
+                                "errors": [],
+                            }
+                        ]
+                    ],
+                }
+            ],
+        )
 
     def test_list_reactive_dropdown(self):
         schema = ListItemSchema().reactive(
@@ -134,18 +135,23 @@ class TestListInput(unittest.TestCase):
                     "fullWidth": False,
                     "required": True,
                     "disabled": False,
-                    "value": [{"foo": ["bar"]}],
+                    "value": [{"foo": [ANY]}],
                     "schemas": [
                         [
                             {
                                 "type": "dropdown-input",
                                 "key": "foo",
                                 "label": "foo",
-                                "options": ["bar", "baz"],
+                                "options": [
+                                    {"label": "bar", "value": ANY},
+                                    {"label": "baz", "value": ANY},
+                                ],
+                                "min": None,
+                                "max": None,
                                 "hint": None,
                                 "multiple": False,
                                 "placeholder": "",
-                                "value": ["bar"],
+                                "value": [ANY],
                                 "required": True,
                                 "fullWidth": False,
                                 "disabled": False,

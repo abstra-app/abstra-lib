@@ -506,8 +506,8 @@ metadata = {
                 {
                     "argName": "options",
                     "description": "The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]",
-                    "typeName": "list",
-                    "typeDescription": ["list[AbstraOption]"],
+                    "typeName": "List[AbstraOption]",
+                    "typeDescription": ["List[AbstraOption]"],
                     "isKwarg": False,
                     "default": "None",
                 },
@@ -1403,8 +1403,8 @@ metadata = {
                 {
                     "argName": "options",
                     "description": "The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]",
-                    "typeName": "list",
-                    "typeDescription": ["list[AbstraOption]"],
+                    "typeName": "List[AbstraOption]",
+                    "typeDescription": ["List[AbstraOption]"],
                     "isKwarg": False,
                     "default": "None",
                 },
@@ -1428,6 +1428,20 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": '"Choose an option"',
+                },
+                {
+                    "argName": "min",
+                    "description": "The minimal amount of options that should be selected. Defaults to None.",
+                    "typeName": "number",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "max",
+                    "description": "The maximum amount of options that should be selected. Defaults to None.",
+                    "typeName": "number",
+                    "isKwarg": True,
+                    "default": "None",
                 },
                 {
                     "argName": "disabled",
@@ -1480,7 +1494,11 @@ metadata = {
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": "array"},
+                {
+                    "argName": "value",
+                    "typeName": "array",
+                    "items": {"typeName": "string"},
+                },
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -1491,7 +1509,7 @@ metadata = {
                     "argName": "options",
                     "typeName": "array",
                     "items": {
-                        "typeName": ["string", "object"],
+                        "typeName": ["object"],
                         "properties": [
                             {
                                 "argName": "label",
@@ -1506,6 +1524,8 @@ metadata = {
                         ],
                     },
                 },
+                {"argName": "min", "typeName": ["number", "null"]},
+                {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "placeholder", "typeName": "string"},
                 {"argName": "multiple", "typeName": "boolean"},
             ]
@@ -2084,8 +2104,8 @@ metadata = {
                 {
                     "argName": "options",
                     "description": "The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]",
-                    "typeName": "list",
-                    "typeDescription": ["list[AbstraOption]"],
+                    "typeName": "List[AbstraOption]",
+                    "typeDescription": ["List[AbstraOption]"],
                     "isKwarg": False,
                     "default": "None",
                 },
@@ -2172,7 +2192,11 @@ metadata = {
             "params": [
                 {"argName": "label", "typeName": "string"},
                 {"argName": "multiple", "typeName": "boolean"},
-                {"argName": "value", "typeName": "array"},
+                {
+                    "argName": "value",
+                    "typeName": "array",
+                    "items": {"typeName": "string"},
+                },
                 {"argName": "min", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
@@ -2660,6 +2684,13 @@ metadata = {
                     "default": None,
                 },
                 {
+                    "argName": "initial_value",
+                    "description": "The initial value of the selection. Defaults to []",
+                    "typeName": "list",
+                    "isKwarg": True,
+                    "default": "[]",
+                },
+                {
                     "argName": "multiple",
                     "description": "Whether the user will be allowed to select multiple rows. Defaults to False.",
                     "typeName": "bool",
@@ -2667,11 +2698,18 @@ metadata = {
                     "default": "False",
                 },
                 {
-                    "argName": "initial_value",
-                    "description": "The initial value of the selection. Defaults to []",
-                    "typeName": "list",
+                    "argName": "min",
+                    "description": "The minimal amount of options that should be selected. Defaults to None.",
+                    "typeName": "number",
                     "isKwarg": True,
-                    "default": "[]",
+                    "default": "None",
+                },
+                {
+                    "argName": "max",
+                    "description": "The maximum amount of options that should be selected. Defaults to None.",
+                    "typeName": "number",
+                    "isKwarg": True,
+                    "default": "None",
                 },
                 {
                     "argName": "disabled",
@@ -2738,6 +2776,8 @@ metadata = {
                 {"argName": "displayIndex", "typeName": "boolean"},
                 {"argName": "label", "typeName": "string"},
                 {"argName": "value", "typeName": "array"},
+                {"argName": "min", "typeName": ["number", "null"]},
+                {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},

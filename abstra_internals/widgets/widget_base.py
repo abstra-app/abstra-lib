@@ -1,5 +1,6 @@
-from abc import abstractmethod, ABC
-from typing import Any, List, Union, Callable, Optional
+import uuid
+from abc import ABC, abstractmethod
+from typing import Any, Callable, List, Optional, TypedDict, Union, TypeVar
 
 
 class Widget(ABC):
@@ -79,65 +80,118 @@ class Input(Widget):
         raise NotImplementedError("serialize_value not implemented")
 
 
-class OptionalListInput(Input):
-    # Input widgets that can be either a single value or a list of values
-    multiple: bool = False
-    min: Optional[int] = None
-    max: Optional[int] = None
+class LabelValueOption(TypedDict):
+    label: str
+    value: object
 
-    def is_value_unset(self) -> bool:
-        if self.multiple:
-            return self.value == None
-        else:
-            return super().is_value_unset()
 
-    def _single_value_or_list(self, value: List) -> Union[List, Any]:
-        if not isinstance(value, list) and value is not None:
-            raise Exception("Non-list value received")
+AbstraOption = Union[str, LabelValueOption]
 
-        if value is None:
-            return self.empty_value
 
-        if self.multiple:
-            return value or []
+class OptionsHandler:
+    def __init__(self, options: Union[List[str], List[LabelValueOption]]) -> None:
+        self.options = options
 
-        return value[0] if len(value) > 0 else None
+        self._mappedOptions = {
+            str(uuid.uuid4()): {
+                "label": option if isinstance(option, str) else option["label"],
+                "value": option if isinstance(option, str) else option["value"],
+            }
+            for option in options
+        }
 
-    def _validate_list_min_max(self) -> List[str]:
-        if self.min is not None and len(self.value) < self.min:
+    def value_from_uuid(self, uuid: str) -> object:
+        return self._mappedOptions[uuid]["value"]
+
+    def uuid_from_value(self, value: object) -> str:
+        for mapKey, mapValue in self._mappedOptions.items():
+            if mapValue["value"] == value:
+                return mapKey
+        raise ValueError(f"Value {value} not found in options")
+
+    def serialized_options(self) -> List[LabelValueOption]:
+        return [
+            {"label": v["label"], "value": k} for k, v in self._mappedOptions.items()
+        ]
+
+
+T = TypeVar("T")
+
+
+class MultipleHandler:
+    def __init__(
+        self,
+        multiple: bool,
+        min: Optional[int] = None,
+        max: Optional[int] = None,
+        required: Optional[Union[bool, str]] = None,
+    ) -> None:
+        self.multiple = multiple
+        self.min = min
+        self.max = max
+        self.required = required
+
+    def _is_value_unset(self, value: Union[object, List[object]]) -> bool:
+        return value is None or value == []
+
+    def validate(self, value: Union[object, List[object]]) -> List[str]:
+        if self.required and self._is_value_unset(value):
+            if type(self.required) == str:
+                return [self.required]
+
+            return ["i18n_error_required_field"]
+
+        if not self.multiple or not isinstance(value, list):
+            return []
+
+        if self.min is not None and len(value) < self.min:
             return ["i18n_error_min_list"]
 
-        if self.max is not None and len(self.value) > self.max:
+        if self.max is not None and len(value) > self.max:
             return ["i18n_error_max_list"]
 
         return []
 
-    @property
-    def validators(self) -> List[Callable[[], List[str]]]:
-        return super().validators + [self._validate_list_min_max]
+    def value_to_list_or_value(self, value: List[T]) -> Union[List[T], T, None]:
+        if not isinstance(value, list) and value is not None:
+            raise Exception("Non-list value received")
 
-    def parse_value(self, value: List) -> Union[List, Any]:
-        _value = self._single_value_or_list(value)
+        if self.multiple:
+            return value
 
-        return super().parse_value(_value)
+        return value[0] if len(value) else None
 
-
-class NumberishInput(Input):
-    min: Optional[Union[int, float]] = None
-    max: Optional[Union[int, float]] = None
-
-    @property
-    def validators(self) -> List[Callable[[], List[str]]]:
-        return super().validators + [self._validate_number_min_max]
-
-    def _validate_number_min_max(self) -> List[str]:
-        if type(self.value) != int and type(self.value) != float:
+    def value_to_list(self, value: Union[List[T], T]) -> List[T]:
+        if isinstance(value, list):
+            return value
+        if value is None:
             return []
+        return [value]
 
-        if self.min is not None and self.value < self.min:
-            return ["i18n_error_min_number"]
 
-        if self.max is not None and self.value > self.max:
-            return ["i18n_error_max_number"]
+class NumberValueHandler:
+    def __init__(
+        self,
+        min: Optional[Union[int, float]] = None,
+        max: Optional[Union[int, float]] = None,
+        required: Optional[Union[bool, str]] = None,
+    ) -> None:
+        self.min = min
+        self.max = max
+        self.required = required
 
-        return []
+    def validate(self, value: Union[int, float]) -> List[str]:
+        errors = []
+        if self.required and value is None:
+            if type(self.required) == str:
+                errors.append(self.required)
+            else:
+                errors.append("i18n_error_required_field")
+
+        if self.min is not None and value < self.min:
+            errors.append("i18n_error_min_number")
+
+        if self.max is not None and value > self.max:
+            errors.append("i18n_error_max_number")
+
+        return errors

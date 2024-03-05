@@ -1,13 +1,12 @@
-from ..widget_base import OptionalListInput
-from typing import List, Any, Union
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List, Union
+from ..widget_base import Input, MultipleHandler
 
 if TYPE_CHECKING:
     import pandas as pd
 
 
-class PandasRowSelectionInput(OptionalListInput):
+class PandasRowSelectionInput(Input):
     type = "pandas-row-selection-input"
     empty_value: Union[List, Any] = None
     multiple: bool = False
@@ -29,6 +28,11 @@ class PandasRowSelectionInput(OptionalListInput):
         self.multiple = props.get("multiple", False)
         self.empty_value = [] if self.multiple else None
         self.value = props.get("initial_value", self.empty_value)
+        self.min = props.get("min", None)
+        self.max = props.get("max", None)
+        self.multiple_handler = MultipleHandler(
+            self.multiple, self.min, self.max, self.required
+        )
 
     def serialize_table(self):
         if self.df is None:
@@ -46,6 +50,15 @@ class PandasRowSelectionInput(OptionalListInput):
         del serialized["schema"]["pandas_version"]
         return serialized
 
+    def validate(self) -> List[str]:
+        return self.multiple_handler.validate(self.value)
+
+    def serialize_value(self) -> List:
+        return self.multiple_handler.value_to_list(self.value)
+
+    def parse_value(self, value):
+        return self.multiple_handler.value_to_list_or_value(value)
+
     def render(self, ctx: dict):
         return {
             "type": self.type,
@@ -61,11 +74,6 @@ class PandasRowSelectionInput(OptionalListInput):
             "filterable": self.filterable,
             "value": self.serialize_value(),
             "errors": self.errors,
+            "min": self.min,
+            "max": self.max,
         }
-
-    def serialize_value(self) -> List:
-        if isinstance(self.value, list):
-            return self.value
-        if self.value is None:
-            return []
-        return [self.value]

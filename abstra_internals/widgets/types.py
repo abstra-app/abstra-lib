@@ -1,7 +1,14 @@
 from abc import ABC
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Union, TypedDict
 
+
+class LabelValueOption(TypedDict):
+    label: str
+    value: Any
+
+
+AbstraOption = Union[str, LabelValueOption]
 
 if TYPE_CHECKING:
     from plotly.graph_objects import Figure

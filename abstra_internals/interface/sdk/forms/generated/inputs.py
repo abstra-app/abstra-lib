@@ -1,5 +1,5 @@
 from typing import Any, Dict, Union, List
-from abstra_internals.widgets.types import PandasDataFrame
+from abstra_internals.widgets.types import PandasDataFrame, AbstraOption
 
 from ..page import Page
 
@@ -84,12 +84,12 @@ def read_checkbox(label: str, **kwargs):
     return get_single_value(Page().read_checkbox(label, **kwargs).run(button_text))
 
 
-def read_checklist(label: str, options: list, **kwargs):
+def read_checklist(label: str, options: List[AbstraOption], **kwargs):
     """Show a checklist for users to select items
 
     Position Args:
             label (str): The label to display to the user
-            options (list): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
+            options (List[AbstraOption]): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
 
     Keyword Args:
             initial_value (str): The initial value to display to the user. Defaults to None.
@@ -260,17 +260,19 @@ def read_date(label: str, **kwargs):
     return get_single_value(Page().read_date(label, **kwargs).run(button_text))
 
 
-def read_dropdown(label: str, options: list, **kwargs):
+def read_dropdown(label: str, options: List[AbstraOption], **kwargs):
     """Allow users to select one or more options by selecting items in a dropdown
 
     Position Args:
             label (str): The label to display to the user
-            options (list): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
+            options (List[AbstraOption]): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
 
     Keyword Args:
             multiple (bool): Whether the user can select multiple options. Defaults to False.
             initial_value (str or list): The initial value to display to the user. Defaults to [].
             placeholder (str): The placeholder text to display to the user. Defaults to "Choose an option".
+            min (number): The minimal amount of options that should be selected. Defaults to None.
+            max (number): The maximum amount of options that should be selected. Defaults to None.
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.
@@ -389,12 +391,12 @@ def read_list(item_schema: Any, **kwargs):
     return get_single_value(Page().read_list(item_schema, **kwargs).run(button_text))
 
 
-def read_multiple_choice(label: str, options: list, **kwargs):
+def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
     """Read a multiple choice value from the user
 
     Position Args:
             label (str): The label to display to the user
-            options (list): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
+            options (List[AbstraOption]): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
 
     Keyword Args:
             multiple (bool): Whether the user can select multiple options. Defaults to False.
@@ -506,8 +508,10 @@ def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
     Keyword Args:
             display_index (bool): Whether to show a index column. Defaults to False.
             label (str): The label to display to the user
-            multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.
             initial_value (list): The initial value of the selection. Defaults to []
+            multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.
+            min (number): The minimal amount of options that should be selected. Defaults to None.
+            max (number): The maximum amount of options that should be selected. Defaults to None.
             disabled (bool): whether the input is disabled. Defaults to False.
             required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
             hint (str): A tooltip displayed to the user. Defaults to None.

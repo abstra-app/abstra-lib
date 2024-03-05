@@ -1,10 +1,10 @@
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, TypedDict
 import io
 
 from ..reactive import Reactive
 from abstra_internals.widgets.library import *
 from abstra_internals.widgets import Input, Output
-from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame
+from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame, AbstraOption
 
 
 class WidgetSchema:
@@ -145,12 +145,12 @@ class WidgetSchema:
         self.widgets.append(CheckboxInput(key, label, **kwargs))
         return self
 
-    def read_checklist(self, label: str, options: list, **kwargs):
+    def read_checklist(self, label: str, options: List[AbstraOption], **kwargs):
         """Show a checklist for users to select items
 
         Position Args:
                 label (str): The label to display to the user
-                options (list): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
+                options (List[AbstraOption]): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
 
         Keyword Args:
                 initial_value (str): The initial value to display to the user. Defaults to None.
@@ -327,17 +327,19 @@ class WidgetSchema:
         self.widgets.append(DateInput(key, label, **kwargs))
         return self
 
-    def read_dropdown(self, label: str, options: list, **kwargs):
+    def read_dropdown(self, label: str, options: List[AbstraOption], **kwargs):
         """Allow users to select one or more options by selecting items in a dropdown
 
         Position Args:
                 label (str): The label to display to the user
-                options (list): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
+                options (List[AbstraOption]): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
 
         Keyword Args:
                 multiple (bool): Whether the user can select multiple options. Defaults to False.
                 initial_value (str or list): The initial value to display to the user. Defaults to [].
                 placeholder (str): The placeholder text to display to the user. Defaults to "Choose an option".
+                min (number): The minimal amount of options that should be selected. Defaults to None.
+                max (number): The maximum amount of options that should be selected. Defaults to None.
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.
@@ -460,12 +462,12 @@ class WidgetSchema:
         self.widgets.append(ListInput(key, item_schema, **kwargs))
         return self
 
-    def read_multiple_choice(self, label: str, options: list, **kwargs):
+    def read_multiple_choice(self, label: str, options: List[AbstraOption], **kwargs):
         """Read a multiple choice value from the user
 
         Position Args:
                 label (str): The label to display to the user
-                options (list): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
+                options (List[AbstraOption]): The options to display to the user, eg. ['Option 1', 'Option 2'] or [{'label': 'Option 1', 'value': '1'}, {'label': 'Option 2', 'value': '2'}]
 
         Keyword Args:
                 multiple (bool): Whether the user can select multiple options. Defaults to False.
@@ -579,8 +581,10 @@ class WidgetSchema:
         Keyword Args:
                 display_index (bool): Whether to show a index column. Defaults to False.
                 label (str): The label to display to the user
-                multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.
                 initial_value (list): The initial value of the selection. Defaults to []
+                multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.
+                min (number): The minimal amount of options that should be selected. Defaults to None.
+                max (number): The maximum amount of options that should be selected. Defaults to None.
                 disabled (bool): whether the input is disabled. Defaults to False.
                 required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
                 hint (str): A tooltip displayed to the user. Defaults to None.

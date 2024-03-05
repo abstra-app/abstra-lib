@@ -1,14 +1,24 @@
-from ..widget_base import OptionalListInput
+from typing import List, Optional, TypedDict
 from ..file_utils import convert_file
-from typing import Union, List, Any
+from ..widget_base import Input, MultipleHandler
 
 
-class CardsInput(OptionalListInput):
+class CardOption(TypedDict):
+    title: Optional[str]
+    subtitle: Optional[str]
+    image: Optional[str]
+    description: Optional[str]
+    topLeftExtra: Optional[str]
+    topRightExtra: Optional[str]
+
+
+class CardsInput(Input):
     type = "cards-input"
     empty_value = None
     multiple: bool = False
+    multiple_handler: MultipleHandler
 
-    def __init__(self, key: str, label: str, options: Any, **kwargs):
+    def __init__(self, key: str, label: str, options: List[CardOption], **kwargs):
         super().__init__(key)
         self.set_props(dict(label=label, options=options, **kwargs))
 
@@ -30,6 +40,9 @@ class CardsInput(OptionalListInput):
         self.value = props.get("initial_value", self.empty_value)
         self.min = props.get("min", None)
         self.max = props.get("max", None)
+        self.multiple_handler = MultipleHandler(
+            self.multiple, self.min, self.max, self.required
+        )
 
     def render(self, ctx: dict):
         return {
@@ -40,7 +53,6 @@ class CardsInput(OptionalListInput):
             "options": self.options,
             "multiple": self.multiple,
             "searchable": self.searchable,
-            "value": self.serialize_value(),
             "required": self.required,
             "columns": self.columns,
             "fullWidth": self.full_width,
@@ -49,11 +61,14 @@ class CardsInput(OptionalListInput):
             "errors": self.errors,
             "min": self.min,
             "max": self.max,
+            "value": self.serialize_value(),
         }
 
-    def serialize_value(self) -> Union[List, Any]:
-        if isinstance(self.value, list):
-            return self.value
-        if self.value is None:
-            return []
-        return [self.value]
+    def validate(self) -> List[str]:
+        return self.multiple_handler.validate(self.value)
+
+    def serialize_value(self) -> List:
+        return self.multiple_handler.value_to_list(self.value)
+
+    def parse_value(self, value):
+        return self.multiple_handler.value_to_list_or_value(value)

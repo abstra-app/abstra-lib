@@ -1,7 +1,8 @@
-from ..widget_base import NumberishInput
+from typing import List
+from ..widget_base import Input, NumberValueHandler
 
 
-class NumberInput(NumberishInput):
+class NumberInput(Input):
     type = "number-input"
     empty_value = None
 
@@ -19,6 +20,9 @@ class NumberInput(NumberishInput):
         self.min = props.get("min")
         self.max = props.get("max")
         self.disabled = props.get("disabled", False)
+        self.number_value_handler = NumberValueHandler(
+            min=self.min, max=self.max, required=self.required
+        )
 
     def render(self, ctx: dict):
         return {
@@ -35,6 +39,9 @@ class NumberInput(NumberishInput):
             "disabled": self.disabled,
             "errors": self.errors,
         }
+
+    def validate(self) -> List[str]:
+        return self.number_value_handler.validate(self.value)
 
     def serialize_value(self) -> float:
         return self.value
