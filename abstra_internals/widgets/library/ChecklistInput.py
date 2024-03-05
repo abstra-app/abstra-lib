@@ -1,4 +1,4 @@
-from ..widget_base import Input, AbstraOption
+from ..widget_base import Input, AbstraOption, OptionsHandler
 from typing import Union, List, Dict
 
 
@@ -20,6 +20,7 @@ class ChecklistInput(Input):
         self.disabled = props.get("disabled", False)
         self.min = props.get("min", 0)
         self.max = props.get("max", len(self.options))
+        self.options_handler = OptionsHandler(self.options)
 
     def is_value_unset(self):
         return False
@@ -41,7 +42,7 @@ class ChecklistInput(Input):
         return {
             "type": self.type,
             "key": self.key,
-            "options": self.options,
+            "options": self.options_handler.serialized_options(),
             "label": self.label,
             "value": self.serialize_value(),
             "required": self.required,
@@ -53,7 +54,8 @@ class ChecklistInput(Input):
             "max": self.max,
         }
 
-    def serialize_value(self) -> list:
-        if isinstance(self.value, list):
-            return self.value
-        return []
+    def serialize_value(self) -> List:
+        return [self.options_handler.uuid_from_value(value) for value in self.value]
+
+    def parse_value(self, value):
+        return [self.options_handler.value_from_uuid(uuid) for uuid in value]
