@@ -586,16 +586,16 @@ metadata = {
                 {
                     "argName": "value",
                     "typeName": "array",
-                    "items": {"typeName": ["string", "number"]},
+                    "items": {"typeName": ["string"]},
                 },
                 {
                     "argName": "options",
                     "typeName": "array",
                     "items": {
-                        "typeName": ["string", "object"],
+                        "typeName": ["object"],
                         "properties": [
                             {
-                                "argName": "key",
+                                "argName": "label",
                                 "typeName": "string",
                                 "description": "The key of the option on the returning object",
                             },
@@ -2209,10 +2209,10 @@ metadata = {
                     "argName": "options",
                     "typeName": "array",
                     "items": {
-                        "typeName": ["string", "object"],
+                        "typeName": ["object"],
                         "properties": [
                             {
-                                "argName": "key",
+                                "argName": "label",
                                 "typeName": "string",
                                 "description": "The key of the option on the returning object",
                             },
