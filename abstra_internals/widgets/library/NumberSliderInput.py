@@ -1,7 +1,8 @@
-from ..widget_base import NumberishInput
+from typing import List
+from ..widget_base import Input, NumberValueHandler
 
 
-class NumberSliderInput(NumberishInput):
+class NumberSliderInput(Input):
     type = "number-slider-input"
     empty_value = 0
 
@@ -19,6 +20,9 @@ class NumberSliderInput(NumberishInput):
         self.max = props.get("max")
         self.step = props.get("step")
         self.disabled = props.get("disabled", False)
+        self.number_value_handler = NumberValueHandler(
+            min=self.min, max=self.max, required=self.required
+        )
 
     def render(self, ctx: dict):
         return {
@@ -35,6 +39,9 @@ class NumberSliderInput(NumberishInput):
             "disabled": self.disabled,
             "errors": self.errors,
         }
+
+    def validate(self) -> List[str]:
+        return self.number_value_handler.validate(self.value)
 
     def serialize_value(self) -> float:
         return self.value or 0

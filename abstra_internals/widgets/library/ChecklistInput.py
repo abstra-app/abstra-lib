@@ -1,4 +1,4 @@
-from ..widget_base import Input
+from ..widget_base import Input, AbstraOption
 from typing import Union, List, Dict
 
 
@@ -6,9 +6,7 @@ class ChecklistInput(Input):
     type = "checklist-input"
     empty_value: List[str] = []
 
-    def __init__(
-        self, key: str, label: str, options: Union[List[str], List[Dict]], **kwargs
-    ):
+    def __init__(self, key: str, label: str, options: List[AbstraOption], **kwargs):
         super().__init__(key)
         self.set_props(dict(label=label, options=options, **kwargs))
 

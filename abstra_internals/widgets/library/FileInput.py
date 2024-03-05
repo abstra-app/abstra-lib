@@ -1,15 +1,15 @@
 from io import BufferedReader, TextIOWrapper
-from typing import Optional, Union, List
-from ..apis import upload_file
-from ..widget_base import OptionalListInput
 from pathlib import Path
+from typing import List, Union
+from ..apis import upload_file
 from ..response_types import FileResponse
+from ..widget_base import Input, MultipleHandler
 
 
-class FileInput(OptionalListInput):
+class FileInput(Input):
     type = "file-input"
-    empty_value = None
     multiple: bool = False
+    multiple_handler: MultipleHandler
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
@@ -23,8 +23,8 @@ class FileInput(OptionalListInput):
         self.disabled = props.get("disabled", False)
         self.max_file_size = props.get("max_file_size", None)
         self.multiple = props.get("multiple", False)
-        self.empty_value = [] if self.multiple else None
         self.value = props.get("initial_value", self.empty_value)
+        self.multiple_handler = MultipleHandler(self.multiple, self.required)
 
     def render(self, ctx: dict):
         return {
@@ -59,16 +59,11 @@ class FileInput(OptionalListInput):
         return ""
 
     def serialize_value(self) -> List[str]:
-        if not self.value:
-            return []
-        if isinstance(self.value, list):
-            return [FileInput.__get_file_uri(item) for item in self.value]
-        return [FileInput.__get_file_uri(self.value)]
+        values_list = self.multiple_handler.value_to_list(self.value)
+        return [FileInput.__get_file_uri(item) for item in values_list]
 
     def parse_value(
-        self, value: Optional[List[str]]
-    ) -> Optional[Union[FileResponse, List[FileResponse]]]:
-        if value is None:
-            return self.empty_value
+        self, value: List[str]
+    ) -> Union[FileResponse, List[FileResponse], None]:
         file_responses = [FileResponse(item) for item in value]
-        return super().parse_value(file_responses)
+        return self.multiple_handler.value_to_list_or_value(file_responses)

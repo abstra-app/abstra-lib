@@ -1,9 +1,9 @@
-from ..widget_base import NumberishInput
+from typing import List
+from ..widget_base import Input, NumberValueHandler
 
 
-class NpsInput(NumberishInput):
+class NpsInput(Input):
     type = "nps-input"
-    empty_value = None
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
@@ -20,6 +20,7 @@ class NpsInput(NumberishInput):
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", False)
         self.disabled = props.get("disabled", False)
+        self.number_value_handler = NumberValueHandler(min=self.min, max=self.max)
 
     def render(self, ctx: dict):
         return {
@@ -37,6 +38,9 @@ class NpsInput(NumberishInput):
             "disabled": self.disabled,
             "errors": self.errors,
         }
+
+    def validate(self) -> List[str]:
+        return self.number_value_handler.validate(self.value)
 
     def serialize_value(self) -> int:
         return self.value

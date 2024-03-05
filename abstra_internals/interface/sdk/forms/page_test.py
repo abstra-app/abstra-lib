@@ -8,13 +8,15 @@ class TestPage(unittest.TestCase):
         schema = ListItemSchema().read_dropdown("dropdown", ["foo", "bar"])
 
         def render(ctx):
-            return Page().read_list(schema, key="list")
+            return Page().read_list(schema, key="list", min=1)
 
         page = Page().reactive(render)
 
-        page.render({})
+        rendered = page.render({})
 
-        browser_input = {"list": [{"dropdown": ["bar"]}]}
+        bar_value = rendered[0]["schemas"][0][0]["options"][1]["value"]
+
+        browser_input = {"list": [{"dropdown": [bar_value]}]}
         parsed_value = page.parse_value(browser_input)
 
         self.assertEqual(parsed_value, {"list": [{"dropdown": "bar"}]})
