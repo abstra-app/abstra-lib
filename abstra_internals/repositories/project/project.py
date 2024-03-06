@@ -1112,6 +1112,7 @@ def _update_file(
     new_file = Settings.root_path.joinpath(new_file_relative)
 
     if old_file.exists() and not new_file.exists():
+        new_file.parent.mkdir(parents=True, exist_ok=True)
         old_file.rename(new_file)
 
     stage.file = new_file_relative
