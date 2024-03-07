@@ -1,3 +1,4 @@
+from token import OP
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Optional, TypedDict, Union, TypeVar
@@ -100,14 +101,24 @@ class OptionsHandler:
             for option in options
         }
 
-    def value_from_uuid(self, uuid: str) -> object:
+    def uuids_from_values(self, values: List[object]) -> List[str]:
+        value = [self._uuid_from_value(value) for value in values]
+        return [v for v in value if v is not None]
+
+    def values_from_uuids(self, uuids: Union[List[str], None]) -> List[object]:
+        if uuids is None:
+            return []
+
+        return [self._value_from_uuid(uuid) for uuid in uuids]
+
+    def _value_from_uuid(self, uuid: str) -> object:
         return self._mappedOptions[uuid]["value"]
 
-    def uuid_from_value(self, value: object) -> str:
+    def _uuid_from_value(self, value: object) -> Optional[str]:
         for mapKey, mapValue in self._mappedOptions.items():
             if mapValue["value"] == value:
                 return mapKey
-        raise ValueError(f"Value {value} not found in options")
+        return None
 
     def serialized_options(self) -> List[LabelValueOption]:
         return [
