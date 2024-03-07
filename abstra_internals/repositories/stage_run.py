@@ -260,6 +260,7 @@ class LocalStageRunRepository(StageRunRepository):
                 if stage_run.id not in parent_ids
             ],
             key=lambda x: x.created_at,
+            reverse=True,
         )
 
         total_count = len(leaves)

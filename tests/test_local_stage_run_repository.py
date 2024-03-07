@@ -103,6 +103,21 @@ class TestLocalStageRunRepository(TestCase):
         )
         self.assertEqual(len(leaves_stage3.stage_runs), 2)
 
+    def test_leaves_in_reverse_order(self):
+        repository = self.repository
+
+        pagination = Pagination(limit=10, offset=0)
+
+        wfs1_stage1 = repository.create_initial("stage1")
+        repository.create_initial("stage1")
+        wfs1_stage2 = repository.create_next(wfs1_stage1, [{"stage": "stage2"}])
+        repository.create_next(wfs1_stage2[0], [{"stage": "stage3"}])
+        leaves = repository.find_leaves(
+            GetStageRunByQueryFilter.from_dict({}), pagination=pagination
+        )
+        self.assertEqual(leaves.stage_runs[0].stage, "stage3")
+        self.assertEqual(leaves.stage_runs[1].stage, "stage1")
+
     def test_fork(self):
         parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
         child = self.repository.create_next(
