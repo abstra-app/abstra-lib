@@ -48,8 +48,8 @@ class MultipleChoiceInput(Input):
 
     def serialize_value(self) -> List:
         list_values = self.multiple_handler.value_to_list(self.value)
-        return [self.options_handler.uuid_from_value(value) for value in list_values]
+        return self.options_handler.uuids_from_values(list_values)
 
-    def parse_value(self, value):
-        list_values = [self.options_handler.value_from_uuid(uuid) for uuid in value]
+    def parse_value(self, value: Union[List[str], None]):
+        list_values = self.options_handler.values_from_uuids(value)
         return self.multiple_handler.value_to_list_or_value(list_values)

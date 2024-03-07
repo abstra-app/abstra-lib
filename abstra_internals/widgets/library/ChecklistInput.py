@@ -55,7 +55,7 @@ class ChecklistInput(Input):
         }
 
     def serialize_value(self) -> List:
-        return [self.options_handler.uuid_from_value(value) for value in self.value]
+        return self.options_handler.uuids_from_values(self.value)
 
     def parse_value(self, value):
-        return [self.options_handler.value_from_uuid(uuid) for uuid in value]
+        return self.options_handler.values_from_uuids(value)
