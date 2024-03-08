@@ -1,10 +1,9 @@
-import json
 import typing
 from dataclasses import is_dataclass
-from datetime import date, datetime
-from uuid import UUID
+
 from ..forms.page_response import PageResponse
 from ..forms.step import StepsResponse
+from ..serializer import serialize
 
 
 def escape_ref(ref: str):
@@ -13,19 +12,6 @@ def escape_ref(ref: str):
 
 def quoted_identifier(ref: str):
     return f'"{escape_ref(ref)}"'
-
-
-def serialize(value: typing.Any):
-    if isinstance(value, (datetime, date)):
-        return value.isoformat()
-    if isinstance(value, (dict, list, tuple)):
-        return json.dumps(value)
-    if isinstance(value, set):
-        return json.dumps(list(value))
-    if isinstance(value, UUID):
-        return str(value)
-
-    return value
 
 
 def _execute(query: str, params: typing.List):  # private api
