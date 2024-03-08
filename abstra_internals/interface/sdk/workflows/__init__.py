@@ -5,14 +5,7 @@ from ....execution.execution import get_current_execution_throwable
 from ....execution.hook_execution import HookExecution
 from ....execution.stage_run_manager import UnsetStageRun
 from ....repositories.stage_run import GetStageRunByQueryFilter
-
-
-def is_json_serializable(value):
-    try:
-        json.dumps(value)
-        return True
-    except TypeError:
-        return False
+from ..serializer import serialize
 
 
 def match_thread(filter: dict):
@@ -40,12 +33,10 @@ def get_data(key: Optional[str] = None):
 
 
 def set_data(key, value):
-    value = to_json_serializable(value)
-    if not is_json_serializable(value):
-        raise TypeError(f"{key} is not JSON serializable")
+    serialized = serialize(value)
     execution = get_current_execution_throwable()
     stage_run = execution.stage_run
     if not stage_run:
         raise UnsetStageRun()
-    stage_run.data[key] = value
+    stage_run.data[key] = serialized
     execution.stage_run_manager.update_data(stage_run.id, stage_run.data)
