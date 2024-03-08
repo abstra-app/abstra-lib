@@ -77,6 +77,7 @@ class StageRun:
     data: dict
     status: str
     created_at: datetime = Field(serialization_alias="createdAt")
+    updated_at: datetime = Field(default=None, serialization_alias="updatedAt")
     parent_id: Optional[str] = Field(default=None, serialization_alias="parentId")
     execution_id: Optional[str] = Field(default=None, serialization_alias="executionId")
 
@@ -90,6 +91,7 @@ class StageRun:
             parent_id=data.get("parentId"),
             execution_id=data.get("executionId"),
             created_at=from_utc_iso_string(data["createdAt"]),
+            updated_at=from_utc_iso_string(data["updatedAt"]),
         )
 
     def __getitem__(self, key):
@@ -118,6 +120,7 @@ class StageRun:
             "parentId": self.parent_id,
             "executionId": self.execution_id,
             "createdAt": self.created_at.isoformat(),
+            "updatedAt": self.updated_at.isoformat(),
         }
 
     def clone(self):
@@ -127,6 +130,8 @@ class StageRun:
         new_stage_run = self.clone()
         new_stage_run.id = str(uuid.uuid4())
         new_stage_run.status = "waiting"
+        new_stage_run.created_at = datetime.now()
+        new_stage_run.updated_at = datetime.now()
         return new_stage_run
 
 
@@ -280,6 +285,7 @@ class LocalStageRunRepository(StageRunRepository):
             data=data,
             parent_id=None,
             created_at=datetime.now(),
+            updated_at=datetime.now(),
         )
 
         self._stage_runs.append(stage_run)
@@ -295,6 +301,7 @@ class LocalStageRunRepository(StageRunRepository):
                 status="waiting",
                 **dto,
                 created_at=datetime.now(),
+                updated_at=datetime.now(),
             )
             created.append(stage_run)
             self._stage_runs.append(stage_run)
@@ -304,6 +311,7 @@ class LocalStageRunRepository(StageRunRepository):
         self, id: str, status: str, execution_id: Optional[str] = None
     ) -> bool:
         stage_run = self.get(id)
+        stage_run.updated_at = datetime.now()
 
         if not stage_run.execution_id and execution_id is not None:
             stage_run.execution_id = execution_id
@@ -329,6 +337,7 @@ class LocalStageRunRepository(StageRunRepository):
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:
         stage_run = self.get(stage_run_id)
+        stage_run.updated_at = datetime.now()
         stage_run.data = data
         return True
 
@@ -366,6 +375,7 @@ class RemoteStageRunRepository(StageRunRepository):
             parent_id=dto.get("parentId"),
             execution_id=dto.get("executionId"),
             created_at=from_utc_iso_string(dto["createdAt"]),
+            updated_at=from_utc_iso_string(dto["updatedAt"]),
         )
 
     def get(self, id: str) -> StageRun:
