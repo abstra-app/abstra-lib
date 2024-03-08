@@ -87,6 +87,7 @@ class TestKanbanRouter(TestCase):
                             {
                                 "content": [],
                                 "created_at": to_utc_iso_string(stage_run.created_at),
+                                "updated_at": to_utc_iso_string(stage_run.updated_at),
                                 "id": stage_run.id,
                                 "status": "waiting",
                             }
@@ -161,6 +162,7 @@ class TestKanbanRouter(TestCase):
                             {
                                 "content": [],
                                 "created_at": to_utc_iso_string(stage_run.created_at),
+                                "updated_at": to_utc_iso_string(stage_run.updated_at),
                                 "id": stage_run.id,
                                 "status": "waiting",
                             }

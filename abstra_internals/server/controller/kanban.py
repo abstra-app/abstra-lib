@@ -111,6 +111,7 @@ StageCardContent = List[StageCardContentItem]
 class StageRunCard:
     id: str
     created_at: datetime
+    updated_at: datetime
     status: str
     content: StageCardContent
 
@@ -118,6 +119,7 @@ class StageRunCard:
         return dict(
             id=self.id,
             created_at=to_utc_iso_string(self.created_at),
+            updated_at=to_utc_iso_string(self.updated_at),
             status=self.status,
             content=[item.to_dict() for item in self.content],
         )
@@ -266,6 +268,7 @@ class KanbanController:
                     id=stage_run.id,
                     status=stage_run.status,
                     created_at=stage_run.created_at,
+                    updated_at=stage_run.updated_at,
                     content=self.stage_run_content(stage_run),
                 )
                 for stage_run in paginated_response.stage_runs
