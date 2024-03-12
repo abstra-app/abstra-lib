@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 import requests
 from pydantic.dataclasses import dataclass
 
+from .serializer import SerializationHelper
 from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.dot_abstra import LOCAL_LOGS_FOLDER
@@ -167,9 +168,16 @@ class RemoteExecutionLogsRepository(ExecutionLogsRepository):
         self.headers = headers
 
     def save(self, log_entry: LogEntry) -> None:
+        validated_payload = SerializationHelper.enforce_max_size(log_entry.payload)
+
+        dto = {
+            **log_entry.to_dto(),
+            "payload": validated_payload,
+        }
+
         res = requests.post(
             f"{self.url}/executions/{log_entry.execution_id}/logs",
-            json=log_entry.to_dto(),
+            json=dto,
             headers=self.headers,
         )
 
