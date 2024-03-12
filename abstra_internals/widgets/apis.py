@@ -1,6 +1,5 @@
-import io, tempfile, shutil, uuid, typing
+import io, tempfile, shutil, uuid, typing as t, pathlib
 from werkzeug.datastructures import FileStorage
-from pathlib import Path
 
 
 def public_path(name: str):
@@ -8,7 +7,7 @@ def public_path(name: str):
 
 
 def ensure_uploaded_files_dir():
-    uploaded_files_dir = Path(tempfile.gettempdir(), "_uploaded_files")
+    uploaded_files_dir = pathlib.Path(tempfile.gettempdir(), "_uploaded_files")
     uploaded_files_dir.mkdir(exist_ok=True)
     return uploaded_files_dir
 
@@ -22,27 +21,33 @@ def get_random_filepath(name=None):
     if name is None:
         name = str(uuid.uuid4())
     else:
-        name = str(uuid.uuid4()) + "/" + Path(name).name
+        name = str(uuid.uuid4()) + "/" + pathlib.Path(name).name
     path = internal_path(name)
     path.parent.mkdir(exist_ok=True)
     return name, path
 
 
-def upload_file(
-    file: typing.Union[FileStorage, io.BufferedReader, io.TextIOWrapper, Path]
-):
-    name, path = get_random_filepath(file.name)
-
-    if isinstance(file, io.BufferedReader) or isinstance(file, io.TextIOWrapper):
+def upload_file(file: t.Union[FileStorage, io.IOBase, pathlib.Path]):
+    if isinstance(file, (io.BufferedReader, io.TextIOWrapper)):
+        # TODO: use hasattr(file, "name")
+        name, path = get_random_filepath(file.name)
         shutil.copy(file.name, path)
         return public_path(name)
 
     if isinstance(file, FileStorage):
+        name, path = get_random_filepath(file.name)
         file.save(path)
         return public_path(name)
 
-    if isinstance(file, Path):
+    if isinstance(file, pathlib.Path):
+        name, path = get_random_filepath(file.name)
         shutil.copy(file, path)
+        return public_path(name)
+
+    if isinstance(file, io.IOBase):
+        name, path = get_random_filepath()
+        with open(path, "wb") as f:
+            shutil.copyfileobj(file, f)
         return public_path(name)
 
     raise ValueError(f"Cannot upload {type(file)}")

@@ -1,16 +1,13 @@
-import io
-import tempfile
-import pathlib
-import typing
-from typing import Union
-from .apis import upload_file, internal_path
+import io, tempfile, pathlib, typing as t
+from .apis import upload_file, internal_path, get_random_filepath
 
 
-def convert_file(
-    file: typing.Union[str, io.BufferedReader, io.TextIOWrapper, pathlib.Path]
-) -> str:
+def convert_file(file: t.Union[str, io.IOBase, pathlib.Path]) -> str:
     if not file:
         return ""
+
+    if isinstance(file, (io.IOBase, pathlib.Path)):
+        return upload_file(file)
 
     if isinstance(file, str):
         # URL or base64 encoded string
@@ -20,18 +17,9 @@ def convert_file(
         # path to file
         return upload_file(open(file, "rb"))
 
-    if isinstance(file, io.BufferedReader):
-        return upload_file(file)
-
-    if isinstance(file, io.TextIOWrapper):
-        return upload_file(file)
-
-    if isinstance(file, pathlib.Path):
-        return upload_file(file)
-
     # PILImage. TODO: check with isinstance without external dependency
     if hasattr(file, "save"):
-        file_path = pathlib.Path(tempfile.gettempdir(), "img.png")
+        _, file_path = get_random_filepath()
         file.save(str(file_path))
         return upload_file(open(file_path, "rb"))
 
@@ -39,8 +27,12 @@ def convert_file(
     if hasattr(file, "file"):
         return upload_file(file.file)
 
+    raise ValueError(f"Cannot convert {type(file)}")
 
-def download_file(url: str) -> Union[io.BufferedReader, tempfile._TemporaryFileWrapper]:
+
+def download_file(
+    url: str,
+) -> t.Union[io.BufferedReader, tempfile._TemporaryFileWrapper]:
     import requests
 
     if url.startswith("http://") or url.startswith("https://"):
