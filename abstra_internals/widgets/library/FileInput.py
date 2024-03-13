@@ -1,6 +1,6 @@
 from io import BufferedReader, TextIOWrapper
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Optional
 from ..apis import upload_file
 from ..response_types import FileResponse
 from ..widget_base import Input, MultipleHandler
@@ -63,7 +63,7 @@ class FileInput(Input):
         return [FileInput.__get_file_uri(item) for item in values_list]
 
     def parse_value(
-        self, value: List[str]
+        self, value: Optional[List[str]]
     ) -> Union[FileResponse, List[FileResponse], None]:
-        file_responses = [FileResponse(item) for item in value]
+        file_responses = [FileResponse(item) for item in value or []]
         return self.multiple_handler.value_to_list_or_value(file_responses)
