@@ -28,7 +28,7 @@ class ProductionNotificationRepository(NotificationRepository):
         stage_run_id: str,
         stage_path: str,
     ):
-        url = self.base_url + "/notify"
+        url = self.base_url + "/thread-waiting"
         requests.post(
             url,
             json={
