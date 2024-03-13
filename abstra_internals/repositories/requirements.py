@@ -158,10 +158,11 @@ class RequirementsRepository:
                 for node in parsed.body:
                     if isinstance(node, ast.Import):
                         for alias in node.names:
-                            if alias.name in visited_set:
+                            package_name = alias.name.split(".")[0]
+                            if package_name in visited_set:
                                 continue
-                            visited_set.add(alias.name)
-                            lib_name = package_dist.get(alias.name)
+                            visited_set.add(package_name)
+                            lib_name = package_dist.get(package_name)
                             if lib_name is None:
                                 continue
                             for l in lib_name:
@@ -178,10 +179,14 @@ class RequirementsRepository:
                                     )
                                 )
                     if isinstance(node, ast.ImportFrom):
-                        if node.module is None or node.module in visited_set:
+                        if node.module is None:
                             continue
-                        visited_set.add(node.module)
-                        lib_name = package_dist.get(node.module)
+
+                        package_name = node.module.split(".")[0]
+                        if package_name in visited_set:
+                            continue
+                        visited_set.add(package_name)
+                        lib_name = package_dist.get(package_name)
                         if lib_name is None:
                             continue
                         for l in lib_name:

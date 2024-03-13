@@ -30,10 +30,33 @@ class MissingPackagesInRequirementsTest(TestCase):
         rule = MissingPackagesInRequirements()
         self.assertEqual(len(rule.find_issues()), 0)
 
+    def test_missing_packages_in_requirements_valid_with_packages_using_from_syntax(
+        self,
+    ):
+        requirements_file = self.root / "requirements.txt"
+        requirements_file.touch()
+        requirements_file.write_text("pandas==1.0.0")
+        constroller = MainController()
+        script = constroller.create_script("New script", "script.py")
+        code = "from pandas import foo"
+        script.file_path.write_text(code)
+        rule = MissingPackagesInRequirements()
+        self.assertEqual(len(rule.find_issues()), 0)
+
     def test_missing_packages_in_requirements_invalid_requirements_file(self):
         constroller = MainController()
         script = constroller.create_script("New script", "script.py")
         code = "import pandas"
+        script.file_path.write_text(code)
+        rule = MissingPackagesInRequirements()
+        self.assertEqual(len(rule.find_issues()), 1)
+
+    def test_missing_packages_in_requirements_invalid_requirements_file_using_from_syntax(
+        self,
+    ):
+        constroller = MainController()
+        script = constroller.create_script("New script", "script.py")
+        code = "from pandas import foo"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
         self.assertEqual(len(rule.find_issues()), 1)
@@ -44,6 +67,26 @@ class MissingPackagesInRequirementsTest(TestCase):
         constroller = MainController()
         script = constroller.create_script("New script", "script.py")
         code = "import pandas"
+        script.file_path.write_text(code)
+        rule = MissingPackagesInRequirements()
+        self.assertEqual(len(rule.find_issues()), 1)
+
+    def test_missing_packages_with_submodule_import(self):
+        requirements_file = self.root / "requirements.txt"
+        requirements_file.touch()
+        constroller = MainController()
+        script = constroller.create_script("New script", "script.py")
+        code = "import pandas.plotting"
+        script.file_path.write_text(code)
+        rule = MissingPackagesInRequirements()
+        self.assertEqual(len(rule.find_issues()), 1)
+
+    def test_missing_package_with_submodule_using_from_syntax(self):
+        requirements_file = self.root / "requirements.txt"
+        requirements_file.touch()
+        constroller = MainController()
+        script = constroller.create_script("New script", "script.py")
+        code = "from pandas.plotting import foo"
         script.file_path.write_text(code)
         rule = MissingPackagesInRequirements()
         self.assertEqual(len(rule.find_issues()), 1)
