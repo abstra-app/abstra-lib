@@ -71,7 +71,7 @@ class KanbanTests(TestCase):
                         id="job",
                         title="Job",
                         path=None,
-                        can_be_started=False,
+                        can_be_started=True,
                         type="job",
                     )
                 ],
@@ -624,3 +624,21 @@ class KanbanTests(TestCase):
                 not_found_stages=["script"],
             ),
         )
+
+    def test_get_job(self):
+        project = ProjectRepository.load()
+
+        job = JobStage(
+            id="job",
+            title="Job",
+            file="job.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(job)
+        ProjectRepository.save(project)
+
+        rtvd = self.controller.get_job("job")
+
+        self.assertEqual(rtvd, job)

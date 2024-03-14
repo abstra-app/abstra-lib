@@ -1,36 +1,36 @@
-from datetime import datetime
-from pydantic.dataclasses import dataclass
+import flask
+
 from typing import Any, List, Optional, Type, Sequence, Tuple
+from pydantic.dataclasses import dataclass
+from datetime import datetime
+
+from ...repositories import execution_logs_repository, stage_run_repository
+from ...repositories.members import members_repository_factory
+from ..guards.role_guard import RoleGuardFactory
+from ...utils.datetime import to_utc_iso_string
+from ..workflow_engine import workflow_engine
 from .workflows import make_stage_dto
+
 from ...repositories.project.project import (
     ProjectRepository,
     WorkflowStage,
     FormStage,
-)
-from ...repositories.stage_run import (
-    StageRunRepository,
-    StageRun,
-    GetStageRunByQueryFilter,
-    Pagination,
-    stage_run_repository_factory,
+    JobStage,
 )
 
-from ...repositories.members import members_repository_factory
-from ..guards.role_guard import RoleGuardFactory
-from typing import Any, List, Optional, Sequence, Tuple, Type
-
-import flask
-
-from ...repositories import execution_logs_repository, stage_run_repository
 from ...repositories.execution_logs import (
-    LogEntry,
-    StdioLogEntry,
     UnhandledExceptionLogEntry,
+    StdioLogEntry,
+    LogEntry,
 )
-from ...repositories.project.project import FormStage, ProjectRepository, WorkflowStage
-from ...repositories.stage_run import StageRun, StageRunRepository
-from ...utils.datetime import to_utc_iso_string
-from .workflows import make_stage_dto
+
+from ...repositories.stage_run import (
+    stage_run_repository_factory,
+    GetStageRunByQueryFilter,
+    StageRunRepository,
+    Pagination,
+    StageRun,
+)
 
 
 @dataclass
@@ -135,12 +135,18 @@ class ColumnStage:
 
     @staticmethod
     def create(stage: WorkflowStage) -> "ColumnStage":
+        can_be_started = False
+        if isinstance(stage, JobStage):
+            can_be_started = True
+        elif isinstance(stage, FormStage):
+            can_be_started = stage.is_initial
+
         return ColumnStage(
             id=stage.id,
-            type=stage.type_name,
             title=stage.title,
+            type=stage.type_name,
+            can_be_started=can_be_started,
             path=stage.path if isinstance(stage, FormStage) else None,
-            can_be_started=isinstance(stage, FormStage) and stage.is_initial,
         )
 
     def to_dict(self) -> dict:
@@ -199,6 +205,13 @@ class KanbanController:
         if self.read_only:
             return self.initial_project
         return self.project_repository.load()
+
+    def get_job(self, id: str):
+        stage = self._get_project().get_stage(id)
+        if not stage or not isinstance(stage, JobStage):
+            return None
+
+        return stage
 
     def stage_run_content(self, stage_run: StageRun):
         visualization = self._get_project().visualization
@@ -350,6 +363,15 @@ def get_editor_bp():
             for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
         ]
 
+    @bp.post("/jobs/<path:id>/start")
+    def _start_job(id: str):
+        stage = controller.get_job(id)
+        if not stage:
+            flask.abort(404)
+
+        workflow_engine.run_job(stage)
+        return {"status": "running"}
+
     return bp
 
 
@@ -391,5 +413,15 @@ def get_player_bp():
             entry_from_run(stage_run, logs)
             for stage_run, logs in controller.get_ancestor_logs(stage_run_id)
         ]
+
+    @bp.post("/jobs/<path:id>/start")
+    @guard.requires("workflow_viewer")
+    def _start_job(id: str):
+        stage = controller.get_job(id)
+        if not stage:
+            flask.abort(404)
+
+        workflow_engine.run_job(stage)
+        return {"status": "running"}
 
     return bp
