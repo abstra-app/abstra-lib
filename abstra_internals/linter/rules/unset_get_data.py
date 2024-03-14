@@ -6,6 +6,11 @@ from ...repositories.project.project import ProjectRepository
 from ...utils.code import function_called_args
 
 
+# "item" is injected by a iterator in the workflow.
+# TODO: Check if there is a iterator before ignoring "item".
+IGNORED_KEYS = ["item"]
+
+
 class UnsetDataFound(LinterIssue):
     def __init__(self, key: str, path: Path, lineno: int):
         self.label = f"There is a call to get_data('{key}') in {path}:{lineno}, but no corresponding set_data call was found."
@@ -60,7 +65,7 @@ class UnsetGetData(LinterRule):
 
         issues = []
         for data_get_key, data_get_path in data_gets.items():
-            if data_get_key not in data_sets:
+            if data_get_key not in data_sets and data_get_key not in IGNORED_KEYS:
                 for path, lineno in data_get_path:
                     issues.append(UnsetDataFound(data_get_key, path, lineno))
 
