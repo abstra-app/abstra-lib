@@ -28,7 +28,7 @@ class EnvInCodeNotInEnvFile(LinterIssue):
 
 class MissingEnv(LinterRule):
     label: str = "Missing env vars"
-    type: str = "bug"
+    type: str = "info"
 
     def find_issues(self) -> List[LinterIssue]:
         env_vars_in_code_dict = EnvVarsRepository.get_env_vars_in_code()
