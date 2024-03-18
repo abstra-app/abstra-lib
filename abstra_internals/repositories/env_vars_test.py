@@ -71,3 +71,21 @@ class TestEnvVarsRepository(TestCase):
         ProjectRepository.save(project)
         env_vars_in_code = self.env_var_repo.get_env_vars_in_code()
         self.assertEqual(env_vars_in_code.keys(), {"FOO", "BAR"})
+
+    def test_env_vars_in_code_only_consider_first_arg(self):
+        project = ProjectRepository.load()
+        code_path = self.dir / "code.py"
+        code_content = "\n".join(["import os", "os.getenv('FOO', 'default')"])
+        code_path.write_text(code_content)
+        script = ScriptStage(
+            file=str(code_path),
+            id="script",
+            is_initial=False,
+            title="foo bar",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(script)
+        ProjectRepository.save(project)
+        env_vars_in_code = self.env_var_repo.get_env_vars_in_code()
+        self.assertEqual(env_vars_in_code.keys(), {"FOO"})

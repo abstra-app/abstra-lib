@@ -69,7 +69,8 @@ class EnvVarsRepository:
 
                 if function_calls is not None:
                     for function_call in function_calls:
-                        for arg in function_call:
+                        if len(function_call) > 0:
+                            arg = function_call[0]
                             if isinstance(arg, ast.Constant) and isinstance(
                                 arg.value, str
                             ):
@@ -78,7 +79,8 @@ class EnvVarsRepository:
                                 )
                 if subscript_calls is not None:
                     for subscript_call in subscript_calls:
-                        for arg in subscript_call:
+                        if len(subscript_call) > 0:
+                            arg = subscript_call[0]
                             if isinstance(arg, ast.Constant) and isinstance(
                                 arg.value, str
                             ):
