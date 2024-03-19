@@ -1,17 +1,16 @@
-import json
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from datetime import datetime
+import json, requests
 from pathlib import Path
+from datetime import datetime
+from abc import ABC, abstractmethod
+from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Literal, Optional, Union
 
-import requests
-from pydantic.dataclasses import dataclass
 
+from ..utils import serialize
 from .serializer import SerializationHelper
-from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
-from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.dot_abstra import LOCAL_LOGS_FOLDER
+from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
+from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 
 
 class LogEntryFactory:
@@ -133,7 +132,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
             log_file.parent.mkdir(parents=True)
 
         with open(log_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry.to_dto()) + "\n")
+            f.write(serialize(log_entry.to_dto()) + "\n")
 
     def get(
         self,

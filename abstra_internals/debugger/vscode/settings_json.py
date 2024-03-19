@@ -1,7 +1,7 @@
-import json
-from ...settings import Settings
+import json, sys
 from typing import Union
-import sys
+from ...utils import serialize
+from ...settings import Settings
 
 
 class EverythingSet:
@@ -66,12 +66,12 @@ def configure_settings_json():
     elif isinstance(configuration_check, NoSettingsJson):
         Settings.root_path.joinpath(".vscode").mkdir(exist_ok=True)
         Settings.root_path.joinpath(".vscode/settings.json").write_text(
-            json.dumps({"python.defaultInterpreterPath": sys.executable}, indent=4),
+            serialize({"python.defaultInterpreterPath": sys.executable}, indent=4),
             encoding="utf-8",
         )
     elif isinstance(configuration_check, InvalidSettingsJson):
         Settings.root_path.joinpath(".vscode/settings.json").write_text(
-            json.dumps({"python.defaultInterpreterPath": sys.executable}, indent=4),
+            serialize({"python.defaultInterpreterPath": sys.executable}, indent=4),
             encoding="utf-8",
         )
     elif isinstance(configuration_check, MissingPythonPath):
@@ -79,7 +79,7 @@ def configure_settings_json():
         settings_json = json.loads(settings_json_file.read_text(encoding="utf-8"))
         settings_json["python.defaultInterpreterPath"] = sys.executable
         settings_json_file.write_text(
-            json.dumps(settings_json, indent=4), encoding="utf-8"
+            serialize(settings_json, indent=4), encoding="utf-8"
         )
     elif isinstance(configuration_check, MismatchedPythonPath):
         raise Exception("Mismatched python path in settings.json")

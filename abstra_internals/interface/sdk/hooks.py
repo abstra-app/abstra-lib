@@ -1,6 +1,7 @@
 import json
 from io import BytesIO
 
+from ...utils import serialize
 from ...execution import HookExecution
 
 
@@ -43,7 +44,7 @@ def send_response(body="", status_code=200, headers={}):
 
 def send_json(data={}, status_code=200, headers={}):
     send_response(
-        body=json.dumps(data, allow_nan=False),
+        body=serialize(data),
         headers={**headers, "content-type": "application/json"},
         status_code=status_code,
     )

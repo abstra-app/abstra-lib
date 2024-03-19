@@ -1,7 +1,7 @@
 from unittest import TestCase
+from abstra_internals.utils import serialize
 from tests.fixtures import init_dir, clear_dir
 from .launch_json import configure_launch_json, is_launch_json_configured
-import json
 
 
 class ConfigureLaunchJsonTest(TestCase):
@@ -22,7 +22,7 @@ class ConfigureLaunchJsonTest(TestCase):
         launch_json_path = self.root.joinpath(".vscode/launch.json")
         launch_json_path.parent.mkdir(exist_ok=True, parents=True)
         launch_json_path.write_text(
-            json.dumps({"version": "0.2.0", "configurations": []}), encoding="utf-8"
+            serialize({"version": "0.2.0", "configurations": []}), encoding="utf-8"
         )
 
         self.assertFalse(is_launch_json_configured())
@@ -59,7 +59,7 @@ class IsLaunchJsonConfiguredTest(TestCase):
         launch_json_path = self.root.joinpath(".vscode/launch.json")
         launch_json_path.parent.mkdir(exist_ok=True, parents=True)
         launch_json_path.write_text(
-            json.dumps({"version": "0.2.0", "configurations": []}), encoding="utf-8"
+            serialize({"version": "0.2.0", "configurations": []}), encoding="utf-8"
         )
 
         self.assertFalse(is_launch_json_configured())
@@ -68,7 +68,7 @@ class IsLaunchJsonConfiguredTest(TestCase):
         launch_json_path = self.root.joinpath(".vscode/launch.json")
         launch_json_path.parent.mkdir(exist_ok=True, parents=True)
         launch_json_path.write_text(
-            json.dumps(
+            serialize(
                 {
                     "version": "0.2.0",
                     "configurations": [
