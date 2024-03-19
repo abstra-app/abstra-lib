@@ -5,6 +5,7 @@ from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Union
 
+from ..utils import serialize
 from ..utils.datetime import from_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
@@ -239,7 +240,7 @@ class LocalStageRunRepository(StageRunRepository):
 
     def _compare_data(self, data: dict, filter: dict) -> bool:
         filtered_data = {k: v for k, v in data.items() if k in filter}
-        return json.dumps(filtered_data, sort_keys=True) == json.dumps(
+        return serialize(filtered_data, sort_keys=True) == serialize(
             filter, sort_keys=True
         )
 

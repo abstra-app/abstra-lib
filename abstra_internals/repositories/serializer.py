@@ -1,4 +1,4 @@
-import json
+from ..utils import serialize
 from typing import TypeVar, Dict
 
 T = TypeVar("T")
@@ -11,7 +11,7 @@ class SerializationHelper:
     @classmethod
     def enforce_max_size(cls, obj: Dict) -> Dict[str, str]:
         try:
-            dump = json.dumps(obj)
+            dump = serialize(obj)
             if len(dump) > cls.MAX_SIZE:
                 return {"serialization-error": "payload too large"}
             return obj

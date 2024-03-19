@@ -1,4 +1,5 @@
 import json
+from ...utils import serialize
 from ...settings import Settings
 from ...templates import vscode_launch_json
 
@@ -42,5 +43,5 @@ def configure_launch_json():
         return
     Settings.root_path.joinpath(".vscode").mkdir(exist_ok=True)
     Settings.root_path.joinpath(".vscode/launch.json").write_text(
-        json.dumps(vscode_launch_json, indent=4), encoding="utf-8"
+        serialize(vscode_launch_json, indent=4), encoding="utf-8"
     )

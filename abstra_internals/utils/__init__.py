@@ -5,8 +5,8 @@ from .file import *
 from .email import *
 
 
-def serialize(obj):
-    return simplejson.dumps(obj, ignore_nan=True)
+def serialize(obj, **kwargs):
+    return simplejson.dumps(obj, ignore_nan=True, **kwargs)
 
 
 def deserialize(st):

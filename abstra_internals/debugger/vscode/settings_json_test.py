@@ -1,15 +1,17 @@
+import json, sys
 from unittest import TestCase
+from tests.fixtures import init_dir, clear_dir
+from abstra_internals.utils import serialize
+
 from .settings_json import (
-    check_settings_json,
     configure_settings_json,
-    EverythingSet,
+    MismatchedPythonPath,
+    check_settings_json,
     InvalidSettingsJson,
     MissingPythonPath,
-    MismatchedPythonPath,
     NoSettingsJson,
+    EverythingSet,
 )
-from tests.fixtures import init_dir, clear_dir
-import json, sys
 
 
 class CheckSettingsJsonTest(TestCase):
@@ -22,7 +24,7 @@ class CheckSettingsJsonTest(TestCase):
     def test_everything_set(self):
         self.root.joinpath(".vscode").mkdir(exist_ok=True)
         self.root.joinpath(".vscode/settings.json").write_text(
-            json.dumps({"python.defaultInterpreterPath": sys.executable}, indent=4),
+            serialize({"python.defaultInterpreterPath": sys.executable}, indent=4),
             encoding="utf-8",
         )
         self.assertIsInstance(check_settings_json(), EverythingSet)
@@ -48,7 +50,7 @@ class CheckSettingsJsonTest(TestCase):
     def test_mismatched_python_path(self):
         self.root.joinpath(".vscode").mkdir(exist_ok=True)
         self.root.joinpath(".vscode/settings.json").write_text(
-            json.dumps(
+            serialize(
                 {"python.defaultInterpreterPath": "not the same as sys.executable"},
                 indent=4,
             ),
@@ -71,7 +73,7 @@ class ConfigureSettingsTest(TestCase):
     def test_set_from_existing_config(self):
         self.root.joinpath(".vscode").mkdir(exist_ok=True)
         self.root.joinpath(".vscode/settings.json").write_text(
-            json.dumps({"foo": "bar"}), encoding="utf-8"
+            serialize({"foo": "bar"}), encoding="utf-8"
         )
         configure_settings_json()
         self.assertIsInstance(check_settings_json(), EverythingSet)
@@ -95,7 +97,7 @@ class ConfigureSettingsTest(TestCase):
         settings_json_path = self.root.joinpath(".vscode/settings.json")
         settings_json_path.parent.mkdir(exist_ok=True)
         settings_json_path.write_text(
-            json.dumps({"python.defaultInterpreterPath": sys.executable}, indent=4),
+            serialize({"python.defaultInterpreterPath": sys.executable}, indent=4),
             encoding="utf-8",
         )
         last_modified = settings_json_path.stat().st_mtime
