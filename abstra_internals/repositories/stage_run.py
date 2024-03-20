@@ -9,6 +9,8 @@ from ..utils import serialize
 from ..utils.datetime import from_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
+from ..utils.validate import validate_json
+
 end_status = ["failed", "finished", "abandoned"]
 
 status_transitions = {
@@ -169,6 +171,12 @@ class StageRunRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def find_past(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ) -> PaginatedListResponse:
+        raise NotImplementedError()
+
+    @abstractmethod
     def get(self, id: str) -> StageRun:
         raise NotImplementedError()
 
@@ -187,7 +195,7 @@ class StageRunRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def fork(self, stage_run: StageRun) -> StageRun:
+    def fork(self, stage_run: StageRun, custom_thread_data: Optional[str]) -> StageRun:
         raise NotImplementedError()
 
     @abstractmethod
@@ -278,6 +286,27 @@ class LocalStageRunRepository(StageRunRepository):
             total_count=total_count,
         )
 
+    def find_past(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ) -> PaginatedListResponse:
+        filter_matches = self.find(filter)
+        parent_ids = set(u.parent_id for u in self._stage_runs)
+
+        past = sorted(
+            [stage_run for stage_run in filter_matches if stage_run.id in parent_ids],
+            key=lambda x: x.created_at,
+            reverse=True,
+        )
+
+        total_count = len(past)
+        if pagination.offset >= total_count:
+            return PaginatedListResponse(stage_runs=[], total_count=total_count)
+
+        return PaginatedListResponse(
+            stage_runs=past[pagination.offset : pagination.limit],
+            total_count=total_count,
+        )
+
     def create_initial(self, stage: str, data: dict = {}) -> StageRun:
         stage_run = StageRun(
             id=str(uuid.uuid4()),
@@ -326,7 +355,9 @@ class LocalStageRunRepository(StageRunRepository):
 
         return False
 
-    def fork(self, stage_run: StageRun) -> StageRun:
+    def fork(
+        self, stage_run: StageRun, custom_thread_data: Optional[str] = None
+    ) -> StageRun:
         if stage_run.parent_id == None:
             return self.create_initial(stage_run.stage, {})
         parent_stage_run = self.get(stage_run.parent_id)
@@ -334,6 +365,9 @@ class LocalStageRunRepository(StageRunRepository):
         new_stage_run.data = parent_stage_run.data
         new_stage_run_dto = new_stage_run.to_dto()
         stage_runs = self.create_next(parent_stage_run, [new_stage_run_dto])
+        if custom_thread_data:
+            validate_json(custom_thread_data)
+            stage_runs[0].data = json.loads(custom_thread_data)
         return stage_runs[0]
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:
@@ -433,7 +467,12 @@ class RemoteStageRunRepository(StageRunRepository):
 
         return PaginatedListResponse.from_dict(r.json())
 
-    def fork(self, stage_run: StageRun) -> StageRun:
+    def find_past(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ) -> PaginatedListResponse:
+        raise NotImplementedError()
+
+    def fork(self, stage_run: StageRun, custom_thread_data: Optional[str]) -> StageRun:
         raise NotImplementedError()
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:

@@ -92,6 +92,15 @@ def get_editor_bp(controller: MainController):
     def _read_test_data():
         return controller.read_test_data()
 
+    @bp.post("/write-test-data")
+    @usage
+    def _write_test_data():
+        if not flask.request.json:
+            flask.abort(400)
+        test_data = flask.request.json.get("test_data", "{}")
+        controller.write_test_data(test_data)
+        return {"success": True}
+
     @bp.get("/files")
     @usage
     def _list_files():

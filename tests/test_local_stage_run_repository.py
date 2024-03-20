@@ -130,3 +130,16 @@ class TestLocalStageRunRepository(TestCase):
         self.assertEqual(clone.stage, child.stage)
         self.assertEqual(clone.parent_id, child.parent_id)
         self.assertEqual(clone.execution_id, None)
+
+    def test_fork_with_custom_thread_data(self):
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
+            parent, [dict(stage="foo", data=dict(b=3, c=4))]
+        )[0]
+        clone = self.repository.fork(child, '{"custom": "data"}')
+        self.assertNotEqual(clone.id, child.id)
+        self.assertEqual(clone.status, "waiting")
+        self.assertEqual(clone.data, {"custom": "data"})
+        self.assertEqual(clone.stage, child.stage)
+        self.assertEqual(clone.parent_id, child.parent_id)
+        self.assertEqual(clone.execution_id, None)

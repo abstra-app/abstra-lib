@@ -1,9 +1,15 @@
 import flask
 
+import json
+
 from ...execution.job_execution import JobExecution
 from ...execution.stage_run_manager import (
     AttachedStageRunManager,
+    DetachedStageRunManager,
 )
+
+from ...repositories.stage_run import stage_run_repository_factory
+
 from ...repositories import (
     execution_logs_repository,
     execution_repository,
@@ -65,9 +71,9 @@ def get_editor_bp(controller: MainController):
         controller.delete_job(id, remove_file)
         return {"success": True}
 
-    @bp.post("/<path:id>/test")
+    @bp.post("/<path:id>/run")
     @usage
-    def _test_job(id: str):
+    def _run_job(id: str):
         job = controller.get_job(id)
         if not job:
             flask.abort(404)
@@ -82,6 +88,46 @@ def get_editor_bp(controller: MainController):
         )
         execution.run()
         workflow_engine.handle_execution_end(execution)
+
+        stdout: str = ""
+        stderr: str = ""
+
+        for entry in execution_logs_repository.get(execution.id):
+            if isinstance(entry, FormEventLogEntry):
+                continue
+
+            text = entry.payload.get("text")
+            if not text:
+                continue
+
+            if entry.event == "stdout":
+                stdout += text
+            elif entry.event == "stderr":
+                stderr += text
+            elif entry.event == "unhandled-exception":
+                stderr += text
+
+        return {"stdout": stdout, "stderr": stderr}
+
+    @bp.post("/<path:id>/test")
+    @usage
+    def _test_job(id: str):
+        job = controller.get_job(id)
+        if not job:
+            flask.abort(404)
+
+        data = json.loads(controller.read_test_data())
+
+        tmp_stage_run_repository = stage_run_repository_factory()
+        stage_run_manager = DetachedStageRunManager(tmp_stage_run_repository, data=data)
+
+        execution = JobExecution(
+            job,
+            stage_run_manager=stage_run_manager,
+            execution_logs_repository=execution_logs_repository,
+            execution_repository=execution_repository,
+        )
+        execution.run()
 
         stdout: str = ""
         stderr: str = ""
