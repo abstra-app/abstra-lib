@@ -1,80 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon-cloud.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Primary Meta Tags -->
-    <title>Abstra Cloud Console</title>
-    <meta name="title" content="Abstra Editor" />
-    <meta
-      name="description"
-      content="Log in to Abstra’s Cloud Console to deploy and manage your Python workflows and scripts, user access, logs and more."
-    />
-    <!-- Hotjar Tracking Code for abstra.io -->
-    <script>
-      (function (h, o, t, j, a, r) {
-        h.hj =
-          h.hj ||
-          function () {
-            (h.hj.q = h.hj.q || []).push(arguments);
-          };
-        h._hjSettings = { hjid: 3572501, hjsv: 6 };
-        a = o.getElementsByTagName('head')[0];
-        r = o.createElement('script');
-        r.async = 1;
-        r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
-        a.appendChild(r);
-      })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
-    </script>
-    <script type="module" crossorigin src="/assets/console.0ff96e40.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/outputWidgets.415d7ed9.js">
-    <link rel="modulepreload" crossorigin href="/assets/hasIn.af9e963d.js">
-    <link rel="modulepreload" crossorigin href="/assets/Form.a84cb2b9.js">
-    <link rel="modulepreload" crossorigin href="/assets/popupNotifcation.eaaa79e4.js">
-    <link rel="modulepreload" crossorigin href="/assets/router.62758fe7.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.3ab5b6f7.js">
-    <link rel="modulepreload" crossorigin href="/assets/ArrowRightOutlined.08fa31dd.js">
-    <link rel="modulepreload" crossorigin href="/assets/Typography.b95e4aa0.js">
-    <link rel="modulepreload" crossorigin href="/assets/Base.a4b3ce11.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.f48fce3f.js">
-    <link rel="modulepreload" crossorigin href="/assets/isNumeric.75337b1e.js">
-    <link rel="modulepreload" crossorigin href="/assets/Badge.c47fcb76.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.850a3af4.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.cc1cfc71.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.a0374890.js">
-    <link rel="modulepreload" crossorigin href="/assets/TabPane.0aac9ad6.js">
-    <link rel="modulepreload" crossorigin href="/assets/Card.f25df3d9.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.eddafd60.js">
-    <link rel="modulepreload" crossorigin href="/assets/CollapsePanel.b0e55cc7.js">
-    <link rel="modulepreload" crossorigin href="/assets/Timeline.27c103f9.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.9f26bb43.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.bd6c1bff.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.6de8110f.js">
-    <link rel="modulepreload" crossorigin href="/assets/dayjs.529060f0.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.b6a857f4.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.47e30b86.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.7ac1c900.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.24495aee.js">
-    <link rel="modulepreload" crossorigin href="/assets/Modal.9dce3cbe.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.5d6fbd34.js">
-    <link rel="modulepreload" crossorigin href="/assets/StarFilled.fad29e50.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.18c1408d.js">
-    <link rel="modulepreload" crossorigin href="/assets/DeleteOutlined.f8ba9770.js">
-    <link rel="modulepreload" crossorigin href="/assets/dayjs.3265b6ae.js">
-    <link rel="modulepreload" crossorigin href="/assets/Link.e84f8104.js">
-    <link rel="modulepreload" crossorigin href="/assets/Paragraph.01b06a11.js">
-    <link rel="modulepreload" crossorigin href="/assets/Text.0097eaf4.js">
-    <link rel="modulepreload" crossorigin href="/assets/Title.d12082f2.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.44a19965.js">
-    <link rel="modulepreload" crossorigin href="/assets/DownloadOutlined.f0b0e5f7.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.0ddbb3d1.js">
-    <link rel="stylesheet" href="/assets/outputWidgets.a254438e.css">
-    <link rel="stylesheet" href="/assets/index.33178bd1.css">
-  </head>
 
-  <body>
-    <div id="app"></div>
-    
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon-cloud.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Primary Meta Tags -->
+  <title>Abstra Cloud Console</title>
+  <meta name="title" content="Abstra Editor" />
+  <meta name="description"
+    content="Log in to Abstra’s Cloud Console to deploy and manage your Python workflows and scripts, user access, logs and more." />
+  <!-- Hotjar Tracking Code for abstra.io -->
+  <script>
+    (function (h, o, t, j, a, r) {
+      h.hj =
+        h.hj ||
+        function () {
+          (h.hj.q = h.hj.q || []).push(arguments);
+        };
+      h._hjSettings = { hjid: 3572501, hjsv: 6 };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script');
+      r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+  </script>
+  <script>
+    // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/h97k86ks'
+    (function () { var w = window; var ic = w.Intercom; if (typeof ic === "function") { ic('reattach_activator'); ic('update', w.intercomSettings); } else { var d = document; var i = function () { i.c(arguments); }; i.q = []; i.c = function (args) { i.q.push(args); }; w.Intercom = i; var l = function () { var s = d.createElement('script'); s.type = 'text/javascript'; s.async = true; s.src = 'https://widget.intercom.io/widget/h97k86ks'; var x = d.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x); }; if (document.readyState === 'complete') { l(); } else if (w.attachEvent) { w.attachEvent('onload', l); } else { w.addEventListener('load', l, false); } } })();
+  </script>
+  <script type="module" crossorigin src="/assets/console.4ac2e3c0.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/outputWidgets.5f4e897a.js">
+  <link rel="modulepreload" crossorigin href="/assets/hasIn.c3ca752b.js">
+  <link rel="modulepreload" crossorigin href="/assets/Form.f17a93e0.js">
+  <link rel="modulepreload" crossorigin href="/assets/popupNotifcation.960d37a9.js">
+  <link rel="modulepreload" crossorigin href="/assets/router.68e9bd30.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.5379103d.js">
+  <link rel="modulepreload" crossorigin href="/assets/ArrowRightOutlined.08fa31dd.js">
+  <link rel="modulepreload" crossorigin href="/assets/Typography.01a47c18.js">
+  <link rel="modulepreload" crossorigin href="/assets/Base.f38935dc.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.7a9b4ae0.js">
+  <link rel="modulepreload" crossorigin href="/assets/isNumeric.75337b1e.js">
+  <link rel="modulepreload" crossorigin href="/assets/Badge.2fe0c07b.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.b9f2077d.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.85963ad9.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.ea532c65.js">
+  <link rel="modulepreload" crossorigin href="/assets/TabPane.e739b457.js">
+  <link rel="modulepreload" crossorigin href="/assets/Card.cacab3a8.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.5a1a74d0.js">
+  <link rel="modulepreload" crossorigin href="/assets/CollapsePanel.40166804.js">
+  <link rel="modulepreload" crossorigin href="/assets/Timeline.8395e199.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.51a2556a.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.ea2f9680.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.67295494.js">
+  <link rel="modulepreload" crossorigin href="/assets/dayjs.99f19e49.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.cfbfe51a.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.9da2dc5f.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.d5086fa5.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.9b535dbb.js">
+  <link rel="modulepreload" crossorigin href="/assets/Modal.7da97b41.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.629081a3.js">
+  <link rel="modulepreload" crossorigin href="/assets/StarFilled.fad29e50.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.e48a13b5.js">
+  <link rel="modulepreload" crossorigin href="/assets/DeleteOutlined.f8ba9770.js">
+  <link rel="modulepreload" crossorigin href="/assets/dayjs.da75aaaa.js">
+  <link rel="modulepreload" crossorigin href="/assets/Link.88800d15.js">
+  <link rel="modulepreload" crossorigin href="/assets/Paragraph.e9d9bed1.js">
+  <link rel="modulepreload" crossorigin href="/assets/Text.88ecca0b.js">
+  <link rel="modulepreload" crossorigin href="/assets/Title.e77a553b.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.5d60c792.js">
+  <link rel="modulepreload" crossorigin href="/assets/DownloadOutlined.f0b0e5f7.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.cf356e21.js">
+  <link rel="stylesheet" href="/assets/outputWidgets.a254438e.css">
+  <link rel="stylesheet" href="/assets/index.33178bd1.css">
+</head>
+
+<body>
+  <div id="app"></div>
+  
+</body>
+
 </html>
