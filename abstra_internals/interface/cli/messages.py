@@ -12,11 +12,3 @@ def serve_message():
         + f"\n\nABSTRA EDITOR RUNNING: http://{HOST}:{Settings.server_port}/_editor\n\n"
         + Style.RESET_ALL
     )
-
-
-def read_credentials():
-    credentials = input(f"API Token: ")
-    if not credentials:
-        print("No API token configured")
-        sys.exit(1)
-    return credentials

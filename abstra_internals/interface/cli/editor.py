@@ -10,7 +10,7 @@ from ...server.controller import MainController
 from ...server.fs_watcher import watch_py_root_files
 
 
-def serve(
+def editor(
     debug: bool,
     load_dotenv: bool,
 ):
