@@ -1,32 +1,9 @@
 import typing
-from uuid import UUID
-from datetime import date, datetime
 from dataclasses import is_dataclass
-
 from ..forms.step import StepsResponse
 from ..forms.page_response import PageResponse
-from ....utils import serialize as json_serialize
-
-
-def escape_ref(ref: str):
-    return ref.replace('"', '""')
-
-
-def quoted_identifier(ref: str):
-    return f'"{escape_ref(ref)}"'
-
-
-def serialize(value: typing.Any):
-    if isinstance(value, (datetime, date)):
-        return value.isoformat()
-    if isinstance(value, (dict, list, tuple)):
-        return json_serialize(value)
-    if isinstance(value, set):
-        return json_serialize(list(value))
-    if isinstance(value, UUID):
-        return str(value)
-
-    return value
+from .utils import escape_ref, quoted_identifier, serialize
+from . import comparators as cmp
 
 
 def _execute(query: str, params: typing.List):  # private api
@@ -45,22 +22,34 @@ def _run(query: str, params: typing.List):  # private api
     return _execute(query, params)["result"]
 
 
+def make_where_exp(where: typing.Optional[dict], offset=0):
+    column_names = []
+    values_list = []
+    if where is None or len(where) == 0:
+        where_exp = ""
+    else:
+        for column_name, value in where.items():
+            if value is None:
+                value = cmp.is_null()
+            elif not isinstance(value, cmp.Comparator):
+                value = cmp.is_eq(value)
+            idx = len(values_list) + offset + 1
+            exp, exp_values = value.exp(column_name, idx)
+            column_names.append(exp)
+            values_list.extend(exp_values)
+        conditions = " AND ".join(column_names)
+        where_exp = f"WHERE {conditions}"
+    return where_exp, values_list
+
+
 def _make_delete_query(table: str, values: dict):
     if len(values) == 0:
         raise Exception("Delete query must have at least one where clause")
 
-    table = escape_ref(table)
-    column_names = []
-    values_list = []
-    for column_name, value in values.items():
-        column_name = escape_ref(column_name)
-        if value is None:
-            column_names.append(f'"{column_name}" IS NULL')
-        else:
-            column_names.append(f'"{column_name}"=${len(values_list)+1}')
-            values_list.append(serialize(value))
-    conditions = " AND ".join(column_names)
-    return f"""DELETE FROM "{table}" WHERE {conditions} RETURNING *""", values_list
+    table = quoted_identifier(table)
+    where_exp, values_list = make_where_exp(values)
+
+    return f"""DELETE FROM {table} {where_exp} RETURNING *""", values_list
 
 
 def _make_select_query(
@@ -75,20 +64,7 @@ def _make_select_query(
     assert limit is None or isinstance(limit, int)
     assert offset is None or isinstance(offset, int)
     table = quoted_identifier(table)
-    column_names = []
-    values_list = []
-    if where is None or len(where) == 0:
-        where_exp = ""
-    else:
-        for column_name, value in where.items():
-            column_name = quoted_identifier(column_name)
-            if value is None:
-                column_names.append(f"{column_name} IS NULL")
-            else:
-                column_names.append(f"{column_name}=${len(values_list)+1}")
-                values_list.append(serialize(value))
-        conditions = " AND ".join(column_names)
-        where_exp = f"WHERE {conditions}"
+    where_exp, values_list = make_where_exp(where)
 
     order_type_exp = "DESC" if order_desc else "ASC"
     order_by_exp = (
@@ -147,26 +123,15 @@ def _make_update_query(table: str, set: dict, where: dict):
     set_column_names = []
     set_values_list = []
     for column_name, value in set.items():
-        column_name = escape_ref(column_name)
-        set_column_names.append(f'"{column_name}"=${len(set_values_list)+1}')
+        column_id = quoted_identifier(column_name)
+        set_column_names.append(f"{column_id}=${len(set_values_list)+1}")
         set_values_list.append(serialize(value))
     set_exp = ", ".join(set_column_names)
 
-    where_column_names = []
-    where_values_list = []
-    for column_name, value in where.items():
-        column_name = escape_ref(column_name)
-        if value is None:
-            where_column_names.append(f'"{column_name}" IS NULL')
-        else:
-            where_column_names.append(
-                f'"{column_name}"=${len(set_values_list)+len(where_values_list)+1}'
-            )
-            where_values_list.append(serialize(value))
-    where_exp = " AND ".join(where_column_names)
+    where_exp, where_values_list = make_where_exp(where, len(set_values_list))
 
     return (
-        f"""UPDATE "{table}" SET {set_exp} WHERE {where_exp} RETURNING *""",
+        f"""UPDATE "{table}" SET {set_exp} {where_exp} RETURNING *""",
         set_values_list + where_values_list,
     )
 
