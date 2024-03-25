@@ -62,6 +62,30 @@ class ConditionTransitionsTest(TestCase):
         result = workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": "bar"})])
 
+    def test_nested_value(self):
+        stage = ConditionStage(
+            id="1",
+            title="title",
+            variable_name="foo.bar",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="1",
+                    target_type="target_type",
+                    target_id="target_id",
+                    type="conditions:patternMatched",
+                    condition_value="afulepa",
+                )
+            ],
+        )
+        stage_run = self.repository.create_initial(
+            stage="1", data={"foo": {"bar": "afulepa"}}
+        )
+        result = workflow_engine._follow_condition_transitions(stage, stage_run)
+        self.assertEqual(
+            result, [dict(stage="target_id", data={"foo": {"bar": "afulepa"}})]
+        )
+
     def test_match_str_when_int(self):
         stage = ConditionStage(
             id="1",
