@@ -1,4 +1,4 @@
-import base64, simplejson, re, socket
+import base64, simplejson, re, socket, jsonpath_ng as jp, typing as t
 from contextlib import closing
 
 from .file import *
@@ -82,3 +82,11 @@ def get_free_port(default_port: int) -> int:
     raise Exception(
         f"Could not find a free port in the range {range_start}-{range_end}"
     )
+
+
+def nested_get(data: t.Dict, path: str):
+    try:
+        expr = jp.parse(path)
+        return next(m.value for m in expr.find(data))
+    except Exception:
+        return None

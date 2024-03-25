@@ -1,20 +1,15 @@
-import json
-import os
-import shutil
-import sys
-import tempfile
-import uuid
-from abstra_internals.utils.graph import Edge, Graph, Node
+import json, os, shutil, sys, tempfile, uuid
+from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 from pydantic.dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
-from ...settings import Settings
-from ...utils import check_is_url
-from ...utils.file import traverse_code
-from ...utils.format import normalize_path
-from ...utils.string import to_kebab_case
 from . import json_migrations
+from ...settings import Settings
+from ...utils.file import traverse_code
+from ...utils.string import to_kebab_case
+from ...utils.format import normalize_path
+from ...utils.graph import Edge, Graph, Node
+from ...utils import check_is_url, nested_get
 
 
 ServedStage = Union["FormStage", "HookStage"]
@@ -31,14 +26,16 @@ class NotificationTrigger:
     def validate_email(self, email: str) -> bool:
         return type(email) == str and "@" in email
 
-    def get_validated_recipients(self, thread_data: Dict[str, Any]) -> List[str]:
-        raw_value = thread_data.get(self.variable_name)
+    def get_recipients(self, thread_data: Dict[str, Any]) -> List[str]:
+        variable_name = self.variable_name
+        if not variable_name:
+            return []
 
+        raw_value = nested_get(thread_data, variable_name)
         if not raw_value:
             return []
 
         emails: List[str] = []
-
         if isinstance(raw_value, str):
             emails.append(raw_value)
 
@@ -763,6 +760,17 @@ class IteratorStage:
             "transitions": [t.as_dict for t in self.workflow_transitions],
         }
 
+    def get_items(self, thread_data: Dict[str, Any]) -> List:
+        variable_name = self.variable_name
+        if not variable_name:
+            return []
+
+        raw_value = nested_get(thread_data, variable_name)
+        if not isinstance(raw_value, list):
+            return []
+
+        return raw_value
+
     @staticmethod
     def from_dict(data: dict):
         x, y = data["workflow_position"]
@@ -795,6 +803,13 @@ class ConditionStage:
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
         }
+
+    def get_condition(self, thread_data: Dict[str, Any]) -> Any:
+        variable_name = self.variable_name
+        if not variable_name:
+            return None
+
+        return nested_get(thread_data, variable_name)
 
     @staticmethod
     def from_dict(data: dict):

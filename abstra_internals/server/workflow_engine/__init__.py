@@ -67,10 +67,10 @@ class WorkflowEngine:
         stage_run: StageRun,
         transition_type="conditions:patternMatched",
     ):
-        variable_value = stage_run.data.get(stage.variable_name)
+        condition = stage.get_condition(stage_run.data)
 
         next_stage_ids = [
-            t.target_id for t in stage.workflow_transitions if t.matches(variable_value)
+            t.target_id for t in stage.workflow_transitions if t.matches(condition)
         ]
 
         return [
@@ -98,10 +98,7 @@ class WorkflowEngine:
         stage_run: StageRun,
         transition_type="iterators:each",
     ):
-        variable_value = stage_run.data.get(stage.variable_name)
-
-        if not isinstance(variable_value, list):
-            return []
+        items = stage.get_items(stage_run.data)
 
         next_stage_ids = [
             t.target_id for t in stage.workflow_transitions if t.type == transition_type
@@ -109,7 +106,7 @@ class WorkflowEngine:
 
         return [
             dict(stage=stage_id, data={"item": item})
-            for item in variable_value
+            for item in items
             for stage_id in next_stage_ids
         ]
 
@@ -118,22 +115,18 @@ class WorkflowEngine:
         if not stage:
             raise Exception(f"Stage {stage_run.stage} not found")
 
-        if not isinstance(stage, FormStage):
+        if not isinstance(stage, FormStage) or not stage.notification_trigger.enabled:
             return
 
-        if (
-            not stage.notification_trigger.variable_name
-            or not stage.notification_trigger.enabled
-        ):
+        recipient_emails = stage.notification_trigger.get_recipients(stage_run.data)
+        if not recipient_emails:
             return
 
         self.notification_repository.notify_waiting_thread(
-            recipient_emails=stage.notification_trigger.get_validated_recipients(
-                stage_run.data
-            ),
+            recipient_emails=recipient_emails,
             stage_run_id=stage_run.id,
-            stage_path=stage.path,
             stage_name=stage.title,
+            stage_path=stage.path,
         )
 
     def _pub(self, parent_stage_run: StageRun, stage_run_dtos: List[Dict]):

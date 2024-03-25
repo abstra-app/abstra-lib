@@ -21,3 +21,4 @@ python-dotenv>=1.0.0
 unidecode>=1.3.7
 pydantic>=2.6.4
 packaging
+jsonpath-ng>=1.6.1
