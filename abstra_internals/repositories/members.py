@@ -1,4 +1,4 @@
-from ..contracts_generated import CommonUserRoles, CommonUserRolesItemValues, CommonUser
+from ..contracts_generated import CommonUserRoles, CommonUser
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List
 import requests
@@ -20,7 +20,7 @@ class LocalMembersRepository(MembersRepository):
 
     def get_member_roles(self, email: str) -> CommonUserRoles:
         if self.data is None:
-            return CommonUserRolesItemValues
+            return ["workflow_viewer"]
         return self.data.get(email, [])
 
 
