@@ -2,11 +2,11 @@ import os, re, pathlib
 from setuptools import setup, find_packages
 
 regex = r"^v(\d+\.\d+\.\d+)$"
-TAG = os.getenv("TAG", "v0.0.0")
+TAG = os.getenv("TAG", "v100.0.0")
 if not TAG or not re.search(regex, TAG):
     raise ValueError("TAG environment variable must be in the format v1.2.3")
 match = re.search(regex, TAG)
-version = match.group(1) if match else "0.0.0"
+version = match.group(1) if match else "100.0.0"
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
