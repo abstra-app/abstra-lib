@@ -12,7 +12,6 @@ class ConditionTransitionsTest(TestCase):
     def test_not_match_when_no_transitions(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[],
@@ -25,7 +24,6 @@ class ConditionTransitionsTest(TestCase):
     def test_not_match_when_variable_not_found(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -45,7 +43,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_when_equal(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -65,7 +62,6 @@ class ConditionTransitionsTest(TestCase):
     def test_nested_value(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo.bar",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -89,7 +85,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_str_when_int(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -109,7 +104,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_none_when_not_found(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -129,7 +123,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_none_when_none(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -149,7 +142,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_empty_when_none(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -169,7 +161,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_empty_when_not_found(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -189,7 +180,6 @@ class ConditionTransitionsTest(TestCase):
     def test_match_empty_when_empty(self):
         stage = ConditionStage(
             id="1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[

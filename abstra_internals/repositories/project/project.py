@@ -744,11 +744,14 @@ class VisualizationSettings:
 @dataclass
 class IteratorStage:
     id: str
-    title: str
     variable_name: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
     type_name: str = "iterator"
+
+    @property
+    def title(self):
+        return self.variable_name
 
     @property
     def as_dict(self):
@@ -776,7 +779,6 @@ class IteratorStage:
         x, y = data["workflow_position"]
         return IteratorStage(
             id=data["id"],
-            title=data["title"],
             variable_name=data["variable_name"],
             workflow_position=(x, y),
             workflow_transitions=[
@@ -788,17 +790,19 @@ class IteratorStage:
 @dataclass
 class ConditionStage:
     id: str
-    title: str
     variable_name: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
     type_name: str = "condition"
 
     @property
+    def title(self):
+        return self.variable_name
+
+    @property
     def as_dict(self):
         return {
             "id": self.id,
-            "title": self.title,
             "variable_name": self.variable_name,
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
@@ -816,7 +820,6 @@ class ConditionStage:
         x, y = data["workflow_position"]
         return ConditionStage(
             id=data["id"],
-            title=data["title"],
             variable_name=data["variable_name"],
             workflow_position=(x, y),
             workflow_transitions=[

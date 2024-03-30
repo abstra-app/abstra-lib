@@ -112,7 +112,10 @@ def update_workflow(workflow_state_dto: dict):
                 stage_dto["position"]["x"],
                 stage_dto["position"]["y"],
             )
-            stage.title = stage_dto["title"]
+            if not isinstance(stage, ConditionStage) and not isinstance(
+                stage, IteratorStage
+            ):
+                stage.title = stage_dto["title"]
             if isinstance(stage, IteratorStage) or isinstance(stage, ConditionStage):
                 stage.variable_name = stage_dto["props"]["variableName"]
             if (
@@ -189,7 +192,6 @@ def update_workflow(workflow_state_dto: dict):
 
             stage = IteratorStage(
                 id=stage_dto["id"],
-                title=stage_dto["title"],
                 workflow_position=(
                     stage_dto["position"]["x"],
                     stage_dto["position"]["y"],
@@ -204,7 +206,6 @@ def update_workflow(workflow_state_dto: dict):
 
             stage = ConditionStage(
                 id=stage_dto["id"],
-                title=stage_dto["title"],
                 workflow_position=(
                     stage_dto["position"]["x"],
                     stage_dto["position"]["y"],

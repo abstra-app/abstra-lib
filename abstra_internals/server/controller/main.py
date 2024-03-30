@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import pkg_resources
 import flask, pkgutil, webbrowser
 from pathlib import Path
-
 from abstra_internals.server.controller.linters import check_linters
 from ...utils.dot_abstra import TEST_DATA_FILE
 from ...utils.validate import validate_json
@@ -22,15 +21,6 @@ from ...repositories import (
 from ...repositories.execution import ExecutionRepository
 from ...repositories.execution_logs import ExecutionLogsRepository
 from ...repositories.stage_run import StageRunRepository
-
-from ...debugger.vscode import (
-    is_launch_json_configured,
-    is_settings_json_set,
-    configure_settings_json,
-    configure_launch_json,
-    is_client_connected,
-    start_debugger,
-)
 
 from ...credentials import (
     delete_credentials,
@@ -403,17 +393,3 @@ class MainController:
         if execution:
             # execution.stop()
             pass
-
-    # Debugger
-    def get_debugger_status(self):
-        return dict(
-            port=start_debugger(),
-            connected=is_client_connected(),
-            is_launch_json_configured=is_launch_json_configured()
-            and is_settings_json_set(),
-        )
-
-    def create_vscode_launch(self):
-        configure_launch_json()
-        configure_settings_json()
-        return {"status": "ok"}

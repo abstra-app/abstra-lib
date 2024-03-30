@@ -12,7 +12,6 @@ class IteratorTransitionsTest(TestCase):
     def test_simple_foreach(self):
         stage = IteratorStage(
             id="s1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -39,7 +38,6 @@ class IteratorTransitionsTest(TestCase):
     def test_nested_value(self):
         stage = IteratorStage(
             id="s1",
-            title="title",
             variable_name="foo.bar",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -68,7 +66,6 @@ class IteratorTransitionsTest(TestCase):
     def test_empty_when_not_list(self):
         stage = IteratorStage(
             id="s1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
@@ -88,7 +85,6 @@ class IteratorTransitionsTest(TestCase):
     def test_empty_when_not_found(self):
         stage = IteratorStage(
             id="s1",
-            title="title",
             variable_name="foo",
             workflow_position=(0, 0),
             workflow_transitions=[
