@@ -17,8 +17,9 @@ class PackageVersionManager:
             package_name if package_name != "abstra" else "Abstra Editor"
         )
         self.current_local_version = pkg_utils.get_local_package_version(package_name)
-        self.cached_latest_version = pkg_utils.get_cached_latest_version(
-            Settings.root_path, package_name
+        self.cached_latest_version = (
+            pkg_utils.get_cached_latest_version(Settings.root_path, package_name)
+            or self.current_local_version
         )
 
     def get_version_status(self) -> VersionStatus:

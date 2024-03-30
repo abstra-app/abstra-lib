@@ -42,14 +42,17 @@ def get_cached_latest_version(root_path: Path, package_name="abstra"):
         ):
             return Version(version)
 
-    response = requests.get(
-        f"https://pypi.org/pypi/{package_name}/json", timeout=TIMEOUT
-    )
-    latest_version = response.json()["info"]["version"]
+    try:
+        response = requests.get(
+            f"https://pypi.org/pypi/{package_name}/json", timeout=TIMEOUT
+        )
+        latest_version = response.json()["info"]["version"]
 
-    update_cached_latest_version(root_path, latest_version, package_name)
+        update_cached_latest_version(root_path, latest_version, package_name)
 
-    return Version(latest_version)
+        return Version(latest_version)
+    except:
+        return None
 
 
 def update_cached_latest_version(

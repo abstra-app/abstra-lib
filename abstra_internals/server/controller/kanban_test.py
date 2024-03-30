@@ -139,7 +139,6 @@ class KanbanTests(TestCase):
         )
         condition = ConditionStage(
             id="condition",
-            title="Condition",
             variable_name="title",
             type_name="condition",
             workflow_position=(0, 0),
@@ -211,7 +210,6 @@ class KanbanTests(TestCase):
         )
         condition = ConditionStage(
             id="condition",
-            title="Condition",
             variable_name="title",
             type_name="condition",
             workflow_position=(0, 0),
@@ -299,7 +297,6 @@ class KanbanTests(TestCase):
         )
         condition = ConditionStage(
             id="condition",
-            title="Condition",
             variable_name="title",
             type_name="condition",
             workflow_position=(0, 0),
@@ -397,7 +394,6 @@ class KanbanTests(TestCase):
         )
         condition = ConditionStage(
             id="condition",
-            title="Condition",
             variable_name="title",
             type_name="condition",
             workflow_position=(0, 0),
@@ -488,7 +484,6 @@ class KanbanTests(TestCase):
         )
         condition = ConditionStage(
             id="condition",
-            title="Condition",
             variable_name="title",
             type_name="condition",
             workflow_position=(0, 0),
