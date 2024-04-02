@@ -1,53 +1,53 @@
-from werkzeug.datastructures import FileStorage
-from typing import Any, Dict, List, Optional, Tuple
-import pkg_resources
-import flask, pkgutil, webbrowser
+import pkgutil
+import webbrowser
 from pathlib import Path
-from abstra_internals.server.controller.linters import check_linters
-from ...utils.dot_abstra import TEST_DATA_FILE
-from ...utils.validate import validate_json
-from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
-from ...utils import path2module, module2path, files_from_directory
-from ...widgets.apis import get_random_filepath, internal_path
-from ...execution.execution import Execution
-from ...interface.cli.deploy import deploy
-from ...settings import Settings
-from ...repositories import (
-    requirements_repository,
-    stage_run_repository,
-    execution_logs_repository,
-    execution_repository,
-)
-from ...repositories.execution import ExecutionRepository
-from ...repositories.execution_logs import ExecutionLogsRepository
-from ...repositories.stage_run import StageRunRepository
+from typing import Any, Dict, List, Optional, Tuple
 
+import flask
+import pkg_resources
+from werkzeug.datastructures import FileStorage
+
+from abstra_internals.server.controller.linters import check_linters
+
+from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...credentials import (
     delete_credentials,
     get_credentials,
     resolve_headers,
     set_credentials,
 )
-
-from ...templates import (
-    ensure_abstraignore,
-    new_script_code,
-    new_form_code,
-    new_hook_code,
-    new_job_code,
+from ...execution.execution import Execution
+from ...interface.cli.deploy import deploy
+from ...repositories import (
+    execution_logs_repository,
+    execution_repository,
+    requirements_repository,
+    stage_run_repository,
 )
-
+from ...repositories.execution import ExecutionRepository
+from ...repositories.execution_logs import ExecutionLogsRepository
 from ...repositories.project.project import (
-    ProjectRepository,
-    StyleSettings,
     ActionStage,
-    ScriptStage,
-    ScriptStage,
-    ScriptStage,
     FormStage,
     HookStage,
     JobStage,
+    ProjectRepository,
+    ScriptStage,
+    StyleSettings,
 )
+from ...repositories.stage_run import StageRunRepository
+from ...settings import Settings
+from ...templates import (
+    ensure_abstraignore,
+    new_form_code,
+    new_hook_code,
+    new_job_code,
+    new_script_code,
+)
+from ...utils import files_from_directory, module2path, path2module
+from ...utils.dot_abstra import TEST_DATA_FILE
+from ...utils.validate import validate_json
+from ...widgets.apis import get_random_filepath, internal_path
 
 
 class UnknownNodeTypeError(Exception):
@@ -64,7 +64,7 @@ class SelfTransitionError(Exception):
         self.node_id = node_id
 
     def __str__(self):
-        return f"You can't add a transition to itself."
+        return "You can't add a transition to itself."
 
 
 class TransitionToJobError(Exception):
@@ -77,7 +77,7 @@ class TransitionToJobError(Exception):
         self.target_id = target_id
 
     def __str__(self):
-        return f"You can't add a transition to a job. Use a script instead."
+        return "You can't add a transition to a job. Use a script instead."
 
 
 class DoubleTransitionError(Exception):
@@ -90,7 +90,7 @@ class DoubleTransitionError(Exception):
         self.target_id = target_id
 
     def __str__(self):
-        return f"You can't add the same transition twice."
+        return "You can't add the same transition twice."
 
 
 class MainController:
@@ -130,6 +130,8 @@ class MainController:
         return project.workspace
 
     def init_code_file(self, path: str, code: str):
+        if Settings.root_path.joinpath(path).is_file():
+            return
         Settings.root_path.joinpath(path).write_text(code, encoding="utf-8")
 
     def open_file(self, file_path: str, mode: str, create_if_not_exists: bool = False):
