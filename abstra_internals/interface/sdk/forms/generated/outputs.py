@@ -26,7 +26,7 @@ def display_file(file: Union[str, io.IOBase], **kwargs):
 
 
 def display_html(html: str, **kwargs):
-    """Embed HTML to the app.
+    """Simple HTML embed widget.
 
     Position Args:
             html (str): The html snippet to display to the user
@@ -45,7 +45,7 @@ def display_html(html: str, **kwargs):
 
 
 def display_iframe(url_or_html: str, **kwargs):
-    """Embed content using iframe.
+    """Embed content using an iframe.
 
     Position Args:
             url_or_html (str): The link to the document or the own document to display to the user
@@ -93,7 +93,7 @@ def display_image(image: Union[str, io.IOBase], **kwargs):
 
 
 def display_latex(text: str, **kwargs):
-    """Show an Latex formula to the user
+    """Display a latex formula to the user.
 
     Position Args:
             text (str): The latex formula to display to the user
@@ -114,7 +114,7 @@ def display_latex(text: str, **kwargs):
 
 
 def display_link(link_url: str, **kwargs):
-    """Allow users to see and open content from text links.
+    """Display a link to the user.
 
     Position Args:
             link_url (str): The url of the link to display to the user
@@ -139,7 +139,7 @@ def display_link(link_url: str, **kwargs):
 
 
 def display_markdown(text: str, **kwargs):
-    """Show a formatted text to the user
+    """Show markdown formatted text to the user
 
     Position Args:
             text (str): The formatted text to display to the user
@@ -185,7 +185,7 @@ def display_pandas(df: PandasDataFrame, **kwargs):
 
 
 def display_plotly(fig: PlotlyFigure, **kwargs):
-    """Displays a Plotly figure to the user
+    """Displays a Plotly figure.
 
     Position Args:
             fig (PlotlyFigure): The figure to display to the user
@@ -207,7 +207,7 @@ def display_plotly(fig: PlotlyFigure, **kwargs):
 
 
 def display_progress(current: float, total: float, **kwargs):
-    """Show a progress bar when loading the app.
+    """Displays a progress bar to the user.
 
     Position Args:
             current (float): The progress being made. Defaults to 50.

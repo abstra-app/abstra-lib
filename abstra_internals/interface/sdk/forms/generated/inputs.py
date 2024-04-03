@@ -9,7 +9,7 @@ def get_single_value(answer: Dict):
 
 
 def read_camera(label: str, **kwargs):
-    """Take a picture with user's camera and upload it
+    """Captures and uploads a photo using the user's camera.
 
     Position Args:
             label (str): The label to display to the user
@@ -32,7 +32,7 @@ def read_camera(label: str, **kwargs):
 
 
 def read_cards(label: str, options: list, **kwargs):
-    """Read a text value from the user simple text input
+    """Presents options as cards for the user. Cards may be selectable.
 
     Position Args:
             label (str): The text related to this input
@@ -62,7 +62,7 @@ def read_cards(label: str, options: list, **kwargs):
 
 
 def read_checkbox(label: str, **kwargs):
-    """Allow users to select an option by interacting with a checkbox
+    """Enables a selection through a single checkbox interaction.
 
     Position Args:
             label (str): The label to display to the user
@@ -85,7 +85,7 @@ def read_checkbox(label: str, **kwargs):
 
 
 def read_checklist(label: str, options: List[AbstraOption], **kwargs):
-    """Show a checklist for users to select items
+    """Displays a checklist allowing multiple item selections.
 
     Position Args:
             label (str): The label to display to the user
@@ -113,7 +113,7 @@ def read_checklist(label: str, options: List[AbstraOption], **kwargs):
 
 
 def read_cnpj(label: str, **kwargs):
-    """Allow users to insert a CNPJ number into the app.
+    """CNPJ number input with validation and masking.
 
     Position Args:
             label (str): The label to display to the user
@@ -138,7 +138,7 @@ def read_cnpj(label: str, **kwargs):
 
 
 def read_code(label: str, **kwargs):
-    """Code input allow users to insert code and reads it.
+    """Accepts code input with syntax highlighting
 
     Position Args:
             label (str): The label to display to the user
@@ -162,7 +162,7 @@ def read_code(label: str, **kwargs):
 
 
 def read_cpf(label: str, **kwargs):
-    """Allow users to insert a CPF number into the app.
+    """CPF number input with validation and masking.
 
     Position Args:
             label (str): The label to display to the user
@@ -187,7 +187,7 @@ def read_cpf(label: str, **kwargs):
 
 
 def read_currency(label: str, **kwargs):
-    """Currency input allows users to enter monetary values.
+    """Enables monetary value input with currency formatting.
 
     Position Args:
             label (str): The label to display to the user
@@ -214,7 +214,7 @@ def read_currency(label: str, **kwargs):
 
 
 def read_custom(html_body: str, **kwargs):
-    """Widget with customizable UI and behaviour
+    """Allows for a fully customizable widget with custom HTML, CSS, and JS.
 
     Position Args:
             html_body (str): The HTML body content
@@ -238,7 +238,7 @@ def read_custom(html_body: str, **kwargs):
 
 
 def read_date(label: str, **kwargs):
-    """Allow users to select  a date, or a range of dates.*
+    """Provides a date picker with calendar interface.
 
     Position Args:
             label (str): The label to display to the user
@@ -261,7 +261,7 @@ def read_date(label: str, **kwargs):
 
 
 def read_dropdown(label: str, options: List[AbstraOption], **kwargs):
-    """Allow users to select one or more options by selecting items in a dropdown
+    """Provides a dropdown menu for single or multiple selections.
 
     Position Args:
             label (str): The label to display to the user
@@ -291,7 +291,7 @@ def read_dropdown(label: str, options: List[AbstraOption], **kwargs):
 
 
 def read_email(label: str, **kwargs):
-    """Email input allow users to enter a valid email address.
+    """Collects and validates an email address.
 
     Position Args:
             label (str): The label to display to the user
@@ -316,7 +316,7 @@ def read_email(label: str, **kwargs):
 
 
 def read_file(label: str, **kwargs):
-    """File upload adds a drop-area for users to upload one or more files
+    """Enables file upload via file explorer.
 
     Position Args:
             label (str): The label to display to the user
@@ -341,7 +341,7 @@ def read_file(label: str, **kwargs):
 
 
 def read_image(label: str, **kwargs):
-    """Image upload adds a drop-area for users to upload one or more image files.
+    """Allows for image file uploads with preview and validation.
 
     Position Args:
             label (str): The label to display to the user
@@ -366,7 +366,7 @@ def read_image(label: str, **kwargs):
 
 
 def read_list(item_schema: Any, **kwargs):
-    """Read a list value from the user
+    """Collects a dynamic list of values based on a specified schema.
 
     Position Args:
             item_schema (Any): The schema for the items of the list
@@ -392,7 +392,7 @@ def read_list(item_schema: Any, **kwargs):
 
 
 def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
-    """Read a multiple choice value from the user
+    """Offers multiple choice selections with single or multi-select options.
 
     Position Args:
             label (str): The label to display to the user
@@ -421,7 +421,7 @@ def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
 
 
 def read_nps(label: str, **kwargs):
-    """NPS feedback allow users to rank their experience from 0 to 10.
+    """Captures Net Promoter Score feedback with a 0-10 rating scale.
 
     Position Args:
             label (str): The label to display to the user
@@ -448,7 +448,7 @@ def read_nps(label: str, **kwargs):
 
 
 def read_number(label: str, **kwargs):
-    """Number input allow users to enter numeric values.
+    """Collects numeric input with optional min/max limits.
 
     Position Args:
             label (str): The label to display to the user
@@ -474,7 +474,7 @@ def read_number(label: str, **kwargs):
 
 
 def read_number_slider(label: str, **kwargs):
-    """Allow users to select values in a slider bar.
+    """Provides a slider for selecting numerical values within a range.
 
     Position Args:
             label (str): The label to display to the user
@@ -500,7 +500,7 @@ def read_number_slider(label: str, **kwargs):
 
 
 def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
-    """Display a pandas dataframe as a table and allow the user to select rows
+    """Enables selection of rows from a displayed pandas DataFrame table.
 
     Position Args:
             df (PandasDataFrame): The pandas dataframe to be displayed
@@ -530,7 +530,7 @@ def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
 
 
 def read_password(label: str, **kwargs):
-    """Password input allow users to enter a password before seen the content.
+    """A password field, including strength validation options.
 
     Position Args:
             label (str): The label to display to the user
@@ -562,7 +562,7 @@ def read_password(label: str, **kwargs):
 
 
 def read_phone(label: str, **kwargs):
-    """Phone input allow users to enter a valid phone number.
+    """A phone inputs with country code and national number.
 
     Position Args:
             label (str): The label to display to the user
@@ -587,7 +587,7 @@ def read_phone(label: str, **kwargs):
 
 
 def read_rating(label: str, **kwargs):
-    """Rating feedback allow users to rank their experience from 1 to 5 starts.
+    """Collects user feedback with emoji icons.
 
     Position Args:
             label (str): The label to display to the user
@@ -612,7 +612,7 @@ def read_rating(label: str, **kwargs):
 
 
 def read_richtext(label: str, **kwargs):
-    """Rich text input allows users to type and format textual content.
+    """Offers a rich text editor for formatted textual input.
 
     Position Args:
             label (str): The label to display to the user
@@ -636,7 +636,7 @@ def read_richtext(label: str, **kwargs):
 
 
 def read_tag(label: str, **kwargs):
-    """Read a tag value from the user
+    """Enables input of tags or keywords with autocomplete suggestions.
 
     Position Args:
             label (str): The label to display to the user
@@ -660,7 +660,7 @@ def read_tag(label: str, **kwargs):
 
 
 def read(label: str, **kwargs):
-    """Text fields allow users to insert plain text.
+    """Collects plain text input with customizable placeholders and validation.
 
     Position Args:
             label (str): The label to display to the user
@@ -685,7 +685,7 @@ def read(label: str, **kwargs):
 
 
 def read_textarea(label: str, **kwargs):
-    """Long text input allow users to type longer textual content.
+    """Provides a text area for multi-line text input.
 
     Position Args:
             label (str): The label to display to the user
@@ -709,7 +709,7 @@ def read_textarea(label: str, **kwargs):
 
 
 def read_time(label: str, **kwargs):
-    """Read a time value from the user
+    """Allows selection of a specific time.
 
     Position Args:
             label (str): The label to display to the user
@@ -733,7 +733,7 @@ def read_time(label: str, **kwargs):
 
 
 def read_toggle(label: str, **kwargs):
-    """Allow users to set between two items.
+    """Offers a toggle switch between two defined options.
 
     Position Args:
             label (str): The label to display to the user
@@ -758,7 +758,7 @@ def read_toggle(label: str, **kwargs):
 
 
 def read_video(label: str, **kwargs):
-    """Video upload adds a drop-area for users to upload one or more video files.
+    """Facilitates video file uploads with preview and size validation.
 
     Position Args:
             label (str): The label to display to the user
