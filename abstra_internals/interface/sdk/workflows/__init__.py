@@ -21,7 +21,7 @@ def match_thread(filter: dict):
         raise Exception("match_thread may only be used inside a hook")
     stage_id = execution.stage.id
     stage_runs = execution.stage_run_manager.find(
-        filter=GetStageRunByQueryFilter(stage=stage_id, data=filter, status="waiting")
+        filter=GetStageRunByQueryFilter(stage=stage_id, data=filter, status=["waiting"])
     )
     if len(stage_runs) == 0:
         raise Exception(f"No thread found for {filter}")
