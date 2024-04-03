@@ -1,4 +1,10 @@
-import json, os, shutil, sys, tempfile, uuid, re
+import json
+import os
+import shutil
+import sys
+import tempfile
+import uuid
+import re
 from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 from pydantic.dataclasses import dataclass
 from pathlib import Path
@@ -741,7 +747,7 @@ class StyleSettings:
     def from_dict(data: Dict, forms: List[FormStage] = []):
         return StyleSettings(
             sidebar=Sidebar.from_dict(data.get("sidebar", []), forms=forms),
-            name=data.get("name", "Untitled Workspace"),
+            name=data.get("name", "Untitled Project"),
             font_family=data.get("font_family"),
             brand_name=data.get("brand_name"),
             main_color=data.get("main_color"),

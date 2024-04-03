@@ -7,13 +7,13 @@ from abstra_internals.settings import SettingsController
 
 class CLI(object):
     """
-    A CLI to manage your Abstra Cloud Workspace environment.
+    A CLI to manage your Abstra Cloud project environment.
 
     usage: abstra <command> <resource> [<argument> ...] [parameters]
     """
 
-    def deploy(self, workspace_root: str = "."):
-        SettingsController.set_root_path(workspace_root)
+    def deploy(self, project_root: str = "."):
+        SettingsController.set_root_path(project_root)
         deploy()
 
     def version(self):
@@ -21,12 +21,12 @@ class CLI(object):
 
     def editor(
         self,
-        workspace_root: str = ".",
+        project_root: str = ".",
         port: int = 3000,
         debug=False,
         load_dotenv=True,
     ):
-        SettingsController.set_root_path(workspace_root)
+        SettingsController.set_root_path(project_root)
         SettingsController.set_server_port(port)
         editor(
             debug=debug,
@@ -35,14 +35,14 @@ class CLI(object):
 
     def serve(
         self,
-        workspace_root: str = ".",
+        project_root: str = ".",
         port: int = 3000,
         debug=False,
         load_dotenv=True,
     ):
         print("This command is deprecated. Please use 'abstra editor' instead.")
         self.editor(
-            workspace_root=workspace_root,
+            project_root=project_root,
             port=port,
             debug=debug,
             load_dotenv=load_dotenv,
