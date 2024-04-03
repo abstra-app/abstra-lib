@@ -1,16 +1,22 @@
-import flask, flask_cors, flask_talisman
+import flask
+import flask_cors
+import flask_talisman
 from flask_talisman import ALLOW_FROM
 
 from ...cloud_init import cloud_setup
-from ..controller import MainController
-from ..blueprints.player import get_player_bp
+from ...server.sentry import init_sentry
 from ...utils.environment import ENABLE_TALISMAN
+from ..blueprints.player import get_player_bp
+from ..controller import MainController
 
 
 def get_cloud_app(root: str):
+    init_sentry("cloud")
+
     cloud_setup(root)
 
     controller = MainController()
+
     app = flask.Flask(__name__)
     flask_cors.CORS(app)
 
