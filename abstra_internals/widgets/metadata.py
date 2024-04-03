@@ -1,7 +1,7 @@
 metadata = {
     "camera-input": {
-        "name": "Camera input",
-        "description": "Take a picture with user's camera and upload it",
+        "name": "User Camera",
+        "description": "Captures and uploads a photo using the user's camera.",
         "type": "camera-input",
         "events": [
             {
@@ -101,8 +101,8 @@ metadata = {
         ],
     },
     "cards-input": {
-        "name": "Card display",
-        "description": "Read a text value from the user simple text input",
+        "name": "Cards",
+        "description": "Presents options as cards for the user. Cards may be selectable.",
         "type": "cards-input",
         "events": [
             {
@@ -359,7 +359,7 @@ metadata = {
     },
     "checkbox-input": {
         "name": "Checkbox",
-        "description": "Allow users to select an option by interacting with a checkbox",
+        "description": "Enables a selection through a single checkbox interaction.",
         "type": "checkbox-input",
         "events": [
             {
@@ -484,7 +484,7 @@ metadata = {
     },
     "checklist-input": {
         "name": "Checklist",
-        "description": "Show a checklist for users to select items",
+        "description": "Displays a checklist allowing multiple item selections.",
         "type": "checklist-input",
         "events": [
             {
@@ -674,8 +674,8 @@ metadata = {
         ],
     },
     "cnpj-input": {
-        "name": "CNPJ input",
-        "description": "Allow users to insert a CNPJ number into the app.",
+        "name": "CNPJ Input",
+        "description": "CNPJ number input with validation and masking.",
         "type": "cnpj-input",
         "events": [
             {
@@ -790,8 +790,8 @@ metadata = {
         ],
     },
     "code-input": {
-        "name": "Code input",
-        "description": "Code input allow users to insert code and reads it.",
+        "name": "Code Input",
+        "description": "Accepts code input with syntax highlighting",
         "type": "code-input",
         "events": [
             {
@@ -900,8 +900,8 @@ metadata = {
         ],
     },
     "cpf-input": {
-        "name": "CPF input",
-        "description": "Allow users to insert a CPF number into the app.",
+        "name": "CPF Input",
+        "description": "CPF number input with validation and masking.",
         "type": "cpf-input",
         "events": [
             {
@@ -1016,8 +1016,8 @@ metadata = {
         ],
     },
     "currency-input": {
-        "name": "Currency input",
-        "description": "Currency input allows users to enter monetary values.",
+        "name": "Currency Input",
+        "description": "Enables monetary value input with currency formatting.",
         "type": "currency-input",
         "events": [
             {
@@ -1155,8 +1155,8 @@ metadata = {
     },
     "custom-input": {
         "type": "custom-input",
-        "name": "Custom widget",
-        "description": "Widget with customizable UI and behaviour",
+        "name": "Custom Widget",
+        "description": "Allows for a fully customizable widget with custom HTML, CSS, and JS.",
         "events": [
             {
                 "key": "custom-event",
@@ -1274,8 +1274,8 @@ metadata = {
         ],
     },
     "date-input": {
-        "name": "Date picker input",
-        "description": "Allow users to select  a date, or a range of dates.*",
+        "name": "Date Picker",
+        "description": "Provides a date picker with calendar interface.",
         "type": "date-input",
         "events": [
             {
@@ -1381,7 +1381,7 @@ metadata = {
     },
     "dropdown-input": {
         "name": "Dropdown",
-        "description": "Allow users to select one or more options by selecting items in a dropdown",
+        "description": "Provides a dropdown menu for single or multiple selections.",
         "type": "dropdown-input",
         "events": [
             {
@@ -1554,8 +1554,8 @@ metadata = {
         ],
     },
     "email-input": {
-        "name": "Email input",
-        "description": "Email input allow users to enter a valid email address.",
+        "name": "Email Input",
+        "description": " Collects and validates an email address.",
         "type": "email-input",
         "events": [
             {
@@ -1668,8 +1668,8 @@ metadata = {
         ],
     },
     "file-input": {
-        "name": "File upload area",
-        "description": "File upload adds a drop-area for users to upload one or more files",
+        "name": "File Upload",
+        "description": "Enables file upload via file explorer.",
         "type": "file-input",
         "events": [
             {
@@ -1806,8 +1806,8 @@ metadata = {
         ],
     },
     "image-input": {
-        "name": "Image upload",
-        "description": "Image upload adds a drop-area for users to upload one or more image files.",
+        "name": "Image Upload",
+        "description": "Allows for image file uploads with preview and validation.",
         "type": "image-input",
         "events": [
             {
@@ -1923,8 +1923,8 @@ metadata = {
         ],
     },
     "list-input": {
-        "name": "List of inputs",
-        "description": "Read a list value from the user",
+        "name": "Custom List",
+        "description": "Collects a dynamic list of values based on a specified schema.",
         "type": "list-input",
         "events": [
             {
@@ -2081,8 +2081,8 @@ metadata = {
         ],
     },
     "multiple-choice-input": {
-        "name": "Multiple choice",
-        "description": "Read a multiple choice value from the user",
+        "name": "Multiple Choice",
+        "description": "Offers multiple choice selections with single or multi-select options.",
         "type": "multiple-choice-input",
         "events": [
             {
@@ -2264,8 +2264,8 @@ metadata = {
         ],
     },
     "nps-input": {
-        "name": "NPS feedback",
-        "description": "NPS feedback allow users to rank their experience from 0 to 10.",
+        "name": "NPS Input",
+        "description": "Captures Net Promoter Score feedback with a 0-10 rating scale.",
         "type": "nps-input",
         "events": [
             {
@@ -2399,8 +2399,8 @@ metadata = {
         ],
     },
     "number-input": {
-        "name": "Number input",
-        "description": "Number input allow users to enter numeric values.",
+        "name": "Number Input",
+        "description": "Collects numeric input with optional min/max limits.",
         "type": "number-input",
         "events": [
             {
@@ -2524,8 +2524,8 @@ metadata = {
         ],
     },
     "number-slider-input": {
-        "name": "Number slider",
-        "description": "Allow users to select values in a slider bar. ",
+        "name": "Number Slider",
+        "description": "Provides a slider for selecting numerical values within a range.",
         "type": "number-slider-input",
         "events": [
             {
@@ -2649,8 +2649,8 @@ metadata = {
         ],
     },
     "pandas-row-selection-input": {
-        "name": "Table with selection",
-        "description": "Display a pandas dataframe as a table and allow the user to select rows",
+        "name": "Selectable Table",
+        "description": "Enables selection of rows from a displayed pandas DataFrame table.",
         "type": "pandas-row-selection-input",
         "events": [
             {
@@ -2814,7 +2814,7 @@ metadata = {
         ],
     },
     "password-input": {
-        "name": "Password input",
+        "name": "Password Input",
         "type": "password-input",
         "events": [
             {
@@ -2823,7 +2823,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Password input allow users to enter a password before seen the content.",
+        "description": "A password field, including strength validation options.",
         "pythonAPI": {
             "name": "read_password",
             "params": [
@@ -2990,8 +2990,8 @@ metadata = {
         ],
     },
     "phone-input": {
-        "name": "Phone input",
-        "description": "Phone input allow users to enter a valid phone number.",
+        "name": "Phone Input",
+        "description": "A phone inputs with country code and national number.",
         "type": "phone-input",
         "events": [
             {
@@ -3120,8 +3120,8 @@ metadata = {
         ],
     },
     "rating-input": {
-        "name": "Rating feedback",
-        "description": "Rating feedback allow users to rank their experience from 1 to 5 starts.",
+        "name": "Rating Input",
+        "description": "Collects user feedback with emoji icons.",
         "type": "rating-input",
         "events": [
             {
@@ -3250,7 +3250,7 @@ metadata = {
         ],
     },
     "rich-text-input": {
-        "name": "Rich text input",
+        "name": "Rich Text Input",
         "type": "rich-text-input",
         "events": [
             {
@@ -3259,7 +3259,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Rich text input allows users to type and format textual content.",
+        "description": "Offers a rich text editor for formatted textual input.",
         "pythonAPI": {
             "name": "read_richtext",
             "params": [
@@ -3359,7 +3359,7 @@ metadata = {
         ],
     },
     "tag-input": {
-        "name": "Tag input",
+        "name": "Tag Input",
         "type": "tag-input",
         "events": [
             {
@@ -3368,7 +3368,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a tag value from the user",
+        "description": "Enables input of tags or keywords with autocomplete suggestions.",
         "pythonAPI": {
             "name": "read_tag",
             "params": [
@@ -3472,8 +3472,8 @@ metadata = {
         ],
     },
     "text-input": {
-        "name": "Text input",
-        "description": "Text fields allow users to insert plain text.",
+        "name": "Text Input",
+        "description": "Collects plain text input with customizable placeholders and validation.",
         "type": "text-input",
         "events": [
             {
@@ -3597,7 +3597,7 @@ metadata = {
         ],
     },
     "textarea-input": {
-        "name": "Long text input",
+        "name": "Text Box Input",
         "type": "textarea-input",
         "events": [
             {
@@ -3606,7 +3606,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Long text input allow users to type longer textual content.",
+        "description": "Provides a text area for multi-line text input.",
         "pythonAPI": {
             "name": "read_textarea",
             "params": [
@@ -3706,7 +3706,7 @@ metadata = {
         ],
     },
     "time-input": {
-        "name": "Time input",
+        "name": "Time Input",
         "type": "time-input",
         "events": [
             {
@@ -3715,7 +3715,7 @@ metadata = {
                 "payloadSchema": [],
             }
         ],
-        "description": "Read a time value from the user",
+        "description": "Allows selection of a specific time.",
         "pythonAPI": {
             "name": "read_time",
             "params": [
@@ -3827,7 +3827,7 @@ metadata = {
     },
     "toggle-input": {
         "name": "Toggle",
-        "description": "Allow users to set between two items.",
+        "description": "Offers a toggle switch between two defined options.",
         "type": "toggle-input",
         "events": [
             {
@@ -3955,8 +3955,8 @@ metadata = {
         ],
     },
     "video-input": {
-        "name": "Video upload",
-        "description": "Video upload adds a drop-area for users to upload one or more video files.",
+        "name": "Video Upload",
+        "description": "Facilitates video file uploads with preview and size validation.",
         "type": "video-input",
         "events": [
             {
@@ -4077,7 +4077,7 @@ metadata = {
         ],
     },
     "file-output": {
-        "name": "Download file",
+        "name": "File Download",
         "description": "Show a button for the user to download a file.",
         "type": "file-output",
         "events": [],
@@ -4144,8 +4144,8 @@ metadata = {
         ],
     },
     "html-output": {
-        "name": "HTML",
-        "description": "Embed HTML to the app.",
+        "name": "HTML Embed",
+        "description": "Simple HTML embed widget.",
         "type": "html-output",
         "events": [],
         "pythonAPI": {
@@ -4202,8 +4202,8 @@ metadata = {
         ],
     },
     "iframe-output": {
-        "name": "iframe",
-        "description": "Embed content using iframe.",
+        "name": "Iframe Embed",
+        "description": "Embed content using an iframe.",
         "type": "iframe-output",
         "events": [],
         "pythonAPI": {
@@ -4280,7 +4280,7 @@ metadata = {
         ],
     },
     "image-output": {
-        "name": "Show image",
+        "name": "Image Display",
         "description": "Show an image to the user",
         "type": "image-output",
         "events": [],
@@ -4355,8 +4355,8 @@ metadata = {
         ],
     },
     "latex-output": {
-        "name": "Show Latex formula",
-        "description": "Show an Latex formula to the user",
+        "name": "Latex",
+        "description": "Display a latex formula to the user.",
         "type": "latex-output",
         "events": [],
         "pythonAPI": {
@@ -4420,8 +4420,8 @@ metadata = {
         ],
     },
     "link-output": {
-        "name": "Link (text URL)",
-        "description": "Allow users to see and open content from text links.",
+        "name": "Link",
+        "description": "Display a link to the user.",
         "type": "link-output",
         "events": [],
         "pythonAPI": {
@@ -4495,8 +4495,8 @@ metadata = {
         ],
     },
     "markdown-output": {
-        "name": "Markdown",
-        "description": "Show a formatted text to the user",
+        "name": "Markdown Display",
+        "description": "Show markdown formatted text to the user",
         "type": "markdown-output",
         "events": [],
         "pythonAPI": {
@@ -4695,8 +4695,8 @@ metadata = {
         ],
     },
     "plotly-output": {
-        "name": "Plotly graph",
-        "description": "Displays a Plotly figure to the user",
+        "name": "Plotly",
+        "description": "Displays a Plotly figure.",
         "type": "plotly-output",
         "events": [],
         "pythonAPI": {
@@ -4763,8 +4763,8 @@ metadata = {
         ],
     },
     "progress-output": {
-        "name": "Progress bar",
-        "description": "Show a progress bar when loading the app.",
+        "name": "Progress Bar",
+        "description": "Displays a progress bar to the user.",
         "type": "progress-output",
         "events": [],
         "pythonAPI": {
@@ -4841,7 +4841,7 @@ metadata = {
         ],
     },
     "text-output": {
-        "name": "Text display",
+        "name": "Text Display",
         "description": '"Text display" adds textual information into the app.',
         "type": "text-output",
         "events": [],
