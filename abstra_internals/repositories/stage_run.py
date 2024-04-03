@@ -56,8 +56,9 @@ class GetStageRunByQueryFilter:
     stage: Optional[Union[str, List[str]]] = None
     assignee: Optional[str] = None
     parent_id: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[List[str]] = None
     data: Optional[Dict] = None
+    search: Optional[str] = None
 
     @staticmethod
     def from_dict(data: dict) -> "GetStageRunByQueryFilter":
@@ -67,6 +68,7 @@ class GetStageRunByQueryFilter:
             parent_id=data.get("parent_id", None),
             status=data.get("status", None),
             data=data.get("data", None),
+            search=data.get("search", None),
         )
 
     def to_dict(self) -> dict:
@@ -166,7 +168,9 @@ class StageRunRepository(ABC):
 
     @abstractmethod
     def find_leaves(
-        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+        self,
+        filter: GetStageRunByQueryFilter,
+        pagination: Pagination,
     ) -> PaginatedListResponse:
         raise NotImplementedError()
 
@@ -225,21 +229,19 @@ class LocalStageRunRepository(StageRunRepository):
         results: List[StageRun] = []
 
         for stage_run in self._stage_runs:
-            if filter.stage:
-                if isinstance(filter.stage, list):
-                    if stage_run.stage not in filter.stage:
-                        continue
-                else:
-                    if stage_run.stage != filter.stage:
-                        continue
+            if filter.stage and stage_run.stage not in filter.stage:
+                continue
 
             if filter.data and not self._compare_data(stage_run.data, filter.data):
                 continue
 
-            if filter.status and stage_run.status != filter.status:
+            if filter.status and stage_run.status not in filter.status:
                 continue
 
             if filter.parent_id and stage_run.parent_id != filter.parent_id:
+                continue
+
+            if filter.search and not self._compare_search(stage_run, filter.search):
                 continue
 
             results.append(stage_run)
@@ -247,10 +249,19 @@ class LocalStageRunRepository(StageRunRepository):
         return results
 
     def _compare_data(self, data: dict, filter: dict) -> bool:
-        filtered_data = {k: v for k, v in data.items() if k in filter}
-        return serialize(filtered_data, sort_keys=True) == serialize(
-            filter, sort_keys=True
-        )
+        for key, value in filter.items():
+            if key not in data or data[key] not in value:
+                return False
+        return True
+
+    def _compare_search(self, stage_run: StageRun, search: str) -> bool:
+        # TODO: filter by stage title and stage type
+        status_match = search.lower() in stage_run.status.lower()
+        data_match = False
+        for key, value in stage_run.data.items():
+            if search.lower() in value.lower():
+                data_match = True
+        return status_match or data_match
 
     def find_ancestors(self, id: str) -> List[StageRun]:
         ancestors = []
@@ -262,7 +273,9 @@ class LocalStageRunRepository(StageRunRepository):
         return ancestors
 
     def find_leaves(
-        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+        self,
+        filter: GetStageRunByQueryFilter,
+        pagination: Pagination,
     ) -> PaginatedListResponse:
         filter_matches = self.find(filter)
         parent_ids = set(u.parent_id for u in self._stage_runs)
@@ -280,7 +293,6 @@ class LocalStageRunRepository(StageRunRepository):
         total_count = len(leaves)
         if pagination.offset >= total_count:
             return PaginatedListResponse(stage_runs=[], total_count=total_count)
-
         return PaginatedListResponse(
             stage_runs=leaves[pagination.offset : pagination.limit],
             total_count=total_count,
@@ -454,7 +466,9 @@ class RemoteStageRunRepository(StageRunRepository):
         return True
 
     def find_leaves(
-        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+        self,
+        filter: GetStageRunByQueryFilter,
+        pagination: Pagination,
     ) -> PaginatedListResponse:
         r = self._request(
             "GET",

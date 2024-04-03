@@ -36,35 +36,21 @@ from ...repositories.stage_run import (
 
 
 @dataclass
-class DataRequestSelection:
-    stage_id: str
-    limit: int
-    offset: int
-
-    @staticmethod
-    def from_dict(data: dict) -> "DataRequestSelection":
-        return DataRequestSelection(
-            stage_id=data["stage_id"],
-            offset=data.get("offset", 0),
-            limit=data.get("limit", 10),
-        )
-
-    def to_dict(self) -> dict:
-        return dict(stage_id=self.stage_id, offset=self.offset, limit=self.limit)
-
-
-@dataclass
 class DataRequestFilter:
-    status: Optional[str]
+    stage: Optional[List[str]]
+    status: Optional[List[str]]
     asignee: Optional[str]
     data: Optional[dict]
+    search: Optional[str]
 
     @staticmethod
     def from_dict(data: dict) -> "DataRequestFilter":
         return DataRequestFilter(
+            stage=data.get("stage", None),
             status=data.get("status", None),
             asignee=data.get("asignee", None),
             data=data.get("data", None),
+            search=data.get("search", None),
         )
 
     def to_dict(self) -> dict:
@@ -73,23 +59,20 @@ class DataRequestFilter:
 
 @dataclass
 class DataRequest:
-    selection: List[DataRequestSelection]
     filter: DataRequestFilter
+    limit: int
+    offset: int
 
     @staticmethod
     def from_dict(data: dict) -> "DataRequest":
         return DataRequest(
-            selection=[
-                DataRequestSelection.from_dict(s) for s in data.get("selection", [])
-            ],
             filter=DataRequestFilter.from_dict(data.get("filter", {})),
+            limit=data.get("limit", 10),
+            offset=data.get("offset", 0),
         )
 
     def to_dict(self) -> dict:
-        return dict(
-            selection=[s.to_dict() for s in self.selection],
-            filter=self.filter.to_dict(),
-        )
+        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
 
 
 @dataclass
@@ -116,6 +99,7 @@ class StageRunCard:
     updated_at: datetime
     status: str
     content: StageCardContent
+    stage: str
 
     def to_dict(self) -> dict:
         return dict(
@@ -124,6 +108,7 @@ class StageRunCard:
             updated_at=to_utc_iso_string(self.updated_at),
             status=self.status,
             content=[item.to_dict() for item in self.content],
+            stage=self.stage,
         )
 
 
@@ -162,32 +147,16 @@ class ColumnStage:
 
 
 @dataclass
-class KanbanColumn:
-    selected_stage: ColumnStage
+class KanbanData:
     stage_run_cards: List[StageRunCard]
-    stages: List[ColumnStage]
+    not_found_stages: List[str]
     total_count: int
 
     def to_dict(self) -> dict:
         return dict(
-            selected_stage=self.selected_stage.to_dict(),
-            stage_run_cards=[card.to_dict() for card in self.stage_run_cards],
-            stages=[stage.to_dict() for stage in self.stages],
-            total_count=self.total_count,
-        )
-
-
-@dataclass
-class KanbanData:
-    columns: List[KanbanColumn]
-    next_stage_options: List[ColumnStage]
-    not_found_stages: List[str]
-
-    def to_dict(self) -> dict:
-        return dict(
-            columns=[column.to_dict() for column in self.columns],
-            next_stage_options=[option.to_dict() for option in self.next_stage_options],
+            stage_run_cards=[column.to_dict() for column in self.stage_run_cards],
             not_found_stages=self.not_found_stages,
+            total_count=self.total_count,
         )
 
 
@@ -261,52 +230,34 @@ class KanbanController:
 
     def get_data(self, request: DataRequest) -> KanbanData:
         stages_not_found = []
-        selected_stage_ids = [s.stage_id for s in request.selection]
-        non_selected_stages_column = [
-            ColumnStage.create(c)
-            for c in self._get_project().workflow_stages
-            if c.id not in selected_stage_ids
+        selected_stage_ids = request.filter.stage or []
+        request_filter = GetStageRunByQueryFilter.from_dict(
+            data=request.filter.to_dict()
+        )
+        paginated_response = self.stage_run_repository.find_leaves(
+            filter=request_filter,
+            pagination=Pagination(limit=request.limit, offset=request.offset),
+        )
+        stage_run_cards = [
+            StageRunCard(
+                id=stage_run.id,
+                status=stage_run.status,
+                created_at=stage_run.created_at,
+                updated_at=stage_run.updated_at,
+                content=self.stage_run_content(stage_run),
+                stage=stage_run.stage,
+            )
+            for stage_run in paginated_response.stage_runs
         ]
-
-        columns: List[KanbanColumn] = []
-        for selection in request.selection:
-            request_filter = GetStageRunByQueryFilter.from_dict(
-                data=request.filter.to_dict()
-            )
-            request_filter.stage = selection.stage_id
-            paginated_response = self.stage_run_repository.find_leaves(
-                filter=request_filter,
-                pagination=Pagination(limit=selection.limit, offset=selection.offset),
-            )
-            stage_run_cards = [
-                StageRunCard(
-                    id=stage_run.id,
-                    status=stage_run.status,
-                    created_at=stage_run.created_at,
-                    updated_at=stage_run.updated_at,
-                    content=self.stage_run_content(stage_run),
-                )
-                for stage_run in paginated_response.stage_runs
-            ]
-            selected_stage = self._get_project().get_stage(selection.stage_id)
-            if not selected_stage:
-                stages_not_found.append(selection.stage_id)
-                continue
-            selected_stage_run = ColumnStage.create(selected_stage)
-
-            columns.append(
-                KanbanColumn(
-                    selected_stage=selected_stage_run,
-                    stage_run_cards=stage_run_cards,
-                    stages=non_selected_stages_column + [selected_stage_run],
-                    total_count=paginated_response.total_count,
-                )
-            )
+        for stage_id in selected_stage_ids:
+            exists = self._get_project().get_stage(stage_id)
+            if not exists:
+                stages_not_found.append(stage_id)
 
         return KanbanData(
-            columns=columns,
-            next_stage_options=non_selected_stages_column,
+            stage_run_cards=stage_run_cards,
             not_found_stages=stages_not_found,
+            total_count=paginated_response.total_count,
         )
 
     def get_ancestor_logs(
