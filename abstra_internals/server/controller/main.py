@@ -381,6 +381,21 @@ class MainController:
         headers = resolve_headers() or {}
         yield from get_ai_messages(messages, stage, headers)
 
+    # access_control
+    def list_access_controls(self):
+        project = ProjectRepository.load()
+        return project.list_access_controls()
+
+    def update_access_controls(self, changes: List[Dict[str, Any]]):
+        project = ProjectRepository.load()
+        response = project.update_access_controls(changes)
+        ProjectRepository.save(project)
+        return response
+
+    def get_access_control_by_stage_id(self, id):
+        project = ProjectRepository.load()
+        return project.get_access_control_by_stage_id(id)
+
     # files
     def save_file(self, file: FileStorage, filename: str):
         name, path = get_random_filepath(filename)

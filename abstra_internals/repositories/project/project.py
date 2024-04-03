@@ -1,8 +1,8 @@
-import json, os, shutil, sys, tempfile, uuid
+import json, os, shutil, sys, tempfile, uuid, re
 from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 from pydantic.dataclasses import dataclass
 from pathlib import Path
-
+from dataclasses import field
 from . import json_migrations
 from ...settings import Settings
 from ...utils.file import traverse_code
@@ -16,6 +16,36 @@ ServedStage = Union["FormStage", "HookStage"]
 ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
 ControlStage = Union["IteratorStage", "ConditionStage"]
 WorkflowStage = Union[ActionStage, ControlStage]
+
+
+@dataclass
+class SignupPolicy:
+    email_patterns: List[str]
+
+    @staticmethod
+    def create():
+        return SignupPolicy(email_patterns=[])
+
+    @staticmethod
+    def from_dict(data: dict):
+        return SignupPolicy(email_patterns=data.get("email_patterns", []))
+
+    @property
+    def as_dict(self):
+        return {"email_patterns": self.email_patterns}
+
+    def update(self, changes: Dict[str, Any]):
+        for attr, value in changes.items():
+            setattr(self, attr, value)
+
+    def allow(self, email: str) -> bool:
+        for pattern in self.email_patterns:
+            if pattern == "*":
+                return True
+            prog = re.compile(pattern.replace("*", ".*"))
+            if prog.match(email) is not None:
+                return True
+        return False
 
 
 @dataclass
@@ -303,6 +333,30 @@ class ScriptStage:
 
 
 @dataclass
+class AccessSettings:
+    is_public: bool
+    required_roles: List[str]
+
+    @staticmethod
+    def from_dict(data: dict):
+        return AccessSettings(
+            is_public=data.get("is_public", True),
+            required_roles=data.get("required_roles", []),
+        )
+
+    @property
+    def as_dict(self):
+        return {
+            "is_public": self.is_public,
+            "required_roles": self.required_roles,
+        }
+
+    def update(self, changes: Dict[str, Any]):
+        for attr, value in changes.items():
+            setattr(self, attr, value)
+
+
+@dataclass
 class JobStage:
     id: str
     file: str
@@ -310,6 +364,7 @@ class JobStage:
     schedule: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
+
     is_initial = True
 
     @staticmethod
@@ -409,6 +464,9 @@ class FormStage:
     timeout_message: Optional[str] = None
     start_button_text: Optional[str] = None
     restart_button_text: Optional[str] = None
+    access_control: AccessSettings = field(
+        default_factory=lambda: AccessSettings(is_public=True, required_roles=[])
+    )
 
     @staticmethod
     def create(
@@ -457,6 +515,7 @@ class FormStage:
                 variable_name=data["notification_trigger"]["variable_name"],
                 enabled=data["notification_trigger"]["enabled"],
             ),
+            access_control=AccessSettings.from_dict(data.get("access_control", {})),
         )
 
     @property
@@ -505,6 +564,7 @@ class FormStage:
                 if self.notification_trigger
                 else None
             ),
+            "access_control": self.access_control.as_dict,
         }
 
     @property
@@ -532,6 +592,8 @@ class FormStage:
                 setattr(self, attr, value)
             elif attr == "file":
                 _update_file(self, value)
+            elif attr == "access_control":
+                self.access_control = AccessSettings.from_dict(value)
             elif attr == "path":
                 setattr(self, attr, normalize_path(value))
             elif attr == "notification_trigger":
@@ -550,6 +612,15 @@ class FormStage:
                 "transitions": [],
             }
         )
+
+    def to_access_dto(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "type": self.type_name,
+            "is_public": self.access_control.is_public,
+            "required_roles": self.access_control.required_roles,
+        }
 
 
 @dataclass
@@ -829,15 +900,53 @@ class ConditionStage:
 
 
 @dataclass
+class KanbanView:
+    access_control: AccessSettings
+
+    @staticmethod
+    def from_dict(data: dict):
+        return KanbanView(
+            access_control=AccessSettings.from_dict(
+                data.get("access_control", {"is_public": False, "required_roles": []})
+            ),
+        )
+
+    @staticmethod
+    def create():
+        return KanbanView(
+            access_control=AccessSettings(is_public=False, required_roles=[]),
+        )
+
+    @property
+    def as_dict(self):
+        return {"access_control": self.access_control.as_dict}
+
+    def to_access_dto(self):
+        return {
+            "id": "kanban",
+            "title": "Kanban",
+            "type": "internal",
+            "is_public": self.access_control.is_public,
+            "required_roles": self.access_control.required_roles,
+        }
+
+    def update(self, id, changes: Dict[str, Any]):
+        if id == "access_control":
+            setattr(self, id, AccessSettings.from_dict(changes))
+
+
+@dataclass
 class Project:
     workspace: StyleSettings
     visualization: VisualizationSettings
+    kanban: KanbanView
     scripts: List[ScriptStage]
     forms: List[FormStage]
     hooks: List[HookStage]
     jobs: List[JobStage]
     iterators: List[IteratorStage]
     conditions: List[ConditionStage]
+    signup_policy: SignupPolicy
 
     _graph: Graph
 
@@ -857,12 +966,14 @@ class Project:
         return {
             "workspace": self.workspace.as_dict,
             "visualization": self.visualization.as_dict,
+            "kanban": self.kanban.as_dict,
             "jobs": [job.as_dict for job in self.jobs],
             "hooks": [hook.as_dict for hook in self.hooks],
             "forms": [form.as_dict for form in self.forms],
             "scripts": [script.as_dict for script in self.scripts],
             "iterators": [i.as_dict for i in self.iterators],
             "conditions": [c.as_dict for c in self.conditions],
+            "signup_policy": self.signup_policy.as_dict,
         }
 
     @property
@@ -876,6 +987,9 @@ class Project:
     def iter_entrypoints(self) -> Generator[Path, None, None]:
         for stage in self.actions:
             yield Path(stage.file)
+
+    def update_sign_up_policy(self, email_patterns: List[str]) -> None:
+        self.signup_policy.update({"email_patterns": email_patterns})
 
     @property
     def project_files(self) -> Generator[Path, None, None]:
@@ -920,6 +1034,57 @@ class Project:
                 return stage
 
         return None
+
+    def list_access_controls(self):
+        access_controls = [self.kanban.to_access_dto()]
+        access_controls.extend([stage.to_access_dto() for stage in self.forms])
+        return access_controls
+
+    def get_access_control_by_stage_id(self, id: str) -> Optional[AccessSettings]:
+        if id == "kanban":
+            return self.kanban.access_control
+        for stage in [*self.forms, *self.jobs]:
+            if stage.id == id:
+                return stage.access_control
+        return None
+
+    def get_access_control_by_stage_path(self, path: str) -> Optional[AccessSettings]:
+        if path == "kanban":
+            return self.kanban.access_control
+        form = self.get_form_by_path(path)
+        if form:
+            return form.access_control
+        return None
+
+    def get_secured_stage(self, id: str) -> Optional[FormStage]:
+        for stage in self.forms:
+            if stage.id == id:
+                return stage
+
+    def update_access_controls(self, changes: List[Dict[str, Any]]):
+        response = []
+        for change in changes:
+            id = change["id"]
+            del change["id"]
+            response.append(self.update_access_control(id, change))
+
+        return response
+
+    def update_access_control(self, id: str, change: Dict[str, Any]):
+        if id == "kanban":
+            self.kanban.update("access_control", change)
+            return self.kanban.to_access_dto()
+
+        stage = self.get_secured_stage(id)
+        if not stage:
+            raise StageNotFoundError(f"Stage with id '{id}' not found")
+        stage = self.update_stage(stage, {"access_control": change})
+        if not isinstance(stage, (FormStage)):
+            raise Exception(
+                f"Stage with id {stage.id} is a {type(stage.type_name)} does not have access control"
+            )
+
+        return stage.to_access_dto()
 
     def get_stage_raises(self, id: str) -> WorkflowStage:
         stage = self.get_stage(id)
@@ -1087,6 +1252,8 @@ class Project:
             visualization = VisualizationSettings.from_dict(data["visualization"])
 
             workspace = StyleSettings.from_dict(data["workspace"], forms=forms)
+            kanban = KanbanView.from_dict(data.get("kanban", {}))
+            signup_policy = SignupPolicy.from_dict(data.get("signup_policy", {}))
 
             return Project(
                 workspace=workspace,
@@ -1097,7 +1264,9 @@ class Project:
                 jobs=jobs,
                 iterators=iterators,
                 conditions=conditions,
+                kanban=kanban,
                 _graph=Graph.from_primitives(nodes=nodes, edges=edges),
+                signup_policy=signup_policy,
             )
 
         except Exception:
@@ -1118,7 +1287,9 @@ class Project:
             jobs=[],
             iterators=[],
             conditions=[],
+            kanban=KanbanView.create(),
             _graph=Graph.from_primitives([], []),
+            signup_policy=SignupPolicy.create(),
         )
 
 

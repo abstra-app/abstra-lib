@@ -7,6 +7,7 @@ from .project import (
     Project,
     FormStage,
     WorkflowTransition,
+    SignupPolicy,
 )
 
 
@@ -203,3 +204,10 @@ class ProjectTests(TestCase):
         self.assertEqual(p.get_next_stages_ids(form2.id), [])
 
         self.assertEqual(p.get_previous_stages_ids(form2.id), [form1.id])
+
+    def test_sign_up(self):
+        policy = SignupPolicy.create()
+        policy.update({"email_patterns": ["*@abstra.app"]})
+
+        self.assertTrue(policy.allow("user@abstra.app"))
+        self.assertFalse(policy.allow("external@evil.corp"))

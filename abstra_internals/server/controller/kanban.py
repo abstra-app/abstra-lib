@@ -5,8 +5,11 @@ from pydantic.dataclasses import dataclass
 from datetime import datetime
 
 from ...repositories import execution_logs_repository, stage_run_repository
-from ...repositories.members import members_repository_factory
-from ..guards.role_guard import RoleGuardFactory
+from ...repositories import users_repository
+from ..guards.role_guard import (
+    Guard,
+    StageIdSelector,
+)
 from ...utils.datetime import to_utc_iso_string
 from ..workflow_engine import workflow_engine
 from .workflows import make_stage_dto
@@ -25,7 +28,6 @@ from ...repositories.execution_logs import (
 )
 
 from ...repositories.stage_run import (
-    stage_run_repository_factory,
     GetStageRunByQueryFilter,
     StageRunRepository,
     Pagination,
@@ -377,10 +379,8 @@ def get_editor_bp():
 
 def get_player_bp():
     project_repository = ProjectRepository
-    stage_run_repository = stage_run_repository_factory()
 
-    members_repository = members_repository_factory()
-    guard = RoleGuardFactory(members_repository)
+    guard = Guard(users_repository)
 
     controller = KanbanController(
         stage_run_repository, project_repository, read_only=True
@@ -388,7 +388,7 @@ def get_player_bp():
     bp = flask.Blueprint("kanban", __name__)
 
     @bp.post("/")
-    @guard.requires("workflow_viewer")
+    @guard.by(StageIdSelector("kanban"))
     def _get_kanban():
         if flask.request.json is None:
             flask.abort(400)
@@ -396,7 +396,7 @@ def get_player_bp():
         return controller.get_data(req).to_dict()
 
     @bp.get("/logs/<stage_run_id>")
-    @guard.requires("workflow_viewer")
+    @guard.by(StageIdSelector("kanban"))
     def _get_ancestor_logs(stage_run_id: str):
         project = project_repository.load()
 
@@ -415,7 +415,7 @@ def get_player_bp():
         ]
 
     @bp.post("/jobs/<path:id>/start")
-    @guard.requires("workflow_viewer")
+    @guard.by(StageIdSelector("kanban"))
     def _start_job(id: str):
         stage = controller.get_job(id)
         if not stage:

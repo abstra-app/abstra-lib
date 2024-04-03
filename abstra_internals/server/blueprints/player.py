@@ -10,16 +10,23 @@ from ..controller import auth as auth_controller
 from ..controller import users as user_controller
 from ..controller import kanban as kanban_controller
 from ..controller import visualizations as visualizations_controller
+from ..controller import access_control as access_control_controller
 from ...execution import HookExecution, FormExecution
 from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
 from ...execution.stage_run_manager import (
     AttachedStageRunManager,
     DetachedStageRunManager,
 )
+
+from ..guards.role_guard import Guard, PathArgSelector
+
 from ...repositories import stage_run_repository_factory
+from ...repositories import users_repository
 
 
 def get_player_bp(controller: MainController):
+    guard = Guard(users_repository)
+
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
 
@@ -32,6 +39,9 @@ def get_player_bp(controller: MainController):
     kanban_bp = kanban_controller.get_player_bp()
     bp.register_blueprint(kanban_bp, url_prefix="/_kanban")
 
+    access_control_bp = access_control_controller.get_player_bp()
+    bp.register_blueprint(access_control_bp, url_prefix="/_access-control")
+
     visuvisualizations_bp = visualizations_controller.get_player_bp()
     bp.register_blueprint(visuvisualizations_bp, url_prefix="/_visualizations")
 
@@ -41,6 +51,7 @@ def get_player_bp(controller: MainController):
         return workspace.browser_runner_dto
 
     @bp.get("/_pages/<string:path>")
+    @guard.by(PathArgSelector("path"))
     def _get_page(path):
         form = controller.get_form_by_path(path)
         if not form:
