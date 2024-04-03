@@ -4,7 +4,7 @@ from pathlib import Path
 from .utils import assert_form
 from .fixtures import init_dir, clear_dir
 
-from abstra_internals.repositories.project.project import FormStage
+from abstra_internals.repositories.project.project import FormStage, NotificationTrigger
 
 
 class TestFormExamples(unittest.TestCase):
@@ -31,6 +31,9 @@ class TestFormExamples(unittest.TestCase):
             file=file_path.as_posix(),
             workflow_transitions=[],
             workflow_position=(0, 0),
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
         )
         assert_form(self, form_json, msgs, execution_id="execution-id")
 

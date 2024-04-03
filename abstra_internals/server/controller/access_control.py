@@ -1,0 +1,40 @@
+import flask
+
+from ...usage import usage
+from .main import MainController
+
+from ...repositories import users_repository
+from ..guards.role_guard import Guard
+
+
+def get_editor_bp(controller: MainController):
+    bp = flask.Blueprint("access_control", __name__)
+
+    @bp.get("/")
+    @usage
+    def _get_project_level_access_control():
+        return controller.list_access_controls()
+
+    @bp.put("/")
+    @usage
+    def _update_access_controls():
+        changes = flask.request.json
+        if not changes:
+            flask.abort(400)
+
+        access_control = controller.update_access_controls(changes)
+        return access_control if access_control else None
+
+    return bp
+
+
+def get_player_bp():
+    guard = Guard(users_repository)
+
+    bp = flask.Blueprint("player_access_control", __name__)
+
+    @bp.get("/allow/<string:path>")
+    def _get_allow_status_by_path(path: str):
+        return guard.allow(path).to_dict()
+
+    return bp

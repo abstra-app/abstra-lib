@@ -20,6 +20,9 @@ from ..controller import stage_runs as stage_runs_controller
 from ..controller import requirements as requirements_controller
 from ..controller import visualizations as visualizations_controller
 from ..controller import env_vars as envvars_controller
+from ..controller import roles as roles_controller
+from ..controller import access_control as access_control_controller
+from ..controller import users as user_controller
 
 
 def __get_api_bp(controller: MainController):
@@ -72,6 +75,15 @@ def __get_api_bp(controller: MainController):
 
     envvars_bp = envvars_controller.get_editor_bp()
     bp.register_blueprint(envvars_bp, url_prefix="/env-vars")
+
+    roles_bp = roles_controller.get_editor_bp()
+    bp.register_blueprint(roles_bp, url_prefix="/roles")
+
+    user_bp = user_controller.get_editor_bp()
+    bp.register_blueprint(user_bp, url_prefix="/users")
+
+    access_control_bp = access_control_controller.get_editor_bp(controller)
+    bp.register_blueprint(access_control_bp, url_prefix="/access-control")
 
     return bp
 

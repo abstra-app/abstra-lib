@@ -1,8 +1,8 @@
 import requests
+from typing import List
 from ..contracts_generated import (
     CloudApiCliBuildCreateResponse,
     CloudApiCliAuthInfoResponse,
-    CloudApiCliUserGetResponse,
 )
 from ..utils.environment import CLOUD_API_ENDPOINT
 
@@ -46,8 +46,3 @@ def get_ai_messages(messages, stage, headers: dict):
 def get_project_info(headers):
     url = f"{CLOUD_API_ENDPOINT}/cli/project"
     return requests.get(url, headers=headers).json()
-
-
-def get_user(headers, email: str) -> CloudApiCliUserGetResponse:
-    url = f"{CLOUD_API_ENDPOINT}/cli/users/{email}"
-    return CloudApiCliUserGetResponse(**requests.get(url, headers=headers).json())
