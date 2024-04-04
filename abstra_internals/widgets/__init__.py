@@ -29,7 +29,7 @@ def is_prop_required(widget_type: str, prop_name: str):
     try:
         prop = _get_prop(widget_type, prop_name)
         return not prop.isKwarg
-    except:
+    except Exception:
         return False
 
 
@@ -41,7 +41,7 @@ def _get_broker_prop(widget_type: str, prop_name: str):
 def get_widget_name(widget_type: str):
     try:
         return metadata_objects[widget_type].name
-    except:
+    except Exception:
         return None
 
 
@@ -49,5 +49,5 @@ def get_prop_type(widget_type: str, prop_name: str):
     try:
         prop = _get_prop(widget_type, prop_name)
         return prop.typeName
-    except:
+    except Exception:
         return None
