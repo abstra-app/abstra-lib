@@ -13,8 +13,8 @@ class CLI(object):
     usage: abstra <command> <resource> [<argument> ...] [parameters]
     """
 
-    def deploy(self, project_root: str = "."):
-        SettingsController.set_root_path(project_root)
+    def deploy(self, root_dir: str = "."):
+        SettingsController.set_root_path(root_dir)
         deploy()
 
     def version(self):
@@ -22,12 +22,12 @@ class CLI(object):
 
     def editor(
         self,
-        project_root: str = ".",
+        root_dir: str = ".",
         port: int = 3000,
         debug=False,
         load_dotenv=True,
     ):
-        SettingsController.set_root_path(project_root)
+        SettingsController.set_root_path(root_dir)
         SettingsController.set_server_port(port)
         editor(
             debug=debug,
@@ -36,14 +36,14 @@ class CLI(object):
 
     def serve(
         self,
-        project_root: str = ".",
+        root_dir: str = ".",
         port: int = 3000,
         debug=False,
         load_dotenv=True,
     ):
         print("This command is deprecated. Please use 'abstra editor' instead.")
         self.editor(
-            project_root=project_root,
+            root_dir=root_dir,
             port=port,
             debug=debug,
             load_dotenv=load_dotenv,
