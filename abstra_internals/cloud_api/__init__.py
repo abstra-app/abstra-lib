@@ -1,8 +1,10 @@
 import requests
-from typing import List
+
+from abstra_internals.logger import AbstraLogger
+
 from ..contracts_generated import (
-    CloudApiCliBuildCreateResponse,
     CloudApiCliAuthInfoResponse,
+    CloudApiCliBuildCreateResponse,
 )
 from ..utils.environment import CLOUD_API_ENDPOINT
 
@@ -22,7 +24,8 @@ def get_auth_info(headers: dict) -> dict:
     url = f"{CLOUD_API_ENDPOINT}/cli/auth-info"
     try:
         response = requests.get(url, headers=headers)
-    except:
+    except Exception as e:
+        AbstraLogger.capture_exception(e)
         return {"logged": False, "reason": "CONNECTION_ERROR"}
     if response.ok:
         response_data = CloudApiCliAuthInfoResponse.from_dict(response.json())

@@ -4,19 +4,21 @@ import shutil
 import sys
 import tempfile
 import uuid
-import re
-from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
-from pydantic.dataclasses import dataclass
-from pathlib import Path
 from dataclasses import field
-from . import json_migrations
+from pathlib import Path
+from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
+
+from pydantic.dataclasses import dataclass
+
+from abstra_internals.logger import AbstraLogger
+
 from ...settings import Settings
+from ...utils import check_is_url, nested_get
 from ...utils.file import traverse_code
-from ...utils.string import to_kebab_case
 from ...utils.format import normalize_path
 from ...utils.graph import Edge, Graph, Node
-from ...utils import check_is_url, nested_get
-
+from ...utils.string import to_kebab_case
+from . import json_migrations
 
 ServedStage = Union["FormStage", "HookStage"]
 ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
@@ -1277,11 +1279,9 @@ class Project:
                 signup_policy=signup_policy,
             )
 
-        except Exception:
+        except Exception as e:
             print("Error: incompatible abstra.json file.")
-            import traceback
-
-            traceback.print_exc()
+            AbstraLogger.capture_exception(e)
             sys.exit(1)
 
     @staticmethod

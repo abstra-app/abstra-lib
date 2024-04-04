@@ -1,7 +1,10 @@
-import json, os
+import json
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import List, Type
+
+from abstra_internals.logger import AbstraLogger
 
 from ....utils.dot_abstra import CONFIG_FILE_BACKUPS
 
@@ -69,6 +72,7 @@ def migrate(data: dict, path: Path):
                 print(warning)
 
         except Exception as e:
+            AbstraLogger.capture_exception(e)
             print(f"An error occurred during migration from {current_version}: {e}")
             raise
 
