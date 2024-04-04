@@ -1,7 +1,7 @@
 import flask
 
 
-from ...utils.email import is_valid_email
+from ...utils import is_valid_email
 from ...repositories import authn_repository
 
 

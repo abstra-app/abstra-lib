@@ -1,6 +1,4 @@
-from abstra_internals.logger import AbstraLogger
-import flask
-import flask_sock
+import flask, flask_sock
 import json
 
 from ...settings import Settings
@@ -105,8 +103,6 @@ def get_player_bp(controller: MainController):
 
             execution.run()
             workflow_engine.handle_execution_end(execution)
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
         finally:
             conn.close(message="Done")
 
@@ -143,8 +139,6 @@ def get_player_bp(controller: MainController):
             )
 
             execution.run()
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
         finally:
             conn.close(message="Done")
 

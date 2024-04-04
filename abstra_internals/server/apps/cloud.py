@@ -4,14 +4,14 @@ import flask_talisman
 from flask_talisman import ALLOW_FROM
 
 from ...cloud_init import cloud_setup
-from ...logger import AbstraLogger
+from ...server.sentry import init_sentry
 from ...utils.environment import ENABLE_TALISMAN
 from ..blueprints.player import get_player_bp
 from ..controller import MainController
 
 
 def get_cloud_app(root: str):
-    AbstraLogger.init("cloud")
+    init_sentry("cloud")
 
     cloud_setup(root)
 

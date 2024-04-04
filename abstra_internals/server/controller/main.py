@@ -44,7 +44,7 @@ from ...templates import (
     new_job_code,
     new_script_code,
 )
-from ...utils.file import files_from_directory, module2path, path2module
+from ...utils import files_from_directory, module2path, path2module
 from ...utils.dot_abstra import TEST_DATA_FILE
 from ...utils.validate import validate_json
 from ...widgets.apis import get_random_filepath, internal_path

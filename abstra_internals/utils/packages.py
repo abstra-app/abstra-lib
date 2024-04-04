@@ -1,6 +1,4 @@
-from abstra_internals.logger import AbstraLogger
-import json
-import requests
+import json, requests
 from pathlib import Path
 from datetime import datetime
 from packaging.version import Version
@@ -32,8 +30,7 @@ def get_cached_latest_version(root_path: Path, package_name="abstra"):
 
             created_at = cached_version["created_at"]
             version = cached_version["version"]
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
+        except:
             created_at = None
             version = None
 
