@@ -1,5 +1,9 @@
-import io, tempfile, pathlib, typing as t
-from .apis import upload_file, internal_path, get_random_filepath
+import io
+import pathlib
+import tempfile
+import typing as t
+
+from .apis import get_random_filepath, internal_path, upload_file
 
 
 def convert_file(file: t.Union[str, io.IOBase, pathlib.Path]) -> str:

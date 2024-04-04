@@ -1,8 +1,10 @@
-from unittest import TestCase, mock
-from pathlib import Path
-from abstra_internals.settings import Settings
-from abstra_internals.debug import make_debug_data
 from inspect import stack
+from pathlib import Path
+from unittest import TestCase, mock
+
+from abstra_internals.debug import make_debug_data
+from abstra_internals.settings import Settings
+
 from .resources.make_debug.module import func
 
 
@@ -25,7 +27,7 @@ class TestDebug(TestCase):
                     stack=[
                         dict(
                             filename=__file__,
-                            lineno=15,
+                            lineno=17,
                             name="test_make_debug_data_from_exception",
                             locals=mock.ANY,
                         )
@@ -44,7 +46,7 @@ class TestDebug(TestCase):
                     stack=[
                         dict(
                             filename=__file__,
-                            lineno=38,
+                            lineno=40,
                             name="test_make_debug_data_from_frames",
                             locals=mock.ANY,
                         )
@@ -72,7 +74,7 @@ class TestDebug(TestCase):
                     stack=[
                         dict(
                             filename=__file__,
-                            lineno=61,
+                            lineno=63,
                             name="test_make_debug_data_nested",
                             locals=mock.ANY,
                         ),
@@ -88,7 +90,7 @@ class TestDebug(TestCase):
                         ),
                         dict(
                             filename=__file__,
-                            lineno=58,
+                            lineno=60,
                             name="outer_func",
                             locals=mock.ANY,
                         ),

@@ -1,9 +1,9 @@
 import unittest
 from os.path import join
 
-from .fixtures import init_dir, clear_dir, get_local_client
+from abstra_internals.server.controller.main import MainController
 
-from abstra_internals.server.controller import MainController
+from .fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestWorkspace(unittest.TestCase):

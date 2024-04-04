@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from tests.fixtures import clear_dir, init_dir
 
-from ...server.controller import MainController
+from ...server.controller.main import MainController
 from .missing_entrypoint import AddEntrypoint, MissingEntrypoint
 
 

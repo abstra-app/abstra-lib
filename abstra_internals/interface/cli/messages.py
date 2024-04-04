@@ -1,4 +1,3 @@
-import sys
 from colorama import Fore, Style
 
 from ...settings import Settings

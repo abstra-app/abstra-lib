@@ -1,8 +1,10 @@
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
-from ...server.controller import MainController
-from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
+
+from tests.fixtures import clear_dir, init_dir
+
 from ...repositories.requirements import RequirementsRepository
+from ...server.controller.main import MainController
+from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
 
 
 class TestDuplicatePackagesInRequirements(TestCase):

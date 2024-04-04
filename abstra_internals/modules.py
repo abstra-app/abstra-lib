@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 from .logger import AbstraLogger
-
 from .repositories.project.project import ProjectRepository
 from .utils.file import path2module
 

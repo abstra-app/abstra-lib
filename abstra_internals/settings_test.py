@@ -1,7 +1,8 @@
-from unittest import TestCase
-from .settings import SettingsController
-from tempfile import gettempdir
 from pathlib import Path
+from tempfile import gettempdir
+from unittest import TestCase
+
+from .settings import SettingsController
 
 
 class SettingsTest(TestCase):

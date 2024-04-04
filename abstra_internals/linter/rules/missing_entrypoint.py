@@ -1,15 +1,15 @@
-from typing import Union, List
+from typing import List, Union
 
-from ..linter import LinterRule, LinterFix, LinterIssue
-from ...templates import new_hook_code, new_job_code, new_script_code, new_form_code
 from ...repositories.project.project import (
-    ProjectRepository,
-    ScriptStage,
+    ActionStage,
     FormStage,
     HookStage,
     JobStage,
-    ActionStage,
+    ProjectRepository,
+    ScriptStage,
 )
+from ...templates import new_form_code, new_hook_code, new_job_code, new_script_code
+from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class AddEntrypoint(LinterFix):

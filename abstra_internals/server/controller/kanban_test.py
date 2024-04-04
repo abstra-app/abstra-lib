@@ -1,14 +1,15 @@
-from datetime import datetime
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
-from .kanban import KanbanController, DataRequest, KanbanData, ColumnStage, StageRunCard
+
+from tests.fixtures import clear_dir, init_dir
+
 from ...repositories.project.project import (
-    ProjectRepository,
-    JobStage,
     FormStage,
+    JobStage,
     NotificationTrigger,
+    ProjectRepository,
 )
 from ...repositories.stage_run import LocalStageRunRepository
+from .kanban import DataRequest, KanbanController, KanbanData, StageRunCard
 
 
 class KanbanTests(TestCase):

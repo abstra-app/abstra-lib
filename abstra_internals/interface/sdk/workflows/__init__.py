@@ -1,10 +1,11 @@
 from typing import Optional
-from ....utils import serialize
-from ....utils.json import to_json_serializable
+
+from ....execution.execution import get_current_execution_throwable
 from ....execution.hook_execution import HookExecution
 from ....execution.stage_run_manager import UnsetStageRun
 from ....repositories.stage_run import GetStageRunByQueryFilter
-from ....execution.execution import get_current_execution_throwable
+from ....utils import serialize
+from ....utils.json import to_json_serializable
 
 
 def is_json_serializable(value):
@@ -28,7 +29,7 @@ def match_thread(filter: dict):
     stage_run = stage_runs[0]
     execution.set_stage_run(stage_run.id)
     if execution.status == "lock-failed":
-        raise Exception(f"Failed to lock execution")
+        raise Exception("Failed to lock execution")
 
 
 def get_data(key: Optional[str] = None):

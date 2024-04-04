@@ -1,11 +1,12 @@
-from unittest import TestCase
-from .json import to_json_serializable
 from dataclasses import dataclass
 from datetime import date, datetime
+from unittest import TestCase
 from uuid import UUID
+
 from ..interface.sdk.forms.page_response import PageResponse
 from ..interface.sdk.forms.step import StepsResponse
 from ..widgets.response_types import FileResponse, PhoneResponse
+from .json import to_json_serializable
 
 
 class TestToJsonSerializable(TestCase):

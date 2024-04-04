@@ -1,7 +1,7 @@
-from typing import List, Optional, Set
+from typing import List, Optional
+
 from ...repositories.requirements import RequirementsRepository
-import pkg_resources
-from ..linter import LinterRule, LinterFix, LinterIssue
+from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class MergeDuplicatePackages(LinterFix):

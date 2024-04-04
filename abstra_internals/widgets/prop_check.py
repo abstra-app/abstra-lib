@@ -1,26 +1,27 @@
 import typing
-from .metadata_parsed import metadata_objects, WBrokerAPIParams
+
+from .metadata_parsed import WBrokerAPIParams, metadata_objects
 
 
 def types_compatible(prop, typeName: typing.Union[typing.List[str], str]):
-    if type(typeName) == list:
+    if isinstance(typeName, list):
         return any(types_compatible(prop, tn) for tn in typeName)
 
-    if prop == None:
+    if prop is None:
         return True
 
     if typeName == "string":
-        return type(prop) == str
+        return isinstance(prop, str)
     if typeName == "number":
-        return type(prop) == int or type(prop) == float
+        return isinstance(prop, int) or isinstance(prop, float)
     if typeName == "boolean":
-        return type(prop) == bool
+        return isinstance(prop, bool)
     if typeName == "array":
-        return type(prop) == list
+        return isinstance(prop, list)
     if typeName == "object":
-        return type(prop) == dict
+        return isinstance(prop, dict)
     if typeName == "null":
-        return prop == None
+        return prop is None
     if typeName == "any":
         return True
 
@@ -47,7 +48,7 @@ def to_generic_type(type):
         return "array"
     if type == dict:
         return "object"
-    if type == None:
+    if type is None:
         return "null"
     raise Exception(f"Unknown type: {type}")
 
@@ -58,7 +59,7 @@ def validate_widget_props(widget):
 
     for prop in required_props:
         prop_name = prop.argName
-        if not prop_name in widget:
+        if prop_name not in widget:
             raise Exception(
                 f"Error in {widget['type']}: {prop_name} not in {widget.keys()}"
             )

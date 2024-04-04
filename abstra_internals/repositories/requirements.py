@@ -1,11 +1,13 @@
 import ast
-from shutil import move
-from pathlib import Path
-from tempfile import mkdtemp
 from dataclasses import dataclass
-from typing import List, Optional, Set, Dict
-from pkg_resources import get_distribution
+from pathlib import Path
+from shutil import move
+from tempfile import mkdtemp
+from typing import Dict, List, Optional, Set
+
 from importlib_metadata import packages_distributions
+from pkg_resources import get_distribution
+
 from ..settings import Settings
 from .project.project import ProjectRepository
 
@@ -165,11 +167,12 @@ class RequirementsRepository:
                             lib_name = package_dist.get(package_name)
                             if lib_name is None:
                                 continue
-                            for l in lib_name:
+                            for lib in lib_name:
                                 imported_modules.add(
                                     RequirementRecommendation(
                                         requirement=Requirement(
-                                            name=l, version=get_distribution(l).version
+                                            name=lib,
+                                            version=get_distribution(lib).version,
                                         ),
                                         reason_file=python_file,
                                         reason_line=node.lineno,
@@ -189,11 +192,11 @@ class RequirementsRepository:
                         lib_name = package_dist.get(package_name)
                         if lib_name is None:
                             continue
-                        for l in lib_name:
+                        for lib in lib_name:
                             imported_modules.add(
                                 RequirementRecommendation(
                                     requirement=Requirement(
-                                        name=l, version=get_distribution(l).version
+                                        name=lib, version=get_distribution(lib).version
                                     ),
                                     reason_file=python_file,
                                     reason_line=node.lineno,

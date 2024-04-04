@@ -1,8 +1,14 @@
-import tempfile, requests, zipfile, uuid, pathlib
-from ...settings import Settings
-from ...credentials import resolve_headers
-from ...utils.file import files_from_directory
+import pathlib
+import tempfile
+import uuid
+import zipfile
+
+import requests
+
 from ...cloud_api import create_build, update_build
+from ...credentials import resolve_headers
+from ...settings import Settings
+from ...utils.file import files_from_directory
 
 
 def _generate_zip_file() -> pathlib.Path:

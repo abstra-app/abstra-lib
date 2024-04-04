@@ -1,5 +1,7 @@
-import pkg_resources, requests
 from enum import Enum
+
+import pkg_resources
+import requests
 
 from ...settings import Settings
 from ...utils import packages as pkg_utils

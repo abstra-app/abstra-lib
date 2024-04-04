@@ -1,6 +1,7 @@
 import fire
-from abstra_internals.interface.cli.editor import editor
+
 from abstra_internals.interface.cli.deploy import deploy
+from abstra_internals.interface.cli.editor import editor
 from abstra_internals.interface.cli.version import check_latest_version
 from abstra_internals.settings import SettingsController
 

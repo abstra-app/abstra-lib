@@ -1,4 +1,10 @@
-import io, tempfile, shutil, uuid, typing as t, pathlib
+import io
+import pathlib
+import shutil
+import tempfile
+import typing as t
+import uuid
+
 from werkzeug.datastructures import FileStorage
 
 

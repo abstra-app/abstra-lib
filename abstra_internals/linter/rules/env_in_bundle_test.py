@@ -1,5 +1,7 @@
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
+
+from tests.fixtures import clear_dir, init_dir
+
 from .env_in_bundle import EnvInBundle
 
 

@@ -1,3 +1,6 @@
+# flake8: noqa
+# Can't use __all__ yet because of the wildcard imports and code generation
+
 from abstra_internals.interface.sdk.forms.generated.inputs import *
 from abstra_internals.interface.sdk.forms.generated.outputs import *
 from abstra_internals.interface.sdk.forms.page import Page

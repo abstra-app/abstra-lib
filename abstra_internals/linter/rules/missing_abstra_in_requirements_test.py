@@ -1,11 +1,14 @@
 from unittest import TestCase
+
 import pkg_resources
 from pkg_resources import get_distribution as gd
+
 from tests.fixtures import clear_dir, init_dir
-from ...server.controller import MainController
+
+from ...server.controller.main import MainController
 from .missing_abstra_in_requirements import (
-    MissingAbstraInRequirements,
     AbstraVersionInRequirementsIsBehindInstalled,
+    MissingAbstraInRequirements,
 )
 
 
@@ -34,13 +37,13 @@ class MissingAbstraInRequirementsTest(TestCase):
     def test_missing_abstra_in_requirements_valid_with_requirements(self):
         rule = MissingAbstraInRequirements()
         requirements_txt = self.root / "requirements.txt"
-        requirements_txt.write_text(f"abstra==1.0.0")
+        requirements_txt.write_text("abstra==1.0.0")
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_missing_abstra_in_requirements_invalid_with_different_version(self):
         rule = MissingAbstraInRequirements()
         requirements_txt = self.root / "requirements.txt"
-        requirements_txt.write_text(f"abstra==0.0.1")
+        requirements_txt.write_text("abstra==0.0.1")
         issues = rule.find_issues()
         self.assertEqual(len(issues), 1)
         self.assertIsInstance(issues[0], AbstraVersionInRequirementsIsBehindInstalled)
@@ -58,4 +61,4 @@ class MissingAbstraInRequirementsTest(TestCase):
         self.assertTrue(requirements_txt.exists())
         with requirements_txt.open("r") as file:
             content = file.read()
-            self.assertTrue(f"abstra==1.0.0" in content)
+            self.assertTrue("abstra==1.0.0" in content)

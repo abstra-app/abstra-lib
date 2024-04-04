@@ -7,7 +7,7 @@ from ..widget_base import Input, MultipleHandler
 
 
 class FileInput(Input):
-    type = "file-input"
+    type = 'file-input'
     multiple: bool = False
     multiple_handler: MultipleHandler
 
@@ -16,35 +16,26 @@ class FileInput(Input):
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
-        self.label = props.get("label", "Label")
-        self.required = props.get("required", True)
-        self.hint = props.get("hint", None)
-        self.full_width = props.get("full_width", False)
-        self.disabled = props.get("disabled", False)
-        self.max_file_size = props.get("max_file_size", None)
-        self.multiple = props.get("multiple", False)
-        self.value = props.get("initial_value", self.empty_value)
+        self.label = props.get('label', 'Label')
+        self.required = props.get('required', True)
+        self.hint = props.get('hint', None)
+        self.full_width = props.get('full_width', False)
+        self.disabled = props.get('disabled', False)
+        self.max_file_size = props.get('max_file_size', None)
+        self.multiple = props.get('multiple', False)
+        self.value = props.get('initial_value', self.empty_value)
         self.multiple_handler = MultipleHandler(self.multiple, self.required)
 
     def render(self, ctx: dict):
-        return {
-            "type": self.type,
-            "key": self.key,
-            "hint": self.hint,
-            "label": self.label,
-            "value": self.serialize_value(),
-            "required": self.required,
-            "multiple": self.multiple,
-            "fullWidth": self.full_width,
-            "disabled": self.disabled,
-            "maxFileSize": self.max_file_size,
-            "errors": self.errors,
-        }
+        return {'type': self.type, 'key': self.key, 'hint': self.hint,
+            'label': self.label, 'value': self.serialize_value(),
+            'required': self.required, 'multiple': self.multiple,
+            'fullWidth': self.full_width, 'disabled': self.disabled,
+            'maxFileSize': self.max_file_size, 'errors': self.errors}
 
     @staticmethod
-    def __get_file_uri(
-        value: Union[FileResponse, str, BufferedReader, TextIOWrapper]
-    ) -> str:
+    def __get_file_uri(value: Union[FileResponse, str, BufferedReader,
+        TextIOWrapper]) ->str:
         if isinstance(value, str):
             if Path(value).is_file():
                 return upload_file(open(value))
@@ -56,14 +47,13 @@ class FileInput(Input):
             return upload_file(value)
         if isinstance(value, TextIOWrapper):
             return upload_file(value)
-        return ""
+        return ''
 
-    def serialize_value(self) -> List[str]:
+    def serialize_value(self) ->List[str]:
         values_list = self.multiple_handler.value_to_list(self.value)
         return [FileInput.__get_file_uri(item) for item in values_list]
 
-    def parse_value(
-        self, value: Optional[List[str]]
-    ) -> Union[FileResponse, List[FileResponse], None]:
+    def parse_value(self, value: Optional[List[str]]) ->Union[FileResponse,
+        List[FileResponse], None]:
         file_responses = [FileResponse(item) for item in value or []]
         return self.multiple_handler.value_to_list_or_value(file_responses)

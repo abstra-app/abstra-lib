@@ -1,7 +1,8 @@
 from unittest import TestCase
+
 from abstra_internals.repositories.stage_run import (
-    LocalStageRunRepository,
     GetStageRunByQueryFilter,
+    LocalStageRunRepository,
     Pagination,
 )
 

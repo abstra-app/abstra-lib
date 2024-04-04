@@ -3,8 +3,8 @@ from .generated.outputs import display_plotly
 
 def _overload_plotly_show():
     try:
-        from plotly.io import renderers
         from plotly.graph_objects import Figure
+        from plotly.io import renderers
         from plotly.io._base_renderers import ExternalRenderer
 
         class FormsRenderer(ExternalRenderer):

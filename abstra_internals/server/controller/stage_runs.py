@@ -1,15 +1,14 @@
+from typing import Optional
+
 import flask
 
 from ...repositories import stage_run_repository
-from ...usage import usage
-
 from ...repositories.stage_run import (
     GetStageRunByQueryFilter,
-    StageRunRepository,
     Pagination,
+    StageRunRepository,
 )
-
-from typing import Optional
+from ...usage import usage
 
 
 class StageRunsController:

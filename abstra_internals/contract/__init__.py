@@ -1,2 +1,8 @@
-from . import forms as forms_contract  # exported
-from .forms import Message, ExecutionStdioMessage  # exported
+from . import forms as forms_contract
+from .forms import ExecutionStdioMessage, Message
+
+__all__ = [
+    "forms_contract",
+    "Message",
+    "ExecutionStdioMessage",
+]

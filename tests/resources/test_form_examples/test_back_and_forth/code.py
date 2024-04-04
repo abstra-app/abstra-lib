@@ -1,4 +1,4 @@
-from abstra.forms import *
+from abstra.forms import Page, run_steps
 
 page1 = Page().read_number("a")
 page2 = Page().read_number("b")

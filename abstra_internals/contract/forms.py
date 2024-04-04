@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Union, List, Literal, TypedDict, Dict
+from typing import Dict, List, Literal, Optional, TypedDict, Union
 
 
 class ValidationResult(TypedDict):

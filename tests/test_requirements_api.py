@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from abstra_internals.server.controller.main import MainController
 
-from .fixtures import init_dir, clear_dir, get_local_client
+from .fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestRequirementsApi(TestCase):

@@ -1,9 +1,10 @@
 import unittest
 from pathlib import Path
 
+from tests.fixtures import clear_dir, init_dir
+
 from .dot_abstra import DOT_ABSTRA_FOLDER_NAME
-from .file import module2path, path2module, files_from_directory
-from tests.fixtures import init_dir, clear_dir
+from .file import files_from_directory, module2path, path2module
 
 
 class Module2PathTest(unittest.TestCase):

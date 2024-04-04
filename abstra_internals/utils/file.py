@@ -1,11 +1,11 @@
 import ast
-import fnmatch, re
+import fnmatch
 import os
+import re
 from pathlib import Path
 from typing import Generator, Optional, Union
 
 from .dot_abstra import DOT_ABSTRA_FOLDER_NAME
-
 
 GIT_FOLDER = ".git"
 ABSTRA_IGNORE = ".abstraignore"
@@ -19,7 +19,7 @@ def get_ignore_files(dir: Path):
     ignored = [IGNOREFILE.name, GITIGNORE.name, abstra_path.name, git_path.name]
 
     if IGNOREFILE.exists():
-        with open(IGNOREFILE, "r", encoding="utf-8") as f:
+        with open(IGNOREFILE, "r", encoding="utf-8"):
             ignored.extend(IGNOREFILE.read_text(encoding="utf-8").split("\n"))
     elif GITIGNORE.exists():
         ignored.extend(GITIGNORE.read_text(encoding="utf-8").split("\n"))

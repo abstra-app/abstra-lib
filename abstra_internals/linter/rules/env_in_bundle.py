@@ -1,7 +1,8 @@
-from ..linter import LinterRule, LinterFix, LinterIssue
-from ...settings import Settings
 from typing import List
+
+from ...settings import Settings
 from ...utils.file import files_from_directory
+from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class AddEnvToAbstraIgnore(LinterFix):

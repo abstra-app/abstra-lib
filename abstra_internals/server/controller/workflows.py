@@ -1,18 +1,21 @@
-from typing import TypedDict, Dict, Optional
-from abstra_internals.logger import AbstraLogger
+from typing import Dict, Optional, TypedDict
+
 import flask
+
+from abstra_internals.logger import AbstraLogger
+
 from ...repositories.project.project import (
     ConditionStage,
+    FormStage,
+    HookStage,
     IteratorStage,
+    JobStage,
     NotificationTrigger,
     Project,
     ProjectRepository,
-    FormStage,
-    JobStage,
-    HookStage,
     ScriptStage,
-    WorkflowTransition,
     WorkflowStage,
+    WorkflowTransition,
 )
 from ...usage import usage
 from .main import MainController, UnknownNodeTypeError

@@ -1,7 +1,8 @@
 import json
-from ...utils import serialize
+
 from ...settings import Settings
 from ...templates import vscode_launch_json
+from ...utils import serialize
 
 CONNECTED_PORT = None
 

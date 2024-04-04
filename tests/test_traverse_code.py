@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from .fixtures import init_dir, clear_dir
-
 from abstra_internals.utils.file import traverse_code
+
+from .fixtures import clear_dir, init_dir
 
 
 class TestTraverseCode(unittest.TestCase):

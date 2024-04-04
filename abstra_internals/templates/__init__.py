@@ -1,5 +1,5 @@
-import pathlib, json
-from pkg_resources import get_distribution
+import json
+import pathlib
 
 abstraignore = (pathlib.Path(__file__).parent / "abstraignore").read_text(
     encoding="utf-8"

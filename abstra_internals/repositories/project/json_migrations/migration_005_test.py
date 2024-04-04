@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from .migration_005 import Migration005
 
 

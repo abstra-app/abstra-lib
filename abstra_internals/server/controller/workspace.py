@@ -1,17 +1,14 @@
 import flask
-import json
-from ...usage import usage
-from ...settings import Settings
-from .main import MainController
 
+from ...settings import Settings
 from ...templates import (
-    new_script_code,
     new_form_code,
     new_hook_code,
     new_job_code,
+    new_script_code,
 )
-
-from ...utils.validate import validate_json
+from ...usage import usage
+from .main import MainController
 
 
 def get_editor_bp(controller: MainController):

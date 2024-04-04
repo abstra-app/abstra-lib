@@ -1,9 +1,10 @@
 import typing
 from dataclasses import is_dataclass
-from ..forms.step import StepsResponse
+
 from ..forms.page_response import PageResponse
-from .utils import escape_ref, quoted_identifier, serialize
+from ..forms.step import StepsResponse
 from . import comparators as cmp
+from .utils import escape_ref, quoted_identifier, serialize
 
 
 def _execute(query: str, params: typing.List):  # private api

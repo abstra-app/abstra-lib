@@ -1,7 +1,7 @@
 from datetime import date
 from unittest import TestCase
 
-from . import serialize, deserialize, is_serializable, check_is_url, nested_get
+from . import check_is_url, deserialize, is_serializable, nested_get, serialize
 
 
 class SerializeTest(TestCase):
