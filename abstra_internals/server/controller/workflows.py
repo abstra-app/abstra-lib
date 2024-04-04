@@ -1,5 +1,4 @@
 from typing import TypedDict, Dict, Optional
-from abstra_internals.logger import AbstraLogger
 import flask
 from ...repositories.project.project import (
     ConditionStage,
@@ -255,20 +254,18 @@ def get_editor_bp(controller: MainController):
         try:
             return get_workflow()
         except Exception as e:
-            AbstraLogger.capture_exception(e)
             return str(e), 500
 
     @bp.put("/")
     @usage
     def _update_workflow():
-        try:
-            payload = flask.request.json
-            if payload is None:
-                raise Exception("No payload found")
-            new_state = update_workflow(payload)
-            return new_state
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
-            return str(e), 500
+        # try:
+        payload = flask.request.json
+        if payload is None:
+            raise Exception("No payload found")
+        new_state = update_workflow(payload)
+        return new_state
+        # except Exception as e:
+        #     return str(e), 500
 
     return bp

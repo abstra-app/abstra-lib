@@ -1,8 +1,6 @@
-import inspect
-import traceback
-import typing
-from dataclasses import dataclass
+import inspect, typing, traceback
 from types import TracebackType
+from dataclasses import dataclass
 
 from .settings import Settings
 
@@ -14,7 +12,7 @@ def representations(locals: typing.Dict):
     for key, value in list(locals.items()):
         try:
             result[key] = repr(value)
-        except Exception:
+        except:
             pass
     return result
 

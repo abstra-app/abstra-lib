@@ -83,7 +83,7 @@ def processVariants(partial):
     try:
         variant_attributes = partial["attr_list"]
         partial["var_list"]
-    except Exception:
+    except:
         print("couldn't save variants")
 
     # TODO: Rejigger other and dimension variants here

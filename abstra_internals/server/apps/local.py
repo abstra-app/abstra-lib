@@ -1,15 +1,14 @@
 import flask
 import flask_cors
 
-from abstra_internals.logger import AbstraLogger
-
+from ...server.sentry import init_sentry
 from ..blueprints.editor import get_editor_bp
 from ..blueprints.player import get_player_bp
 from ..controller import MainController
 
 
 def get_local_app(controller: MainController) -> flask.Flask:
-    AbstraLogger.init("local")
+    init_sentry("local")
 
     app = flask.Flask(__name__)
     app.url_map.strict_slashes = False

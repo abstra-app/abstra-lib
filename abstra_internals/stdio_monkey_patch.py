@@ -1,8 +1,6 @@
 import sys
 from typing import Callable, Literal, Union
 
-from abstra_internals.logger import AbstraLogger
-
 from .env_masker import GLOBAL_MASKER
 from .execution.execution import Execution
 from .stdio_skip_request import ESCAPE_STRING
@@ -37,7 +35,6 @@ def writeWraper(
             execution.stdio(type, text)
         write(term_output)
     except Exception as e:
-        AbstraLogger.capture_exception(e)
         if print_exceptions:
             write(f"[STDIO_WRAPPER_ERROR]: {e}")
     finally:
