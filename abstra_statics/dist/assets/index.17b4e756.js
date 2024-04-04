@@ -1,0 +1,2 @@
+import{B as n,R as o}from"./Badge.8eccecad.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},t=new Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]="5e285b10-cb0a-45cc-9403-160c172f58ef",e._sentryDebugIdIdentifier="sentry-dbid-5e285b10-cb0a-45cc-9403-160c172f58ef")}catch{}})();n.install=function(e){return e.component(n.name,n),e.component(o.name,o),e};
+//# sourceMappingURL=index.17b4e756.js.map
