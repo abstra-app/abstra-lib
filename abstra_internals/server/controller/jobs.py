@@ -1,21 +1,19 @@
-import flask
-
 import json
+
+import flask
 
 from ...execution.job_execution import JobExecution
 from ...execution.stage_run_manager import (
     AttachedStageRunManager,
     DetachedStageRunManager,
 )
-
-from ...repositories.stage_run import stage_run_repository_factory
-
 from ...repositories import (
     execution_logs_repository,
     execution_repository,
     stage_run_repository,
 )
 from ...repositories.execution_logs import FormEventLogEntry
+from ...repositories.stage_run import stage_run_repository_factory
 from ...usage import usage
 from ..utils import is_it_true
 from ..workflow_engine import workflow_engine

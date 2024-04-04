@@ -1,9 +1,10 @@
-from ..contracts_generated import CommonUserRoles, CommonUser
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Any, List
+from typing import Any, Dict, Optional
+
 import requests
 
-from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS
+from ..contracts_generated import CommonUserRoles
+from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class MembersRepository(ABC):

@@ -1,5 +1,6 @@
-from .utils import quoted_identifier
 from typing import Tuple
+
+from .utils import quoted_identifier
 
 
 class Comparator:

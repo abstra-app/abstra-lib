@@ -1,8 +1,10 @@
-import jwt
 import typing
 from dataclasses import dataclass
+
+import jwt
+
 from .utils.email import is_valid_email
-from .utils.environment import PUBLIC_KEY, PROJECT_ID
+from .utils.environment import PROJECT_ID, PUBLIC_KEY
 
 USER_AUTH_HEADER_KEY = "Authorization"
 API_AUTH_HEADER_KEY = "Api-Authorization"

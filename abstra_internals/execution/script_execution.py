@@ -1,8 +1,9 @@
 from typing import Optional
+
+from ..repositories.execution import ExecutionRepository
+from ..repositories.execution_logs import ExecutionLogsRepository
 from ..repositories.project.project import ScriptStage
 from .execution import Execution, RequestData
-from ..repositories.execution_logs import ExecutionLogsRepository
-from ..repositories.execution import ExecutionRepository
 from .stage_run_manager import StageRunManager
 
 

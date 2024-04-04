@@ -1,6 +1,6 @@
-import unittest
 import ast
-from typing import List
+import unittest
+
 from .code import function_called_args, subscript_called_args
 
 # Include the implementation of FunctionCallVisitor and function_called_args here (not repeated to save space)

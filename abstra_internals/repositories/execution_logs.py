@@ -1,16 +1,18 @@
-import json, requests
-from pathlib import Path
-from datetime import datetime
+import json
 from abc import ABC, abstractmethod
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
+
+import requests
 
 from ..threaded import threaded
 from ..utils import serialize
-from .serializer import SerializationHelper
+from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 from ..utils.dot_abstra import LOCAL_LOGS_FOLDER
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
-from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
+from .serializer import SerializationHelper
 
 
 class LogEntryFactory:

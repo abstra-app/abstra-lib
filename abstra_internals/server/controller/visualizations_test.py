@@ -1,11 +1,13 @@
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
-from .visualizations import VisualizationsController
+
+from tests.fixtures import clear_dir, init_dir
+
 from ...repositories.project.project import (
     ProjectRepository,
-    VisualizationSettings,
     VisualizationItem,
+    VisualizationSettings,
 )
+from .visualizations import VisualizationsController
 
 
 class VisualizationsTest(TestCase):

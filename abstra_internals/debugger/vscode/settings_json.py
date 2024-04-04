@@ -1,7 +1,9 @@
-import json, sys
+import json
+import sys
 from typing import Union
-from ...utils import serialize
+
 from ...settings import Settings
+from ...utils import serialize
 
 
 class EverythingSet:

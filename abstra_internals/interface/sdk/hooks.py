@@ -1,8 +1,8 @@
 import json
 from io import BytesIO
 
-from ...utils import serialize
 from ...execution import HookExecution
+from ...utils import serialize
 
 
 def _app_json_parse(body: str):

@@ -64,7 +64,7 @@ class NotificationTrigger:
     enabled: bool
 
     def validate_email(self, email: str) -> bool:
-        return type(email) == str and "@" in email
+        return isinstance(email, str) and "@" in email
 
     def get_recipients(self, thread_data: Dict[str, Any]) -> List[str]:
         variable_name = self.variable_name
@@ -102,9 +102,9 @@ class WorkflowTransition:
     def matches(self, variable_value):
         if self.type != "conditions:patternMatched":
             return False
-        if type(variable_value) == int or type(variable_value) == float:
+        if isinstance(variable_value, int) or isinstance(variable_value, float):
             return self.condition_value == str(variable_value)
-        if type(variable_value) == str:
+        if isinstance(variable_value, str):
             return self.condition_value == variable_value
         elif variable_value is None:
             return self.condition_value is None or self.condition_value == ""

@@ -1,7 +1,9 @@
 from unittest import TestCase
-from .unset_get_data import UnsetGetData
-from tests.fixtures import init_dir, clear_dir
+
+from tests.fixtures import clear_dir, init_dir
+
 from ...repositories.project.project import ProjectRepository, ScriptStage
+from .unset_get_data import UnsetGetData
 
 
 class UnsetGetDataTest(TestCase):

@@ -1,13 +1,15 @@
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
+
+from tests.fixtures import clear_dir, init_dir
+
 from .project import (
+    FormStage,
     NotificationTrigger,
+    Project,
     ProjectRepository,
     ScriptStage,
-    Project,
-    FormStage,
-    WorkflowTransition,
     SignupPolicy,
+    WorkflowTransition,
 )
 
 

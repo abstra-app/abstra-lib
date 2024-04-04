@@ -20,7 +20,7 @@ def representations(locals: typing.Dict):
 
 
 def traceback_to_infos(
-    traceback: typing.Union[TracebackType, None]
+    traceback: typing.Union[TracebackType, None],
 ) -> typing.List[inspect.FrameInfo]:
     return inspect.getouterframes(traceback.tb_frame) if traceback else []
 

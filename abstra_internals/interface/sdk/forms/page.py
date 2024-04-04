@@ -54,14 +54,14 @@ class Page(WidgetSchema):
         """
 
         actions = actions if actions != "i18n_next_action" else self.__actions
-        end_program = end_program if end_program != False else self.__end_program
+        end_program = end_program if end_program is not False else self.__end_program
         reactive_polling_interval = (
             reactive_polling_interval
             if reactive_polling_interval != 0
             else self.__reactive_polling_interval
         )
         self.__context = context if context is not None else self.__context
-        validate = validate if validate != None else self.__validate
+        validate = validate if validate is not None else self.__validate
 
         if self.__context:
             for widget in self.widgets:
@@ -172,10 +172,10 @@ class Page(WidgetSchema):
 
         if validation:
             validation_response = validation(payload)
-            if type(validation_response) == bool:
+            if isinstance(validation_response, bool):
                 validation_status = validation_response
                 validation_message = ""
-            elif type(validation_response) == str:
+            elif isinstance(validation_response, str):
                 validation_status = False
                 validation_message = validation_response
 

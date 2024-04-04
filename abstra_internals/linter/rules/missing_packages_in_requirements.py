@@ -1,9 +1,10 @@
-from ..linter import LinterRule, LinterFix, LinterIssue
+from typing import Sequence
+
 from ...repositories.requirements import (
-    RequirementsRepository,
     RequirementRecommendation,
+    RequirementsRepository,
 )
-from typing import List, Sequence
+from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class AddMissingPackagesToRequirements(LinterFix):
@@ -28,7 +29,7 @@ class PackageNotInRequirementsFound(LinterIssue):
                 f"You're importing the {recommendation.requirement.name}.",
                 f"It is being used in {recommendation.reason_file}:{recommendation.reason_line}:",
                 f"{recommendation.reason_code}",
-                f"But it's not in your requirements.txt file.",
+                "But it's not in your requirements.txt file.",
             ]
         )
         self.fixes = [AddMissingPackagesToRequirements(recommendation)]

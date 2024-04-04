@@ -1,20 +1,22 @@
-import flask
-from typing import Callable
+from dataclasses import dataclass
 from functools import wraps
+from typing import Callable, Optional, Union
+
+import flask
+
 from ...contracts_generated import (
-    CommonUserRolesItem,
     AbstraLibApiPlayerUserNavigationGuard as NavigationGuard,
 )
-from ...repositories.users import UsersRepository
-from ...repositories.project.project import (
-    ProjectRepository,
-    Project,
-    AccessSettings,
+from ...contracts_generated import (
+    CommonUserRolesItem,
 )
 from ...jwt_auth import UserClaims
-from typing import Callable, Optional
-from dataclasses import dataclass
-from typing import Union
+from ...repositories.project.project import (
+    AccessSettings,
+    Project,
+    ProjectRepository,
+)
+from ...repositories.users import UsersRepository
 
 
 def default_auth_decoder(auth_header: str) -> Optional[UserClaims]:

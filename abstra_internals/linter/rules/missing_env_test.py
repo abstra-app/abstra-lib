@@ -1,7 +1,9 @@
 from unittest import TestCase
-from .missing_env import MissingEnv
-from tests.fixtures import init_dir, clear_dir
+
+from tests.fixtures import clear_dir, init_dir
+
 from ...repositories.project.project import ProjectRepository, ScriptStage
+from .missing_env import MissingEnv
 
 
 class TestMissingEnv(TestCase):

@@ -1,13 +1,13 @@
-from pathlib import Path
 import os
-import tempfile
 import shutil
+import tempfile
 import typing
-from abstra_internals.repositories.project.project import ProjectRepository
+from pathlib import Path
 
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.server import get_cloud_app, get_local_app
+from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import SettingsController
-from abstra_internals.server.controller import MainController
-from abstra_internals.server import get_local_app, get_cloud_app
 
 
 def rm_tree(pth: Path):

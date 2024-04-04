@@ -1,5 +1,11 @@
-import requests, typing, abc, jwt, datetime
-from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS, PROJECT_ID
+import abc
+import datetime
+import typing
+
+import jwt
+import requests
+
+from ..utils.environment import PROJECT_ID, SIDECAR_HEADERS, SIDECAR_URL
 
 
 def endcode_fake_jwt(email: str):

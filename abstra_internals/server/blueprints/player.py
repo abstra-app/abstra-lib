@@ -1,29 +1,28 @@
-from abstra_internals.logger import AbstraLogger
-import flask
-import flask_sock
 import json
 
-from ...settings import Settings
-from ..utils import send_from_dist
-from ..controller.main import MainController
-from ..workflow_engine import workflow_engine
+import flask
+import flask_sock
+
+from abstra_internals.logger import AbstraLogger
+
+from ...execution import FormExecution, HookExecution
 from ...execution.execution import RequestData
-from ..controller import auth as auth_controller
-from ..controller import users as user_controller
-from ..controller import kanban as kanban_controller
-from ..controller import visualizations as visualizations_controller
-from ..controller import access_control as access_control_controller
-from ...execution import HookExecution, FormExecution
-from ...utils.environment import BUILD_ID, SIDECAR_SHARED_TOKEN, SHOW_WATERMARK
 from ...execution.stage_run_manager import (
     AttachedStageRunManager,
     DetachedStageRunManager,
 )
-
+from ...repositories import stage_run_repository_factory, users_repository
+from ...settings import Settings
+from ...utils.environment import BUILD_ID, SHOW_WATERMARK, SIDECAR_SHARED_TOKEN
+from ..controller import access_control as access_control_controller
+from ..controller import auth as auth_controller
+from ..controller import kanban as kanban_controller
+from ..controller import users as user_controller
+from ..controller import visualizations as visualizations_controller
+from ..controller.main import MainController
 from ..guards.role_guard import Guard, PathArgSelector
-
-from ...repositories import stage_run_repository_factory
-from ...repositories import users_repository
+from ..utils import send_from_dist
+from ..workflow_engine import workflow_engine
 
 
 def get_player_bp(controller: MainController):

@@ -1,12 +1,13 @@
-import unittest, io
-
-from .fixtures import clear_dir, init_dir, get_cloud_client
+import io
+import unittest
 
 from abstra_internals.server import get_local_app
+from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.utils import send_from_dist
-from abstra_internals.widgets.file_utils import convert_file
 from abstra_internals.widgets.apis import get_random_filepath
-from abstra_internals.server.controller import MainController
+from abstra_internals.widgets.file_utils import convert_file
+
+from .fixtures import clear_dir, get_cloud_client, init_dir
 
 
 class TestFileSending(unittest.TestCase):

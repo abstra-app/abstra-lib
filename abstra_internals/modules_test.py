@@ -1,6 +1,8 @@
 from unittest import TestCase
+
+from tests.fixtures import clear_dir, init_dir
+
 from .modules import import_as_new, reload_project_local_modules
-from tests.fixtures import init_dir, clear_dir
 from .repositories.project.project import ProjectRepository, ScriptStage
 
 

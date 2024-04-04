@@ -1,7 +1,9 @@
-from typing import List
 import abc
+from typing import List
+
 import requests
-from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS, PROJECT_ID
+
+from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class NotificationRepository(abc.ABC):

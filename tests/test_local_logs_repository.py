@@ -1,13 +1,13 @@
 import unittest
 from datetime import datetime
-from .fixtures import init_dir, clear_dir
-
 
 from abstra_internals.repositories.execution_logs import (
+    FormEventLogEntry,
     LocalExecutionLogsRepository,
     StdioLogEntry,
-    FormEventLogEntry,
 )
+
+from .fixtures import clear_dir, init_dir
 
 
 class TestLocalExecutionLogsRepository(unittest.TestCase):

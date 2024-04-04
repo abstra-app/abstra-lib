@@ -1,8 +1,8 @@
 from typing import List
 
-from ...utils import packages as pkg_utils
-from ..linter import LinterRule, LinterFix, LinterIssue
 from ...repositories.requirements import RequirementsRepository
+from ...utils import packages as pkg_utils
+from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class AddAbstraToRequirements(LinterFix):

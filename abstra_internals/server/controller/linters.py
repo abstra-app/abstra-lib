@@ -1,7 +1,8 @@
 import flask
+
 from ...contracts_generated import (
-    AbstraLibApiEditorLintersFixResponse,
     AbstraLibApiEditorLintersCheckResponse,
+    AbstraLibApiEditorLintersFixResponse,
     AbstraLibApiEditorLintersRule,
 )
 from ...linter.rules import rules

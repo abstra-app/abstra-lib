@@ -1,14 +1,16 @@
-import copy, uuid, json, requests
-from datetime import datetime
+import copy
+import json
+import uuid
 from abc import ABC, abstractmethod
-from pydantic import ConfigDict, Field
-from pydantic.dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Dict, List, Mapping, Optional, Union
 
-from ..utils import serialize
+import requests
+from pydantic import ConfigDict, Field
+from pydantic.dataclasses import dataclass
+
 from ..utils.datetime import from_utc_iso_string
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
-
 from ..utils.validate import validate_json
 
 end_status = ["failed", "finished", "abandoned"]
@@ -370,7 +372,7 @@ class LocalStageRunRepository(StageRunRepository):
     def fork(
         self, stage_run: StageRun, custom_thread_data: Optional[str] = None
     ) -> StageRun:
-        if stage_run.parent_id == None:
+        if stage_run.parent_id is None:
             return self.create_initial(stage_run.stage, {})
         parent_stage_run = self.get(stage_run.parent_id)
         new_stage_run = stage_run.clone_to_waiting()
@@ -472,7 +474,7 @@ class RemoteStageRunRepository(StageRunRepository):
     ) -> PaginatedListResponse:
         r = self._request(
             "GET",
-            path=f"/leaves",
+            path="/leaves",
             params={**filter.to_dict(), **pagination.to_dict()},
             raise_for_status=False,
         )

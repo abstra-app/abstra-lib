@@ -1,10 +1,9 @@
 import flask
 
-from ...usage import usage
-from .main import MainController
-
 from ...repositories import users_repository
+from ...usage import usage
 from ..guards.role_guard import Guard
+from .main import MainController
 
 
 def get_editor_bp(controller: MainController):

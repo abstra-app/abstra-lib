@@ -1,7 +1,10 @@
-import requests, typing, abc
+import abc
+import typing
+
+import requests
 
 from ..credentials import resolve_headers
-from ..utils.environment import SIDECAR_URL, CLOUD_API_CLI_URL, SIDECAR_HEADERS
+from ..utils.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
 
 
 class TablesApiHttpClient(abc.ABC):

@@ -1,16 +1,15 @@
 from typing import Dict, List, Optional
 
 from ...execution.execution import Execution
-from ...execution.stage_run_manager import UnsetStageRun
 from ...execution.job_execution import JobExecution
 from ...execution.script_execution import ScriptExecution
+from ...execution.stage_run_manager import AttachedStageRunManager, UnsetStageRun
 from ...repositories import (
     execution_logs_repository,
     execution_repository,
     notification_repository,
     stage_run_repository,
 )
-from ...execution.stage_run_manager import AttachedStageRunManager
 from ...repositories.execution import ExecutionRepository
 from ...repositories.execution_logs import ExecutionLogsRepository
 from ...repositories.notifications import NotificationRepository

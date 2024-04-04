@@ -1,16 +1,16 @@
 import time
+from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
-from datetime import datetime
 
-from .fixtures import clear_dir, init_dir, get_local_client
-
-from abstra_internals.server.fs_watcher import reload_files_on_change
 from abstra_internals.repositories.project.project import (
-    ProjectRepository,
     HookStage,
     Project,
+    ProjectRepository,
 )
+from abstra_internals.server.fs_watcher import reload_files_on_change
+
+from .fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestHotReloadLocalModules(TestCase):

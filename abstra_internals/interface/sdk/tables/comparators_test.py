@@ -1,20 +1,19 @@
 from unittest import TestCase
+
 from .comparators import (
-    is_eq,
-    is_neq,
-    is_gt,
     is_between,
+    is_eq,
+    is_gt,
     is_gte,
     is_in,
-    is_lt,
     is_like,
+    is_lt,
     is_lte,
+    is_neq,
     is_not_in,
     is_not_like,
-    is_null,
     is_not_null,
-    is_ilike,
-    is_not_ilike,
+    is_null,
 )
 
 

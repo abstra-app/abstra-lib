@@ -5,29 +5,24 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, ClassVar, Dict, Literal, Optional, Tuple, Union
 
-from .stage_run_manager import StageRunManager
-
 from ..compatibility import compat_traceback
 from ..modules import import_as_new
-from ..repositories.project.project import ActionStage
-from ..repositories.stage_run import (
-    StageRun,
-)
-
 from ..repositories.execution import (
+    ExecutionDTO,
     ExecutionRepository,
     ExecutionStatus,
-    ExecutionDTO,
 )
-
 from ..repositories.execution_logs import (
     ExecutionLogsRepository,
     StdioLogEntry,
     UnhandledExceptionLogEntry,
 )
 from ..repositories.project.project import ActionStage
-from ..repositories.stage_run import StageRun
+from ..repositories.stage_run import (
+    StageRun,
+)
 from ..utils.datetime import to_utc_iso_string
+from .stage_run_manager import StageRunManager
 
 
 class NoExecutionFound(Exception):

@@ -7,7 +7,7 @@ from ...cloud_init import cloud_setup
 from ...logger import AbstraLogger
 from ...utils.environment import ENABLE_TALISMAN
 from ..blueprints.player import get_player_bp
-from ..controller import MainController
+from ..controller.main import MainController
 
 
 def get_cloud_app(root: str):

@@ -1,9 +1,9 @@
 import flask
 
 from ...repositories.project.project import (
-    VisualizationSettings,
     ProjectRepository,
     VisualizationItem,
+    VisualizationSettings,
 )
 
 

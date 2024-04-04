@@ -1,8 +1,9 @@
-from typing import Union
 from dataclasses import dataclass
-from .file_utils import download_file
 from io import BufferedReader
 from tempfile import _TemporaryFileWrapper
+from typing import Union
+
+from .file_utils import download_file
 
 
 class FileResponse:

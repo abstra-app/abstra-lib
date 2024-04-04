@@ -5,7 +5,7 @@ from abstra_internals.logger import AbstraLogger
 
 from ..blueprints.editor import get_editor_bp
 from ..blueprints.player import get_player_bp
-from ..controller import MainController
+from ..controller.main import MainController
 
 
 def get_local_app(controller: MainController) -> flask.Flask:

@@ -1,14 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from ..repositories.project.project import ActionStage
 from ..repositories.stage_run import (
+    GetStageRunByQueryFilter,
     StageRun,
     StageRunRepository,
-    GetStageRunByQueryFilter,
 )
-
-from ..repositories.project.project import ActionStage
-from ..repositories.stage_run import StageRun, StageRunRepository
 
 
 class InvalidStageRunId(Exception):

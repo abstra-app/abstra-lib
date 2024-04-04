@@ -1,12 +1,14 @@
 from unittest import TestCase
-from .unset_match_thread import UnsetMatchThread
-from tests.fixtures import init_dir, clear_dir
+
+from tests.fixtures import clear_dir, init_dir
+
 from ...repositories.project.project import (
+    HookStage,
     ProjectRepository,
     ScriptStage,
-    HookStage,
     WorkflowTransition,
 )
+from .unset_match_thread import UnsetMatchThread
 
 
 class UnsetMatchThreadTest(TestCase):

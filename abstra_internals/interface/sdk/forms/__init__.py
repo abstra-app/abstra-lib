@@ -1,3 +1,6 @@
+# flake8: noqa
+# Can't use __all__ yet because of the wildcard imports and code generation
+
 from ....proxy import ReadOnlyProxyDict
 from ..common import execute_js, get_query_params, get_user, redirect  # exported
 from .generated.inputs import *

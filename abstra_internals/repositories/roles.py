@@ -1,14 +1,14 @@
-import requests
 from typing import List
+
+import requests
 
 from ..contracts_generated import (
     CommonRole,
 )
-from ..utils.environment import CLOUD_API_ENDPOINT
-
 from ..credentials import (
     resolve_headers,
 )
+from ..utils.environment import CLOUD_API_ENDPOINT
 
 
 class RolesRepository:

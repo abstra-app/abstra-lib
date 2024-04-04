@@ -1,5 +1,6 @@
+from typing import Dict, TypeVar
+
 from ..utils import serialize
-from typing import TypeVar, Dict
 
 T = TypeVar("T")
 

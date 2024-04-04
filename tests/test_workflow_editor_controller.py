@@ -1,8 +1,10 @@
 from unittest import TestCase
-from .fixtures import init_dir, clear_dir
+
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.controller.workflows import get_workflow, update_workflow
+
+from .fixtures import clear_dir, init_dir
 
 
 class TestWorkflowEditorController(TestCase):

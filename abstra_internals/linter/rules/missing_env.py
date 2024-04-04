@@ -1,9 +1,10 @@
-from ..linter import LinterRule, LinterIssue, LinterFix
-from ...repositories.env_vars import EnvVarsRepository
-from typing import Set, List
 import webbrowser
-from ...contracts_generated import AbstraLibApiEditorEnvVarsModel
 from pathlib import Path
+from typing import List, Set
+
+from ...contracts_generated import AbstraLibApiEditorEnvVarsModel
+from ...repositories.env_vars import EnvVarsRepository
+from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class AddEnvToEnvFile(LinterFix):

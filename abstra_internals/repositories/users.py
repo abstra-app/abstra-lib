@@ -1,14 +1,16 @@
-from abstra_internals.logger import AbstraLogger
-from ..contracts_generated import CommonUserRoles, CommonUser
-from abc import ABC, abstractmethod
-from typing import Dict, Optional, Any, List
-import requests
 import datetime
 import json
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional
 
+import requests
+
+from abstra_internals.logger import AbstraLogger
+
+from ..contracts_generated import CommonUser, CommonUserRoles
 from ..settings import Settings
-from ..utils.environment import SIDECAR_URL, SIDECAR_HEADERS
 from ..utils.dot_abstra import LOCAL_USERS_FILE
+from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class UsersRepository(ABC):

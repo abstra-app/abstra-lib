@@ -1,19 +1,22 @@
 from __future__ import annotations  # required for type check
 
-import datetime, inspect, flask_sock
-from simple_websocket.ws import ConnectionClosed
+import datetime
+import inspect
 from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
-from ..jwt_auth import UserClaims
-from ..debug import make_debug_data
-from ..contract import forms_contract
-from ..utils import deserialize, serialize
+import flask_sock
+from simple_websocket.ws import ConnectionClosed
+
 from ..compatibility import compat_traceback
-from ..utils.environment import IS_PRODUCTION
-from .stage_run_manager import StageRunManager
+from ..contract import forms_contract
+from ..debug import make_debug_data
+from ..jwt_auth import UserClaims
 from ..repositories.execution import ExecutionRepository
-from .execution import ABSTRA_RUN_KEY, Execution, NoExecutionFound, RequestData
 from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
+from ..utils import deserialize, serialize
+from ..utils.environment import IS_PRODUCTION
+from .execution import ABSTRA_RUN_KEY, Execution, NoExecutionFound, RequestData
+from .stage_run_manager import StageRunManager
 
 if TYPE_CHECKING:
     from ..repositories.project.project import FormStage
@@ -34,7 +37,7 @@ class FormExecution(Execution):
     @staticmethod
     def broadcast(msg: forms_contract.Message):
         for e in list(Execution.executions.values()):
-            if isinstance(e, FormExecution) and e.connected and e.closed == False:
+            if isinstance(e, FormExecution) and e.connected and not e.closed:
                 e.send(msg)
 
     def __init__(

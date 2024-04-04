@@ -1,12 +1,13 @@
-from abstra_internals.logger import AbstraLogger
 import json
-import requests
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import requests
 from packaging.version import Version
 
-from .dot_abstra import CACHED_VERSIONS_DIR
+from abstra_internals.logger import AbstraLogger
 
+from .dot_abstra import CACHED_VERSIONS_DIR
 
 EXPIRE_PERIOD = 60 * 60 * 4  # 4 hours
 TIMEOUT = 5
@@ -54,7 +55,7 @@ def get_cached_latest_version(root_path: Path, package_name="abstra"):
         update_cached_latest_version(root_path, latest_version, package_name)
 
         return Version(latest_version)
-    except:
+    except Exception:
         return None
 
 

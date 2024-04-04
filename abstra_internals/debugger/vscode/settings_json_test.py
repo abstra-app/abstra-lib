@@ -1,16 +1,18 @@
-import json, sys
+import json
+import sys
 from unittest import TestCase
-from tests.fixtures import init_dir, clear_dir
+
 from abstra_internals.utils import serialize
+from tests.fixtures import clear_dir, init_dir
 
 from .settings_json import (
-    configure_settings_json,
-    MismatchedPythonPath,
-    check_settings_json,
+    EverythingSet,
     InvalidSettingsJson,
+    MismatchedPythonPath,
     MissingPythonPath,
     NoSettingsJson,
-    EverythingSet,
+    check_settings_json,
+    configure_settings_json,
 )
 
 

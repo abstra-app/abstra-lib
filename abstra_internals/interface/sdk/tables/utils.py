@@ -1,7 +1,8 @@
-from ....utils import serialize as json_serialize
 import typing
-from datetime import datetime, date
+from datetime import date, datetime
 from uuid import UUID
+
+from ....utils import serialize as json_serialize
 
 
 def escape_ref(ref: str):

@@ -1,7 +1,6 @@
-from token import OP
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Optional, TypedDict, Union, TypeVar
+from typing import Any, Callable, List, Optional, TypedDict, TypeVar, Union
 
 
 class Widget(ABC):
@@ -52,16 +51,16 @@ class Input(Widget):
 
     def is_value_unset(self) -> bool:
         return (
-            self.value == None
+            self.value is None
             or self.value == ""
             or self.value == []
-            or (isinstance(self.empty_value, bool) and self.value == False)
+            or (isinstance(self.empty_value, bool) and self.value is False)
             or self.value == {}
         )
 
     def _validate_required(self) -> List[str]:
         if self.required and self.is_value_unset():
-            if type(self.required) == str:
+            if isinstance(self.required, str):
                 return [self.required]
 
             return ["i18n_error_required_field"]
@@ -147,7 +146,7 @@ class MultipleHandler:
 
     def validate(self, value: Union[object, List[object]]) -> List[str]:
         if self.required and self._is_value_unset(value):
-            if type(self.required) == str:
+            if isinstance(self.required, str):
                 return [self.required]
 
             return ["i18n_error_required_field"]
@@ -194,7 +193,7 @@ class NumberValueHandler:
     def validate(self, value: Union[int, float]) -> List[str]:
         errors = []
         if self.required and value is None:
-            if type(self.required) == str:
+            if isinstance(self.required, str):
                 errors.append(self.required)
             else:
                 errors.append("i18n_error_required_field")

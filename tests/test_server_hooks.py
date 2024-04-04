@@ -1,6 +1,9 @@
-import unittest, pathlib
-from .fixtures import init_dir, clear_dir, get_local_client
+import pathlib
+import unittest
+
 from abstra_internals.templates import new_hook_code
+
+from .fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestHooks(unittest.TestCase):

@@ -2,4 +2,4 @@ from .FileInput import FileInput
 
 
 class VideoInput(FileInput):
-    type = "video-input"
+    type = 'video-input'

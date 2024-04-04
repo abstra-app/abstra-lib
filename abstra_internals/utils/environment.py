@@ -20,5 +20,14 @@ FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
 SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
-WORKER_UUID = lambda: os.getenv("ABSTRA_WORKER_UUID")  # Set during runtime
-SERVER_UUID = lambda: os.getenv("ABSTRA_SERVER_UUID")  # Set during runtime
+
+
+# gunicorn.conf.py imports this functions, do not move them
+def WORKER_UUID():
+    # Set during runtime
+    return os.getenv("ABSTRA_WORKER_UUID")
+
+
+def SERVER_UUID():
+    # Set during runtime
+    return os.getenv("ABSTRA_SERVER_UUID")

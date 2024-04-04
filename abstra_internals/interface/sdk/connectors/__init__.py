@@ -1,1 +1,3 @@
-from .classes import get_connector, ConnectorExecutionError
+from .classes import ConnectorExecutionError, get_connector
+
+__all__ = ["get_connector", "ConnectorExecutionError"]

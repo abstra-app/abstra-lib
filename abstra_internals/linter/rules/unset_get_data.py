@@ -1,10 +1,10 @@
-from ..linter import LinterRule, LinterIssue
-from typing import Set, List, Dict, Tuple
 import ast
 from pathlib import Path
+from typing import Dict, List, Set, Tuple
+
 from ...repositories.project.project import ProjectRepository
 from ...utils.code import function_called_args
-
+from ..linter import LinterIssue, LinterRule
 
 # "item" is injected by a iterator in the workflow.
 # TODO: Check if there is a iterator before ignoring "item".

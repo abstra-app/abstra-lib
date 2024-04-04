@@ -1,6 +1,7 @@
 from typing import Literal
-import sentry_sdk
+
 import pkg_resources
+import sentry_sdk
 
 from .utils import is_testing
 

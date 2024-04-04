@@ -3,7 +3,7 @@ from collections import deque
 from threading import get_ident
 
 from abstra.forms import Page
-from abstra_internals.execution import FormExecution, Execution
+from abstra_internals.execution import Execution, FormExecution
 
 
 class MockFormExecution(FormExecution):

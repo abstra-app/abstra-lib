@@ -1,15 +1,15 @@
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Literal, Optional
+
 import requests
 from pydantic.dataclasses import dataclass
-from typing import Literal, Optional, Dict, Any
-from abc import ABC, abstractmethod
 
 from ..utils.environment import (
+    SERVER_UUID,
     SIDECAR_HEADERS,
     SIDECAR_URL,
-    SERVER_UUID,
     WORKER_UUID,
 )
-
 
 ExecutionStatus = Literal["running", "lock-failed", "failed", "finished", "abandoned"]
 

@@ -6,7 +6,6 @@ Last generated: 2024-04-03 19:32:51.808772
 
 import typing
 from dataclasses import dataclass
-import datetime
 
 CommonRoleDescription = str
 
@@ -207,7 +206,7 @@ class CloudApiCliBuildCreateResponse:
 
     @staticmethod
     def from_dict(
-        data: typing.Dict[str, typing.Any]
+        data: typing.Dict[str, typing.Any],
     ) -> "CloudApiCliBuildCreateResponse":
         return CloudApiCliBuildCreateResponse(
             url=str(data["url"]),
@@ -624,7 +623,7 @@ class AbstraLibApiEditorLintersIssue:
 
     @staticmethod
     def from_dict(
-        data: typing.Dict[str, typing.Any]
+        data: typing.Dict[str, typing.Any],
     ) -> "AbstraLibApiEditorLintersIssue":
         return AbstraLibApiEditorLintersIssue(
             label=str(data["label"]),
@@ -658,7 +657,7 @@ class AbstraLibApiEditorLintersRule:
 
     @staticmethod
     def from_dict(
-        data: typing.Dict[str, typing.Any]
+        data: typing.Dict[str, typing.Any],
     ) -> "AbstraLibApiEditorLintersRule":
         return AbstraLibApiEditorLintersRule(
             name=str(data["name"]),
@@ -685,7 +684,7 @@ class AbstraLibApiEditorLintersFixResponse:
 
     @staticmethod
     def from_dict(
-        data: typing.Dict[str, typing.Any]
+        data: typing.Dict[str, typing.Any],
     ) -> "AbstraLibApiEditorLintersFixResponse":
         return AbstraLibApiEditorLintersFixResponse(
             success=bool(data["success"]),
@@ -716,7 +715,7 @@ class AbstraLibApiEditorEnvVarsModel:
 
     @staticmethod
     def from_dict(
-        data: typing.Dict[str, typing.Any]
+        data: typing.Dict[str, typing.Any],
     ) -> "AbstraLibApiEditorEnvVarsModel":
         return AbstraLibApiEditorEnvVarsModel(
             key=str(data["key"]),
@@ -775,7 +774,7 @@ class AbstraLibApiPlayerUserNavigationGuard:
 
     @staticmethod
     def from_dict(
-        data: typing.Dict[str, typing.Any]
+        data: typing.Dict[str, typing.Any],
     ) -> "AbstraLibApiPlayerUserNavigationGuard":
         return AbstraLibApiPlayerUserNavigationGuard(
             status=data["status"],

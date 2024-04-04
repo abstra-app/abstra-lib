@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from .fixtures import init_dir, clear_dir, get_local_client
+from abstra_internals.repositories import stage_run_repository
 from abstra_internals.repositories.project.project import (
-    ProjectRepository,
     HookStage,
+    ProjectRepository,
     ScriptStage,
     WorkflowTransition,
 )
@@ -12,7 +12,8 @@ from abstra_internals.server.controller.kanban import (
     DataRequestFilter,
 )
 from abstra_internals.utils.datetime import to_utc_iso_string
-from abstra_internals.repositories import stage_run_repository
+
+from .fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestKanbanRouter(TestCase):

@@ -1,6 +1,6 @@
 import unittest
-from abstra.forms import Page
-from abstra.forms import ListItemSchema
+
+from abstra.forms import ListItemSchema, Page
 
 
 class TestPage(unittest.TestCase):

@@ -1,8 +1,8 @@
 import flask
 
 from ...settings import Settings
-from .main import MainController
 from ..utils import send_from_dist
+from .main import MainController
 
 
 def get_editor_bp(controller: MainController):
