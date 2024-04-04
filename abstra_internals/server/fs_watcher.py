@@ -1,5 +1,9 @@
-import threading, os, time
+import threading
+import os
+import time
 from datetime import datetime
+
+from abstra_internals.logger import AbstraLogger
 from ..contract.forms import FilesChangedMessage
 from ..modules import reload_project_local_modules
 from ..execution.form_execution import FormExecution
@@ -35,7 +39,8 @@ def files_changed_polling_loop():
             has_reloaded = reload_files_on_change(project, last_change)
             if has_reloaded:
                 last_change = datetime.now().timestamp()
-        except Exception:
+        except Exception as e:
+            AbstraLogger.capture_exception(e)
             pass
         time.sleep(1)
 

@@ -1,8 +1,11 @@
-import base64, simplejson, re, socket, jsonpath_ng as jp, typing as t
+import base64
+import re
+import socket
+import typing as t
 from contextlib import closing
 
-from .file import *
-from .email import *
+import jsonpath_ng as jp
+import simplejson
 
 
 def serialize(obj, **kwargs):
@@ -17,7 +20,7 @@ def is_serializable(st):
     try:
         serialize(st)
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -42,7 +45,8 @@ def serialize_value(cls, value):
 
 
 def random_id(length=10):
-    import random, string
+    import random
+    import string
 
     return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
