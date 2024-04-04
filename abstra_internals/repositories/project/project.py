@@ -40,16 +40,18 @@ class SignupPolicy:
     def as_dict(self):
         return {"email_patterns": self.email_patterns}
 
+    @staticmethod
+    def extract_pattern(pattern: str) -> str:
+        return pattern.replace("*", "").replace("@", "")
+
     def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             setattr(self, attr, value)
 
     def allow(self, email: str) -> bool:
+        domain = email.split("@")[1]
         for pattern in self.email_patterns:
-            if pattern == "*":
-                return True
-            prog = re.compile(pattern.replace("*", ".*"))
-            if prog.match(email) is not None:
+            if pattern == "*" or SignupPolicy.extract_pattern(pattern) == domain:
                 return True
         return False
 
