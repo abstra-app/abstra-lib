@@ -2,10 +2,15 @@ from typing import Literal
 import sentry_sdk
 import pkg_resources
 
+from .utils import is_testing
+
 
 class AbstraLogger:
     @staticmethod
     def init(environment: Literal["cloud", "local"]):
+        if is_testing():
+            return
+
         try:
             sentry_sdk.init(
                 dsn="https://9bbccd1a46ddb8a563483c6afc61ca35@o1317386.ingest.us.sentry.io/4507024713383936",
@@ -20,4 +25,7 @@ class AbstraLogger:
 
     @staticmethod
     def capture_exception(exception: Exception):
+        if is_testing():
+            return
+
         sentry_sdk.capture_exception(exception)

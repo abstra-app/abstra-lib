@@ -1,5 +1,6 @@
 import base64
 import re
+import os
 import socket
 import typing as t
 from contextlib import closing
@@ -94,3 +95,7 @@ def nested_get(data: t.Dict, path: str):
         return next(m.value for m in expr.find(data))
     except Exception:
         return None
+
+
+def is_testing():
+    return "PYTEST_CURRENT_TEST" in os.environ
