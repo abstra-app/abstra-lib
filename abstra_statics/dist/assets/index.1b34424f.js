@@ -1,0 +1,2 @@
+import{T as n,A as t}from"./TabPane.385f8290.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="9c5d403e-0355-4ac9-94d8-42395a781e19",e._sentryDebugIdIdentifier="sentry-dbid-9c5d403e-0355-4ac9-94d8-42395a781e19")}catch{}})();n.TabPane=t;n.install=function(e){return e.component(n.name,n),e.component(t.name,t),e};
+//# sourceMappingURL=index.1b34424f.js.map
