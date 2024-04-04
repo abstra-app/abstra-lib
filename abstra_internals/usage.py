@@ -1,15 +1,20 @@
-import requests, inspect
+import inspect
 from typing import Any, Callable, Tuple
 
+import requests
+
 from .threaded import threaded
-from .utils import get_local_user_id
 from .credentials import get_credentials
+from .utils import get_local_user_id, is_testing
 from .utils.environment import CLOUD_API_CLI_URL
 from .utils.packages import get_local_package_version
 
 
 @threaded
 def send_usage(data, header):
+    if is_testing():
+        return
+
     api_url = f"{CLOUD_API_CLI_URL}/editor/usage"
     requests.post(api_url, json=data, headers=header)
 
