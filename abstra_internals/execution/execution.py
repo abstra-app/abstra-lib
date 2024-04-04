@@ -232,7 +232,7 @@ class Execution:
             except SystemExit as e:
                 had_errors = e.code is not None and e.code != 0
                 if had_errors:
-                    raise e
+                    raise Exception(f"SystemExit: {e.code}")
 
             self.status = "finished"
             self.handle_success()
