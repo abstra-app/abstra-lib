@@ -1,3 +1,4 @@
+from abstra_internals.logger import AbstraLogger
 from ..contracts_generated import CommonUserRoles, CommonUser
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List
@@ -52,8 +53,8 @@ class LocalUsersRepository(UsersRepository):
         try:
             with open(self.local_cache, "r") as f:
                 self.data = {**self.data, **json.load(f)}
-        except:
-            pass
+        except Exception as e:
+            AbstraLogger.capture_exception(e)
 
     def __dump(self):
         with open(self.local_cache, "w") as f:

@@ -1,9 +1,12 @@
-import sys
 import importlib
 import importlib.util as imp_util
+import sys
+from pathlib import Path
+
+from .logger import AbstraLogger
+
 from .repositories.project.project import ProjectRepository
 from .utils.file import path2module
-from pathlib import Path
 
 
 def import_as_new(filepath: str):
@@ -43,4 +46,5 @@ def reload_project_local_modules():
         except Exception as e:
             print(f"Could not reload module from {file} with the following error:")
             print(e)
+            AbstraLogger.capture_exception(e)
             continue
