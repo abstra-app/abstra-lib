@@ -210,4 +210,17 @@ class ProjectTests(TestCase):
         policy.update({"email_patterns": ["*@abstra.app"]})
 
         self.assertTrue(policy.allow("user@abstra.app"))
+        self.assertFalse(policy.allow("user@new.abstra.app"))
+        self.assertFalse(policy.allow("external@evil.corp"))
+
+        policy.update({"email_patterns": ["@abstra.app"]})
+
+        self.assertTrue(policy.allow("user@abstra.app"))
+        self.assertFalse(policy.allow("user@new.abstra.app"))
+        self.assertFalse(policy.allow("external@evil.corp"))
+
+        policy.update({"email_patterns": ["abstra.app"]})
+
+        self.assertTrue(policy.allow("user@abstra.app"))
+        self.assertFalse(policy.allow("user@new.abstra.app"))
         self.assertFalse(policy.allow("external@evil.corp"))
