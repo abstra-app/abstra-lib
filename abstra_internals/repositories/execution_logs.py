@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Literal, Optional, Union
 
-
+from ..threaded import threaded
 from ..utils import serialize
 from .serializer import SerializationHelper
 from ..utils.dot_abstra import LOCAL_LOGS_FOLDER
@@ -166,6 +166,7 @@ class RemoteExecutionLogsRepository(ExecutionLogsRepository):
         self.url = url
         self.headers = headers
 
+    @threaded
     def save(self, log_entry: LogEntry) -> None:
         validated_payload = SerializationHelper.enforce_max_size(log_entry.payload)
 
