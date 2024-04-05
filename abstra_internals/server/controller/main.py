@@ -1,13 +1,11 @@
 import pkgutil
 import webbrowser
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import flask
 import pkg_resources
 from werkzeug.datastructures import FileStorage
-
-from abstra_internals.server.controller.linters import check_linters
 
 from ...cloud_api import get_ai_messages, get_auth_info, get_project_info
 from ...credentials import (
@@ -34,8 +32,10 @@ from ...repositories.project.project import (
     ProjectRepository,
     ScriptStage,
     StyleSettings,
+    WorkflowStage,
 )
 from ...repositories.stage_run import StageRunRepository
+from ...server.controller.linters import check_linters
 from ...settings import Settings
 from ...templates import (
     ensure_abstraignore,
@@ -128,6 +128,24 @@ class MainController:
     def get_workspace(self) -> StyleSettings:
         project = ProjectRepository.load()
         return project.workspace
+
+    def get_stage(self, id: str) -> Optional[WorkflowStage]:
+        project = ProjectRepository.load()
+        return project.get_stage(id)
+
+    def get_action(self, id: str) -> Optional[ActionStage]:
+        project = ProjectRepository.load()
+        return project.get_action(id)
+
+    def get_project_local_dependencies(self) -> Generator[Path, None, None]:
+        project = ProjectRepository.load()
+        yield from project.project_local_dependencies
+
+    def get_async_stage_ids(self):
+        project = ProjectRepository.load()
+        job_ids = [stage.id for stage in project.jobs]
+        script_ids = [stage.id for stage in project.scripts]
+        return job_ids + script_ids
 
     def init_code_file(self, path: str, code: str):
         if Settings.root_path.joinpath(path).is_file():

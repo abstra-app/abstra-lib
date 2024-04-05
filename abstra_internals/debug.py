@@ -4,9 +4,8 @@ import typing
 from dataclasses import dataclass
 from types import TracebackType
 
-from abstra_internals.utils.file import is_relative_path
-
 from .settings import Settings
+from .utils.file import is_relative_path
 
 Frames = typing.Union[typing.List[inspect.FrameInfo], Exception]
 

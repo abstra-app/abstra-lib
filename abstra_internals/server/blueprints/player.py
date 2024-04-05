@@ -3,14 +3,13 @@ import json
 import flask
 import flask_sock
 
-from abstra_internals.logger import AbstraLogger
-
 from ...execution import FormExecution, HookExecution
 from ...execution.execution import RequestData
 from ...execution.stage_run_manager import (
     AttachedStageRunManager,
     DetachedStageRunManager,
 )
+from ...logger import AbstraLogger
 from ...repositories import stage_run_repository_factory, users_repository
 from ...settings import Settings
 from ...utils.environment import BUILD_ID, SHOW_WATERMARK, SIDECAR_SHARED_TOKEN

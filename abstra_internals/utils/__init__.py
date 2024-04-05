@@ -89,6 +89,10 @@ def get_free_port(default_port: int) -> int:
     )
 
 
+def is_it_true(val: str) -> bool:
+    return val.lower() == "true"
+
+
 def nested_get(data: t.Dict, path: str):
     try:
         expr = jp.parse(path)

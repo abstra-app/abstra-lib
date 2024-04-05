@@ -2,8 +2,7 @@ from typing import Dict, Optional, TypedDict
 
 import flask
 
-from abstra_internals.logger import AbstraLogger
-
+from ...logger import AbstraLogger
 from ...repositories.project.project import (
     ConditionStage,
     FormStage,

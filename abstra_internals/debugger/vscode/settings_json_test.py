@@ -2,9 +2,9 @@ import json
 import sys
 from unittest import TestCase
 
-from abstra_internals.utils import serialize
 from tests.fixtures import clear_dir, init_dir
 
+from ...utils import serialize
 from .settings_json import (
     EverythingSet,
     InvalidSettingsJson,

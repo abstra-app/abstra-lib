@@ -10,8 +10,7 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
-from abstra_internals.logger import AbstraLogger
-
+from ...logger import AbstraLogger
 from ...settings import Settings
 from ...utils import check_is_url, nested_get
 from ...utils.file import traverse_code

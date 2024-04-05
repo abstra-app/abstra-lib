@@ -1,7 +1,7 @@
 import flask
 
 from ...usage import usage
-from ..utils import is_it_true
+from ...utils import is_it_true
 from .main import MainController
 
 

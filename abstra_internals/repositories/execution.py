@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 import requests
 from pydantic.dataclasses import dataclass
@@ -33,6 +33,10 @@ class ExecutionRepository(ABC):
     def update(self, execution_dto: ExecutionDTO) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def find(self, stage_run_id: str) -> List[ExecutionDTO]:
+        raise NotImplementedError()
+
 
 class LocalExecutionRepository(ExecutionRepository):
     def __init__(self):
@@ -43,6 +47,13 @@ class LocalExecutionRepository(ExecutionRepository):
 
     def update(self, execution_dto: ExecutionDTO) -> None:
         self.executions[execution_dto.id] = execution_dto
+
+    def find(self, stage_run_id: str) -> List[ExecutionDTO]:
+        return [
+            execution
+            for execution in self.executions.values()
+            if execution.stage_run_id == stage_run_id
+        ]
 
 
 class RemoteExecutionRepository(ExecutionRepository):
@@ -88,6 +99,16 @@ class RemoteExecutionRepository(ExecutionRepository):
         )
 
         res.raise_for_status()
+
+    def find(self, stage_run_id: str) -> List[ExecutionDTO]:
+        res = requests.get(
+            f"{self.url}/executions",
+            params=dict(stageRunId=stage_run_id),
+            headers=self.headers,
+        )
+
+        res.raise_for_status()
+        return [ExecutionDTO(**execution) for execution in res.json()]
 
 
 def execution_repository_factory() -> ExecutionRepository:

@@ -17,7 +17,7 @@ from ...repositories.execution_logs import FormEventLogEntry
 from ...repositories.project.project import ProjectRepository
 from ...repositories.stage_run import stage_run_repository_factory
 from ...usage import usage
-from ..utils import is_it_true
+from ...utils import is_it_true
 from ..workflow_engine import workflow_engine
 from .main import MainController
 
