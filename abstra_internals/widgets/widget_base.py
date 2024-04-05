@@ -1,4 +1,3 @@
-import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Optional, TypedDict, TypeVar, Union
 
@@ -93,27 +92,27 @@ class OptionsHandler:
         self.options = options
 
         self._mappedOptions = {
-            str(uuid.uuid4()): {
+            str(index): {
                 "label": option if isinstance(option, str) else option["label"],
                 "value": option if isinstance(option, str) else option["value"],
             }
-            for option in options
+            for index, option in enumerate(options)
         }
 
-    def uuids_from_values(self, values: List[object]) -> List[str]:
-        value = [self._uuid_from_value(value) for value in values]
+    def ids_from_values(self, values: List[object]) -> List[str]:
+        value = [self._id_from_value(value) for value in values]
         return [v for v in value if v is not None]
 
-    def values_from_uuids(self, uuids: Union[List[str], None]) -> List[object]:
-        if uuids is None:
+    def values_from_ids(self, ids: Union[List[str], None]) -> List[object]:
+        if ids is None:
             return []
 
-        return [self._value_from_uuid(uuid) for uuid in uuids]
+        return [self._value_from_id(id) for id in ids]
 
-    def _value_from_uuid(self, uuid: str) -> object:
-        return self._mappedOptions[uuid]["value"]
+    def _value_from_id(self, id: str) -> object:
+        return self._mappedOptions[id]["value"]
 
-    def _uuid_from_value(self, value: object) -> Optional[str]:
+    def _id_from_value(self, value: object) -> Optional[str]:
         for mapKey, mapValue in self._mappedOptions.items():
             if mapValue["value"] == value:
                 return mapKey
