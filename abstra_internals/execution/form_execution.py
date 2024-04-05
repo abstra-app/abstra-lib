@@ -11,6 +11,7 @@ from ..compatibility import compat_traceback
 from ..contract import forms_contract
 from ..debug import make_debug_data
 from ..jwt_auth import UserClaims
+from ..logger import AbstraLogger
 from ..repositories.execution import ExecutionRepository
 from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
 from ..utils import deserialize, serialize
@@ -216,36 +217,32 @@ class FormExecution(Execution):
         self.send(forms_contract.ExecutionEndedMessage(close_dto))
 
     def attempt_handle_exception(self, e: Exception) -> bool:
-        NORMAL_CLOSURE = 1000
-        GOING_AWAY = 1001
-        NO_STATUS = 1005
-
         if not isinstance(e, flask_sock.ConnectionClosed):
             return False
 
-        if e.reason == NORMAL_CLOSURE:
-            return True
+        NORMAL_CLOSURE = 1000
+        GOING_AWAY = 1001
+        NO_STATUS = 1005
+        FORM_EDITOR_RESTART = 4000
 
-        if e.reason == GOING_AWAY or e.reason == NO_STATUS:
-            self.status = "abandoned"
-            if self.stage_run:
-                parent_data = (
-                    self.stage_run_manager.get(self.stage_run.parent_id).data
-                    if self.stage_run.parent_id
-                    else {}
-                )
-                self.stage_run_manager.update_data(self.stage_run.id, parent_data)
-            return True
+        expected_reasons = [NORMAL_CLOSURE, GOING_AWAY, NO_STATUS, FORM_EDITOR_RESTART]
 
-        self.log_form_message(
-            "connection-closed",
-            {
-                "message": f"[ERROR] Unhandled connection closed with code {e.reason}: {e.message}\n",
-                "reason": e.reason,
-            },
-        )
+        self.status = "abandoned"
 
-        return False
+        if self.stage_run:
+            parent_data = (
+                self.stage_run_manager.get(self.stage_run.parent_id).data
+                if self.stage_run.parent_id
+                else {}
+            )
+            self.stage_run_manager.update_data(self.stage_run.id, parent_data)
+
+        if e.reason not in expected_reasons:
+            AbstraLogger.capture_message(
+                f"Unexpected connection closed with code {e.reason}: {e.message}"
+            )
+
+        return True
 
 
 def get_form_execution_throwable() -> FormExecution:
