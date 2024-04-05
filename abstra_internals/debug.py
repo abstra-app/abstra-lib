@@ -4,6 +4,8 @@ import typing
 from dataclasses import dataclass
 from types import TracebackType
 
+from abstra_internals.utils.file import is_relative_path
+
 from .settings import Settings
 
 Frames = typing.Union[typing.List[inspect.FrameInfo], Exception]
@@ -61,7 +63,7 @@ def make_debug_data(frames_or_exception: Frames):
                     else _make_debug_item_from_stack(info)
                 )
                 for info in (frames)
-                if root_path in info.filename
+                if root_path in info.filename or is_relative_path(info.filename)
             ]
         }
     }
