@@ -11,6 +11,10 @@ GIT_FOLDER = ".git"
 ABSTRA_IGNORE = ".abstraignore"
 
 
+def is_relative_path(path: str) -> bool:
+    return not path.startswith("<") and not path.startswith("/")
+
+
 def get_ignore_files(dir: Path):
     GITIGNORE = dir.joinpath(".gitignore")
     IGNOREFILE = dir.joinpath(ABSTRA_IGNORE)
