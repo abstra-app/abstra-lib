@@ -30,3 +30,10 @@ class AbstraLogger:
             return
 
         sentry_sdk.capture_exception(exception)
+
+    @staticmethod
+    def capture_message(message: str):
+        if is_testing():
+            return
+
+        sentry_sdk.capture_message(message)
