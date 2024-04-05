@@ -1,8 +1,7 @@
 import flask
 import flask_cors
 
-from abstra_internals.logger import AbstraLogger
-
+from ...logger import AbstraLogger
 from ..blueprints.editor import get_editor_bp
 from ..blueprints.player import get_player_bp
 from ..controller.main import MainController

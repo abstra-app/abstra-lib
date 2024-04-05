@@ -11,10 +11,6 @@ import abstra_statics
 dist_folder = Path(inspect.getfile(abstra_statics)).joinpath("../dist").resolve()
 
 
-def is_it_true(val: str) -> bool:
-    return val.lower() == "true"
-
-
 def send_from_dist(
     filename: str,
     fallback: typing.Optional[str] = None,

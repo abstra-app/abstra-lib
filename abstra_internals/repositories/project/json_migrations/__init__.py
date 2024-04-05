@@ -4,8 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Type
 
-from abstra_internals.logger import AbstraLogger
-
+from ....logger import AbstraLogger
 from ....utils.dot_abstra import CONFIG_FILE_BACKUPS
 from .base_migration import Migration
 from .migration_001 import Migration001

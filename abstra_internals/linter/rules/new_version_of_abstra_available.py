@@ -1,8 +1,7 @@
 import webbrowser
 from typing import List
 
-from abstra_internals.interface.cli.version import PackageVersionManager, VersionStatus
-
+from ...interface.cli.version import PackageVersionManager, VersionStatus
 from ..linter import LinterFix, LinterIssue, LinterRule
 
 RELEASE_NOTES_URL = "https://github.com/abstra-app/abstra-lib/releases"

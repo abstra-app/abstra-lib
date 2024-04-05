@@ -2,9 +2,8 @@ from typing import List
 
 import flask
 
-from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
-
 from ...contracts_generated import CommonUserRoles
+from ...jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from ...repositories import users_repository
 from ...repositories.project.project import ProjectRepository
 from ...repositories.users import UsersRepository

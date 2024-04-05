@@ -1,11 +1,10 @@
 import requests
 
-from abstra_internals.logger import AbstraLogger
-
 from ..contracts_generated import (
     CloudApiCliAuthInfoResponse,
     CloudApiCliBuildCreateResponse,
 )
+from ..logger import AbstraLogger
 from ..utils.environment import CLOUD_API_ENDPOINT
 
 

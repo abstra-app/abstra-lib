@@ -209,7 +209,7 @@ class Execution:
     def attempt_handle_exception(self, e: Exception) -> bool:
         return False
 
-    def set_stage_run(self, stage_run_id):
+    def set_stage_run(self, stage_run_id: Optional[str]):
         self.stage_run = self.stage_run_manager.init_stage_run(self.stage, stage_run_id)
         lock_held = self.set_stage_run_status()
         if self.stage_run and not lock_held:

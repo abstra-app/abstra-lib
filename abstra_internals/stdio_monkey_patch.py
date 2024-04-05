@@ -1,10 +1,9 @@
 import sys
 from typing import Callable, Literal, Union
 
-from abstra_internals.logger import AbstraLogger
-
 from .env_masker import GLOBAL_MASKER
 from .execution.execution import Execution
+from .logger import AbstraLogger
 from .stdio_skip_request import ESCAPE_STRING
 from .utils.environment import IS_PRODUCTION
 

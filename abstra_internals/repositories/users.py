@@ -5,9 +5,8 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from abstra_internals.logger import AbstraLogger
-
 from ..contracts_generated import CommonUser, CommonUserRoles
+from ..logger import AbstraLogger
 from ..settings import Settings
 from ..utils.dot_abstra import LOCAL_USERS_FILE
 from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
