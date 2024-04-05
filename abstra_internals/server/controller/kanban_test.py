@@ -3,13 +3,20 @@ from unittest import TestCase
 from tests.fixtures import clear_dir, init_dir
 
 from ...repositories.project.project import (
-    FormStage,
+    ConditionStage,
     JobStage,
-    NotificationTrigger,
     ProjectRepository,
+    ScriptStage,
+    WorkflowTransition,
 )
 from ...repositories.stage_run import LocalStageRunRepository
-from .kanban import DataRequest, KanbanController, KanbanData, StageRunCard
+from .kanban import (
+    ColumnStage,
+    DataRequest,
+    KanbanColumn,
+    KanbanController,
+    KanbanData,
+)
 
 
 class KanbanTests(TestCase):
@@ -37,10 +44,10 @@ class KanbanTests(TestCase):
         )
 
         self.assertEqual(
-            data, KanbanData(stage_run_cards=[], not_found_stages=[], total_count=0)
+            data, KanbanData(columns=[], next_stage_options=[], not_found_stages=[])
         )
 
-    def test_get_data_stage_no_filters(self):
+    def test_get_data_single_stage_no_selection(self):
         project = ProjectRepository.load()
 
         job = JobStage(
@@ -51,22 +58,8 @@ class KanbanTests(TestCase):
             workflow_position=(0, 0),
             workflow_transitions=[],
         )
-        form = FormStage(
-            id="form",
-            path="form",
-            title="Form",
-            file="form.py",
-            workflow_position=(0, 0),
-            workflow_transitions=[],
-            notification_trigger=NotificationTrigger(
-                variable_name="val", enabled=False
-            ),
-        )
         project.add_stage(job)
-        project.add_stage(form)
         ProjectRepository.save(project)
-        job_stage_run = self.stage_run_repository.create_initial("job")
-        form_stage_run = self.stage_run_repository.create_initial("form")
 
         data = self.controller.get_data(
             DataRequest.from_dict(
@@ -80,30 +73,21 @@ class KanbanTests(TestCase):
         self.assertEqual(
             data,
             KanbanData(
-                stage_run_cards=[
-                    StageRunCard(
-                        form_stage_run.id,
-                        created_at=form_stage_run.created_at,
-                        updated_at=form_stage_run.updated_at,
-                        status=form_stage_run.status,
-                        content=[],
-                        stage=form_stage_run.stage,
-                    ),
-                    StageRunCard(
-                        job_stage_run.id,
-                        created_at=job_stage_run.created_at,
-                        updated_at=job_stage_run.updated_at,
-                        status=job_stage_run.status,
-                        content=[],
-                        stage=job_stage_run.stage,
-                    ),
+                columns=[],
+                next_stage_options=[
+                    ColumnStage(
+                        id="job",
+                        title="Job",
+                        path=None,
+                        can_be_started=True,
+                        type="job",
+                    )
                 ],
                 not_found_stages=[],
-                total_count=2,
             ),
         )
 
-    def test_get_data_with_stage_filter(self):
+    def test_get_data_single_stage_with_selection(self):
         self.maxDiff = None
         project = ProjectRepository.load()
 
@@ -115,31 +99,21 @@ class KanbanTests(TestCase):
             workflow_position=(0, 0),
             workflow_transitions=[],
         )
-        form = FormStage(
-            id="form",
-            path="form",
-            title="Form",
-            file="form.py",
-            workflow_position=(0, 0),
-            workflow_transitions=[],
-            notification_trigger=NotificationTrigger(
-                variable_name="val", enabled=False
-            ),
-        )
+
         project.add_stage(job)
-        project.add_stage(form)
         ProjectRepository.save(project)
-        job_stage_run = self.stage_run_repository.create_initial("job")
-        self.stage_run_repository.create_initial("form")
 
         data = self.controller.get_data(
             DataRequest.from_dict(
                 {
-                    "limit": 10,
-                    "offset": 0,
-                    "filter": {
-                        "stage": ["job"],
-                    },
+                    "selection": [
+                        {
+                            "stage_id": "job",
+                            "limit": 10,
+                            "offset": 0,
+                        }
+                    ],
+                    "filter": {},
                 }
             )
         )
@@ -147,18 +121,510 @@ class KanbanTests(TestCase):
         self.assertEqual(
             data,
             KanbanData(
-                stage_run_cards=[
-                    StageRunCard(
-                        job_stage_run.id,
-                        created_at=job_stage_run.created_at,
-                        updated_at=job_stage_run.updated_at,
-                        status=job_stage_run.status,
-                        content=[],
-                        stage=job_stage_run.stage,
-                    ),
+                columns=[
+                    KanbanColumn(
+                        selected_stage=ColumnStage.create(job),
+                        stages=[ColumnStage.create(job)],
+                        stage_run_cards=[],
+                        total_count=0,
+                    )
+                ],
+                next_stage_options=[],
+                not_found_stages=[],
+            ),
+        )
+
+    def test_get_data_multiple_stages_no_selection(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        script = ScriptStage(
+            id="script",
+            file="script.py",
+            title="Script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        condition = ConditionStage(
+            id="condition",
+            variable_name="title",
+            type_name="condition",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="script",
+                    target_type="script",
+                    type="conditions:patternMatched",
+                    condition_value="true",
+                )
+            ],
+        )
+
+        job = JobStage(
+            id="job",
+            title="Job",
+            file="job.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        project.add_stage(job)
+        project.add_stage(condition)
+        project.add_stage(script)
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [],
+                    "filter": {},
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[],
+                next_stage_options=[
+                    ColumnStage.create(job),
+                    ColumnStage.create(script),
+                    ColumnStage.create(condition),
                 ],
                 not_found_stages=[],
-                total_count=1,
+            ),
+        )
+
+    def test_get_data_multiple_stages_single_selection(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        script = ScriptStage(
+            id="script",
+            file="script.py",
+            title="Script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        condition = ConditionStage(
+            id="condition",
+            variable_name="title",
+            type_name="condition",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="script",
+                    target_type="script",
+                    type="conditions:patternMatched",
+                    condition_value="true",
+                )
+            ],
+        )
+
+        job = JobStage(
+            id="job",
+            title="Job",
+            file="job.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        project.add_stage(job)
+        project.add_stage(condition)
+        project.add_stage(script)
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [
+                        {
+                            "stage_id": "job",
+                            "limit": 10,
+                            "offset": 0,
+                        }
+                    ],
+                    "filter": {},
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[
+                    KanbanColumn(
+                        selected_stage=ColumnStage.create(job),
+                        stages=[
+                            ColumnStage.create(script),
+                            ColumnStage.create(condition),
+                            ColumnStage.create(job),
+                        ],
+                        stage_run_cards=[],
+                        total_count=0,
+                    )
+                ],
+                next_stage_options=[
+                    ColumnStage.create(script),
+                    ColumnStage.create(condition),
+                ],
+                not_found_stages=[],
+            ),
+        )
+
+    def test_get_data_multiple_stages_multiple_selection(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        script = ScriptStage(
+            id="script",
+            file="script.py",
+            title="Script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        condition = ConditionStage(
+            id="condition",
+            variable_name="title",
+            type_name="condition",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="script",
+                    target_type="script",
+                    type="conditions:patternMatched",
+                    condition_value="true",
+                )
+            ],
+        )
+
+        job = JobStage(
+            id="job",
+            title="Job",
+            file="job.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        project.add_stage(job)
+        project.add_stage(condition)
+        project.add_stage(script)
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [
+                        {
+                            "stage_id": "job",
+                            "limit": 10,
+                            "offset": 0,
+                        },
+                        {
+                            "stage_id": "condition",
+                            "limit": 10,
+                            "offset": 0,
+                        },
+                    ],
+                    "filter": {},
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[
+                    KanbanColumn(
+                        selected_stage=ColumnStage.create(job),
+                        stages=[
+                            ColumnStage.create(script),
+                            ColumnStage.create(job),
+                        ],
+                        stage_run_cards=[],
+                        total_count=0,
+                    ),
+                    KanbanColumn(
+                        selected_stage=ColumnStage.create(condition),
+                        stages=[
+                            ColumnStage.create(script),
+                            ColumnStage.create(condition),
+                        ],
+                        stage_run_cards=[],
+                        total_count=0,
+                    ),
+                ],
+                next_stage_options=[ColumnStage.create(script)],
+                not_found_stages=[],
+            ),
+        )
+
+    def test_get_data_multiple_multiple_initial_with_selection(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        script = ScriptStage(
+            id="script",
+            file="script.py",
+            title="Script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        condition = ConditionStage(
+            id="condition",
+            variable_name="title",
+            type_name="condition",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="script",
+                    target_type="script",
+                    type="conditions:patternMatched",
+                    condition_value="true",
+                )
+            ],
+        )
+
+        job1 = JobStage(
+            id="job1",
+            title="Job1",
+            file="job1.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        job2 = JobStage(
+            id="job2",
+            title="Job2",
+            file="job2.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        project.add_stage(job1)
+        project.add_stage(job2)
+        project.add_stage(condition)
+        project.add_stage(script)
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [],
+                    "filter": {},
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[],
+                next_stage_options=[
+                    ColumnStage.create(job1),
+                    ColumnStage.create(job2),
+                    ColumnStage.create(script),
+                    ColumnStage.create(condition),
+                ],
+                not_found_stages=[],
+            ),
+        )
+
+    def test_get_data_multiple_multiple_initial_with_multiple_selection(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        script = ScriptStage(
+            id="script",
+            file="script.py",
+            title="Script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        condition = ConditionStage(
+            id="condition",
+            variable_name="title",
+            type_name="condition",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="script",
+                    target_type="script",
+                    type="conditions:patternMatched",
+                    condition_value="true",
+                )
+            ],
+        )
+
+        job1 = JobStage(
+            id="job1",
+            title="Job1",
+            file="job1.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        job2 = JobStage(
+            id="job2",
+            title="Job2",
+            file="job2.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="transition",
+                    target_id="condition",
+                    target_type="condition",
+                    type="jobs:finished",
+                    condition_value=None,
+                )
+            ],
+        )
+
+        project.add_stage(job1)
+        project.add_stage(job2)
+        project.add_stage(condition)
+        project.add_stage(script)
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [
+                        {
+                            "stage_id": "job1",
+                            "limit": 10,
+                            "offset": 0,
+                        },
+                        {
+                            "stage_id": "condition",
+                            "limit": 10,
+                            "offset": 0,
+                        },
+                    ],
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[
+                    KanbanColumn(
+                        selected_stage=ColumnStage.create(job1),
+                        stages=[
+                            ColumnStage.create(job2),
+                            ColumnStage.create(script),
+                            ColumnStage.create(job1),
+                        ],
+                        stage_run_cards=[],
+                        total_count=0,
+                    ),
+                    KanbanColumn(
+                        selected_stage=ColumnStage.create(condition),
+                        stages=[
+                            ColumnStage.create(job2),
+                            ColumnStage.create(script),
+                            ColumnStage.create(condition),
+                        ],
+                        stage_run_cards=[],
+                        total_count=0,
+                    ),
+                ],
+                next_stage_options=[
+                    ColumnStage.create(job2),
+                    ColumnStage.create(script),
+                ],
+                not_found_stages=[],
+            ),
+        )
+
+    def test_return_not_found_stages(self):
+        self.maxDiff = None
+        project = ProjectRepository.load()
+
+        ProjectRepository.save(project)
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "selection": [
+                        {
+                            "stage_id": "script",
+                            "limit": 10,
+                            "offset": 0,
+                        }
+                    ],
+                    "filter": {},
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                columns=[],
+                next_stage_options=[],
+                not_found_stages=["script"],
             ),
         )
 

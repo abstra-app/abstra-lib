@@ -10,6 +10,7 @@ from abstra_internals.repositories.project.project import (
 from abstra_internals.server.controller.kanban import (
     DataRequest,
     DataRequestFilter,
+    DataRequestSelection,
 )
 from abstra_internals.utils.datetime import to_utc_iso_string
 
@@ -60,27 +61,52 @@ class TestKanbanRouter(TestCase):
         res = self.client.post(
             "/_editor/api/kanban",
             json=DataRequest(
-                filter=DataRequestFilter.from_dict({"stage": [stage.id]}),
-                limit=10,
-                offset=0,
+                filter=DataRequestFilter.from_dict({}),
+                selection=[
+                    DataRequestSelection.from_dict(
+                        {
+                            "stage_id": stage.id,
+                        }
+                    )
+                ],
             ).to_dict(),
         )
         self.maxDiff = None
         self.assertEqual(res.status_code, 200)
         self.assertEqual(
             {
-                "stage_run_cards": [
+                "columns": [
                     {
-                        "content": [],
-                        "created_at": to_utc_iso_string(stage_run.created_at),
-                        "updated_at": to_utc_iso_string(stage_run.updated_at),
-                        "id": stage_run.id,
-                        "status": "waiting",
-                        "stage": stage.id,
+                        "selected_stage": {
+                            "can_be_started": False,
+                            "id": stage.id,
+                            "path": None,
+                            "title": "test",
+                            "type": "hook",
+                        },
+                        "stage_run_cards": [
+                            {
+                                "content": [],
+                                "created_at": to_utc_iso_string(stage_run.created_at),
+                                "updated_at": to_utc_iso_string(stage_run.updated_at),
+                                "id": stage_run.id,
+                                "status": "waiting",
+                            }
+                        ],
+                        "stages": [
+                            {
+                                "can_be_started": False,
+                                "id": stage.id,
+                                "path": None,
+                                "title": "test",
+                                "type": "hook",
+                            }
+                        ],
+                        "total_count": 1,
                     }
                 ],
+                "next_stage_options": [],
                 "not_found_stages": [],
-                "total_count": 1,
             },
             res.json,
         )
@@ -109,9 +135,14 @@ class TestKanbanRouter(TestCase):
         res = self.client.post(
             "/_editor/api/kanban",
             json=DataRequest(
-                limit=10,
-                offset=0,
-                filter=DataRequestFilter.from_dict({"stage": [hook.id]}),
+                filter=DataRequestFilter.from_dict({}),
+                selection=[
+                    DataRequestSelection.from_dict(
+                        {
+                            "stage_id": hook.id,
+                        }
+                    )
+                ],
             ).to_dict(),
         )
 
@@ -119,18 +150,53 @@ class TestKanbanRouter(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(
             {
-                "stage_run_cards": [
+                "columns": [
                     {
-                        "content": [],
-                        "created_at": to_utc_iso_string(stage_run.created_at),
-                        "updated_at": to_utc_iso_string(stage_run.updated_at),
-                        "id": stage_run.id,
-                        "status": "waiting",
-                        "stage": hook.id,
+                        "selected_stage": {
+                            "can_be_started": False,
+                            "id": hook.id,
+                            "path": None,
+                            "title": "test",
+                            "type": "hook",
+                        },
+                        "stage_run_cards": [
+                            {
+                                "content": [],
+                                "created_at": to_utc_iso_string(stage_run.created_at),
+                                "updated_at": to_utc_iso_string(stage_run.updated_at),
+                                "id": stage_run.id,
+                                "status": "waiting",
+                            }
+                        ],
+                        "stages": [
+                            {
+                                "can_be_started": False,
+                                "id": script.id,
+                                "path": None,
+                                "title": "script",
+                                "type": "script",
+                            },
+                            {
+                                "can_be_started": False,
+                                "id": hook.id,
+                                "path": None,
+                                "title": "test",
+                                "type": "hook",
+                            },
+                        ],
+                        "total_count": 1,
+                    }
+                ],
+                "next_stage_options": [
+                    {
+                        "can_be_started": False,
+                        "id": script.id,
+                        "path": None,
+                        "title": "script",
+                        "type": "script",
                     }
                 ],
                 "not_found_stages": [],
-                "total_count": 1,
             },
             res.json,
         )
