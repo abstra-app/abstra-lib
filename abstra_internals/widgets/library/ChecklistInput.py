@@ -1,5 +1,5 @@
-from ..widget_base import Input, AbstraOption, OptionsHandler
-from typing import Union, List, Dict
+from typing import List
+from ..widget_base import AbstraOption, Input, OptionsHandler
 
 
 class ChecklistInput(Input):
@@ -48,7 +48,7 @@ class ChecklistInput(Input):
             self.max}
 
     def serialize_value(self) ->List:
-        return self.options_handler.uuids_from_values(self.value)
+        return self.options_handler.ids_from_values(self.value)
 
     def parse_value(self, value):
-        return self.options_handler.values_from_uuids(value)
+        return self.options_handler.values_from_ids(value)

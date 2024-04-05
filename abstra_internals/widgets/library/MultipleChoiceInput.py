@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Union
-from ..widget_base import Input, AbstraOption, MultipleHandler, OptionsHandler
+from typing import List, Union
+from ..widget_base import AbstraOption, Input, MultipleHandler, OptionsHandler
 
 
 class MultipleChoiceInput(Input):
@@ -39,8 +39,8 @@ class MultipleChoiceInput(Input):
 
     def serialize_value(self) ->List:
         list_values = self.multiple_handler.value_to_list(self.value)
-        return self.options_handler.uuids_from_values(list_values)
+        return self.options_handler.ids_from_values(list_values)
 
     def parse_value(self, value: Union[List[str], None]):
-        list_values = self.options_handler.values_from_uuids(value)
+        list_values = self.options_handler.values_from_ids(value)
         return self.multiple_handler.value_to_list_or_value(list_values)
