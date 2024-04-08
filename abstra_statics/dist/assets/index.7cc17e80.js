@@ -1,0 +1,2 @@
+import{B as n,R as t}from"./Badge.dc576cab.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="9d844c33-e0de-43e0-94bd-a61427f90185",e._sentryDebugIdIdentifier="sentry-dbid-9d844c33-e0de-43e0-94bd-a61427f90185")}catch{}})();n.install=function(e){return e.component(n.name,n),e.component(t.name,t),e};
+//# sourceMappingURL=index.7cc17e80.js.map
