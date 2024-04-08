@@ -4,13 +4,6 @@ import re
 
 from setuptools import find_packages, setup
 
-regex = r"^v(\d+\.\d+\.\d+)$"
-TAG = os.getenv("TAG", "v100.0.0")
-if not TAG or not re.search(regex, TAG):
-    raise ValueError("TAG environment variable must be in the format v1.2.3")
-match = re.search(regex, TAG)
-version = match.group(1) if match else "100.0.0"
-
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
 
@@ -18,12 +11,25 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text(encoding="utf-8")
 
 # The list of requirements
-requirements = (HERE / "requirements.txt").read_text(encoding="utf-8").split("\n")
+REQUIREMENTS = (HERE / "requirements.txt").read_text(encoding="utf-8").split("\n")
+
+# Version
+VERSION_FILE = HERE / "VERSION"
+if VERSION_FILE.exists():
+    VERSION = VERSION_FILE.read_text(encoding="utf-8").strip()
+else:
+    regex = r"^v(\d+\.\d+\.\d+)$"
+    TAG = os.getenv("TAG", "v0.0.0")
+    if not TAG or not re.search(regex, TAG):
+        raise ValueError("TAG environment variable must be in the format v1.2.3")
+
+    match = re.search(regex, TAG)
+    VERSION = match.group(1) if match else "0.0.0"
 
 setup(
     name="abstra",
     license="MIT",
-    version=version,
+    version=VERSION,
     description="Abstra Lib",
     python_requires=">=3.8, <4",
     long_description=README,
@@ -39,5 +45,5 @@ setup(
         "abstra_internals": ["templates/*"],
     },
     packages=find_packages(exclude=["tests"]),
-    install_requires=requirements,
+    install_requires=REQUIREMENTS,
 )

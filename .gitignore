@@ -127,3 +127,6 @@ venv.bak/
 # Pyre type checker
 .pyre/
 .vscode/
+
+# version
+VERSION
