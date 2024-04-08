@@ -50,3 +50,7 @@ def set_data(key, value):
         raise UnsetStageRun()
     stage_run.data[key] = value
     execution.stage_run_manager.update_data(stage_run.id, stage_run.data)
+
+
+def set_title(title: str):
+    set_data("_thread_title", title)
