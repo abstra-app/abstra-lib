@@ -20,6 +20,7 @@ class AbstraLogger:
                 environment=environment,
                 enable_tracing=True,
                 release=pkg_resources.get_distribution("abstra").version,
+                shutdown_timeout=0,
             )
         except Exception:
             print("Error reporting has been turned off.")
@@ -30,6 +31,7 @@ class AbstraLogger:
             return
 
         sentry_sdk.capture_exception(exception)
+        sentry_sdk.flush()
 
     @staticmethod
     def capture_message(message: str):
@@ -37,3 +39,4 @@ class AbstraLogger:
             return
 
         sentry_sdk.capture_message(message)
+        sentry_sdk.flush()
