@@ -619,7 +619,13 @@ metadata = {
             {
                 "props": {
                     "label": "Which programming language have you worked with?",
-                    "options": ["Python", "JavaScript", "Go", "Elixir", "Haskell"],
+                    "options": [
+                        {"label": "Python", "value": "Python"},
+                        {"label": "JavaScript", "value": "JavaScript"},
+                        {"label": "Go", "value": "Go"},
+                        {"label": "Elixir", "value": "Elixir"},
+                        {"label": "Haskell", "value": "Haskell"},
+                    ],
                     "value": [],
                 },
                 "name": "Basic Example",
@@ -663,7 +669,13 @@ metadata = {
             {
                 "props": {
                     "label": "What are your favorite programming languages? Choose up to 3.",
-                    "options": ["Python", "JavaScript", "Go", "Elixir", "Haskell"],
+                    "options": [
+                        {"label": "Python", "value": "Python"},
+                        {"label": "JavaScript", "value": "JavaScript"},
+                        {"label": "Go", "value": "Go"},
+                        {"label": "Elixir", "value": "Elixir"},
+                        {"label": "Haskell", "value": "Haskell"},
+                    ],
                     "value": [],
                 },
                 "name": "Set the range of selections",
