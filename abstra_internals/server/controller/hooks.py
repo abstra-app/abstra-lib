@@ -13,7 +13,7 @@ from ...repositories import (
     execution_repository,
     stage_run_repository,
 )
-from ...repositories.execution_logs import FormEventLogEntry
+from ...repositories.execution_logs import get_logs_output
 from ...repositories.project.project import ProjectRepository
 from ...repositories.stage_run import stage_run_repository_factory
 from ...usage import usage
@@ -103,30 +103,11 @@ def get_editor_bp(controller: MainController):
         body, status, headers = execution.get_response()
         workflow_engine.handle_execution_end(execution)
 
-        stdout: str = ""
-        stderr: str = ""
-
-        for entry in execution_logs_repository.get(execution.id):
-            if isinstance(entry, FormEventLogEntry):
-                continue
-
-            text = entry.payload.get("text")
-            if not text:
-                continue
-
-            if entry.event == "stdout":
-                stdout += text
-            elif entry.event == "stderr":
-                stderr += text
-            elif entry.event == "unhandled-exception":
-                stderr += text
-
         return {
             "body": body,
             "status": status,
             "headers": headers,
-            "stdout": stdout,
-            "stderr": stderr,
+            "output": get_logs_output(execution_logs_repository.get(execution.id)),
         }
 
     @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
@@ -164,30 +145,11 @@ def get_editor_bp(controller: MainController):
         execution.run()
         body, status, headers = execution.get_response()
 
-        stdout: str = ""
-        stderr: str = ""
-
-        for entry in execution_logs_repository.get(execution.id):
-            if isinstance(entry, FormEventLogEntry):
-                continue
-
-            text = entry.payload.get("text")
-            if not text:
-                continue
-
-            if entry.event == "stdout":
-                stdout += text
-            elif entry.event == "stderr":
-                stderr += text
-            elif entry.event == "unhandled-exception":
-                stderr += text
-
         return {
             "body": body,
             "status": status,
             "headers": headers,
-            "stdout": stdout,
-            "stderr": stderr,
+            "output": get_logs_output(execution_logs_repository.get(execution.id)),
         }
 
     return bp

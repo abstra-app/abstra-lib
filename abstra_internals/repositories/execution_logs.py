@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 import requests
 
@@ -206,3 +206,26 @@ def execution_logs_repository_factory() -> ExecutionLogsRepository:
         return RemoteExecutionLogsRepository(url=SIDECAR_URL, headers=SIDECAR_HEADERS)
     else:
         return LocalExecutionLogsRepository()
+
+
+Output = TypedDict("Output", {"type": str, "text": str})
+
+
+def get_logs_output(logs: List[LogEntry]) -> List[Output]:
+    output: List[Output] = []
+    for entry in logs:
+        if isinstance(entry, FormEventLogEntry):
+            continue
+
+        text = entry.payload.get("text")
+        if not text:
+            continue
+
+        if entry.event == "stdout":
+            output.append({"type": "stdout", "text": text})
+        elif entry.event == "stderr":
+            output.append({"type": "stderr", "text": text})
+        elif entry.event == "unhandled-exception":
+            output.append({"type": "stderr", "text": text})
+
+    return output
