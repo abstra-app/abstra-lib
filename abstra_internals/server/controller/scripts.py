@@ -12,7 +12,7 @@ from ...repositories import (
     execution_repository,
     stage_run_repository,
 )
-from ...repositories.execution_logs import FormEventLogEntry
+from ...repositories.execution_logs import get_logs_output
 from ...repositories.stage_run import stage_run_repository_factory
 from ...usage import usage
 from ...utils import is_it_true
@@ -90,24 +90,7 @@ def get_editor_bp(controller: MainController):
 
         execution.run()
 
-        stdout: str = ""
-        stderr: str = ""
-        for entry in execution_logs_repository.get(execution.id):
-            if isinstance(entry, FormEventLogEntry):
-                continue
-
-            text = entry.payload.get("text")
-            if not text:
-                continue
-
-            if entry.event == "stdout":
-                stdout += text
-            elif entry.event == "stderr":
-                stderr += text
-            elif entry.event == "unhandled-exception":
-                stderr += text
-
-        return {"stdout": stdout, "stderr": stderr}
+        return {"output": get_logs_output(execution_logs_repository.get(execution.id))}
 
     @bp.post("/<path:id>/run")
     @usage
@@ -134,23 +117,6 @@ def get_editor_bp(controller: MainController):
         execution.run()
         workflow_engine.handle_execution_end(execution)
 
-        stdout: str = ""
-        stderr: str = ""
-        for entry in execution_logs_repository.get(execution.id):
-            if isinstance(entry, FormEventLogEntry):
-                continue
-
-            text = entry.payload.get("text")
-            if not text:
-                continue
-
-            if entry.event == "stdout":
-                stdout += text
-            elif entry.event == "stderr":
-                stderr += text
-            elif entry.event == "unhandled-exception":
-                stderr += text
-
-        return {"stdout": stdout, "stderr": stderr}
+        return {"output": get_logs_output(execution_logs_repository.get(execution.id))}
 
     return bp
