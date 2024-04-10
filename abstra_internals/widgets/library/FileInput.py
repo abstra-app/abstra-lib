@@ -24,7 +24,8 @@ class FileInput(Input):
         self.max_file_size = props.get('max_file_size', None)
         self.multiple = props.get('multiple', False)
         self.value = props.get('initial_value', self.empty_value)
-        self.multiple_handler = MultipleHandler(self.multiple, self.required)
+        self.multiple_handler = MultipleHandler(self.multiple, required=
+            self.required)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'hint': self.hint,
