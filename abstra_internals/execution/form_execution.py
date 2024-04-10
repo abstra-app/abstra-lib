@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 
 class FormExecution(Execution):
     _connection: flask_sock.Server
+    _closed: bool = False
     debug_enabled = True
 
     @classmethod
@@ -38,7 +39,7 @@ class FormExecution(Execution):
     @staticmethod
     def broadcast(msg: forms_contract.Message):
         for e in list(Execution.executions.values()):
-            if isinstance(e, FormExecution) and e.connected and not e.closed:
+            if isinstance(e, FormExecution) and e.connected:
                 e.send(msg)
 
     def __init__(
@@ -53,9 +54,6 @@ class FormExecution(Execution):
         execution_id=None,
     ):
         self._connection = connection
-        if execution_id is not None:
-            self.id = execution_id
-
         super().__init__(
             stage,
             is_initial,
@@ -68,7 +66,7 @@ class FormExecution(Execution):
 
     @property
     def connected(self) -> bool:
-        return self._connection.connected
+        return self._connection.connected and not self._closed
 
     def log_form_message(self, type: str, payload: dict):
         blocklist = ["auth:saved-jwt", "execution:heartbeat"]
@@ -125,7 +123,7 @@ class FormExecution(Execution):
 
     def close(self, reason: Optional[str] = ""):
         self._connection.close(message=reason)
-        self.closed = True
+        self._closed = True
 
     def stdio(self, event: Literal["stderr", "stdout"], text: str) -> None:
         self.send(forms_contract.ExecutionStdioMessage(event, text))
