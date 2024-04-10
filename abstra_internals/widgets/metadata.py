@@ -354,7 +354,40 @@ metadata = {
                 "iframeHeight": "700px",
                 "key": "example1",
                 "code": 'from abstra.forms import read_cards\n\ncard = read_cards(\n    "Choose your favorite dessert",\n    [\n        {\n            "title": "Crepe",\n            "subtitle": "French",\n            "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",\n            "description": "A crêpe or crepe is a type of very thin pancake.",\n        },\n        {\n            "title": "Pancake",\n            "subtitle": "American",\n            "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",\n            "description": "A pancake is a flat cake, often thin and round.",\n        },\n        {\n            "title": "Waffle",\n            "subtitle": "Belgian",\n            "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",\n            "description": "A waffle is a patterned dish made from leavened batter or dough.",\n        },\n    ],\n)\n# card = { \'title\': ..., \'subtitle\': ..., \'image\': ..., \'description\': ..., \'topLeftExtra\': ..., \'topRightExtra\': ... }\n',
-            }
+            },
+            {
+                "props": {
+                    "value": [],
+                    "label": "Which desserts do you like?",
+                    "options": [
+                        {
+                            "title": "Crepe",
+                            "subtitle": "French",
+                            "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",
+                            "description": "A crêpe or crepe is a type of very thin pancake.",
+                        },
+                        {
+                            "title": "Pancake",
+                            "subtitle": "American",
+                            "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",
+                            "description": "A pancake is a flat cake, often thin and round.",
+                        },
+                        {
+                            "title": "Waffle",
+                            "subtitle": "Belgian",
+                            "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",
+                            "description": "A waffle is a patterned dish made from leavened batter or dough.",
+                        },
+                    ],
+                    "multiple": True,
+                    "searchable": True,
+                },
+                "name": "Multiple Selections and Search",
+                "description": "A multiple selection question with search enabled.",
+                "iframeHeight": "700px",
+                "key": "example2",
+                "code": 'from abstra.forms import read_cards\n\ncard = read_cards(\n    "Which desserts do you like?",\n    [\n        {\n            "title": "Crepe",\n            "subtitle": "French",\n            "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",\n            "description": "A crêpe or crepe is a type of very thin pancake.",\n        },\n        {\n            "title": "Pancake",\n            "subtitle": "American",\n            "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",\n            "description": "A pancake is a flat cake, often thin and round.",\n        },\n        {\n            "title": "Waffle",\n            "subtitle": "Belgian",\n            "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",\n            "description": "A waffle is a patterned dish made from leavened batter or dough.",\n        },\n    ],\n    multiple=True,\n    searchable=True,\n)\n',
+            },
         ],
     },
     "checkbox-input": {

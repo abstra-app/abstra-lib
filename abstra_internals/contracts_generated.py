@@ -364,6 +364,8 @@ AbstraLibApiStageRunCardStatus = AbstraLibApiStageRunStatus
 
 AbstraLibApiStageRunCardContent = AbstraLibApiStageCardContents
 
+AbstraLibApiStageRunCardStage = str
+
 
 @dataclass
 class AbstraLibApiStageRunCard:
@@ -373,6 +375,7 @@ class AbstraLibApiStageRunCard:
     assignee: typing.Optional[AbstraLibApiStageRunCardAssignee]
     status: AbstraLibApiStageRunCardStatus
     content: AbstraLibApiStageRunCardContent
+    stage: typing.Optional[AbstraLibApiStageRunCardStage]
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         return {
@@ -382,6 +385,7 @@ class AbstraLibApiStageRunCard:
             "assignee": self.assignee,
             "status": self.status,
             "content": self.content,
+            "stage": self.stage,
         }
 
     @staticmethod
@@ -395,6 +399,7 @@ class AbstraLibApiStageRunCard:
             content=[
                 AbstraLibApiStageCardContent.from_dict(item) for item in data["content"]
             ],
+            stage=str(data.get("stage")),
         )
 
 
@@ -461,28 +466,24 @@ AbstraLibApiKanbanColumnSelectedStage = AbstraLibApiStage
 
 AbstraLibApiKanbanColumnStageRunCards = AbstraLibApiStageRunCards
 
-AbstraLibApiStagesItem = AbstraLibApiStage
-
-AbstraLibApiStages = typing.List[AbstraLibApiStagesItem]
-
-AbstraLibApiKanbanColumnStages = AbstraLibApiStages
-
 AbstraLibApiKanbanColumnTotalCount = int
+
+AbstraLibApiKanbanColumnLoading = bool
 
 
 @dataclass
 class AbstraLibApiKanbanColumn:
     selected_stage: AbstraLibApiKanbanColumnSelectedStage
     stage_run_cards: AbstraLibApiKanbanColumnStageRunCards
-    stages: AbstraLibApiKanbanColumnStages
     total_count: AbstraLibApiKanbanColumnTotalCount
+    loading: typing.Optional[AbstraLibApiKanbanColumnLoading]
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         return {
             "selected_stage": self.selected_stage,
             "stage_run_cards": self.stage_run_cards,
-            "stages": self.stages,
             "total_count": self.total_count,
+            "loading": self.loading,
         }
 
     @staticmethod
@@ -493,8 +494,8 @@ class AbstraLibApiKanbanColumn:
                 AbstraLibApiStageRunCard.from_dict(item)
                 for item in data["stage_run_cards"]
             ],
-            stages=[AbstraLibApiStage.from_dict(item) for item in data["stages"]],
             total_count=int(data["total_count"]),
+            loading=bool(data.get("loading")),
         )
 
 
@@ -504,26 +505,14 @@ AbstraLibApiKanbanColumns = typing.List[AbstraLibApiKanbanColumnsItem]
 
 AbstraLibApiKanbanDataColumns = AbstraLibApiKanbanColumns
 
-AbstraLibApiKanbanDataNextStageOptions = AbstraLibApiStages
-
-AbstraLibApiKanbanDataNotFoundStagesItem = str
-
-AbstraLibApiKanbanDataNotFoundStages = typing.List[
-    AbstraLibApiKanbanDataNotFoundStagesItem
-]
-
 
 @dataclass
 class AbstraLibApiKanbanData:
     columns: AbstraLibApiKanbanDataColumns
-    next_stage_options: AbstraLibApiKanbanDataNextStageOptions
-    not_found_stages: AbstraLibApiKanbanDataNotFoundStages
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         return {
             "columns": self.columns,
-            "next_stage_options": self.next_stage_options,
-            "not_found_stages": self.not_found_stages,
         }
 
     @staticmethod
@@ -532,16 +521,50 @@ class AbstraLibApiKanbanData:
             columns=[
                 AbstraLibApiKanbanColumn.from_dict(item) for item in data["columns"]
             ],
-            next_stage_options=[
-                AbstraLibApiStage.from_dict(item) for item in data["next_stage_options"]
+        )
+
+
+AbstraLibApiThreadsStageRunCards = AbstraLibApiStageRunCards
+
+AbstraLibApiThreadsNotFoundStagesItem = str
+
+AbstraLibApiThreadsNotFoundStages = typing.List[AbstraLibApiThreadsNotFoundStagesItem]
+
+AbstraLibApiThreadsTotalCount = int
+
+
+@dataclass
+class AbstraLibApiThreads:
+    stage_run_cards: AbstraLibApiThreadsStageRunCards
+    not_found_stages: AbstraLibApiThreadsNotFoundStages
+    total_count: AbstraLibApiThreadsTotalCount
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "stage_run_cards": self.stage_run_cards,
+            "not_found_stages": self.not_found_stages,
+            "total_count": self.total_count,
+        }
+
+    @staticmethod
+    def from_dict(data: typing.Dict[str, typing.Any]) -> "AbstraLibApiThreads":
+        return AbstraLibApiThreads(
+            stage_run_cards=[
+                AbstraLibApiStageRunCard.from_dict(item)
+                for item in data["stage_run_cards"]
             ],
             not_found_stages=[str(item) for item in data["not_found_stages"]],
+            total_count=int(data["total_count"]),
         )
 
 
 AbstraLibApiVisualizationsItem = AbstraLibApiVisualization
 
 AbstraLibApiVisualizations = typing.List[AbstraLibApiVisualizationsItem]
+
+AbstraLibApiStagesItem = AbstraLibApiStage
+
+AbstraLibApiStages = typing.List[AbstraLibApiStagesItem]
 
 AbstraLibApiEditorLintersRuleName = str
 
