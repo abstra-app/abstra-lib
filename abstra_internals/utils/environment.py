@@ -1,8 +1,10 @@
 import os
 
 PORT = os.getenv("PORT", 8002)
-NWORKERS = os.getenv("WORKERS", 2)
-NTHREADS = os.getenv("THREADS", 20)
+WORKERS = os.getenv("ABSTRA_WORKERS", 2)
+THREADS = os.getenv("ABSTRA_THREADS", 20)
+WORKER_TEMP_DIR = os.getenv("ABSTRA_WORKER_TEMP_DIR")
+WORKER_CLASS = os.getenv("ABSTRA_WORKER_CLASS", "gthread")
 
 HOST = os.getenv("ABSTRA_HOST", "localhost")
 DEFAULT_PORT = os.getenv("PORT") or os.getenv("ABSTRA_SERVER_PORT")
