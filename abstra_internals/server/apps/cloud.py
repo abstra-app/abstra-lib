@@ -11,7 +11,7 @@ from ..controller.main import MainController
 
 
 def get_cloud_app(root: str):
-    AbstraLogger.init("cloud")
+    AbstraLogger.init("cloud")  # TODO: move to run_cloud_server in 2.9.0
 
     cloud_setup(root)
 
