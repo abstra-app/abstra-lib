@@ -1,6 +1,5 @@
 import os
 
-PORT = os.getenv("PORT", 8002)
 WORKERS = os.getenv("ABSTRA_WORKERS", 2)
 THREADS = os.getenv("ABSTRA_THREADS", 20)
 WORKER_TEMP_DIR = os.getenv("ABSTRA_WORKER_TEMP_DIR")
