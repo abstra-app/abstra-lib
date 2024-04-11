@@ -38,7 +38,6 @@ setup(
     entry_points={
         "console_scripts": [
             "abstra=abstra.cli:main",
-            "abstracloudserver=abstra_internals.cloud:server",
         ],
     },
     package_data={
