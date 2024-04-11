@@ -1579,7 +1579,12 @@ metadata = {
             {
                 "props": {
                     "label": "Choose a color",
-                    "options": ["Red", "Green", "Blue"],
+                    "options": [
+                        {"label": "Red", "value": "Red"},
+                        {"label": "Green", "value": "Green"},
+                        {"label": "Blue", "value": "Blue"},
+                    ],
+                    "value": [],
                 },
                 "name": "Basic Example",
                 "description": "Basic use of read_dropdown",
@@ -1589,7 +1594,12 @@ metadata = {
             {
                 "props": {
                     "label": "Choose a color",
-                    "options": ["Red", "Green", "Blue"],
+                    "options": [
+                        {"label": "Red", "value": "R"},
+                        {"label": "Green", "value": "G"},
+                        {"label": "Blue", "value": "B"},
+                    ],
+                    "value": [],
                 },
                 "name": "Label and value dict",
                 "description": "Use a dictionary to specify the label and value of each option. The label will be displayed to the user, and the value will be returned by the widget.",
