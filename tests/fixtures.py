@@ -5,7 +5,7 @@ import typing
 from pathlib import Path
 
 from abstra_internals.repositories.project.project import ProjectRepository
-from abstra_internals.server import get_cloud_app, get_local_app
+from abstra_internals.server.apps import get_cloud_app, get_local_app
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import SettingsController
 
@@ -36,8 +36,9 @@ def get_local_client():
     return app.test_client()
 
 
-def get_cloud_client(root: Path):
-    app = get_cloud_app(str(root))
+def get_cloud_client():
+    controller = MainController()
+    app = get_cloud_app(controller)
     return app.test_client()
 
 

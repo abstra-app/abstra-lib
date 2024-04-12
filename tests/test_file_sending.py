@@ -1,7 +1,7 @@
 import io
 import unittest
 
-from abstra_internals.server import get_local_app
+from abstra_internals.server.apps import get_local_app
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.widgets.apis import get_random_filepath
@@ -65,7 +65,7 @@ class TestFileUtils(unittest.TestCase):
 class TestFileUpload(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
-        self.app = get_cloud_client(self.path)
+        self.app = get_cloud_client()
 
     def tearDown(self) -> None:
         clear_dir(self.path)

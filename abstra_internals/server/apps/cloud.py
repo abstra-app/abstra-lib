@@ -3,20 +3,12 @@ import flask_cors
 import flask_talisman
 from flask_talisman import ALLOW_FROM
 
-from ...cloud_init import cloud_setup
-from ...logger import AbstraLogger
 from ...utils.environment import ENABLE_TALISMAN
 from ..blueprints.player import get_player_bp
 from ..controller.main import MainController
 
 
-def get_cloud_app(root: str):
-    AbstraLogger.init("cloud")  # TODO: move to run_cloud_server in 2.9.0
-
-    cloud_setup(root)
-
-    controller = MainController()
-
+def get_cloud_app(controller: MainController):
     app = flask.Flask(__name__)
     flask_cors.CORS(app)
 

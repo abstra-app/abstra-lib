@@ -1,4 +1,8 @@
-from ..server import get_cloud_app
+from ..logger import AbstraLogger
+from ..server.apps import get_cloud_app
+from ..server.controller.main import MainController
+from ..settings import SettingsController
+from ..stdio_monkey_patch import override_stdio
 from ..utils.environment import (
     DEFAULT_PORT,
     THREADS,
@@ -7,11 +11,14 @@ from ..utils.environment import (
     WORKERS,
 )
 from .application import CustomApplication
-from .hooks import hooks_options
+from .hooks import on_starting, pre_fork
 
 
 def run():
-    app = get_cloud_app(".")  # TODO: use CWD post 2.9.0
+    AbstraLogger.init("cloud")
+    override_stdio(print_exceptions=True)
+    SettingsController.set_root_path(".")  # TODO: use CWD
+    SettingsController.set_server_port(DEFAULT_PORT)
 
     options = {
         "workers": WORKERS,
@@ -19,9 +26,12 @@ def run():
         "worker_class": WORKER_CLASS,
         "worker_tmp_dir": WORKER_TEMP_DIR,
         "bind": f":{DEFAULT_PORT or 8002}",
-        **hooks_options,
+        "on_starting": on_starting,
+        "pre_fork": pre_fork,
     }
 
+    controller = MainController()
+    app = get_cloud_app(controller)
     CustomApplication(app, options).run()
 
 
