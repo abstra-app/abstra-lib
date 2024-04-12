@@ -11,4 +11,4 @@ aw.set_data("name", name)
 # Different kinds of input and output widgets are available
 af.display(f"🎉 Welcome, {name}!")
 
-af.display_markdown("Check out our [docs](https://docs.abstra.io/forms/overview) 📚")
+af.display_markdown("Check out our [docs](https://docs.abstra.io/concepts/forms/) 📚")
