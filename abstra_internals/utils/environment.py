@@ -1,4 +1,5 @@
 import os
+from uuid import uuid4
 
 WORKERS = os.getenv("ABSTRA_WORKERS", 2)
 THREADS = os.getenv("ABSTRA_THREADS", 20)
@@ -21,7 +22,6 @@ CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
 FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")
 
-# gunicorn.conf.py imports this variables, do not move them - Deprecated in 2.9.0
 SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
@@ -34,8 +34,8 @@ def WORKER_UUID():
     return os.getenv(__WORKER_UUID_ENV__)
 
 
-def set_WORKER_UUID(uuid: str):
-    os.environ[__WORKER_UUID_ENV__] = uuid
+def set_WORKER_UUID():
+    os.environ[__WORKER_UUID_ENV__] = uuid4().__str__()
 
 
 __SERVER_UUID_ENV__ = "ABSTRA_SERVER_UUID"
@@ -45,5 +45,5 @@ def SERVER_UUID():
     return os.getenv(__SERVER_UUID_ENV__)
 
 
-def set_SERVER_UUID(uuid: str):
-    os.environ[__SERVER_UUID_ENV__] = uuid
+def set_SERVER_UUID():
+    os.environ[__SERVER_UUID_ENV__] = uuid4().__str__()
