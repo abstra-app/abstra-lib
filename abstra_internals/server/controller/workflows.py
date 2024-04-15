@@ -1,4 +1,4 @@
-from typing import Dict, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 import flask
 
@@ -24,6 +24,46 @@ from .main import MainController, UnknownNodeTypeError
 def get_workflow():
     project = ProjectRepository.load()
     return _make_workflow_dto(project)
+
+
+def build_adjacency_list() -> Dict[str, List[str]]:
+    workflow = get_workflow()
+    transitions = workflow["transitions"]
+    adj = {}
+    for t in transitions:
+        if t["sourceStageId"] not in adj:
+            adj[t["sourceStageId"]] = []
+        adj[t["sourceStageId"]].append(t["targetStageId"])
+    return adj
+
+
+def get_initial_stages():
+    workflow = get_workflow()
+    stages = workflow["stages"]
+    target_stage_ids = set([t["targetStageId"] for t in workflow["transitions"]])
+    return [s for s in stages if s["id"] not in target_stage_ids]
+
+
+def get_path(n: int):
+    adj = build_adjacency_list()
+    initial_stages = get_initial_stages()
+    longest_path = []
+
+    def dfs(stage_id: str, current_path: List[str]):
+        if stage_id in current_path:
+            return
+        current_path = current_path.copy()
+        current_path.append(stage_id)
+        if len(current_path) > len(longest_path):
+            longest_path.clear()
+            longest_path.extend(current_path)
+        for next_stage_id in adj.get(stage_id, []):
+            dfs(next_stage_id, current_path)
+
+    for stage in initial_stages:
+        dfs(stage["id"], [])
+
+    return longest_path[:n]
 
 
 class StageDTO(TypedDict):
@@ -256,6 +296,15 @@ def get_editor_bp(controller: MainController):
     def _load_workflow():
         try:
             return get_workflow()
+        except Exception as e:
+            AbstraLogger.capture_exception(e)
+            return str(e), 500
+
+    @bp.get("/path")
+    def _get_path():
+        try:
+            n = int(flask.request.args.get("n", 3))
+            return get_path(n)
         except Exception as e:
             AbstraLogger.capture_exception(e)
             return str(e), 500
