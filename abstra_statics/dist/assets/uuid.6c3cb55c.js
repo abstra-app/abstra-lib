@@ -1,0 +1,2 @@
+import"./outputWidgets.0112c29a.js";(function(){try{var x=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},e=new Error().stack;e&&(x._sentryDebugIds=x._sentryDebugIds||{},x._sentryDebugIds[e]="5604deda-6d03-44f1-9086-19f1c1753f08",x._sentryDebugIdIdentifier="sentry-dbid-5604deda-6d03-44f1-9086-19f1c1753f08")}catch{}})();const t=()=>"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(x){const e=Math.random()*16|0;return(x=="x"?e:e&3|8).toString(16)});export{t as u};
+//# sourceMappingURL=uuid.6c3cb55c.js.map
