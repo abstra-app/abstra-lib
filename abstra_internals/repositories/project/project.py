@@ -1058,7 +1058,7 @@ class Project:
         return None
 
     def get_access_control_by_stage_path(self, path: str) -> Optional[AccessSettings]:
-        if path == "kanban":
+        if path == "threads":
             return self.kanban.access_control
         form = self.get_form_by_path(path)
         if form:
