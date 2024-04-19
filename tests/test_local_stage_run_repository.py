@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from abstra_internals.repositories.project.project import Project
 from abstra_internals.repositories.stage_run import (
     GetStageRunByQueryFilter,
     LocalStageRunRepository,
@@ -10,6 +11,7 @@ from abstra_internals.repositories.stage_run import (
 class TestLocalStageRunRepository(TestCase):
     def setUp(self) -> None:
         self.repository = LocalStageRunRepository()
+        self.project = Project.create()
 
     def test_starts_empty(self):
         stage_runs = self.repository.find(GetStageRunByQueryFilter.from_dict({}))
@@ -124,7 +126,7 @@ class TestLocalStageRunRepository(TestCase):
         child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        clone = self.repository.fork(child)
+        clone = self.repository.fork(child, False)
         self.assertNotEqual(clone.id, child.id)
         self.assertEqual(clone.status, "waiting")
         self.assertEqual(clone.data, parent.data)
@@ -137,7 +139,7 @@ class TestLocalStageRunRepository(TestCase):
         child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        clone = self.repository.fork(child, '{"custom": "data"}')
+        clone = self.repository.fork(child, False, '{"custom": "data"}')
         self.assertNotEqual(clone.id, child.id)
         self.assertEqual(clone.status, "waiting")
         self.assertEqual(clone.data, {"custom": "data"})

@@ -3,6 +3,7 @@ from typing import Optional
 import flask
 
 from ...repositories import stage_run_repository
+from ...repositories.project.project import ProjectRepository
 from ...repositories.stage_run import (
     GetStageRunByQueryFilter,
     Pagination,
@@ -38,7 +39,19 @@ class StageRunsController:
 
     def fork(self, stage_run_id: str, custom_thread_data: Optional[str]):
         stage_run = self.stage_run_repository.get(stage_run_id)
-        return self.stage_run_repository.fork(stage_run, custom_thread_data).to_dto()
+        project = ProjectRepository.load()
+        parent_is_iterator = False
+        previous_stages = project.get_previous_stages_ids(stage_run.stage)
+        some_is_iterator = False
+        for previous_stage in previous_stages:
+            previous_stage = project.get_stage(previous_stage)
+            if previous_stage and previous_stage.type_name == "iterator":
+                some_is_iterator = True
+        if some_is_iterator and "item" in stage_run.data:
+            parent_is_iterator = True
+        return self.stage_run_repository.fork(
+            stage_run, parent_is_iterator, custom_thread_data
+        ).to_dto()
 
 
 def get_editor_bp():
