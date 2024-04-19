@@ -201,7 +201,12 @@ class StageRunRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def fork(self, stage_run: StageRun, custom_thread_data: Optional[str]) -> StageRun:
+    def fork(
+        self,
+        stage_run: StageRun,
+        parent_is_iterator: bool,
+        custom_thread_data: Optional[str],
+    ) -> StageRun:
         raise NotImplementedError()
 
     @abstractmethod
@@ -370,13 +375,18 @@ class LocalStageRunRepository(StageRunRepository):
         return False
 
     def fork(
-        self, stage_run: StageRun, custom_thread_data: Optional[str] = None
+        self,
+        stage_run: StageRun,
+        parent_is_iterator: bool,
+        custom_thread_data: Optional[str] = None,
     ) -> StageRun:
         if stage_run.parent_id is None:
             return self.create_initial(stage_run.stage, {})
         parent_stage_run = self.get(stage_run.parent_id)
         new_stage_run = stage_run.clone_to_waiting()
         new_stage_run.data = parent_stage_run.data
+        if parent_is_iterator:
+            new_stage_run.data["item"] = stage_run.data["item"]
         new_stage_run_dto = new_stage_run.to_dto()
         stage_runs = self.create_next(parent_stage_run, [new_stage_run_dto])
         if custom_thread_data:
@@ -488,7 +498,12 @@ class RemoteStageRunRepository(StageRunRepository):
     ) -> PaginatedListResponse:
         raise NotImplementedError()
 
-    def fork(self, stage_run: StageRun, custom_thread_data: Optional[str]) -> StageRun:
+    def fork(
+        self,
+        stage_run: StageRun,
+        parent_is_iterator: bool,
+        custom_thread_data: Optional[str],
+    ) -> StageRun:
         raise NotImplementedError()
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:
