@@ -726,6 +726,7 @@ class WidgetSchema:
 		multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.
 		min (number): The minimal amount of options that should be selected. Defaults to None.
 		max (number): The maximum amount of options that should be selected. Defaults to None.
+		page_size (number): The number of rows to display per page. Defaults to 10.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
@@ -1232,6 +1233,7 @@ class WidgetSchema:
 		display_index (bool): Whether to show a index column. Defaults to False.
 		label (str): The label to display to the user
 		editable (bool): Whether the user will be allowed to edit the cells. Defaults to False.
+		page_size (number): The number of rows to display per page. Defaults to 10.
 		actions (list): Actions that can be triggered by table rows
 		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.

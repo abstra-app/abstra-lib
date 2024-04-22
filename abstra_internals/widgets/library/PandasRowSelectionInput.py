@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, List, Union
 from ..widget_base import Input, MultipleHandler
 if TYPE_CHECKING:
     import pandas as pd
+DEFAULT_PAGE_SIZE = 10
 
 
 class PandasRowSelectionInput(Input):
@@ -31,6 +32,7 @@ class PandasRowSelectionInput(Input):
         self.max = props.get('max', None)
         self.multiple_handler = MultipleHandler(self.multiple, self.min,
             self.max, self.required)
+        self.page_size = props.get('page_size', DEFAULT_PAGE_SIZE)
 
     def serialize_table(self):
         if self.df is None:
@@ -64,4 +66,4 @@ class PandasRowSelectionInput(Input):
             display_index, 'disabled': self.disabled, 'label': self.label,
             'multiple': self.multiple, 'filterable': self.filterable,
             'value': self.serialize_value(), 'errors': self.errors, 'min':
-            self.min, 'max': self.max}
+            self.min, 'max': self.max, 'pageSize': self.page_size}

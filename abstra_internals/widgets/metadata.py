@@ -2767,6 +2767,13 @@ metadata = {
                     "default": "None",
                 },
                 {
+                    "argName": "page_size",
+                    "description": "The number of rows to display per page. Defaults to 10.",
+                    "typeName": "number",
+                    "isKwarg": True,
+                    "default": "10",
+                },
+                {
                     "argName": "disabled",
                     "description": "whether the input is disabled. Defaults to False.",
                     "typeName": "bool",
@@ -2833,6 +2840,7 @@ metadata = {
                 {"argName": "value", "typeName": "array"},
                 {"argName": "min", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": ["number", "null"]},
+                {"argName": "pageSize", "typeName": "number"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -4672,6 +4680,13 @@ metadata = {
                     "default": "False",
                 },
                 {
+                    "argName": "page_size",
+                    "description": "The number of rows to display per page. Defaults to 10.",
+                    "typeName": "number",
+                    "isKwarg": True,
+                    "default": "10",
+                },
+                {
                     "argName": "actions",
                     "description": "Actions that can be triggered by table rows",
                     "typeName": "list",
@@ -4720,6 +4735,7 @@ metadata = {
                 {"argName": "displayIndex", "typeName": "boolean"},
                 {"argName": "label", "typeName": "string"},
                 {"argName": "editable", "typeName": "boolean"},
+                {"argName": "pageSize", "typeName": "number"},
                 {"argName": "actions", "typeName": "array"},
                 {"argName": "fullWidth", "typeName": "boolean"},
             ]

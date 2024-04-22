@@ -562,6 +562,7 @@ def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
 		multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.
 		min (number): The minimal amount of options that should be selected. Defaults to None.
 		max (number): The maximum amount of options that should be selected. Defaults to None.
+		page_size (number): The number of rows to display per page. Defaults to 10.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
