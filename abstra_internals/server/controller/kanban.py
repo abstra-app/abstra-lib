@@ -29,7 +29,7 @@ from ...repositories.stage_run import (
 from ...utils.datetime import to_utc_iso_string
 from ..guards.role_guard import Guard, StageIdSelector
 from ..workflow_engine import workflow_engine
-from .workflows import make_stage_dto
+from .workflows import get_path, make_stage_dto
 
 
 @dataclass
@@ -297,6 +297,11 @@ def get_editor_bp():
         req = DataRequest.from_dict(flask.request.json)
         return controller.get_data(req).to_dict()
 
+    @bp.get("/path")
+    def _get_path():
+        n = int(flask.request.args.get("n", 3))
+        return get_path(n)
+
     # 1s pooling in this route
     @bp.get("/logs/<stage_run_id>")
     def _get_ancestor_logs(stage_run_id: str):
@@ -349,6 +354,12 @@ def get_player_bp():
     def _get_stages():
         stages = controller._get_stages()
         return [stage.to_dict() for stage in stages]
+
+    @bp.get("/path")
+    @guard.by(StageIdSelector("kanban"))
+    def _get_path():
+        n = int(flask.request.args.get("n", 3))
+        return get_path(n)
 
     @bp.post("/")
     @guard.by(StageIdSelector("kanban"))

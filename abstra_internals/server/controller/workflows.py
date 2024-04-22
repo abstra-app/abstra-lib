@@ -300,15 +300,6 @@ def get_editor_bp(controller: MainController):
             AbstraLogger.capture_exception(e)
             return str(e), 500
 
-    @bp.get("/path")
-    def _get_path():
-        try:
-            n = int(flask.request.args.get("n", 3))
-            return get_path(n)
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
-            return str(e), 500
-
     @bp.put("/")
     @usage
     def _update_workflow():

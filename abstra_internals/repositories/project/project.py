@@ -933,7 +933,7 @@ class KanbanView:
     def to_access_dto(self):
         return {
             "id": "kanban",
-            "title": "Kanban",
+            "title": "Threads",
             "type": "internal",
             "is_public": self.access_control.is_public,
             "required_roles": self.access_control.required_roles,
@@ -1058,7 +1058,7 @@ class Project:
         return None
 
     def get_access_control_by_stage_path(self, path: str) -> Optional[AccessSettings]:
-        if path == "threads":
+        if path == "kanban":
             return self.kanban.access_control
         form = self.get_form_by_path(path)
         if form:
