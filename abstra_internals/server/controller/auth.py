@@ -40,4 +40,20 @@ def get_player_bp():
 
         return {"jwt": jwt}
 
+    @bp.post("/oidc-verify")
+    def _oidc_access():
+        data = flask.request.get_json(force=True)
+        if not data:
+            return flask.abort(400)
+
+        access_token = data.get("access_token")
+        if not access_token:
+            return flask.abort(400)
+
+        jwt = authn_repository.oidc_access(access_token)
+        if not jwt:
+            return flask.abort(404)
+
+        return {"jwt": jwt}
+
     return bp

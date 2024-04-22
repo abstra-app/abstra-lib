@@ -12,7 +12,13 @@ from ...execution.stage_run_manager import (
 from ...logger import AbstraLogger
 from ...repositories import stage_run_repository_factory, users_repository
 from ...settings import Settings
-from ...utils.environment import BUILD_ID, SHOW_WATERMARK, SIDECAR_SHARED_TOKEN
+from ...utils.environment import (
+    BUILD_ID,
+    OIDC_AUTHORITY,
+    OIDC_CLIENT_ID,
+    SHOW_WATERMARK,
+    SIDECAR_SHARED_TOKEN,
+)
 from ..controller import access_control as access_control_controller
 from ..controller import auth as auth_controller
 from ..controller import kanban as kanban_controller
@@ -70,7 +76,13 @@ def get_player_bp(controller: MainController):
 
     @bp.get("/_settings")
     def _get_settings():
-        return flask.jsonify({"show_watermark": SHOW_WATERMARK})
+        return flask.jsonify(
+            {
+                "show_watermark": SHOW_WATERMARK,
+                "oidc_authority": OIDC_AUTHORITY,
+                "oidc_client_id": OIDC_CLIENT_ID,
+            }
+        )
 
     @sock.route("/_socket")
     def _websocket(conn: flask_sock.Server):
