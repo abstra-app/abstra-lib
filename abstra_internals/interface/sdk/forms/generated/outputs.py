@@ -171,6 +171,7 @@ def display_pandas(df: PandasDataFrame, **kwargs):
 		display_index (bool): Whether to show a index column. Defaults to False.
 		label (str): The label to display to the user
 		editable (bool): Whether the user will be allowed to edit the cells. Defaults to False.
+		page_size (number): The number of rows to display per page. Defaults to 10.
 		actions (list): Actions that can be triggered by table rows
 		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.

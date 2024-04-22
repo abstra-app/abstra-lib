@@ -1,6 +1,7 @@
 from ..widget_base import Output
 from typing import Any
 import json
+DEFAULT_PAGE_SIZE = 10
 
 
 class PandasOutput(Output):
@@ -17,6 +18,7 @@ class PandasOutput(Output):
         self.actions = props.get('actions', [])
         self.filterable = props.get('filterable', False)
         self.editable = props.get('editable', False)
+        self.page_size = props.get('page_size', DEFAULT_PAGE_SIZE)
 
     def serialize_table(self):
         if self.df is None:
@@ -37,4 +39,5 @@ class PandasOutput(Output):
         return {'type': self.type, 'table': self.serialize_table(),
             'fullWidth': self.full_width, 'displayIndex': self.
             display_index, 'label': self.label, 'actions': self.actions,
-            'filterable': self.filterable, 'editable': self.editable}
+            'filterable': self.filterable, 'editable': self.editable,
+            'pageSize': self.page_size}
