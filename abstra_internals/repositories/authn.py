@@ -5,7 +5,7 @@ import typing
 import jwt
 import requests
 
-from ..utils.environment import (
+from ..environment import (
     OIDC_AUTHORITY,
     PROJECT_ID,
     SIDECAR_HEADERS,

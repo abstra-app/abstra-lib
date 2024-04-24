@@ -3,6 +3,13 @@ import json
 import flask
 import flask_sock
 
+from ...environment import (
+    BUILD_ID,
+    OIDC_AUTHORITY,
+    OIDC_CLIENT_ID,
+    SHOW_WATERMARK,
+    SIDECAR_SHARED_TOKEN,
+)
 from ...execution import FormExecution, HookExecution
 from ...execution.execution import RequestData
 from ...execution.stage_run_manager import (
@@ -12,13 +19,6 @@ from ...execution.stage_run_manager import (
 from ...logger import AbstraLogger
 from ...repositories import stage_run_repository_factory, users_repository
 from ...settings import Settings
-from ...utils.environment import (
-    BUILD_ID,
-    OIDC_AUTHORITY,
-    OIDC_CLIENT_ID,
-    SHOW_WATERMARK,
-    SIDECAR_SHARED_TOKEN,
-)
 from ..controller import access_control as access_control_controller
 from ..controller import auth as auth_controller
 from ..controller import kanban as kanban_controller

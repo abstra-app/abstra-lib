@@ -7,11 +7,11 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 import requests
 
+from ..environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..threaded import threaded
 from ..utils import serialize
 from ..utils.datetime import from_utc_iso_string, to_utc_iso_string
 from ..utils.dot_abstra import LOCAL_LOGS_FOLDER
-from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 from .serializer import SerializationHelper
 
 

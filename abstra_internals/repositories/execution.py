@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Literal, Optional
 import requests
 from pydantic.dataclasses import dataclass
 
-from ..utils.environment import (
+from ..environment import (
     SERVER_UUID,
     SIDECAR_HEADERS,
     SIDECAR_URL,

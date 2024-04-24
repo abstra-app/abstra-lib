@@ -1,7 +1,7 @@
 from colorama import Fore, Style
 
+from ...environment import HOST
 from ...settings import Settings
-from ...utils.environment import HOST
 
 
 def serve_message():
