@@ -148,7 +148,9 @@ class TestRequirementsApi(TestCase):
             is_public=False, required_roles=[WORKFLOW_VIEWER]
         )
 
-        guard = Guard(repo, test_auth_decoder, project=project)
+        ProjectRepository.save(project)
+
+        guard = Guard(repo, test_auth_decoder)
 
         app = Flask(__name__)
         bp = Blueprint("dummy", __name__)
