@@ -13,7 +13,6 @@ from ...contracts_generated import (
 from ...jwt_auth import UserClaims
 from ...repositories.project.project import (
     AccessSettings,
-    Project,
     ProjectRepository,
 )
 from ...repositories.users import UsersRepository
@@ -43,33 +42,29 @@ Selector = Union[StageIdSelector, PathArgSelector, IdArgSelector]
 
 class Guard:
     repository: UsersRepository
-    project: Project
     auth_decoder: Callable[[str], Optional[UserClaims]]
 
     def __init__(
         self,
         repository: UsersRepository,
         auth_decoder: Callable[[str], Optional[UserClaims]] = default_auth_decoder,
-        project: Optional[Project] = None,
     ) -> None:
         self.repository = repository
         self.auth_decoder = auth_decoder
-        if project is None:
-            self.project = ProjectRepository.load()
-        else:
-            self.project = project
 
     def __get_access_settings(self, selector: Selector, **kwargs):
         if isinstance(selector, IdArgSelector):
             stage_id = str(kwargs.get(selector.value))
-            return self.project.get_access_control_by_stage_id(stage_id)
+            return ProjectRepository.load().get_access_control_by_stage_id(stage_id)
 
         elif isinstance(selector, StageIdSelector):
-            return self.project.get_access_control_by_stage_id(selector.value)
+            return ProjectRepository.load().get_access_control_by_stage_id(
+                selector.value
+            )
 
         ##path arg is default
         path = str(kwargs.get(selector.value))
-        return self.project.get_access_control_by_stage_path(path)
+        return ProjectRepository.load().get_access_control_by_stage_path(path)
 
     def __allow(self, access_setting: AccessSettings) -> NavigationGuard:
         ##public access
@@ -99,7 +94,9 @@ class Guard:
         return NavigationGuard("FORBIDEN")
 
     def allow(self, path: str) -> NavigationGuard:
-        access_settings = self.project.get_access_control_by_stage_path(path)
+        access_settings = ProjectRepository.load().get_access_control_by_stage_path(
+            path
+        )
         ##404 allow this to be handled by the frontend
         if access_settings is None:
             return NavigationGuard("ALLOWED")
