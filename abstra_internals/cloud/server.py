@@ -11,7 +11,7 @@ from ..server.controller.main import MainController
 from ..settings import SettingsController
 from ..stdio_monkey_patch import override_stdio
 from .application import CustomApplication
-from .hooks import on_starting, pre_fork
+from .hooks import child_exit, on_starting, pre_fork
 
 
 def run():
@@ -21,12 +21,13 @@ def run():
     SettingsController.set_server_port(DEFAULT_PORT)
 
     options = {
+        "bind": f":{DEFAULT_PORT or 8002}",
         "workers": WORKERS,
         "threads": THREADS,
         "worker_class": WORKER_CLASS,
         "worker_tmp_dir": WORKER_TEMP_DIR,
-        "bind": f":{DEFAULT_PORT or 8002}",
         "on_starting": on_starting,
+        "child_exit": child_exit,
         "pre_fork": pre_fork,
     }
 
