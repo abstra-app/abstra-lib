@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 import requests
 
 from ..contracts_generated import CommonUserRoles
-from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
+from ..environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class MembersRepository(ABC):

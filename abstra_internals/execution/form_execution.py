@@ -10,12 +10,12 @@ from simple_websocket.ws import ConnectionClosed
 from ..compatibility import compat_traceback
 from ..contract import forms_contract
 from ..debug import make_debug_data
+from ..environment import IS_PRODUCTION
 from ..jwt_auth import UserClaims
 from ..logger import AbstraLogger
 from ..repositories.execution import ExecutionRepository
 from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
 from ..utils import deserialize, serialize
-from ..utils.environment import IS_PRODUCTION
 from .execution import ABSTRA_RUN_KEY, Execution, NoExecutionFound, RequestData
 from .stage_run_manager import StageRunManager
 

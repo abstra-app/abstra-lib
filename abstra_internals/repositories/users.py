@@ -6,10 +6,10 @@ from typing import Any, Dict, List, Optional
 import requests
 
 from ..contracts_generated import CommonUser, CommonUserRoles
+from ..environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..logger import AbstraLogger
 from ..settings import Settings
 from ..utils.dot_abstra import LOCAL_USERS_FILE
-from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class UsersRepository(ABC):

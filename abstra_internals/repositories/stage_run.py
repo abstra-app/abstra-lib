@@ -9,8 +9,8 @@ import requests
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
+from ..environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.datetime import from_utc_iso_string
-from ..utils.environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.validate import validate_json
 
 end_status = ["failed", "finished", "abandoned"]

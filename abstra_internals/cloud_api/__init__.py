@@ -4,8 +4,8 @@ from ..contracts_generated import (
     CloudApiCliAuthInfoResponse,
     CloudApiCliBuildCreateResponse,
 )
+from ..environment import CLOUD_API_ENDPOINT
 from ..logger import AbstraLogger
-from ..utils.environment import CLOUD_API_ENDPOINT
 
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:

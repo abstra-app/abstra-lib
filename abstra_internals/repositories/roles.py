@@ -8,7 +8,7 @@ from ..contracts_generated import (
 from ..credentials import (
     resolve_headers,
 )
-from ..utils.environment import CLOUD_API_ENDPOINT
+from ..environment import CLOUD_API_ENDPOINT
 
 
 class RolesRepository:

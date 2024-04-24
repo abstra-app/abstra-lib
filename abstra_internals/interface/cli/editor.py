@@ -3,12 +3,12 @@ import os
 import threading
 import webbrowser
 
+from ...environment import HOST
 from ...server.apps import get_local_app
 from ...server.controller.main import MainController
 from ...server.fs_watcher import watch_py_root_files
 from ...settings import Settings
 from ...stdio_monkey_patch import override_stdio
-from ...utils.environment import HOST
 from .messages import serve_message
 from .version import check_latest_version
 

@@ -4,7 +4,7 @@ import typing
 import requests
 
 from ..credentials import resolve_headers
-from ..utils.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from ..environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
 
 
 class ConnectorsApiHttpClient(abc.ABC):
