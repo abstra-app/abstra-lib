@@ -4,6 +4,7 @@ import re
 import socket
 import typing as t
 from contextlib import closing
+from uuid import uuid4
 
 import jsonpath_ng as jp
 import simplejson
@@ -103,3 +104,12 @@ def nested_get(data: t.Dict, path: str):
 
 def is_testing():
     return "PYTEST_CURRENT_TEST" in os.environ
+
+
+def get_internal_id(obj: object, ensure=True) -> str:
+    key = "abstra_uuid"
+
+    if not getattr(obj, key, None) and ensure:
+        setattr(obj, key, uuid4().__str__())
+
+    return getattr(obj, key)

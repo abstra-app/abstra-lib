@@ -23,6 +23,17 @@ class ExecutionDTO:
     stage_id: str
     stage_run_id: Optional[str]
 
+    @staticmethod
+    def from_dict(data: dict) -> "ExecutionDTO":
+        return ExecutionDTO(
+            id=data["id"],
+            status=data["status"],
+            context=data["context"],
+            stage_id=data["stageId"],
+            created_at=data["createdAt"],
+            stage_run_id=data.get("stageRunId"),
+        )
+
 
 class ExecutionRepository(ABC):
     @abstractmethod
@@ -34,7 +45,9 @@ class ExecutionRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def find(self, stage_run_id: str) -> List[ExecutionDTO]:
+    def find_for_worker(
+        self, app_id: str, worker_id: str, status: ExecutionStatus
+    ) -> List[ExecutionDTO]:
         raise NotImplementedError()
 
 
@@ -48,12 +61,10 @@ class LocalExecutionRepository(ExecutionRepository):
     def update(self, execution_dto: ExecutionDTO) -> None:
         self.executions[execution_dto.id] = execution_dto
 
-    def find(self, stage_run_id: str) -> List[ExecutionDTO]:
-        return [
-            execution
-            for execution in self.executions.values()
-            if execution.stage_run_id == stage_run_id
-        ]
+    def find_for_worker(
+        self, app_id: str, worker_id: str, status: ExecutionStatus
+    ) -> List[ExecutionDTO]:
+        raise NotImplementedError()
 
 
 class RemoteExecutionRepository(ExecutionRepository):
@@ -100,15 +111,21 @@ class RemoteExecutionRepository(ExecutionRepository):
 
         res.raise_for_status()
 
-    def find(self, stage_run_id: str) -> List[ExecutionDTO]:
+    def find_for_worker(
+        self, app_id: str, worker_id: str, status: ExecutionStatus
+    ) -> List[ExecutionDTO]:
         res = requests.get(
             f"{self.url}/executions",
-            params=dict(stageRunId=stage_run_id),
+            params=dict(
+                appId=app_id,
+                status=status,
+                workerId=worker_id,
+            ),
             headers=self.headers,
         )
 
         res.raise_for_status()
-        return [ExecutionDTO(**execution) for execution in res.json()]
+        return [ExecutionDTO.from_dict(execution) for execution in res.json()]
 
 
 def execution_repository_factory() -> ExecutionRepository:

@@ -90,13 +90,10 @@ class FormExecution(Execution):
     def send(self, msg: forms_contract.Message):
         self.log_form_message(msg.type, msg.data)
 
-        skip_sending = (
-            isinstance(msg, forms_contract.ExecutionStdioMessage) and IS_PRODUCTION
-        )
-        if skip_sending:
+        if IS_PRODUCTION and isinstance(msg, forms_contract.ExecutionStdioMessage):
             return
 
-        if self.debug_enabled:
+        if not IS_PRODUCTION:
             if (
                 isinstance(msg, forms_contract.ExecutionEndedMessage)
                 and msg.close_dto.exception
