@@ -23,11 +23,15 @@ def has_local_dependencies_changed(project: Project, last_change: float) -> bool
 
 
 def reload_files_on_change(project: Project, last_change: float):
-    if has_local_dependencies_changed(project, last_change):
+    if not has_local_dependencies_changed(project, last_change):
+        return False
+
+    try:
         reload_project_local_modules()
         FormExecution.broadcast(FilesChangedMessage())
         return True
-    else:
+    except Exception as e:
+        AbstraLogger.capture_exception(e)
         return False
 
 
