@@ -2,6 +2,7 @@ from typing import List
 
 from ..linter import LinterRule
 from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
+from .env_file_changed import EnvFileChanged
 from .env_in_bundle import EnvInBundle
 from .missing_abstra_in_requirements import MissingAbstraInRequirements
 from .missing_entrypoint import MissingEntrypoint
@@ -23,4 +24,5 @@ rules: List[LinterRule] = [
     NewVersionOfAbstraAvailable(),
     UnsetGetData(),
     UnsetMatchThread(),
+    EnvFileChanged(),
 ]
