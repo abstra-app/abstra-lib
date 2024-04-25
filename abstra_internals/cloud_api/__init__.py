@@ -37,12 +37,17 @@ def get_auth_info(headers: dict) -> dict:
         return {"logged": False, "reason": "INVALID_API_TOKEN"}
 
 
-def get_ai_messages(messages, stage, headers: dict):
+def get_ai_messages(messages, stage, thread_id, headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/messages"
-    body = {"messages": messages, "runtime": stage}
+    body = {"messages": messages, "runtime": stage, "threadId": thread_id}
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
         chunk_size=None
     )
+
+
+def create_thread(headers: dict):
+    url = f"{CLOUD_API_ENDPOINT}/cli/ai/thread"
+    return requests.post(url, headers=headers).json()
 
 
 def get_project_info(headers):
