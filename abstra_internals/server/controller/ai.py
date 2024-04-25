@@ -14,11 +14,18 @@ def get_editor_bp(controller: MainController):
         if not body:
             flask.abort(400)
 
-        streamer = controller.send_ai_message(body["messages"], body["runtime"])
+        streamer = controller.send_ai_message(
+            body["messages"], body["runtime"], body["threadId"]
+        )
 
         if streamer is None:
             flask.abort(403)
 
         return flask.Response(streamer, mimetype="text/event-stream")
+
+    @bp.post("/thread")
+    @usage
+    def _create_thread():
+        return controller.create_thread()
 
     return bp
