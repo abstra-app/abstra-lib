@@ -6,13 +6,13 @@ import requests
 from .credentials import get_credentials
 from .environment import CLOUD_API_CLI_URL
 from .threaded import threaded
-from .utils import get_local_user_id, is_testing
+from .utils import get_local_user_id, is_test_env
 from .utils.packages import get_local_package_version
 
 
 @threaded
 def send_usage(data, header):
-    if is_testing():
+    if is_test_env():
         return
 
     api_url = f"{CLOUD_API_CLI_URL}/editor/usage"

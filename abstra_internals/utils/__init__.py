@@ -102,8 +102,15 @@ def nested_get(data: t.Dict, path: str):
         return None
 
 
-def is_testing():
+def is_test_env():
     return "PYTEST_CURRENT_TEST" in os.environ
+
+
+def is_dev_env() -> bool:
+    dev_versions = ["0.0.0", "100.0.0"]
+    from .packages import get_local_package_version
+
+    return str(get_local_package_version()) in dev_versions
 
 
 def get_internal_id(obj: object, ensure=True) -> str:

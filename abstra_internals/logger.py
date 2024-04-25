@@ -3,13 +3,13 @@ from typing import Literal
 import pkg_resources
 import sentry_sdk
 
-from .utils import is_testing
+from .utils import is_dev_env, is_test_env
 
 
 class AbstraLogger:
     @staticmethod
     def init(environment: Literal["cloud", "local"]):
-        if is_testing():
+        if AbstraLogger.is_enabled():
             return
 
         try:
@@ -27,7 +27,7 @@ class AbstraLogger:
 
     @staticmethod
     def capture_exception(exception: Exception):
-        if is_testing():
+        if AbstraLogger.is_enabled():
             return
 
         sentry_sdk.capture_exception(exception)
@@ -35,8 +35,12 @@ class AbstraLogger:
 
     @staticmethod
     def capture_message(message: str):
-        if is_testing():
+        if AbstraLogger.is_enabled():
             return
 
         sentry_sdk.capture_message(message)
         sentry_sdk.flush()
+
+    @staticmethod
+    def is_enabled():
+        return not is_test_env() and not is_dev_env()
