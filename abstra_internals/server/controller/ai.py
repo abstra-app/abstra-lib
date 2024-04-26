@@ -26,6 +26,9 @@ def get_editor_bp(controller: MainController):
     @bp.post("/thread")
     @usage
     def _create_thread():
-        return controller.create_thread()
+        thread = controller.create_thread()
+        if not thread:
+            flask.abort(403)
+        return thread
 
     return bp
