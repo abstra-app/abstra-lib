@@ -26,10 +26,10 @@ def endcode_fake_jwt(email: str):
 
 
 def get_oidc_userinfo_email(access_token: str) -> typing.Optional[str]:
-    if not OIDC_AUTHORITY:
+    if not OIDC_AUTHORITY():
         raise ValueError("[OIDC] OIDC_AUTHORITY is not set")
 
-    r = requests.get(f"{OIDC_AUTHORITY}/.well-known/openid-configuration")
+    r = requests.get(f"{OIDC_AUTHORITY()}/.well-known/openid-configuration")
     if not r.ok:
         raise ValueError("[OIDC] Failed to fetch OIDC configuration")
 
