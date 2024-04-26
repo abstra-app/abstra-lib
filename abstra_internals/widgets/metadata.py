@@ -2477,7 +2477,7 @@ metadata = {
                 {
                     "argName": "initial_value",
                     "description": "The initial value to display to the user. Defaults to 0.",
-                    "typeName": "str",
+                    "typeName": "number",
                     "isKwarg": True,
                     "default": "0",
                 },
