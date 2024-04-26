@@ -25,7 +25,7 @@ from ..controller import kanban as kanban_controller
 from ..controller import users as user_controller
 from ..controller import visualizations as visualizations_controller
 from ..controller.main import MainController
-from ..guards.role_guard import Guard, PathArgSelector
+from ..guards.role_guard import Guard, PathArgSelector, QueryArgSelector
 from ..utils import send_from_dist
 from ..workflow_engine import workflow_engine
 
@@ -85,6 +85,7 @@ def get_player_bp(controller: MainController):
         )
 
     @sock.route("/_socket")
+    @guard.socket_by(QueryArgSelector("id"))
     def _websocket(conn: flask_sock.Server):
         request_data = RequestData(
             query_params=flask.request.args,
@@ -121,6 +122,7 @@ def get_player_bp(controller: MainController):
             conn.close(message="Done")
 
     @sock.route("/_socket/detached")
+    @guard.socket_by(QueryArgSelector("id"))
     def _websocket_detached(conn: flask_sock.Server):
         request_data = RequestData(
             query_params=flask.request.args,

@@ -34,6 +34,7 @@ def get_player_bp():
 
     @bp.get("/allow/<string:path>")
     def _get_allow_status_by_path(path: str):
-        return guard.allow(path).to_dict()
+        authHeader = flask.request.headers.get("Authorization")
+        return guard.allow(path, authHeader).to_dict()
 
     return bp
