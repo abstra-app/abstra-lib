@@ -6,6 +6,30 @@ Source code: [monorepo]/contracts/generator.py
 import typing
 from dataclasses import dataclass
 
+CloudApiCliAuthInfoResponseAuthorId = str
+
+CloudApiCliAuthInfoResponseProjectId = str
+
+
+@dataclass
+class CloudApiCliAuthInfoResponse:
+    author_id: CloudApiCliAuthInfoResponseAuthorId
+    project_id: CloudApiCliAuthInfoResponseProjectId
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "authorId": self.author_id,
+            "projectId": self.project_id,
+        }
+
+    @staticmethod
+    def from_dict(data: typing.Dict[str, typing.Any]) -> "CloudApiCliAuthInfoResponse":
+        return CloudApiCliAuthInfoResponse(
+            author_id=str(data["authorId"]),
+            project_id=str(data["projectId"]),
+        )
+
+
 CommonRoleDescription = str
 
 CloudApiCliRoleUpdateRequestDescription = CommonRoleDescription
@@ -162,30 +186,6 @@ class CommonUser:
 
 
 CloudApiCliUserGetResponse = CommonUser
-
-CloudApiCliAuthInfoResponseAuthorId = str
-
-CloudApiCliAuthInfoResponseProjectId = str
-
-
-@dataclass
-class CloudApiCliAuthInfoResponse:
-    author_id: CloudApiCliAuthInfoResponseAuthorId
-    project_id: CloudApiCliAuthInfoResponseProjectId
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "authorId": self.author_id,
-            "projectId": self.project_id,
-        }
-
-    @staticmethod
-    def from_dict(data: typing.Dict[str, typing.Any]) -> "CloudApiCliAuthInfoResponse":
-        return CloudApiCliAuthInfoResponse(
-            author_id=str(data["authorId"]),
-            project_id=str(data["projectId"]),
-        )
-
 
 CloudApiCliBuildCreateResponseUrl = str
 
@@ -669,6 +669,32 @@ class AbstraLibApiEditorLintersRule:
         )
 
 
+AbstraLibApiEditorEnvVarsModelKey = str
+
+AbstraLibApiEditorEnvVarsModelValue = str
+
+
+@dataclass
+class AbstraLibApiEditorEnvVarsModel:
+    key: AbstraLibApiEditorEnvVarsModelKey
+    value: AbstraLibApiEditorEnvVarsModelValue
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "key": self.key,
+            "value": self.value,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "AbstraLibApiEditorEnvVarsModel":
+        return AbstraLibApiEditorEnvVarsModel(
+            key=str(data["key"]),
+            value=str(data["value"]),
+        )
+
+
 AbstraLibApiEditorLintersFixResponseSuccess = bool
 
 
@@ -695,32 +721,6 @@ AbstraLibApiEditorLintersCheckResponseItem = AbstraLibApiEditorLintersRule
 AbstraLibApiEditorLintersCheckResponse = typing.List[
     AbstraLibApiEditorLintersCheckResponseItem
 ]
-
-AbstraLibApiEditorEnvVarsModelKey = str
-
-AbstraLibApiEditorEnvVarsModelValue = str
-
-
-@dataclass
-class AbstraLibApiEditorEnvVarsModel:
-    key: AbstraLibApiEditorEnvVarsModelKey
-    value: AbstraLibApiEditorEnvVarsModelValue
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "key": self.key,
-            "value": self.value,
-        }
-
-    @staticmethod
-    def from_dict(
-        data: typing.Dict[str, typing.Any],
-    ) -> "AbstraLibApiEditorEnvVarsModel":
-        return AbstraLibApiEditorEnvVarsModel(
-            key=str(data["key"]),
-            value=str(data["value"]),
-        )
-
 
 AbstraLibApiEditorEnvVarsListResponseItem = AbstraLibApiEditorEnvVarsModel
 

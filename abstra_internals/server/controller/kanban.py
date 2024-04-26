@@ -134,13 +134,7 @@ class ColumnStage:
         )
 
     def to_dict(self) -> dict:
-        return dict(
-            id=self.id,
-            type=self.type,
-            title=self.title,
-            path=self.path,
-            can_be_started=self.can_be_started,
-        )
+        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
 
 
 @dataclass
