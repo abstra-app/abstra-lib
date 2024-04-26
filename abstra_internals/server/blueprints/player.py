@@ -79,8 +79,8 @@ def get_player_bp(controller: MainController):
         return flask.jsonify(
             {
                 "show_watermark": SHOW_WATERMARK,
-                "oidc_authority": OIDC_AUTHORITY,
-                "oidc_client_id": OIDC_CLIENT_ID,
+                "oidc_authority": OIDC_AUTHORITY(),
+                "oidc_client_id": OIDC_CLIENT_ID(),
             }
         )
 

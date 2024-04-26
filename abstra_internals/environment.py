@@ -25,9 +25,6 @@ SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
 
-OIDC_AUTHORITY = os.getenv("ABSTRA_OIDC_AUTHORITY")
-OIDC_CLIENT_ID = os.getenv("ABSTRA_OIDC_CLIENT_ID")
-
 __WORKER_UUID_ENV__ = "ABSTRA_WORKER_UUID"
 
 
@@ -48,3 +45,11 @@ def SERVER_UUID():
 
 def set_SERVER_UUID(server_uuid: str):
     os.environ[__SERVER_UUID_ENV__] = server_uuid
+
+
+def OIDC_CLIENT_ID():
+    return os.getenv("ABSTRA_OIDC_CLIENT_ID")
+
+
+def OIDC_AUTHORITY():
+    return os.getenv("ABSTRA_OIDC_AUTHORITY")
