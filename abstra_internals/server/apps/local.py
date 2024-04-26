@@ -11,6 +11,7 @@ def get_local_app(controller: MainController) -> flask.Flask:
     AbstraLogger.init("local")
 
     app = flask.Flask(__name__)
+    app.config["SOCK_SERVER_OPTIONS"] = {"subprotocols": ["default"]}
     app.url_map.strict_slashes = False
     flask_cors.CORS(app)
 
