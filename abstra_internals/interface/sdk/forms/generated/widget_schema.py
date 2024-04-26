@@ -656,7 +656,7 @@ class WidgetSchema:
 		label (str): The label to display to the user
 		
         Keyword Args: 
-		initial_value (str): The initial value to display to the user. Defaults to 0.
+		initial_value (number): The initial value to display to the user. Defaults to 0.
 		placeholder (str): The placeholder text to display to the user. Defaults to "".
 		min (float): Min value accepted by the input. Defaults to None.
 		max (float): Max value accepted by the input. Defaults to None.
