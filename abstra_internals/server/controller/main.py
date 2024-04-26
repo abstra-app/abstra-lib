@@ -400,7 +400,9 @@ class MainController:
         yield from get_ai_messages(messages, stage, thread_id, headers)
 
     def create_thread(self):
-        headers = resolve_headers() or {}
+        headers = resolve_headers()
+        if headers is None:
+            return None
         return create_thread(headers)
 
     # access_control
