@@ -935,12 +935,12 @@ metadata = {
                 "props": {
                     "label": "Show me the code!",
                     "language": "c",
-                    "value": '#include<stdio.h>\nint main(int argc, char** argv) {\n  char name[256];\n  scanf("%s", name);\np  rintf("%s, here is", name);\n}',
+                    "value": '#include<stdio.h>\nint main(int argc, char** argv) {\n  char name[256];\n  scanf("%s", name);\n  printf("%s, here is", name);\n  return 0;\n}',
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_code",
                 "key": "example1",
-                "code": 'from abstra.forms import read_code\n\nans = read_code("Show me the code!", language="c")\n',
+                "code": 'from abstra.forms import read_code\n\nans = read_code(\n    "Show me the code!",\n    language="c",\n    initial_value="""\\\n#include<stdio.h>\nint main(int argc, char** argv) {\n  char name[256];\n  scanf("%s", name);\n  printf("%s, here is", name);\n  return 0;\n}""",\n)\n',
             }
         ],
     },
