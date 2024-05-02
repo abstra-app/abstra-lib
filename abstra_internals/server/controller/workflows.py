@@ -81,6 +81,9 @@ def make_stage_dto(stage: WorkflowStage) -> StageDTO:
     variable_name = None
     if isinstance(stage, (IteratorStage, ConditionStage)):
         variable_name = stage.variable_name
+    item_name = None
+    if isinstance(stage, IteratorStage):
+        item_name = stage.item_name
     path = None
     if isinstance(stage, (FormStage, HookStage)):
         path = stage.path
@@ -96,6 +99,7 @@ def make_stage_dto(stage: WorkflowStage) -> StageDTO:
             "filename": filename,
             "variableName": variable_name,
             "path": path,
+            "itemName": item_name,
         },
     )
 
@@ -107,6 +111,9 @@ def _make_workflow_dto(project: Project):
 
         if isinstance(stage, IteratorStage) or isinstance(stage, ConditionStage):
             stage_dto["props"]["variableName"] = stage.variable_name
+
+        if isinstance(stage, IteratorStage):
+            stage_dto["props"]["itemName"] = stage.item_name
 
         if (
             isinstance(stage, FormStage)
@@ -161,6 +168,8 @@ def update_workflow(workflow_state_dto: dict):
                 stage.title = stage_dto["title"]
             if isinstance(stage, IteratorStage) or isinstance(stage, ConditionStage):
                 stage.variable_name = stage_dto["props"]["variableName"]
+            if isinstance(stage, IteratorStage):
+                stage.item_name = stage_dto["props"]["itemName"]
             if (
                 isinstance(stage, FormStage)
                 or isinstance(stage, ScriptStage)

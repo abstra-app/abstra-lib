@@ -104,7 +104,7 @@ class WorkflowEngine:
         ]
 
         return [
-            dict(stage=stage_id, data={"item": item})
+            dict(stage=stage_id, data={stage.item_name: item})
             for item in items
             for stage_id in next_stage_ids
         ]

@@ -100,3 +100,30 @@ class IteratorTransitionsTest(TestCase):
         stage_run = self.repository.create_initial(stage="s1", data={})
         result = workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])
+
+    def test_custom_item_name(self):
+        stage = IteratorStage(
+            id="s1",
+            variable_name="foo",
+            item_name="bar",
+            workflow_position=(0, 0),
+            workflow_transitions=[
+                WorkflowTransition(
+                    id="t1",
+                    condition_value=None,
+                    target_id="target_id",
+                    target_type="target_type",
+                    type="iterators:each",
+                )
+            ],
+        )
+        stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
+        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
+        self.assertEqual(
+            result,
+            [
+                dict(stage="target_id", data=dict(bar=1)),
+                dict(stage="target_id", data=dict(bar=2)),
+                dict(stage="target_id", data=dict(bar=3)),
+            ],
+        )

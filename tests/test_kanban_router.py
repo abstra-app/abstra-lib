@@ -7,10 +7,7 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
     WorkflowTransition,
 )
-from abstra_internals.server.controller.kanban import (
-    DataRequest,
-    DataRequestFilter,
-)
+from abstra_internals.server.controller.kanban import DataRequest, DataRequestFilter
 from abstra_internals.utils.datetime import to_utc_iso_string
 
 from .fixtures import clear_dir, get_local_client, init_dir
@@ -47,7 +44,12 @@ class TestKanbanRouter(TestCase):
                 "id": stage.id,
                 "title": "test",
                 "position": {"x": 0, "y": 0},
-                "props": {"filename": "test.py", "variableName": None, "path": "test"},
+                "props": {
+                    "filename": "test.py",
+                    "variableName": None,
+                    "path": "test",
+                    "itemName": None,
+                },
             },
         )
 
