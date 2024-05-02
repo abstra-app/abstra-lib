@@ -828,6 +828,7 @@ class IteratorStage:
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
     type_name: str = "iterator"
+    item_name: Optional[str] = "item"
 
     @property
     def title(self):
@@ -841,6 +842,7 @@ class IteratorStage:
             "variable_name": self.variable_name,
             "workflow_position": self.workflow_position,
             "transitions": [t.as_dict for t in self.workflow_transitions],
+            "item_name": self.item_name,
         }
 
     def get_items(self, thread_data: Dict[str, Any]) -> List:
@@ -860,6 +862,7 @@ class IteratorStage:
         return IteratorStage(
             id=data["id"],
             variable_name=data["variable_name"],
+            item_name=data.get("item_name", "item"),
             workflow_position=(x, y),
             workflow_transitions=[
                 WorkflowTransition.from_dict(t) for t in data["transitions"]

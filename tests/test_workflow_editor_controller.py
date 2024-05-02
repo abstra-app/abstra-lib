@@ -31,6 +31,7 @@ class TestWorkflowEditorController(TestCase):
                         "filename": "foo.py",
                         "path": "foo",
                         "variableName": None,
+                        "itemName": None,
                     },
                     "position": {"x": 0, "y": 0},
                 }
@@ -52,6 +53,7 @@ class TestWorkflowEditorController(TestCase):
                         "filename": "foo.py",
                         "path": "foo",
                         "variableName": None,
+                        "itemName": None,
                     },
                     "position": {"x": 0, "y": 0},
                 },
@@ -62,6 +64,7 @@ class TestWorkflowEditorController(TestCase):
                         "filename": "bar.py",
                         "path": "bar",
                         "variableName": None,
+                        "itemName": None,
                     },
                     "title": "Bar",
                     "position": {"x": 0, "y": 0},
@@ -98,6 +101,7 @@ class TestWorkflowEditorController(TestCase):
                         "filename": "foo.py",
                         "path": "foo",
                         "variableName": None,
+                        "itemName": None,
                     },
                     "title": "Foo",
                     "position": {"x": 0, "y": 0},
@@ -109,6 +113,7 @@ class TestWorkflowEditorController(TestCase):
                         "filename": "bar.py",
                         "path": "bar",
                         "variableName": None,
+                        "itemName": None,
                     },
                     "title": "Bar",
                     "position": {"x": 0, "y": 0},
@@ -142,6 +147,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     }
                 ],
@@ -164,6 +170,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     }
                 ],
@@ -194,6 +201,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     }
                 ],
@@ -215,6 +223,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "foo.py",
                             "path": "foo",
                             "variableName": None,
+                            "itemName": None,
                         },
                     }
                 ],
@@ -238,6 +247,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     }
                 ],
@@ -259,6 +269,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "bar.py",
                             "path": "bar",
                             "variableName": None,
+                            "itemName": None,
                         },
                     }
                 ],
@@ -282,6 +293,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     },
                     {
@@ -293,6 +305,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "bar.py",
                             "path": "bar",
                             "variableName": None,
+                            "itemName": None,
                         },
                     },
                 ],
@@ -313,6 +326,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     },
                     {
@@ -324,6 +338,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "bar.py",
                             "path": "bar",
                             "variableName": None,
+                            "itemName": None,
                         },
                     },
                 ],
@@ -354,6 +369,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     },
                     {
@@ -365,6 +381,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "bar.py",
                             "path": "bar",
                             "variableName": None,
+                            "itemName": None,
                         },
                     },
                 ],
@@ -403,6 +420,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     },
                     {
@@ -414,6 +432,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "bar.py",
                             "path": "bar",
                             "variableName": None,
+                            "itemName": None,
                         },
                     },
                 ],
@@ -443,6 +462,7 @@ class TestWorkflowEditorController(TestCase):
                             "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
+                            "itemName": None,
                         },
                     },
                     {
@@ -454,6 +474,7 @@ class TestWorkflowEditorController(TestCase):
                             "filename": "bar.py",
                             "path": "bar",
                             "variableName": None,
+                            "itemName": None,
                         },
                     },
                 ],
