@@ -39,6 +39,7 @@ from ...server.controller.linters import check_linters
 from ...settings import Settings
 from ...templates import (
     ensure_abstraignore,
+    ensure_gitignore,
     new_form_code,
     new_hook_code,
     new_job_code,
@@ -105,6 +106,7 @@ class MainController:
         requirements.ensure("abstra", pkg_resources.get_distribution("abstra").version)
         requirements_repository.save(requirements)
         ensure_abstraignore(Settings.root_path)
+        ensure_gitignore(Settings.root_path)
 
         self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
