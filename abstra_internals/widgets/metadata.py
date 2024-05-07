@@ -2187,7 +2187,7 @@ metadata = {
                 },
                 {
                     "argName": "initial_value",
-                    "description": "The initial value of the selection. Defaults to [].",
+                    "description": "The initial indexes of the selection. Defaults to [].",
                     "typeName": "[]",
                     "isKwarg": True,
                     "default": "None",
