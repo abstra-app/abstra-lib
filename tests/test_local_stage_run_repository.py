@@ -146,3 +146,61 @@ class TestLocalStageRunRepository(TestCase):
         self.assertEqual(clone.stage, child.stage)
         self.assertEqual(clone.parent_id, child.parent_id)
         self.assertEqual(clone.execution_id, None)
+
+    def test_retry_if_failed_is_root(self):
+        stage = self.repository.create_initial("stage1")
+        stage.data = {"a": 1, "b": 2}
+        stage.status = "failed"
+        retried = self.repository.retry(stage)
+        self.assertEqual(retried.status, "waiting")
+        self.assertEqual(retried.data, {})
+        self.assertEqual(retried.stage, "stage1")
+
+    def test_retry_if_failed_is_not_root(self):
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
+            parent, [dict(stage="foo", data=dict(b=3, c=4))]
+        )[0]
+        child.status = "failed"
+        retried = self.repository.retry(child)
+        self.assertEqual(retried.status, "waiting")
+        self.assertEqual(retried.data, {"a": 1, "b": 2})
+        self.assertEqual(retried.stage, "foo")
+
+    def test_retry_if_not_failed(self):
+        stage = self.repository.create_initial("stage1")
+        stage.status = "waiting"
+        with self.assertRaises(Exception):
+            self.repository.retry(stage)
+
+    def test_retry_with_retry_sequence(self):
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child = self.repository.create_next(
+            parent, [dict(stage="foo", data=dict(b=3, c=4))]
+        )[0]
+        child.status = "failed"
+        retry1 = self.repository.retry(child)
+        retry1.status = "failed"
+        retry2 = self.repository.retry(retry1)
+        retry2.status = "failed"
+        retry3 = self.repository.retry(retry2)
+        self.assertEqual(retry3.status, "waiting")
+        self.assertEqual(retry3.data, {"a": 1, "b": 2})
+        self.assertEqual(retry3.stage, "foo")
+
+    def test_retry_with_other_failed_stages(self):
+        parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
+        child1 = self.repository.create_next(
+            parent, [dict(stage="foo", data=dict(b=3, c=4))]
+        )[0]
+        child1.status = "failed"
+        child2 = self.repository.create_next(
+            child1, [dict(stage="bar", data=dict(d=5, e=6))]
+        )[0]
+        child2.status = "failed"
+        retry1 = self.repository.retry(child2)
+        retry1.status = "failed"
+        retry2 = self.repository.retry(retry1)
+        self.assertEqual(retry2.status, "waiting")
+        self.assertEqual(retry2.data, {"a": 1, "b": 3, "c": 4})
+        self.assertEqual(retry2.stage, "bar")
