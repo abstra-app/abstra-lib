@@ -1,6 +1,6 @@
 from io import BufferedReader, TextIOWrapper
 from pathlib import Path
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 from ..apis import upload_file
 from ..response_types import FileResponse
 from ..widget_base import Input, MultipleHandler
@@ -9,6 +9,7 @@ from ..widget_base import Input, MultipleHandler
 class FileInput(Input):
     type = 'file-input'
     multiple: bool = False
+    accepted_formats: list = []
     multiple_handler: MultipleHandler
 
     def __init__(self, key: str, label: str, **kwargs):
@@ -23,6 +24,7 @@ class FileInput(Input):
         self.disabled = props.get('disabled', False)
         self.max_file_size = props.get('max_file_size', None)
         self.multiple = props.get('multiple', False)
+        self.accepted_formats = props.get('accepted_formats', [])
         self.value = props.get('initial_value', self.empty_value)
         self.multiple_handler = MultipleHandler(self.multiple, required=
             self.required)
@@ -31,8 +33,9 @@ class FileInput(Input):
         return {'type': self.type, 'key': self.key, 'hint': self.hint,
             'label': self.label, 'value': self.serialize_value(),
             'required': self.required, 'multiple': self.multiple,
-            'fullWidth': self.full_width, 'disabled': self.disabled,
-            'maxFileSize': self.max_file_size, 'errors': self.errors}
+            'acceptedFormats': self.accepted_formats, 'fullWidth': self.
+            full_width, 'disabled': self.disabled, 'maxFileSize': self.
+            max_file_size, 'errors': self.errors}
 
     @staticmethod
     def __get_file_uri(value: Union[FileResponse, str, BufferedReader,

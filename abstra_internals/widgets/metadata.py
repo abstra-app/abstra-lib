@@ -1758,6 +1758,13 @@ metadata = {
                     "default": "False",
                 },
                 {
+                    "argName": "accepted_formats",
+                    "description": "The specific file types that the input should accept. Defaults to [], accepting all file formats.",
+                    "typeName": "list",
+                    "isKwarg": True,
+                    "default": "[]",
+                },
+                {
                     "argName": "max_file_size",
                     "description": "Maximum size allowed to be transfered in total in MB.",
                     "typeName": "float",
@@ -1820,6 +1827,7 @@ metadata = {
                 {"argName": "label", "typeName": "string"},
                 {"argName": "value", "typeName": ["array"]},
                 {"argName": "multiple", "typeName": "boolean"},
+                {"argName": "acceptedFormats", "typeName": "array"},
                 {"argName": "maxFileSize", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
