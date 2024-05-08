@@ -53,6 +53,10 @@ class StageRunsController:
             stage_run, parent_is_iterator, custom_thread_data
         ).to_dto()
 
+    def retry(self, stage_run_id: str):
+        stage_run = self.stage_run_repository.get(stage_run_id)
+        return self.stage_run_repository.retry(stage_run).to_dto()
+
 
 def get_editor_bp():
     bp = flask.Blueprint("editor_stage_runs", __name__)
@@ -83,5 +87,16 @@ def get_editor_bp():
         if not stage_run_id:
             flask.abort(400)
         return controller.fork(stage_run_id, custom_thread_data)
+
+    @bp.post("/retry")
+    @usage
+    def _retry():
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+        stage_run_id = data.get("stage_run_id")
+        if not stage_run_id:
+            flask.abort(400)
+        return controller.retry(stage_run_id)
 
     return bp
