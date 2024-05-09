@@ -216,7 +216,7 @@ def update_workflow(workflow_state_dto: dict):
                 enabled=True,
                 file=f"{stage_dto['props']['filename']}",
                 is_initial=False,
-                path=stage_dto["id"],
+                path=stage_dto["props"]["path"],
                 title=stage_dto["title"],
                 workflow_position=(
                     stage_dto["position"]["x"],
