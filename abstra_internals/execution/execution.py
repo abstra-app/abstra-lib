@@ -1,4 +1,5 @@
 import datetime
+import gc
 import threading
 import uuid
 from abc import abstractmethod
@@ -246,6 +247,7 @@ class Execution:
                 self.log_exception(e)
                 self.handle_failure(e)
         finally:
+            gc.collect()
             self.save()
             self.unbind()
             self.set_stage_run_status()
