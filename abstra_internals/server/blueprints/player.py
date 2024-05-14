@@ -17,6 +17,7 @@ from ...settings import Settings
 from ..controller import access_control as access_control_controller
 from ..controller import auth as auth_controller
 from ..controller import kanban as kanban_controller
+from ..controller import stage_runs as stage_runs_controller
 from ..controller import users as user_controller
 from ..controller import visualizations as visualizations_controller
 from ..controller.main import MainController
@@ -39,6 +40,9 @@ def get_player_bp(controller: MainController):
 
     kanban_bp = kanban_controller.get_player_bp()
     bp.register_blueprint(kanban_bp, url_prefix="/_kanban")
+
+    stage_run_bp = stage_runs_controller.get_player_bp()
+    bp.register_blueprint(stage_run_bp, url_prefix="/_stage-runs")
 
     access_control_bp = access_control_controller.get_player_bp()
     bp.register_blueprint(access_control_bp, url_prefix="/_access-control")
