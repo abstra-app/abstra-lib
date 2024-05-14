@@ -100,3 +100,20 @@ def get_editor_bp():
         return controller.retry(stage_run_id)
 
     return bp
+
+
+def get_player_bp():
+    bp = flask.Blueprint("player_stage_runs", __name__)
+    controller = StageRunsController(stage_run_repository)
+
+    @bp.post("/retry")
+    def _retry():
+        data = flask.request.json
+        if not data:
+            flask.abort(400)
+        stage_run_id = data.get("stage_run_id")
+        if not stage_run_id:
+            flask.abort(400)
+        return controller.retry(stage_run_id)
+
+    return bp
