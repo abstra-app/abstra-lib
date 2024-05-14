@@ -13,6 +13,7 @@ class NotificationRepository(abc.ABC):
         stage_name: str,
         stage_run_id: str,
         stage_path: str,
+        stage_run_title: str,
     ):
         raise NotImplementedError()
 
@@ -29,6 +30,7 @@ class ProductionNotificationRepository(NotificationRepository):
         stage_name: str,
         stage_run_id: str,
         stage_path: str,
+        stage_run_title: str,
     ):
         url = self.base_url + "/thread-waiting"
         requests.post(
@@ -38,6 +40,7 @@ class ProductionNotificationRepository(NotificationRepository):
                 "stageName": stage_name,
                 "stageRunId": stage_run_id,
                 "stagePath": stage_path,
+                "stageRunTitle": stage_run_title,
             },
             headers=SIDECAR_HEADERS,
         )
@@ -50,6 +53,7 @@ class LocalNotificationRepository(NotificationRepository):
         stage_name: str,
         stage_run_id: str,
         stage_path: str,
+        stage_run_title: str,
     ):
         print(
             f"[NOTIFICATION_TEST] Sending notification to emails '{recipient_emails}' for stage '{stage_name}'"

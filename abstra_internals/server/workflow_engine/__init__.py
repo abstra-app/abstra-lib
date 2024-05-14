@@ -121,11 +121,14 @@ class WorkflowEngine:
         if not recipient_emails:
             return
 
+        title = stage_run.data.get("_thread_title", "Untitled task")
+
         self.notification_repository.notify_waiting_thread(
             recipient_emails=recipient_emails,
             stage_run_id=stage_run.id,
             stage_name=stage.title,
             stage_path=stage.path,
+            stage_run_title=title,
         )
 
     def _pub(self, parent_stage_run: StageRun, stage_run_dtos: List[Dict]):
