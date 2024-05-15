@@ -17,6 +17,9 @@ class NotificationRepository(abc.ABC):
     ):
         raise NotImplementedError()
 
+    def notify_message(self, recipient_emails: List[str], message: str, title: str):
+        raise NotImplementedError()
+
 
 class ProductionNotificationRepository(NotificationRepository):
     base_url: str
@@ -45,6 +48,18 @@ class ProductionNotificationRepository(NotificationRepository):
             headers=SIDECAR_HEADERS,
         )
 
+    def notify_message(self, recipient_emails: List[str], message: str, title: str):
+        url = self.base_url + "/message"
+        requests.post(
+            url,
+            json={
+                "recipientEmails": recipient_emails,
+                "message": message,
+                "title": title,
+            },
+            headers=SIDECAR_HEADERS,
+        )
+
 
 class LocalNotificationRepository(NotificationRepository):
     def notify_waiting_thread(
@@ -61,6 +76,11 @@ class LocalNotificationRepository(NotificationRepository):
         print(
             f"[NOTIFICATION_TEST] Thread URL: '/{stage_path}/?abstra-run-id={stage_run_id}'"
         )
+
+    def notify_message(self, recipient_emails: List[str], message: str, title: str):
+        print(f"[NOTIFICATION_TEST] Sending message to emails '{recipient_emails}'")
+        print(f"[NOTIFICATION_TEST] Title: '{title}'")
+        print(f"[NOTIFICATION_TEST] Message: '{message}'")
 
 
 def notification_repository_factory() -> NotificationRepository:
