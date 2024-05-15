@@ -6,9 +6,8 @@ from ...repositories.project.project import ProjectRepository
 from ...utils.code import function_called_args
 from ..linter import LinterIssue, LinterRule
 
-# "item" is injected by a iterator in the workflow.
-# TODO: Check if there is a iterator before ignoring "item".
-IGNORED_KEYS = ["item"]
+# We must check if every get_data is preceded by a set_data in the topological sort of the graph
+# Also, check when ignoring those iterator keys if the current get_data is actually preceded by that iterator
 
 
 class UnsetDataFound(LinterIssue):
@@ -23,6 +22,7 @@ class UnsetGetData(LinterRule):
 
     def find_issues(self) -> List[LinterIssue]:
         project = ProjectRepository.load()
+        iterators_item_names = list(set(map(lambda x: x.item_name, project.iterators)))
         data_gets: Dict[str, Set[Tuple[Path, int]]] = {}
         data_sets: Dict[str, Set[Tuple[Path, int]]] = {}
         for python_file in project.project_files:
@@ -65,7 +65,10 @@ class UnsetGetData(LinterRule):
 
         issues = []
         for data_get_key, data_get_path in data_gets.items():
-            if data_get_key not in data_sets and data_get_key not in IGNORED_KEYS:
+            if (
+                data_get_key not in data_sets
+                and data_get_key not in iterators_item_names
+            ):
                 for path, lineno in data_get_path:
                     issues.append(UnsetDataFound(data_get_key, path, lineno))
 
