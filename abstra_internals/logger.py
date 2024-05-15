@@ -9,7 +9,7 @@ from .utils import is_dev_env, is_test_env
 class AbstraLogger:
     @staticmethod
     def init(environment: Literal["cloud", "local"]):
-        if AbstraLogger.is_enabled():
+        if AbstraLogger.is_disabled():
             return
 
         try:
@@ -27,7 +27,7 @@ class AbstraLogger:
 
     @staticmethod
     def capture_exception(exception: Exception):
-        if AbstraLogger.is_enabled():
+        if AbstraLogger.is_disabled():
             return
 
         sentry_sdk.capture_exception(exception)
@@ -35,12 +35,12 @@ class AbstraLogger:
 
     @staticmethod
     def capture_message(message: str):
-        if AbstraLogger.is_enabled():
+        if AbstraLogger.is_disabled():
             return
 
         sentry_sdk.capture_message(message)
         sentry_sdk.flush()
 
     @staticmethod
-    def is_enabled():
-        return not is_test_env() and not is_dev_env()
+    def is_disabled():
+        return is_test_env() or is_dev_env()
