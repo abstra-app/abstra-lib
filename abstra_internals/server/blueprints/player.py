@@ -14,6 +14,7 @@ from ...execution.stage_run_manager import AttachedStageRunManager
 from ...logger import AbstraLogger
 from ...repositories import users_repository
 from ...settings import Settings
+from ...utils import check_is_url
 from ..controller import access_control as access_control_controller
 from ..controller import auth as auth_controller
 from ..controller import kanban as kanban_controller
@@ -144,6 +145,10 @@ def get_player_bp(controller: MainController):
         logo_path = controller.get_workspace().logo_url
         if not logo_path:
             return flask.abort(404)
+
+        if check_is_url(logo_path):
+            return flask.redirect(logo_path)
+
         return send_from_dist(logo_path, dist_folder=Settings.root_path)
 
     @bp.get("/favicon.ico")
