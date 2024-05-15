@@ -26,12 +26,14 @@ class CLI(object):
         port: int = 3000,
         debug=False,
         load_dotenv=True,
+        reloading=False,
     ):
         SettingsController.set_root_path(root_dir)
         SettingsController.set_server_port(port)
         editor(
             debug=debug,
             load_dotenv=load_dotenv,
+            reloading=reloading,
         )
 
     def serve(
@@ -40,6 +42,7 @@ class CLI(object):
         port: int = 3000,
         debug=False,
         load_dotenv=True,
+        reloading=False,
     ):
         print("This command is deprecated. Please use 'abstra editor' instead.")
         self.editor(
@@ -47,6 +50,7 @@ class CLI(object):
             port=port,
             debug=debug,
             load_dotenv=load_dotenv,
+            reloading=reloading,
         )
 
 

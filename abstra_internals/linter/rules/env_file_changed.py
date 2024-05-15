@@ -1,19 +1,27 @@
-from os.path import getmtime
+import os
 from typing import List
 
+from ...editor_reloader import LocalReloader
 from ...settings import Settings
-from ..linter import LinterIssue, LinterRule
+from ..linter import LinterFix, LinterIssue, LinterRule
+
+
+class ReloadServer(LinterFix):
+    label = "Reload server"
+
+    def fix(self):
+        LocalReloader.reload()
 
 
 class EnvFileChangeFound(LinterIssue):
     def __init__(self) -> None:
         self.label = "Your .env file was updated. Please restart your development server to ensure consistency."
-        self.fixes = []
+        self.fixes = [ReloadServer()]
 
 
 class EnvFileChanged(LinterRule):
     label = "Changes to .env file detected"
-    type = "warning"
+    type = "bug"
     initial_last_modified = None
     initial_file_exists = None
 
@@ -24,7 +32,7 @@ class EnvFileChanged(LinterRule):
         if EnvFileChanged.initial_file_exists is None:
             EnvFileChanged.initial_file_exists = current_file_exists
             if current_file_exists:
-                EnvFileChanged.initial_last_modified = getmtime(env_file)
+                EnvFileChanged.initial_last_modified = os.path.getmtime(env_file)
                 return []
 
         if EnvFileChanged.initial_file_exists != current_file_exists:
@@ -32,7 +40,7 @@ class EnvFileChanged(LinterRule):
 
         if (
             EnvFileChanged.initial_last_modified
-            and EnvFileChanged.initial_last_modified < getmtime(env_file)
+            and EnvFileChanged.initial_last_modified < os.path.getmtime(env_file)
         ):
             return [EnvFileChangeFound()]
 
