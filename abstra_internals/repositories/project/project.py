@@ -496,6 +496,7 @@ class FormStage:
             notification_trigger=NotificationTrigger(
                 variable_name="assignee_emails", enabled=False
             ),
+            access_control=AccessSettings(is_public=False, required_roles=[]),
         )
 
     @staticmethod
