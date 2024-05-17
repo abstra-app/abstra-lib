@@ -1,3 +1,4 @@
+import sys
 from typing import Literal
 
 import pkg_resources
@@ -6,14 +7,30 @@ import sentry_sdk
 from .utils import is_dev_env, is_test_env
 
 
-class AbstraLogger:
-    @staticmethod
-    def init(environment: Literal["cloud", "local"]):
-        if AbstraLogger.is_disabled():
-            return
+class DevSDK:
+    @classmethod
+    def init(cls, *args, **kwargs):
+        pass
 
+    @classmethod
+    def capture_exception(cls, exception: Exception):
+        print("[ABSTRA_LOGGER] Exception captured:", file=sys.stderr)
+        raise exception
+
+    @classmethod
+    def capture_message(cls, message):
+        print(f"[ABSTRA_LOGGER] Message captured: {message}")
+
+    @classmethod
+    def flush(cls):
+        pass
+
+
+class AbstraLogger:
+    @classmethod
+    def init(cls, environment: Literal["cloud", "local"]):
         try:
-            sentry_sdk.init(
+            cls.get_sdk().init(
                 dsn="https://9bbccd1a46ddb8a563483c6afc61ca35@o1317386.ingest.us.sentry.io/4507024713383936",
                 traces_sample_rate=1.0,
                 profiles_sample_rate=1.0,
@@ -25,22 +42,19 @@ class AbstraLogger:
         except Exception:
             print("Error reporting has been turned off.")
 
-    @staticmethod
-    def capture_exception(exception: Exception):
-        if AbstraLogger.is_disabled():
-            return
+    @classmethod
+    def capture_exception(cls, exception: Exception):
+        cls.get_sdk().capture_exception(exception)
+        cls.get_sdk().flush()
 
-        sentry_sdk.capture_exception(exception)
-        sentry_sdk.flush()
+    @classmethod
+    def capture_message(cls, message: str):
+        cls.get_sdk().capture_message(message)
+        cls.get_sdk().flush()
 
-    @staticmethod
-    def capture_message(message: str):
-        if AbstraLogger.is_disabled():
-            return
+    @classmethod
+    def get_sdk(cls):
+        if is_test_env() or is_dev_env():
+            return DevSDK
 
-        sentry_sdk.capture_message(message)
-        sentry_sdk.flush()
-
-    @staticmethod
-    def is_disabled():
-        return is_test_env() or is_dev_env()
+        return sentry_sdk
