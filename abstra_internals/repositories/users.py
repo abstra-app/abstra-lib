@@ -51,9 +51,14 @@ class LocalUsersRepository(UsersRepository):
     def __load(self):
         self.is_loaded = True
         self.local_cache = Settings.root_path.joinpath(LOCAL_USERS_FILE)
+        Settings.root_path.joinpath(".abstra").mkdir(exist_ok=True)
         try:
             with open(self.local_cache, "r") as f:
                 self.data = {**self.data, **json.load(f)}
+        except FileNotFoundError:
+            with open(self.local_cache, "w") as f:
+                json.dump({}, f)
+            self.data = {**self.data}
         except Exception as e:
             AbstraLogger.capture_exception(e)
 
