@@ -6,11 +6,20 @@ from ...contracts_generated import (
     AbstraLibApiEditorLintersRule,
 )
 from ...linter.rules import rules
+from ...logger import AbstraLogger
 from ...usage import usage
 
 
 def check_linters() -> AbstraLibApiEditorLintersCheckResponse:
-    return [AbstraLibApiEditorLintersRule.from_dict(rule.to_dict()) for rule in rules]
+    checks = []
+
+    for rule in rules:
+        try:
+            checks.append(AbstraLibApiEditorLintersRule.from_dict(rule.to_dict()))
+        except Exception as e:
+            AbstraLogger.capture_exception(e)
+
+    return checks
 
 
 def fix_linter(rule_name: str, fix_name: str):

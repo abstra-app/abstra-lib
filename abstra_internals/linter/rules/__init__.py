@@ -12,9 +12,11 @@ from .new_version_of_abstra_available import NewVersionOfAbstraAvailable
 from .syntax_errors import SyntaxErrors
 from .unset_get_data import UnsetGetData
 from .unset_match_thread import UnsetMatchThread
+from .venv_in_bundle import VenvInBundle
 
 rules: List[LinterRule] = [
     EnvInBundle(),
+    VenvInBundle(),
     MissingPackagesInRequirements(),
     SyntaxErrors(),
     MissingEntrypoint(),
