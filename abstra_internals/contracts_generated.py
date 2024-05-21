@@ -167,16 +167,20 @@ CloudApiCliAuthInfoResponseAuthorId = str
 
 CloudApiCliAuthInfoResponseProjectId = str
 
+CloudApiCliAuthInfoResponseEmail = str
+
 
 @dataclass
 class CloudApiCliAuthInfoResponse:
     author_id: CloudApiCliAuthInfoResponseAuthorId
     project_id: CloudApiCliAuthInfoResponseProjectId
+    email: CloudApiCliAuthInfoResponseEmail
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         return {
             "authorId": self.author_id,
             "projectId": self.project_id,
+            "email": self.email,
         }
 
     @staticmethod
@@ -184,6 +188,7 @@ class CloudApiCliAuthInfoResponse:
         return CloudApiCliAuthInfoResponse(
             author_id=str(data["authorId"]),
             project_id=str(data["projectId"]),
+            email=str(data["email"]),
         )
 
 
