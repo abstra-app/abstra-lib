@@ -24,3 +24,4 @@ packaging
 sentry_sdk[flask]
 jsonpath-ng>=1.6.1
 gunicorn
+userpath
