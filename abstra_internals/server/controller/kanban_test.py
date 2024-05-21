@@ -9,7 +9,13 @@ from ...repositories.project.project import (
     ProjectRepository,
 )
 from ...repositories.stage_run import LocalStageRunRepository
-from .kanban import DataRequest, KanbanController, KanbanData, StageRunCard
+from .kanban import (
+    DataRequest,
+    KanbanController,
+    KanbanData,
+    StageCardContentItem,
+    StageRunCard,
+)
 
 
 class KanbanTests(TestCase):
@@ -159,6 +165,69 @@ class KanbanTests(TestCase):
                 ],
                 not_found_stages=[],
                 total_count=1,
+            ),
+        )
+
+    def test_get_data_with_advanced_data_filter(self):
+        project = ProjectRepository.load()
+
+        job = JobStage(
+            id="job",
+            title="Job",
+            file="job.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(job)
+        ProjectRepository.save(project)
+        job_stage_run_1 = self.stage_run_repository.create_initial(
+            "job", {"foo": "bar"}
+        )
+        job_stage_run_2 = self.stage_run_repository.create_initial(
+            "job", {"foo": "contains bar"}
+        )
+        self.stage_run_repository.create_initial("job", {"foo": "baz"})
+
+        data = self.controller.get_data(
+            DataRequest.from_dict(
+                {
+                    "limit": 10,
+                    "offset": 0,
+                    "filter": {
+                        "data_conditions": {
+                            "key": "foo",
+                            "comparator": "contains",
+                            "value": "bar",
+                        },
+                    },
+                }
+            )
+        )
+
+        self.assertEqual(
+            data,
+            KanbanData(
+                stage_run_cards=[
+                    StageRunCard(
+                        job_stage_run_2.id,
+                        created_at=job_stage_run_2.created_at,
+                        updated_at=job_stage_run_2.updated_at,
+                        status=job_stage_run_2.status,
+                        content=[StageCardContentItem(key="foo", value="contains bar")],
+                        stage=job_stage_run_2.stage,
+                    ),
+                    StageRunCard(
+                        job_stage_run_1.id,
+                        created_at=job_stage_run_1.created_at,
+                        updated_at=job_stage_run_1.updated_at,
+                        status=job_stage_run_1.status,
+                        content=[StageCardContentItem(key="foo", value="bar")],
+                        stage=job_stage_run_1.stage,
+                    ),
+                ],
+                not_found_stages=[],
+                total_count=2,
             ),
         )
 
