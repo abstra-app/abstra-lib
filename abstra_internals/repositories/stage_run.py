@@ -9,6 +9,8 @@ import requests
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.utils.filter import FilterCondition, evaluate_filter_condition
+
 from ..environment import SIDECAR_HEADERS, SIDECAR_URL
 from ..utils.datetime import from_utc_iso_string
 from ..utils.validate import validate_json
@@ -61,6 +63,7 @@ class GetStageRunByQueryFilter:
     status: Optional[List[str]] = None
     data: Optional[Dict] = None
     search: Optional[str] = None
+    data_conditions: Optional[FilterCondition] = None
 
     @staticmethod
     def from_dict(data: dict) -> "GetStageRunByQueryFilter":
@@ -71,6 +74,7 @@ class GetStageRunByQueryFilter:
             status=data.get("status", None),
             data=data.get("data", None),
             search=data.get("search", None),
+            data_conditions=FilterCondition.from_dict(data.get("data_conditions", {})),
         )
 
     def to_dict(self) -> dict:
@@ -253,6 +257,11 @@ class LocalStageRunRepository(StageRunRepository):
                 continue
 
             if filter.search and not self._compare_search(stage_run, filter.search):
+                continue
+
+            if filter.data_conditions and not evaluate_filter_condition(
+                filter.data_conditions, stage_run.data
+            ):
                 continue
 
             results.append(stage_run)
