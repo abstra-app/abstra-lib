@@ -2,8 +2,6 @@ import sys
 from pathlib import Path
 from typing import List
 
-from pip._internal.utils.virtualenv import running_under_virtualenv
-
 from ...settings import Settings
 from ..linter import LinterFix, LinterIssue, LinterRule
 
@@ -13,6 +11,18 @@ def get_root_and_prefix_path():
     root_path = Settings.root_path.resolve().as_posix()
 
     return root_path, prefix_path
+
+
+def running_under_virtualenv() -> bool:
+    # pip._internal.utils.virtualenv._running_under_venv
+    if sys.prefix != getattr(sys, "base_prefix", sys.prefix):
+        return True
+
+    # pip._internal.utils.virtualenv._running_under_legacy_virtualenv
+    if hasattr(sys, "real_prefix"):
+        return True
+
+    return False
 
 
 class AddVenvToAbstraIgnore(LinterFix):
