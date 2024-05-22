@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .proxy import ReadOnlyProxyDict
+from abstra_internals.proxy import ReadOnlyProxyDict
 
 
 def getter():

@@ -1,30 +1,38 @@
 import flask
 import flask_sock
 
-from ...environment import (
+from abstra_internals.environment import (
     BUILD_ID,
     OIDC_AUTHORITY,
     OIDC_CLIENT_ID,
     SHOW_WATERMARK,
     SIDECAR_SHARED_TOKEN,
 )
-from ...execution import FormExecution, HookExecution
-from ...execution.execution import RequestData
-from ...execution.stage_run_manager import AttachedStageRunManager
-from ...logger import AbstraLogger
-from ...repositories import users_repository
-from ...settings import Settings
-from ...utils import check_is_url
-from ..controller import access_control as access_control_controller
-from ..controller import auth as auth_controller
-from ..controller import kanban as kanban_controller
-from ..controller import stage_runs as stage_runs_controller
-from ..controller import users as user_controller
-from ..controller import visualizations as visualizations_controller
-from ..controller.main import MainController
-from ..guards.role_guard import Guard, PathArgSelector, QueryArgSelector
-from ..utils import send_from_dist
-from ..workflow_engine import workflow_engine
+from abstra_internals.execution import FormExecution, HookExecution
+from abstra_internals.execution.execution import RequestData
+from abstra_internals.execution.stage_run_manager import AttachedStageRunManager
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories import users_repository
+from abstra_internals.server.controller import (
+    access_control as access_control_controller,
+)
+from abstra_internals.server.controller import auth as auth_controller
+from abstra_internals.server.controller import kanban as kanban_controller
+from abstra_internals.server.controller import stage_runs as stage_runs_controller
+from abstra_internals.server.controller import users as user_controller
+from abstra_internals.server.controller import (
+    visualizations as visualizations_controller,
+)
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.server.guards.role_guard import (
+    Guard,
+    PathArgSelector,
+    QueryArgSelector,
+)
+from abstra_internals.server.utils import send_from_dist
+from abstra_internals.server.workflow_engine import workflow_engine
+from abstra_internals.settings import Settings
+from abstra_internals.utils import check_is_url
 
 
 def get_player_bp(controller: MainController):

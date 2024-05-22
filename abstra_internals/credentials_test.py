@@ -1,15 +1,14 @@
 import os
 import unittest
 
-from tests.fixtures import clear_dir, init_dir
-
-from .credentials import (
+from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
     resolve_headers,
     set_credentials,
 )
-from .utils.dot_abstra import CREDENTIALS_FILE, DOT_ABSTRA_FOLDER_NAME
+from abstra_internals.utils.dot_abstra import CREDENTIALS_FILE, DOT_ABSTRA_FOLDER_NAME
+from tests.fixtures import clear_dir, init_dir
 
 
 class CredentialsTest(unittest.TestCase):

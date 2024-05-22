@@ -1,7 +1,7 @@
 from colorama import Fore, Style
 
-from ...environment import HOST
-from ...settings import Settings
+from abstra_internals.environment import HOST
+from abstra_internals.settings import Settings
 
 
 def serve_message():

@@ -1,9 +1,9 @@
 import flask
 
-from ...repositories import users_repository
-from ...usage import usage
-from ..guards.role_guard import Guard
-from .main import MainController
+from abstra_internals.repositories import users_repository
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.server.guards.role_guard import Guard
+from abstra_internals.usage import usage
 
 
 def get_editor_bp(controller: MainController):

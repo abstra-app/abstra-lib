@@ -3,8 +3,8 @@ import importlib.util as imp_util
 import sys
 from pathlib import Path
 
-from .repositories.project.project import ProjectRepository
-from .utils.file import path2module
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.utils.file import path2module
 
 
 def import_as_new(filepath: str):

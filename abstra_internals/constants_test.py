@@ -1,9 +1,8 @@
 from unittest import TestCase
 
+from abstra_internals.constants import get_persistent_dir
+from abstra_internals.utils.dot_abstra import PERSISTENT_DIR
 from tests.fixtures import clear_dir, init_dir
-
-from .constants import get_persistent_dir
-from .utils.dot_abstra import PERSISTENT_DIR
 
 
 class GetPersistentDirTest(TestCase):

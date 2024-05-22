@@ -1,7 +1,7 @@
 import os
 
-from .settings import Settings
-from .utils.dot_abstra import CREDENTIALS_FILE
+from abstra_internals.settings import Settings
+from abstra_internals.utils.dot_abstra import CREDENTIALS_FILE
 
 
 def get_credentials():

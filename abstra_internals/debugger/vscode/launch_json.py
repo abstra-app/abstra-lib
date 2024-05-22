@@ -1,8 +1,8 @@
 import json
 
-from ...settings import Settings
-from ...templates import vscode_launch_json
-from ...utils import serialize
+from abstra_internals.settings import Settings
+from abstra_internals.templates import vscode_launch_json
+from abstra_internals.utils import serialize
 
 CONNECTED_PORT = None
 

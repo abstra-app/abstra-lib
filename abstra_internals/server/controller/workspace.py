@@ -1,14 +1,14 @@
 import flask
 
-from ...settings import Settings
-from ...templates import (
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.settings import Settings
+from abstra_internals.templates import (
     new_form_code,
     new_hook_code,
     new_job_code,
     new_script_code,
 )
-from ...usage import usage
-from .main import MainController
+from abstra_internals.usage import usage
 
 
 def get_editor_bp(controller: MainController):

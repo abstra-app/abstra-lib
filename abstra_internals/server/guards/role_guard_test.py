@@ -2,22 +2,21 @@ from unittest import TestCase
 
 from flask import Blueprint, Flask
 
-from tests.fixtures import clear_dir, init_dir
-
-from ...jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
-from ...repositories.project.project import (
+from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
+from abstra_internals.repositories.project.project import (
     AccessSettings,
     FormStage,
     NotificationTrigger,
     ProjectRepository,
 )
-from ...repositories.users import LocalUsersRepository
-from .role_guard import (
+from abstra_internals.repositories.users import LocalUsersRepository
+from abstra_internals.server.guards.role_guard import (
     Guard,
     IdArgSelector,
     PathArgSelector,
     StageIdSelector,
 )
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestRequirementsApi(TestCase):

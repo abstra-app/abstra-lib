@@ -3,7 +3,7 @@ from io import BufferedReader
 from tempfile import _TemporaryFileWrapper
 from typing import Union
 
-from .file_utils import download_file
+from abstra_internals.widgets.file_utils import download_file
 
 
 class FileResponse:

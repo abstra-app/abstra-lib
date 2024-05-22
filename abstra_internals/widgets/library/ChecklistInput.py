@@ -1,5 +1,5 @@
 from typing import List
-from ..widget_base import AbstraOption, Input, OptionsHandler
+from abstra_internals.widgets.widget_base import AbstraOption, Input, OptionsHandler
 
 
 class ChecklistInput(Input):

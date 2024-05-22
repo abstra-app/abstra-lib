@@ -2,10 +2,7 @@ import json
 import sys
 from unittest import TestCase
 
-from tests.fixtures import clear_dir, init_dir
-
-from ...utils import serialize
-from .settings_json import (
+from abstra_internals.debugger.vscode.settings_json import (
     EverythingSet,
     InvalidSettingsJson,
     MismatchedPythonPath,
@@ -14,6 +11,8 @@ from .settings_json import (
     check_settings_json,
     configure_settings_json,
 )
+from abstra_internals.utils import serialize
+from tests.fixtures import clear_dir, init_dir
 
 
 class CheckSettingsJsonTest(TestCase):

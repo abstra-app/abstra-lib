@@ -5,8 +5,8 @@ from pathlib import Path
 import requests
 from packaging.version import Version
 
-from ..logger import AbstraLogger
-from .dot_abstra import CACHED_VERSIONS_DIR
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.utils.dot_abstra import CACHED_VERSIONS_DIR
 
 EXPIRE_PERIOD = 60 * 60 * 4  # 4 hours
 TIMEOUT = 5

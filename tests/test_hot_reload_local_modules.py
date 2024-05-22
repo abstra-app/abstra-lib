@@ -9,8 +9,7 @@ from abstra_internals.repositories.project.project import (
     ProjectRepository,
 )
 from abstra_internals.server.fs_watcher import reload_files_on_change
-
-from .fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestHotReloadLocalModules(TestCase):

@@ -3,7 +3,7 @@ from typing import List
 
 import requests
 
-from ..environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class NotificationRepository(abc.ABC):

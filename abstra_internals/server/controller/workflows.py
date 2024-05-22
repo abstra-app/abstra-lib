@@ -2,8 +2,8 @@ from typing import Dict, List, Optional, TypedDict
 
 import flask
 
-from ...logger import AbstraLogger
-from ...repositories.project.project import (
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories.project.project import (
     ConditionStage,
     FormStage,
     HookStage,
@@ -16,8 +16,8 @@ from ...repositories.project.project import (
     WorkflowStage,
     WorkflowTransition,
 )
-from ...usage import usage
-from .main import MainController, UnknownNodeTypeError
+from abstra_internals.server.controller.main import MainController, UnknownNodeTypeError
+from abstra_internals.usage import usage
 
 
 # workflow visual editor

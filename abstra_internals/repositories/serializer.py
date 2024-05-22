@@ -1,6 +1,6 @@
 from typing import Dict, TypeVar
 
-from ..utils import serialize
+from abstra_internals.utils import serialize
 
 T = TypeVar("T")
 

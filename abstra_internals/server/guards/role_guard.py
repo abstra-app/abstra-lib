@@ -5,18 +5,18 @@ from typing import Callable, Optional, Union
 import flask
 import flask_sock
 
-from ...contracts_generated import (
+from abstra_internals.contracts_generated import (
     AbstraLibApiPlayerUserNavigationGuard as NavigationGuard,
 )
-from ...contracts_generated import (
+from abstra_internals.contracts_generated import (
     CommonUserRolesItem,
 )
-from ...jwt_auth import UserClaims
-from ...repositories.project.project import (
+from abstra_internals.jwt_auth import UserClaims
+from abstra_internals.repositories.project.project import (
     AccessSettings,
     ProjectRepository,
 )
-from ...repositories.users import UsersRepository
+from abstra_internals.repositories.users import UsersRepository
 
 SOCKET_AUTH_HEADER_PREFIX = "base64url.bearer.authorization."
 

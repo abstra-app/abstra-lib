@@ -1,9 +1,11 @@
 from unittest import TestCase
 
+from abstra_internals.linter.rules.missing_entrypoint import (
+    AddEntrypoint,
+    MissingEntrypoint,
+)
+from abstra_internals.server.controller.main import MainController
 from tests.fixtures import clear_dir, init_dir
-
-from ...server.controller.main import MainController
-from .missing_entrypoint import AddEntrypoint, MissingEntrypoint
 
 
 class MissingEntrypointTest(TestCase):

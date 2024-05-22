@@ -2,9 +2,9 @@ import ast
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-from ...repositories.project.project import ProjectRepository
-from ...utils.code import function_called_args
-from ..linter import LinterIssue, LinterRule
+from abstra_internals.linter.linter import LinterIssue, LinterRule
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.utils.code import function_called_args
 
 
 class UnsetMatchFound(LinterIssue):

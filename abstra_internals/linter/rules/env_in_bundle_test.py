@@ -1,8 +1,7 @@
 from unittest import TestCase
 
+from abstra_internals.linter.rules.env_in_bundle import EnvInBundle
 from tests.fixtures import clear_dir, init_dir
-
-from .env_in_bundle import EnvInBundle
 
 
 class EnvInBundleTest(TestCase):

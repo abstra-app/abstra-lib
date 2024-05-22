@@ -10,14 +10,14 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
-from ...logger import AbstraLogger
-from ...settings import Settings
-from ...utils import check_is_url, nested_get
-from ...utils.file import traverse_code
-from ...utils.format import normalize_path
-from ...utils.graph import Edge, Graph, Node
-from ...utils.string import to_kebab_case
-from . import json_migrations
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories.project import json_migrations
+from abstra_internals.settings import Settings
+from abstra_internals.utils import check_is_url, nested_get
+from abstra_internals.utils.file import traverse_code
+from abstra_internals.utils.format import normalize_path
+from abstra_internals.utils.graph import Edge, Graph, Node
+from abstra_internals.utils.string import to_kebab_case
 
 ServedStage = Union["FormStage", "HookStage"]
 ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]

@@ -4,8 +4,7 @@ from unittest import TestCase, mock
 
 from abstra_internals.debug import make_debug_data
 from abstra_internals.settings import Settings
-
-from .resources.make_debug.module import func
+from tests.resources.make_debug.module import func
 
 
 class TestDebug(TestCase):
@@ -27,7 +26,7 @@ class TestDebug(TestCase):
                     stack=[
                         dict(
                             filename=__file__,
-                            lineno=17,
+                            lineno=16,
                             name="test_make_debug_data_from_exception",
                             locals=mock.ANY,
                         )
@@ -46,7 +45,7 @@ class TestDebug(TestCase):
                     stack=[
                         dict(
                             filename=__file__,
-                            lineno=40,
+                            lineno=39,
                             name="test_make_debug_data_from_frames",
                             locals=mock.ANY,
                         )
@@ -74,7 +73,7 @@ class TestDebug(TestCase):
                     stack=[
                         dict(
                             filename=__file__,
-                            lineno=63,
+                            lineno=62,
                             name="test_make_debug_data_nested",
                             locals=mock.ANY,
                         ),
@@ -90,7 +89,7 @@ class TestDebug(TestCase):
                         ),
                         dict(
                             filename=__file__,
-                            lineno=60,
+                            lineno=59,
                             name="outer_func",
                             locals=mock.ANY,
                         ),

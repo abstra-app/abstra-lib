@@ -1,13 +1,13 @@
 import flask
 
-from ...contracts_generated import (
+from abstra_internals.contracts_generated import (
     AbstraLibApiEditorLintersCheckResponse,
     AbstraLibApiEditorLintersFixResponse,
     AbstraLibApiEditorLintersRule,
 )
-from ...linter.rules import rules
-from ...logger import AbstraLogger
-from ...usage import usage
+from abstra_internals.linter.rules import rules
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.usage import usage
 
 
 def check_linters() -> AbstraLibApiEditorLintersCheckResponse:

@@ -1,5 +1,5 @@
-from ..widget_base import Input
 from typing import List, Optional
+from abstra_internals.widgets.widget_base import Input
 
 
 class CurrencyInput(Input):

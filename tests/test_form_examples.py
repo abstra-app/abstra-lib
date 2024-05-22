@@ -3,9 +3,8 @@ import unittest
 from pathlib import Path
 
 from abstra_internals.repositories.project.project import FormStage, NotificationTrigger
-
-from .fixtures import clear_dir, init_dir
-from .utils import assert_form
+from tests.fixtures import clear_dir, init_dir
+from tests.utils import assert_form
 
 
 class TestFormExamples(unittest.TestCase):

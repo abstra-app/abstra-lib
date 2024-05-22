@@ -5,11 +5,11 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from ..contracts_generated import CommonUser, CommonUserRoles
-from ..environment import SIDECAR_HEADERS, SIDECAR_URL
-from ..logger import AbstraLogger
-from ..settings import Settings
-from ..utils.dot_abstra import LOCAL_USERS_FILE
+from abstra_internals.contracts_generated import CommonUser, CommonUserRoles
+from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.settings import Settings
+from abstra_internals.utils.dot_abstra import LOCAL_USERS_FILE
 
 
 class UsersRepository(ABC):

@@ -2,7 +2,7 @@ import os
 from typing import Dict
 from unittest import TestCase
 
-from .env_masker import EnvMasker
+from abstra_internals.env_masker import EnvMasker
 
 
 def set_env(env: Dict[str, str]) -> None:

@@ -1,10 +1,10 @@
 from typing import Optional
 
-from ..repositories.execution import ExecutionRepository
-from ..repositories.execution_logs import ExecutionLogsRepository
-from ..repositories.project.project import ScriptStage
-from .execution import Execution, RequestData
-from .stage_run_manager import StageRunManager
+from abstra_internals.execution.execution import Execution, RequestData
+from abstra_internals.execution.stage_run_manager import StageRunManager
+from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.project.project import ScriptStage
 
 
 class ScriptExecution(Execution):

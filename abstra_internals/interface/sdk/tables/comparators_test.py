@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .comparators import (
+from abstra_internals.interface.sdk.tables.comparators import (
     is_between,
     is_eq,
     is_gt,

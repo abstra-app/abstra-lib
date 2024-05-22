@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 from typing import List
 
-from ...settings import Settings
-from ..linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.settings import Settings
 
 
 def get_root_and_prefix_path():

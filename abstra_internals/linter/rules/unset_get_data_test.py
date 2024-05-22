@@ -1,9 +1,8 @@
 from unittest import TestCase
 
+from abstra_internals.linter.rules.unset_get_data import UnsetGetData
+from abstra_internals.repositories.project.project import ProjectRepository, ScriptStage
 from tests.fixtures import clear_dir, init_dir
-
-from ...repositories.project.project import ProjectRepository, ScriptStage
-from .unset_get_data import UnsetGetData
 
 
 class UnsetGetDataTest(TestCase):

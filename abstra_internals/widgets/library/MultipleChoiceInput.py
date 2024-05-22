@@ -1,5 +1,5 @@
 from typing import List, Union
-from ..widget_base import AbstraOption, Input, MultipleHandler, OptionsHandler
+from abstra_internals.widgets.widget_base import AbstraOption, Input, MultipleHandler, OptionsHandler
 
 
 class MultipleChoiceInput(Input):

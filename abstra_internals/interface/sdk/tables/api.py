@@ -1,14 +1,18 @@
 import typing
 from dataclasses import is_dataclass
 
-from ..forms.page_response import PageResponse
-from ..forms.step import StepsResponse
-from . import comparators as cmp
-from .utils import escape_ref, quoted_identifier, serialize
+from abstra_internals.interface.sdk.forms.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra_internals.interface.sdk.tables import comparators as cmp
+from abstra_internals.interface.sdk.tables.utils import (
+    escape_ref,
+    quoted_identifier,
+    serialize,
+)
 
 
 def _execute(query: str, params: typing.List):  # private api
-    from ....repositories import tables_api_http_client
+    from abstra_internals.repositories import tables_api_http_client
 
     r = tables_api_http_client.execute(query=query, params=params)
     if not r.ok:

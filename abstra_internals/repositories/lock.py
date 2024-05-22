@@ -3,7 +3,7 @@ import datetime as dt
 
 import requests
 
-from ..environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class LockRepository(abc.ABC):

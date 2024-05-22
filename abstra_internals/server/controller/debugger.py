@@ -2,7 +2,7 @@ import sys
 
 import flask
 
-from ...debugger.vscode import (
+from abstra_internals.debugger.vscode import (
     configure_launch_json,
     configure_settings_json,
     is_client_connected,
@@ -10,9 +10,9 @@ from ...debugger.vscode import (
     is_settings_json_set,
     start_debugger,
 )
-from ...settings import Settings
-from ...usage import usage
-from .main import MainController
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.settings import Settings
+from abstra_internals.usage import usage
 
 
 # Debugger

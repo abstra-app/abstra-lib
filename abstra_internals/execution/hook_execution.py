@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .execution import ABSTRA_RUN_KEY, Execution, ResponseData
+from abstra_internals.execution.execution import ABSTRA_RUN_KEY, Execution, ResponseData
 
 
 class HookExecution(Execution):

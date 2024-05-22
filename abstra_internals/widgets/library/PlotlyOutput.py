@@ -1,6 +1,6 @@
-from ..widget_base import Output
-from typing import Any
 import json
+from typing import Any
+from abstra_internals.widgets.widget_base import Output
 
 
 class PlotlyOutput(Output):

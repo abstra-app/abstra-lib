@@ -1,7 +1,7 @@
-from ..widget_base import Output
-from ..file_utils import convert_file
-from typing import Union
 import io
+from typing import Union
+from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.widgets.widget_base import Output
 
 
 class ImageOutput(Output):

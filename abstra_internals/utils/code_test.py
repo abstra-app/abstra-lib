@@ -1,7 +1,7 @@
 import ast
 import unittest
 
-from .code import function_called_args, subscript_called_args
+from abstra_internals.utils.code import function_called_args, subscript_called_args
 
 # Include the implementation of FunctionCallVisitor and function_called_args here (not repeated to save space)
 

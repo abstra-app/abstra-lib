@@ -2,8 +2,8 @@ import json
 import sys
 from typing import Union
 
-from ...settings import Settings
-from ...utils import serialize
+from abstra_internals.settings import Settings
+from abstra_internals.utils import serialize
 
 
 class EverythingSet:

@@ -1,11 +1,11 @@
 import sys
 from typing import Callable, Literal, Union
 
-from .env_masker import GLOBAL_MASKER
-from .environment import IS_PRODUCTION
-from .execution.execution import Execution
-from .logger import AbstraLogger
-from .stdio_skip_request import ESCAPE_STRING
+from abstra_internals.env_masker import GLOBAL_MASKER
+from abstra_internals.environment import IS_PRODUCTION
+from abstra_internals.execution.execution import Execution
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.stdio_skip_request import ESCAPE_STRING
 
 _og_stdout_write = sys.stdout.write
 _og_stderr_write = sys.stderr.write

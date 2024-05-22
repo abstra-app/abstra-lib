@@ -1,10 +1,10 @@
 from typing import Sequence
 
-from ...repositories.requirements import (
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.repositories.requirements import (
     RequirementRecommendation,
     RequirementsRepository,
 )
-from ..linter import LinterFix, LinterIssue, LinterRule
 
 
 class AddMissingPackagesToRequirements(LinterFix):

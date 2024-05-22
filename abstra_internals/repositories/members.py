@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional
 
 import requests
 
-from ..contracts_generated import CommonUserRoles
-from ..environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.contracts_generated import CommonUserRoles
+from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
 
 
 class MembersRepository(ABC):

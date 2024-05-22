@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import jwt
 
-from .environment import PROJECT_ID, PUBLIC_KEY
-from .utils.email import is_valid_email
+from abstra_internals.environment import PROJECT_ID, PUBLIC_KEY
+from abstra_internals.utils.email import is_valid_email
 
 USER_AUTH_HEADER_KEY = "Authorization"
 API_AUTH_HEADER_KEY = "Api-Authorization"

@@ -3,11 +3,11 @@ from typing import Any, Callable, Tuple
 
 import requests
 
-from .credentials import get_credentials
-from .environment import CLOUD_API_CLI_URL
-from .threaded import threaded
-from .utils import get_local_user_id, is_test_env
-from .utils.packages import get_local_package_version
+from abstra_internals.credentials import get_credentials
+from abstra_internals.environment import CLOUD_API_CLI_URL
+from abstra_internals.threaded import threaded
+from abstra_internals.utils import get_local_user_id, is_test_env
+from abstra_internals.utils.packages import get_local_package_version
 
 
 @threaded

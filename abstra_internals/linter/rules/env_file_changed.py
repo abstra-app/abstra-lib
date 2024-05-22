@@ -1,9 +1,9 @@
 import os
 from typing import List
 
-from ...editor_reloader import LocalReloader
-from ...settings import Settings
-from ..linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.editor_reloader import LocalReloader
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.settings import Settings
 
 
 class ReloadServer(LinterFix):

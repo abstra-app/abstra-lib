@@ -1,4 +1,6 @@
-from .base_migration import Migration
+from abstra_internals.repositories.project.json_migrations.base_migration import (
+    Migration,
+)
 
 
 class Migration002(Migration):

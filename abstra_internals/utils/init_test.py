@@ -1,7 +1,13 @@
 from datetime import date
 from unittest import TestCase
 
-from . import check_is_url, deserialize, is_serializable, nested_get, serialize
+from abstra_internals.utils import (
+    check_is_url,
+    deserialize,
+    is_serializable,
+    nested_get,
+    serialize,
+)
 
 
 class SerializeTest(TestCase):

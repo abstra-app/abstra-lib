@@ -1,9 +1,11 @@
 from unittest import TestCase
 
+from abstra_internals.debugger.vscode.launch_json import (
+    configure_launch_json,
+    is_launch_json_configured,
+)
 from abstra_internals.utils import serialize
 from tests.fixtures import clear_dir, init_dir
-
-from .launch_json import configure_launch_json, is_launch_json_configured
 
 
 class ConfigureLaunchJsonTest(TestCase):

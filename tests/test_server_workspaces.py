@@ -2,8 +2,7 @@ import unittest
 from os.path import join
 
 from abstra_internals.server.controller.main import MainController
-
-from .fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestWorkspace(unittest.TestCase):

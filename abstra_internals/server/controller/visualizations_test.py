@@ -1,13 +1,12 @@
 from unittest import TestCase
 
-from tests.fixtures import clear_dir, init_dir
-
-from ...repositories.project.project import (
+from abstra_internals.repositories.project.project import (
     ProjectRepository,
     VisualizationItem,
     VisualizationSettings,
 )
-from .visualizations import VisualizationsController
+from abstra_internals.server.controller.visualizations import VisualizationsController
+from tests.fixtures import clear_dir, init_dir
 
 
 class VisualizationsTest(TestCase):

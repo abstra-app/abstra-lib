@@ -1,9 +1,8 @@
 from unittest import TestCase
 
+from abstra_internals.modules import import_as_new, reload_project_local_modules
+from abstra_internals.repositories.project.project import ProjectRepository, ScriptStage
 from tests.fixtures import clear_dir, init_dir
-
-from .modules import import_as_new, reload_project_local_modules
-from .repositories.project.project import ProjectRepository, ScriptStage
 
 
 class TestImportAsNew(TestCase):

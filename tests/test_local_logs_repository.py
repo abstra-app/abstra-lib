@@ -6,8 +6,7 @@ from abstra_internals.repositories.execution_logs import (
     LocalExecutionLogsRepository,
     StdioLogEntry,
 )
-
-from .fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestLocalExecutionLogsRepository(unittest.TestCase):

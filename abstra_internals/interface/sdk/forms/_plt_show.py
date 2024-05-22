@@ -1,4 +1,4 @@
-from .generated.outputs import display_plotly
+from abstra_internals.interface.sdk.forms.generated.outputs import display_plotly
 
 
 def _overload_plotly_show():

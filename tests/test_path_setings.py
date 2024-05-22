@@ -3,8 +3,7 @@ import unittest
 from pathlib import Path
 
 from abstra_internals.server.controller.main import MainController
-
-from .fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestWorkspace(unittest.TestCase):

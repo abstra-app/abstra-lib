@@ -3,7 +3,7 @@
 from typing import List, Union, Dict, Any, TypedDict
 import io
 
-from ..reactive import Reactive
+from abstra_internals.interface.sdk.forms.reactive import Reactive
 from abstra_internals.widgets.library import *
 from abstra_internals.widgets import Input, Output
 from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame, AbstraOption

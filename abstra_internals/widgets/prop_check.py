@@ -1,6 +1,6 @@
 import typing
 
-from .metadata_parsed import WBrokerAPIParams, metadata_objects
+from abstra_internals.widgets.metadata_parsed import WBrokerAPIParams, metadata_objects
 
 
 def types_compatible(prop, typeName: typing.Union[typing.List[str], str]):

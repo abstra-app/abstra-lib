@@ -3,12 +3,11 @@ import threading
 import time
 from datetime import datetime
 
+from abstra_internals.contract.forms import FilesChangedMessage
+from abstra_internals.execution.form_execution import FormExecution
 from abstra_internals.logger import AbstraLogger
-
-from ..contract.forms import FilesChangedMessage
-from ..execution.form_execution import FormExecution
-from ..modules import reload_project_local_modules
-from ..repositories.project.project import Project, ProjectRepository
+from abstra_internals.modules import reload_project_local_modules
+from abstra_internals.repositories.project.project import Project, ProjectRepository
 
 
 def has_local_dependencies_changed(project: Project, last_change: float) -> bool:

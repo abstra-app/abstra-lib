@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from .utils import quoted_identifier
+from abstra_internals.interface.sdk.tables.utils import quoted_identifier
 
 
 class Comparator:

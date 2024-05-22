@@ -1,8 +1,7 @@
 
 from typing import Any, Dict, List
 from abstra_internals.widgets.types import PandasDataFrame, AbstraOption
-
-from ..page import Page
+from abstra_internals.interface.sdk.forms.page import Page
 
 def get_single_value(answer: Dict):
     return list(answer.values())[0]

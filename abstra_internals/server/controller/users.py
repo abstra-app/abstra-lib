@@ -2,12 +2,12 @@ from typing import List
 
 import flask
 
-from ...contracts_generated import CommonUserRoles
-from ...jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
-from ...repositories import users_repository
-from ...repositories.project.project import ProjectRepository
-from ...repositories.users import UsersRepository
-from ...usage import usage
+from abstra_internals.contracts_generated import CommonUserRoles
+from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
+from abstra_internals.repositories import users_repository
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.users import UsersRepository
+from abstra_internals.usage import usage
 
 
 class UserController:

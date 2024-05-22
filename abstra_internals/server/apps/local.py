@@ -1,10 +1,10 @@
 import flask
 import flask_cors
 
-from ...logger import AbstraLogger
-from ..blueprints.editor import get_editor_bp
-from ..blueprints.player import get_player_bp
-from ..controller.main import MainController
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.server.blueprints.editor import get_editor_bp
+from abstra_internals.server.blueprints.player import get_player_bp
+from abstra_internals.server.controller.main import MainController
 
 
 def get_local_app(controller: MainController) -> flask.Flask:

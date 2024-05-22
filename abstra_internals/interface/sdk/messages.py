@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from ...repositories import notification_repository
+from abstra_internals.repositories import notification_repository
 
 
 def send_email(to: Union[str, List[str]], message: str, title: str = ""):
