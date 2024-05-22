@@ -9,8 +9,7 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.server.controller.kanban import DataRequest, DataRequestFilter
 from abstra_internals.utils.datetime import to_utc_iso_string
-
-from .fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestKanbanRouter(TestCase):

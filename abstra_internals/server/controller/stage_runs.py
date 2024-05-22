@@ -2,14 +2,14 @@ from typing import Optional
 
 import flask
 
-from ...repositories import stage_run_repository
-from ...repositories.project.project import ProjectRepository
-from ...repositories.stage_run import (
+from abstra_internals.repositories import stage_run_repository
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.stage_run import (
     GetStageRunByQueryFilter,
     Pagination,
     StageRunRepository,
 )
-from ...usage import usage
+from abstra_internals.usage import usage
 
 
 class StageRunsController:

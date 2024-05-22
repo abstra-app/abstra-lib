@@ -1,7 +1,7 @@
 import flask
 
-from ...repositories import authn_repository
-from ...utils.email import is_valid_email
+from abstra_internals.repositories import authn_repository
+from abstra_internals.utils.email import is_valid_email
 
 
 def get_player_bp():

@@ -3,17 +3,17 @@ import json
 import flask
 import flask_sock
 
-from ...execution import FormExecution
-from ...execution.execution import RequestData
-from ...execution.stage_run_manager import (
+from abstra_internals.execution import FormExecution
+from abstra_internals.execution.execution import RequestData
+from abstra_internals.execution.stage_run_manager import (
     AttachedStageRunManager,
     DetachedStageRunManager,
 )
-from ...logger import AbstraLogger
-from ...repositories import stage_run_repository_factory
-from ...usage import usage
-from ...utils import is_it_true
-from .main import MainController
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories import stage_run_repository_factory
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.usage import usage
+from abstra_internals.utils import is_it_true
 
 
 def get_editor_bp(controller: MainController):

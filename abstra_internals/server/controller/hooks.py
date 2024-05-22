@@ -2,24 +2,24 @@ import json
 
 import flask
 
-from ...execution.execution import RequestData
-from ...execution.hook_execution import HookExecution
-from ...execution.stage_run_manager import (
+from abstra_internals.execution.execution import RequestData
+from abstra_internals.execution.hook_execution import HookExecution
+from abstra_internals.execution.stage_run_manager import (
     AttachedStageRunManager,
     DetachedStageRunManager,
 )
-from ...repositories import (
+from abstra_internals.repositories import (
     execution_logs_repository,
     execution_repository,
     stage_run_repository,
 )
-from ...repositories.execution_logs import get_logs_output
-from ...repositories.project.project import ProjectRepository
-from ...repositories.stage_run import stage_run_repository_factory
-from ...usage import usage
-from ...utils import is_it_true
-from ..workflow_engine import workflow_engine
-from .main import MainController
+from abstra_internals.repositories.execution_logs import get_logs_output
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.stage_run import stage_run_repository_factory
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.server.workflow_engine import workflow_engine
+from abstra_internals.usage import usage
+from abstra_internals.utils import is_it_true
 
 
 def get_editor_bp(controller: MainController):

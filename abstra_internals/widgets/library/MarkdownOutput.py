@@ -1,4 +1,4 @@
-from ..widget_base import Output
+from abstra_internals.widgets.widget_base import Output
 
 
 class MarkdownOutput(Output):

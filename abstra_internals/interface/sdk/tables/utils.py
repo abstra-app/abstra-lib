@@ -2,7 +2,7 @@ import typing
 from datetime import date, datetime
 from uuid import UUID
 
-from ....utils import serialize as json_serialize
+from abstra_internals.utils import serialize as json_serialize
 
 
 def escape_ref(ref: str):

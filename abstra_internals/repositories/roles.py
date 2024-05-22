@@ -2,13 +2,13 @@ from typing import List
 
 import requests
 
-from ..contracts_generated import (
+from abstra_internals.contracts_generated import (
     CommonRole,
 )
-from ..credentials import (
+from abstra_internals.credentials import (
     resolve_headers,
 )
-from ..environment import CLOUD_API_ENDPOINT
+from abstra_internals.environment import CLOUD_API_ENDPOINT
 
 
 class RolesRepository:

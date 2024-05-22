@@ -1,7 +1,7 @@
 from typing import Callable, Dict, List, Optional, Union
 
-from .page import Page
-from .page_response import PageResponse
+from abstra_internals.interface.sdk.forms.page import Page
+from abstra_internals.interface.sdk.forms.page_response import PageResponse
 
 Step = Union[Page, Callable]
 Steps = List[Step]

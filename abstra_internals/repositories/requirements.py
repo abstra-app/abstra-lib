@@ -8,8 +8,8 @@ from typing import Dict, List, Optional, Set
 from importlib_metadata import packages_distributions
 from pkg_resources import get_distribution
 
-from ..settings import Settings
-from .project.project import ProjectRepository
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.settings import Settings
 
 
 @dataclass

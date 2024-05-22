@@ -1,8 +1,8 @@
 import flask
 
-from ...settings import Settings
-from ..utils import send_from_dist
-from .main import MainController
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.server.utils import send_from_dist
+from abstra_internals.settings import Settings
 
 
 def get_editor_bp(controller: MainController):

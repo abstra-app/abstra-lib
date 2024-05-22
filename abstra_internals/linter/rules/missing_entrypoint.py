@@ -1,6 +1,7 @@
 from typing import List, Union
 
-from ...repositories.project.project import (
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.repositories.project.project import (
     ActionStage,
     FormStage,
     HookStage,
@@ -8,8 +9,12 @@ from ...repositories.project.project import (
     ProjectRepository,
     ScriptStage,
 )
-from ...templates import new_form_code, new_hook_code, new_job_code, new_script_code
-from ..linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.templates import (
+    new_form_code,
+    new_hook_code,
+    new_job_code,
+    new_script_code,
+)
 
 
 class AddEntrypoint(LinterFix):

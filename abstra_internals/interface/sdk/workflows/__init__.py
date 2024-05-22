@@ -1,11 +1,11 @@
 from typing import Optional
 
-from ....execution.execution import get_current_execution_throwable
-from ....execution.hook_execution import HookExecution
-from ....execution.stage_run_manager import UnsetStageRun
-from ....repositories.stage_run import GetStageRunByQueryFilter
-from ....utils import serialize
-from ....utils.json import to_json_serializable
+from abstra_internals.execution.execution import get_current_execution_throwable
+from abstra_internals.execution.hook_execution import HookExecution
+from abstra_internals.execution.stage_run_manager import UnsetStageRun
+from abstra_internals.repositories.stage_run import GetStageRunByQueryFilter
+from abstra_internals.utils import serialize
+from abstra_internals.utils.json import to_json_serializable
 
 
 def is_json_serializable(value):

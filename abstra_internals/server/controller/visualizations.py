@@ -1,6 +1,6 @@
 import flask
 
-from ...repositories.project.project import (
+from abstra_internals.repositories.project.project import (
     ProjectRepository,
     VisualizationItem,
     VisualizationSettings,

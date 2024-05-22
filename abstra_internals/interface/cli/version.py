@@ -3,9 +3,9 @@ from enum import Enum
 import pkg_resources
 import requests
 
-from ...environment import IS_PRODUCTION
-from ...settings import Settings
-from ...utils import packages as pkg_utils
+from abstra_internals.environment import IS_PRODUCTION
+from abstra_internals.settings import Settings
+from abstra_internals.utils import packages as pkg_utils
 
 VersionStatus = Enum(
     "VersionStatus", ["UP_TO_DATE", "OUT_OF_DATE", "LATEST_IS_OUTDATED", "UNKNOWN"]

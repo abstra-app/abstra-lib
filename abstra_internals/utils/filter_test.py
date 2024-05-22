@@ -1,6 +1,6 @@
 import unittest
 
-from .filter import (
+from abstra_internals.utils.filter import (
     Condition,
     FilterCondition,
     LogicalGroup,

@@ -1,6 +1,6 @@
 import json
 from typing import TYPE_CHECKING, Any, List, Union
-from ..widget_base import Input, MultipleHandler
+from abstra_internals.widgets.widget_base import Input, MultipleHandler
 if TYPE_CHECKING:
     import pandas as pd
 DEFAULT_PAGE_SIZE = 10

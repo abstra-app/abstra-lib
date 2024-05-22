@@ -1,8 +1,8 @@
 from typing import List
 
-from ...settings import Settings
-from ...utils.file import files_from_directory
-from ..linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.settings import Settings
+from abstra_internals.utils.file import files_from_directory
 
 
 class AddEnvToAbstraIgnore(LinterFix):

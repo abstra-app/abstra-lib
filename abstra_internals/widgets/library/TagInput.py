@@ -1,5 +1,5 @@
-from ..widget_base import Input
 from typing import List, Union
+from abstra_internals.widgets.widget_base import Input
 
 
 class TagInput(Input):

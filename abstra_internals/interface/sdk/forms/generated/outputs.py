@@ -2,8 +2,7 @@
 import io
 from typing import Union
 from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame
-
-from ..page import Page
+from abstra_internals.interface.sdk.forms.page import Page
 
 
 def display_file(file: Union[str, io.IOBase], **kwargs):

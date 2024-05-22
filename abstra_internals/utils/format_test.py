@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .format import normalize_path
+from abstra_internals.utils.format import normalize_path
 
 
 class NormalizePathTest(TestCase):

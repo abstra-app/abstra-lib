@@ -1,5 +1,5 @@
-from ..widget_base import Input
 from typing import Any, List
+from abstra_internals.widgets.widget_base import Input
 
 
 class ListInput(Input):

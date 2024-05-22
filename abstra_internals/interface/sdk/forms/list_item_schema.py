@@ -1,4 +1,4 @@
-from .generated.widget_schema import WidgetSchema
+from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
 
 
 class ListItemSchema(WidgetSchema):

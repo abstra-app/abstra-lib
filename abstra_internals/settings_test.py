@@ -2,7 +2,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from unittest import TestCase
 
-from .settings import SettingsController
+from abstra_internals.settings import SettingsController
 
 
 class SettingsTest(TestCase):

@@ -1,7 +1,7 @@
 import flask
 
-from ...repositories import roles_repository
-from ...usage import usage
+from abstra_internals.repositories import roles_repository
+from abstra_internals.usage import usage
 
 
 def get_editor_bp():

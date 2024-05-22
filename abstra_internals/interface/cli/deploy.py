@@ -5,10 +5,10 @@ import zipfile
 
 import requests
 
-from ...cloud_api import create_build, update_build
-from ...credentials import resolve_headers
-from ...settings import Settings
-from ...utils.file import files_from_directory
+from abstra_internals.cloud_api import create_build, update_build
+from abstra_internals.credentials import resolve_headers
+from abstra_internals.settings import Settings
+from abstra_internals.utils.file import files_from_directory
 
 
 def _generate_zip_file() -> pathlib.Path:

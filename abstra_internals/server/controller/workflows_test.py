@@ -1,8 +1,6 @@
 from unittest import TestCase
 
-from tests.fixtures import clear_dir, init_dir
-
-from ...repositories.project.project import (
+from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
     NotificationTrigger,
@@ -10,7 +8,8 @@ from ...repositories.project.project import (
     ScriptStage,
     WorkflowTransition,
 )
-from .workflows import get_path
+from abstra_internals.server.controller.workflows import get_path
+from tests.fixtures import clear_dir, init_dir
 
 
 class WorkflowTest(TestCase):

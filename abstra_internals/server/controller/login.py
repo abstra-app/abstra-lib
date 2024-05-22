@@ -1,7 +1,7 @@
 import flask
 
-from ...usage import usage
-from .main import MainController
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.usage import usage
 
 
 def get_editor_bp(controller: MainController):

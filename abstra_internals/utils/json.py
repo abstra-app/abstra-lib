@@ -3,10 +3,10 @@ from dataclasses import is_dataclass
 from datetime import date, datetime
 from uuid import UUID
 
-from ..interface.sdk.forms.page_response import PageResponse
-from ..interface.sdk.forms.step import StepsResponse
-from ..utils import serialize
-from ..widgets.response_types import FileResponse, PhoneResponse
+from abstra_internals.interface.sdk.forms.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra_internals.utils import serialize
+from abstra_internals.widgets.response_types import FileResponse, PhoneResponse
 
 
 def to_json_serializable(data):

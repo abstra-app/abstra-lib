@@ -1,6 +1,6 @@
 from typing import List, Optional, TypedDict
-from ..file_utils import convert_file
-from ..widget_base import Input, MultipleHandler
+from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.widgets.widget_base import Input, MultipleHandler
 
 
 class CardOption(TypedDict):

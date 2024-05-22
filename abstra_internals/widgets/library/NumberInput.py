@@ -1,5 +1,5 @@
 from typing import List
-from ..widget_base import Input, NumberValueHandler
+from abstra_internals.widgets.widget_base import Input, NumberValueHandler
 
 
 class NumberInput(Input):

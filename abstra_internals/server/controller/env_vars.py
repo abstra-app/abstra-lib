@@ -1,8 +1,8 @@
 import flask
 
-from ...contracts_generated import AbstraLibApiEditorEnvVarsModel
-from ...repositories import env_vars_repository
-from ...usage import usage
+from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
+from abstra_internals.repositories import env_vars_repository
+from abstra_internals.usage import usage
 
 
 def get_editor_bp():

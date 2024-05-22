@@ -1,5 +1,5 @@
-from ..widget_base import Output
 from urllib.parse import quote
+from abstra_internals.widgets.widget_base import Output
 from validators import url
 
 

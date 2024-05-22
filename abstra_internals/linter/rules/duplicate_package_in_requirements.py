@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from ...repositories.requirements import RequirementsRepository
-from ..linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.repositories.requirements import RequirementsRepository
 
 
 class MergeDuplicatePackages(LinterFix):

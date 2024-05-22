@@ -3,8 +3,8 @@ import typing
 
 import requests
 
-from ..credentials import resolve_headers
-from ..environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.credentials import resolve_headers
+from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
 
 
 class TablesApiHttpClient(abc.ABC):

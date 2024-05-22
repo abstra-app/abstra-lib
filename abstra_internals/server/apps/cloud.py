@@ -3,9 +3,9 @@ import flask_cors
 import flask_talisman
 from flask_talisman import ALLOW_FROM
 
-from ...environment import ENABLE_TALISMAN
-from ..blueprints.player import get_player_bp
-from ..controller.main import MainController
+from abstra_internals.environment import ENABLE_TALISMAN
+from abstra_internals.server.blueprints.player import get_player_bp
+from abstra_internals.server.controller.main import MainController
 
 
 def get_cloud_app(controller: MainController):

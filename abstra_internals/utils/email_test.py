@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .email import is_valid_email
+from abstra_internals.utils.email import is_valid_email
 
 
 class IsValidEmailTest(TestCase):

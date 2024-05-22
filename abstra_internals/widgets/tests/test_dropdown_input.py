@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import ANY
 
-from ...widgets.library.DropdownInput import DropdownInput
+from abstra_internals.widgets.library.DropdownInput import DropdownInput
 
 
 class TestHotReloadLocalModules(TestCase):

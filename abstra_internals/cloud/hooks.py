@@ -3,15 +3,15 @@ import datetime
 from gunicorn.arbiter import Arbiter
 from gunicorn.workers.base import Worker
 
-from ..environment import set_SERVER_UUID, set_WORKER_UUID
-from ..repositories import (
+from abstra_internals.environment import set_SERVER_UUID, set_WORKER_UUID
+from abstra_internals.repositories import (
     execution_logs_repository,
     execution_repository,
     stage_run_repository,
 )
-from ..repositories.execution_logs import StdioLogEntry
-from ..threaded import threaded
-from ..utils import get_internal_id
+from abstra_internals.repositories.execution_logs import StdioLogEntry
+from abstra_internals.threaded import threaded
+from abstra_internals.utils import get_internal_id
 
 
 @threaded

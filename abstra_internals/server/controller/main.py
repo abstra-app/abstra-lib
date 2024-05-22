@@ -7,24 +7,29 @@ import flask
 import pkg_resources
 from werkzeug.datastructures import FileStorage
 
-from ...cloud_api import create_thread, get_ai_messages, get_auth_info, get_project_info
-from ...credentials import (
+from abstra_internals.cloud_api import (
+    create_thread,
+    get_ai_messages,
+    get_auth_info,
+    get_project_info,
+)
+from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
     resolve_headers,
     set_credentials,
 )
-from ...execution.execution import Execution
-from ...interface.cli.deploy import deploy
-from ...repositories import (
+from abstra_internals.execution.execution import Execution
+from abstra_internals.interface.cli.deploy import deploy
+from abstra_internals.repositories import (
     execution_logs_repository,
     execution_repository,
     requirements_repository,
     stage_run_repository,
 )
-from ...repositories.execution import ExecutionRepository
-from ...repositories.execution_logs import ExecutionLogsRepository
-from ...repositories.project.project import (
+from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.project.project import (
     ActionStage,
     FormStage,
     HookStage,
@@ -34,10 +39,10 @@ from ...repositories.project.project import (
     StyleSettings,
     WorkflowStage,
 )
-from ...repositories.stage_run import StageRunRepository
-from ...server.controller.linters import check_linters
-from ...settings import Settings
-from ...templates import (
+from abstra_internals.repositories.stage_run import StageRunRepository
+from abstra_internals.server.controller.linters import check_linters
+from abstra_internals.settings import Settings
+from abstra_internals.templates import (
     ensure_abstraignore,
     ensure_gitignore,
     new_form_code,
@@ -45,10 +50,10 @@ from ...templates import (
     new_job_code,
     new_script_code,
 )
-from ...utils.dot_abstra import TEST_DATA_FILE
-from ...utils.file import files_from_directory, module2path, path2module
-from ...utils.validate import validate_json
-from ...widgets.apis import get_random_filepath, internal_path
+from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
+from abstra_internals.utils.file import files_from_directory, module2path, path2module
+from abstra_internals.utils.validate import validate_json
+from abstra_internals.widgets.apis import get_random_filepath, internal_path
 
 
 class UnknownNodeTypeError(Exception):

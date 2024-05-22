@@ -1,6 +1,8 @@
 from unittest import TestCase
 
-from .migration_007 import Migration007
+from abstra_internals.repositories.project.json_migrations.migration_007 import (
+    Migration007,
+)
 
 
 class TestMigration07(TestCase):

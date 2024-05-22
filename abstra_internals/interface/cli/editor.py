@@ -7,15 +7,15 @@ from dotenv import load_dotenv as _load_dotenv
 from werkzeug.debug import DebuggedApplication
 from werkzeug.serving import make_server
 
-from ...editor_reloader import LocalReloader
-from ...environment import HOST
-from ...server.apps import get_local_app
-from ...server.controller.main import MainController
-from ...server.fs_watcher import watch_py_root_files
-from ...settings import Settings
-from ...stdio_monkey_patch import override_stdio
-from .messages import serve_message
-from .version import check_latest_version
+from abstra_internals.editor_reloader import LocalReloader
+from abstra_internals.environment import HOST
+from abstra_internals.interface.cli.messages import serve_message
+from abstra_internals.interface.cli.version import check_latest_version
+from abstra_internals.server.apps import get_local_app
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.server.fs_watcher import watch_py_root_files
+from abstra_internals.settings import Settings
+from abstra_internals.stdio_monkey_patch import override_stdio
 
 
 def editor(

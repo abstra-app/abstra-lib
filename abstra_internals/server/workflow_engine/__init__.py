@@ -1,19 +1,22 @@
 from typing import Dict, List, Optional
 
-from ...execution.execution import Execution
-from ...execution.job_execution import JobExecution
-from ...execution.script_execution import ScriptExecution
-from ...execution.stage_run_manager import AttachedStageRunManager, UnsetStageRun
-from ...repositories import (
+from abstra_internals.execution.execution import Execution
+from abstra_internals.execution.job_execution import JobExecution
+from abstra_internals.execution.script_execution import ScriptExecution
+from abstra_internals.execution.stage_run_manager import (
+    AttachedStageRunManager,
+    UnsetStageRun,
+)
+from abstra_internals.repositories import (
     execution_logs_repository,
     execution_repository,
     notification_repository,
     stage_run_repository,
 )
-from ...repositories.execution import ExecutionRepository
-from ...repositories.execution_logs import ExecutionLogsRepository
-from ...repositories.notifications import NotificationRepository
-from ...repositories.project.project import (
+from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.notifications import NotificationRepository
+from abstra_internals.repositories.project.project import (
     ActionStage,
     ConditionStage,
     ControlStage,
@@ -24,8 +27,8 @@ from ...repositories.project.project import (
     ScriptStage,
     WorkflowStage,
 )
-from ...repositories.stage_run import StageRun, StageRunRepository
-from ...threaded import threaded
+from abstra_internals.repositories.stage_run import StageRun, StageRunRepository
+from abstra_internals.threaded import threaded
 
 
 class WorkflowEngine:

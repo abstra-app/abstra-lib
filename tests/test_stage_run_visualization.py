@@ -9,8 +9,7 @@ from abstra_internals.server.controller.kanban import (
     KanbanController,
     StageCardContentItem,
 )
-
-from .fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestStageRunVisualization(TestCase):

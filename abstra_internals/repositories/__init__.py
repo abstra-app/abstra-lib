@@ -1,15 +1,17 @@
-from .authn import authn_repository_factory
-from .connectors import connectors_api_http_client_factory
-from .env_vars import env_vars_repository_factory
-from .execution import execution_repository_factory
-from .execution_logs import execution_logs_repository_factory
-from .lock import lock_repository_factory
-from .notifications import notification_repository_factory
-from .requirements import requirements_repository_factory
-from .roles import roles_repository_factory
-from .stage_run import stage_run_repository_factory
-from .tables import tables_api_http_client_factory
-from .users import users_repository_factory
+from abstra_internals.repositories.authn import authn_repository_factory
+from abstra_internals.repositories.connectors import connectors_api_http_client_factory
+from abstra_internals.repositories.env_vars import env_vars_repository_factory
+from abstra_internals.repositories.execution import execution_repository_factory
+from abstra_internals.repositories.execution_logs import (
+    execution_logs_repository_factory,
+)
+from abstra_internals.repositories.lock import lock_repository_factory
+from abstra_internals.repositories.notifications import notification_repository_factory
+from abstra_internals.repositories.requirements import requirements_repository_factory
+from abstra_internals.repositories.roles import roles_repository_factory
+from abstra_internals.repositories.stage_run import stage_run_repository_factory
+from abstra_internals.repositories.tables import tables_api_http_client_factory
+from abstra_internals.repositories.users import users_repository_factory
 
 connectors_api_http_client = connectors_api_http_client_factory()
 execution_logs_repository = execution_logs_repository_factory()

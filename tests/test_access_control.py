@@ -6,8 +6,7 @@ from abstra_internals.repositories.project.project import (
     NotificationTrigger,
     ProjectRepository,
 )
-
-from .fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestAccessControl(TestCase):

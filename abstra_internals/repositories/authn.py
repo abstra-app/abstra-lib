@@ -5,7 +5,7 @@ import typing
 import jwt
 import requests
 
-from ..environment import (
+from abstra_internals.environment import (
     OIDC_AUTHORITY,
     PROJECT_ID,
     SIDECAR_HEADERS,

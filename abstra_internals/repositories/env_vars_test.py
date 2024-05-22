@@ -1,10 +1,9 @@
 from unittest import TestCase
 
+from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
+from abstra_internals.repositories.env_vars import env_vars_repository_factory
+from abstra_internals.repositories.project.project import ProjectRepository, ScriptStage
 from tests.fixtures import clear_dir, init_dir
-
-from ..contracts_generated import AbstraLibApiEditorEnvVarsModel
-from ..repositories.project.project import ProjectRepository, ScriptStage
-from .env_vars import env_vars_repository_factory
 
 
 class TestEnvVarsRepository(TestCase):

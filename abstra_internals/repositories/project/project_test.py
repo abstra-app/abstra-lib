@@ -1,8 +1,6 @@
 from unittest import TestCase
 
-from tests.fixtures import clear_dir, init_dir
-
-from .project import (
+from abstra_internals.repositories.project.project import (
     FormStage,
     NotificationTrigger,
     Project,
@@ -11,6 +9,7 @@ from .project import (
     SignupPolicy,
     WorkflowTransition,
 )
+from tests.fixtures import clear_dir, init_dir
 
 
 class ProjectTests(TestCase):

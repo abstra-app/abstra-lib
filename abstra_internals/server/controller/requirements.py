@@ -1,7 +1,7 @@
 import flask
 
-from ...repositories import requirements_repository
-from ...usage import usage
+from abstra_internals.repositories import requirements_repository
+from abstra_internals.usage import usage
 
 
 def get_editor_bp():

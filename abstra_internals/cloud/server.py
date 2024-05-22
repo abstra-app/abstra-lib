@@ -1,17 +1,17 @@
-from ..environment import (
+from abstra_internals.cloud.application import CustomApplication
+from abstra_internals.cloud.hooks import child_exit, on_starting, pre_fork
+from abstra_internals.environment import (
     DEFAULT_PORT,
     THREADS,
     WORKER_CLASS,
     WORKER_TEMP_DIR,
     WORKERS,
 )
-from ..logger import AbstraLogger
-from ..server.apps import get_cloud_app
-from ..server.controller.main import MainController
-from ..settings import SettingsController
-from ..stdio_monkey_patch import override_stdio
-from .application import CustomApplication
-from .hooks import child_exit, on_starting, pre_fork
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.server.apps import get_cloud_app
+from abstra_internals.server.controller.main import MainController
+from abstra_internals.settings import SettingsController
+from abstra_internals.stdio_monkey_patch import override_stdio
 
 
 def run():

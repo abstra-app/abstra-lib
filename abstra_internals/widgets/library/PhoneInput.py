@@ -1,6 +1,6 @@
-from ..widget_base import Input
-from ..response_types import PhoneResponse
 import re
+from abstra_internals.widgets.response_types import PhoneResponse
+from abstra_internals.widgets.widget_base import Input
 
 
 class PhoneInput(Input):

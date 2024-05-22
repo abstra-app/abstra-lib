@@ -1,9 +1,8 @@
 from unittest import TestCase
 
+from abstra_internals.linter.rules.missing_env import MissingEnv
+from abstra_internals.repositories.project.project import ProjectRepository, ScriptStage
 from tests.fixtures import clear_dir, init_dir
-
-from ...repositories.project.project import ProjectRepository, ScriptStage
-from .missing_env import MissingEnv
 
 
 class TestMissingEnv(TestCase):

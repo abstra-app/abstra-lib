@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Generator, Optional, Union
 
-from .dot_abstra import DOT_ABSTRA_FOLDER_NAME
+from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 GIT_FOLDER = ".git"
 ABSTRA_IGNORE = ".abstraignore"

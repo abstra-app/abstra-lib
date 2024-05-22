@@ -2,8 +2,7 @@ from pathlib import Path
 from unittest import TestCase
 
 from abstra_internals.server.controller.main import MainController
-
-from .fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_local_client, init_dir
 
 
 class TestRequirementsApi(TestCase):

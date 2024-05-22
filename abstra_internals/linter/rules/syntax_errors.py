@@ -2,9 +2,9 @@ import webbrowser
 from pathlib import Path
 from typing import List
 
-from ...repositories.project.project import ProjectRepository
-from ...utils.file import traverse_code
-from ..linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.utils.file import traverse_code
 
 
 class OpenBrokenFile(LinterFix):

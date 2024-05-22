@@ -1,12 +1,12 @@
 import sys
 from typing import Callable, Dict, List, Optional, Union
 
-from ....contract import forms_contract
-from ....widgets.prop_check import validate_widget_props
-from .connection import receive, send
-from .generated.widget_schema import WidgetSchema
-from .page_response import PageResponse
-from .reactive import Reactive
+from abstra_internals.contract import forms_contract
+from abstra_internals.interface.sdk.forms.connection import receive, send
+from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
+from abstra_internals.interface.sdk.forms.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.reactive import Reactive
+from abstra_internals.widgets.prop_check import validate_widget_props
 
 
 class Page(WidgetSchema):

@@ -1,8 +1,7 @@
 import unittest
 
 from abstra_internals.server.controller.main import MainController
-
-from .fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestSidebar(unittest.TestCase):

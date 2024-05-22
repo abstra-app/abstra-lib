@@ -1,6 +1,6 @@
 import typing
 
-from ....widgets.widget_base import Input
+from abstra_internals.widgets.widget_base import Input
 
 
 class Reactive(Input):

@@ -1,7 +1,11 @@
 import unittest
 from typing import Optional
 
-from .validate import check_type, validate_json, validate_json_typing
+from abstra_internals.utils.validate import (
+    check_type,
+    validate_json,
+    validate_json_typing,
+)
 
 
 class ValidateTest(unittest.TestCase):

@@ -1,6 +1,7 @@
-import datetime, re
-from ..widget_base import Input
+import datetime
+import re
 from typing import Optional
+from abstra_internals.widgets.widget_base import Input
 
 
 class TimeInput(Input):

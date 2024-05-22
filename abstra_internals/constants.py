@@ -1,8 +1,8 @@
 import pathlib
 
-from .environment import FILES_FOLDER
-from .settings import Settings
-from .utils.dot_abstra import PERSISTENT_DIR
+from abstra_internals.environment import FILES_FOLDER
+from abstra_internals.settings import Settings
+from abstra_internals.utils.dot_abstra import PERSISTENT_DIR
 
 
 def get_persistent_dir() -> pathlib.Path:

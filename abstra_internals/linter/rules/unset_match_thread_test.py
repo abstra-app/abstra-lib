@@ -1,14 +1,13 @@
 from unittest import TestCase
 
-from tests.fixtures import clear_dir, init_dir
-
-from ...repositories.project.project import (
+from abstra_internals.linter.rules.unset_match_thread import UnsetMatchThread
+from abstra_internals.repositories.project.project import (
     HookStage,
     ProjectRepository,
     ScriptStage,
     WorkflowTransition,
 )
-from .unset_match_thread import UnsetMatchThread
+from tests.fixtures import clear_dir, init_dir
 
 
 class UnsetMatchThreadTest(TestCase):

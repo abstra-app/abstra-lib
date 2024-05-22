@@ -6,24 +6,24 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, ClassVar, Dict, Literal, Optional, Tuple, Union
 
-from ..compatibility import compat_traceback
-from ..modules import import_as_new
-from ..repositories.execution import (
+from abstra_internals.compatibility import compat_traceback
+from abstra_internals.execution.stage_run_manager import StageRunManager
+from abstra_internals.modules import import_as_new
+from abstra_internals.repositories.execution import (
     ExecutionDTO,
     ExecutionRepository,
     ExecutionStatus,
 )
-from ..repositories.execution_logs import (
+from abstra_internals.repositories.execution_logs import (
     ExecutionLogsRepository,
     StdioLogEntry,
     UnhandledExceptionLogEntry,
 )
-from ..repositories.project.project import ActionStage
-from ..repositories.stage_run import (
+from abstra_internals.repositories.project.project import ActionStage
+from abstra_internals.repositories.stage_run import (
     StageRun,
 )
-from ..utils.datetime import to_utc_iso_string
-from .stage_run_manager import StageRunManager
+from abstra_internals.utils.datetime import to_utc_iso_string
 
 
 class NoExecutionFound(Exception):

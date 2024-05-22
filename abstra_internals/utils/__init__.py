@@ -108,7 +108,7 @@ def is_test_env():
 
 def is_dev_env() -> bool:
     dev_versions = ["0.0.0", "100.0.0"]
-    from .packages import get_local_package_version
+    from abstra_internals.utils.packages import get_local_package_version
 
     return str(get_local_package_version()) in dev_versions
 

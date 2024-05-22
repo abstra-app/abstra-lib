@@ -1,7 +1,6 @@
 from abstra_internals.widgets.metadata_parsed import metadata_objects
 from abstra_internals.widgets.prop_check import validate_widget_props
-
-from .example_instances import example_instances
+from tests.example_instances import example_instances
 
 generated_widgets = [
     example_instance.render({}) for example_instance in example_instances

@@ -4,12 +4,10 @@ from datetime import datetime
 from uuid import UUID
 
 from abstra.tables import insert
-from tests.fixtures import clear_dir, init_dir
-
-from .... import repositories
-from ....interface.sdk.forms.page_response import PageResponse
-from ....interface.sdk.forms.step import StepsResponse
-from .api import (
+from abstra_internals import repositories
+from abstra_internals.interface.sdk.forms.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra_internals.interface.sdk.tables.api import (
     _make_delete_query,
     _make_insert_query,
     _make_row_dict,
@@ -17,6 +15,7 @@ from .api import (
     _make_update_query,
     serialize,
 )
+from tests.fixtures import clear_dir, init_dir
 
 
 @dataclass

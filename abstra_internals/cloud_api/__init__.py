@@ -1,11 +1,11 @@
 import requests
 
-from ..contracts_generated import (
+from abstra_internals.contracts_generated import (
     CloudApiCliAuthInfoResponse,
     CloudApiCliBuildCreateResponse,
 )
-from ..environment import CLOUD_API_ENDPOINT
-from ..logger import AbstraLogger
+from abstra_internals.environment import CLOUD_API_ENDPOINT
+from abstra_internals.logger import AbstraLogger
 
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:

@@ -1,7 +1,6 @@
 {
-  "python.formatting.provider": "black",
   "python.terminal.activateEnvironment": true,
-  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.typeCheckingMode": "standard",
   "python.testing.pytestArgs": [
     "."
   ],
@@ -11,4 +10,5 @@
     "source.organizeImports": "explicit"
   },
   "editor.defaultFormatter": "charliermarsh.ruff",
+  "python.analysis.autoImportCompletions": true,
 }

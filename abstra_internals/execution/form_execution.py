@@ -7,20 +7,28 @@ from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 import flask_sock
 from simple_websocket.ws import ConnectionClosed
 
-from ..compatibility import compat_traceback
-from ..contract import forms_contract
-from ..debug import make_debug_data
-from ..environment import IS_PRODUCTION
-from ..jwt_auth import UserClaims
-from ..logger import AbstraLogger
-from ..repositories.execution import ExecutionRepository
-from ..repositories.execution_logs import ExecutionLogsRepository, FormEventLogEntry
-from ..utils import deserialize, serialize
-from .execution import ABSTRA_RUN_KEY, Execution, NoExecutionFound, RequestData
-from .stage_run_manager import StageRunManager
+from abstra_internals.compatibility import compat_traceback
+from abstra_internals.contract import forms_contract
+from abstra_internals.debug import make_debug_data
+from abstra_internals.environment import IS_PRODUCTION
+from abstra_internals.execution.execution import (
+    ABSTRA_RUN_KEY,
+    Execution,
+    NoExecutionFound,
+    RequestData,
+)
+from abstra_internals.execution.stage_run_manager import StageRunManager
+from abstra_internals.jwt_auth import UserClaims
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.execution_logs import (
+    ExecutionLogsRepository,
+    FormEventLogEntry,
+)
+from abstra_internals.utils import deserialize, serialize
 
 if TYPE_CHECKING:
-    from ..repositories.project.project import FormStage
+    from abstra_internals.repositories.project.project import FormStage
 
 
 class FormExecution(Execution):

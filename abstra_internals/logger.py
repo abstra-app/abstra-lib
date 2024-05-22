@@ -4,7 +4,7 @@ from typing import Literal
 import pkg_resources
 import sentry_sdk
 
-from .utils import is_dev_env, is_test_env
+from abstra_internals.utils import is_dev_env, is_test_env
 
 
 class DevSDK:

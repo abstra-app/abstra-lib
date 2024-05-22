@@ -9,11 +9,10 @@ import requests
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.utils.datetime import from_utc_iso_string
 from abstra_internals.utils.filter import FilterCondition, evaluate_filter_condition
-
-from ..environment import SIDECAR_HEADERS, SIDECAR_URL
-from ..utils.datetime import from_utc_iso_string
-from ..utils.validate import validate_json
+from abstra_internals.utils.validate import validate_json
 
 end_status = ["failed", "finished", "abandoned"]
 

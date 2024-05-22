@@ -1,21 +1,20 @@
 from unittest import TestCase
 
-from tests.fixtures import clear_dir, init_dir
-
-from ...repositories.project.project import (
+from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
     NotificationTrigger,
     ProjectRepository,
 )
-from ...repositories.stage_run import LocalStageRunRepository
-from .kanban import (
+from abstra_internals.repositories.stage_run import LocalStageRunRepository
+from abstra_internals.server.controller.kanban import (
     DataRequest,
     KanbanController,
     KanbanData,
     StageCardContentItem,
     StageRunCard,
 )
+from tests.fixtures import clear_dir, init_dir
 
 
 class KanbanTests(TestCase):

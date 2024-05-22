@@ -1,9 +1,9 @@
-from ..widget_base import Input
 from io import BufferedReader, TextIOWrapper
-from typing import Optional, Union, List
-from ..apis import upload_file
-from ..response_types import FileResponse
 from pathlib import Path
+from typing import List, Optional, Union
+from abstra_internals.widgets.apis import upload_file
+from abstra_internals.widgets.response_types import FileResponse
+from abstra_internals.widgets.widget_base import Input
 
 
 class CameraInput(Input):
