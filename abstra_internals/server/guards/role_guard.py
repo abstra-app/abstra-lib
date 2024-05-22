@@ -8,9 +8,7 @@ import flask_sock
 from abstra_internals.contracts_generated import (
     AbstraLibApiPlayerUserNavigationGuard as NavigationGuard,
 )
-from abstra_internals.contracts_generated import (
-    CommonUserRolesItem,
-)
+from abstra_internals.contracts_generated import CommonUserRolesItem
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.project.project import (
     AccessSettings,
@@ -112,7 +110,7 @@ class Guard:
         )
         ##404 allow this to be handled by the frontend
         if access_settings is None:
-            return NavigationGuard("ALLOWED")
+            return NavigationGuard("NOT_FOUND")
 
         return self.__allow(access_settings, auth)
 

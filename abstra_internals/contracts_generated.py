@@ -760,11 +760,12 @@ AbstraLibApiPlayerUserNavigationGuardStatus = typing.Union[
     typing.Literal["ALLOWED"],
     typing.Literal["UNAUTHORIZED"],
     typing.Literal["FORBIDEN"],
+    typing.Literal["NOT_FOUND"],
 ]
 
 AbstraLibApiPlayerUserNavigationGuardStatusValues: typing.List[
     AbstraLibApiPlayerUserNavigationGuardStatus
-] = ["ALLOWED", "UNAUTHORIZED", "FORBIDEN"]
+] = ["ALLOWED", "UNAUTHORIZED", "FORBIDEN", "NOT_FOUND"]
 
 
 @dataclass
