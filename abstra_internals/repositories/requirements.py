@@ -1,15 +1,30 @@
 import ast
+import importlib.util
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Literal, Mapping, Optional, Set
 
 from importlib_metadata import packages_distributions
 from pkg_resources import get_distribution
 
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
+
+
+def check_package(package_name) -> Literal["builtin", "installed", "unknown"]:
+    if package_name in sys.builtin_module_names:
+        return "builtin"
+
+    spec = importlib.util.find_spec(package_name)
+    if spec is not None and spec.origin is not None:
+        if "site-packages" in spec.origin:
+            return "installed"
+        return "builtin"
+
+    return "unknown"
 
 
 @dataclass
@@ -143,6 +158,7 @@ class RequirementsRepository:
     def get_file_path(cls):
         return Settings.root_path / "requirements.txt"
 
+    # TODO: refactor this method -> TA ORIVEL
     @classmethod
     def get_recommendation(cls) -> List[RequirementRecommendation]:
         imported_modules: Set[RequirementRecommendation] = set()
@@ -158,45 +174,27 @@ class RequirementsRepository:
                 code = python_file.read_text(encoding="utf-8")
                 parsed = ast.parse(code)
                 for node in parsed.body:
+                    pkg_names = []
+
                     if isinstance(node, ast.Import):
                         for alias in node.names:
-                            package_name = alias.name.split(".")[0]
-                            if package_name in visited_set:
-                                continue
-                            visited_set.add(package_name)
-                            lib_name = package_dist.get(package_name)
-                            if lib_name is None:
-                                continue
-                            for lib in lib_name:
-                                imported_modules.add(
-                                    RequirementRecommendation(
-                                        requirement=Requirement(
-                                            name=lib,
-                                            version=get_distribution(lib).version,
-                                        ),
-                                        reason_file=python_file,
-                                        reason_line=node.lineno,
-                                        reason_code=python_file.read_text(
-                                            encoding="utf-8"
-                                        ).splitlines()[node.lineno - 1],
-                                    )
-                                )
+                            pkg_names.append(alias.name.split(".")[0])
+
                     if isinstance(node, ast.ImportFrom):
                         if node.module is None:
                             continue
 
-                        package_name = node.module.split(".")[0]
-                        if package_name in visited_set:
-                            continue
-                        visited_set.add(package_name)
-                        lib_name = package_dist.get(package_name)
-                        if lib_name is None:
-                            continue
-                        for lib in lib_name:
+                        pkg_names.append(node.module.split(".")[0])
+
+                    for pkg_name in pkg_names:
+                        for lib in find_installed_libs(
+                            pkg_name, visited_set, package_dist
+                        ):
                             imported_modules.add(
                                 RequirementRecommendation(
                                     requirement=Requirement(
-                                        name=lib, version=get_distribution(lib).version
+                                        name=lib["name"],
+                                        version=lib["version"],
                                     ),
                                     reason_file=python_file,
                                     reason_line=node.lineno,
@@ -205,6 +203,7 @@ class RequirementsRepository:
                                     ).splitlines()[node.lineno - 1],
                                 )
                             )
+
             except SyntaxError:
                 continue
 
@@ -236,3 +235,27 @@ class RequirementsRepository:
 
 def requirements_repository_factory() -> RequirementsRepository:
     return RequirementsRepository()
+
+
+def find_installed_libs(
+    pkg_name: str, visited_set: set, package_dist: Mapping[str, List[str]]
+) -> List[dict]:
+    if pkg_name in visited_set:
+        return []
+
+    visited_set.add(pkg_name)
+    kind = check_package(pkg_name)
+    if kind != "installed":
+        return []
+
+    lib_name = package_dist.get(pkg_name)
+    if lib_name is None:
+        return []  # this should not happen
+
+    return [
+        dict(
+            name=lib,
+            version=get_distribution(lib).version,
+        )
+        for lib in lib_name
+    ]
