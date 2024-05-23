@@ -4,16 +4,20 @@ import unittest
 from collections import deque
 from json import dumps, loads
 
-from abstra_internals.execution.execution import RequestData
-from abstra_internals.execution.form_execution import FormExecution
-from abstra_internals.execution.stoppable_thread import StoppableThread
-from abstra_internals.repositories.project.project import FormStage
-from abstra_internals.stdio_monkey_patch import override_stdio
+from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.execution_client import BasicClient
+from abstra_internals.entities.execution import RequestContext
+from abstra_internals.repositories import (
+    execution_repository,
+    stage_run_repository,
+)
+from abstra_internals.repositories.project.project import FormStage, ProjectRepository
+from abstra_internals.stdio_patcher import StdioPatcher
 
-override_stdio(print_exceptions=True)
+StdioPatcher.apply(debug=True)
 
 
-class MockConnection:
+class MockWebSocket:
     msgs: queue.Queue
 
     def __init__(self, browser_msgs) -> None:
@@ -39,7 +43,7 @@ class MockConnection:
 
 
 def iter_messages(
-    conn: MockConnection, msgs: typing.Deque[list], test_case: unittest.TestCase
+    conn: MockWebSocket, msgs: typing.Deque[list], test_case: unittest.TestCase
 ):
     while True:
         yield
@@ -68,19 +72,21 @@ def assert_form(
 ):
     msgs: typing.Deque[list] = deque(msg_list)
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
-    conn = MockConnection(browser_msgs)
+    ws = MockWebSocket(browser_msgs)
 
-    request_data = RequestData(body="{}", headers={}, method="GET", query_params={})
-    execution = FormExecution(
+    request_data = RequestContext(body="{}", headers={}, method="GET", query_params={})
+
+    controller = ExecutionController(
         stage=form_json,
-        is_initial=True,
-        connection=conn,  # type: ignore
+        target_stage_run_id=None,
         request=request_data,
-        execution_id=execution_id,
-    )  # type: ignore
+        project_repository=ProjectRepository,
+        execution_repository=execution_repository,
+        stage_run_repository=stage_run_repository,
+        client=BasicClient(),
+    )
 
-    thread = StoppableThread(target=execution.run, args=())
-    thread.start()
+    controller.run()
 
-    for msg in iter_messages(conn, msgs, test_case):
+    for msg in iter_messages(ws, msgs, test_case):
         pass

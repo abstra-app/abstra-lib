@@ -2,13 +2,13 @@ from pathlib import Path
 from unittest import TestCase
 
 from abstra_internals.server.controller.main import MainController
-from tests.fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
 class TestRequirementsApi(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        self.client = get_local_client()
+        self.client = get_editor_flask_client()
         self.controller = MainController()
 
     def tearDown(self) -> None:

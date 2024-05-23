@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
@@ -7,7 +8,6 @@ from abstra_internals.repositories.project.project import (
     WorkflowTransition,
 )
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from abstra_internals.server.workflow_engine import workflow_engine
 
 
 class ActionTransitionsTest(TestCase):

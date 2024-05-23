@@ -1,4 +1,5 @@
 import sys
+import traceback
 from typing import Literal
 
 import pkg_resources
@@ -15,7 +16,7 @@ class DevSDK:
     @classmethod
     def capture_exception(cls, exception: Exception):
         print("[ABSTRA_LOGGER] Exception captured:", file=sys.stderr)
-        raise exception
+        traceback.print_exception(type(exception), exception, exception.__traceback__)
 
     @classmethod
     def capture_message(cls, message):
@@ -40,7 +41,7 @@ class AbstraLogger:
                 shutdown_timeout=0,
             )
         except Exception:
-            print("Error reporting has been turned off.")
+            print("[ABSTRA_LOGGER]Error reporting has been turned off.")
 
     @classmethod
     def capture_exception(cls, exception: Exception):

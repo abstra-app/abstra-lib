@@ -6,7 +6,7 @@ from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.widgets.apis import get_random_filepath
 from abstra_internals.widgets.file_utils import convert_file
-from tests.fixtures import clear_dir, get_cloud_client, init_dir
+from tests.fixtures import clear_dir, get_cloud_flask_client, init_dir
 
 
 class TestFileSending(unittest.TestCase):
@@ -64,7 +64,7 @@ class TestFileUtils(unittest.TestCase):
 class TestFileUpload(unittest.TestCase):
     def setUp(self) -> None:
         self.path = init_dir()
-        self.app = get_cloud_client()
+        self.app = get_cloud_flask_client()
 
     def tearDown(self) -> None:
         clear_dir(self.path)

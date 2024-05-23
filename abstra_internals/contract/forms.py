@@ -29,7 +29,6 @@ PythonMessageType = Literal[
     "auth:valid-jwt",
     "redirect:request",
     "execute-js:request",
-    "env:files-changed",
 ]
 
 MessageType = Union[BrowserMessageTypes, PythonMessageType]
@@ -89,13 +88,6 @@ class ExecuteJSRequestMessage(Message):
         super().__init__({"code": code, "context": context})
 
 
-class FilesChangedMessage(Message):
-    type = "env:files-changed"
-
-    def __init__(self):
-        super().__init__({})
-
-
 class ExecutionLockFailedMessage(Message):
     type = "execution:lock-failed"
 
@@ -147,7 +139,7 @@ class FormMountPageMessage(Message):
         actions: List,
         end_program: bool,
         reactive_polling_interval: int,
-        steps: List,
+        steps: Optional[List],
     ):
         super().__init__(
             {

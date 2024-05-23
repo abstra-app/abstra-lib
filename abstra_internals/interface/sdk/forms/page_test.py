@@ -1,9 +1,22 @@
 import unittest
 
 from abstra.forms import ListItemSchema, Page
+from abstra_internals.controllers.execution_client import (
+    ExecutionClientStore,
+    FormClient,
+)
 
 
 class TestPage(unittest.TestCase):
+    def setUp(self) -> None:
+        self.client = FormClient(None, {})  # type: ignore
+        ExecutionClientStore.set(self.client)
+        return super().setUp()
+
+    def tearDown(self) -> None:
+        ExecutionClientStore.clear()
+        return super().tearDown()
+
     def test_reactive_list_dropdown(self):
         schema = ListItemSchema().read_dropdown("dropdown", ["foo", "bar"])
 

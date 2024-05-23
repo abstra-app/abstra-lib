@@ -1,12 +1,7 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 
-from abstra_internals.execution.execution import Execution
-from abstra_internals.execution.job_execution import JobExecution
-from abstra_internals.execution.script_execution import ScriptExecution
-from abstra_internals.execution.stage_run_manager import (
-    AttachedStageRunManager,
-    UnsetStageRun,
-)
+from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.repositories import (
     execution_logs_repository,
     execution_repository,
@@ -34,29 +29,40 @@ from abstra_internals.threaded import threaded
 class WorkflowEngine:
     def __init__(
         self,
-        stage_run_repo: StageRunRepository,
+        stage_run_repository: StageRunRepository,
         execution_repository: ExecutionRepository,
         execution_logs_repository: ExecutionLogsRepository,
         notification_repository: NotificationRepository,
+        project_repository: Type[ProjectRepository],
     ):
-        self.stage_run_repo = stage_run_repo
+        self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
         self.execution_logs_repository = execution_logs_repository
         self.notification_repository = notification_repository
-        self.stage_run_manager = AttachedStageRunManager(stage_run_repo)
+        self.project_repository = project_repository
 
-    def handle_execution_end(self, execution: Execution):
-        if not execution.stage_run:
-            raise UnsetStageRun()
+    def handle_pthread_execution_end(self):
+        dto = self.execution_repository.get_current()
 
-        stage = execution.stage
-        status = execution.status
-        stage_run = execution.stage_run
+        if not dto:
+            raise Exception("Execution not found for this pthread")
+
+        project = ProjectRepository.load()
+
+        stage = project.get_action(dto["stage_id"])
+
+        if not stage:
+            raise Exception(f"Stage {dto['stage_id']} not found")
+
+        stage_run = self.stage_run_repository.get(dto["stage_run_id"])
+        status = dto["status"]
 
         transition_type = f"{stage.type_name}s:{status}"
         next_stage_run_dtos = self._follow_action_transitions(
             stage, stage_run, transition_type
         )
+
+        self.execution_repository.free_current()
         self._pub(stage_run, next_stage_run_dtos)
 
     def _get_stage(self, id: str) -> Optional[WorkflowStage]:
@@ -138,7 +144,7 @@ class WorkflowEngine:
         # As we don't have a queue yet, we just create the next stage runs
         # and consume them immediatelly
 
-        for stage_run in self.stage_run_repo.create_next(
+        for stage_run in self.stage_run_repository.create_next(
             parent_stage_run, stage_run_dtos
         ):
             self._send_waiting_thread_notification(stage_run)
@@ -157,31 +163,46 @@ class WorkflowEngine:
 
     @threaded
     def run_job(self, stage: JobStage):
-        execution = JobExecution(
-            stage,
-            stage_run_manager=self.stage_run_manager,
+        execution_controller = ExecutionController(
+            stage=stage,
+            target_stage_run_id=None,
+            stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-            execution_logs_repository=self.execution_logs_repository,
+            project_repository=self.project_repository,
+            request=None,
+            client=BasicClient(),
         )
-        execution.run()
-        self.handle_execution_end(execution)
+
+        execution_dto = execution_controller.run()
+
+        if not execution_dto:
+            return
+
+        self.handle_pthread_execution_end()
 
     @threaded
     def run_script(self, stage: ScriptStage, stage_run: StageRun):
-        execution = ScriptExecution(
-            stage,
-            stage_run_id=stage_run.id,
-            stage_run_manager=self.stage_run_manager,
+        execution_controller = ExecutionController(
+            stage=stage,
+            target_stage_run_id=stage_run.id,
+            stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-            execution_logs_repository=self.execution_logs_repository,
+            project_repository=self.project_repository,
+            request=None,
+            client=BasicClient(),
         )
-        execution.run()
-        self.handle_execution_end(execution)
+
+        execution_dto = execution_controller.run()
+
+        if not execution_dto:
+            return
+
+        self.handle_pthread_execution_end()
 
     @threaded
     def run_control(self, stage: ControlStage, stage_run: StageRun):
         next_stage_run_dtos: List[Dict] = []
-        self.stage_run_repo.change_state(stage_run.id, "running")
+        self.stage_run_repository.change_status(stage_run.id, "running")
 
         if isinstance(stage, ConditionStage):
             next_stage_run_dtos = self._follow_condition_transitions(stage, stage_run)
@@ -189,7 +210,7 @@ class WorkflowEngine:
         if isinstance(stage, IteratorStage):
             next_stage_run_dtos = self._follow_iterator_transitions(stage, stage_run)
 
-        self.stage_run_repo.change_state(stage_run.id, "finished")
+        self.stage_run_repository.change_status(stage_run.id, "finished")
         self._pub(stage_run, next_stage_run_dtos)
 
 
@@ -199,6 +220,7 @@ def factory():
         execution_repository,
         execution_logs_repository,
         notification_repository,
+        ProjectRepository,
     )
 
 

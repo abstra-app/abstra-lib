@@ -1,26 +1,26 @@
 import unittest
 from os.path import join
 
-from abstra_internals.server.controller.main import MainController
-from tests.fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
 class TestWorkspace(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        self.client = get_local_client()
+        self.client = get_editor_flask_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
 
     def test_api_update(self):
-        controller = MainController()
-
-        controller.update_workspace({"name": "test-workspace-updated"})
-
-        workspace = controller.get_workspace()
-
-        self.assertEqual(workspace.name, "test-workspace-updated")
+        self.client.put(
+            "/_editor/api/workspace",
+            json={"name": "test-workspace-updated", "brand_name": "test-brand-name"},
+        )
+        workspace = self.client.get("/_editor/api/workspace").get_json()
+        print(workspace)
+        self.assertEqual(workspace["name"], "test-workspace-updated")
+        self.assertEqual(workspace["brand_name"], "test-brand-name")
 
     def test_list_files(self):
         res = self.client.get("/_editor/api/workspace/files")
@@ -42,18 +42,6 @@ class TestWorkspace(unittest.TestCase):
             res.json,
             [dict(path=join("subdir", "test.txt"), name="test.txt", type="file")],
         )
-
-    # def test_list_dirs(self):
-    #     (self.root / "subdir").mkdir()
-
-    #     res = self.client.get("/_editor/api/workspace/files")
-    #     if res.json is None:
-    #         raise Exception("No json response")
-
-    #     self.assertIn(
-    #         dict(path="abstra.json", name="abstra.json", type="file"), res.json
-    #     )
-    #     self.assertIn(dict(path="subdir", name="subdir", type="dir"), res.json)
 
     def test_shallow_module_mode(self):
         (self.root / "subdir").mkdir()

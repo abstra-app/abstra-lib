@@ -30,13 +30,13 @@ def init_dir(path: typing.Optional[Path] = None):
     return path
 
 
-def get_local_client():
+def get_editor_flask_client():
     controller = MainController()
     app = get_local_app(controller)
     return app.test_client()
 
 
-def get_cloud_client():
+def get_cloud_flask_client():
     controller = MainController()
     app = get_cloud_app(controller)
     return app.test_client()

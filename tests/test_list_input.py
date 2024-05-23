@@ -2,6 +2,10 @@ import unittest
 from unittest.mock import ANY
 
 from abstra.forms import ListItemSchema, Page
+from abstra_internals.controllers.execution_client import (
+    ExecutionClientStore,
+    FormClient,
+)
 from abstra_internals.widgets.library import ListInput
 
 default_text_input = {
@@ -22,6 +26,12 @@ default_text_input = {
 class TestListInput(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
+        self.form_client = FormClient(None, {})  # type: ignore
+        ExecutionClientStore.set(self.form_client)
+
+    def tearDown(self) -> None:
+        ExecutionClientStore.clear()
+        return super().tearDown()
 
     def test_empty_case(self):
         schema = ListItemSchema().read("foo")

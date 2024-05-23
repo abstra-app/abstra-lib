@@ -1,7 +1,7 @@
 import unittest
 
 from abstra.forms import display
-from abstra_internals.execution.execution import NoExecutionFound
+from abstra_internals.interface.sdk.user_exceptions import UnboundSDK
 from abstra_internals.server.controller.main import MainController
 from tests.fixtures import clear_dir, init_dir
 
@@ -38,5 +38,5 @@ class TestForms(unittest.TestCase):
             )
 
     def test_raises_exception_on_running_directly(self):
-        with self.assertRaises(NoExecutionFound):
+        with self.assertRaises(UnboundSDK):
             display("test")

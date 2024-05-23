@@ -19,7 +19,6 @@ from abstra_internals.credentials import (
     resolve_headers,
     set_credentials,
 )
-from abstra_internals.execution.execution import Execution
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.repositories import (
     execution_logs_repository,
@@ -435,9 +434,3 @@ class MainController:
 
     def get_file(self, path: str):
         return internal_path(path)
-
-    def abort_execution(self, id: str):
-        execution = Execution.get_execution_by_id(id)
-        if execution:
-            # execution.stop()
-            pass

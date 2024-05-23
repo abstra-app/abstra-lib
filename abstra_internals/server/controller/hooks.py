@@ -2,24 +2,23 @@ import json
 
 import flask
 
-from abstra_internals.execution.execution import RequestData
-from abstra_internals.execution.hook_execution import HookExecution
-from abstra_internals.execution.stage_run_manager import (
-    AttachedStageRunManager,
-    DetachedStageRunManager,
+from abstra_internals.controllers.execution import (
+    STAGE_RUN_ID_PARAM_KEY,
+    ExecutionController,
 )
+from abstra_internals.controllers.execution_client import HookClient
+from abstra_internals.controllers.workflow import workflow_engine
+from abstra_internals.entities.execution import RequestContext
 from abstra_internals.repositories import (
     execution_logs_repository,
     execution_repository,
     stage_run_repository,
 )
-from abstra_internals.repositories.execution_logs import get_logs_output
 from abstra_internals.repositories.project.project import ProjectRepository
-from abstra_internals.repositories.stage_run import stage_run_repository_factory
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.server.workflow_engine import workflow_engine
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
+from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_editor_bp(controller: MainController):
@@ -78,36 +77,37 @@ def get_editor_bp(controller: MainController):
         if not hook:
             flask.abort(404)
 
-        request_data = RequestData(
+        request_context = RequestContext(
             method=flask.request.method,
             body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
+            headers=filter_non_string_values(flask.request.headers),
             query_params=flask.request.args,
         )
 
-        project = ProjectRepository.load()
-        is_initial = project.is_initial(hook)
+        client = HookClient(request_context)
 
-        stage_run_manager = AttachedStageRunManager(stage_run_repository)
-
-        execution = HookExecution(
-            hook,
-            is_initial,
-            request_data,
+        execution_controller = ExecutionController(
+            stage=hook,
+            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
+            stage_run_repository=stage_run_repository,
             execution_repository=execution_repository,
-            execution_logs_repository=execution_logs_repository,
-            stage_run_manager=stage_run_manager,
+            project_repository=ProjectRepository,
+            request=request_context,
+            client=client,
         )
 
-        execution.run()
-        body, status, headers = execution.get_response()
-        workflow_engine.handle_execution_end(execution)
+        execution_dto = execution_controller.run()
+
+        if not execution_dto:
+            return flask.abort(429)
+
+        workflow_engine.handle_pthread_execution_end()
 
         return {
-            "body": body,
-            "status": status,
-            "headers": headers,
-            "output": get_logs_output(execution_logs_repository.get(execution.id)),
+            "body": client.response["body"],
+            "status": client.response["status"],
+            "headers": client.response["headers"],
+            "output": execution_logs_repository.get_logs_dto(execution_dto["id"]),
         }
 
     @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
@@ -117,39 +117,36 @@ def get_editor_bp(controller: MainController):
         if not hook:
             flask.abort(404)
 
-        request_data = RequestData(
+        request_context = RequestContext(
             method=flask.request.method,
             body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
+            headers=filter_non_string_values(flask.request.headers),
             query_params=flask.request.args,
         )
 
-        data = json.loads(controller.read_test_data())
+        client = HookClient(request_context)
 
-        tmp_stage_run_repository = stage_run_repository_factory()
-
-        project = ProjectRepository.load()
-        is_initial = project.is_initial(hook)
-
-        stage_run_manager = DetachedStageRunManager(tmp_stage_run_repository, data=data)
-
-        execution = HookExecution(
-            hook,
-            is_initial,
-            request_data,
+        execution_controller = ExecutionController(
+            stage=hook,
+            request=request_context,
+            target_stage_run_id=None,
+            stage_run_repository=controller.stage_run_repository,
             execution_repository=execution_repository,
-            execution_logs_repository=execution_logs_repository,
-            stage_run_manager=stage_run_manager,
+            project_repository=ProjectRepository,
+            client=client,
         )
 
-        execution.run()
-        body, status, headers = execution.get_response()
+        thread_data = json.loads(controller.read_test_data())
+        execution_dto = execution_controller.run_detached(thread_data=thread_data)
+
+        if not execution_dto:
+            return flask.abort(429)
 
         return {
-            "body": body,
-            "status": status,
-            "headers": headers,
-            "output": get_logs_output(execution_logs_repository.get(execution.id)),
+            "body": client.response["body"],
+            "status": client.response["status"],
+            "headers": client.response["headers"],
+            "output": execution_logs_repository.get_logs_dto(execution_dto["id"]),
         }
 
     return bp

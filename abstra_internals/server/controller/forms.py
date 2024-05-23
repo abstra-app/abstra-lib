@@ -3,17 +3,19 @@ import json
 import flask
 import flask_sock
 
-from abstra_internals.execution import FormExecution
-from abstra_internals.execution.execution import RequestData
-from abstra_internals.execution.stage_run_manager import (
-    AttachedStageRunManager,
-    DetachedStageRunManager,
+from abstra_internals.controllers.execution import (
+    STAGE_RUN_ID_PARAM_KEY,
+    ExecutionController,
 )
+from abstra_internals.controllers.execution_client import FormClient
+from abstra_internals.controllers.workflow import workflow_engine
+from abstra_internals.entities.execution import RequestContext
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories import stage_run_repository_factory
+from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
+from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_editor_bp(controller: MainController):
@@ -21,49 +23,54 @@ def get_editor_bp(controller: MainController):
     sock = flask_sock.Sock(bp)
 
     @sock.route("/socket")
-    def _websocket(conn: flask_sock.Server):
-        request_data = RequestData(
-            query_params=flask.request.args,
-            body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
-            method=flask.request.method,
-        )
-
+    def _websocket(ws: flask_sock.Server):
         try:
+            request_context = RequestContext(
+                query_params=flask.request.args,
+                body=flask.request.get_data(as_text=True),
+                headers=filter_non_string_values(flask.request.headers),
+                method=flask.request.method,
+            )
+
             id = flask.request.args.get("id")
             if id is None:
-                return conn.close(reason=400, message="No path")
+                return
 
             form = controller.get_form(id)
             if not form:
-                return conn.close(reason=404, message="Not found")
+                return
 
-            if flask.request.args.get("detached", default=False, type=is_it_true):
-                stage_run_repository = stage_run_repository_factory()
-                data = json.loads(controller.read_test_data())
-                stage_run_manager = DetachedStageRunManager(
-                    stage_run_repository, data=data
-                )
-            else:
-                stage_run_manager = AttachedStageRunManager(
-                    controller.stage_run_repository
-                )
+            form_client = FormClient(ws=ws, request_context=request_context)
 
-            execution = FormExecution(
-                is_initial=controller.is_initial(form.id),
-                request=request_data,
-                connection=conn,
+            execution_controller = ExecutionController(
                 stage=form,
-                execution_logs_repository=controller.execution_logs_repository,
+                client=form_client,
+                request=request_context,
+                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
                 execution_repository=controller.execution_repository,
-                stage_run_manager=stage_run_manager,
+                project_repository=ProjectRepository,
+                stage_run_repository=controller.stage_run_repository,
             )
 
-            execution.run()
+            is_detached = flask.request.args.get(
+                "detached", default=False, type=is_it_true
+            )
+
+            if is_detached:
+                thread_data = json.loads(controller.read_test_data())
+                execution_dto = execution_controller.run_detached(thread_data)
+            else:
+                execution_dto = execution_controller.run()
+
+            if not execution_dto:
+                return
+
+            if not is_detached:
+                workflow_engine.handle_pthread_execution_end()
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
-            conn.close(message="Done")
+            ws.close(message="Done")
 
     @bp.get("/")
     @usage

@@ -1,41 +1,30 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Literal, Optional
+from typing import Dict, List, Optional
 
 import requests
-from pydantic.dataclasses import dataclass
 
+from abstra_internals.entities.execution import (
+    ExecutionDTO,
+    ExecutionStatus,
+)
 from abstra_internals.environment import (
     SERVER_UUID,
     SIDECAR_HEADERS,
     SIDECAR_URL,
     WORKER_UUID,
 )
-
-ExecutionStatus = Literal["running", "lock-failed", "failed", "finished", "abandoned"]
-
-
-@dataclass
-class ExecutionDTO:
-    id: str
-    status: ExecutionStatus
-    created_at: str
-    context: Dict[str, Any]
-    stage_id: str
-    stage_run_id: Optional[str]
-
-    @staticmethod
-    def from_dict(data: dict) -> "ExecutionDTO":
-        return ExecutionDTO(
-            id=data["id"],
-            status=data["status"],
-            context=data["context"],
-            stage_id=data["stageId"],
-            created_at=data["createdAt"],
-            stage_run_id=data.get("stageRunId"),
-        )
+from abstra_internals.utils.pthread_store import PThreadStore
 
 
 class ExecutionRepository(ABC):
+    pthread_store: PThreadStore[ExecutionDTO]
+
+    def get_current(self) -> Optional[ExecutionDTO]:
+        return self.pthread_store.get()
+
+    def free_current(self) -> None:
+        self.pthread_store.clear()
+
     @abstractmethod
     def create(self, execution_dto: ExecutionDTO) -> None:
         raise NotImplementedError()
@@ -45,29 +34,46 @@ class ExecutionRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def find_for_worker(
+    def set_failure_by_id(self, execution_id: str) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
     ) -> List[ExecutionDTO]:
         raise NotImplementedError()
 
 
-class LocalExecutionRepository(ExecutionRepository):
+class EditorExecutionRepository(ExecutionRepository):
     def __init__(self):
-        self.executions: Dict[str, ExecutionDTO] = {}
+        self.pthread_store = PThreadStore()
 
     def create(self, execution_dto: ExecutionDTO) -> None:
-        self.executions[execution_dto.id] = execution_dto
+        self.pthread_store.set(execution_dto)
 
     def update(self, execution_dto: ExecutionDTO) -> None:
-        self.executions[execution_dto.id] = execution_dto
+        self.pthread_store.set(execution_dto)
 
-    def find_for_worker(
+    def set_failure_by_id(self, execution_id: str) -> None:
+        execution = next(
+            (
+                execution
+                for execution in self.pthread_store.items.values()
+                if execution["id"] == execution_id
+            ),
+            None,
+        )
+
+        if execution:
+            execution["status"] = "failed"
+
+    def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
     ) -> List[ExecutionDTO]:
         raise NotImplementedError()
 
 
-class RemoteExecutionRepository(ExecutionRepository):
+class CloudExecutionRepository(ExecutionRepository):
     def __init__(
         self,
         url: str,
@@ -75,15 +81,18 @@ class RemoteExecutionRepository(ExecutionRepository):
     ):
         self.url = url
         self.headers = headers
+        self.pthread_store = PThreadStore()
 
     def create(self, execution_dto: ExecutionDTO) -> None:
+        self.pthread_store.set(execution_dto)
+
         request_dto = dict(
-            id=execution_dto.id,
-            status=execution_dto.status,
-            createdAt=execution_dto.created_at,
-            context=execution_dto.context,
-            stageId=execution_dto.stage_id,
-            stageRunId=execution_dto.stage_run_id,
+            id=execution_dto["id"],
+            status=execution_dto["status"],
+            createdAt=execution_dto["created_at"],
+            context=execution_dto["context"] if execution_dto["context"] else {},
+            stageId=execution_dto["stage_id"],
+            stageRunId=execution_dto["stage_run_id"],
             workerId=WORKER_UUID(),
             appId=SERVER_UUID(),
         )
@@ -97,21 +106,32 @@ class RemoteExecutionRepository(ExecutionRepository):
         res.raise_for_status()
 
     def update(self, execution_dto: ExecutionDTO) -> None:
+        self.pthread_store.set(execution_dto)
+
         request_dto = dict(
-            status=execution_dto.status,
-            context=execution_dto.context,
-            stageRunId=execution_dto.stage_run_id,
+            status=execution_dto["status"],
+            context=execution_dto["context"] if execution_dto["context"] else {},
+            stageRunId=execution_dto["stage_run_id"],
         )
 
         res = requests.patch(
-            f"{self.url}/executions/{execution_dto.id}",
+            f"{self.url}/executions/{execution_dto['id']}",
             json=request_dto,
             headers=self.headers,
         )
 
         res.raise_for_status()
 
-    def find_for_worker(
+    def set_failure_by_id(self, execution_id: str) -> None:
+        res = requests.patch(
+            f"{self.url}/executions/{execution_id}",
+            json=dict(status="failed"),
+            headers=self.headers,
+        )
+
+        res.raise_for_status()
+
+    def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
     ) -> List[ExecutionDTO]:
         res = requests.get(
@@ -125,14 +145,25 @@ class RemoteExecutionRepository(ExecutionRepository):
         )
 
         res.raise_for_status()
-        return [ExecutionDTO.from_dict(execution) for execution in res.json()]
+
+        return [
+            ExecutionDTO(
+                id=cloud_dto["id"],
+                status=cloud_dto["status"],
+                created_at=cloud_dto["createdAt"],
+                stage_id=cloud_dto["stageId"],
+                stage_run_id=cloud_dto["stageRunId"],
+                context=cloud_dto["context"],
+            )
+            for cloud_dto in res.json()
+        ]
 
 
 def execution_repository_factory() -> ExecutionRepository:
     if SIDECAR_URL:
-        return RemoteExecutionRepository(
+        return CloudExecutionRepository(
             url=SIDECAR_URL,
             headers=SIDECAR_HEADERS,
         )
     else:
-        return LocalExecutionRepository()
+        return EditorExecutionRepository()

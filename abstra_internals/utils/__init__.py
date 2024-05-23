@@ -14,8 +14,16 @@ def serialize(obj, **kwargs):
     return simplejson.dumps(obj, ignore_nan=True, **kwargs)
 
 
-def deserialize(st):
+def deserialize(st) -> object:
     return simplejson.loads(st)
+
+
+def is_json_serializable(value):
+    try:
+        serialize(value)
+        return True
+    except TypeError:
+        return False
 
 
 def is_serializable(st):
