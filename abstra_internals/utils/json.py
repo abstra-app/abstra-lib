@@ -3,8 +3,8 @@ from dataclasses import is_dataclass
 from datetime import date, datetime
 from uuid import UUID
 
-from abstra_internals.interface.sdk.forms.page_response import PageResponse
-from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra_internals.entities.forms.page_response import PageResponse
+from abstra_internals.entities.forms.steps_response import StepsResponse
 from abstra_internals.utils import serialize
 from abstra_internals.widgets.response_types import FileResponse, PhoneResponse
 

@@ -1,21 +1,25 @@
 import unittest
 from collections import deque
-from threading import get_ident
+
+import simplejson
 
 from abstra.forms import Page
-from abstra_internals.execution import Execution, FormExecution
+from abstra_internals.controllers.execution_client import (
+    ExecutionClientStore,
+    FormClient,
+)
 
 
-class MockFormExecution(FormExecution):
+class MockWS:
     def __init__(self):
         self.browser_messages = deque([])
         self.python_messages = deque([])
 
     def send(self, python_message):
-        self.python_messages.append(python_message)
+        self.python_messages.append(simplejson.loads(python_message))
 
     def receive(self):
-        return self.browser_messages.popleft()
+        return simplejson.dumps(self.browser_messages.popleft())
 
     def add_browser_message(self, message):
         self.browser_messages.append(message)
@@ -23,11 +27,15 @@ class MockFormExecution(FormExecution):
 
 class TestReactive(unittest.TestCase):
     def setUp(self):
-        self.mock = MockFormExecution()
-        Execution.executions[get_ident()] = self.mock
+        self.mock_ws = MockWS()
+        self.form_client = FormClient(self.mock_ws, {})  # type: ignore
+        ExecutionClientStore.set(self.form_client)
+
+    def tearDown(self) -> None:
+        ExecutionClientStore.clear()
 
     def test_rendering_with_static_part_initial_value(self):
-        self.mock.add_browser_message(
+        self.mock_ws.add_browser_message(
             {"type": "form:page-response", "payload": {"a": "1", "b": "2"}}
         )
 
@@ -37,8 +45,8 @@ class TestReactive(unittest.TestCase):
         ans = Page().read("a", initial_value="x").reactive(render).run()
 
         # Checking python sent message
-        self.assertEqual(len(self.mock.python_messages), 1)
-        widgets = self.mock.python_messages[0].data["widgets"]
+        self.assertEqual(len(self.mock_ws.python_messages), 1)
+        widgets = self.mock_ws.python_messages[0]["widgets"]
         self.assertEqual(widgets[0]["errors"], [])
         self.assertEqual(widgets[0]["value"], "x")
         self.assertEqual(widgets[1]["errors"], [])

@@ -3,8 +3,6 @@ import threading
 import time
 from datetime import datetime
 
-from abstra_internals.contract.forms import FilesChangedMessage
-from abstra_internals.execution.form_execution import FormExecution
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.modules import reload_project_local_modules
 from abstra_internals.repositories.project.project import Project, ProjectRepository
@@ -27,7 +25,6 @@ def reload_files_on_change(project: Project, last_change: float):
 
     try:
         reload_project_local_modules()
-        FormExecution.broadcast(FilesChangedMessage())
         return True
     except Exception as e:
         AbstraLogger.capture_exception(e)

@@ -3,7 +3,7 @@ import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Mapping, Optional, Union
+from typing import Any, Dict, List, Literal, Mapping, Optional, Union
 
 import requests
 from pydantic import ConfigDict, Field
@@ -14,9 +14,13 @@ from abstra_internals.utils.datetime import from_utc_iso_string
 from abstra_internals.utils.filter import FilterCondition, evaluate_filter_condition
 from abstra_internals.utils.validate import validate_json
 
+Status = Literal["waiting", "running", "finished", "failed", "abandoned"]
+
 end_status = ["failed", "finished", "abandoned"]
 
-status_transitions = {
+end_status: List[Status] = ["failed", "finished", "abandoned"]
+
+status_transitions: Dict[Status, List[Status]] = {
     "waiting": ["running"],
     "running": end_status,
 }
@@ -59,7 +63,7 @@ class GetStageRunByQueryFilter:
     stage: Optional[Union[str, List[str]]] = None
     assignee: Optional[str] = None
     parent_id: Optional[str] = None
-    status: Optional[List[str]] = None
+    status: Optional[List[Status]] = None
     data: Optional[Dict] = None
     search: Optional[str] = None
     data_conditions: Optional[FilterCondition] = None
@@ -85,7 +89,7 @@ class StageRun:
     id: str
     stage: str
     data: dict
-    status: str
+    status: Status
     created_at: datetime = Field(serialization_alias="createdAt")
     updated_at: datetime = Field(default=None, serialization_alias="updatedAt")
     parent_id: Optional[str] = Field(default=None, serialization_alias="parentId")
@@ -145,6 +149,10 @@ class StageRun:
         return new_stage_run
 
 
+class DetachedStageRun(StageRun):
+    pass
+
+
 class StageRunRepository(ABC):
     valid_filter_keys = ["data", "stage", "status", "parent_id"]
 
@@ -164,7 +172,9 @@ class StageRunRepository(ABC):
         return next_dtos
 
     @abstractmethod
-    def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
+    def find(
+        self, filter: GetStageRunByQueryFilter, filter_detached: Optional[bool] = True
+    ) -> List[StageRun]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -190,13 +200,21 @@ class StageRunRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def change_state(
-        self, id: str, status: str, execution_id: Optional[str] = None
+    def change_status(
+        self, id: str, status: Status, execution_id: Optional[str] = None
     ) -> bool:
         raise NotImplementedError()
 
     @abstractmethod
     def create_initial(self, stage: str, data: dict = {}) -> StageRun:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_detached(self, stage_id: str, thread_data: dict = {}) -> StageRun:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def remove(self, id: str) -> None:
         raise NotImplementedError()
 
     @abstractmethod
@@ -220,6 +238,27 @@ class StageRunRepository(ABC):
     def update_data(self, stage_run_id: str, data: dict) -> bool:
         raise NotImplementedError()
 
+    def get_not_abandoned_stage_run(
+        self, stage_run: StageRun, stage_id: str
+    ) -> StageRun:
+        if stage_run.status != "abandoned":
+            return stage_run
+
+        filter = GetStageRunByQueryFilter()
+        filter.parent_id = stage_run.id
+        filter.stage = stage_id
+
+        next_matches = self.find(filter)
+
+        assert (
+            len(next_matches) == 1
+        ), "Internal error: abandoned stage run does not have exactly one child"
+
+        return self.get_not_abandoned_stage_run(next_matches[0], stage_id)
+
+    def acquire_lock(self, stage_run_id: str, execution_id: str) -> bool:
+        return self.change_status(stage_run_id, "running", execution_id)
+
 
 class LocalStageRunRepository(StageRunRepository):
     _stage_runs: List[StageRun]
@@ -239,10 +278,15 @@ class LocalStageRunRepository(StageRunRepository):
 
         raise Exception(f"StageRun with id {id} not found")
 
-    def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
+    def find(
+        self, filter: GetStageRunByQueryFilter, filter_detached: Optional[bool] = True
+    ) -> List[StageRun]:
         results: List[StageRun] = []
 
         for stage_run in self._stage_runs:
+            if isinstance(stage_run, DetachedStageRun) and filter_detached:
+                continue
+
             if filter.stage and stage_run.stage not in filter.stage:
                 continue
 
@@ -266,6 +310,11 @@ class LocalStageRunRepository(StageRunRepository):
             results.append(stage_run)
 
         return results
+
+    def remove(self, id: str) -> None:
+        self._stage_runs = [
+            stage_run for stage_run in self._stage_runs if stage_run.id != id
+        ]
 
     def _compare_data(self, data: dict, filter: dict) -> bool:
         for key, value in filter.items():
@@ -353,6 +402,21 @@ class LocalStageRunRepository(StageRunRepository):
 
         return stage_run
 
+    def create_detached(self, stage_id: str, thread_data: dict = {}) -> StageRun:
+        stage_run = DetachedStageRun(
+            id=str(uuid.uuid4()),
+            status="waiting",
+            stage=stage_id,
+            data=thread_data,
+            parent_id=None,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+
+        self._stage_runs.append(stage_run)
+
+        return stage_run
+
     def create_next(self, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         created = []
         for dto in self.hydrate_next_dto(parent, dtos):
@@ -368,8 +432,8 @@ class LocalStageRunRepository(StageRunRepository):
             self._stage_runs.append(stage_run)
         return created
 
-    def change_state(
-        self, id: str, status: str, execution_id: Optional[str] = None
+    def change_status(
+        self, id: str, status: Status, execution_id: Optional[str] = None
     ) -> bool:
         stage_run = self.get(id)
         stage_run.updated_at = datetime.now()
@@ -473,7 +537,9 @@ class RemoteStageRunRepository(StageRunRepository):
         r = self._request("GET", path=f"/{id}")
         return self.create_from_dto(r.json())
 
-    def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
+    def find(
+        self, filter: GetStageRunByQueryFilter, filter_detached: Optional[bool] = True
+    ) -> List[StageRun]:
         r = self._request("GET", path="/", params=filter.to_dict())
         return [self.create_from_dto(dto) for dto in r.json()]
 
@@ -486,6 +552,12 @@ class RemoteStageRunRepository(StageRunRepository):
         r = self._request("POST", path="/", body=body)
         return self.create_from_dto(r.json())
 
+    def create_detached(self, stage_id: str, thread_data: dict = {}) -> StageRun:
+        raise Exception("Attempt to create detached stage run in remote repository")
+
+    def remove(self, id: str) -> None:
+        raise Exception("Attempt to remove stage run in remote repository")
+
     def create_next(self, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         if len(dtos) == 0:
             return []
@@ -495,7 +567,7 @@ class RemoteStageRunRepository(StageRunRepository):
         r = self._request("PUT", path=f"/{parent_id}/children", body=next_dtos)
         return [self.create_from_dto(dto) for dto in r.json()]
 
-    def change_state(
+    def change_status(
         self, id: str, status: str, execution_id: Optional[str] = None
     ) -> bool:
         r = self._request(

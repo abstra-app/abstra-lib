@@ -157,6 +157,7 @@ class HookStage:
     workflow_position: Tuple[float, float]
     is_initial: bool = True
     enabled: bool = False
+    type_name: Literal["hook"] = "hook"
 
     @staticmethod
     def from_dict(dto: dict):
@@ -191,10 +192,6 @@ class HookStage:
             workflow_transitions=[],
             workflow_position=workflow_position,
         )
-
-    @property
-    def type_name(self):
-        return "hook"
 
     @property
     def admin_dto(self):
@@ -257,6 +254,7 @@ class ScriptStage:
     workflow_transitions: List[WorkflowTransition]
     workflow_position: Tuple[float, float]
     is_initial: bool = True
+    type_name: Literal["script"] = "script"
 
     @staticmethod
     def create(
@@ -288,10 +286,6 @@ class ScriptStage:
                 WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
         )
-
-    @property
-    def type_name(self):
-        return "script"
 
     @property
     def admin_dto(self):
@@ -373,6 +367,7 @@ class JobStage:
     schedule: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
+    type_name: Literal["job"] = "job"
 
     is_initial = True
 
@@ -406,10 +401,6 @@ class JobStage:
                 WorkflowTransition.from_dict(t) for t in data["transitions"]
             ],
         )
-
-    @property
-    def type_name(self):
-        return "job"
 
     @property
     def admin_dto(self):
@@ -477,6 +468,8 @@ class FormStage:
         default_factory=lambda: AccessSettings(is_public=True, required_roles=[])
     )
 
+    type_name: Literal["form"] = "form"
+
     @staticmethod
     def create(
         title: str,
@@ -527,10 +520,6 @@ class FormStage:
             ),
             access_control=AccessSettings.from_dict(data.get("access_control", {})),
         )
-
-    @property
-    def type_name(self):
-        return "form"
 
     @property
     def admin_dto(self):

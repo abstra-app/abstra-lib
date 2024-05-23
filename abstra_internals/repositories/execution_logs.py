@@ -100,9 +100,29 @@ class UnhandledExceptionLogEntry:
 
 LogEntry = Union[StdioLogEntry, FormEventLogEntry, UnhandledExceptionLogEntry]
 LogEvent = Literal["stdout", "stderr", "form-message", "unhandled-exception"]
+LogsDTO = TypedDict("LogsDTO", {"type": str, "text": str})
 
 
 class ExecutionLogsRepository(ABC):
+    sequence: int
+
+    def get_sequence(self) -> int:
+        self.sequence += 1
+        return self.sequence
+
+    def insert_stdio(
+        self, execution_id: str, event: Literal["stdout", "stderr"], text: str
+    ):
+        self.save(
+            StdioLogEntry(
+                execution_id=execution_id,
+                created_at=datetime.now(),
+                event=event,
+                payload={"text": text},
+                sequence=self.get_sequence(),
+            )
+        )
+
     @abstractmethod
     def save(self, log_entry: LogEntry) -> None:
         raise NotImplementedError()
@@ -115,11 +135,32 @@ class ExecutionLogsRepository(ABC):
     ) -> List[LogEntry]:
         raise NotImplementedError()
 
+    def get_logs_dto(self, execution_id: str) -> List[LogsDTO]:
+        logs = self.get(execution_id)
+        output: List[LogsDTO] = []
+        for entry in logs:
+            if isinstance(entry, FormEventLogEntry):
+                continue
+
+            text = entry.payload.get("text")
+            if not text:
+                continue
+
+            if entry.event == "stdout":
+                output.append({"type": "stdout", "text": text})
+            elif entry.event == "stderr":
+                output.append({"type": "stderr", "text": text})
+            elif entry.event == "unhandled-exception":
+                output.append({"type": "stderr", "text": text})
+
+        return output
+
 
 class LocalExecutionLogsRepository(ExecutionLogsRepository):
     _logs: Dict[str, List[LogEntry]]
 
     def __init__(self):
+        self.sequence = 0
         self._logs = {}
 
     def save(self, log_entry: LogEntry) -> None:
@@ -167,6 +208,7 @@ class RemoteExecutionLogsRepository(ExecutionLogsRepository):
     def __init__(self, url: str, headers: Dict[str, str]):
         self.url = url
         self.headers = headers
+        self.sequence = 0
 
     @threaded
     def save(self, log_entry: LogEntry) -> None:
@@ -206,26 +248,3 @@ def execution_logs_repository_factory() -> ExecutionLogsRepository:
         return RemoteExecutionLogsRepository(url=SIDECAR_URL, headers=SIDECAR_HEADERS)
     else:
         return LocalExecutionLogsRepository()
-
-
-Output = TypedDict("Output", {"type": str, "text": str})
-
-
-def get_logs_output(logs: List[LogEntry]) -> List[Output]:
-    output: List[Output] = []
-    for entry in logs:
-        if isinstance(entry, FormEventLogEntry):
-            continue
-
-        text = entry.payload.get("text")
-        if not text:
-            continue
-
-        if entry.event == "stdout":
-            output.append({"type": "stdout", "text": text})
-        elif entry.event == "stderr":
-            output.append({"type": "stderr", "text": text})
-        elif entry.event == "unhandled-exception":
-            output.append({"type": "stderr", "text": text})
-
-    return output

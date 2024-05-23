@@ -19,7 +19,6 @@ from abstra_internals.linter.rules.new_version_of_abstra_available import (
 )
 from abstra_internals.linter.rules.syntax_errors import SyntaxErrors
 from abstra_internals.linter.rules.unset_get_data import UnsetGetData
-from abstra_internals.linter.rules.unset_match_thread import UnsetMatchThread
 from abstra_internals.linter.rules.venv_in_bundle import VenvInBundle
 
 rules: List[LinterRule] = [
@@ -33,6 +32,5 @@ rules: List[LinterRule] = [
     MissingEnv(),
     NewVersionOfAbstraAvailable(),
     UnsetGetData(),
-    UnsetMatchThread(),
     EnvFileChanged(),
 ]

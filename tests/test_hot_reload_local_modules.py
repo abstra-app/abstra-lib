@@ -9,7 +9,7 @@ from abstra_internals.repositories.project.project import (
     ProjectRepository,
 )
 from abstra_internals.server.fs_watcher import reload_files_on_change
-from tests.fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
 class TestHotReloadLocalModules(TestCase):
@@ -29,7 +29,7 @@ class TestHotReloadLocalModules(TestCase):
         self.project.hooks.append(hook)
         ProjectRepository.save(self.project)
 
-        self.client = get_local_client()
+        self.client = get_editor_flask_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

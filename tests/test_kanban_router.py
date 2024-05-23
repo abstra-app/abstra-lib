@@ -9,13 +9,13 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.server.controller.kanban import DataRequest, DataRequestFilter
 from abstra_internals.utils.datetime import to_utc_iso_string
-from tests.fixtures import clear_dir, get_local_client, init_dir
+from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
 class TestKanbanRouter(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        self.client = get_local_client()
+        self.client = get_editor_flask_client()
         stage_run_repository.clear()  # type: ignore
         self.stage_run_repository = stage_run_repository
         self.stage_run_repository.clear()  # type: ignore

@@ -1,6 +1,13 @@
 import flask
 import flask_sock
 
+from abstra_internals.controllers.execution import (
+    STAGE_RUN_ID_PARAM_KEY,
+    ExecutionController,
+)
+from abstra_internals.controllers.execution_client import FormClient, HookClient
+from abstra_internals.controllers.workflow import workflow_engine
+from abstra_internals.entities.execution import RequestContext
 from abstra_internals.environment import (
     BUILD_ID,
     OIDC_AUTHORITY,
@@ -8,11 +15,9 @@ from abstra_internals.environment import (
     SHOW_WATERMARK,
     SIDECAR_SHARED_TOKEN,
 )
-from abstra_internals.execution import FormExecution, HookExecution
-from abstra_internals.execution.execution import RequestData
-from abstra_internals.execution.stage_run_manager import AttachedStageRunManager
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories import users_repository
+from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller import (
     access_control as access_control_controller,
 )
@@ -30,9 +35,9 @@ from abstra_internals.server.guards.role_guard import (
     QueryArgSelector,
 )
 from abstra_internals.server.utils import send_from_dist
-from abstra_internals.server.workflow_engine import workflow_engine
 from abstra_internals.settings import Settings
 from abstra_internals.utils import check_is_url
+from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_player_bp(controller: MainController):
@@ -94,40 +99,43 @@ def get_player_bp(controller: MainController):
 
     @sock.route("/_socket")
     @guard.socket_by(QueryArgSelector("id"))
-    def _websocket(conn: flask_sock.Server):
-        request_data = RequestData(
+    def _websocket(ws: flask_sock.Server):
+        request_context = RequestContext(
             query_params=flask.request.args,
             body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
+            headers=filter_non_string_values(flask.request.headers),
             method=flask.request.method,
         )
 
         try:
+            form_client = FormClient(ws=ws, request_context=request_context)
             id = flask.request.args.get("id")
             if id is None:
-                return conn.close(reason=400, message="No path")
-
+                return
             form = controller.get_form(id)
             if not form:
-                return conn.close(reason=404, message="Not found")
+                return
 
-            stage_run_manager = AttachedStageRunManager(controller.stage_run_repository)
-            execution = FormExecution(
-                is_initial=controller.is_initial(form.id),
-                request=request_data,
-                connection=conn,
+            execution_controller = ExecutionController(
                 stage=form,
-                execution_logs_repository=controller.execution_logs_repository,
+                client=form_client,
+                request=request_context,
+                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
+                stage_run_repository=controller.stage_run_repository,
                 execution_repository=controller.execution_repository,
-                stage_run_manager=stage_run_manager,
+                project_repository=ProjectRepository,
             )
 
-            execution.run()
-            workflow_engine.handle_execution_end(execution)
+            execution_dto = execution_controller.run()
+
+            if not execution_dto:
+                return
+
+            workflow_engine.handle_pthread_execution_end()
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
-            conn.close(message="Done")
+            ws.close(message="Done")
 
     @bp.put("/_files")
     def _upload_file():
@@ -182,28 +190,40 @@ def get_player_bp(controller: MainController):
         if not hook.file:
             flask.abort(500)
 
-        request_data = RequestData(
+        request_context = RequestContext(
             query_params=flask.request.args,
             body=flask.request.get_data(as_text=True),
-            headers=flask.request.headers,
+            headers=filter_non_string_values(flask.request.headers),
             method=flask.request.method,
         )
 
-        stage_run_manager = AttachedStageRunManager(controller.stage_run_repository)
-        execution = HookExecution(
-            is_initial=controller.is_initial(hook.id),
-            request=request_data,
+        client = HookClient(request_context)
+
+        execution_controller = ExecutionController(
             stage=hook,
-            execution_logs_repository=controller.execution_logs_repository,
+            request=request_context,
+            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
+            stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
-            stage_run_manager=stage_run_manager,
+            project_repository=ProjectRepository,
+            client=client,
         )
 
-        execution.run()
-        workflow_engine.handle_execution_end(execution)
+        execution_dto = execution_controller.run()
 
-        body, status, headers = execution.get_response()
-        return flask.Response(status=status, headers=headers, response=body)
+        if not execution_dto:
+            return flask.Response(
+                status=423,
+                response="This thread is already running.",
+            )
+
+        workflow_engine.handle_pthread_execution_end()
+
+        return flask.Response(
+            status=client.response["status"],
+            response=client.response["body"],
+            headers=client.response["headers"],
+        )
 
     @bp.get("/_jobs")
     def list_jobs():
@@ -229,13 +249,6 @@ def get_player_bp(controller: MainController):
 
         workflow_engine.run_job(job)
         return {"status": "running"}
-
-    @bp.delete("/_executions/<string:execution_id>")
-    def abort_execution(execution_id):
-        if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
-            flask.abort(401)
-        controller.abort_execution(execution_id)
-        return {"status": "deleted"}
 
     @bp.get("/")
     def index():

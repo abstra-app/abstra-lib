@@ -11,12 +11,12 @@ from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.apps import get_cloud_app
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import SettingsController
-from abstra_internals.stdio_monkey_patch import override_stdio
+from abstra_internals.stdio_patcher import StdioPatcher
 
 
 def run():
     AbstraLogger.init("cloud")
-    override_stdio(print_exceptions=True)
+    StdioPatcher.apply(debug=True)
     SettingsController.set_root_path(".")  # TODO: use CWD
     SettingsController.set_server_port(DEFAULT_PORT)
 

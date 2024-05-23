@@ -1,55 +1,30 @@
-from typing import Optional
+from typing import Dict, Optional, Union
 
-from abstra_internals.execution.execution import get_current_execution_throwable
-from abstra_internals.execution.hook_execution import HookExecution
-from abstra_internals.execution.stage_run_manager import UnsetStageRun
-from abstra_internals.repositories.stage_run import GetStageRunByQueryFilter
-from abstra_internals.utils import serialize
-from abstra_internals.utils.json import to_json_serializable
+from abstra_internals.controllers.sdk import WorkflowSDKController
+from abstra_internals.repositories import execution_repository, stage_run_repository
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.utils import is_json_serializable
 
 
-def is_json_serializable(value):
-    try:
-        serialize(value)
-        return True
-    except TypeError:
-        return False
-
-
-def match_thread(filter: dict):
-    execution = get_current_execution_throwable()
-    if not isinstance(execution, HookExecution):
-        raise Exception("match_thread may only be used inside a hook")
-    stage_id = execution.stage.id
-    stage_runs = execution.stage_run_manager.find(
-        filter=GetStageRunByQueryFilter(stage=stage_id, data=filter, status=["waiting"])
+def get_data(key: Optional[str] = None) -> Union[Dict[str, object], object]:
+    sdk_controller = WorkflowSDKController(
+        stage_run_repository=stage_run_repository,
+        execution_repository=execution_repository,
+        project_repository=ProjectRepository(),
     )
-    if len(stage_runs) == 0:
-        raise Exception(f"No thread found for {filter}")
-    stage_run = stage_runs[0]
-    execution.set_stage_run(stage_run.id)
-    if execution.status == "lock-failed":
-        raise Exception("Failed to lock execution")
+    return sdk_controller.get_data(key)
 
 
-def get_data(key: Optional[str] = None):
-    execution = get_current_execution_throwable()
-    stage_run = execution.stage_run
-    if not stage_run:
-        raise UnsetStageRun()
-    return stage_run.data.get(key) if key else stage_run.data
-
-
-def set_data(key, value):
-    value = to_json_serializable(value)
+def set_data(key: str, value: object):
     if not is_json_serializable(value):
-        raise TypeError(f"{key} is not JSON serializable")
-    execution = get_current_execution_throwable()
-    stage_run = execution.stage_run
-    if not stage_run:
-        raise UnsetStageRun()
-    stage_run.data[key] = value
-    execution.stage_run_manager.update_data(stage_run.id, stage_run.data)
+        raise Exception("Value is not JSON serializable")
+
+    sdk_controller = WorkflowSDKController(
+        stage_run_repository=stage_run_repository,
+        execution_repository=execution_repository,
+        project_repository=ProjectRepository(),
+    )
+    sdk_controller.set_data(key, value)
 
 
 def set_title(title: str):

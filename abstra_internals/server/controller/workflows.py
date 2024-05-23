@@ -152,7 +152,7 @@ def _make_workflow_dto(project: Project):
     )
 
 
-def update_workflow(workflow_state_dto: dict):
+def update_workflow(workflow_state_dto: Dict):
     project = ProjectRepository.load()
 
     for stage_dto in workflow_state_dto["stages"]:

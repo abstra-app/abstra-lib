@@ -4,6 +4,7 @@ from typing import Any, List, Optional, Sequence, Tuple, Type
 import flask
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.repositories import (
     execution_logs_repository,
     stage_run_repository,
@@ -28,7 +29,6 @@ from abstra_internals.repositories.stage_run import (
 )
 from abstra_internals.server.controller.workflows import get_path, make_stage_dto
 from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
-from abstra_internals.server.workflow_engine import workflow_engine
 from abstra_internals.utils.datetime import to_utc_iso_string
 
 

@@ -5,7 +5,7 @@ from uuid import UUID
 
 from abstra.tables import insert
 from abstra_internals import repositories
-from abstra_internals.interface.sdk.forms.page_response import PageResponse
+from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.step import StepsResponse
 from abstra_internals.interface.sdk.tables.api import (
     _make_delete_query,

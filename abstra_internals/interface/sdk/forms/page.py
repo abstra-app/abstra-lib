@@ -2,9 +2,9 @@ import sys
 from typing import Callable, Dict, List, Optional, Union
 
 from abstra_internals.contract import forms_contract
-from abstra_internals.interface.sdk.forms.connection import receive, send
+from abstra_internals.controllers.sdk import FormSDKController
+from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
-from abstra_internals.interface.sdk.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.reactive import Reactive
 from abstra_internals.widgets.prop_check import validate_widget_props
 
@@ -27,11 +27,12 @@ class Page(WidgetSchema):
         context: Optional[Dict] = None,
     ):
         super().__init__()
-        self.__actions = actions
-        self.__validate = validate
-        self.__end_program = end_program
-        self.__reactive_polling_interval = reactive_polling_interval
-        self.__context = context or {}
+        self._actions = actions
+        self._validate = validate
+        self._end_program = end_program
+        self._reactive_polling_interval = reactive_polling_interval
+        self._context = context or {}
+        self._sdk_controller = FormSDKController()
 
     def run(
         self,
@@ -40,7 +41,7 @@ class Page(WidgetSchema):
         end_program: bool = False,
         reactive_polling_interval=0,
         context: Optional[Dict] = None,
-        steps_info: Optional[Dict] = None,
+        steps_info=None,
     ) -> PageResponse:
         """Run the form
 
@@ -52,36 +53,35 @@ class Page(WidgetSchema):
         Returns:
             The form result as a dict with the keys being the key of the input and the value being the value of the input
         """
-
-        actions = actions if actions != "i18n_next_action" else self.__actions
-        end_program = end_program if end_program is not False else self.__end_program
+        actions = actions if actions != "i18n_next_action" else self._actions
+        end_program = end_program if end_program is not False else self._end_program
         reactive_polling_interval = (
             reactive_polling_interval
             if reactive_polling_interval != 0
-            else self.__reactive_polling_interval
+            else self._reactive_polling_interval
         )
-        self.__context = context if context is not None else self.__context
-        validate = validate if validate is not None else self.__validate
+        self._context = context if context is not None else self._context
+        validate = validate if validate is not None else self._validate
 
-        if self.__context:
+        if self._context:
             for widget in self.widgets:
                 if (
                     not isinstance(widget, Reactive)
                     and hasattr(widget, "key")
-                    and widget.key in self.__context
+                    and widget.key in self._context
                 ):
-                    widget.value = self.__context[widget.key]
+                    widget.value = self._context[widget.key]
 
         for widget in self.widgets:
             if hasattr(widget, "key"):
-                self.__context[widget.key] = widget.value
+                self._context[widget.key] = widget.value
 
-        rendered_page = self.render(context=self.__context)
+        rendered_page = self.render(context=self._context)
 
-        self.__check_widget_props(rendered_page)
+        self._check_widget_props(rendered_page)
 
-        if self.__is_progress_screen():
-            self.__send_mount_page_message(
+        if self._is_progress_screen():
+            self._sdk_controller.request_mount_page(
                 widgets=rendered_page,
                 actions=[],
                 end_program=end_program,
@@ -90,9 +90,9 @@ class Page(WidgetSchema):
             )
             return PageResponse({}, "")
 
-        self.__send_mount_page_message(
+        self._sdk_controller.request_mount_page(
             widgets=rendered_page,
-            actions=self.__actions_property(actions, end_program),
+            actions=self._actions_property(actions, end_program),
             end_program=end_program,
             reactive_polling_interval=reactive_polling_interval,
             steps_info=steps_info,
@@ -101,18 +101,18 @@ class Page(WidgetSchema):
         if end_program:
             sys.exit(0)
 
-        response: Dict = self.__handle_page_user_events(validate_func=validate)
+        response: Dict = self._handle_page_user_events(validate_func=validate)
 
         return PageResponse(
             self.parse_value(response["payload"]),
             response.get("action"),
         )
 
-    def __handle_page_user_events(self, validate_func: Optional[Callable]):
+    def _handle_page_user_events(self, validate_func: Optional[Callable]):
         while True:
-            response = receive()
+            response = self._sdk_controller.next_message()
 
-            self.update(response["payload"])
+            self.update(response.get("payload"))
 
             # TODO: handle back actions without string comparison
             if response.get("action") == "i18n_back_action":
@@ -129,9 +129,9 @@ class Page(WidgetSchema):
                 if not self.has_errors() and validation_result.get("status"):
                     break
 
-            rendered_page = self.render(self.__context)
+            rendered_page = self.render(self._context)
 
-            self.__send_form_update_message(
+            self._sdk_controller.request_page_update(
                 widgets=rendered_page,
                 validation=validation_result,
                 event_seq=response["seq"],
@@ -139,14 +139,14 @@ class Page(WidgetSchema):
 
         return response
 
-    def __check_widget_props(self, rendered_page):
+    def _check_widget_props(self, rendered_page):
         for widget in rendered_page:
             if isinstance(widget, list):
-                self.__check_widget_props(widget)
+                self._check_widget_props(widget)
             else:
                 validate_widget_props(widget)
 
-    def __actions_property(self, actions, end_page):
+    def _actions_property(self, actions, end_page):
         if end_page:
             return []
         elif isinstance(actions, list):
@@ -155,13 +155,13 @@ class Page(WidgetSchema):
             return []
         return [actions]
 
-    def __is_progress_screen(self):
+    def _is_progress_screen(self):
         return len(self.widgets) == 1 and self.widgets[0].type == "progress-output"
 
     def update(self, payload):
         parsed_values = self.parse_value(payload)
         self.set_values(parsed_values)
-        self.__context.update(parsed_values)
+        self._context.update(parsed_values)
 
     def _get_validation_result(
         self, validation, payload
@@ -180,32 +180,3 @@ class Page(WidgetSchema):
                 validation_message = validation_response
 
         return {"status": validation_status, "message": validation_message}
-
-    def __send_mount_page_message(
-        self,
-        widgets: list,
-        actions: list,
-        end_program: bool,
-        reactive_polling_interval,
-        steps_info,
-    ):
-        send(
-            forms_contract.FormMountPageMessage(
-                widgets=widgets,
-                actions=actions,
-                end_program=end_program,
-                reactive_polling_interval=reactive_polling_interval,
-                steps=steps_info,
-            )
-        )
-
-    def __send_form_update_message(
-        self, widgets: list, validation: forms_contract.ValidationResult, event_seq: int
-    ):
-        send(
-            forms_contract.FormUpdatePageMessage(
-                widgets=widgets,
-                validation=validation,
-                event_seq=event_seq,
-            )
-        )
