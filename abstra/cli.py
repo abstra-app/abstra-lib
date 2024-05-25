@@ -1,9 +1,41 @@
+import tkinter as tk
+from tkinter.filedialog import askdirectory
+from typing import Optional
+
 import fire
 
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.interface.cli.editor import editor
 from abstra_internals.interface.cli.version import check_latest_version
 from abstra_internals.settings import SettingsController
+
+
+def is_headless():
+    """
+    Check if the application is running in a headless environment.
+    """
+    try:
+        # Attempt to create a Tkinter window to see if it fails
+        root = tk.Tk()
+        root.withdraw()  # Hide the root window
+        root.update_idletasks()
+        root.destroy()  # Clean up
+        return False
+    except tk.TclError:
+        return True
+
+
+def select_dir(selected_dir: Optional[str]) -> str:
+    if selected_dir:
+        return selected_dir
+    elif is_headless():
+        return "."
+    else:
+        selected_dir = askdirectory(initialdir=".")
+        if selected_dir == "":
+            print("No directory selected. Please, select a directory.")
+            exit(0)
+        return selected_dir
 
 
 class CLI(object):
@@ -13,8 +45,8 @@ class CLI(object):
     usage: abstra <command> <resource> [<argument> ...] [parameters]
     """
 
-    def deploy(self, root_dir: str = "."):
-        SettingsController.set_root_path(root_dir)
+    def deploy(self, root_dir: Optional[str] = None):
+        SettingsController.set_root_path(select_dir(root_dir))
         deploy()
 
     def version(self):
@@ -22,13 +54,13 @@ class CLI(object):
 
     def editor(
         self,
-        root_dir: str = ".",
+        root_dir: Optional[str] = None,
         port: int = 3000,
         debug=False,
         load_dotenv=True,
         reloading=False,
     ):
-        SettingsController.set_root_path(root_dir)
+        SettingsController.set_root_path(select_dir(root_dir))
         SettingsController.set_server_port(port)
         editor(
             debug=debug,
@@ -38,7 +70,7 @@ class CLI(object):
 
     def serve(
         self,
-        root_dir: str = ".",
+        root_dir: Optional[str] = None,
         port: int = 3000,
         debug=False,
         load_dotenv=True,
