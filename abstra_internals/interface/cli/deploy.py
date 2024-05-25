@@ -31,7 +31,7 @@ def deploy():
     headers = resolve_headers()
     if not headers:
         print(
-            "No project credentials found. Please run `abstra serve` and login via the web interface."
+            "No project credentials found. Please run `abstra editor` and login via the web interface."
         )
         return
 
