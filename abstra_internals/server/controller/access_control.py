@@ -1,5 +1,6 @@
 import flask
 
+from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.repositories import users_repository
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.guards.role_guard import Guard
@@ -32,9 +33,10 @@ def get_player_bp():
 
     bp = flask.Blueprint("player_access_control", __name__)
 
-    @bp.get("/allow/<string:path>")
-    def _get_allow_status_by_path(path: str):
-        authHeader = flask.request.headers.get("Authorization")
-        return guard.allow(path, authHeader).to_dict()
+    @bp.get("/allow/")
+    @bp.get("/allow/<path:path>")
+    def _get_allow_status_by_path(path: str = ""):
+        authHeader = flask.request.headers.get(USER_AUTH_HEADER_KEY)
+        return guard.should_allow(path, authHeader).to_dict()
 
     return bp

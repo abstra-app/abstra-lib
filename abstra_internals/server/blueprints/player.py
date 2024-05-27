@@ -15,6 +15,7 @@ from abstra_internals.environment import (
     SHOW_WATERMARK,
     SIDECAR_SHARED_TOKEN,
 )
+from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories import users_repository
 from abstra_internals.repositories.project.project import ProjectRepository
@@ -66,8 +67,8 @@ def get_player_bp(controller: MainController):
 
     @bp.get("/_workspace")
     def _get_workspace():
-        workspace = controller.get_workspace()
-        return workspace.browser_runner_dto
+        auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
+        return guard.filtered_workspace(auth).as_dict
 
     @bp.get("/_pages/<string:path>")
     @guard.by(PathArgSelector("path"))
@@ -76,10 +77,11 @@ def get_player_bp(controller: MainController):
         if not form:
             flask.abort(404)
 
+        auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
         return {
             form.type_name: {
                 **form.browser_runner_dto,
-                "workspace": controller.get_workspace().browser_runner_dto,
+                "workspace": guard.filtered_workspace(auth).as_dict,
             }
         }
 

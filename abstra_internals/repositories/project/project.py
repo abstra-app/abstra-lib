@@ -10,6 +10,7 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.contracts_generated import CommonUser
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
 from abstra_internals.settings import Settings
@@ -23,6 +24,7 @@ ServedStage = Union["FormStage", "HookStage"]
 ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
 ControlStage = Union["IteratorStage", "ConditionStage"]
 WorkflowStage = Union[ActionStage, ControlStage]
+SecuredStage = Union["FormStage", "Home", "KanbanView"]
 
 
 @dataclass
@@ -340,6 +342,15 @@ class AccessSettings:
     is_public: bool
     required_roles: List[str]
 
+    def should_allow(self, user: Optional[CommonUser]) -> bool:
+        if self.is_public:
+            return True
+        if not user:
+            return False
+        return len(self.required_roles) == 0 or any(
+            role in user.roles for role in self.required_roles
+        )
+
     @staticmethod
     def from_dict(data: dict):
         return AccessSettings(
@@ -528,8 +539,16 @@ class FormStage:
             "id": self.id,
             "path": self.path,
             "type": "form",
-            "is_initial": self.is_initial,
         }
+
+    @property
+    def to_sidebar_item(self) -> "SidebarItem":
+        return SidebarItem(
+            id=self.id,
+            name=self.title,
+            path=self.path,
+            type="form",
+        )
 
     @property
     def browser_runner_dto(self):
@@ -628,7 +647,6 @@ class SidebarItem:
     name: str
     path: str
     type: str
-    visible: Optional[bool]
 
     @property
     def as_dict(self):
@@ -637,8 +655,16 @@ class SidebarItem:
             "name": self.name,
             "path": self.path,
             "type": self.type,
-            "visible": self.visible,
         }
+
+    @staticmethod
+    def from_dict(data: dict):
+        return SidebarItem(
+            id=data["id"],
+            name=data["name"],
+            path=data["path"],
+            type=data["type"],
+        )
 
 
 @dataclass
@@ -648,38 +674,8 @@ class Sidebar:
     @staticmethod
     def from_dict(
         sidebar_data: List[dict],
-        forms: List[FormStage] = [],
     ):
-        def item_name(path):
-            return [s.title for s in forms if s.path == path][0]
-
-        stored_items = []
-
-        initial_forms = [f for f in forms if f.is_initial]
-
-        for item in sidebar_data:
-            if item["path"] in [f.path for f in initial_forms]:
-                sidebar_item = SidebarItem(
-                    id=item["id"],
-                    name=item_name(item["path"]),
-                    path=item["path"],
-                    type=item["type"],
-                    visible=item.get("visible"),
-                )
-                stored_items.append(sidebar_item)
-
-        for form in initial_forms:
-            if form.path not in [item.path for item in stored_items]:
-                stored_items.append(
-                    SidebarItem(
-                        id=form.id,
-                        name=form.title,
-                        path=form.path,
-                        type="form",
-                        visible=False,
-                    )
-                )
-        return Sidebar(items=stored_items)
+        return Sidebar(items=[SidebarItem.from_dict(item) for item in sidebar_data])
 
     @property
     def as_dict(self):
@@ -689,13 +685,12 @@ class Sidebar:
 @dataclass
 class StyleSettings:
     name: str
-    sidebar: Sidebar
-    theme: Optional[str] = None
-    logo_url: Optional[str] = None
-    brand_name: Optional[str] = None
-    main_color: Optional[str] = None
-    font_family: Optional[str] = None
-    font_color: Optional[str] = None
+    theme: Optional[str]
+    logo_url: Optional[str]
+    brand_name: Optional[str]
+    main_color: Optional[str]
+    font_family: Optional[str]
+    font_color: Optional[str]
 
     @property
     def as_dict(self):
@@ -708,7 +703,6 @@ class StyleSettings:
             "main_color": self.main_color,
             "font_color": self.font_color,
             "font_family": self.font_family,
-            "sidebar": self.sidebar.as_dict,
         }
 
     @property
@@ -721,33 +715,59 @@ class StyleSettings:
             logo_url = None
         return {**self.as_dict, "logo_url": logo_url}
 
-    @property
-    def editor_dto(self):
-        return self.as_dict
-
-    def update(
-        self,
-        changes: Dict[str, Any],
-        forms: List[FormStage] = [],
-    ):
+    def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             if attr == "sidebar":
-                self.sidebar = Sidebar.from_dict(changes["sidebar"], forms)
+                continue
             else:
                 setattr(self, attr, value)
 
     @staticmethod
-    def from_dict(data: Dict, forms: List[FormStage] = []):
+    def from_dict(data: Dict):
+        defaultValue = StyleSettings.defaultValue()
         return StyleSettings(
-            sidebar=Sidebar.from_dict(data.get("sidebar", []), forms=forms),
-            name=data.get("name", "Untitled Project"),
-            font_family=data.get("font_family"),
-            brand_name=data.get("brand_name"),
-            main_color=data.get("main_color"),
-            font_color=data.get("font_color"),
-            logo_url=data.get("logo_url"),
-            theme=data.get("theme"),
+            name=data.get("name", defaultValue.name),
+            font_family=data.get("font_family", defaultValue.font_family),
+            brand_name=data.get("brand_name", defaultValue.brand_name),
+            main_color=data.get("main_color", defaultValue.main_color),
+            font_color=data.get("font_color", defaultValue.font_color),
+            logo_url=data.get("logo_url", defaultValue.logo_url),
+            theme=data.get("theme", defaultValue.theme),
         )
+
+    @staticmethod
+    def defaultValue():
+        return StyleSettings(
+            name="Untitled Workspace",
+            font_family=None,
+            brand_name=None,
+            main_color=None,
+            font_color=None,
+            logo_url=None,
+            theme=None,
+        )
+
+
+@dataclass
+class StyleSettingsWithSidebar(StyleSettings):
+    sidebar: Sidebar
+
+    @staticmethod
+    def from_dict(data: Dict):
+        child_data = StyleSettings.from_dict(data)
+        return StyleSettingsWithSidebar(
+            **{
+                **child_data.__dict__,
+                "sidebar": Sidebar.from_dict(data.get("sidebar", [])),
+            }
+        )
+
+    @property
+    def as_dict(self):
+        return {
+            **super().as_dict,
+            "sidebar": self.sidebar.as_dict,
+        }
 
 
 class PathConflictError(Exception):
@@ -923,14 +943,39 @@ class KanbanView:
     def as_dict(self):
         return {"access_control": self.access_control.as_dict}
 
+    @property
+    def type_name(self):
+        return "kanban"
+
+    @property
+    def path(self):
+        return "_player/threads"
+
+    @property
+    def title(self):
+        return "Threads"
+
+    @property
+    def id(self):
+        return "kanban"
+
     def to_access_dto(self):
         return {
-            "id": "kanban",
-            "title": "Threads",
-            "type": "kanban",
+            "id": self.id,
+            "title": self.title,
+            "type": self.type_name,
             "is_public": self.access_control.is_public,
             "required_roles": self.access_control.required_roles,
         }
+
+    @property
+    def to_sidebar_item(self) -> SidebarItem:
+        return SidebarItem(
+            id=self.id,
+            name=self.title,
+            path=self.path,
+            type=self.type_name,
+        )
 
     def update(self, id, changes: Dict[str, Any]):
         if id == "access_control":
@@ -959,14 +1004,39 @@ class Home:
     def as_dict(self):
         return {"access_control": self.access_control.as_dict}
 
+    @property
+    def type_name(self):
+        return "home"
+
+    @property
+    def path(self):
+        return ""
+
+    @property
+    def title(self):
+        return "Home"
+
+    @property
+    def id(self):
+        return "home"
+
     def to_access_dto(self):
         return {
-            "id": "home",
-            "title": "Home",
-            "type": "home",
+            "id": self.id,
+            "title": self.title,
+            "type": self.type_name,
             "is_public": self.access_control.is_public,
             "required_roles": self.access_control.required_roles,
         }
+
+    @property
+    def to_sidebar_item(self) -> SidebarItem:
+        return SidebarItem(
+            id=self.id,
+            name=self.title,
+            path=self.path,
+            type=self.type_name,
+        )
 
     def update(self, id, changes: Dict[str, Any]):
         if id == "access_control":
@@ -1075,35 +1145,43 @@ class Project:
 
         return None
 
-    def list_access_controls(self):
-        access_controls = [self.kanban.to_access_dto(), self.home.to_access_dto()]
-        access_controls.extend([stage.to_access_dto() for stage in self.forms])
-        return access_controls
+    def get_workspace(self):
+        sidebar = [
+            stage.to_sidebar_item.as_dict for stage in self.list_accessible_stages()
+        ]
+        return StyleSettingsWithSidebar.from_dict(
+            {**self.workspace.as_dict, "sidebar": sidebar}
+        )
+
+    def default_sidebar(self) -> Sidebar:
+        return Sidebar(
+            items=[stage.to_sidebar_item for stage in self.list_accessible_stages()]
+        )
 
     def get_access_control_by_stage_id(self, id: str) -> Optional[AccessSettings]:
-        if id == "kanban":
-            return self.kanban.access_control
-        if id == "home":
-            return self.home.access_control
-        for stage in [*self.forms, *self.jobs]:
+        for stage in [self.kanban, self.home, *self.forms, *self.jobs]:
             if stage.id == id:
                 return stage.access_control
         return None
 
     def get_access_control_by_stage_path(self, path: str) -> Optional[AccessSettings]:
-        if path == "kanban":
-            return self.kanban.access_control
-        if path == "home":
-            return self.home.access_control
-        form = self.get_form_by_path(path)
-        if form:
-            return form.access_control
+        for stage in self.secured_stages:
+            if stage.path == path:
+                return stage.access_control
         return None
 
-    def get_secured_stage(self, id: str) -> Optional[FormStage]:
-        for stage in self.forms:
+    @property
+    def secured_stages(self) -> List[SecuredStage]:
+        return [self.home, self.kanban, *self.forms]
+
+    def get_secured_stage(self, id: str) -> Optional[SecuredStage]:
+        for stage in self.secured_stages:
             if stage.id == id:
                 return stage
+
+    def list_accessible_stages(self) -> Generator[SecuredStage, None, None]:
+        for stage in self.secured_stages:
+            yield stage
 
     def update_access_controls(self, changes: List[Dict[str, Any]]):
         response = []
@@ -1115,15 +1193,12 @@ class Project:
         return response
 
     def update_access_control(self, id: str, change: Dict[str, Any]):
-        if id == "kanban":
-            self.kanban.update("access_control", change)
-            return self.kanban.to_access_dto()
-        if id == "home":
-            self.home.update("access_control", change)
-            return self.home.to_access_dto()
         stage = self.get_secured_stage(id)
         if not stage:
             raise StageNotFoundError(f"Stage with id '{id}' not found")
+        if isinstance(stage, (Home, KanbanView)):
+            stage.update("access_control", change)
+            return stage.to_access_dto()
         stage = self.update_stage(stage, {"access_control": change})
         if not isinstance(stage, (FormStage)):
             raise Exception(
@@ -1297,7 +1372,7 @@ class Project:
             conditions = [ConditionStage.from_dict(c) for c in data["conditions"]]
             visualization = VisualizationSettings.from_dict(data["visualization"])
 
-            workspace = StyleSettings.from_dict(data["workspace"], forms=forms)
+            workspace = StyleSettings.from_dict(data["workspace"])
             kanban = KanbanView.from_dict(data.get("kanban", {}))
             home = Home.from_dict(data.get("home", {}))
             signup_policy = SignupPolicy.from_dict(data.get("signup_policy", {}))
@@ -1325,7 +1400,7 @@ class Project:
     @staticmethod
     def create():
         return Project(
-            workspace=StyleSettings(name="Untitled Workspace", sidebar=Sidebar([])),
+            workspace=StyleSettings.defaultValue(),
             visualization=VisualizationSettings.create(),
             scripts=[],
             forms=[],

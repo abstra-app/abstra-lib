@@ -8,11 +8,13 @@ import flask_sock
 from abstra_internals.contracts_generated import (
     AbstraLibApiPlayerUserNavigationGuard as NavigationGuard,
 )
-from abstra_internals.contracts_generated import CommonUserRolesItem
-from abstra_internals.jwt_auth import UserClaims
+from abstra_internals.contracts_generated import CommonUser, CommonUserRolesItem
+from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.repositories.project.project import (
     AccessSettings,
     ProjectRepository,
+    Sidebar,
+    StyleSettingsWithSidebar,
 )
 from abstra_internals.repositories.users import UsersRepository
 
@@ -94,17 +96,12 @@ class Guard:
         if user is None:
             return NavigationGuard("FORBIDEN")
 
-        ##protected access
-        if len(access_setting.required_roles) == 0:
+        if access_setting.should_allow(user):
             return NavigationGuard("ALLOWED")
 
-        if len(set(user.roles).intersection(set(access_setting.required_roles))) > 0:
-            return NavigationGuard("ALLOWED")
-
-        ##private access
         return NavigationGuard("FORBIDEN")
 
-    def allow(self, path: str, auth: Optional[str]) -> NavigationGuard:
+    def should_allow(self, path: str, auth: Optional[str]) -> NavigationGuard:
         access_settings = ProjectRepository.load().get_access_control_by_stage_path(
             path
         )
@@ -114,11 +111,32 @@ class Guard:
 
         return self.__allow(access_settings, auth)
 
+    def filtered_workspace(self, auth: Optional[str]) -> StyleSettingsWithSidebar:
+        project = ProjectRepository.load()
+        user: Optional[CommonUser] = None
+
+        visible_sidebar = Sidebar(items=[])
+
+        if auth is not None:
+            claims = self.auth_decoder(auth)
+            if claims is not None and claims.email:
+                user = self.repository.get_user(claims.email)
+
+        if project.home.access_control.should_allow(user):
+            stages = [stage for stage in project.list_accessible_stages()]
+            for stage in stages:
+                if stage.access_control.should_allow(user):
+                    visible_sidebar.items.append(stage.to_sidebar_item)
+
+        return StyleSettingsWithSidebar.from_dict(
+            {**project.workspace.as_dict, "sidebar": visible_sidebar.as_dict}
+        )
+
     def requires(self, role: CommonUserRolesItem):
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
-                auth = flask.request.headers.get("Authorization")
+                auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
                 if auth is None:
                     flask.abort(401)
 
@@ -144,7 +162,7 @@ class Guard:
                 if access_settings is None:
                     flask.abort(401)
 
-                auth = flask.request.headers.get("Authorization")
+                auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
 
                 status = self.__allow(access_settings, auth).status
 
