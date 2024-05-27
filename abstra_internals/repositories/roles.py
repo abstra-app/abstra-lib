@@ -18,6 +18,8 @@ class RolesRepository:
 
     def get_roles(self) -> List[CommonRole]:
         url = f"{CLOUD_API_ENDPOINT}/cli/roles"
+        if not self.headers:
+            return []
         response = requests.get(url, headers=self.headers)
         return [CommonRole.from_dict(role) for role in response.json()]
 

@@ -17,15 +17,15 @@ def get_editor_bp(controller: MainController):
     @bp.get("/")
     @usage
     def _get_workspace():
-        return controller.get_workspace().editor_dto
+        return controller.get_workspace().as_dict
 
     @bp.put("/")
     @usage
     def _update_workspace():
         if not flask.request.json:
             flask.abort(400)
-        workspace = controller.update_workspace(flask.request.json)
-        return workspace.editor_dto
+        controller.update_workspace(flask.request.json)
+        return controller.get_workspace().as_dict
 
     @bp.get("/root")
     @usage

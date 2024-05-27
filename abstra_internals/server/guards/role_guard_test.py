@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest import TestCase
 
 from flask import Blueprint, Flask
@@ -255,3 +256,132 @@ class TestRequirementsApi(TestCase):
         for route, status in test_matrix.items():
             response = client.get(route, headers={})
             self.assertEqual(response.status, status, f"Failed for {route}")
+
+    def test_sidebar(self):
+        ##Autorization: Bearer <test_email>
+        def test_auth(email: Optional[str]):
+            if email is None:
+                return None
+            return f"Bearer {email}"
+
+        def test_auth_decoder(email: str):
+            email = email.split(" ")[1]
+            return UserClaims(claims={"email": email})
+
+        JOB_EXECUTOR = "job_executor"
+        WORKFLOW_VIEWER = "workflow_viewer"
+        ADMIN = "admin"
+
+        TESTER_EMAIL = "tester@abstra.app"
+        ADMIN_EMAIL = "admin@abstra.app"
+        USER_EMAIL = "user@abstra.app"
+
+        NOT_A_USER_EMAIL = "external@evil.corp"
+
+        repo = LocalUsersRepository(
+            {
+                TESTER_EMAIL: [WORKFLOW_VIEWER],
+                ADMIN_EMAIL: [ADMIN, JOB_EXECUTOR, WORKFLOW_VIEWER],
+                USER_EMAIL: [],
+            }
+        )
+
+        project = ProjectRepository.load()
+
+        public_form = FormStage(
+            id="public_form_id",
+            path="public_form",
+            title="public_form",
+            file="public_form.py",
+            workflow_position=(0.0, 0.0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+            access_control=AccessSettings(is_public=True, required_roles=[]),
+        )
+
+        protected_form = FormStage(
+            id="protected_form_id",
+            path="protected_form",
+            title="protected_form",
+            file="protected_form.py",
+            workflow_position=(0.0, 0.0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+            access_control=AccessSettings(is_public=False, required_roles=[]),
+        )
+
+        private_form = FormStage(
+            id="private_form_id",
+            path="private_form",
+            title="private_form",
+            file="private_form.py",
+            workflow_position=(0.0, 0.0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+            access_control=AccessSettings(is_public=False, required_roles=[ADMIN]),
+        )
+
+        project.forms.append(public_form)
+        project.forms.append(protected_form)
+        project.forms.append(private_form)
+
+        project.kanban.access_control = AccessSettings(
+            is_public=False, required_roles=[WORKFLOW_VIEWER]
+        )
+
+        ProjectRepository.save(project)
+
+        guard = Guard(repo, test_auth_decoder)
+
+        ## Logged in users
+        test_matrix = [
+            {
+                "email": TESTER_EMAIL,
+                "accessible_stages_ids": [
+                    "home",
+                    "kanban",
+                    "public_form_id",
+                    "protected_form_id",
+                ],
+            },
+            {
+                "email": ADMIN_EMAIL,
+                "accessible_stages_ids": [
+                    "home",
+                    "kanban",
+                    "public_form_id",
+                    "protected_form_id",
+                    "private_form_id",
+                ],
+            },
+            {
+                "email": USER_EMAIL,
+                "accessible_stages_ids": [
+                    "home",
+                    "public_form_id",
+                    "protected_form_id",
+                ],
+            },
+            {
+                "email": NOT_A_USER_EMAIL,
+                "accessible_stages_ids": ["home", "public_form_id"],
+            },
+            {
+                "email": None,  ##Logged off user
+                "accessible_stages_ids": ["home", "public_form_id"],
+            },
+        ]
+
+        for case in test_matrix:
+            auth = test_auth(case["email"])
+            workspace = guard.filtered_workspace(auth)
+            response = [stage.id for stage in workspace.sidebar.items]
+            expected = case["accessible_stages_ids"]
+
+            self.assertEqual(response, expected, f"Failed for {case['email']}")

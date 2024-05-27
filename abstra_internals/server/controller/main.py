@@ -35,7 +35,7 @@ from abstra_internals.repositories.project.project import (
     JobStage,
     ProjectRepository,
     ScriptStage,
-    StyleSettings,
+    StyleSettingsWithSidebar,
     WorkflowStage,
 )
 from abstra_internals.repositories.stage_run import StageRunRepository
@@ -131,9 +131,9 @@ class MainController:
 
         deploy()
 
-    def get_workspace(self) -> StyleSettings:
+    def get_workspace(self) -> StyleSettingsWithSidebar:
         project = ProjectRepository.load()
-        return project.workspace
+        return project.get_workspace()
 
     def get_stage(self, id: str) -> Optional[WorkflowStage]:
         project = ProjectRepository.load()
@@ -223,7 +223,7 @@ class MainController:
 
     def update_workspace(self, changes: Dict[str, Any]):
         project = ProjectRepository.load()
-        project.workspace.update(changes, project.forms)
+        project.workspace.update(changes)
         ProjectRepository.save(project)
         return project.workspace
 
@@ -414,7 +414,7 @@ class MainController:
     # access_control
     def list_access_controls(self):
         project = ProjectRepository.load()
-        return project.list_access_controls()
+        return [s.to_access_dto() for s in project.list_accessible_stages()]
 
     def update_access_controls(self, changes: List[Dict[str, Any]]):
         project = ProjectRepository.load()
