@@ -163,35 +163,6 @@ class CommonUser:
 
 CloudApiCliUserGetResponse = CommonUser
 
-CloudApiCliAuthInfoResponseAuthorId = str
-
-CloudApiCliAuthInfoResponseProjectId = str
-
-CloudApiCliAuthInfoResponseEmail = str
-
-
-@dataclass
-class CloudApiCliAuthInfoResponse:
-    author_id: CloudApiCliAuthInfoResponseAuthorId
-    project_id: CloudApiCliAuthInfoResponseProjectId
-    email: CloudApiCliAuthInfoResponseEmail
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "authorId": self.author_id,
-            "projectId": self.project_id,
-            "email": self.email,
-        }
-
-    @staticmethod
-    def from_dict(data: typing.Dict[str, typing.Any]) -> "CloudApiCliAuthInfoResponse":
-        return CloudApiCliAuthInfoResponse(
-            author_id=str(data["authorId"]),
-            project_id=str(data["projectId"]),
-            email=str(data["email"]),
-        )
-
-
 CloudApiCliBuildCreateResponseUrl = str
 
 CloudApiCliBuildCreateResponseBuildId = str
@@ -215,6 +186,42 @@ class CloudApiCliBuildCreateResponse:
         return CloudApiCliBuildCreateResponse(
             url=str(data["url"]),
             build_id=str(data["buildId"]),
+        )
+
+
+CloudApiCliApiKeyInfoResponseAuthorId = str
+
+CloudApiCliApiKeyInfoResponseProjectId = str
+
+CloudApiCliApiKeyInfoResponseEmail = str
+
+CloudApiCliApiKeyInfoResponseIntercomHash = str
+
+
+@dataclass
+class CloudApiCliApiKeyInfoResponse:
+    author_id: CloudApiCliApiKeyInfoResponseAuthorId
+    project_id: CloudApiCliApiKeyInfoResponseProjectId
+    email: CloudApiCliApiKeyInfoResponseEmail
+    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "authorId": self.author_id,
+            "projectId": self.project_id,
+            "email": self.email,
+            "intercomHash": self.intercom_hash,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "CloudApiCliApiKeyInfoResponse":
+        return CloudApiCliApiKeyInfoResponse(
+            author_id=str(data["authorId"]),
+            project_id=str(data["projectId"]),
+            email=str(data["email"]),
+            intercom_hash=str(data["intercomHash"]),
         )
 
 

@@ -10,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 from abstra_internals.cloud_api import (
     create_thread,
     get_ai_messages,
-    get_auth_info,
+    get_api_key_info,
     get_project_info,
 )
 from abstra_internals.credentials import (
@@ -383,7 +383,7 @@ class MainController:
         headers = resolve_headers()
         if not headers:
             return {"logged": False, "reason": "NO_API_TOKEN"}
-        return get_auth_info(headers)
+        return get_api_key_info(headers)
 
     def create_login(self, token):
         set_credentials(token)

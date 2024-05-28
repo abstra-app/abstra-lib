@@ -1,7 +1,7 @@
 import requests
 
 from abstra_internals.contracts_generated import (
-    CloudApiCliAuthInfoResponse,
+    CloudApiCliApiKeyInfoResponse,
     CloudApiCliBuildCreateResponse,
 )
 from abstra_internals.environment import CLOUD_API_ENDPOINT
@@ -19,20 +19,16 @@ def update_build(build_id: str, headers: dict):
     requests.patch(url=url, headers=headers)
 
 
-def get_auth_info(headers: dict) -> dict:
-    url = f"{CLOUD_API_ENDPOINT}/cli/auth-info"
+def get_api_key_info(headers: dict) -> dict:
+    url = f"{CLOUD_API_ENDPOINT}/cli/api-keys/info"
     try:
         response = requests.get(url, headers=headers)
     except Exception as e:
         AbstraLogger.capture_exception(e)
         return {"logged": False, "reason": "CONNECTION_ERROR"}
     if response.ok:
-        response_data = CloudApiCliAuthInfoResponse.from_dict(response.json())
-        return {
-            "logged": True,
-            "author_id": response_data.author_id,
-            "project_id": response_data.project_id,
-        }
+        response_data = CloudApiCliApiKeyInfoResponse.from_dict(response.json())
+        return {"logged": True, "info": response_data.to_dict()}
     else:
         return {"logged": False, "reason": "INVALID_API_TOKEN"}
 

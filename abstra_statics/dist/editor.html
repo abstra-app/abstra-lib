@@ -1,28 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon-editor.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Primary Meta Tags -->
-    <title>Abstra Cloud Console</title>
-    <meta name="title" content="Abstra Editor" />
-    <script type="module" crossorigin src="/assets/editor.0f943939.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/outputWidgets.5808ba34.js">
-    <link rel="modulepreload" crossorigin href="/assets/fetch.abdf3775.js">
-    <link rel="modulepreload" crossorigin href="/assets/pubsub.7d216f56.js">
-    <link rel="modulepreload" crossorigin href="/assets/index.dc1ee91e.js">
-    <link rel="modulepreload" crossorigin href="/assets/url.70e9a948.js">
-    <link rel="modulepreload" crossorigin href="/assets/runnerData.73af4553.js">
-    <link rel="modulepreload" crossorigin href="/assets/record.b7f30705.js">
-    <link rel="modulepreload" crossorigin href="/assets/asyncComputed.fcfb976b.js">
-    <link rel="modulepreload" crossorigin href="/assets/envVars.54694e7d.js">
-    <link rel="stylesheet" href="/assets/outputWidgets.b5bd3a75.css">
-    <link rel="stylesheet" href="/assets/index.f328d44c.css">
-  </head>
 
-  <body>
-    <div id="app"></div>
-    
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon-editor.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Primary Meta Tags -->
+  <title>Abstra Editor</title>
+  <meta name="title" content="Abstra Editor" />
+  <script>
+    // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/h97k86ks'
+    (function () {
+      var w = window;
+      var ic = w.Intercom;
+      if (typeof ic === 'function') {
+        ic('reattach_activator');
+        ic('update', w.intercomSettings);
+      } else {
+        var d = document;
+        var i = function () {
+          i.c(arguments);
+        };
+        i.q = [];
+        i.c = function (args) {
+          i.q.push(args);
+        };
+        w.Intercom = i;
+        var l = function () {
+          var s = d.createElement('script');
+          s.type = 'text/javascript';
+          s.async = true;
+          s.src = 'https://widget.intercom.io/widget/h97k86ks';
+          var x = d.getElementsByTagName('script')[0];
+          x.parentNode.insertBefore(s, x);
+        };
+        if (document.readyState === 'complete') {
+          l();
+        } else if (w.attachEvent) {
+          w.attachEvent('onload', l);
+        } else {
+          w.addEventListener('load', l, false);
+        }
+      }
+    })();
+  </script>
+  <script type="module" crossorigin src="/assets/editor.aa2c4c1e.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/outputWidgets.e5f9ffc6.js">
+  <link rel="modulepreload" crossorigin href="/assets/fetch.c1359dac.js">
+  <link rel="modulepreload" crossorigin href="/assets/pubsub.75396d00.js">
+  <link rel="modulepreload" crossorigin href="/assets/index.4303c11c.js">
+  <link rel="modulepreload" crossorigin href="/assets/url.c11ddd9f.js">
+  <link rel="modulepreload" crossorigin href="/assets/runnerData.f991c68f.js">
+  <link rel="modulepreload" crossorigin href="/assets/record.3c5b5204.js">
+  <link rel="modulepreload" crossorigin href="/assets/asyncComputed.2210bd1a.js">
+  <link rel="modulepreload" crossorigin href="/assets/envVars.e2ea4c38.js">
+  <link rel="stylesheet" href="/assets/outputWidgets.b5bd3a75.css">
+  <link rel="stylesheet" href="/assets/index.f328d44c.css">
+</head>
+
+<body>
+  <div id="app"></div>
+  
+</body>
+
 </html>
