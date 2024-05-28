@@ -197,10 +197,10 @@ class NumberValueHandler:
             else:
                 errors.append("i18n_error_required_field")
 
-        if self.min is not None and value < self.min:
+        if self.min is not None and value is not None and value < self.min:
             errors.append("i18n_error_min_number")
 
-        if self.max is not None and value > self.max:
+        if self.max is not None and value is not None and value > self.max:
             errors.append("i18n_error_max_number")
 
         return errors
