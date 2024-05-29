@@ -28,38 +28,6 @@ SecuredStage = Union["FormStage", "Home", "KanbanView"]
 
 
 @dataclass
-class SignupPolicy:
-    email_patterns: List[str]
-
-    @staticmethod
-    def create():
-        return SignupPolicy(email_patterns=[])
-
-    @staticmethod
-    def from_dict(data: dict):
-        return SignupPolicy(email_patterns=data.get("email_patterns", []))
-
-    @property
-    def as_dict(self):
-        return {"email_patterns": self.email_patterns}
-
-    @staticmethod
-    def extract_pattern(pattern: str) -> str:
-        return pattern.replace("*", "").replace("@", "")
-
-    def update(self, changes: Dict[str, Any]):
-        for attr, value in changes.items():
-            setattr(self, attr, value)
-
-    def allow(self, email: str) -> bool:
-        domain = email.split("@")[1]
-        for pattern in self.email_patterns:
-            if pattern == "*" or SignupPolicy.extract_pattern(pattern) == domain:
-                return True
-        return False
-
-
-@dataclass
 class NotificationTrigger:
     variable_name: str
     enabled: bool
@@ -1055,7 +1023,6 @@ class Project:
     jobs: List[JobStage]
     iterators: List[IteratorStage]
     conditions: List[ConditionStage]
-    signup_policy: SignupPolicy
 
     _graph: Graph
 
@@ -1083,7 +1050,6 @@ class Project:
             "scripts": [script.as_dict for script in self.scripts],
             "iterators": [i.as_dict for i in self.iterators],
             "conditions": [c.as_dict for c in self.conditions],
-            "signup_policy": self.signup_policy.as_dict,
         }
 
     @property
@@ -1097,9 +1063,6 @@ class Project:
     def iter_entrypoints(self) -> Generator[Path, None, None]:
         for stage in self.actions:
             yield Path(stage.file)
-
-    def update_sign_up_policy(self, email_patterns: List[str]) -> None:
-        self.signup_policy.update({"email_patterns": email_patterns})
 
     @property
     def project_files(self) -> Generator[Path, None, None]:
@@ -1375,7 +1338,6 @@ class Project:
             workspace = StyleSettings.from_dict(data["workspace"])
             kanban = KanbanView.from_dict(data.get("kanban", {}))
             home = Home.from_dict(data.get("home", {}))
-            signup_policy = SignupPolicy.from_dict(data.get("signup_policy", {}))
 
             return Project(
                 workspace=workspace,
@@ -1389,7 +1351,6 @@ class Project:
                 kanban=kanban,
                 home=home,
                 _graph=Graph.from_primitives(nodes=nodes, edges=edges),
-                signup_policy=signup_policy,
             )
 
         except Exception as e:
@@ -1411,7 +1372,6 @@ class Project:
             kanban=KanbanView.create(),
             home=Home.create(),
             _graph=Graph.from_primitives([], []),
-            signup_policy=SignupPolicy.create(),
         )
 
 

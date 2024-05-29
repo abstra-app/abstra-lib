@@ -8,7 +8,7 @@ import flask_sock
 from abstra_internals.contracts_generated import (
     AbstraLibApiPlayerUserNavigationGuard as NavigationGuard,
 )
-from abstra_internals.contracts_generated import CommonUser, CommonUserRolesItem
+from abstra_internals.contracts_generated import CommonUser
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.repositories.project.project import (
     AccessSettings,
@@ -131,28 +131,6 @@ class Guard:
         return StyleSettingsWithSidebar.from_dict(
             {**project.workspace.as_dict, "sidebar": visible_sidebar.as_dict}
         )
-
-    def requires(self, role: CommonUserRolesItem):
-        def decorator(func):
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
-                if auth is None:
-                    flask.abort(401)
-
-                claims = self.auth_decoder(auth)
-                if claims is None or claims.email is None:
-                    flask.abort(401)
-
-                user_roles = self.repository.get_user_roles(claims.email)
-                if len(user_roles) == 0 or role not in user_roles:
-                    flask.abort(403)
-
-                return func(*args, **kwargs)
-
-            return wrapper
-
-        return decorator
 
     def by(self, selector: Selector):
         def decorator(func):

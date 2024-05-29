@@ -6,7 +6,6 @@ from abstra_internals.repositories.project.project import (
     Project,
     ProjectRepository,
     ScriptStage,
-    SignupPolicy,
     WorkflowTransition,
 )
 from tests.fixtures import clear_dir, init_dir
@@ -205,23 +204,3 @@ class ProjectTests(TestCase):
         self.assertEqual(p.get_next_stages_ids(form2.id), [])
 
         self.assertEqual(p.get_previous_stages_ids(form2.id), [form1.id])
-
-    def test_sign_up(self):
-        policy = SignupPolicy.create()
-        policy.update({"email_patterns": ["*@abstra.app"]})
-
-        self.assertTrue(policy.allow("user@abstra.app"))
-        self.assertFalse(policy.allow("user@new.abstra.app"))
-        self.assertFalse(policy.allow("external@evil.corp"))
-
-        policy.update({"email_patterns": ["@abstra.app"]})
-
-        self.assertTrue(policy.allow("user@abstra.app"))
-        self.assertFalse(policy.allow("user@new.abstra.app"))
-        self.assertFalse(policy.allow("external@evil.corp"))
-
-        policy.update({"email_patterns": ["abstra.app"]})
-
-        self.assertTrue(policy.allow("user@abstra.app"))
-        self.assertFalse(policy.allow("user@new.abstra.app"))
-        self.assertFalse(policy.allow("external@evil.corp"))

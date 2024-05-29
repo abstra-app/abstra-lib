@@ -17,7 +17,6 @@ from abstra_internals.server.controller import requirements as requirements_cont
 from abstra_internals.server.controller import roles as roles_controller
 from abstra_internals.server.controller import scripts as scripts_controller
 from abstra_internals.server.controller import stage_runs as stage_runs_controller
-from abstra_internals.server.controller import users as user_controller
 from abstra_internals.server.controller import (
     visualizations as visualizations_controller,
 )
@@ -81,9 +80,6 @@ def __get_api_bp(controller: MainController):
 
     roles_bp = roles_controller.get_editor_bp()
     bp.register_blueprint(roles_bp, url_prefix="/roles")
-
-    user_bp = user_controller.get_editor_bp()
-    bp.register_blueprint(user_bp, url_prefix="/users")
 
     access_control_bp = access_control_controller.get_editor_bp(controller)
     bp.register_blueprint(access_control_bp, url_prefix="/access-control")
