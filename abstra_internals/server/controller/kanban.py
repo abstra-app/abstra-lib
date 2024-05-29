@@ -303,7 +303,7 @@ def get_editor_bp():
     def _get_ancestor_logs(stage_run_id: str):
         project = project_repository.load()
 
-        def player_log_filter(log: LogEntry):
+        def kanban_log_filter(log: LogEntry):
             return (
                 isinstance(log, StdioLogEntry)
                 or isinstance(log, UnhandledExceptionLogEntry)
@@ -315,7 +315,7 @@ def get_editor_bp():
             return {
                 "stage_run": stage_run.to_dto(),
                 "stage": make_stage_dto(stage) if stage else None,
-                "logs": [log.to_dto() for log in logs if player_log_filter(log)],
+                "logs": [log.to_dto() for log in logs if kanban_log_filter(log)],
             }
 
         return [

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, Type
 
+from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.controllers.execution_client import (
     ExecutionClient,
     ExecutionClientStore,
@@ -101,6 +102,7 @@ class ExecutionController:
         self.execution_repo.update(execution.to_dto())
 
         if exception:
+            print_exception(exception)
             self.client.handle_failure(exception)
         else:
             self.client.handle_success()

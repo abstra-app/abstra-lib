@@ -19,7 +19,7 @@ class ExecutionService:
             no_errors = e.code is None or e.code == 0
             if no_errors:
                 return
-            raise e
+            raise Exception(f"SystemExit: {e.code}") from e
 
     @classmethod
     def run(cls, filepath: Path) -> Result:
