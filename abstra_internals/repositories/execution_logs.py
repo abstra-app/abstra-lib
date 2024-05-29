@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 import requests
 
 from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.serializer import SerializationHelper
 from abstra_internals.threaded import threaded
 from abstra_internals.utils import serialize
@@ -197,10 +198,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
                     logs.append(LogEntryFactory.from_dto(dto))
                 return logs
         except Exception as e:
-            import traceback
-
-            traceback.print_exc()
-            print(f"Error reading log file {log_file}: {e}")
+            AbstraLogger.capture_exception(e)
             return []
 
 

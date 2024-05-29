@@ -331,8 +331,6 @@ class TestWorkflowA(TestCase):
 
         self.assertEqual(first_kanban_state.status_code, 200)
 
-        print(first_kanban_state.get_json())
-
         self.assertEqual(
             sort_response(first_kanban_state.get_json()),
             sort_response(
