@@ -1,5 +1,4 @@
-import tkinter as tk
-from tkinter.filedialog import askdirectory
+import sys
 from typing import Optional
 
 import fire
@@ -11,21 +10,23 @@ from abstra_internals.settings import SettingsController
 
 
 def is_headless():
-    """
-    Check if the application is running in a headless environment.
-    """
-    try:
-        # Attempt to create a Tkinter window to see if it fails
-        root = tk.Tk()
-        root.withdraw()  # Hide the root window
-        root.update_idletasks()
-        root.destroy()  # Clean up
-        return False
-    except tk.TclError:
-        return True
+    return not sys.stdin.isatty()
 
 
 def select_dir(selected_dir: Optional[str]) -> str:
+    try:
+        from tkinter.filedialog import askdirectory  # type: ignore
+    except ImportError:
+
+        def askdirectory(initialdir):
+            ans = input(
+                "The project will be created in the current directory. Continue? (y/n): "
+            )
+            if ans.lower() != "y":
+                print("\nTry using: 'abstra editor <PATH>' to specify a directory.")
+                exit(0)
+            return "."
+
     if selected_dir:
         return selected_dir
     elif is_headless():
