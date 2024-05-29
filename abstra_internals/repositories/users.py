@@ -1,126 +1,79 @@
-import datetime
-import json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import requests
 
 from abstra_internals.contracts_generated import CommonUser, CommonUserRoles
-from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
-from abstra_internals.logger import AbstraLogger
-from abstra_internals.settings import Settings
-from abstra_internals.utils.dot_abstra import LOCAL_USERS_FILE
+from abstra_internals.credentials import resolve_headers
+from abstra_internals.environment import (
+    CLOUD_API_ENDPOINT,
+    SIDECAR_HEADERS,
+    SIDECAR_URL,
+)
 
 
 class UsersRepository(ABC):
     @abstractmethod
-    def get_user_roles(self, email: str) -> CommonUserRoles:
-        pass
-
-    @abstractmethod
     def get_user(self, email: str) -> Optional[CommonUser]:
         pass
 
     @abstractmethod
-    def list_users(self) -> List[CommonUser]:
+    def insert_user(self, email: str) -> bool:
         pass
 
-    @abstractmethod
-    def insert_user(self, email: str, roles: CommonUserRoles) -> bool:
-        pass
 
-    @abstractmethod
-    def delete_user(self, email: str) -> None:
-        pass
+class TestUsersRepository(UsersRepository):
+    ## prevent pytest to inspect this class
+    __test__ = False
+    data: Dict[str, CommonUserRoles]
 
-    @abstractmethod
-    def update_user(self, email: str, roles: CommonUserRoles) -> None:
-        pass
+    def __init__(self, data: Dict[str, CommonUserRoles] = {}) -> None:
+        super().__init__()
+        self.data = data
+
+    def get_user(self, email: str) -> Optional[CommonUser]:
+        if email in self.data:
+            return CommonUser(
+                id=email,
+                email=email,
+                roles=self.data[email],
+                created_at="2021-09-01T00:00:00Z",
+                project_id="1",
+            )
+
+        return None
+
+    def insert_user(self, email: str) -> bool:
+        if email in self.data:
+            return False
+        self.data[email] = []
+        return True
 
 
 class LocalUsersRepository(UsersRepository):
-    data: Dict[str, CommonUserRoles]
-    sign_up_policy: List[str]
-    is_loaded: bool
-
-    def __init__(self, data: Dict[str, CommonUserRoles] = {}) -> None:
-        self.data = data
-        self.sign_up_policy: List[str] = []
-        self.is_loaded = False
-
-    def __load(self):
-        self.is_loaded = True
-        self.local_cache = Settings.root_path.joinpath(LOCAL_USERS_FILE)
-        Settings.root_path.joinpath(".abstra").mkdir(exist_ok=True)
-        try:
-            with open(self.local_cache, "r") as f:
-                self.data = {**self.data, **json.load(f)}
-        except FileNotFoundError:
-            with open(self.local_cache, "w") as f:
-                json.dump({}, f)
-            self.data = {**self.data}
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
-
-    def __dump(self):
-        with open(self.local_cache, "w") as f:
-            json.dump(self.data, f)
-
-    def get_user_roles(self, email: str) -> CommonUserRoles:
-        user = self.get_user(email)
-        if user is None:
-            return []
-        return user.roles
+    @property
+    def headers(self):
+        return resolve_headers()
 
     def get_user(self, email: str) -> Optional[CommonUser]:
-        if not self.is_loaded:
-            self.__load()
-
-        if email not in self.data:
+        if not self.headers:
             return None
 
-        roles = self.data.get(email, [])
+        url = f"{CLOUD_API_ENDPOINT}/cli/users/"
+        response = requests.get(url, headers=self.headers, params={"email": email})
+        if response.status_code == 404:
+            return None
 
-        return CommonUser(
-            id=email,
-            email=email,
-            roles=roles,
-            project_id=email,
-            created_at=datetime.datetime.now().isoformat(),
-        )
+        return CommonUser.from_dict(response.json())
 
-    def list_users(self) -> List[CommonUser]:
-        if not self.is_loaded:
-            self.__load()
+    def insert_user(self, email: str) -> bool:
+        if not self.headers:
+            return False
 
-        return [
-            CommonUser(
-                id=email,
-                email=email,
-                roles=roles,
-                project_id=email,
-                created_at=datetime.datetime.now().isoformat(),
-            )
-            for email, roles in self.data.items()
-        ]
+        url = f"{CLOUD_API_ENDPOINT}/cli/users/"
+        response = requests.post(url, headers=self.headers, json={"email": email})
 
-    def insert_user(self, email: str, roles: CommonUserRoles) -> bool:
-        if not self.is_loaded:
-            self.__load()
-
-        self.data[email] = roles
-        self.__dump()
-        return True
-
-    def delete_user(self, email: str) -> None:
-        if email in self.data:
-            del self.data[email]
-            self.__dump()
-
-    def update_user(self, email: str, roles: CommonUserRoles) -> None:
-        if email in self.data:
-            self.data[email] = roles
-            self.__dump()
+        return response.status_code == 201
 
 
 class ProductionUsersRepository(UsersRepository):
@@ -158,27 +111,9 @@ class ProductionUsersRepository(UsersRepository):
             return None
         return CommonUser.from_dict(r.json())
 
-    def get_user_roles(self, email: str) -> CommonUserRoles:
-        user = self.get_user(email)
-        if user is None:
-            return []
-        return user.roles
-
-    def insert_user(self, email: str, roles: CommonUserRoles) -> bool:
-        r = self._request(
-            "POST", "/", body={"email": email, "roles": roles}, raise_for_status=False
-        )
+    def insert_user(self, email: str) -> bool:
+        r = self._request("POST", "/", body={"email": email}, raise_for_status=False)
         return r.status_code == 201
-
-    ##this is not expected, but is needed to keep the interface
-    def list_users(self) -> List[CommonUser]:
-        return []
-
-    def delete_user(self, email: str) -> None:
-        pass
-
-    def update_user(self, email: str, roles: CommonUserRoles) -> None:
-        pass
 
 
 def users_repository_factory() -> UsersRepository:
