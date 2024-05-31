@@ -241,6 +241,7 @@ def update_workflow(workflow_state_dto: Dict):
         elif stage_dto["type"] == "iterators":
             props = stage_dto.get("props", {})
             variable_name = props.get("variableName", "")
+            item_name = props.get("itemName", "")
 
             stage = IteratorStage(
                 id=stage_dto["id"],
@@ -250,6 +251,7 @@ def update_workflow(workflow_state_dto: Dict):
                 ),
                 variable_name=variable_name,
                 workflow_transitions=[],
+                item_name=item_name,
             )
             project.add_stage(stage)
         elif stage_dto["type"] == "conditions":
