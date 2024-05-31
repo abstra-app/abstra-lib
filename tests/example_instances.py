@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from abstra_internals.widgets.library import (
+    AppointmentInput,
     CameraInput,
     CardsInput,
     CheckboxInput,
@@ -130,4 +131,5 @@ example_instances = [
     ),
     RichTextInput("rich-text", "Write your blog post here"),
     CameraInput("camera", "Take a picture"),
+    AppointmentInput("appointment", "Schedule an appointment", slots=[]),
 ]

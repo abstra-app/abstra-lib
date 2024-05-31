@@ -1,4 +1,397 @@
 metadata = {
+    "appointment-input": {
+        "name": "Appointment Input",
+        "description": "A calendar slot selection that allows users to select a time slot for an appointment.",
+        "type": "appointment-input",
+        "events": [
+            {
+                "key": "update:value",
+                "description": "Function or expression to be run when the input value changes",
+                "payloadSchema": [],
+            }
+        ],
+        "pythonAPI": {
+            "name": "read_appointment",
+            "params": [
+                {
+                    "argName": "label",
+                    "description": "The label to display to the user",
+                    "typeName": "str",
+                    "isKwarg": False,
+                    "default": "''",
+                },
+                {
+                    "argName": "slots",
+                    "description": "The available slots for the user to choose from",
+                    "typeName": "List[Union[AppointmentSlot, dict, Tuple[datetime, datetime]]]",
+                    "isKwarg": True,
+                    "default": "[]",
+                },
+                {
+                    "argName": "initial_value",
+                    "description": "The initial value to display to the user. Defaults to None.",
+                    "typeName": "Union[AppointmentSlot, dict, Tuple[datetime, datetime]]",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "disabled",
+                    "description": "whether the input is disabled. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                },
+                {
+                    "argName": "required",
+                    "description": 'Whether the input is required or not eg. "this field is required". Defaults to True.',
+                    "typeName": "Union[bool, str]",
+                    "typeDescription": ["bool", "str"],
+                    "isKwarg": True,
+                    "default": "True",
+                },
+                {
+                    "argName": "hint",
+                    "description": "A tooltip displayed to the user. Defaults to None.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "end_program",
+                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                },
+                {
+                    "argName": "full_width",
+                    "description": "Whether the input should use full screen width. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
+                },
+                {
+                    "argName": "button_text",
+                    "description": "What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.",
+                    "typeName": "str",
+                    "isKwarg": True,
+                    "default": "Next",
+                },
+            ],
+            "returns": [
+                {
+                    "typeName": "AppointmentSlot",
+                    "typeDescription": "A dict containing the selected appointment slot",
+                }
+            ],
+        },
+        "brokerAPI": {
+            "params": [
+                {"argName": "label", "typeName": "string"},
+                {"argName": "slots", "typeName": "array"},
+                {"argName": "value", "typeName": "number"},
+                {"argName": "key", "typeName": "string"},
+                {"argName": "disabled", "typeName": "boolean"},
+                {"argName": "errors", "typeName": "array"},
+                {"argName": "hint", "typeName": ["string", "null"]},
+                {"argName": "required", "typeName": ["string", "boolean"]},
+                {"argName": "fullWidth", "typeName": "boolean"},
+            ]
+        },
+        "examples": [
+            {
+                "props": {
+                    "label": "Welcome to Abstra, please select a demo slot",
+                    "slots": [
+                        {
+                            "begin": "2024-05-31T10:00:39.129608",
+                            "end": "2024-05-31T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-05-31T11:00:39.129608",
+                            "end": "2024-05-31T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-05-31T13:00:39.129608",
+                            "end": "2024-05-31T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-05-31T14:00:39.129608",
+                            "end": "2024-05-31T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-05-31T15:00:39.129608",
+                            "end": "2024-05-31T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-05-31T16:00:39.129608",
+                            "end": "2024-05-31T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-05-31T17:00:39.129608",
+                            "end": "2024-05-31T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T10:00:39.129608",
+                            "end": "2024-06-03T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T11:00:39.129608",
+                            "end": "2024-06-03T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T13:00:39.129608",
+                            "end": "2024-06-03T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T14:00:39.129608",
+                            "end": "2024-06-03T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T15:00:39.129608",
+                            "end": "2024-06-03T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T16:00:39.129608",
+                            "end": "2024-06-03T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-03T17:00:39.129608",
+                            "end": "2024-06-03T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T10:00:39.129608",
+                            "end": "2024-06-04T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T11:00:39.129608",
+                            "end": "2024-06-04T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T13:00:39.129608",
+                            "end": "2024-06-04T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T14:00:39.129608",
+                            "end": "2024-06-04T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T15:00:39.129608",
+                            "end": "2024-06-04T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T16:00:39.129608",
+                            "end": "2024-06-04T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-04T17:00:39.129608",
+                            "end": "2024-06-04T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T10:00:39.129608",
+                            "end": "2024-06-05T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T11:00:39.129608",
+                            "end": "2024-06-05T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T13:00:39.129608",
+                            "end": "2024-06-05T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T14:00:39.129608",
+                            "end": "2024-06-05T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T15:00:39.129608",
+                            "end": "2024-06-05T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T16:00:39.129608",
+                            "end": "2024-06-05T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-05T17:00:39.129608",
+                            "end": "2024-06-05T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T10:00:39.129608",
+                            "end": "2024-06-06T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T11:00:39.129608",
+                            "end": "2024-06-06T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T13:00:39.129608",
+                            "end": "2024-06-06T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T14:00:39.129608",
+                            "end": "2024-06-06T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T15:00:39.129608",
+                            "end": "2024-06-06T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T16:00:39.129608",
+                            "end": "2024-06-06T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-06T17:00:39.129608",
+                            "end": "2024-06-06T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T10:00:39.129608",
+                            "end": "2024-06-07T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T11:00:39.129608",
+                            "end": "2024-06-07T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T13:00:39.129608",
+                            "end": "2024-06-07T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T14:00:39.129608",
+                            "end": "2024-06-07T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T15:00:39.129608",
+                            "end": "2024-06-07T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T16:00:39.129608",
+                            "end": "2024-06-07T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-07T17:00:39.129608",
+                            "end": "2024-06-07T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T10:00:39.129608",
+                            "end": "2024-06-10T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T11:00:39.129608",
+                            "end": "2024-06-10T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T13:00:39.129608",
+                            "end": "2024-06-10T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T14:00:39.129608",
+                            "end": "2024-06-10T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T15:00:39.129608",
+                            "end": "2024-06-10T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T16:00:39.129608",
+                            "end": "2024-06-10T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-10T17:00:39.129608",
+                            "end": "2024-06-10T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T10:00:39.129608",
+                            "end": "2024-06-11T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T11:00:39.129608",
+                            "end": "2024-06-11T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T13:00:39.129608",
+                            "end": "2024-06-11T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T14:00:39.129608",
+                            "end": "2024-06-11T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T15:00:39.129608",
+                            "end": "2024-06-11T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T16:00:39.129608",
+                            "end": "2024-06-11T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-11T17:00:39.129608",
+                            "end": "2024-06-11T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T10:00:39.129608",
+                            "end": "2024-06-12T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T11:00:39.129608",
+                            "end": "2024-06-12T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T13:00:39.129608",
+                            "end": "2024-06-12T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T14:00:39.129608",
+                            "end": "2024-06-12T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T15:00:39.129608",
+                            "end": "2024-06-12T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T16:00:39.129608",
+                            "end": "2024-06-12T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-12T17:00:39.129608",
+                            "end": "2024-06-12T17:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T10:00:39.129608",
+                            "end": "2024-06-13T10:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T11:00:39.129608",
+                            "end": "2024-06-13T11:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T13:00:39.129608",
+                            "end": "2024-06-13T13:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T14:00:39.129608",
+                            "end": "2024-06-13T14:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T15:00:39.129608",
+                            "end": "2024-06-13T15:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T16:00:39.129608",
+                            "end": "2024-06-13T16:45:39.129608",
+                        },
+                        {
+                            "begin": "2024-06-13T17:00:39.129608",
+                            "end": "2024-06-13T17:45:39.129608",
+                        },
+                    ],
+                },
+                "name": "Basic Example",
+                "description": "A simple appointment booking selector",
+                "key": "example1",
+                "code": 'from datetime import datetime, timedelta\nfrom abstra.forms import read_appointment\n# next 14 days\n# only weekdays\n# 10:00 - 18:00\n# 15 minutes interval\n# 45 minutes duration\n# remove lunch break\nslots = []\nmax_date = datetime.now() + timedelta(days=14)\ncurrent_date = datetime.now()\nwhile current_date < max_date:\n    if current_date.weekday() < 5:\n        for hour in range(10, 18):\n            if hour == 12:\n                continue\n            begin = current_date.replace(hour=hour, minute=0)\n            end = begin + timedelta(minutes=45)\n            slots.append((begin, end))\n    current_date += timedelta(days=1)\nread_appointment("Welcome to Abstra, please select a demo slot", slots=slots)',
+            }
+        ],
+    },
     "camera-input": {
         "name": "User Camera",
         "description": "Captures and uploads a photo using the user's camera.",

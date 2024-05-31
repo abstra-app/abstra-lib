@@ -4,6 +4,7 @@ from .ProgressOutput import ProgressOutput
 from .TagInput import TagInput
 from .HtmlOutput import HtmlOutput
 from .CnpjInput import CnpjInput
+from .AppointmentInput import AppointmentInput
 from .PlotlyOutput import PlotlyOutput
 from .PhoneInput import PhoneInput
 from .EmailInput import EmailInput
