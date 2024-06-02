@@ -12,7 +12,7 @@ def get_user(refresh: bool = False) -> Union[UserClaims, None]:
 
 def execute_js(code: str, context: dict = {}):
     sdk_controller = FormSDKController()
-    sdk_controller.execute_js(code, context)
+    return sdk_controller.execute_js(code, context)
 
 
 def redirect(url: str, query_params: Optional[dict] = None) -> None:
