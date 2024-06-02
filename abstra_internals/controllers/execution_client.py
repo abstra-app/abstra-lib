@@ -151,9 +151,7 @@ class FormClient(ExecutionClient):
     def request_redirect(
         self, url: str, query_params: Optional[Dict[str, str]]
     ) -> None:
-        _query_params = (
-            query_params if query_params is not None else self.get_query_params()
-        )
+        _query_params = query_params if query_params is not None else {}
         self._send(forms_contract.RedirectRequestMessage(url, _query_params))
 
     def handle_success(self):
