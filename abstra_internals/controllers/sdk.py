@@ -12,12 +12,8 @@ from abstra_internals.entities.execution import ExecutionDTO
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.execution import ExecutionRepository
-from abstra_internals.repositories.project.project import (
-    ProjectRepository,
-)
-from abstra_internals.repositories.stage_run import (
-    StageRunRepository,
-)
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.utils import is_json_serializable
 from abstra_internals.utils.json import to_json_serializable
 
@@ -79,7 +75,7 @@ class FormSDKController:
         return claims
 
     def execute_js(self, code: str, context: dict = {}):
-        self.client.request_execute_js(code, context)
+        return self.client.request_execute_js(code, context)
 
     def redirect(self, url: str, query_params: Optional[Dict[str, str]] = None) -> None:
         self.client.request_redirect(url, query_params)
