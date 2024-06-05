@@ -5,7 +5,7 @@ from abstra_internals.templates import new_hook_code
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
-class TestHooks(unittest.TestCase):
+class TestCRUDHooks(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.client = get_editor_flask_client()
