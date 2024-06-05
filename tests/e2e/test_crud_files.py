@@ -4,7 +4,7 @@ from os.path import join
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
-class TestWorkspace(unittest.TestCase):
+class TestCRUDFiles(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.client = get_editor_flask_client()

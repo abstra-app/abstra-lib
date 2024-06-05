@@ -15,6 +15,7 @@ from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.utils import is_json_serializable
+from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 from abstra_internals.utils.json import to_json_serializable
 
 
@@ -28,13 +29,17 @@ class HookSDKController:
     def set_response(self, status: int, body: str, headers: Dict[str, str]):
         self.get_current_client().set_response(status, body, headers)
 
-    def get_raw_request(self) -> Tuple[str, Dict[str, str], Dict[str, str]]:
+    def get_raw_request(self) -> Tuple[str, Dict[str, str], CaseInsensitiveDict]:
         request = self.get_current_client().get_request()
-        return request["body"], request["query_params"], request["headers"]
+        return (
+            request["body"],
+            request["query_params"],
+            CaseInsensitiveDict(request["headers"]),
+        )
 
     def get_request(
         self,
-    ) -> Tuple[Union[str, List, Dict], Dict[str, str], Dict[str, str]]:
+    ) -> Tuple[Union[str, List, Dict], Dict[str, str], CaseInsensitiveDict]:
         body, query, headers = self.get_raw_request()
         try:
             if "application/json" in headers["Content-Type"]:
