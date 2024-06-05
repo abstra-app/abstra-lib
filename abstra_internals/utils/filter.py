@@ -9,6 +9,8 @@ class FilterCondition:
     @staticmethod
     def from_dict(data: dict) -> Optional[FilterCondition]:
         if "key" in data and "comparator" in data and "value" in data:
+            if data["key"] == "":
+                return None
             return Condition(
                 key=data["key"], comparator=data["comparator"], value=data["value"]
             )
@@ -41,6 +43,9 @@ class LogicalGroup(FilterCondition):
 
 
 def evaluate_condition(condition: Condition, data: dict):
+    if condition.key == "":
+        return True
+
     if condition.key not in data:
         return False
 
@@ -56,13 +61,17 @@ def evaluate_condition(condition: Condition, data: dict):
 
 
 def evaluate_logical_group(group: LogicalGroup, data: dict):
-    if group.AND:
+    if group.AND is not None:
+        if len(group.AND) == 0:
+            return True
         return all(
             evaluate_filter_condition(condition, data) for condition in group.AND
         )
-    if group.OR:
+    if group.OR is not None:
+        if len(group.OR) == 0:
+            return True
         return any(evaluate_filter_condition(condition, data) for condition in group.OR)
-    if group.NOT:
+    if group.NOT is not None:
         return not evaluate_filter_condition(group.NOT, data)
 
     return False

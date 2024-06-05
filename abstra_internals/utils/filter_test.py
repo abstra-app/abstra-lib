@@ -75,6 +75,13 @@ class TestEvaluateLogicalGroup(unittest.TestCase):
         self.assertFalse(evaluate_logical_group(group, {"key": "value"}))
         self.assertTrue(evaluate_logical_group(group, {"key": "not_value"}))
 
+    def test_group_with_no_conditions(self):
+        empty_AND_group = LogicalGroup(AND=[])
+        empty_OR_group = LogicalGroup(OR=[])
+
+        self.assertTrue(evaluate_logical_group(empty_AND_group, {}))
+        self.assertTrue(evaluate_logical_group(empty_OR_group, {}))
+
     def test_invalid_group(self):
         group = LogicalGroup()
         self.assertFalse(evaluate_logical_group(group, {"key": "value"}))
