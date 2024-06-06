@@ -9,7 +9,7 @@ from abstra_internals.controllers.execution_client import (
 
 class TestPage(unittest.TestCase):
     def setUp(self) -> None:
-        self.client = FormClient(None, {})  # type: ignore
+        self.client = FormClient(ws=None, request_context={}, production_mode=False)  # type: ignore
         ExecutionClientStore.set(self.client)
         return super().setUp()
 

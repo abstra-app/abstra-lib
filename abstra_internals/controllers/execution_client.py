@@ -103,9 +103,15 @@ class HookClient(ExecutionClient):
 
 
 class FormClient(ExecutionClient):
-    def __init__(self, ws: flask_sock.Server, request_context: RequestContext) -> None:
+    def __init__(
+        self,
+        ws: flask_sock.Server,
+        request_context: RequestContext,
+        production_mode: bool,
+    ) -> None:
         self._ws = ws
         self._request_context = request_context
+        self._production_mode = production_mode
 
     def request_mount_page(
         self,
@@ -186,6 +192,9 @@ class FormClient(ExecutionClient):
         self._send(forms_contract.ExecutionLockFailedMessage(status))
 
     def handle_stdio(self, event: Literal["stdout", "stderr"], text: str) -> None:
+        if self._production_mode:
+            return
+
         self._send(forms_contract.ExecutionStdioMessage(event, text))
 
     def _receive_message(self):

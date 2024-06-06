@@ -28,7 +28,7 @@ class MockWS:
 class TestReactive(unittest.TestCase):
     def setUp(self):
         self.mock_ws = MockWS()
-        self.form_client = FormClient(self.mock_ws, {})  # type: ignore
+        self.form_client = FormClient(self.mock_ws, {}, production_mode=False)  # type: ignore
         ExecutionClientStore.set(self.form_client)
 
     def tearDown(self) -> None:

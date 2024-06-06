@@ -26,7 +26,11 @@ default_text_input = {
 class TestListInput(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
-        self.form_client = FormClient(None, {})  # type: ignore
+        self.form_client = FormClient(
+            ws=None,  # type: ignore
+            request_context={},  # type: ignore
+            production_mode=False,
+        )
         ExecutionClientStore.set(self.form_client)
 
     def tearDown(self) -> None:
