@@ -40,7 +40,9 @@ def get_editor_bp(controller: MainController):
             if not form:
                 return
 
-            form_client = FormClient(ws=ws, request_context=request_context)
+            form_client = FormClient(
+                ws=ws, request_context=request_context, production_mode=False
+            )
 
             execution_controller = ExecutionController(
                 stage=form,

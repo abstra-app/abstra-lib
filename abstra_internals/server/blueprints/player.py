@@ -110,7 +110,9 @@ def get_player_bp(controller: MainController):
         )
 
         try:
-            form_client = FormClient(ws=ws, request_context=request_context)
+            form_client = FormClient(
+                ws=ws, request_context=request_context, production_mode=True
+            )
             id = flask.request.args.get("id")
             if id is None:
                 return
