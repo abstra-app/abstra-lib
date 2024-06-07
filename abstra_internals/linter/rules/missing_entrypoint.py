@@ -32,13 +32,13 @@ class AddEntrypoint(LinterFix):
 
     def fix(self):
         if isinstance(self.stage, FormStage):
-            self.stage.file_path.write_text(new_form_code)
+            self.stage.file_path.write_text(new_form_code, "utf-8")
         elif isinstance(self.stage, HookStage):
-            self.stage.file_path.write_text(new_hook_code)
+            self.stage.file_path.write_text(new_hook_code, "utf-8")
         elif isinstance(self.stage, JobStage):
-            self.stage.file_path.write_text(new_job_code)
+            self.stage.file_path.write_text(new_job_code, "utf-8")
         elif isinstance(self.stage, ScriptStage):
-            self.stage.file_path.write_text(new_script_code)
+            self.stage.file_path.write_text(new_script_code, "utf-8")
         else:
             raise Exception(f"Unknown stage: {self.stage}")
 
