@@ -39,7 +39,7 @@ class DataRequestFilter:
     asignee: Optional[str]
     data: Optional[dict]
     search: Optional[str]
-    data_conditions: Optional[dict] = None
+    advanced_data_filter: Optional[dict] = None
 
     @staticmethod
     def from_dict(data: dict) -> "DataRequestFilter":
@@ -49,7 +49,7 @@ class DataRequestFilter:
             asignee=data.get("asignee", None),
             data=data.get("data", None),
             search=data.get("search", None),
-            data_conditions=data.get("data_conditions", {}),
+            advanced_data_filter=data.get("advanced_data_filter", {}),
         )
 
     def to_dict(self) -> dict:

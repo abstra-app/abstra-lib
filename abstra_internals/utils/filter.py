@@ -1,7 +1,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Tuple, Union, get_args
+
+CONDITION_COMPARATORS_TYPE = Literal["is", "contains"]
+
+SINGLE_CONDITION_OPERATORS_TYPE = Literal["NOT"]
+SINGLE_CONDITION_OPERATORS: Tuple[SINGLE_CONDITION_OPERATORS_TYPE, ...] = get_args(
+    SINGLE_CONDITION_OPERATORS_TYPE
+)
+
+MULTIPLE_CONDITIONS_OPERATORS_TYPE = Literal["AND", "OR"]
+MULTIPLE_CONDITIONS_OPERATORS: Tuple[MULTIPLE_CONDITIONS_OPERATORS_TYPE, ...] = (
+    get_args(MULTIPLE_CONDITIONS_OPERATORS_TYPE)
+)
 
 
 @dataclass
@@ -14,16 +26,20 @@ class FilterCondition:
             return Condition(
                 key=data["key"], comparator=data["comparator"], value=data["value"]
             )
-        if "AND" in data:
-            return LogicalGroup(
-                AND=[FilterCondition.from_dict(condition) for condition in data["AND"]]
-            )
-        if "OR" in data:
-            return LogicalGroup(
-                OR=[FilterCondition.from_dict(condition) for condition in data["OR"]]
-            )
-        if "NOT" in data:
-            return LogicalGroup(NOT=FilterCondition.from_dict(data["NOT"]))
+        if "operator" in data:
+            if data["operator"] in SINGLE_CONDITION_OPERATORS:
+                return LogicalGroupSingleCondition(
+                    operator=data["operator"],
+                    condition=FilterCondition.from_dict(data["condition"]),
+                )
+            if data["operator"] in MULTIPLE_CONDITIONS_OPERATORS:
+                return LogicalGroupMultipleConditions(
+                    operator=data["operator"],
+                    conditions=[
+                        FilterCondition.from_dict(condition)
+                        for condition in data["conditions"]
+                    ],
+                )
 
         return None
 
@@ -31,15 +47,23 @@ class FilterCondition:
 @dataclass
 class Condition(FilterCondition):
     key: str
-    comparator: Literal["is", "contains"]
+    comparator: CONDITION_COMPARATORS_TYPE
     value: str
 
 
 @dataclass
-class LogicalGroup(FilterCondition):
-    AND: Optional[List[Optional[FilterCondition]]] = None
-    OR: Optional[List[Optional[FilterCondition]]] = None
-    NOT: Optional[FilterCondition] = None
+class LogicalGroupSingleCondition(FilterCondition):
+    operator: SINGLE_CONDITION_OPERATORS_TYPE
+    condition: Optional[FilterCondition]
+
+
+@dataclass
+class LogicalGroupMultipleConditions(FilterCondition):
+    operator: MULTIPLE_CONDITIONS_OPERATORS_TYPE
+    conditions: Optional[List[Optional[FilterCondition]]]
+
+
+LogicalGroup = Union[LogicalGroupSingleCondition, LogicalGroupMultipleConditions]
 
 
 def evaluate_condition(condition: Condition, data: dict):
@@ -61,18 +85,22 @@ def evaluate_condition(condition: Condition, data: dict):
 
 
 def evaluate_logical_group(group: LogicalGroup, data: dict):
-    if group.AND is not None:
-        if len(group.AND) == 0:
+    if group.operator == "AND":
+        if group.conditions is None or len(group.conditions) == 0:
             return True
         return all(
-            evaluate_filter_condition(condition, data) for condition in group.AND
+            evaluate_filter_condition(condition, data) for condition in group.conditions
         )
-    if group.OR is not None:
-        if len(group.OR) == 0:
+    if group.operator == "OR":
+        if group.conditions is None or len(group.conditions) == 0:
             return True
-        return any(evaluate_filter_condition(condition, data) for condition in group.OR)
-    if group.NOT is not None:
-        return not evaluate_filter_condition(group.NOT, data)
+        return any(
+            evaluate_filter_condition(condition, data) for condition in group.conditions
+        )
+    if group.operator == "NOT":
+        if group.condition is None:
+            return True
+        return not evaluate_filter_condition(group.condition, data)
 
     return False
 
@@ -80,7 +108,9 @@ def evaluate_logical_group(group: LogicalGroup, data: dict):
 def evaluate_filter_condition(filter_condition: Optional[FilterCondition], data: dict):
     if isinstance(filter_condition, Condition):
         return evaluate_condition(filter_condition, data)
-    if isinstance(filter_condition, LogicalGroup):
+    if isinstance(
+        filter_condition, (LogicalGroupSingleCondition, LogicalGroupMultipleConditions)
+    ):
         return evaluate_logical_group(filter_condition, data)
     if filter_condition is None:
         return True
