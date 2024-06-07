@@ -917,7 +917,7 @@ class KanbanView:
 
     @property
     def path(self):
-        return "_player/threads"
+        return "threads"
 
     @property
     def title(self):
