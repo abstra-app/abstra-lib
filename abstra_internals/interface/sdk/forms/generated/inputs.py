@@ -469,7 +469,7 @@ def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
 		multiple (bool): Whether the user can select multiple options. Defaults to False.
 		min (number): The minimal amount of options that should be selected. Defaults to None.
 		max (number): The maximum amount of options that should be selected. Defaults to None.
-		initial_value ([]): The initial indexes of the selection. Defaults to [].
+		initial_value ([]): The initial values of the selection. Defaults to [].
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
