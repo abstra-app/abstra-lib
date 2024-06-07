@@ -66,7 +66,7 @@ class GetStageRunByQueryFilter:
     status: Optional[List[Status]] = None
     data: Optional[Dict] = None
     search: Optional[str] = None
-    data_conditions: Optional[FilterCondition] = None
+    advanced_data_filter: Optional[FilterCondition] = None
 
     @staticmethod
     def from_dict(data: dict) -> "GetStageRunByQueryFilter":
@@ -77,7 +77,9 @@ class GetStageRunByQueryFilter:
             status=data.get("status", None),
             data=data.get("data", None),
             search=data.get("search", None),
-            data_conditions=FilterCondition.from_dict(data.get("data_conditions", {})),
+            advanced_data_filter=FilterCondition.from_dict(
+                data.get("advanced_data_filter", {})
+            ),
         )
 
     def to_dict(self) -> dict:
@@ -302,8 +304,8 @@ class LocalStageRunRepository(StageRunRepository):
             if filter.search and not self._compare_search(stage_run, filter.search):
                 continue
 
-            if filter.data_conditions and not evaluate_filter_condition(
-                filter.data_conditions, stage_run.data
+            if filter.advanced_data_filter and not evaluate_filter_condition(
+                filter.advanced_data_filter, stage_run.data
             ):
                 continue
 

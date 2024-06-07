@@ -194,7 +194,7 @@ class KanbanTests(TestCase):
                     "limit": 10,
                     "offset": 0,
                     "filter": {
-                        "data_conditions": {
+                        "advanced_data_filter": {
                             "key": "foo",
                             "comparator": "contains",
                             "value": "bar",

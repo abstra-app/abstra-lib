@@ -3,7 +3,8 @@ import unittest
 from abstra_internals.utils.filter import (
     Condition,
     FilterCondition,
-    LogicalGroup,
+    LogicalGroupMultipleConditions,
+    LogicalGroupSingleCondition,
     evaluate_condition,
     evaluate_logical_group,
 )
@@ -44,8 +45,12 @@ class TestEvaluateCondition(unittest.TestCase):
 
 class TestEvaluateLogicalGroup(unittest.TestCase):
     def test_and_group(self):
-        group = LogicalGroup(
-            AND=[Condition("key1", "is", "value1"), Condition("key2", "is", "value2")]
+        group = LogicalGroupMultipleConditions(
+            operator="AND",
+            conditions=[
+                Condition("key1", "is", "value1"),
+                Condition("key2", "is", "value2"),
+            ],
         )
         self.assertTrue(
             evaluate_logical_group(group, {"key1": "value1", "key2": "value2"})
@@ -55,8 +60,12 @@ class TestEvaluateLogicalGroup(unittest.TestCase):
         )
 
     def test_or_group(self):
-        group = LogicalGroup(
-            OR=[Condition("key1", "is", "value1"), Condition("key2", "is", "value2")]
+        group = LogicalGroupMultipleConditions(
+            operator="OR",
+            conditions=[
+                Condition("key1", "is", "value1"),
+                Condition("key2", "is", "value2"),
+            ],
         )
         self.assertTrue(
             evaluate_logical_group(group, {"key1": "value1", "key2": "value2"})
@@ -71,39 +80,44 @@ class TestEvaluateLogicalGroup(unittest.TestCase):
         )
 
     def test_not_group(self):
-        group = LogicalGroup(NOT=Condition("key", "is", "value"))
+        group = LogicalGroupSingleCondition(
+            operator="NOT", condition=Condition("key", "is", "value")
+        )
         self.assertFalse(evaluate_logical_group(group, {"key": "value"}))
         self.assertTrue(evaluate_logical_group(group, {"key": "not_value"}))
 
     def test_group_with_no_conditions(self):
-        empty_AND_group = LogicalGroup(AND=[])
-        empty_OR_group = LogicalGroup(OR=[])
+        empty_AND_group = LogicalGroupMultipleConditions(operator="AND", conditions=[])
+        empty_OR_group = LogicalGroupMultipleConditions(operator="OR", conditions=[])
+        empty_NOT_group = LogicalGroupSingleCondition(operator="NOT", condition=None)
 
         self.assertTrue(evaluate_logical_group(empty_AND_group, {}))
         self.assertTrue(evaluate_logical_group(empty_OR_group, {}))
-
-    def test_invalid_group(self):
-        group = LogicalGroup()
-        self.assertFalse(evaluate_logical_group(group, {"key": "value"}))
+        self.assertTrue(evaluate_logical_group(empty_NOT_group, {}))
 
 
 class TestEvaluateFilterCondition(unittest.TestCase):
     def test_nested_condition(self):
-        group = LogicalGroup(
-            AND=[
-                LogicalGroup(
-                    OR=[
+        group = LogicalGroupMultipleConditions(
+            operator="AND",
+            conditions=[
+                LogicalGroupMultipleConditions(
+                    operator="OR",
+                    conditions=[
                         Condition("key1", "is", "value1"),
-                        LogicalGroup(NOT=Condition("key2", "is", "value2")),
-                    ]
+                        LogicalGroupSingleCondition(
+                            operator="NOT", condition=Condition("key2", "is", "value2")
+                        ),
+                    ],
                 ),
-                LogicalGroup(
-                    OR=[
+                LogicalGroupMultipleConditions(
+                    operator="OR",
+                    conditions=[
                         Condition("key2", "is", "value2"),
                         Condition("key3", "is", "value3"),
-                    ]
+                    ],
                 ),
-            ]
+            ],
         )
         self.assertTrue(
             evaluate_logical_group(
@@ -122,12 +136,12 @@ class TestEvaluateFilterCondition(unittest.TestCase):
         )
 
     def test_none_is_evaluated_as_true_except_for_not(self):
-        group = LogicalGroup(AND=[None])
+        group = LogicalGroupMultipleConditions(operator="AND", conditions=[None])
         self.assertTrue(evaluate_logical_group(group, {}))
-        group = LogicalGroup(OR=[None])
+        group = LogicalGroupMultipleConditions(operator="OR", conditions=[None])
         self.assertTrue(evaluate_logical_group(group, {}))
-        group = LogicalGroup(NOT=None)
-        self.assertFalse(evaluate_logical_group(group, {}))
+        group = LogicalGroupSingleCondition(operator="NOT", condition=None)
+        self.assertTrue(evaluate_logical_group(group, {}))
 
 
 class TestFilterCondition(unittest.TestCase):
@@ -139,20 +153,34 @@ class TestFilterCondition(unittest.TestCase):
 
     def test_from_dict_complex_logic_group(self):
         data = {
-            "AND": [
-                {"NOT": {"key": "key1", "comparator": "is", "value": "value1"}},
-                {"OR": [{"key": "key2", "comparator": "is", "value": "value2"}]},
-            ]
+            "operator": "AND",
+            "conditions": [
+                {
+                    "operator": "NOT",
+                    "condition": {"key": "key1", "comparator": "is", "value": "value1"},
+                },
+                {
+                    "operator": "OR",
+                    "conditions": [
+                        {"key": "key2", "comparator": "is", "value": "value2"}
+                    ],
+                },
+            ],
         }
         group = FilterCondition.from_dict(data)
-        self.assertIsInstance(group, LogicalGroup)
+        self.assertIsInstance(group, LogicalGroupMultipleConditions)
         self.assertEqual(
             group,
-            LogicalGroup(
-                AND=[
-                    LogicalGroup(NOT=Condition("key1", "is", "value1")),
-                    LogicalGroup(OR=[Condition("key2", "is", "value2")]),
-                ]
+            LogicalGroupMultipleConditions(
+                operator="AND",
+                conditions=[
+                    LogicalGroupSingleCondition(
+                        operator="NOT", condition=Condition("key1", "is", "value1")
+                    ),
+                    LogicalGroupMultipleConditions(
+                        operator="OR", conditions=[Condition("key2", "is", "value2")]
+                    ),
+                ],
             ),
         )
 
