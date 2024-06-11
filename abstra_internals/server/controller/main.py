@@ -414,7 +414,10 @@ class MainController:
     # access_control
     def list_access_controls(self):
         project = ProjectRepository.load()
-        return [s.to_access_dto() for s in project.list_accessible_stages()]
+        return [
+            s.to_access_dto()
+            for s in project.list_accessible_stages(initial_forms_only=False)
+        ]
 
     def update_access_controls(self, changes: List[Dict[str, Any]]):
         project = ProjectRepository.load()
