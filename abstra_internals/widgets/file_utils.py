@@ -1,16 +1,16 @@
 import io
 import pathlib
 import tempfile
-import typing as t
+from typing import Union
 
-from abstra_internals.widgets.apis import (
+from abstra_internals.utils.file import (
     get_random_filepath,
     internal_path,
-    upload_file,
 )
+from abstra_internals.widgets.apis import upload_file
 
 
-def convert_file(file: t.Union[str, io.IOBase, pathlib.Path]) -> str:
+def convert_file(file: Union[str, io.IOBase, pathlib.Path]) -> str:
     if not file:
         return ""
 
@@ -40,7 +40,7 @@ def convert_file(file: t.Union[str, io.IOBase, pathlib.Path]) -> str:
 
 def download_file(
     url: str,
-) -> t.Union[io.BufferedReader, tempfile._TemporaryFileWrapper]:
+) -> Union[io.BufferedReader, tempfile._TemporaryFileWrapper]:
     import requests
 
     if url.startswith("http://") or url.startswith("https://"):

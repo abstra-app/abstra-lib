@@ -1,3 +1,4 @@
+from abstra_internals.repositories.ai import ai_api_http_client_factory
 from abstra_internals.repositories.authn import authn_repository_factory
 from abstra_internals.repositories.connectors import connectors_api_http_client_factory
 from abstra_internals.repositories.env_vars import env_vars_repository_factory
@@ -25,6 +26,7 @@ authn_repository = authn_repository_factory()
 lock_repository = lock_repository_factory()
 users_repository = users_repository_factory()
 roles_repository = roles_repository_factory()
+ai_repository = ai_api_http_client_factory()
 
 
 __all__ = [
@@ -39,4 +41,5 @@ __all__ = [
     "lock_repository",
     "users_repository",
     "roles_repository",
+    "ai_repository",
 ]
