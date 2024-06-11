@@ -9,6 +9,7 @@ from abstra_internals.repositories.project.project import (
     FormStage,
     NotificationTrigger,
     ProjectRepository,
+    WorkflowTransition,
 )
 from abstra_internals.repositories.users import TestUsersRepository
 from abstra_internals.server.guards.role_guard import (
@@ -269,6 +270,28 @@ class TestRequirementsApi(TestCase):
             access_control=AccessSettings(is_public=True, required_roles=[]),
         )
 
+        public_pependent_form = FormStage(
+            id="public_pependent_form",
+            path="public_pependent_form",
+            title="public_pependent_form",
+            file="public_pependent_form.py",
+            workflow_position=(0.0, 0.0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+            access_control=AccessSettings(is_public=True, required_roles=[]),
+        )
+
+        public_form.workflow_transitions.append(
+            WorkflowTransition(
+                id="1",
+                target_type="target_type",
+                target_id="public_pependent_form",
+                type="form:finished",
+            )
+        )
+
         protected_form = FormStage(
             id="protected_form_id",
             path="protected_form",
@@ -296,6 +319,7 @@ class TestRequirementsApi(TestCase):
         )
 
         project.forms.append(public_form)
+        project.forms.append(public_pependent_form)
         project.forms.append(protected_form)
         project.forms.append(private_form)
 

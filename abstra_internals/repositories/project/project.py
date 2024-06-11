@@ -1142,8 +1142,16 @@ class Project:
             if stage.id == id:
                 return stage
 
-    def list_accessible_stages(self) -> Generator[SecuredStage, None, None]:
+    def list_accessible_stages(
+        self, initial_forms_only: bool = True
+    ) -> Generator[SecuredStage, None, None]:
         for stage in self.secured_stages:
+            if (
+                initial_forms_only
+                and isinstance(stage, FormStage)
+                and not stage.is_initial
+            ):
+                continue
             yield stage
 
     def update_access_controls(self, changes: List[Dict[str, Any]]):
