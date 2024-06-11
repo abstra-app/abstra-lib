@@ -2,6 +2,8 @@ import ast
 import fnmatch
 import os
 import re
+import tempfile
+import uuid
 from pathlib import Path
 from typing import Generator, Optional, Union
 
@@ -176,3 +178,24 @@ def traverse_code(
     except Exception as e:
         if raise_on_syntax_errors and isinstance(e, SyntaxError):
             raise e
+
+
+def _ensure_uploaded_files_dir():
+    uploaded_files_dir = Path(tempfile.gettempdir(), "_uploaded_files")
+    uploaded_files_dir.mkdir(exist_ok=True)
+    return uploaded_files_dir
+
+
+def internal_path(name: str):
+    uploaded_files_dir = _ensure_uploaded_files_dir()
+    return uploaded_files_dir.joinpath(name)
+
+
+def get_random_filepath(name=None):
+    if name is None:
+        name = str(uuid.uuid4())
+    else:
+        name = str(uuid.uuid4()) + "/" + Path(name).name
+    path = internal_path(name)
+    path.parent.mkdir(exist_ok=True)
+    return name, path

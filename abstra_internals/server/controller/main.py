@@ -50,9 +50,14 @@ from abstra_internals.templates import (
     new_script_code,
 )
 from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
-from abstra_internals.utils.file import files_from_directory, module2path, path2module
+from abstra_internals.utils.file import (
+    files_from_directory,
+    get_random_filepath,
+    internal_path,
+    module2path,
+    path2module,
+)
 from abstra_internals.utils.validate import validate_json
-from abstra_internals.widgets.apis import get_random_filepath, internal_path
 
 
 class UnknownNodeTypeError(Exception):
