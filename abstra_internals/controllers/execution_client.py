@@ -128,29 +128,38 @@ class FormClient(ExecutionClient):
                 end_program,
                 reactive_polling_interval,
                 steps_info,
+                self._production_mode,
             )
         )
 
     def request_page_update(
         self, widgets: list, validation: forms_contract.ValidationResult, event_seq: int
     ) -> None:
-        self._send(forms_contract.FormUpdatePageMessage(widgets, validation, event_seq))
+        self._send(
+            forms_contract.FormUpdatePageMessage(
+                widgets, validation, event_seq, self._production_mode
+            )
+        )
 
     def get_query_params(self) -> Dict[str, str]:
         return self._request_context.get("query_params", {})
 
     def request_auth(self, refresh: bool = False):
-        self._send(forms_contract.AuthRequireInfoMessage(refresh=refresh))
+        self._send(
+            forms_contract.AuthRequireInfoMessage(refresh, self._production_mode)
+        )
         return self.wait_for_message("auth:saved-jwt")
 
     def handle_invalid_jwt(self):
-        self._send(forms_contract.AuthInvalidJWTMessage())
+        self._send(forms_contract.AuthInvalidJWTMessage(self._production_mode))
 
     def handle_valid_jwt(self):
-        self._send(forms_contract.AuthValidJWTMessage())
+        self._send(forms_contract.AuthValidJWTMessage(self._production_mode))
 
     def request_execute_js(self, code: str, context: dict = {}):
-        self._send(forms_contract.ExecuteJSRequestMessage(code, context))
+        self._send(
+            forms_contract.ExecuteJSRequestMessage(code, context, self._production_mode)
+        )
         data = self.wait_for_message("execute-js:response")
         return data.get("value")
 
@@ -158,18 +167,26 @@ class FormClient(ExecutionClient):
         self, url: str, query_params: Optional[Dict[str, str]]
     ) -> None:
         _query_params = query_params if query_params is not None else {}
-        self._send(forms_contract.RedirectRequestMessage(url, _query_params))
+        self._send(
+            forms_contract.RedirectRequestMessage(
+                url, _query_params, self._production_mode
+            )
+        )
 
     def handle_success(self):
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
         try:
-            self._send(forms_contract.ExecutionEndedMessage(close_dto))
+            self._send(
+                forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
+            )
         except ClientAbandoned:
             pass
 
     def handle_start(self, execution_id: str):
         self.wait_for_message("execution:start")
-        self._send(forms_contract.ExecutionStartedMessage(execution_id))
+        self._send(
+            forms_contract.ExecutionStartedMessage(execution_id, self._production_mode)
+        )
 
     def handle_unset_thread(self):
         self.handle_failure(Exception("Thread was unset"))
@@ -180,22 +197,29 @@ class FormClient(ExecutionClient):
             "".join(
                 compat_traceback.format_exception(e),
             ),
+            self._production_mode,
         )
         try:
             self._send(stdio_msg)
             close_dto = forms_contract.CloseDTO(exit_status="EXCEPTION", exception=e)
-            self._send(forms_contract.ExecutionEndedMessage(close_dto))
+            self._send(
+                forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
+            )
         except ClientAbandoned:
             pass
 
     def handle_lock_failed(self, status: str) -> None:
-        self._send(forms_contract.ExecutionLockFailedMessage(status))
+        self._send(
+            forms_contract.ExecutionLockFailedMessage(status, self._production_mode)
+        )
 
     def handle_stdio(self, event: Literal["stdout", "stderr"], text: str) -> None:
         if self._production_mode:
             return
 
-        self._send(forms_contract.ExecutionStdioMessage(event, text))
+        self._send(
+            forms_contract.ExecutionStdioMessage(event, text, self._production_mode)
+        )
 
     def _receive_message(self):
         try:
