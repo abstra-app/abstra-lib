@@ -590,11 +590,11 @@ def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
 		min (number): The minimal amount of options that should be selected. Defaults to None.
 		max (number): The maximum amount of options that should be selected. Defaults to None.
 		page_size (number): The number of rows to display per page. Defaults to 10.
+		full_width (bool): Whether the input should use full screen width. Defaults to True.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
 		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
-		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:

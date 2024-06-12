@@ -3175,6 +3175,13 @@ metadata = {
                     "default": "10",
                 },
                 {
+                    "argName": "full_width",
+                    "description": "Whether the input should use full screen width. Defaults to True.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "True",
+                },
+                {
                     "argName": "disabled",
                     "description": "whether the input is disabled. Defaults to False.",
                     "typeName": "bool",
@@ -3199,13 +3206,6 @@ metadata = {
                 {
                     "argName": "end_program",
                     "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
-                    "argName": "full_width",
-                    "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
@@ -5088,6 +5088,13 @@ metadata = {
                     "default": "10",
                 },
                 {
+                    "argName": "full_width",
+                    "description": "Whether the input should use full screen width. Defaults to True.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "True",
+                },
+                {
                     "argName": "actions",
                     "description": "Actions that can be triggered by table rows",
                     "typeName": "list",
@@ -5098,13 +5105,6 @@ metadata = {
                 {
                     "argName": "end_program",
                     "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
-                    "argName": "full_width",
-                    "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
                     "isKwarg": True,
                     "default": "False",
