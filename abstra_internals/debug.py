@@ -44,23 +44,28 @@ def _make_debug_item_from_stack(frame_summary: traceback.FrameSummary):
     }
 
 
-def make_debug_data(frames_or_exception: Frames):
-    if isinstance(frames_or_exception, Exception):
-        e = frames_or_exception
-        frames = traceback.TracebackException(
-            type(e), e, e.__traceback__, capture_locals=True
-        ).stack
-    else:
-        frames = frames_or_exception
+def make_frame_debug_data(frames: typing.List[inspect.FrameInfo]):
     root_path = str(Settings.root_path)
     return {
         "debug": {
             "stack": [
-                (
-                    _make_debug_item_from_info(info)
-                    if isinstance(info, inspect.FrameInfo)
-                    else _make_debug_item_from_stack(info)
-                )
+                _make_debug_item_from_info(info)
+                for info in (frames)
+                if root_path in info.filename or is_relative_path(info.filename)
+            ]
+        }
+    }
+
+
+def make_exception_debug_data(e: Exception):
+    frames = traceback.TracebackException(
+        type(e), e, e.__traceback__, capture_locals=True
+    ).stack
+    root_path = str(Settings.root_path)
+    return {
+        "debug": {
+            "stack": [
+                _make_debug_item_from_stack(info)
                 for info in (frames)
                 if root_path in info.filename or is_relative_path(info.filename)
             ]

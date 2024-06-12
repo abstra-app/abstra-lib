@@ -2,7 +2,7 @@ from inspect import stack
 from pathlib import Path
 from unittest import TestCase, mock
 
-from abstra_internals.debug import make_debug_data
+from abstra_internals.debug import make_exception_debug_data, make_frame_debug_data
 from abstra_internals.settings import Settings
 from tests.resources.make_debug.module import func
 
@@ -15,7 +15,7 @@ class TestDebug(TestCase):
         try:
             raise Exception("test")
         except Exception as exc:
-            debug_data = make_debug_data(exc)
+            debug_data = make_exception_debug_data(exc)
 
         self.maxDiff = None
 
@@ -36,7 +36,7 @@ class TestDebug(TestCase):
         )
 
     def test_make_debug_data_from_frames(self):
-        debug_data = make_debug_data(stack())
+        debug_data = make_frame_debug_data(stack())
 
         self.assertEqual(
             debug_data,
@@ -62,7 +62,7 @@ class TestDebug(TestCase):
             func(outer_func)
             debug_data = None
         except Exception as exc:
-            debug_data = make_debug_data(exc)
+            debug_data = make_exception_debug_data(exc)
 
         self.maxDiff = None
 
@@ -108,7 +108,7 @@ class TestDebug(TestCase):
             func(outer_func)
             debug_data = None
         except Exception as exc:
-            debug_data = make_debug_data(exc)
+            debug_data = make_exception_debug_data(exc)
 
         self.maxDiff = None
 
