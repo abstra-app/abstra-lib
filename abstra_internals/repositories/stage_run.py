@@ -261,6 +261,9 @@ class StageRunRepository(ABC):
     def acquire_lock(self, stage_run_id: str, execution_id: str) -> bool:
         return self.change_status(stage_run_id, "running", execution_id)
 
+    def clear(self):
+        raise NotImplementedError()
+
 
 class LocalStageRunRepository(StageRunRepository):
     _stage_runs: List[StageRun]
@@ -521,6 +524,9 @@ class RemoteStageRunRepository(StageRunRepository):
             r.raise_for_status()
 
         return r
+
+    def clear(self):
+        raise NotImplementedError("Can't clear remote repository")
 
     @staticmethod
     def create_from_dto(dto: dict) -> StageRun:

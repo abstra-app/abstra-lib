@@ -85,10 +85,10 @@ class ExecutionController:
             stage_run_id=stage_run_id,
         )
 
-        if self.target_stage_run_id and not self.stage_run_repo.acquire_lock(
-            self.target_stage_run_id, execution.id
+        if not self.stage_run_repo.acquire_lock(
+            stage_run_id=stage_run_id, execution_id=execution.id
         ):
-            self.client.handle_lock_failed(self.target_stage_run_id)
+            self.client.handle_lock_failed(stage_run_id)
             ExecutionClientStore.clear()
             return
 
@@ -97,7 +97,6 @@ class ExecutionController:
 
         status, exception = ExecutionService.run(Path(execution.stage.file))
         self.stage_run_repo.change_status(execution.stage_run_id, status)
-
         execution.set_status(status)
         self.execution_repo.update(execution.to_dto())
 
