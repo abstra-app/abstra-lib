@@ -19,7 +19,9 @@ class StageRunsController:
     ) -> None:
         self.stage_run_repository = stage_run_repository
 
-    def get_stage_runs(self, filter: GetStageRunByQueryFilter, pagination: Pagination):
+    def get_leaf_stage_runs(
+        self, filter: GetStageRunByQueryFilter, pagination: Pagination
+    ):
         return [
             stage_run.to_dto()
             for stage_run in self.stage_run_repository.find_leaves(
@@ -64,10 +66,10 @@ def get_editor_bp():
 
     @bp.get("/")
     @usage
-    def _get_stage_runs():
+    def _get_leaf_stage_runs():
         filter = GetStageRunByQueryFilter.from_dict(flask.request.args)
         pagination = Pagination.from_dict(flask.request.args)
-        return controller.get_stage_runs(filter, pagination)
+        return controller.get_leaf_stage_runs(filter, pagination)
 
     @bp.get("/past")
     @usage
