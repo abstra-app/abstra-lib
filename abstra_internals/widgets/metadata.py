@@ -388,7 +388,7 @@ metadata = {
                 "name": "Basic Example",
                 "description": "A simple appointment booking selector",
                 "key": "example1",
-                "code": 'from datetime import datetime, timedelta\nfrom abstra.forms import read_appointment\n# next 14 days\n# only weekdays\n# 10:00 - 18:00\n# 15 minutes interval\n# 45 minutes duration\n# remove lunch break\nslots = []\nmax_date = datetime.now() + timedelta(days=14)\ncurrent_date = datetime.now()\nwhile current_date < max_date:\n    if current_date.weekday() < 5:\n        for hour in range(10, 18):\n            if hour == 12:\n                continue\n            begin = current_date.replace(hour=hour, minute=0)\n            end = begin + timedelta(minutes=45)\n            slots.append((begin, end))\n    current_date += timedelta(days=1)\nread_appointment("Welcome to Abstra, please select a demo slot", slots=slots)',
+                "code": 'from datetime import datetime, timedelta\n\nfrom abstra.forms import read_appointment\n\n# next 14 days\n# only weekdays\n# 10:00 - 18:00\n# 15 minutes interval\n# 45 minutes duration\n# remove lunch break\nslots = []\nmax_date = datetime.now() + timedelta(days=14)\ncurrent_date = datetime.now()\nwhile current_date < max_date:\n    if current_date.weekday() < 5:\n        for hour in range(10, 18):\n            if hour == 12:\n                continue\n            begin = current_date.replace(hour=hour, minute=0)\n            end = begin + timedelta(minutes=45)\n            slots.append((begin, end))\n    current_date += timedelta(days=1)\nread_appointment("Welcome to Abstra, please select a demo slot", slots=slots)\n',
             }
         ],
     },

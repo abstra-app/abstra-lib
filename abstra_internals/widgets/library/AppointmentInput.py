@@ -1,7 +1,7 @@
-from abstra_internals.widgets.widget_base import Input
-from typing import Optional, List, Union, Tuple
 from datetime import datetime
+from typing import List, Optional, Tuple, Union
 from abstra_internals.widgets.response_types import AppointmentSlot
+from abstra_internals.widgets.widget_base import Input
 
 
 class AppointmentInput(Input):
