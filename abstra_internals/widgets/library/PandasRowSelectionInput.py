@@ -20,7 +20,7 @@ class PandasRowSelectionInput(Input):
         self.df = props.get('df', '')
         self.required = props.get('required', True)
         self.hint = props.get('hint', None)
-        self.full_width = props.get('full_width', False)
+        self.full_width = props.get('full_width', True)
         self.display_index = props.get('display_index', False)
         self.disabled = props.get('disabled', False)
         self.label = props.get('label', '')

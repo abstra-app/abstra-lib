@@ -12,7 +12,7 @@ class PandasOutput(Output):
 
     def set_props(self, props):
         self.df = props.get('df', '')
-        self.full_width = props.get('full_width', False)
+        self.full_width = props.get('full_width', True)
         self.display_index = props.get('display_index', False)
         self.label = props.get('label', '')
         self.actions = props.get('actions', [])
