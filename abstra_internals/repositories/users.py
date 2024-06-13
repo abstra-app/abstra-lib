@@ -9,7 +9,6 @@ from abstra_internals.environment import (
     SIDECAR_HEADERS,
     SIDECAR_URL,
 )
-from abstra_internals.repositories.project.project import ProjectRepository
 
 
 class UsersRepository(ABC):
@@ -56,18 +55,7 @@ class LocalUsersRepository(UsersRepository):
         return resolve_headers()
 
     def get_user(self, email: str) -> Optional[CommonUser]:
-        project = ProjectRepository.load()
-        all_roles = project.get_all_required_roles()
-
-        return CommonUser.from_dict(
-            {
-                "id": email,
-                "email": email,
-                "roles": all_roles,
-                "created_at": "2021-09-01T00:00:00Z",
-                "project_id": "1",
-            }
-        )
+        return None
 
     def insert_user(self, email: str) -> bool:
         return True
