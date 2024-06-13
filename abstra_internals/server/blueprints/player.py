@@ -10,6 +10,7 @@ from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.environment import (
     BUILD_ID,
+    IS_PRODUCTION,
     OIDC_AUTHORITY,
     OIDC_CLIENT_ID,
     SHOW_WATERMARK,
@@ -42,7 +43,7 @@ from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_player_bp(controller: MainController):
-    guard = Guard(users_repository)
+    guard = Guard(users_repository, enabled=IS_PRODUCTION)
 
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)

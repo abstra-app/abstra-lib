@@ -55,10 +55,12 @@ class Guard:
     def __init__(
         self,
         repository: UsersRepository,
+        enabled: bool,
         auth_decoder: Callable[[str], Optional[UserClaims]] = default_auth_decoder,
     ) -> None:
         self.repository = repository
         self.auth_decoder = auth_decoder
+        self.enable = enabled
 
     def __get_access_settings(self, selector: Selector, **kwargs):
         if isinstance(selector, IdArgSelector):
@@ -81,6 +83,9 @@ class Guard:
     def __allow(
         self, access_setting: AccessSettings, authHeader: Optional[str]
     ) -> NavigationGuard:
+        if not self.enable:
+            return NavigationGuard("ALLOWED")
+
         if access_setting.is_public:
             return NavigationGuard("ALLOWED")
 

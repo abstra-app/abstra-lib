@@ -5,6 +5,7 @@ import flask
 from pydantic.dataclasses import dataclass
 
 from abstra_internals.controllers.workflow import workflow_engine
+from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.repositories import (
     execution_logs_repository,
     stage_run_repository,
@@ -338,7 +339,7 @@ def get_editor_bp():
 def get_player_bp():
     project_repository = ProjectRepository
 
-    guard = Guard(users_repository)
+    guard = Guard(users_repository, enabled=IS_PRODUCTION)
 
     controller = KanbanController(
         stage_run_repository, project_repository, read_only=True
