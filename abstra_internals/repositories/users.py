@@ -6,10 +6,10 @@ import requests
 from abstra_internals.contracts_generated import CommonUser, CommonUserRoles
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.environment import (
-    CLOUD_API_ENDPOINT,
     SIDECAR_HEADERS,
     SIDECAR_URL,
 )
+from abstra_internals.repositories.project.project import ProjectRepository
 
 
 class UsersRepository(ABC):
@@ -56,24 +56,21 @@ class LocalUsersRepository(UsersRepository):
         return resolve_headers()
 
     def get_user(self, email: str) -> Optional[CommonUser]:
-        if not self.headers:
-            return None
+        project = ProjectRepository.load()
+        all_roles = project.get_all_required_roles()
 
-        url = f"{CLOUD_API_ENDPOINT}/cli/users/"
-        response = requests.get(url, headers=self.headers, params={"email": email})
-        if response.status_code == 404:
-            return None
-
-        return CommonUser.from_dict(response.json())
+        return CommonUser.from_dict(
+            {
+                "id": email,
+                "email": email,
+                "roles": all_roles,
+                "created_at": "2021-09-01T00:00:00Z",
+                "project_id": "1",
+            }
+        )
 
     def insert_user(self, email: str) -> bool:
-        if not self.headers:
-            return False
-
-        url = f"{CLOUD_API_ENDPOINT}/cli/users/"
-        response = requests.post(url, headers=self.headers, json={"email": email})
-
-        return response.status_code == 201
+        return True
 
 
 class ProductionUsersRepository(UsersRepository):

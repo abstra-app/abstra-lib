@@ -6,7 +6,7 @@ import tempfile
 import uuid
 from dataclasses import field
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Generator, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
@@ -1177,6 +1177,12 @@ class Project:
             )
 
         return stage.to_access_dto()
+
+    def get_all_required_roles(self) -> Set[str]:
+        roles = set()
+        for stage in self.secured_stages:
+            roles.update(stage.access_control.required_roles)
+        return roles
 
     def get_stage_raises(self, id: str) -> WorkflowStage:
         stage = self.get_stage(id)

@@ -119,7 +119,7 @@ class TestRequirementsApi(TestCase):
 
         ProjectRepository.save(project)
 
-        guard = Guard(repo, enabled=True, auth_decoder=test_auth_decoder)
+        guard = Guard(repo, auth_decoder=test_auth_decoder)
 
         app = Flask(__name__)
         bp = Blueprint("dummy", __name__)
@@ -329,7 +329,7 @@ class TestRequirementsApi(TestCase):
 
         ProjectRepository.save(project)
 
-        guard = Guard(repo, enabled=True, auth_decoder=test_auth_decoder)
+        guard = Guard(repo, auth_decoder=test_auth_decoder)
 
         ## Logged in users
         test_matrix = [
