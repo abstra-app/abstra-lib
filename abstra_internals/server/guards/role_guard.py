@@ -120,6 +120,13 @@ class Guard:
         user: Optional[CommonUser] = None
 
         visible_sidebar = Sidebar(items=[])
+        if not self.enable:
+            visible_sidebar.items = [
+                stage.to_sidebar_item for stage in project.list_accessible_stages()
+            ]
+            return StyleSettingsWithSidebar.from_dict(
+                {**project.workspace.as_dict, "sidebar": visible_sidebar.as_dict}
+            )
 
         if auth is not None:
             claims = self.auth_decoder(auth)
