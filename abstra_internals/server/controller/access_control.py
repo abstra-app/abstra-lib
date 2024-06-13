@@ -1,6 +1,5 @@
 import flask
 
-from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.repositories import users_repository
 from abstra_internals.server.controller.main import MainController
@@ -30,7 +29,7 @@ def get_editor_bp(controller: MainController):
 
 
 def get_player_bp():
-    guard = Guard(users_repository, enabled=IS_PRODUCTION)
+    guard = Guard(users_repository)
 
     bp = flask.Blueprint("player_access_control", __name__)
 
