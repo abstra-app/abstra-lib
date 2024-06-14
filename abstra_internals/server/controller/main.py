@@ -158,8 +158,23 @@ class MainController:
         script_ids = [stage.id for stage in project.scripts]
         return job_ids + script_ids
 
+    def __ensure_case(self, path: str):
+        file_dirs = [p for p in Settings.root_path.iterdir()]
+        if path in file_dirs:
+            return
+
+        conflicting_paths = [p for p in file_dirs if p.name.lower() == path.lower()]
+        if len(conflicting_paths) == 1:
+            conflicting_paths[0].rename(Settings.root_path.joinpath(path))
+            return
+
+        raise Exception(
+            f"File {path} already exists with different casing. Conflict with files ({', '.join(p.name for p in conflicting_paths)})"
+        )
+
     def init_code_file(self, path: str, code: str):
         if Settings.root_path.joinpath(path).is_file():
+            self.__ensure_case(path)
             return
         Settings.root_path.joinpath(path).write_text(code, encoding="utf-8")
 
