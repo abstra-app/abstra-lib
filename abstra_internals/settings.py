@@ -4,7 +4,7 @@ import sys
 import typing
 
 from abstra_internals.environment import DEFAULT_PORT
-from abstra_internals.utils import get_free_port
+from abstra_internals.utils.find_port import get_free_port
 
 
 class SettingsController(object):
