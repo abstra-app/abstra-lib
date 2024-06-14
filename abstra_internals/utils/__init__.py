@@ -1,9 +1,7 @@
 import base64
 import os
 import re
-import socket
 import typing as t
-from contextlib import closing
 from uuid import uuid4
 
 import jsonpath_ng as jp
@@ -81,21 +79,6 @@ def get_local_user_id():
 
 def check_is_url(url: str) -> bool:
     return bool(re.match(r"^https?://", url))
-
-
-def get_free_port(default_port: int) -> int:
-    range_start = default_port
-    range_end = default_port + 100
-
-    for port in range(range_start, range_end):
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            port_is_available = sock.connect_ex(("localhost", port)) != 0
-            if port_is_available:
-                return port
-
-    raise Exception(
-        f"Could not find a free port in the range {range_start}-{range_end}"
-    )
 
 
 def is_it_true(val: str) -> bool:
