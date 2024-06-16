@@ -1,6 +1,6 @@
 import debugpy
 
-from abstra_internals.utils.find_port import get_free_port
+from abstra_internals.utils import get_free_port
 
 CONNECTED_PORT = None
 
