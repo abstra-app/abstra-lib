@@ -45,7 +45,7 @@ class TestAccessControl(TestCase):
         newProject = ProjectRepository.load()
         self.assertEqual(
             newProject.forms[0].access_control.as_dict,
-            {"is_public": True, "required_roles": []},
+            {"is_public": False, "required_roles": []},
         )
 
     def test_update_accesses(self):
@@ -91,7 +91,7 @@ class TestAccessControl(TestCase):
 
         self.assertEqual(
             project.forms[0].access_control.as_dict,
-            {"is_public": True, "required_roles": []},
+            {"is_public": False, "required_roles": []},
         )
 
         ProjectRepository.save(project)
@@ -104,5 +104,5 @@ class TestAccessControl(TestCase):
 
         self.assertEqual(
             project.forms[0].access_control.as_dict,
-            {"is_public": True, "required_roles": []},
+            {"is_public": False, "required_roles": []},
         )
