@@ -444,7 +444,7 @@ class FormStage:
     start_button_text: Optional[str] = None
     restart_button_text: Optional[str] = None
     access_control: AccessSettings = field(
-        default_factory=lambda: AccessSettings(is_public=True, required_roles=[])
+        default_factory=lambda: AccessSettings(is_public=False, required_roles=[])
     )
 
     type_name: Literal["form"] = "form"
