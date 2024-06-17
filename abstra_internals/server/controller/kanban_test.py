@@ -83,7 +83,7 @@ class KanbanTests(TestCase):
         )
 
         self.assertEqual(
-            data,
+            data.to_dict(),
             KanbanData(
                 stage_run_cards=[
                     StageRunCard(
@@ -105,7 +105,7 @@ class KanbanTests(TestCase):
                 ],
                 not_found_stages=[],
                 total_count=2,
-            ),
+            ).to_dict(),
         )
 
     def test_get_data_with_stage_filter(self):
@@ -150,7 +150,7 @@ class KanbanTests(TestCase):
         )
 
         self.assertEqual(
-            data,
+            data.to_dict(),
             KanbanData(
                 stage_run_cards=[
                     StageRunCard(
@@ -164,7 +164,7 @@ class KanbanTests(TestCase):
                 ],
                 not_found_stages=[],
                 total_count=1,
-            ),
+            ).to_dict(),
         )
 
     def test_get_data_with_advanced_data_filter(self):
@@ -205,7 +205,7 @@ class KanbanTests(TestCase):
         )
 
         self.assertEqual(
-            data,
+            data.to_dict(),
             KanbanData(
                 stage_run_cards=[
                     StageRunCard(
@@ -227,7 +227,7 @@ class KanbanTests(TestCase):
                 ],
                 not_found_stages=[],
                 total_count=2,
-            ),
+            ).to_dict(),
         )
 
     def test_get_job(self):

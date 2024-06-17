@@ -6,12 +6,22 @@ from abstra_internals.repositories.stage_run import (
     LocalStageRunRepository,
     Pagination,
 )
+from tests.fixtures import clear_dir, init_dir
 
 
 class TestLocalStageRunRepository(TestCase):
     def setUp(self) -> None:
         self.repository = LocalStageRunRepository()
         self.project = Project.create()
+        self.root = init_dir()
+
+    def tearDown(self):
+        clear_dir(self.root)
+
+    def assert_stage_run_list_equals(self, actual, expected):
+        self.assertEqual(len(actual), len(expected))
+        for a, e in zip(actual, expected):
+            self.assertEqual(a.to_dto(), e.to_dto())
 
     def test_starts_empty(self):
         stage_runs = self.repository.find(GetStageRunByQueryFilter.from_dict({}))
@@ -40,11 +50,16 @@ class TestLocalStageRunRepository(TestCase):
         child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        self.assertEqual(self.repository.find_ancestors(child.id), [parent, child])
+
+        self.assert_stage_run_list_equals(
+            self.repository.find_ancestors(child.id), [parent, child]
+        )
 
     def test_find_ancestors_when_initial(self):
         initial = self.repository.create_initial("parent", {"a": 1, "b": 2})
-        self.assertEqual(self.repository.find_ancestors(initial.id), [initial])
+        self.assert_stage_run_list_equals(
+            self.repository.find_ancestors(initial.id), [initial]
+        )
 
     def test_find_ancestors_when_forked(self):
         parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
@@ -55,8 +70,12 @@ class TestLocalStageRunRepository(TestCase):
                 dict(stage="foo", data=dict(b=5, c=6)),
             ],
         )
-        self.assertEqual(self.repository.find_ancestors(child1.id), [parent, child1])
-        self.assertEqual(self.repository.find_ancestors(child2.id), [parent, child2])
+        self.assert_stage_run_list_equals(
+            self.repository.find_ancestors(child1.id), [parent, child1]
+        )
+        self.assert_stage_run_list_equals(
+            self.repository.find_ancestors(child2.id), [parent, child2]
+        )
 
     def test_find_ancestors_when_not_found(self):
         with self.assertRaises(Exception):
@@ -150,8 +169,14 @@ class TestLocalStageRunRepository(TestCase):
     def test_retry_if_failed_is_root(self):
         stage = self.repository.create_initial("stage1")
         stage.data = {"a": 1, "b": 2}
-        stage.status = "failed"
-        retried = self.repository.retry(stage)
+        has_changed = self.repository.change_status(stage.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(stage.id, "failed")
+        self.assertTrue(has_changed)
+
+        retried = self.repository.retry(stage.id)
+
         self.assertEqual(retried.status, "waiting")
         self.assertEqual(retried.data, {})
         self.assertEqual(retried.stage, "stage1")
@@ -161,29 +186,51 @@ class TestLocalStageRunRepository(TestCase):
         child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        child.status = "failed"
-        retried = self.repository.retry(child)
+        has_changed = self.repository.change_status(child.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child.id, "failed")
+        self.assertTrue(has_changed)
+
+        retried = self.repository.retry(child.id)
+
         self.assertEqual(retried.status, "waiting")
         self.assertEqual(retried.data, {"a": 1, "b": 2})
         self.assertEqual(retried.stage, "foo")
 
     def test_retry_if_not_failed(self):
         stage = self.repository.create_initial("stage1")
-        stage.status = "waiting"
+
         with self.assertRaises(Exception):
-            self.repository.retry(stage)
+            self.repository.retry(stage.id)
 
     def test_retry_with_retry_sequence(self):
         parent = self.repository.create_initial("parent", {"a": 1, "b": 2})
         child = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        child.status = "failed"
-        retry1 = self.repository.retry(child)
-        retry1.status = "failed"
-        retry2 = self.repository.retry(retry1)
-        retry2.status = "failed"
-        retry3 = self.repository.retry(retry2)
+
+        has_changed = self.repository.change_status(child.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child.id, "failed")
+        self.assertTrue(has_changed)
+        retry1 = self.repository.retry(child.id)
+
+        has_changed = self.repository.change_status(retry1.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(retry1.id, "failed")
+        self.assertTrue(has_changed)
+        retry2 = self.repository.retry(retry1.id)
+
+        has_changed = self.repository.change_status(retry2.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(retry2.id, "failed")
+        self.assertTrue(has_changed)
+        retry3 = self.repository.retry(retry2.id)
+
         self.assertEqual(retry3.status, "waiting")
         self.assertEqual(retry3.data, {"a": 1, "b": 2})
         self.assertEqual(retry3.stage, "foo")
@@ -193,14 +240,30 @@ class TestLocalStageRunRepository(TestCase):
         child1 = self.repository.create_next(
             parent, [dict(stage="foo", data=dict(b=3, c=4))]
         )[0]
-        child1.status = "failed"
+
+        has_changed = self.repository.change_status(child1.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child1.id, "failed")
+        self.assertTrue(has_changed)
         child2 = self.repository.create_next(
             child1, [dict(stage="bar", data=dict(d=5, e=6))]
         )[0]
-        child2.status = "failed"
-        retry1 = self.repository.retry(child2)
-        retry1.status = "failed"
-        retry2 = self.repository.retry(retry1)
+
+        has_changed = self.repository.change_status(child2.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child2.id, "failed")
+        self.assertTrue(has_changed)
+        retry1 = self.repository.retry(child2.id)
+
+        has_changed = self.repository.change_status(retry1.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(retry1.id, "failed")
+        self.assertTrue(has_changed)
+        retry2 = self.repository.retry(retry1.id)
+
         self.assertEqual(retry2.status, "waiting")
         self.assertEqual(retry2.data, {"a": 1, "b": 3, "c": 4})
         self.assertEqual(retry2.stage, "bar")

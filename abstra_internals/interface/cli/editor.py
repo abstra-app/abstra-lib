@@ -32,6 +32,8 @@ def editor(
     StdioPatcher.apply(debug=False)
 
     controller = MainController()
+    controller.reset_repositories()
+
     app = get_local_app(controller)
 
     watch_py_root_files()

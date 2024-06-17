@@ -136,6 +136,9 @@ class MainController:
 
         deploy()
 
+    def reset_repositories(self):
+        self.stage_run_repository.clear()
+
     def get_workspace(self) -> StyleSettingsWithSidebar:
         project = ProjectRepository.load()
         return project.get_workspace()
