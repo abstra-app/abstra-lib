@@ -56,8 +56,7 @@ class StageRunsController:
         ).to_dto()
 
     def retry(self, stage_run_id: str):
-        stage_run = self.stage_run_repository.get(stage_run_id)
-        return self.stage_run_repository.retry(stage_run).to_dto()
+        return self.stage_run_repository.retry(stage_run_id).to_dto()
 
 
 def get_editor_bp():
