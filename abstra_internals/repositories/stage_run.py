@@ -85,7 +85,20 @@ class GetStageRunByQueryFilter:
         )
 
     def to_dict(self) -> dict:
-        return dict((k, v) for k, v in self.__dict__.items() if v is not None)
+        filter = {
+            "stage": self.stage,
+            "assignee": self.assignee,
+            "parent_id": self.parent_id,
+            "status": self.status,
+            "data": self.data,
+            "search": self.search,
+            "advanced_data_filter": (
+                self.advanced_data_filter.to_dict()
+                if self.advanced_data_filter
+                else None
+            ),
+        }
+        return dict((k, v) for k, v in filter.items() if v is not None)
 
 
 @dataclass(config=ConfigDict(populate_by_name=True))

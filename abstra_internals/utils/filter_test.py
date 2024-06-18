@@ -190,3 +190,44 @@ class TestFilterCondition(unittest.TestCase):
 
         another_data = {"key": "key", "comparator": "is"}
         self.assertIsNone(FilterCondition.from_dict(another_data))
+
+    def test_to_dict_condition(self):
+        condition = Condition("key", "is", "value")
+        self.assertEqual(
+            condition.to_dict(), {"key": "key", "comparator": "is", "value": "value"}
+        )
+
+    def test_to_dict_complex_logic_group(self):
+        group = LogicalGroupMultipleConditions(
+            operator="AND",
+            conditions=[
+                LogicalGroupSingleCondition(
+                    operator="NOT", condition=Condition("key1", "is", "value1")
+                ),
+                LogicalGroupMultipleConditions(
+                    operator="OR", conditions=[Condition("key2", "is", "value2")]
+                ),
+            ],
+        )
+        self.assertEqual(
+            group.to_dict(),
+            {
+                "operator": "AND",
+                "conditions": [
+                    {
+                        "operator": "NOT",
+                        "condition": {
+                            "key": "key1",
+                            "comparator": "is",
+                            "value": "value1",
+                        },
+                    },
+                    {
+                        "operator": "OR",
+                        "conditions": [
+                            {"key": "key2", "comparator": "is", "value": "value2"}
+                        ],
+                    },
+                ],
+            },
+        )

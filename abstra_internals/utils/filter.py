@@ -43,6 +43,29 @@ class FilterCondition:
 
         return None
 
+    def to_dict(self) -> dict:
+        if isinstance(self, Condition):
+            return {
+                "key": self.key,
+                "comparator": self.comparator,
+                "value": self.value,
+            }
+        if isinstance(self, LogicalGroupSingleCondition):
+            return {
+                "operator": self.operator,
+                "condition": self.condition.to_dict() if self.condition else None,
+            }
+        if isinstance(self, LogicalGroupMultipleConditions):
+            return {
+                "operator": self.operator,
+                "conditions": [
+                    condition.to_dict() if condition else None
+                    for condition in (self.conditions or [])
+                ],
+            }
+
+        return {}
+
 
 @dataclass
 class Condition(FilterCondition):
