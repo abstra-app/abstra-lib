@@ -68,6 +68,10 @@ def prompt(
         tools.append({"type": "function", "function": function})
 
     response = ai_repository.prompt(messages, tools).json()
+
+    if response["error"]:
+        raise Exception(response["error"])
+
     if format:
         parameters_dict = response["tool_calls"][0]["function"]["arguments"]
         try:
