@@ -5,13 +5,14 @@ from typing import Dict, List, Optional, Union
 
 from abstra_internals.repositories import ai_repository
 from abstra_internals.utils.b64 import is_base_64, to_base64
+from abstra_internals.utils.string import to_snake_case
 
 
 def _build_function_tool_call(format: Dict[str, object]) -> Dict[str, object]:
     variable_names = list(format.keys())
     function_name = "get_" + "_and_".join(variable_names)
     return {
-        "name": function_name,
+        "name": to_snake_case(function_name),
         "parameters": {
             "type": "object",
             "properties": format,
@@ -69,7 +70,7 @@ def prompt(
 
     response = ai_repository.prompt(messages, tools).json()
 
-    if response["error"]:
+    if response.get("error"):
         raise Exception(response["error"])
 
     if format:
