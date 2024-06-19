@@ -92,8 +92,8 @@ class GetStageRunByQueryFilter:
             "status": self.status,
             "data": self.data,
             "search": self.search,
-            "advanced_data_filter": json.dumps(
-                self.advanced_data_filter.to_dict()
+            "advanced_data_filter": (
+                json.dumps(self.advanced_data_filter.to_dict())
                 if self.advanced_data_filter
                 else None
             ),
