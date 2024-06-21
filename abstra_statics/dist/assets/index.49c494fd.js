@@ -1,0 +1,2 @@
+import{B as n,R as d}from"./Badge.ee030deb.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},t=new Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]="c6730894-f222-463a-b86d-6498a0940e8f",e._sentryDebugIdIdentifier="sentry-dbid-c6730894-f222-463a-b86d-6498a0940e8f")}catch{}})();n.install=function(e){return e.component(n.name,n),e.component(d.name,d),e};
+//# sourceMappingURL=index.49c494fd.js.map
