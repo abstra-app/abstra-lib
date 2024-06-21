@@ -6,42 +6,6 @@ Source code: [monorepo]/contracts/generator.py
 import typing
 from dataclasses import dataclass
 
-CloudApiCliApiKeyInfoResponseAuthorId = str
-
-CloudApiCliApiKeyInfoResponseProjectId = str
-
-CloudApiCliApiKeyInfoResponseEmail = str
-
-CloudApiCliApiKeyInfoResponseIntercomHash = str
-
-
-@dataclass
-class CloudApiCliApiKeyInfoResponse:
-    author_id: CloudApiCliApiKeyInfoResponseAuthorId
-    project_id: CloudApiCliApiKeyInfoResponseProjectId
-    email: CloudApiCliApiKeyInfoResponseEmail
-    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "authorId": self.author_id,
-            "projectId": self.project_id,
-            "email": self.email,
-            "intercomHash": self.intercom_hash,
-        }
-
-    @staticmethod
-    def from_dict(
-        data: typing.Dict[str, typing.Any],
-    ) -> "CloudApiCliApiKeyInfoResponse":
-        return CloudApiCliApiKeyInfoResponse(
-            author_id=str(data["authorId"]),
-            project_id=str(data["projectId"]),
-            email=str(data["email"]),
-            intercom_hash=str(data["intercomHash"]),
-        )
-
-
 CommonRoleDescription = str
 
 CloudApiCliRoleUpdateRequestDescription = CommonRoleDescription
@@ -225,6 +189,42 @@ class CloudApiCliBuildCreateResponse:
         )
 
 
+CloudApiCliApiKeyInfoResponseAuthorId = str
+
+CloudApiCliApiKeyInfoResponseProjectId = str
+
+CloudApiCliApiKeyInfoResponseEmail = str
+
+CloudApiCliApiKeyInfoResponseIntercomHash = str
+
+
+@dataclass
+class CloudApiCliApiKeyInfoResponse:
+    author_id: CloudApiCliApiKeyInfoResponseAuthorId
+    project_id: CloudApiCliApiKeyInfoResponseProjectId
+    email: CloudApiCliApiKeyInfoResponseEmail
+    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "authorId": self.author_id,
+            "projectId": self.project_id,
+            "email": self.email,
+            "intercomHash": self.intercom_hash,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "CloudApiCliApiKeyInfoResponse":
+        return CloudApiCliApiKeyInfoResponse(
+            author_id=str(data["authorId"]),
+            project_id=str(data["projectId"]),
+            email=str(data["email"]),
+            intercom_hash=str(data["intercomHash"]),
+        )
+
+
 AbstraLibApiStageCardContentKey = str
 
 AbstraLibApiStageCardContentValue = typing.Dict[str, typing.Any]
@@ -257,42 +257,6 @@ class AbstraLibApiStageCardContent:
 AbstraLibApiStageCardContentsItem = AbstraLibApiStageCardContent
 
 AbstraLibApiStageCardContents = typing.List[AbstraLibApiStageCardContentsItem]
-
-AbstraLibApiVisualizationName = str
-
-AbstraLibApiVisualizationType = typing.Union[
-    typing.Literal["text"],
-    typing.Literal["image"],
-    typing.Literal["table"],
-    typing.Literal["progress-bar"],
-]
-
-AbstraLibApiVisualizationTypeValues: typing.List[AbstraLibApiVisualizationType] = [
-    "text",
-    "image",
-    "table",
-    "progress-bar",
-]
-
-
-@dataclass
-class AbstraLibApiVisualization:
-    name: AbstraLibApiVisualizationName
-    type: AbstraLibApiVisualizationType
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "name": self.name,
-            "type": self.type,
-        }
-
-    @staticmethod
-    def from_dict(data: typing.Dict[str, typing.Any]) -> "AbstraLibApiVisualization":
-        return AbstraLibApiVisualization(
-            name=str(data["name"]),
-            type=data["type"],
-        )
-
 
 AbstraLibApiStageRunId = str
 
@@ -570,10 +534,6 @@ class AbstraLibApiThreads:
         )
 
 
-AbstraLibApiVisualizationsItem = AbstraLibApiVisualization
-
-AbstraLibApiVisualizations = typing.List[AbstraLibApiVisualizationsItem]
-
 AbstraLibApiStagesItem = AbstraLibApiStage
 
 AbstraLibApiStages = typing.List[AbstraLibApiStagesItem]
@@ -681,32 +641,6 @@ class AbstraLibApiEditorLintersRule:
         )
 
 
-AbstraLibApiEditorEnvVarsModelKey = str
-
-AbstraLibApiEditorEnvVarsModelValue = str
-
-
-@dataclass
-class AbstraLibApiEditorEnvVarsModel:
-    key: AbstraLibApiEditorEnvVarsModelKey
-    value: AbstraLibApiEditorEnvVarsModelValue
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "key": self.key,
-            "value": self.value,
-        }
-
-    @staticmethod
-    def from_dict(
-        data: typing.Dict[str, typing.Any],
-    ) -> "AbstraLibApiEditorEnvVarsModel":
-        return AbstraLibApiEditorEnvVarsModel(
-            key=str(data["key"]),
-            value=str(data["value"]),
-        )
-
-
 AbstraLibApiEditorLintersFixResponseSuccess = bool
 
 
@@ -733,6 +667,32 @@ AbstraLibApiEditorLintersCheckResponseItem = AbstraLibApiEditorLintersRule
 AbstraLibApiEditorLintersCheckResponse = typing.List[
     AbstraLibApiEditorLintersCheckResponseItem
 ]
+
+AbstraLibApiEditorEnvVarsModelKey = str
+
+AbstraLibApiEditorEnvVarsModelValue = str
+
+
+@dataclass
+class AbstraLibApiEditorEnvVarsModel:
+    key: AbstraLibApiEditorEnvVarsModelKey
+    value: AbstraLibApiEditorEnvVarsModelValue
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "key": self.key,
+            "value": self.value,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "AbstraLibApiEditorEnvVarsModel":
+        return AbstraLibApiEditorEnvVarsModel(
+            key=str(data["key"]),
+            value=str(data["value"]),
+        )
+
 
 AbstraLibApiEditorEnvVarsListResponseItem = AbstraLibApiEditorEnvVarsModel
 

@@ -27,9 +27,6 @@ from abstra_internals.server.controller import auth as auth_controller
 from abstra_internals.server.controller import kanban as kanban_controller
 from abstra_internals.server.controller import stage_runs as stage_runs_controller
 from abstra_internals.server.controller import users as user_controller
-from abstra_internals.server.controller import (
-    visualizations as visualizations_controller,
-)
 from abstra_internals.server.controller import workflows as workflows_controller
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.guards.role_guard import (
@@ -66,9 +63,6 @@ def get_player_bp(controller: MainController):
 
     access_control_bp = access_control_controller.get_player_bp()
     bp.register_blueprint(access_control_bp, url_prefix="/_access-control")
-
-    visuvisualizations_bp = visualizations_controller.get_player_bp()
-    bp.register_blueprint(visuvisualizations_bp, url_prefix="/_visualizations")
 
     @bp.get("/_workspace")
     def _get_workspace():
