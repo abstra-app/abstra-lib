@@ -17,9 +17,6 @@ from abstra_internals.server.controller import requirements as requirements_cont
 from abstra_internals.server.controller import roles as roles_controller
 from abstra_internals.server.controller import scripts as scripts_controller
 from abstra_internals.server.controller import stage_runs as stage_runs_controller
-from abstra_internals.server.controller import (
-    visualizations as visualizations_controller,
-)
 from abstra_internals.server.controller import workflows as workflows_controller
 from abstra_internals.server.controller import workspace as workspace_controller
 from abstra_internals.server.controller.main import MainController
@@ -32,9 +29,6 @@ def __get_api_bp(controller: MainController):
 
     kanban_bp = kanban_controller.get_editor_bp()
     bp.register_blueprint(kanban_bp, url_prefix="/kanban")
-
-    visualizations_bp = visualizations_controller.get_editor_bp()
-    bp.register_blueprint(visualizations_bp, url_prefix="/visualizations")
 
     stage_run_bp = stage_runs_controller.get_editor_bp()
     bp.register_blueprint(stage_run_bp, url_prefix="/stage_runs")

@@ -180,22 +180,10 @@ class KanbanController:
         return stage
 
     def stage_run_content(self, stage_run: StageRun):
-        visualization = self._get_project().visualization
-        visualization_defined_data = [
-            StageCardContentItem(
-                key=v.name,
-                value=stage_run.data.get(v.name),
-                type=v.type,
-            )
-            for v in visualization.items
-        ]
-        visualization_defined_keys = [v.name for v in visualization.items]
-        extra_data = [
+        return [
             StageCardContentItem(key=key, value=stage_run.data.get(key))
             for key in sorted(stage_run.data.keys())
-            if key not in visualization_defined_keys
         ]
-        return visualization_defined_data + extra_data
 
     def _get_stages(self) -> List[ColumnStage]:
         stages = self._get_project().actions

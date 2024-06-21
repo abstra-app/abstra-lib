@@ -751,55 +751,6 @@ class TransitionNotFoundError(KeyError):
 
 
 @dataclass
-class VisualizationItem:
-    name: str
-    type: str
-
-    def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, VisualizationItem):
-            return False
-        return self.name == __value.name and self.type == __value.type
-
-    @staticmethod
-    def from_dict(data: dict):
-        return VisualizationItem(
-            name=data["name"],
-            type=data["type"],
-        )
-
-    @property
-    def as_dict(self):
-        return {
-            "name": self.name,
-            "type": self.type,
-        }
-
-
-@dataclass
-class VisualizationSettings:
-    items: List[VisualizationItem]
-
-    def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, VisualizationSettings):
-            return False
-        return self.items == __value.items
-
-    @staticmethod
-    def create():
-        return VisualizationSettings([])
-
-    @staticmethod
-    def from_dict(data: list):
-        return VisualizationSettings(
-            items=[VisualizationItem.from_dict(item) for item in data]
-        )
-
-    @property
-    def as_dict(self):
-        return [item.as_dict for item in self.items]
-
-
-@dataclass
 class IteratorStage:
     id: str
     variable_name: str
@@ -1014,7 +965,6 @@ class Home:
 @dataclass
 class Project:
     workspace: StyleSettings
-    visualization: VisualizationSettings
     kanban: KanbanView
     home: Home
     scripts: List[ScriptStage]
@@ -1041,7 +991,6 @@ class Project:
 
         return {
             "workspace": self.workspace.as_dict,
-            "visualization": self.visualization.as_dict,
             "kanban": self.kanban.as_dict,
             "home": self.home.as_dict,
             "jobs": [job.as_dict for job in self.jobs],
@@ -1341,7 +1290,6 @@ class Project:
             jobs = [JobStage.from_dict(job) for job in data["jobs"]]
             iterators = [IteratorStage.from_dict(i) for i in data["iterators"]]
             conditions = [ConditionStage.from_dict(c) for c in data["conditions"]]
-            visualization = VisualizationSettings.from_dict(data["visualization"])
 
             workspace = StyleSettings.from_dict(data["workspace"])
             kanban = KanbanView.from_dict(data.get("kanban", {}))
@@ -1349,7 +1297,6 @@ class Project:
 
             return Project(
                 workspace=workspace,
-                visualization=visualization,
                 scripts=scripts,
                 forms=forms,
                 hooks=hooks,
@@ -1370,7 +1317,6 @@ class Project:
     def create():
         return Project(
             workspace=StyleSettings.defaultValue(),
-            visualization=VisualizationSettings.create(),
             scripts=[],
             forms=[],
             hooks=[],
