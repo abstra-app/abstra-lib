@@ -29,6 +29,28 @@ status_transitions: Dict[Status, List[Status]] = {
 
 
 @dataclass
+class CountStageRunsByStatus:
+    stage: str
+    count: int
+    status: str
+
+    def to_dict(self) -> dict:
+        return dict(
+            stage=self.stage,
+            count=self.count,
+            status=self.status,
+        )
+
+    @staticmethod
+    def from_dict(data: dict) -> "CountStageRunsByStatus":
+        return CountStageRunsByStatus(
+            stage=data.get("stage", None),
+            count=data.get("count", None),
+            status=data.get("status", None),
+        )
+
+
+@dataclass
 class Pagination:
     limit: int
     offset: int
@@ -201,6 +223,10 @@ class StageRunRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def count_leaves_by_status(self) -> List[CountStageRunsByStatus]:
+        raise NotImplementedError()
+
+    @abstractmethod
     def find_past(
         self, filter: GetStageRunByQueryFilter, pagination: Pagination
     ) -> PaginatedListResponse:
@@ -370,6 +396,24 @@ class LocalStageRunRepository(StageRunRepository):
             stage_runs=leaves[pagination.offset : pagination.limit],
             total_count=total_count,
         )
+
+    def count_leaves_by_status(self) -> List[CountStageRunsByStatus]:
+        all_stage_runs = self.store.load_all()
+        parent_ids = set(u.parent_id for u in all_stage_runs)
+        leaves = [
+            stage_run for stage_run in all_stage_runs if stage_run.id not in parent_ids
+        ]
+        stage_status_count = {}
+        for stage_run in leaves:
+            key = (stage_run.stage, stage_run.status)
+            if key in stage_status_count:
+                stage_status_count[key] += 1
+            else:
+                stage_status_count[key] = 1
+        return [
+            CountStageRunsByStatus(stage=stage, status=status, count=count)
+            for (stage, status), count in stage_status_count.items()
+        ]
 
     def find_past(
         self, filter: GetStageRunByQueryFilter, pagination: Pagination
@@ -611,6 +655,10 @@ class RemoteStageRunRepository(StageRunRepository):
         r.raise_for_status()
 
         return PaginatedListResponse.from_dict(r.json())
+
+    def count_leaves_by_status(self) -> List[CountStageRunsByStatus]:
+        r = self._request("GET", path="/count")
+        return [CountStageRunsByStatus.from_dict(dto) for dto in r.json()]
 
     def find_past(
         self, filter: GetStageRunByQueryFilter, pagination: Pagination
