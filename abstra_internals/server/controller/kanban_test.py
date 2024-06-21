@@ -6,7 +6,10 @@ from abstra_internals.repositories.project.project import (
     NotificationTrigger,
     ProjectRepository,
 )
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
+from abstra_internals.repositories.stage_run import (
+    CountStageRunsByStatus,
+    LocalStageRunRepository,
+)
 from abstra_internals.server.controller.kanban import (
     DataRequest,
     KanbanController,
@@ -247,3 +250,82 @@ class KanbanTests(TestCase):
         rtvd = self.controller.get_job("job")
 
         self.assertEqual(rtvd, job)
+
+    def test_count_by_status_one(self):
+        project = ProjectRepository.load()
+
+        form = FormStage(
+            id="form",
+            path="form",
+            title="Form",
+            file="form.py",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+        )
+        project.add_stage(form)
+        ProjectRepository.save(project)
+        self.stage_run_repository.create_initial("form")
+
+        count = self.controller.count_by_status()
+
+        self.assertEqual(count, [CountStageRunsByStatus("form", 1, "waiting")])
+
+        count = self.controller.count_by_status()
+
+        self.assertEqual(count, [CountStageRunsByStatus("form", 1, "waiting")])
+
+    def test_count_by_status_multiple(self):
+        project = ProjectRepository.load()
+
+        form = FormStage(
+            id="form",
+            path="form",
+            title="Form",
+            file="form.py",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+        )
+        job = JobStage(
+            id="job",
+            title="Job",
+            file="job.py",
+            schedule="* * * * *",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.add_stage(form)
+        project.add_stage(job)
+        ProjectRepository.save(project)
+        form_sr1 = self.stage_run_repository.create_initial("form")
+        form_sr2 = self.stage_run_repository.create_initial("form")
+        form_sr3 = self.stage_run_repository.create_initial("form")
+        form_sr4 = self.stage_run_repository.create_initial("form")
+        job_sr1 = self.stage_run_repository.create_initial("job")
+        _job_sr2 = self.stage_run_repository.create_initial("job")
+
+        self.stage_run_repository.change_status(form_sr1.id, "running")
+        self.stage_run_repository.change_status(form_sr2.id, "running")
+        self.stage_run_repository.change_status(form_sr3.id, "running")
+        self.stage_run_repository.change_status(form_sr4.id, "running")
+        self.stage_run_repository.change_status(job_sr1.id, "running")
+
+        self.stage_run_repository.change_status(form_sr3.id, "finished")
+        self.stage_run_repository.change_status(form_sr4.id, "failed")
+
+        count = self.controller.count_by_status()
+
+        expected = [
+            CountStageRunsByStatus("form", 2, "running"),
+            CountStageRunsByStatus("form", 1, "finished"),
+            CountStageRunsByStatus("form", 1, "failed"),
+            CountStageRunsByStatus("job", 1, "waiting"),
+            CountStageRunsByStatus("job", 1, "running"),
+        ]
+
+        self.assertCountEqual(count, expected)

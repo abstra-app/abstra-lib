@@ -2,7 +2,9 @@ from typing import Dict, List, Optional, TypedDict
 
 import flask
 
+from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories import users_repository
 from abstra_internals.repositories.project.project import (
     ConditionStage,
     FormStage,
@@ -17,6 +19,7 @@ from abstra_internals.repositories.project.project import (
     WorkflowTransition,
 )
 from abstra_internals.server.controller.main import MainController, UnknownNodeTypeError
+from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
 from abstra_internals.usage import usage
 
 
@@ -320,6 +323,24 @@ def get_editor_bp(controller: MainController):
                 raise Exception("No payload found")
             new_state = update_workflow(payload)
             return new_state
+        except Exception as e:
+            AbstraLogger.capture_exception(e)
+            return str(e), 500
+
+    return bp
+
+
+def get_player_bp():
+    guard = Guard(users_repository, enabled=IS_PRODUCTION)
+
+    bp = flask.Blueprint("player_workflow", __name__)
+
+    # 1s pooling in this route
+    @bp.get("/")
+    @guard.by(StageIdSelector("kanban"))
+    def _load_workflow():
+        try:
+            return get_workflow()
         except Exception as e:
             AbstraLogger.capture_exception(e)
             return str(e), 500

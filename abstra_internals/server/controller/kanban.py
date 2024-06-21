@@ -23,6 +23,7 @@ from abstra_internals.repositories.project.project import (
     WorkflowStage,
 )
 from abstra_internals.repositories.stage_run import (
+    CountStageRunsByStatus,
     GetStageRunByQueryFilter,
     Pagination,
     StageRun,
@@ -258,6 +259,9 @@ class KanbanController:
             total_count=paginated_response.total_count,
         )
 
+    def count_by_status(self) -> List[CountStageRunsByStatus]:
+        return self.stage_run_repository.count_leaves_by_status()
+
     def get_ancestor_logs(
         self, stage_run_id: str
     ) -> List[Tuple[StageRun, List[LogEntry]]]:
@@ -293,6 +297,10 @@ def get_editor_bp():
             flask.abort(400)
         req = DataRequest.from_dict(flask.request.json)
         return controller.get_data(req).to_dict()
+
+    @bp.post("/count")
+    def _count_by_status():
+        return controller.count_by_status()
 
     @bp.get("/path")
     def _get_path():
@@ -365,6 +373,11 @@ def get_player_bp():
             flask.abort(400)
         req = DataRequest.from_dict(flask.request.json)
         return controller.get_data(req).to_dict()
+
+    @bp.post("/count")
+    @guard.by(StageIdSelector("kanban"))
+    def _count_by_status():
+        return controller.count_by_status()
 
     @bp.get("/logs/<stage_run_id>")
     @guard.by(StageIdSelector("kanban"))
