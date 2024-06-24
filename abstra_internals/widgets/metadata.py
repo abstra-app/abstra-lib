@@ -5074,13 +5074,6 @@ metadata = {
                     "default": None,
                 },
                 {
-                    "argName": "editable",
-                    "description": "Whether the user will be allowed to edit the cells. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "page_size",
                     "description": "The number of rows to display per page. Defaults to 10.",
                     "typeName": "number",
@@ -5135,7 +5128,6 @@ metadata = {
                 },
                 {"argName": "displayIndex", "typeName": "boolean"},
                 {"argName": "label", "typeName": "string"},
-                {"argName": "editable", "typeName": "boolean"},
                 {"argName": "pageSize", "typeName": "number"},
                 {"argName": "actions", "typeName": "array"},
                 {"argName": "fullWidth", "typeName": "boolean"},
