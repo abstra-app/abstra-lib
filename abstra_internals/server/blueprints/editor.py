@@ -13,6 +13,7 @@ from abstra_internals.server.controller import jobs as jobs_controller
 from abstra_internals.server.controller import kanban as kanban_controller
 from abstra_internals.server.controller import linters as linters_controller
 from abstra_internals.server.controller import login as login_controller
+from abstra_internals.server.controller import pysa as pysa_controller
 from abstra_internals.server.controller import requirements as requirements_controller
 from abstra_internals.server.controller import roles as roles_controller
 from abstra_internals.server.controller import scripts as scripts_controller
@@ -71,6 +72,9 @@ def __get_api_bp(controller: MainController):
 
     envvars_bp = envvars_controller.get_editor_bp()
     bp.register_blueprint(envvars_bp, url_prefix="/env-vars")
+
+    pysa_bp = pysa_controller.get_editor_bp()
+    bp.register_blueprint(pysa_bp, url_prefix="/pysa")
 
     roles_bp = roles_controller.get_editor_bp()
     bp.register_blueprint(roles_bp, url_prefix="/roles")
