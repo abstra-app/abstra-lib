@@ -83,17 +83,16 @@ def get_editor_bp(controller: MainController):
             stage=hook,
             client=client,
             request=request_context,
+            workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
             target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
         )
 
-        execution_dto = execution_controller.run()
+        execution_dto = execution_controller.run_with_workflow()
 
         if not execution_dto:
             return flask.abort(429)
-
-        controller.workflow_engine.handle_execution_end(execution_dto)
 
         return {
             "body": client.response["body"],
@@ -125,12 +124,15 @@ def get_editor_bp(controller: MainController):
             client=client,
             request=request_context,
             target_stage_run_id=None,
+            workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
         )
 
         thread_data = json.loads(controller.read_test_data())
-        execution_dto = execution_controller.run_detached(thread_data=thread_data)
+        execution_dto = execution_controller.run_without_workflow(
+            thread_data=thread_data
+        )
 
         if not execution_dto:
             return flask.abort(429)

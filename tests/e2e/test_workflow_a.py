@@ -299,10 +299,11 @@ class TestWorkflowA(TestCase):
             },
         )
 
-        thread_id = first_kanban_state.get_json()["stage_run_cards"][0]["id"]
+        assert len(first_kanban_state.get_json()["stage_run_cards"]) == 1
+        hook_b_thread_id = first_kanban_state.get_json()["stage_run_cards"][0]["id"]
 
         self.client.post(
-            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + thread_id,
+            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + hook_b_thread_id,
         )
         time.sleep(1)  # TODO: better way to wait all threads
 

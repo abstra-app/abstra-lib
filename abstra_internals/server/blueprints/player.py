@@ -116,21 +116,16 @@ def get_player_bp(controller: MainController):
             if not form:
                 return
 
-            execution_controller = ExecutionController(
+            ExecutionController(
                 stage=form,
                 client=form_client,
                 request=request_context,
+                workflow_engine=controller.workflow_engine,
                 stage_run_repository=controller.stage_run_repository,
                 execution_repository=controller.execution_repository,
                 target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            )
+            ).run_with_workflow()
 
-            execution_dto = execution_controller.run()
-
-            if not execution_dto:
-                return
-
-            controller.workflow_engine.handle_execution_end(execution_dto)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
@@ -202,20 +197,19 @@ def get_player_bp(controller: MainController):
             stage=hook,
             client=client,
             request=request_context,
+            workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
             target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
         )
 
-        execution_dto = execution_controller.run()
+        execution_dto = execution_controller.run_with_workflow()
 
         if not execution_dto:
             return flask.Response(
                 status=423,
                 response="This thread is already running.",
             )
-
-        controller.workflow_engine.handle_execution_end(execution_dto)
 
         return flask.Response(
             status=client.response["status"],
