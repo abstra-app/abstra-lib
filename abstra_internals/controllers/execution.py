@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.controllers.execution_client import (
@@ -14,6 +14,9 @@ from abstra_internals.services.execution_service import ExecutionService
 
 STAGE_RUN_ID_PARAM_KEY = "abstra-run-id"
 
+if TYPE_CHECKING:
+    from abstra_internals.controllers.workflow import WorkflowEngine
+
 
 class UnsetThread(Exception):
     pass
@@ -22,20 +25,22 @@ class UnsetThread(Exception):
 class ExecutionController:
     def __init__(
         self,
+        *,
         stage: ActionStage,
-        target_stage_run_id: Optional[str],
+        client: ExecutionClient,
+        workflow_engine: "WorkflowEngine",
         request: Optional[RequestContext],
+        target_stage_run_id: Optional[str],
         stage_run_repository: StageRunRepository,
         execution_repository: ExecutionRepository,
-        client: ExecutionClient,
     ) -> None:
+        self.stage = stage
+        self.client = client
+        self.request = request
+        self.workflow_engine = workflow_engine
         self.stage_run_repo = stage_run_repository
         self.execution_repo = execution_repository
-
-        self.client = client
-        self.stage = stage
         self.target_stage_run_id = target_stage_run_id
-        self.request = request
 
     def _should_create_initial_stage_run(self) -> bool:
         return (
@@ -43,17 +48,26 @@ class ExecutionController:
             and not self.target_stage_run_id
         )
 
-    def run_detached(self, thread_data: dict) -> Optional[ExecutionDTO]:
+    def run_without_workflow(self, thread_data: dict) -> Optional[ExecutionDTO]:
         test_stage_run = self.stage_run_repo.create_detached(
-            self.stage.id, thread_data=thread_data
+            thread_data=thread_data,
+            stage_id=self.stage.id,
         )
 
         self.target_stage_run_id = test_stage_run.id
-        dto = self.run()
+        dto = self._run()
         self.stage_run_repo.remove(test_stage_run.id)
         return dto
 
-    def run(self) -> Optional[ExecutionDTO]:
+    def run_with_workflow(self) -> Optional[ExecutionDTO]:
+        dto = self._run()
+
+        if dto:
+            self.workflow_engine.handle_execution_end(dto)
+
+        return dto
+
+    def _run(self) -> Optional[ExecutionDTO]:
         ExecutionClientStore.set(self.client)
         stage_run_id = self.target_stage_run_id
 

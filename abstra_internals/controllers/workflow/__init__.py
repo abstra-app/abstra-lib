@@ -150,39 +150,27 @@ class WorkflowEngine:
 
     @threaded
     def run_job(self, stage: JobStage):
-        execution_controller = ExecutionController(
+        ExecutionController(
             stage=stage,
             request=None,
             client=BasicClient(),
+            workflow_engine=self,
             target_stage_run_id=None,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        )
-
-        execution_dto = execution_controller.run()
-
-        if not execution_dto:
-            return
-
-        self.handle_execution_end(execution_dto)
+        ).run_with_workflow()
 
     @threaded
     def run_script(self, stage: ScriptStage, stage_run: StageRun):
-        execution_controller = ExecutionController(
+        ExecutionController(
             stage=stage,
             request=None,
             client=BasicClient(),
+            workflow_engine=self,
             target_stage_run_id=stage_run.id,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        )
-
-        execution_dto = execution_controller.run()
-
-        if not execution_dto:
-            return
-
-        self.handle_execution_end(execution_dto)
+        ).run_with_workflow()
 
     @threaded
     def run_control(self, stage: ControlStage, stage_run: StageRun):

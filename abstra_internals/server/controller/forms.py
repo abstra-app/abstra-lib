@@ -46,6 +46,7 @@ def get_editor_bp(controller: MainController):
                 stage=form,
                 client=form_client,
                 request=request_context,
+                workflow_engine=controller.workflow_engine,
                 execution_repository=controller.execution_repository,
                 stage_run_repository=controller.stage_run_repository,
                 target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
@@ -57,15 +58,10 @@ def get_editor_bp(controller: MainController):
 
             if is_detached:
                 thread_data = json.loads(controller.read_test_data())
-                execution_dto = execution_controller.run_detached(thread_data)
+                execution_controller.run_without_workflow(thread_data)
             else:
-                execution_dto = execution_controller.run()
+                execution_controller.run_with_workflow()
 
-            if not execution_dto:
-                return
-
-            if not is_detached:
-                controller.workflow_engine.handle_execution_end(execution_dto)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
