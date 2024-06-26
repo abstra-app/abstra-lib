@@ -2,13 +2,13 @@ from typing import Optional
 
 import flask
 
-from abstra_internals.repositories import stage_run_repository
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.stage_run import (
     GetStageRunByQueryFilter,
     Pagination,
     StageRunRepository,
 )
+from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 
 
@@ -59,9 +59,9 @@ class StageRunsController:
         return self.stage_run_repository.retry(stage_run_id).to_dto()
 
 
-def get_editor_bp():
+def get_editor_bp(main_controller: MainController):
     bp = flask.Blueprint("editor_stage_runs", __name__)
-    controller = StageRunsController(stage_run_repository)
+    controller = StageRunsController(main_controller.stage_run_repository)
 
     @bp.get("/")
     @usage
@@ -103,9 +103,9 @@ def get_editor_bp():
     return bp
 
 
-def get_player_bp():
+def get_player_bp(main_controller: MainController):
     bp = flask.Blueprint("player_stage_runs", __name__)
-    controller = StageRunsController(stage_run_repository)
+    controller = StageRunsController(main_controller.stage_run_repository)
 
     @bp.post("/retry")
     def _retry():

@@ -8,10 +8,7 @@ from abstra_internals.controllers.execution_stdio import (
 from abstra_internals.env_masker import GLOBAL_MASKER
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories import (
-    execution_logs_repository,
-    execution_repository,
-)
+from abstra_internals.server.controller.main import MainController
 
 
 class StdioPatcher:
@@ -21,10 +18,10 @@ class StdioPatcher:
     _debug: bool = False
 
     @classmethod
-    def apply(cls, debug: bool):
+    def apply(cls, debug: bool, main_controller: MainController):
         cls._stdio_controller = ExecutionStdioController(
-            execution_logs_repository=execution_logs_repository,
-            execution_repository=execution_repository,
+            execution_logs_repository=main_controller.execution_logs_repository,
+            execution_repository=main_controller.execution_repository,
         )
 
         cls._debug = debug

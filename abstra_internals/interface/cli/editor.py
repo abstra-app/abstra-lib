@@ -29,10 +29,9 @@ def editor(
     # used to block hackerforms lib from opening
     os.environ["ABSTRA_SERVER"] = "true"
 
-    StdioPatcher.apply(debug=False)
-
     controller = MainController()
     controller.reset_repositories()
+    StdioPatcher.apply(debug=False, main_controller=controller)
 
     app = get_local_app(controller)
 

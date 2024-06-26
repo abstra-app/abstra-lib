@@ -1,6 +1,9 @@
 from unittest import TestCase
 
-from abstra_internals.controllers.workflow import workflow_engine
+from abstra_internals.controllers.workflow import WorkflowEngine
+from abstra_internals.repositories.execution import EditorExecutionRepository
+from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
+from abstra_internals.repositories.notifications import LocalNotificationRepository
 from abstra_internals.repositories.project.project import (
     IteratorStage,
     WorkflowTransition,
@@ -11,6 +14,12 @@ from abstra_internals.repositories.stage_run import LocalStageRunRepository
 class IteratorTransitionsTest(TestCase):
     def setUp(self) -> None:
         self.repository = LocalStageRunRepository()
+        self.workflow_engine = WorkflowEngine(
+            stage_run_repository=self.repository,
+            execution_repository=EditorExecutionRepository(),
+            notification_repository=LocalNotificationRepository(),
+            execution_logs_repository=LocalExecutionLogsRepository(),
+        )
 
     def test_simple_foreach(self):
         stage = IteratorStage(
@@ -28,7 +37,7 @@ class IteratorTransitionsTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
-        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
+        result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(
             result,
             [
@@ -56,7 +65,7 @@ class IteratorTransitionsTest(TestCase):
         stage_run = self.repository.create_initial(
             stage="s1", data={"foo": {"bar": [1, 2, 3]}}
         )
-        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
+        result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(
             result,
             [
@@ -82,7 +91,7 @@ class IteratorTransitionsTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={"foo": 1})
-        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
+        result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
     def test_empty_when_not_found(self):
@@ -101,7 +110,7 @@ class IteratorTransitionsTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={})
-        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
+        result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
     def test_custom_item_name(self):
@@ -121,7 +130,7 @@ class IteratorTransitionsTest(TestCase):
             ],
         )
         stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
-        result = workflow_engine._follow_iterator_transitions(stage, stage_run)
+        result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(
             result,
             [

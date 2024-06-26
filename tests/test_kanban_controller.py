@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.server.controller.kanban import KanbanController
 from tests.fixtures import clear_dir, init_dir
@@ -12,7 +12,7 @@ class TestKanbanController(TestCase):
         self.repository = LocalStageRunRepository()
         self.controller = KanbanController(
             stage_run_repository=self.repository,
-            project_repository=ProjectRepository,
+            execution_logs_repository=LocalExecutionLogsRepository(),
         )
 
     def tearDown(self) -> None:

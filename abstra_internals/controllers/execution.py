@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Type
+from typing import Optional
 
 from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.controllers.execution_client import (
@@ -27,12 +27,10 @@ class ExecutionController:
         request: Optional[RequestContext],
         stage_run_repository: StageRunRepository,
         execution_repository: ExecutionRepository,
-        project_repository: Type[ProjectRepository],
         client: ExecutionClient,
     ) -> None:
         self.stage_run_repo = stage_run_repository
         self.execution_repo = execution_repository
-        self.project_repo = project_repository
 
         self.client = client
         self.stage = stage
@@ -40,12 +38,10 @@ class ExecutionController:
         self.request = request
 
     def _should_create_initial_stage_run(self) -> bool:
-        # TODO: move logic to stage entity
-        project = self.project_repo.load()
-        if not project:
-            raise Exception("Project not found")
-
-        return project.is_initial(self.stage) and not self.target_stage_run_id
+        return (
+            ProjectRepository.load().is_initial(self.stage)
+            and not self.target_stage_run_id
+        )
 
     def run_detached(self, thread_data: dict) -> Optional[ExecutionDTO]:
         test_stage_run = self.stage_run_repo.create_detached(
@@ -98,4 +94,5 @@ class ExecutionController:
             self.client.handle_success()
 
         ExecutionClientStore.clear()
+        self.execution_repo.free_current()
         return execution.to_dto()

@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from abstra_internals.repositories import stage_run_repository
 from abstra_internals.repositories.project.project import (
     HookStage,
     ProjectRepository,
     ScriptStage,
     WorkflowTransition,
 )
+from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.server.controller.kanban import DataRequest, DataRequestFilter
 from abstra_internals.utils.datetime import to_utc_iso_string
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
@@ -16,9 +16,8 @@ class TestKanbanRouter(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.client = get_editor_flask_client()
-        stage_run_repository.clear()  # type: ignore
-        self.stage_run_repository = stage_run_repository
-        self.stage_run_repository.clear()  # type: ignore
+        self.stage_run_repository = LocalStageRunRepository()
+        self.stage_run_repository.clear()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

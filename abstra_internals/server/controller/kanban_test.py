@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
 from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
@@ -25,10 +26,9 @@ class KanbanTests(TestCase):
         self.root = init_dir()
 
         self.stage_run_repository = LocalStageRunRepository()
-        self.project_repository = ProjectRepository
         self.controller = KanbanController(
+            execution_logs_repository=LocalExecutionLogsRepository(),
             stage_run_repository=self.stage_run_repository,
-            project_repository=self.project_repository,
         )
 
     def tearDown(self) -> None:

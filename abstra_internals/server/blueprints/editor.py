@@ -28,10 +28,10 @@ from abstra_internals.usage import usage
 def __get_api_bp(controller: MainController):
     bp = flask.Blueprint("editor_api", __name__)
 
-    kanban_bp = kanban_controller.get_editor_bp()
+    kanban_bp = kanban_controller.get_editor_bp(controller)
     bp.register_blueprint(kanban_bp, url_prefix="/kanban")
 
-    stage_run_bp = stage_runs_controller.get_editor_bp()
+    stage_run_bp = stage_runs_controller.get_editor_bp(controller)
     bp.register_blueprint(stage_run_bp, url_prefix="/stage_runs")
 
     workspace_bp = workspace_controller.get_editor_bp(controller)
@@ -52,7 +52,7 @@ def __get_api_bp(controller: MainController):
     workflows_bp = workflows_controller.get_editor_bp(controller)
     bp.register_blueprint(workflows_bp, url_prefix="/workflows")
 
-    requirements_bp = requirements_controller.get_editor_bp()
+    requirements_bp = requirements_controller.get_editor_bp(controller)
     bp.register_blueprint(requirements_bp, url_prefix="/requirements")
 
     debugger_bp = debugger_controller.get_editor_bp(controller)
@@ -70,13 +70,13 @@ def __get_api_bp(controller: MainController):
     assets_bp = assets_controller.get_editor_bp(controller)
     bp.register_blueprint(assets_bp, url_prefix="/assets")
 
-    envvars_bp = envvars_controller.get_editor_bp()
+    envvars_bp = envvars_controller.get_editor_bp(controller)
     bp.register_blueprint(envvars_bp, url_prefix="/env-vars")
 
     pysa_bp = pysa_controller.get_editor_bp()
     bp.register_blueprint(pysa_bp, url_prefix="/pysa")
 
-    roles_bp = roles_controller.get_editor_bp()
+    roles_bp = roles_controller.get_editor_bp(controller)
     bp.register_blueprint(roles_bp, url_prefix="/roles")
 
     access_control_bp = access_control_controller.get_editor_bp(controller)
