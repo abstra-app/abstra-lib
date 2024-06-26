@@ -4,7 +4,6 @@ import flask
 
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories import users_repository
 from abstra_internals.repositories.project.project import (
     ConditionStage,
     FormStage,
@@ -302,7 +301,7 @@ def update_workflow(workflow_state_dto: Dict):
     return _make_workflow_dto(project)
 
 
-def get_editor_bp(controller: MainController):
+def get_editor_bp(_: MainController):
     bp = flask.Blueprint("editor_workflows", __name__)
 
     # 1s pooling in this route
@@ -330,8 +329,8 @@ def get_editor_bp(controller: MainController):
     return bp
 
 
-def get_player_bp():
-    guard = Guard(users_repository, enabled=IS_PRODUCTION)
+def get_player_bp(main_controller: MainController):
+    guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
 
     bp = flask.Blueprint("player_workflow", __name__)
 

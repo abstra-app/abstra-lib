@@ -7,14 +7,7 @@ from abstra_internals.controllers.execution import (
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import HookClient
-from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.entities.execution import RequestContext
-from abstra_internals.repositories import (
-    execution_logs_repository,
-    execution_repository,
-    stage_run_repository,
-)
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
@@ -88,12 +81,11 @@ def get_editor_bp(controller: MainController):
 
         execution_controller = ExecutionController(
             stage=hook,
-            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            stage_run_repository=stage_run_repository,
-            execution_repository=execution_repository,
-            project_repository=ProjectRepository,
-            request=request_context,
             client=client,
+            request=request_context,
+            stage_run_repository=controller.stage_run_repository,
+            execution_repository=controller.execution_repository,
+            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
         )
 
         execution_dto = execution_controller.run()
@@ -101,13 +93,15 @@ def get_editor_bp(controller: MainController):
         if not execution_dto:
             return flask.abort(429)
 
-        workflow_engine.handle_pthread_execution_end()
+        controller.workflow_engine.handle_execution_end(execution_dto)
 
         return {
             "body": client.response["body"],
             "status": client.response["status"],
             "headers": client.response["headers"],
-            "output": execution_logs_repository.get_logs_dto(execution_dto["id"]),
+            "output": controller.execution_logs_repository.get_logs_dto(
+                execution_dto["id"]
+            ),
         }
 
     @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
@@ -128,12 +122,11 @@ def get_editor_bp(controller: MainController):
 
         execution_controller = ExecutionController(
             stage=hook,
+            client=client,
             request=request_context,
             target_stage_run_id=None,
             stage_run_repository=controller.stage_run_repository,
-            execution_repository=execution_repository,
-            project_repository=ProjectRepository,
-            client=client,
+            execution_repository=controller.execution_repository,
         )
 
         thread_data = json.loads(controller.read_test_data())
@@ -146,7 +139,9 @@ def get_editor_bp(controller: MainController):
             "body": client.response["body"],
             "status": client.response["status"],
             "headers": client.response["headers"],
-            "output": execution_logs_repository.get_logs_dto(execution_dto["id"]),
+            "output": controller.execution_logs_repository.get_logs_dto(
+                execution_dto["id"]
+            ),
         }
 
     return bp

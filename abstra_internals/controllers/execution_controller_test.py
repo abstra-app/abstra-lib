@@ -46,12 +46,11 @@ class ExecutionControllerTest(TestCase):
     def test_run_initial_returns_dto(self):
         controller = ExecutionController(
             stage=self.stage,
+            client=self.hook_client,
             target_stage_run_id=None,
             request=self.request_context,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-            project_repository=ProjectRepository,
-            client=self.hook_client,
         )
 
         execution_dto = controller.run()
@@ -64,12 +63,11 @@ class ExecutionControllerTest(TestCase):
     def test_run_detached_returns_dto(self):
         controller = ExecutionController(
             stage=self.stage,
+            client=self.hook_client,
             target_stage_run_id=None,
             request=self.request_context,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-            project_repository=ProjectRepository,
-            client=self.hook_client,
         )
 
         execution_dto = controller.run_detached(thread_data={})

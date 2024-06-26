@@ -6,7 +6,6 @@ from abstra_internals.controllers.execution import (
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import FormClient, HookClient
-from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.environment import (
     BUILD_ID,
@@ -18,8 +17,6 @@ from abstra_internals.environment import (
 )
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories import users_repository
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller import (
     access_control as access_control_controller,
 )
@@ -41,27 +38,27 @@ from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_player_bp(controller: MainController):
-    guard = Guard(users_repository, enabled=IS_PRODUCTION)
+    guard = Guard(controller.users_repository, enabled=IS_PRODUCTION)
 
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
 
-    auth_bp = auth_controller.get_player_bp()
+    auth_bp = auth_controller.get_player_bp(controller)
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
-    user_bp = user_controller.get_player_bp()
+    user_bp = user_controller.get_player_bp(controller)
     bp.register_blueprint(user_bp, url_prefix="/_user")
 
-    kanban_bp = kanban_controller.get_player_bp()
+    kanban_bp = kanban_controller.get_player_bp(controller)
     bp.register_blueprint(kanban_bp, url_prefix="/_kanban")
 
-    workflow_bp = workflows_controller.get_player_bp()
+    workflow_bp = workflows_controller.get_player_bp(controller)
     bp.register_blueprint(workflow_bp, url_prefix="/_workflows")
 
-    stage_run_bp = stage_runs_controller.get_player_bp()
+    stage_run_bp = stage_runs_controller.get_player_bp(controller)
     bp.register_blueprint(stage_run_bp, url_prefix="/_stage-runs")
 
-    access_control_bp = access_control_controller.get_player_bp()
+    access_control_bp = access_control_controller.get_player_bp(controller)
     bp.register_blueprint(access_control_bp, url_prefix="/_access-control")
 
     @bp.get("/_workspace")
@@ -123,10 +120,9 @@ def get_player_bp(controller: MainController):
                 stage=form,
                 client=form_client,
                 request=request_context,
-                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
                 stage_run_repository=controller.stage_run_repository,
                 execution_repository=controller.execution_repository,
-                project_repository=ProjectRepository,
+                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
             )
 
             execution_dto = execution_controller.run()
@@ -134,7 +130,7 @@ def get_player_bp(controller: MainController):
             if not execution_dto:
                 return
 
-            workflow_engine.handle_pthread_execution_end()
+            controller.workflow_engine.handle_execution_end(execution_dto)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
@@ -204,12 +200,11 @@ def get_player_bp(controller: MainController):
 
         execution_controller = ExecutionController(
             stage=hook,
+            client=client,
             request=request_context,
-            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
-            project_repository=ProjectRepository,
-            client=client,
+            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
         )
 
         execution_dto = execution_controller.run()
@@ -220,7 +215,7 @@ def get_player_bp(controller: MainController):
                 response="This thread is already running.",
             )
 
-        workflow_engine.handle_pthread_execution_end()
+        controller.workflow_engine.handle_execution_end(execution_dto)
 
         return flask.Response(
             status=client.response["status"],
@@ -250,7 +245,7 @@ def get_player_bp(controller: MainController):
         if not job.file:
             flask.abort(500)
 
-        workflow_engine.run_job(job)
+        controller.workflow_engine.run_job(job)
         return {"status": "running"}
 
     @bp.get("/")

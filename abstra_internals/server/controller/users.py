@@ -1,8 +1,8 @@
 import flask
 
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
-from abstra_internals.repositories import users_repository
 from abstra_internals.repositories.users import UsersRepository
+from abstra_internals.server.controller.main import MainController
 
 
 class UserController:
@@ -16,8 +16,8 @@ class UserController:
         return self.users_repository.insert_user(claims.email)
 
 
-def get_player_bp():
-    controller = UserController(users_repository)
+def get_player_bp(main_controller: MainController):
+    controller = UserController(main_controller.users_repository)
     bp = flask.Blueprint("playerUsers", __name__)
 
     @bp.post("/sign-up")

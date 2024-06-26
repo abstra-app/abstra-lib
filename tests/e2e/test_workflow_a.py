@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import ANY
 
-from abstra_internals.repositories import stage_run_repository
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
@@ -24,16 +23,14 @@ def sort_response(response: dict):
 class TestWorkflowA(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        self.stage_run_repository = LocalStageRunRepository()
         self.client = get_editor_flask_client()
         self.maxDiff = None
 
         (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
-        if not isinstance(stage_run_repository, LocalStageRunRepository):
-            raise Exception("Stage run repository is not local")
-
-        stage_run_repository.clear()
+        self.stage_run_repository.clear()
         clear_dir(self.root)
 
     def create_project_a_py_files(self):

@@ -4,13 +4,6 @@ import flask
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
-from abstra_internals.controllers.workflow import workflow_engine
-from abstra_internals.repositories import (
-    execution_logs_repository,
-    execution_repository,
-    stage_run_repository,
-)
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
@@ -74,12 +67,11 @@ def get_editor_bp(controller: MainController):
 
         execution_controller = ExecutionController(
             stage=job,
-            stage_run_repository=stage_run_repository,
-            target_stage_run_id=None,
-            execution_repository=execution_repository,
-            project_repository=ProjectRepository,
             request=None,
             client=BasicClient(),
+            target_stage_run_id=None,
+            stage_run_repository=controller.stage_run_repository,
+            execution_repository=controller.execution_repository,
         )
 
         execution_dto = execution_controller.run()
@@ -87,9 +79,13 @@ def get_editor_bp(controller: MainController):
         if not execution_dto:
             return flask.abort(429)
 
-        workflow_engine.handle_pthread_execution_end()
+        controller.workflow_engine.handle_execution_end(execution_dto)
 
-        return {"output": execution_logs_repository.get_logs_dto(execution_dto["id"])}
+        return {
+            "output": controller.execution_logs_repository.get_logs_dto(
+                execution_dto["id"]
+            )
+        }
 
     @bp.post("/<path:id>/test")
     @usage
@@ -100,12 +96,11 @@ def get_editor_bp(controller: MainController):
 
         execution_controller = ExecutionController(
             stage=job,
-            stage_run_repository=controller.stage_run_repository,
-            target_stage_run_id=None,
-            execution_repository=execution_repository,
-            project_repository=ProjectRepository,
             request=None,
             client=BasicClient(),
+            target_stage_run_id=None,
+            execution_repository=controller.execution_repository,
+            stage_run_repository=controller.stage_run_repository,
         )
 
         thread_data = json.loads(controller.read_test_data())
@@ -114,6 +109,10 @@ def get_editor_bp(controller: MainController):
         if not execution_dto:
             return flask.abort(429)
 
-        return {"output": execution_logs_repository.get_logs_dto(execution_dto["id"])}
+        return {
+            "output": controller.execution_logs_repository.get_logs_dto(
+                execution_dto["id"]
+            )
+        }
 
     return bp

@@ -1,10 +1,10 @@
 import flask
 
-from abstra_internals.repositories import authn_repository
+from abstra_internals.server.controller.main import MainController
 from abstra_internals.utils.email import is_valid_email
 
 
-def get_player_bp():
+def get_player_bp(main_controller: MainController):
     bp = flask.Blueprint("auth", __name__)
 
     @bp.post("/authenticate")
@@ -17,7 +17,7 @@ def get_player_bp():
         if not email or not is_valid_email(email):
             return flask.abort(400)
 
-        ok = authn_repository.authenticate(email)
+        ok = main_controller.authn_repository.authenticate(email)
         if not ok:
             return flask.abort(400)
 
@@ -34,7 +34,7 @@ def get_player_bp():
         if not email or not token:
             return flask.abort(400)
 
-        jwt = authn_repository.verify(email, token)
+        jwt = main_controller.authn_repository.verify(email, token)
         if not jwt:
             return flask.abort(404)
 
@@ -50,7 +50,7 @@ def get_player_bp():
         if not access_token:
             return flask.abort(400)
 
-        jwt = authn_repository.oidc_access(access_token)
+        jwt = main_controller.authn_repository.oidc_access(access_token)
         if not jwt:
             return flask.abort(404)
 

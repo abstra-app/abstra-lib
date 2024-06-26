@@ -8,10 +8,8 @@ from abstra_internals.controllers.execution import (
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import FormClient
-from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
@@ -48,10 +46,9 @@ def get_editor_bp(controller: MainController):
                 stage=form,
                 client=form_client,
                 request=request_context,
-                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
                 execution_repository=controller.execution_repository,
-                project_repository=ProjectRepository,
                 stage_run_repository=controller.stage_run_repository,
+                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
             )
 
             is_detached = flask.request.args.get(
@@ -68,7 +65,7 @@ def get_editor_bp(controller: MainController):
                 return
 
             if not is_detached:
-                workflow_engine.handle_pthread_execution_end()
+                controller.workflow_engine.handle_execution_end(execution_dto)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:

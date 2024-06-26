@@ -7,14 +7,9 @@ from json import dumps, loads
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.entities.execution import RequestContext
-from abstra_internals.repositories import (
-    execution_repository,
-    stage_run_repository,
-)
-from abstra_internals.repositories.project.project import FormStage, ProjectRepository
-from abstra_internals.stdio_patcher import StdioPatcher
-
-StdioPatcher.apply(debug=True)
+from abstra_internals.repositories.execution import EditorExecutionRepository
+from abstra_internals.repositories.project.project import FormStage
+from abstra_internals.repositories.stage_run import LocalStageRunRepository
 
 
 class MockWebSocket:
@@ -78,12 +73,11 @@ def assert_form(
 
     controller = ExecutionController(
         stage=form_json,
-        target_stage_run_id=None,
         request=request_data,
-        project_repository=ProjectRepository,
-        execution_repository=execution_repository,
-        stage_run_repository=stage_run_repository,
         client=BasicClient(),
+        target_stage_run_id=None,
+        stage_run_repository=LocalStageRunRepository(),
+        execution_repository=EditorExecutionRepository(),
     )
 
     controller.run()

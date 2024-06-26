@@ -1,17 +1,12 @@
 from datetime import datetime
-from typing import Any, List, Optional, Sequence, Tuple, Type
+from typing import Any, List, Optional, Sequence, Tuple
 
 import flask
 from pydantic.dataclasses import dataclass
 
-from abstra_internals.controllers.workflow import workflow_engine
 from abstra_internals.environment import IS_PRODUCTION
-from abstra_internals.repositories import (
-    execution_logs_repository,
-    stage_run_repository,
-    users_repository,
-)
 from abstra_internals.repositories.execution_logs import (
+    ExecutionLogsRepository,
     LogEntry,
     StdioLogEntry,
     UnhandledExceptionLogEntry,
@@ -29,6 +24,7 @@ from abstra_internals.repositories.stage_run import (
     StageRun,
     StageRunRepository,
 )
+from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.controller.workflows import get_path, make_stage_dto
 from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
 from abstra_internals.utils.datetime import to_utc_iso_string
@@ -159,18 +155,18 @@ class KanbanController:
     def __init__(
         self,
         stage_run_repository: StageRunRepository,
-        project_repository: Type[ProjectRepository],
+        execution_logs_repository: ExecutionLogsRepository,
         read_only: bool = False,
     ) -> None:
+        self.execution_logs_repository = execution_logs_repository
         self.stage_run_repository = stage_run_repository
-        self.project_repository = project_repository
+        self.initial_project = ProjectRepository.load()
         self.read_only = read_only
-        self.initial_project = self.project_repository.load()
 
     def _get_project(self):
         if self.read_only:
             return self.initial_project
-        return self.project_repository.load()
+        return ProjectRepository.load()
 
     def get_job(self, id: str):
         stage = self._get_project().get_stage(id)
@@ -258,7 +254,9 @@ class KanbanController:
             (
                 ancestor,
                 (
-                    execution_logs_repository.get(execution_id=ancestor.execution_id)
+                    self.execution_logs_repository.get(
+                        execution_id=ancestor.execution_id
+                    )
                     if ancestor.execution_id
                     else []
                 ),
@@ -267,10 +265,12 @@ class KanbanController:
         ]
 
 
-def get_editor_bp():
+def get_editor_bp(main_controller: MainController):
     project_repository = ProjectRepository
 
-    controller = KanbanController(stage_run_repository, project_repository)
+    controller = KanbanController(
+        main_controller.stage_run_repository, main_controller.execution_logs_repository
+    )
     bp = flask.Blueprint("kanban", __name__)
 
     @bp.get("/stages")
@@ -326,19 +326,21 @@ def get_editor_bp():
         if not stage:
             flask.abort(404)
 
-        workflow_engine.run_job(stage)
+        main_controller.workflow_engine.run_job(stage)
         return {"status": "running"}
 
     return bp
 
 
-def get_player_bp():
+def get_player_bp(main_controller: MainController):
     project_repository = ProjectRepository
 
-    guard = Guard(users_repository, enabled=IS_PRODUCTION)
+    guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
 
     controller = KanbanController(
-        stage_run_repository, project_repository, read_only=True
+        main_controller.stage_run_repository,
+        main_controller.execution_logs_repository,
+        read_only=True,
     )
     bp = flask.Blueprint("kanban", __name__)
 
@@ -393,7 +395,7 @@ def get_player_bp():
         if not stage:
             flask.abort(404)
 
-        workflow_engine.run_job(stage)
+        main_controller.workflow_engine.run_job(stage)
         return {"status": "running"}
 
     return bp

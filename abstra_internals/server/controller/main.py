@@ -13,6 +13,7 @@ from abstra_internals.cloud_api import (
     get_api_key_info,
     get_project_info,
 )
+from abstra_internals.controllers.workflow import WorkflowEngine
 from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
@@ -21,13 +22,21 @@ from abstra_internals.credentials import (
 )
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.repositories import (
+    authn_repository,
+    env_vars_repository,
     execution_logs_repository,
     execution_repository,
+    notification_repository,
     requirements_repository,
+    roles_repository,
     stage_run_repository,
+    users_repository,
 )
+from abstra_internals.repositories.authn import AuthnRepository
+from abstra_internals.repositories.env_vars import EnvVarsRepository
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.notifications import NotificationRepository
 from abstra_internals.repositories.project.project import (
     ActionStage,
     FormStage,
@@ -38,7 +47,10 @@ from abstra_internals.repositories.project.project import (
     StyleSettingsWithSidebar,
     WorkflowStage,
 )
+from abstra_internals.repositories.requirements import RequirementsRepository
+from abstra_internals.repositories.roles import RolesRepository
 from abstra_internals.repositories.stage_run import StageRunRepository
+from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.server.controller.linters import check_linters
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
@@ -104,8 +116,15 @@ class DoubleTransitionError(Exception):
 
 
 class MainController:
+    workflow_engine: WorkflowEngine
+    users_repository: UsersRepository
+    roles_repository: RolesRepository
+    authn_repository: AuthnRepository
+    env_vars_repository: EnvVarsRepository
     stage_run_repository: StageRunRepository
     execution_repository: ExecutionRepository
+    requirements_repository: RequirementsRepository
+    notification_repository: NotificationRepository
     execution_logs_repository: ExecutionLogsRepository
 
     def __init__(self):
@@ -117,8 +136,21 @@ class MainController:
         ensure_abstraignore(Settings.root_path)
         ensure_gitignore(Settings.root_path)
 
+        self.workflow_engine = WorkflowEngine(
+            stage_run_repository=stage_run_repository,
+            execution_repository=execution_repository,
+            notification_repository=notification_repository,
+            execution_logs_repository=execution_logs_repository,
+        )
+
+        self.users_repository = users_repository
+        self.roles_repository = roles_repository
+        self.authn_repository = authn_repository
+        self.env_vars_repository = env_vars_repository
         self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
+        self.requirements_repository = requirements_repository
+        self.notification_repository = notification_repository
         self.execution_logs_repository = execution_logs_repository
 
     def deploy(self):
@@ -138,6 +170,11 @@ class MainController:
 
     def reset_repositories(self):
         self.stage_run_repository.clear()
+
+    def _ensure_abstra_in_requirements(self):
+        requirements = self.requirements_repository.load()
+        requirements.ensure("abstra", pkg_resources.get_distribution("abstra").version)
+        self.requirements_repository.save(requirements)
 
     def get_workspace(self) -> StyleSettingsWithSidebar:
         project = ProjectRepository.load()
