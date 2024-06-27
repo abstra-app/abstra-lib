@@ -1,5 +1,4 @@
 import shutil
-import time
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import ANY
@@ -7,6 +6,7 @@ from unittest.mock import ANY
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.utils.pthread import wait_all_threads
 
 
 def sort_response(response: dict):
@@ -283,7 +283,7 @@ class TestWorkflowA(TestCase):
 
         # Run job and hook
         self.client.post("/_editor/api/jobs/job_a/run")
-        time.sleep(1)  # TODO: better way to wait all threads
+        wait_all_threads()
 
         first_kanban_state = self.client.post(
             "/_editor/api/kanban",
@@ -305,7 +305,7 @@ class TestWorkflowA(TestCase):
         self.client.post(
             "/_editor/api/hooks/hook_b/run?abstra-run-id=" + hook_b_thread_id,
         )
-        time.sleep(1)  # TODO: better way to wait all threads
+        wait_all_threads()
 
         # Check scripts ran
         first_kanban_state = self.client.post(
@@ -408,7 +408,7 @@ class TestWorkflowA(TestCase):
         # Run job, hook and scripts
         job_a_response = self.client.post("/_editor/api/jobs/job_a/test")
         self.assertEqual(job_a_response.status_code, 200)
-        time.sleep(1)  # TODO: better way to wait all threads
+        wait_all_threads()
 
         write_response = self.client.post(
             "/_editor/api/workspace/write-test-data",
@@ -418,14 +418,14 @@ class TestWorkflowA(TestCase):
         )
         hook_b_response = self.client.post("/_editor/api/hooks/hook_b/test")
         self.assertEqual(hook_b_response.status_code, 200)
-        time.sleep(1)  # TODO: better way to wait all threads
+        wait_all_threads()
         script_c_response = self.client.post("/_editor/api/scripts/script_c/test")
         self.assertEqual(script_c_response.status_code, 200)
-        time.sleep(1)  # TODO: better way to wait all threads
+        wait_all_threads()
         script_d_response = self.client.post("/_editor/api/scripts/script_d/test")
         self.assertEqual(script_d_response.status_code, 200)
 
-        time.sleep(1)  # TODO: better way to wait all threads
+        wait_all_threads()
         # Check responses
 
         logs = {
