@@ -6,7 +6,11 @@ from abstra_internals.controllers.execution_client import (
     ExecutionClient,
     ExecutionClientStore,
 )
-from abstra_internals.entities.execution import Execution, ExecutionDTO, RequestContext
+from abstra_internals.entities.execution import (
+    Execution,
+    ExecutionDTO,
+    RequestContext,
+)
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.project.project import ActionStage, ProjectRepository
 from abstra_internals.repositories.stage_run import StageRunRepository

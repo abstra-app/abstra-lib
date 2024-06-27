@@ -6,8 +6,11 @@ from json import dumps, loads
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
+from abstra_internals.controllers.workflow import WorkflowEngine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.repositories.execution import EditorExecutionRepository
+from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
+from abstra_internals.repositories.notifications import LocalNotificationRepository
 from abstra_internals.repositories.project.project import FormStage
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 
@@ -71,16 +74,26 @@ def assert_form(
 
     request_data = RequestContext(body="{}", headers={}, method="GET", query_params={})
 
+    stage_run_repository = LocalStageRunRepository()
+    execution_repository = EditorExecutionRepository()
+    workflow_engine = WorkflowEngine(
+        stage_run_repository=stage_run_repository,
+        execution_repository=execution_repository,
+        notification_repository=LocalNotificationRepository(),
+        execution_logs_repository=LocalExecutionLogsRepository(),
+    )
+
     controller = ExecutionController(
         stage=form_json,
         request=request_data,
         client=BasicClient(),
         target_stage_run_id=None,
-        stage_run_repository=LocalStageRunRepository(),
-        execution_repository=EditorExecutionRepository(),
+        workflow_engine=workflow_engine,
+        stage_run_repository=stage_run_repository,
+        execution_repository=execution_repository,
     )
 
-    controller.run()
+    controller.run_without_workflow({})
 
     for msg in iter_messages(ws, msgs, test_case):
         pass

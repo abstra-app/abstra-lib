@@ -7,11 +7,10 @@ from abstra_internals.controllers.execution import (
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import HookClient
-from abstra_internals.entities.execution import RequestContext
+from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
-from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_editor_bp(controller: MainController):
@@ -70,12 +69,7 @@ def get_editor_bp(controller: MainController):
         if not hook:
             flask.abort(404)
 
-        request_context = RequestContext(
-            method=flask.request.method,
-            body=flask.request.get_data(as_text=True),
-            headers=filter_non_string_values(flask.request.headers),
-            query_params=flask.request.args,
-        )
+        request_context = context_from_flask(flask.request)
 
         client = HookClient(request_context)
 
@@ -110,12 +104,7 @@ def get_editor_bp(controller: MainController):
         if not hook:
             flask.abort(404)
 
-        request_context = RequestContext(
-            method=flask.request.method,
-            body=flask.request.get_data(as_text=True),
-            headers=filter_non_string_values(flask.request.headers),
-            query_params=flask.request.args,
-        )
+        request_context = context_from_flask(flask.request)
 
         client = HookClient(request_context)
 
