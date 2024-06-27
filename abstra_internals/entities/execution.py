@@ -2,17 +2,29 @@ import datetime
 from typing import Any, Dict, Literal, Optional, TypedDict
 from uuid import uuid4
 
+import flask
+
 from abstra_internals.utils.datetime import to_utc_iso_string
+from abstra_internals.utils.dict import filter_non_string_values
 
 # Avoid circular import due to repo and entity being in the same file
 ActionStage = Any
 
 
 class RequestContext(TypedDict):
-    body: str
     query_params: Dict[str, str]
     headers: Dict[str, str]
     method: str
+    body: str
+
+
+def context_from_flask(request: flask.Request) -> RequestContext:
+    return RequestContext(
+        headers=filter_non_string_values(request.headers),
+        body=request.get_data(as_text=True),
+        query_params=request.args,
+        method=request.method,
+    )
 
 
 ExecutionStatus = Literal["running", "failed", "finished", "abandoned"]
@@ -20,10 +32,10 @@ ExecutionStatus = Literal["running", "failed", "finished", "abandoned"]
 
 class ExecutionDTO(TypedDict):
     id: str
-    status: ExecutionStatus
-    created_at: str
     stage_id: str
+    created_at: str
     stage_run_id: str
+    status: ExecutionStatus
     context: Optional[RequestContext]
 
 
@@ -37,23 +49,25 @@ class Execution:
 
     def __init__(
         self,
+        *,
         id: str,
-        stage: ActionStage,
         stage_run_id: str,
-        request_context: Optional[RequestContext],
+        stage: ActionStage,
         created_at: datetime.datetime,
+        request_context: Optional[RequestContext],
     ) -> None:
         self.id = id
-        self.created_at = created_at
         self.stage = stage
+        self.created_at = created_at
         self.stage_run_id = stage_run_id
         self.request_context = request_context
 
     @classmethod
     def create(
         cls,
-        stage: ActionStage,
+        *,
         stage_run_id: str,
+        stage: ActionStage,
         request_context: Optional[RequestContext],
     ):
         return cls(
@@ -74,8 +88,8 @@ class Execution:
         return ExecutionDTO(
             id=self.id,
             status=self._status,
-            created_at=to_utc_iso_string(self.created_at),
             stage_id=self.stage.id,
-            stage_run_id=self.stage_run_id,
             context=self.request_context,
+            stage_run_id=self.stage_run_id,
+            created_at=to_utc_iso_string(self.created_at),
         )

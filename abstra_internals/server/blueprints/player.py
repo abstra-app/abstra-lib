@@ -6,7 +6,7 @@ from abstra_internals.controllers.execution import (
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import FormClient, HookClient
-from abstra_internals.entities.execution import RequestContext
+from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.environment import (
     BUILD_ID,
     IS_PRODUCTION,
@@ -34,7 +34,6 @@ from abstra_internals.server.guards.role_guard import (
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.utils import check_is_url
-from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_player_bp(controller: MainController):
@@ -98,16 +97,13 @@ def get_player_bp(controller: MainController):
     @sock.route("/_socket")
     @guard.socket_by(QueryArgSelector("id"))
     def _websocket(ws: flask_sock.Server):
-        request_context = RequestContext(
-            query_params=flask.request.args,
-            body=flask.request.get_data(as_text=True),
-            headers=filter_non_string_values(flask.request.headers),
-            method=flask.request.method,
-        )
+        request_context = context_from_flask(flask.request)
 
         try:
             form_client = FormClient(
-                ws=ws, request_context=request_context, production_mode=True
+                request_context=request_context,
+                production_mode=True,
+                ws=ws,
             )
             id = flask.request.args.get("id")
             if id is None:
@@ -184,12 +180,7 @@ def get_player_bp(controller: MainController):
         if not hook.file:
             flask.abort(500)
 
-        request_context = RequestContext(
-            query_params=flask.request.args,
-            body=flask.request.get_data(as_text=True),
-            headers=filter_non_string_values(flask.request.headers),
-            method=flask.request.method,
-        )
+        request_context = context_from_flask(flask.request)
 
         client = HookClient(request_context)
 

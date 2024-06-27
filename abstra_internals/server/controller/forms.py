@@ -8,12 +8,11 @@ from abstra_internals.controllers.execution import (
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import FormClient
-from abstra_internals.entities.execution import RequestContext
+from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
 from abstra_internals.utils import is_it_true
-from abstra_internals.utils.dict import filter_non_string_values
 
 
 def get_editor_bp(controller: MainController):
@@ -23,12 +22,7 @@ def get_editor_bp(controller: MainController):
     @sock.route("/socket")
     def _websocket(ws: flask_sock.Server):
         try:
-            request_context = RequestContext(
-                query_params=flask.request.args,
-                body=flask.request.get_data(as_text=True),
-                headers=filter_non_string_values(flask.request.headers),
-                method=flask.request.method,
-            )
+            request_context = context_from_flask(flask.request)
 
             id = flask.request.args.get("id")
             if id is None:
