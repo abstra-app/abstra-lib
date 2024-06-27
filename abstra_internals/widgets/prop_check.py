@@ -37,22 +37,6 @@ def valid_prop(prop, schema: WBrokerAPIParams):
     return valid
 
 
-def to_generic_type(type):
-    if type is str:
-        return "string"
-    if type is int:
-        return "number"
-    if type is bool:
-        return "boolean"
-    if type is list:
-        return "array"
-    if type is dict:
-        return "object"
-    if type is None:
-        return "null"
-    raise Exception(f"Unknown type: {type}")
-
-
 def validate_widget_props(widget):
     metadata_widget = metadata_objects[widget["type"]]
     required_props = [prop for prop in metadata_widget.brokerAPI.params]
