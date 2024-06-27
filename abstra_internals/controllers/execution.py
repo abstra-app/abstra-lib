@@ -72,45 +72,46 @@ class ExecutionController:
         return dto
 
     def _run(self) -> Optional[ExecutionDTO]:
-        ExecutionClientStore.set(self.client)
-        stage_run_id = self.target_stage_run_id
+        try:
+            ExecutionClientStore.set(self.client)
+            stage_run_id = self.target_stage_run_id
 
-        if self._should_create_initial_stage_run():
-            stage_run = self.stage_run_repo.create_initial(self.stage.id)
-            stage_run_id = stage_run.id
+            if self._should_create_initial_stage_run():
+                stage_run = self.stage_run_repo.create_initial(self.stage.id)
+                stage_run_id = stage_run.id
 
-        if not stage_run_id:
-            self.client.handle_unset_thread()
+            if not stage_run_id:
+                self.client.handle_unset_thread()
+                return
+
+            execution = Execution.create(
+                stage=self.stage,
+                request_context=self.request,
+                stage_run_id=stage_run_id,
+            )
+
+            if not self.stage_run_repo.acquire_lock(
+                stage_run_id=stage_run_id, execution_id=execution.id
+            ):
+                self.client.handle_lock_failed(stage_run_id)
+                return
+
+            self.execution_repo.create(execution.to_dto())
+            self.client.handle_start(execution.id)
+
+            status, exception = ExecutionService.run(Path(execution.stage.file))
+            self.stage_run_repo.change_status(execution.stage_run_id, status)
+            execution.set_status(status)
+            self.execution_repo.update(execution.to_dto())
+
+            if exception:
+                print_exception(exception)
+                self.client.handle_failure(exception)
+            else:
+                self.client.handle_success()
+
+            return execution.to_dto()
+
+        finally:
             ExecutionClientStore.clear()
-            return
-
-        execution = Execution.create(
-            stage=self.stage,
-            request_context=self.request,
-            stage_run_id=stage_run_id,
-        )
-
-        if not self.stage_run_repo.acquire_lock(
-            stage_run_id=stage_run_id, execution_id=execution.id
-        ):
-            self.client.handle_lock_failed(stage_run_id)
-            ExecutionClientStore.clear()
-            return
-
-        self.execution_repo.create(execution.to_dto())
-        self.client.handle_start(execution.id)
-
-        status, exception = ExecutionService.run(Path(execution.stage.file))
-        self.stage_run_repo.change_status(execution.stage_run_id, status)
-        execution.set_status(status)
-        self.execution_repo.update(execution.to_dto())
-
-        if exception:
-            print_exception(exception)
-            self.client.handle_failure(exception)
-        else:
-            self.client.handle_success()
-
-        ExecutionClientStore.clear()
-        self.execution_repo.free_current()
-        return execution.to_dto()
+            self.execution_repo.free_current()

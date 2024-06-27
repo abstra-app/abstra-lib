@@ -362,7 +362,7 @@ class JobStage:
             id=_id,
             file=file,
             title=title,
-            schedule="* * * * *",
+            schedule="0 0 * * *",
             workflow_position=workflow_position,
             workflow_transitions=[],
         )
