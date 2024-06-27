@@ -5,9 +5,13 @@ from pydantic import BaseModel
 from abstra_internals.logger import AbstraLogger
 
 
+def _script(code: str):
+    return jedi.Script(code, environment=jedi.InterpreterEnvironment())
+
+
 def jedi_get_autocomplete(code, line, column):
     try:
-        script = jedi.Script(code)
+        script = _script(code)
         completions = script.complete(line, column)
         result = []
         for c in completions:
@@ -30,7 +34,7 @@ def jedi_get_autocomplete(code, line, column):
 
 def jedi_help(code, line, column):
     try:
-        script = jedi.Script(code)
+        script = _script(code)
         return [
             {"docstring": h.docstring(), "name": h.name}
             for h in script.help(line, column)
@@ -42,7 +46,7 @@ def jedi_help(code, line, column):
 
 def jedi_get_syntax_errors(code):
     try:
-        script = jedi.Script(code)
+        script = _script(code)
         errors = script.get_syntax_errors()
         return [
             {

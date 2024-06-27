@@ -38,15 +38,15 @@ def valid_prop(prop, schema: WBrokerAPIParams):
 
 
 def to_generic_type(type):
-    if type == str:
+    if type is str:
         return "string"
-    if type == int:
+    if type is int:
         return "number"
-    if type == bool:
+    if type is bool:
         return "boolean"
-    if type == list:
+    if type is list:
         return "array"
-    if type == dict:
+    if type is dict:
         return "object"
     if type is None:
         return "null"
