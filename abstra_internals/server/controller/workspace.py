@@ -49,7 +49,6 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
         file_path = flask.request.json["path"]
         type = flask.request.json["type"]
-        mode = flask.request.json.get("mode", "file")
         if type == "scripts":
             controller.init_code_file(file_path, new_script_code)
         elif type == "forms":
@@ -60,7 +59,6 @@ def get_editor_bp(controller: MainController):
             controller.init_code_file(file_path, new_job_code)
         else:
             flask.abort(400)
-        controller.open_file(file_path, create_if_not_exists=False, mode=mode)
         return {"success": True}
 
     # 1s pooling in this route
