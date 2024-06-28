@@ -415,10 +415,17 @@ metadata = {
                 },
                 {
                     "argName": "initial_value",
-                    "description": "The initial value to display to the user. Defaults to None.",
+                    "description": 'The initial value to display to the user. Defaults to "".',
                     "typeName": "str",
                     "isKwarg": True,
-                    "default": "None",
+                    "default": '""',
+                },
+                {
+                    "argName": "multiple",
+                    "description": "Whether the user will be allowed to upload multiple files. Defaults to False.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "False",
                 },
                 {
                     "argName": "disabled",
@@ -466,15 +473,16 @@ metadata = {
             ],
             "returns": [
                 {
-                    "typeName": "FileResponse",
-                    "typeDescription": "A dict containing the picture taken by the user FileResponse(file: TemporaryFile, url: str)",
+                    "typeName": "Union[FileResponse, List[FileResponse]]",
+                    "typeDescription": 'A dict containing the picture taken by the user ({"file": file, "url": str, "content": bytes}) or a list of pictures in case of multiple flag set as True',
                 }
             ],
         },
         "brokerAPI": {
             "params": [
                 {"argName": "label", "typeName": "string"},
-                {"argName": "value", "typeName": ["string"]},
+                {"argName": "value", "typeName": "array"},
+                {"argName": "multiple", "typeName": "boolean"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
