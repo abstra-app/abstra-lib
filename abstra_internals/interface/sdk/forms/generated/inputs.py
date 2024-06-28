@@ -42,7 +42,8 @@ def read_camera(label: str, **kwargs):
 		label (str): The label to display to the user
 		
         Keyword Args: 
-		initial_value (str): The initial value to display to the user. Defaults to None.
+		initial_value (str): The initial value to display to the user. Defaults to "".
+		multiple (bool): Whether the user will be allowed to upload multiple files. Defaults to False.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
@@ -51,7 +52,7 @@ def read_camera(label: str, **kwargs):
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
-          A dict containing the picture taken by the user FileResponse(file: TemporaryFile, url: str)
+          A dict containing the picture taken by the user ({"file": file, "url": str, "content": bytes}) or a list of pictures in case of multiple flag set as True
     """
 
     
