@@ -86,7 +86,7 @@ def get_editor_bp(controller: MainController):
         execution_dto = execution_controller.run_with_workflow()
 
         if not execution_dto:
-            return flask.abort(429)
+            return flask.abort(409)
 
         return {
             "body": client.response["body"],
@@ -124,7 +124,7 @@ def get_editor_bp(controller: MainController):
         )
 
         if not execution_dto:
-            return flask.abort(429)
+            return flask.abort(409)
 
         return {
             "body": client.response["body"],

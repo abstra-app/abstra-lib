@@ -34,9 +34,9 @@ def get_player_bp(main_controller: MainController):
         if not email or not token:
             return flask.abort(400)
 
-        jwt = main_controller.authn_repository.verify(email, token)
+        status, jwt = main_controller.authn_repository.verify(email, token)
         if not jwt:
-            return flask.abort(404)
+            return flask.abort(status)
 
         return {"jwt": jwt}
 

@@ -50,7 +50,7 @@ class AuthnRepository(abc.ABC):
     def authenticate(self, email: str) -> bool:
         raise NotImplementedError()
 
-    def verify(self, email: str, token: str) -> typing.Optional[str]:
+    def verify(self, email: str, token: str) -> typing.Tuple[int, typing.Optional[str]]:
         raise NotImplementedError()
 
     def oidc_access(self, access_token: str) -> typing.Optional[str]:
@@ -68,15 +68,15 @@ class ProductionAuthnRepository(AuthnRepository):
         resp = requests.post(url, json={"email": email}, headers=SIDECAR_HEADERS)
         return resp.ok
 
-    def verify(self, email: str, token: str) -> typing.Optional[str]:
+    def verify(self, email: str, token: str) -> typing.Tuple[int, typing.Optional[str]]:
         url = self.base_url + "/verify"
         resp = requests.post(
             url, json={"email": email, "token": token}, headers=SIDECAR_HEADERS
         )
         if not resp.ok:
-            return None
+            return resp.status_code, None
 
-        return resp.json()["jwt"]
+        return resp.status_code, resp.json()["jwt"]
 
     def oidc_access(self, access_token: str) -> typing.Optional[str]:
         email = get_oidc_userinfo_email(access_token)
@@ -97,16 +97,16 @@ class LocalAuthnRepository(AuthnRepository):
         self.emails[email] = True
         return True
 
-    def verify(self, email: str, token: str) -> typing.Optional[str]:
+    def verify(self, email: str, token: str) -> typing.Tuple[int, typing.Optional[str]]:
         if token == "000000":
             # for testing purposes
-            return None
+            return 400, None
 
         verified = self.emails.pop(email, False)
         if not verified:
-            return None
+            return 404, None
 
-        return endcode_fake_jwt(email)
+        return 200, endcode_fake_jwt(email)
 
     def oidc_access(self, access_token: str) -> typing.Optional[str]:
         email = get_oidc_userinfo_email(access_token)
