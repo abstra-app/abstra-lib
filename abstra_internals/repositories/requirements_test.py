@@ -64,6 +64,17 @@ class TestRequirementsRepository(TestCase):
             ),
         )
 
+    def test_parse_requirements_bad_lines(self):
+        self.assertEqual(
+            Requirements.from_text("foo\nbar==1.0.0\nas9sdkjcb##8du3789====3ng8ds7\n"),
+            Requirements(
+                libraries=[
+                    Requirement(name="foo"),
+                    Requirement(name="bar", version="1.0.0"),
+                ]
+            ),
+        )
+
     def test_to_dict(self):
         self.assertEqual(
             Requirements(

@@ -40,11 +40,14 @@ class Requirement:
 
     @staticmethod
     def from_text(text: str):
-        if "==" in text:
-            name, version = text.split("==")
-            return Requirement(name=name, version=version)
-        else:
-            return Requirement(name=text)
+        try:
+            if "==" in text:
+                name, version = text.split("==")
+                return Requirement(name=name, version=version)
+            else:
+                return Requirement(name=text)
+        except ValueError:
+            return None
 
     def to_dict(self):
         return {"name": self.name, "version": self.version}
@@ -91,9 +94,15 @@ class Requirements:
         for line in text.splitlines():
             if line.startswith("#"):
                 continue
+
             if line.strip() == "":
                 continue
-            libraries.append(Requirement.from_text(line))
+
+            requirement = Requirement.from_text(line)
+            if requirement is None:
+                continue
+
+            libraries.append(requirement)
         return Requirements(libraries=libraries)
 
     def to_dict(self):
