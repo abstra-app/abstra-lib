@@ -538,6 +538,11 @@ class LocalStageRunRepository(StageRunRepository):
             raise Exception(
                 f"Can't retry stage run {stage_run.id} with non failed status"
             )
+
+        children = self.find(GetStageRunByQueryFilter(parent_id=stage_run.id))
+        if len(children) > 0:
+            raise Exception(f"Can't retry stage run {stage_run.id} with children")
+
         initial_data = self.get_first_retried_stage_run_initial_data(stage_run)
         retried_stage_run = stage_run.clone_to_waiting()
         retried_stage_run_dto = retried_stage_run.to_dto()
@@ -680,6 +685,11 @@ class RemoteStageRunRepository(StageRunRepository):
             raise Exception(
                 f"Can't retry stage run {stage_run.id} with non failed status"
             )
+
+        children = self.find(GetStageRunByQueryFilter(parent_id=stage_run.id))
+        if len(children) > 0:
+            raise Exception(f"Can't retry stage run {stage_run.id} with children")
+
         ancestors = self.find_ancestors(stage_run.id)
         initial_data = {}
         for ancestor in ancestors:
