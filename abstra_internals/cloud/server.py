@@ -14,10 +14,9 @@ def run():
     SettingsController.set_server_port(DEFAULT_PORT)
 
     controller = MainController()
-    StdioPatcher.apply(debug=True, main_controller=controller)
-    options_builder = GunicornOptionsBuilder(controller)
+    StdioPatcher.apply(controller)
 
-    options = options_builder.build()
+    options = GunicornOptionsBuilder(controller).build()
     app = get_cloud_app(controller)
 
     CustomApplication(app, options).run()

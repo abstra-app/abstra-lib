@@ -18,6 +18,7 @@ from abstra_internals.server.controller import requirements as requirements_cont
 from abstra_internals.server.controller import roles as roles_controller
 from abstra_internals.server.controller import scripts as scripts_controller
 from abstra_internals.server.controller import stage_runs as stage_runs_controller
+from abstra_internals.server.controller import stdio as stdio_controller
 from abstra_internals.server.controller import workflows as workflows_controller
 from abstra_internals.server.controller import workspace as workspace_controller
 from abstra_internals.server.controller.main import MainController
@@ -81,6 +82,9 @@ def __get_api_bp(controller: MainController):
 
     access_control_bp = access_control_controller.get_editor_bp(controller)
     bp.register_blueprint(access_control_bp, url_prefix="/access-control")
+
+    stdio_bp = stdio_controller.get_editor_bp(controller)
+    bp.register_blueprint(stdio_bp, url_prefix="/stdio")
 
     return bp
 
