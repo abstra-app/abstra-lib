@@ -493,7 +493,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Take a picture of your ID"},
+                "props": {"label": "Take a picture of your ID", "value": []},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_camera",
                 "key": "example1",
@@ -2240,28 +2240,32 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Upload your .xlsx file"},
+                "props": {
+                    "label": "Upload your .xlsx file",
+                    "accepted_formats": [".xlsx"],
+                    "value": [],
+                },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_file",
                 "key": "example1",
-                "code": 'from abstra.forms import read_file\n\nfile_response = read_file("Upload your .xlsx file")\nfile = file_response.file  # File object\n',
+                "code": 'from abstra.forms import read_file\n\nfile_response = read_file("Upload your .xlsx file", accepted_formats=[".xlsx"])\nfile = file_response.file  # File object\n',
             },
             {
-                "props": {"label": "Upload your file"},
+                "props": {"label": "Upload your file", "value": []},
                 "name": "Saving file to a directory on Files storage",
                 "description": "This example shows how to save a file to a directory on Files",
                 "key": "example2",
                 "code": 'import os\nimport shutil\n\nfrom abstra.forms import read_file\n\nfile_response = read_file("Upload your file")\n\ndestination_dir = "foo/bar/"\n# Creates directory if it does not exist\nos.makedirs(destination_dir, exist_ok=True)\n\n# Copies file to destination directory\nshutil.copy(file_response.file.name, destination_dir + file_response.name)\n',
             },
             {
-                "props": {"label": "Upload your file"},
+                "props": {"label": "Upload your file", "value": []},
                 "name": "Renaming in File Upload",
                 "description": "This example demonstrates how to upload, rename, and save a user file in a persistent directory.",
                 "key": "example3",
                 "code": 'from pathlib import Path\n\nfrom abstra.common import get_persistent_dir\nfrom abstra.forms import read_file\n\nf = read_file("Upload your file.json")\n\n# Get file extension\nextension = Path(f.name).suffix\n\n# if extension is not .json, raise an error\nif extension != ".json":\n    raise ValueError("File must be a .json file")\n\n# if the extension is the expected, saves the file to a persistent directory\nget_persistent_dir().joinpath("keys.json").write_bytes(f.file.read())\n',
             },
             {
-                "props": {"label": "Upload your file"},
+                "props": {"label": "Upload your file", "value": []},
                 "name": "Preserving Filename in File Upload",
                 "description": "This example demonstrates how to read a user-uploaded file and save it to a specific persistent directory, preserving its original name.",
                 "key": "example4",
@@ -2378,7 +2382,7 @@ metadata = {
         },
         "examples": [
             {
-                "props": {"label": "Upload your .png image"},
+                "props": {"label": "Upload your .png image", "value": []},
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for read_image",
                 "key": "example1",
