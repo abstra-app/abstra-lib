@@ -92,9 +92,6 @@ def get_editor_bp(controller: MainController):
             "body": client.response["body"],
             "status": client.response["status"],
             "headers": client.response["headers"],
-            "output": controller.execution_logs_repository.get_logs_dto(
-                execution_dto["id"]
-            ),
         }
 
     @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
@@ -130,9 +127,6 @@ def get_editor_bp(controller: MainController):
             "body": client.response["body"],
             "status": client.response["status"],
             "headers": client.response["headers"],
-            "output": controller.execution_logs_repository.get_logs_dto(
-                execution_dto["id"]
-            ),
         }
 
     return bp

@@ -31,7 +31,7 @@ def editor(
 
     controller = MainController()
     controller.reset_repositories()
-    StdioPatcher.apply(debug=False, main_controller=controller)
+    StdioPatcher.apply(controller)
 
     app = get_local_app(controller)
 

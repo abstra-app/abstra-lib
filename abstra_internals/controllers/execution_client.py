@@ -1,9 +1,8 @@
 import abc
-from typing import Dict, List, Literal, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 import flask_sock
 
-from abstra_internals.compatibility import compat_traceback
 from abstra_internals.contract import forms_contract
 from abstra_internals.contract.forms import BrowserMessageTypes
 from abstra_internals.entities.execution import RequestContext
@@ -35,10 +34,6 @@ class ExecutionClient(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def handle_stdio(self, event: Literal["stdout", "stderr"], text: str) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
     def handle_start(self, execution_id: str):
         raise NotImplementedError()
 
@@ -55,9 +50,6 @@ class BasicClient(ExecutionClient):
         pass
 
     def handle_success(self) -> None:
-        pass
-
-    def handle_stdio(self, event: Literal["stdout", "stderr"], text: str) -> None:
         pass
 
     def handle_start(self, execution_id: str):
@@ -91,9 +83,6 @@ class HookClient(ExecutionClient):
 
     def get_request(self) -> RequestContext:
         return self.request_context
-
-    def handle_stdio(self, event: Literal["stdout", "stderr"], text: str) -> None:
-        pass
 
     def handle_start(self, execution_id: str):
         pass
@@ -191,14 +180,6 @@ class FormClient(ExecutionClient):
         self.handle_failure(Exception("Thread was unset"))
 
     def handle_failure(self, e: Exception):
-        stdio_msg = forms_contract.ExecutionStdioMessage(
-            "stderr",
-            "".join(
-                compat_traceback.format_exception(e),
-            ),
-            self._production_mode,
-        )
-        self._send(stdio_msg)
         close_dto = forms_contract.CloseDTO(exit_status="EXCEPTION", exception=e)
         self._send(
             forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
@@ -207,14 +188,6 @@ class FormClient(ExecutionClient):
     def handle_lock_failed(self, status: str) -> None:
         self._send(
             forms_contract.ExecutionLockFailedMessage(status, self._production_mode)
-        )
-
-    def handle_stdio(self, event: Literal["stdout", "stderr"], text: str) -> None:
-        if self._production_mode:
-            return
-
-        self._user_code_send(
-            forms_contract.ExecutionStdioMessage(event, text, self._production_mode)
         )
 
     def _receive_message(self):

@@ -56,16 +56,6 @@ class Message:
             self.data = {**self.data, **debug_data}
 
 
-class ExecutionStdioMessage(Message):
-    type: PythonMessageType
-
-    def __init__(
-        self, type: Literal["stdout", "stderr"], log: str, production_mode: bool
-    ):
-        super().__init__({"log": log}, production_mode)
-        self.type = "execution:stdout" if type == "stdout" else "execution:stderr"
-
-
 class AuthRequireInfoMessage(Message):
     type = "auth:require-info"
 

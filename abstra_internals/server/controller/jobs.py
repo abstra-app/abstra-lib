@@ -80,11 +80,7 @@ def get_editor_bp(controller: MainController):
         if not execution_dto:
             return flask.abort(409)
 
-        return {
-            "output": controller.execution_logs_repository.get_logs_dto(
-                execution_dto["id"]
-            )
-        }
+        return {"ok": True}
 
     @bp.post("/<path:id>/test")
     @usage
@@ -111,10 +107,6 @@ def get_editor_bp(controller: MainController):
         if not execution_dto:
             return flask.abort(409)
 
-        return {
-            "output": controller.execution_logs_repository.get_logs_dto(
-                execution_dto["id"]
-            )
-        }
+        return {"ok": True}
 
     return bp
