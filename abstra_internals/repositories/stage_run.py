@@ -181,10 +181,12 @@ class StageRun:
 
     def clone_to_waiting(self):
         new_stage_run = self.clone()
-        new_stage_run.id = str(uuid.uuid4())
+
         new_stage_run.status = "waiting"
+        new_stage_run.id = str(uuid.uuid4())
         new_stage_run.created_at = datetime.now()
         new_stage_run.updated_at = datetime.now()
+
         return new_stage_run
 
 
@@ -267,9 +269,31 @@ class StageRunRepository(ABC):
     ) -> StageRun:
         raise NotImplementedError()
 
-    @abstractmethod
     def retry(self, stage_run_id: str) -> StageRun:
-        raise NotImplementedError()
+        stage_run = self.get(stage_run_id)
+
+        if stage_run.status != "failed":
+            raise Exception(
+                f"Can't retry stage run {stage_run.id} with non failed status"
+            )
+
+        children = self.find(GetStageRunByQueryFilter(parent_id=stage_run.id))
+        if len(children) > 0:
+            raise Exception(f"Can't retry stage run {stage_run.id} with children")
+
+        retried_stage_run = stage_run.clone_to_waiting()
+        retried, *_ = self.create_next(stage_run, [retried_stage_run.to_dto()])
+
+        ancestors = self.find_ancestors(stage_run.id)
+        initial_data = {}
+        for ancestor in ancestors:
+            if ancestor.status != "failed" or ancestor.stage != stage_run.stage:
+                initial_data = ancestor.data
+
+        retried.data = initial_data
+        self.update_data(retried.id, initial_data)
+
+        return retried
 
     @abstractmethod
     def update_data(self, stage_run_id: str, data: dict) -> bool:
@@ -508,49 +532,23 @@ class LocalStageRunRepository(StageRunRepository):
     ) -> StageRun:
         if stage_run.parent_id is None:
             return self.create_initial(stage_run.stage, {})
+
         parent_stage_run = self.get(stage_run.parent_id)
         new_stage_run = stage_run.clone_to_waiting()
-        new_stage_run.data = parent_stage_run.data
-        self.store.save(new_stage_run.id, new_stage_run)
+        forked, *_ = self.create_next(parent_stage_run, [new_stage_run.to_dto()])
 
-        if parent_is_iterator:
-            new_stage_run.data["item"] = stage_run.data["item"]
-        new_stage_run_dto = new_stage_run.to_dto()
-        stage_runs = self.create_next(parent_stage_run, [new_stage_run_dto])
+        forked.data = parent_stage_run.data
+
         if custom_thread_data:
             validate_json(custom_thread_data)
-            stage_runs[0].data = json.loads(custom_thread_data)
-            self.store.save(stage_runs[0].id, stage_runs[0])
-        return stage_runs[0]
+            forked.data = json.loads(custom_thread_data)
 
-    def get_first_retried_stage_run_initial_data(self, stage_run: StageRun) -> dict:
-        if stage_run.parent_id is None:
-            return {}
-        parent = self.get(stage_run.parent_id)
-        if parent.stage == stage_run.stage and parent.status == "failed":
-            return self.get_first_retried_stage_run_initial_data(parent)
-        return parent.data
+        if parent_is_iterator:
+            forked.data["item"] = stage_run.data["item"]
 
-    def retry(self, stage_run_id: str) -> StageRun:
-        stage_run = self.get(stage_run_id)
+        self.store.save(forked.id, forked)
 
-        if stage_run.status != "failed":
-            raise Exception(
-                f"Can't retry stage run {stage_run.id} with non failed status"
-            )
-
-        children = self.find(GetStageRunByQueryFilter(parent_id=stage_run.id))
-        if len(children) > 0:
-            raise Exception(f"Can't retry stage run {stage_run.id} with children")
-
-        initial_data = self.get_first_retried_stage_run_initial_data(stage_run)
-        retried_stage_run = stage_run.clone_to_waiting()
-        retried_stage_run_dto = retried_stage_run.to_dto()
-        child, *_ = self.create_next(stage_run, [retried_stage_run_dto])
-        child.data = initial_data
-        self.store.save(child.id, child)
-
-        return child
+        return forked
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:
         stage_run = self.get(stage_run_id)
@@ -677,29 +675,6 @@ class RemoteStageRunRepository(StageRunRepository):
         custom_thread_data: Optional[str],
     ) -> StageRun:
         raise NotImplementedError()
-
-    def retry(self, stage_run_id: str) -> StageRun:
-        stage_run = self.get(stage_run_id)
-
-        if stage_run.status != "failed":
-            raise Exception(
-                f"Can't retry stage run {stage_run.id} with non failed status"
-            )
-
-        children = self.find(GetStageRunByQueryFilter(parent_id=stage_run.id))
-        if len(children) > 0:
-            raise Exception(f"Can't retry stage run {stage_run.id} with children")
-
-        ancestors = self.find_ancestors(stage_run.id)
-        initial_data = {}
-        for ancestor in ancestors:
-            if ancestor.status != "failed" or ancestor.stage != stage_run.stage:
-                initial_data = ancestor.data
-        retried_stage_run = stage_run.clone_to_waiting()
-        retried_stage_run_dto = retried_stage_run.to_dto()
-        stage_runs = self.create_next(stage_run, [retried_stage_run_dto])
-        stage_runs[0].data = initial_data
-        return stage_runs[0]
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:
         r = self._request("PATCH", path=f"/{stage_run_id}", body={"data": data})
