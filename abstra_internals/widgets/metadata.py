@@ -4960,13 +4960,13 @@ metadata = {
         "examples": [
             {
                 "props": {
-                    "linkUrl": "https://console.abstracloud.com",
-                    "linkText": "Abstra Cloud Homepage",
+                    "linkUrl": "https://abstra.io",
+                    "linkText": "Abstra Homepage",
                 },
                 "name": "Basic Example",
                 "description": "The following example demonstrate some of the available functionality for display_link",
                 "key": "example1",
-                "code": 'from abstra.forms import display_link\n\ndisplay_link("https://console.abstracloud.com", link_text="Abstra Cloud Homepage")\n',
+                "code": 'from abstra.forms import display_link\n\ndisplay_link("https://abstra.io", link_text="Abstra Homepage")\n',
             }
         ],
     },
