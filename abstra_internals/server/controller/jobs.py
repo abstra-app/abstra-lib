@@ -1,8 +1,9 @@
-import json
-
 import flask
 
-from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.execution import (
+    DetachedExecutionController,
+    ExecutionController,
+)
 from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
@@ -65,20 +66,15 @@ def get_editor_bp(controller: MainController):
         if not job:
             flask.abort(404)
 
-        execution_controller = ExecutionController(
-            stage=job,
+        ExecutionController(
             request=None,
+            stage=job,
             client=BasicClient(),
             target_stage_run_id=None,
             workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
-        )
-
-        execution_dto = execution_controller.run_with_workflow()
-
-        if not execution_dto:
-            return flask.abort(409)
+        ).run().wait()
 
         return {"ok": True}
 
@@ -89,23 +85,15 @@ def get_editor_bp(controller: MainController):
         if not job:
             flask.abort(404)
 
-        execution_controller = ExecutionController(
-            stage=job,
+        DetachedExecutionController(
             request=None,
+            stage=job,
             client=BasicClient(),
             target_stage_run_id=None,
             workflow_engine=controller.workflow_engine,
             execution_repository=controller.execution_repository,
             stage_run_repository=controller.stage_run_repository,
-        )
-
-        thread_data = json.loads(controller.read_test_data())
-        execution_dto = execution_controller.run_without_workflow(
-            thread_data=thread_data
-        )
-
-        if not execution_dto:
-            return flask.abort(409)
+        ).run().wait()
 
         return {"ok": True}
 

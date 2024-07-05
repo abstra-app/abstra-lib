@@ -1,11 +1,12 @@
-import json
-
 import flask
 import flask_sock
 
 from abstra_internals.controllers.execution import (
     STAGE_RUN_ID_PARAM_KEY,
+    DetachedExecutionController,
     ExecutionController,
+    LockFailedException,
+    UnsetThreadException,
 )
 from abstra_internals.controllers.execution_client import FormClient
 from abstra_internals.entities.execution import context_from_flask
@@ -32,30 +33,31 @@ def get_editor_bp(controller: MainController):
             if not form:
                 return
 
-            form_client = FormClient(
+            is_detached = flask.request.args.get(
+                "detached", default=False, type=is_it_true
+            )
+
+            client = FormClient(
                 ws=ws, request_context=request_context, production_mode=False
             )
 
-            execution_controller = ExecutionController(
+            Controller = (
+                DetachedExecutionController if is_detached else ExecutionController
+            )
+
+            Controller(
                 stage=form,
-                client=form_client,
+                client=client,
                 request=request_context,
                 workflow_engine=controller.workflow_engine,
                 execution_repository=controller.execution_repository,
                 stage_run_repository=controller.stage_run_repository,
                 target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            )
-
-            is_detached = flask.request.args.get(
-                "detached", default=False, type=is_it_true
-            )
-
-            if is_detached:
-                thread_data = json.loads(controller.read_test_data())
-                execution_controller.run_without_workflow(thread_data)
-            else:
-                execution_controller.run_with_workflow()
-
+            ).run().wait()
+        except LockFailedException:
+            pass
+        except UnsetThreadException:
+            pass
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:

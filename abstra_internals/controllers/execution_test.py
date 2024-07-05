@@ -1,9 +1,12 @@
 from pathlib import Path
 from unittest import TestCase
 
-from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.execution import (
+    DetachedExecutionController,
+    ExecutionController,
+)
 from abstra_internals.controllers.execution_client import HookClient
-from abstra_internals.controllers.workflow import WorkflowEngine
+from abstra_internals.controllers.workflow_engine import WorkflowEngine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.repositories.execution import EditorExecutionRepository
 from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
@@ -21,6 +24,7 @@ class ExecutionControllerTest(TestCase):
         self.root = init_dir()
         self.stage_run_repository = LocalStageRunRepository()
         self.execution_repository = EditorExecutionRepository()
+
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
@@ -55,7 +59,7 @@ class ExecutionControllerTest(TestCase):
         return super().tearDown()
 
     def test_run_initial_returns_dto(self):
-        controller = ExecutionController(
+        ExecutionController(
             stage=self.stage,
             client=self.hook_client,
             target_stage_run_id=None,
@@ -63,17 +67,12 @@ class ExecutionControllerTest(TestCase):
             workflow_engine=self.workflow_engine,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        )
+        ).run().wait()
 
-        execution_dto = controller.run_with_workflow()
-
-        if not execution_dto:
-            self.fail("ExecutionDTO is None")
-
-        self.assertEqual(execution_dto["status"], "finished")
+        self.assertEqual(self.hook_client.response["status"], 200)
 
     def test_run_detached_returns_dto(self):
-        controller = ExecutionController(
+        DetachedExecutionController(
             stage=self.stage,
             client=self.hook_client,
             target_stage_run_id=None,
@@ -81,11 +80,6 @@ class ExecutionControllerTest(TestCase):
             workflow_engine=self.workflow_engine,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        )
+        ).run().wait()
 
-        execution_dto = controller.run_without_workflow(thread_data={})
-
-        if not execution_dto:
-            self.fail("ExecutionDTO is None")
-
-        self.assertEqual(execution_dto["status"], "finished")
+        self.assertEqual(self.hook_client.response["status"], 200)

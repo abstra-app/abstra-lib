@@ -4,6 +4,8 @@ from typing import Any, List, Optional, Sequence, Tuple
 import flask
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.repositories.execution_logs import (
     ExecutionLogsRepository,
@@ -322,11 +324,20 @@ def get_editor_bp(main_controller: MainController):
 
     @bp.post("/jobs/<path:id>/start")
     def _start_job(id: str):
-        stage = controller.get_job(id)
-        if not stage:
+        job = controller.get_job(id)
+        if not job:
             flask.abort(404)
 
-        main_controller.workflow_engine.run_job(stage)
+        ExecutionController(
+            request=None,
+            stage=job,
+            client=BasicClient(),
+            target_stage_run_id=None,
+            workflow_engine=main_controller.workflow_engine,
+            stage_run_repository=main_controller.stage_run_repository,
+            execution_repository=main_controller.execution_repository,
+        ).run()
+
         return {"status": "running"}
 
     return bp
@@ -391,11 +402,20 @@ def get_player_bp(main_controller: MainController):
     @bp.post("/jobs/<path:id>/start")
     @guard.by(StageIdSelector("kanban"))
     def _start_job(id: str):
-        stage = controller.get_job(id)
-        if not stage:
+        job = controller.get_job(id)
+        if not job:
             flask.abort(404)
 
-        main_controller.workflow_engine.run_job(stage)
+        ExecutionController(
+            request=None,
+            stage=job,
+            client=BasicClient(),
+            target_stage_run_id=None,
+            workflow_engine=main_controller.workflow_engine,
+            stage_run_repository=main_controller.stage_run_repository,
+            execution_repository=main_controller.execution_repository,
+        ).run()
+
         return {"status": "running"}
 
     return bp

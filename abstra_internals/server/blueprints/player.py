@@ -4,8 +4,14 @@ import flask_sock
 from abstra_internals.controllers.execution import (
     STAGE_RUN_ID_PARAM_KEY,
     ExecutionController,
+    LockFailedException,
+    UnsetThreadException,
 )
-from abstra_internals.controllers.execution_client import FormClient, HookClient
+from abstra_internals.controllers.execution_client import (
+    BasicClient,
+    FormClient,
+    HookClient,
+)
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.environment import (
     BUILD_ID,
@@ -100,28 +106,34 @@ def get_player_bp(controller: MainController):
         request_context = context_from_flask(flask.request)
 
         try:
-            form_client = FormClient(
-                request_context=request_context,
-                production_mode=True,
-                ws=ws,
-            )
             id = flask.request.args.get("id")
             if id is None:
                 return
+
             form = controller.get_form(id)
             if not form:
                 return
 
+            client = FormClient(
+                request_context=request_context,
+                production_mode=True,
+                ws=ws,
+            )
+
             ExecutionController(
                 stage=form,
-                client=form_client,
+                client=client,
                 request=request_context,
                 workflow_engine=controller.workflow_engine,
                 stage_run_repository=controller.stage_run_repository,
                 execution_repository=controller.execution_repository,
                 target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            ).run_with_workflow()
+            ).run().wait()
 
+        except LockFailedException:
+            pass
+        except UnsetThreadException:
+            pass
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
@@ -184,7 +196,7 @@ def get_player_bp(controller: MainController):
 
         client = HookClient(request_context)
 
-        execution_controller = ExecutionController(
+        ExecutionController(
             stage=hook,
             client=client,
             request=request_context,
@@ -192,15 +204,7 @@ def get_player_bp(controller: MainController):
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
             target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-        )
-
-        execution_dto = execution_controller.run_with_workflow()
-
-        if not execution_dto:
-            return flask.Response(
-                status=423,
-                response="This thread is already running.",
-            )
+        ).run().wait()
 
         return flask.Response(
             status=client.response["status"],
@@ -227,10 +231,16 @@ def get_player_bp(controller: MainController):
         if not job:
             flask.abort(404)
 
-        if not job.file:
-            flask.abort(500)
+        ExecutionController(
+            request=None,
+            stage=job,
+            client=BasicClient(),
+            target_stage_run_id=None,
+            workflow_engine=controller.workflow_engine,
+            stage_run_repository=controller.stage_run_repository,
+            execution_repository=controller.execution_repository,
+        ).run()
 
-        controller.workflow_engine.run_job(job)
         return {"status": "running"}
 
     @bp.get("/")

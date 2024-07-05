@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
+from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.entities.execution import ExecutionDTO
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
@@ -12,7 +13,6 @@ from abstra_internals.repositories.project.project import (
     ControlStage,
     FormStage,
     IteratorStage,
-    JobStage,
     ProjectRepository,
     ScriptStage,
     WorkflowStage,
@@ -21,7 +21,7 @@ from abstra_internals.repositories.stage_run import StageRun, StageRunRepository
 from abstra_internals.threaded import threaded
 
 
-class WorkflowEngine:
+class WorkflowEngine(IWorkflowEngine):
     def __init__(
         self,
         stage_run_repository: StageRunRepository,
@@ -34,6 +34,7 @@ class WorkflowEngine:
         self.notification_repository = notification_repository
         self.execution_logs_repository = execution_logs_repository
 
+    @threaded
     def handle_execution_end(self, execution_dto: ExecutionDTO):
         project = ProjectRepository.load()
 
@@ -148,19 +149,6 @@ class WorkflowEngine:
         if isinstance(stage, (ConditionStage, IteratorStage)):
             return self.run_control(stage, stage_run)
 
-    @threaded
-    def run_job(self, stage: JobStage):
-        ExecutionController(
-            stage=stage,
-            request=None,
-            client=BasicClient(),
-            workflow_engine=self,
-            target_stage_run_id=None,
-            stage_run_repository=self.stage_run_repository,
-            execution_repository=self.execution_repository,
-        ).run_with_workflow()
-
-    @threaded
     def run_script(self, stage: ScriptStage, stage_run: StageRun):
         ExecutionController(
             stage=stage,
@@ -170,9 +158,8 @@ class WorkflowEngine:
             target_stage_run_id=stage_run.id,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        ).run_with_workflow()
+        ).run()
 
-    @threaded
     def run_control(self, stage: ControlStage, stage_run: StageRun):
         next_stage_run_dtos: List[Dict] = []
         self.stage_run_repository.change_status(stage_run.id, "running")
