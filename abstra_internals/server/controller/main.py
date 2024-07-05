@@ -7,8 +7,12 @@ import flask
 import pkg_resources
 from werkzeug.datastructures import FileStorage
 
-from abstra_internals.cloud_api import get_api_key_info, get_project_info
-from abstra_internals.controllers.workflow import WorkflowEngine
+from abstra_internals.cloud_api import (
+    get_api_key_info,
+    get_project_info,
+)
+from abstra_internals.controllers.workflow_engine import WorkflowEngine
+from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
@@ -111,7 +115,7 @@ class DoubleTransitionError(Exception):
 
 
 class MainController:
-    workflow_engine: WorkflowEngine
+    workflow_engine: IWorkflowEngine
     users_repository: UsersRepository
     roles_repository: RolesRepository
     authn_repository: AuthnRepository

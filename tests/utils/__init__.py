@@ -4,9 +4,9 @@ import unittest
 from collections import deque
 from json import dumps, loads
 
-from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.execution import DetachedExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
-from abstra_internals.controllers.workflow import WorkflowEngine
+from abstra_internals.controllers.workflow_engine import WorkflowEngine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.repositories.execution import EditorExecutionRepository
 from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
@@ -83,7 +83,7 @@ def assert_form(
         execution_logs_repository=LocalExecutionLogsRepository(),
     )
 
-    controller = ExecutionController(
+    DetachedExecutionController(
         stage=form_json,
         request=request_data,
         client=BasicClient(),
@@ -91,9 +91,7 @@ def assert_form(
         workflow_engine=workflow_engine,
         stage_run_repository=stage_run_repository,
         execution_repository=execution_repository,
-    )
-
-    controller.run_without_workflow({})
+    ).run()
 
     for msg in iter_messages(ws, msgs, test_case):
         pass

@@ -1,3 +1,5 @@
+import threading
+
 import flask
 import flask_cors
 
@@ -20,5 +22,9 @@ def get_local_app(controller: MainController) -> flask.Flask:
 
     player = get_player_bp(controller)
     app.register_blueprint(player)
+
+    @app.before_request
+    def rename_thread():
+        threading.current_thread().name = flask.request.path
 
     return app

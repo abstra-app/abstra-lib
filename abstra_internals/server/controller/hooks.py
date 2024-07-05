@@ -1,9 +1,8 @@
-import json
-
 import flask
 
 from abstra_internals.controllers.execution import (
     STAGE_RUN_ID_PARAM_KEY,
+    DetachedExecutionController,
     ExecutionController,
 )
 from abstra_internals.controllers.execution_client import HookClient
@@ -73,7 +72,7 @@ def get_editor_bp(controller: MainController):
 
         client = HookClient(request_context)
 
-        execution_controller = ExecutionController(
+        ExecutionController(
             stage=hook,
             client=client,
             request=request_context,
@@ -81,12 +80,7 @@ def get_editor_bp(controller: MainController):
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
             target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-        )
-
-        execution_dto = execution_controller.run_with_workflow()
-
-        if not execution_dto:
-            return flask.abort(409)
+        ).run().wait()
 
         return {
             "body": client.response["body"],
@@ -105,7 +99,7 @@ def get_editor_bp(controller: MainController):
 
         client = HookClient(request_context)
 
-        execution_controller = ExecutionController(
+        DetachedExecutionController(
             stage=hook,
             client=client,
             request=request_context,
@@ -113,15 +107,7 @@ def get_editor_bp(controller: MainController):
             workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
-        )
-
-        thread_data = json.loads(controller.read_test_data())
-        execution_dto = execution_controller.run_without_workflow(
-            thread_data=thread_data
-        )
-
-        if not execution_dto:
-            return flask.abort(409)
+        ).run().wait()
 
         return {
             "body": client.response["body"],

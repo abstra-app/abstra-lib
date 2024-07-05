@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from typing import Generic, List, Optional, Protocol, Type, TypeVar
 
-from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
 
 
@@ -47,11 +46,10 @@ class FileStore(Generic[T]):
         file_path = self._get_file_path(id)
         if file_path.exists():
             with file_path.open("r", encoding="utf-8") as f:
-                dto = json.load(f)
                 try:
+                    dto = json.load(f)
                     return self.model.from_dto(dto)
-                except Exception as e:
-                    AbstraLogger.capture_exception(e)
+                except Exception:
                     self.delete(id)
 
         return None

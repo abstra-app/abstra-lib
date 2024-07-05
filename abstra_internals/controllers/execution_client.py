@@ -1,4 +1,5 @@
 import abc
+from queue import Queue
 from typing import Dict, List, Optional, TypedDict
 
 import flask_sock
@@ -15,9 +16,9 @@ class ClientAbandoned(Exception):
 
 
 class Response(TypedDict):
+    headers: Dict[str, str]
     status: int
     body: str
-    headers: Dict[str, str]
 
 
 class ExecutionClient(abc.ABC):
@@ -43,6 +44,9 @@ class ExecutionClient(abc.ABC):
 
 
 class BasicClient(ExecutionClient):
+    def __init__(self) -> None:
+        self._queue = Queue(maxsize=1)
+
     def handle_lock_failed(self, status: str) -> None:
         pass
 
@@ -63,6 +67,7 @@ class HookClient(ExecutionClient):
     def __init__(self, request_context: RequestContext) -> None:
         self.response = Response(status=200, body="", headers={})
         self.request_context = request_context
+        self._queue = Queue(maxsize=1)
 
     def handle_lock_failed(self, status: str) -> None:
         self.response["status"] = 423
@@ -77,9 +82,9 @@ class HookClient(ExecutionClient):
         pass
 
     def set_response(self, status: int, body: str, headers: Dict[str, str]) -> None:
+        self.response["headers"] = headers
         self.response["status"] = status
         self.response["body"] = body
-        self.response["headers"] = headers
 
     def get_request(self) -> RequestContext:
         return self.request_context
@@ -98,9 +103,10 @@ class FormClient(ExecutionClient):
         request_context: RequestContext,
         production_mode: bool,
     ) -> None:
-        self._ws = ws
         self._request_context = request_context
         self._production_mode = production_mode
+        self._queue = Queue(maxsize=1)
+        self._ws = ws
 
     def request_mount_page(
         self,
@@ -190,16 +196,6 @@ class FormClient(ExecutionClient):
             forms_contract.ExecutionLockFailedMessage(status, self._production_mode)
         )
 
-    def _receive_message(self):
-        try:
-            str_data = self._ws.receive()
-            deserialized = deserialize(str_data)
-            if not isinstance(deserialized, dict):
-                raise ValueError("Invalid message format")
-            return deserialized
-        except flask_sock.ConnectionClosed:
-            raise ClientAbandoned()
-
     def wait_for_message(
         self, target_type: Optional[BrowserMessageTypes] = None
     ) -> Dict:
@@ -215,6 +211,18 @@ class FormClient(ExecutionClient):
                 continue
 
             return message
+
+    # WEBSOCKET
+
+    def _receive_message(self):
+        try:
+            str_data = self._ws.receive()
+            deserialized = deserialize(str_data)
+            if not isinstance(deserialized, dict):
+                raise ValueError("Invalid message format")
+            return deserialized
+        except flask_sock.ConnectionClosed:
+            raise ClientAbandoned()
 
     def _send(self, msg: forms_contract.Message) -> None:
         str_data = serialize(msg.to_json())

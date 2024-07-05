@@ -226,6 +226,8 @@ class TestWorkflowA(TestCase):
 
         # Run job
         run_response = self.client.post("/_editor/api/jobs/job_a/run")
+        wait_all_threads()
+
         self.assertEqual(run_response.status_code, 200)
 
         # Check hook is waiting
@@ -401,44 +403,41 @@ class TestWorkflowA(TestCase):
         write_response = self.client.post(
             "/_editor/api/workspace/write-test-data",
             json={
-                "test_data": '{\n    "key_x": "some test data"\n}',
+                "test_data": '{"key_x": "some test data", "key_a": "job a set this"}',
             },
         )
         self.assertEqual(write_response.status_code, 200)
-        # Run job, hook and scripts
+
+        # Job A
         job_a_response = self.client.post("/_editor/api/jobs/job_a/test")
         self.assertEqual(job_a_response.status_code, 200)
         wait_all_threads()
-
-        write_response = self.client.post(
-            "/_editor/api/workspace/write-test-data",
-            json={
-                "test_data": '{\n    "key_x": "some test data"\n, "key_a": "job a set this"}',
-            },
+        self.assertEqual(
+            (Path(self.root) / "job_a.log").read_text(), "job ran successfully"
         )
+
+        # Hook B
         hook_b_response = self.client.post("/_editor/api/hooks/hook_b/test")
         self.assertEqual(hook_b_response.status_code, 200)
+        self.assertEqual(
+            hook_b_response.json, {"body": "foo", "headers": {}, "status": 234}
+        )
         wait_all_threads()
+        self.assertEqual((Path(self.root) / "hook_b.log").read_text(), "some test data")
+
+        # Script C
         script_c_response = self.client.post("/_editor/api/scripts/script_c/test")
         self.assertEqual(script_c_response.status_code, 200)
         wait_all_threads()
+        self.assertEqual(
+            (Path(self.root) / "script_c.log").read_text(), "some test data"
+        )
+
+        # Script D
         script_d_response = self.client.post("/_editor/api/scripts/script_d/test")
         self.assertEqual(script_d_response.status_code, 200)
-
         wait_all_threads()
-        # Check responses
-
-        logs = {
-            "script_c": Path(self.root) / "script_c.log",
-            "script_d": Path(self.root) / "script_d.log",
-            "job_a": Path(self.root) / "job_a.log",
-            "hook_b": Path(self.root) / "hook_b.log",
-        }
-
-        # Check scripts ran
-        self.assertEqual(logs["job_a"].read_text(), "job ran successfully")
-        self.assertEqual(logs["hook_b"].read_text(), "some test data")
-        self.assertEqual(logs["script_c"].read_text(), "some test data")
         self.assertEqual(
-            logs["script_d"].read_text(), "job a set this\nscript d set this"
+            (Path(self.root) / "script_d.log").read_text(),
+            "job a set this\nscript d set this",
         )
