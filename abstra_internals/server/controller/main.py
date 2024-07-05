@@ -7,12 +7,7 @@ import flask
 import pkg_resources
 from werkzeug.datastructures import FileStorage
 
-from abstra_internals.cloud_api import (
-    create_thread,
-    get_ai_messages,
-    get_api_key_info,
-    get_project_info,
-)
+from abstra_internals.cloud_api import get_api_key_info, get_project_info
 from abstra_internals.controllers.workflow import WorkflowEngine
 from abstra_internals.credentials import (
     delete_credentials,
@@ -459,17 +454,6 @@ class MainController:
         if headers is None:
             flask.abort(401)
         return get_project_info(headers)
-
-    # AI
-    def send_ai_message(self, messages, stage, thread_id):
-        headers = resolve_headers() or {}
-        yield from get_ai_messages(messages, stage, thread_id, headers)
-
-    def create_thread(self):
-        headers = resolve_headers()
-        if headers is None:
-            return None
-        return create_thread(headers)
 
     # access_control
     def list_access_controls(self):
