@@ -1259,7 +1259,7 @@ class Project:
         self.conditions = [c for c in self.conditions if c.id != id]
 
     @staticmethod
-    def from_dict(data: dict):
+    def __from_dict(data: dict):
         target_stages = set()
         nodes = []
         edges = []
@@ -1283,31 +1283,42 @@ class Project:
                 else:
                     data[key][index]["is_initial"] = True
 
+        scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
+        forms = [FormStage.from_dict(form) for form in data["forms"]]
+        hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
+        jobs = [JobStage.from_dict(job) for job in data["jobs"]]
+        iterators = [IteratorStage.from_dict(i) for i in data["iterators"]]
+        conditions = [ConditionStage.from_dict(c) for c in data["conditions"]]
+
+        workspace = StyleSettings.from_dict(data["workspace"])
+        kanban = KanbanView.from_dict(data.get("kanban", {}))
+        home = Home.from_dict(data.get("home", {}))
+
+        return Project(
+            workspace=workspace,
+            scripts=scripts,
+            forms=forms,
+            hooks=hooks,
+            jobs=jobs,
+            iterators=iterators,
+            conditions=conditions,
+            kanban=kanban,
+            home=home,
+            _graph=Graph.from_primitives(nodes=nodes, edges=edges),
+        )
+
+    @staticmethod
+    def validate(data: dict):
         try:
-            scripts = [ScriptStage.from_dict(script) for script in data["scripts"]]
-            forms = [FormStage.from_dict(form) for form in data["forms"]]
-            hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
-            jobs = [JobStage.from_dict(job) for job in data["jobs"]]
-            iterators = [IteratorStage.from_dict(i) for i in data["iterators"]]
-            conditions = [ConditionStage.from_dict(c) for c in data["conditions"]]
+            Project.__from_dict(data)
+            return True
+        except Exception:
+            return False
 
-            workspace = StyleSettings.from_dict(data["workspace"])
-            kanban = KanbanView.from_dict(data.get("kanban", {}))
-            home = Home.from_dict(data.get("home", {}))
-
-            return Project(
-                workspace=workspace,
-                scripts=scripts,
-                forms=forms,
-                hooks=hooks,
-                jobs=jobs,
-                iterators=iterators,
-                conditions=conditions,
-                kanban=kanban,
-                home=home,
-                _graph=Graph.from_primitives(nodes=nodes, edges=edges),
-            )
-
+    @staticmethod
+    def from_dict(data: dict):
+        try:
+            return Project.__from_dict(data)
         except Exception as e:
             print("Error: incompatible abstra.json file.")
             AbstraLogger.capture_exception(e)
@@ -1372,7 +1383,7 @@ class ProjectRepository:
         Path.rmdir(temp_file.parent)
 
     @classmethod
-    def migrate_config_file(cls):
+    def migrate_config_file(cls, verbose=True):
         if not cls.exists():
             return
         data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
@@ -1381,6 +1392,7 @@ class ProjectRepository:
         migrated_data = json_migrations.migrate(
             data,
             Settings.root_path,
+            verbose=verbose,
         )
 
         if migrated_data["version"] != initial_version:
@@ -1393,8 +1405,8 @@ class ProjectRepository:
         return Project.from_dict(data)
 
     @classmethod
-    def initialize_or_migrate(cls):
+    def initialize_or_migrate(cls, verbose=True):
         if not cls.exists():
             cls.initialize()
         else:
-            cls.migrate_config_file()
+            cls.migrate_config_file(verbose=verbose)

@@ -33,6 +33,14 @@ def fix_linter(rule_name: str, fix_name: str):
     raise Exception(f"Could not find fix {fix_name} for rule {rule_name}")
 
 
+def fix_all_linters():
+    for rule in rules:
+        if rule.type != "info":
+            for issue in rule.find_issues():
+                for fix in issue.fixes:
+                    fix.fix()
+
+
 def get_editor_bp():
     bp = flask.Blueprint("editor_linters", __name__)
 

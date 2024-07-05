@@ -66,7 +66,7 @@ def create_backup(data: dict, location: Path, filename: str):
         return f"{CONFIG_FILE_BACKUPS}/{filename}"
 
 
-def migrate(data: dict, path: Path):
+def migrate(data: dict, path: Path, verbose=True):
     if "version" not in data:
         data["version"] = "0.1"
 
@@ -77,14 +77,17 @@ def migrate(data: dict, path: Path):
     if not next_migration:
         return data
 
-    print("Your abstra.json is outdated, running migrations...")
+    if verbose:
+        print("Your abstra.json is outdated, running migrations...")
 
     try:
         filename = f"abstra_{datetime.now().strftime('%Y%m%d%H%M%S')}.json.backup"
         backup_path = create_backup(data, path, filename)
-        print(f"Backup file created: {backup_path}")
+        if verbose:
+            print(f"Backup file created: {backup_path}")
     except Exception as e:
-        print(f"Failed to create backup file: {e}")
+        if verbose:
+            print(f"Failed to create backup file: {e}")
         raise
 
     while next_migration:
@@ -100,15 +103,18 @@ def migrate(data: dict, path: Path):
 
         except Exception as e:
             AbstraLogger.capture_exception(e)
-            print(f"An error occurred during migration from {current_version}: {e}")
+            if verbose:
+                print(f"An error occurred during migration from {current_version}: {e}")
             raise
 
-        print(f"Upgrade to version {data['version']} complete.")
+        if verbose:
+            print(f"Upgrade to version {data['version']} complete.")
 
         next_migration = next_migration = next(
             (m for m in MIGRATIONS if m.source_version() == data["version"]), None
         )
 
-    print("Your abstra.json is up to date ✅")
+    if verbose:
+        print("Your abstra.json is up to date ✅")
 
     return data

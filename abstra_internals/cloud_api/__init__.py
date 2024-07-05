@@ -41,6 +41,12 @@ def get_ai_messages(messages, stage, thread_id, headers: dict):
     )
 
 
+def generate_project(prompt: str, abstra_json_version: str, headers: dict):
+    url = f"{CLOUD_API_ENDPOINT}/cli/ai/generate"
+    body = {"prompt": prompt, "version": abstra_json_version}
+    return requests.post(url, headers=headers, json=body).json()
+
+
 def create_thread(headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/thread"
     return requests.post(url, headers=headers).json()
