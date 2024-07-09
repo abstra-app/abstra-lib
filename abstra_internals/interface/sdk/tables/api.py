@@ -1,10 +1,9 @@
 import typing
 from dataclasses import is_dataclass
 
-from abstra_internals.entities.forms.page_response import PageResponse
-from abstra_internals.interface.sdk.forms.step import StepsResponse
 from abstra_internals.interface.sdk.tables import comparators as cmp
 from abstra_internals.interface.sdk.tables.utils import (
+    WithAsDict,
     escape_ref,
     quoted_identifier,
     serialize,
@@ -23,7 +22,7 @@ def _execute(query: str, params: typing.List):  # private api
     return response["returns"]
 
 
-def _run(query: str, params: typing.List):  # private api
+def _run(query: str, params: typing.List) -> typing.List[dict]:  # private api
     return _execute(query, params)["result"]
 
 
@@ -118,6 +117,39 @@ def _make_insert_query(table: str, values: dict):
         )
 
 
+def _make_insert_multiple_query(table: str, values: list):
+    table = escape_ref(table)
+    if len(values) == 0:
+        return f"""INSERT INTO "{table}" DEFAULT VALUES RETURNING *""", []
+
+    column_names = sorted(
+        list({column_name for row in values for column_name in row.keys()})
+    )
+    indexes = []
+    values_list = []
+    current_index = 1
+
+    for row in values:
+        row_indexes = []
+        for column_name in column_names:
+            if column_name not in row:
+                row_indexes.append("DEFAULT")
+            else:
+                row_indexes.append(f"${current_index}")
+                values_list.append(serialize(row[column_name]))
+                current_index += 1
+        indexes.append(row_indexes)
+
+    indexes_exp = ", ".join([f"({', '.join(row_indexes)})" for row_indexes in indexes])
+    keys_exp = ", ".join(
+        [f'"{escape_ref(column_name)}"' for column_name in column_names]
+    )
+    return (
+        f"""INSERT INTO "{table}" ({keys_exp}) VALUES {indexes_exp} RETURNING *""",
+        values_list,
+    )
+
+
 def _make_update_query(table: str, set: dict, where: dict):
     if len(set) == 0:
         raise Exception("Update query must set at least one property")
@@ -142,13 +174,10 @@ def _make_update_query(table: str, set: dict, where: dict):
 
 
 def _make_row_dict(data: typing.Any) -> typing.Dict[str, typing.Any]:
-    if is_dataclass(data):
-        fields = data.__dataclass_fields__
-        return {k: getattr(data, k) for k in fields.keys()}
-    elif isinstance(data, PageResponse):
-        return data.data
-    elif isinstance(data, StepsResponse):
-        return data.acc
+    if isinstance(data, WithAsDict):
+        return data.as_dict
+    elif is_dataclass(data):
+        return {k: getattr(data, k) for k in data.__dict__}
     elif isinstance(data, dict):
         return data
     elif data is None:
@@ -207,7 +236,10 @@ def select_one(table: str, *, where: typing.Optional[dict] = None):
         where=_make_row_dict(where),
         limit=1,
     )
-    return _run(query, params)[0]
+    rows = _run(query, params)
+    if len(rows) == 0:
+        return None
+    return rows[0]
 
 
 def select_by_id(table: str, id: int):
@@ -215,6 +247,10 @@ def select_by_id(table: str, id: int):
 
 
 def insert(table: str, values: typing.Any):
+    if isinstance(values, list):
+        query, params = _make_insert_multiple_query(table, values)
+        return _run(query, params)
+
     query, params = _make_insert_query(table, _make_row_dict(values))
     return _run(query, params)[0]
 
@@ -227,11 +263,17 @@ def update(table: str, set: typing.Any, where: typing.Any):
 
 
 def update_by_id(table: str, id: int, values: typing.Any):
-    return update(table, _make_row_dict(values), {"id": id})
+    rows = update(table, _make_row_dict(values), {"id": id})
+    if len(rows) == 0:
+        return None
+    return rows[0]
 
 
 def delete_by_id(table: str, id: int):
-    return delete(table, {"id": id})
+    rows = delete(table, {"id": id})
+    if len(rows) == 0:
+        return None
+    return rows[0]
 
 
 def delete(table: str, values: typing.Any):

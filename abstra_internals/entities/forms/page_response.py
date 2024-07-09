@@ -5,6 +5,10 @@ class PageResponse(dict):
     data: dict
     action: Optional[str]
 
+    @property
+    def as_dict(self):
+        return self.data
+
     def __init__(self, data: dict, action: Optional[str]):
         self.action = action
         self.data = data

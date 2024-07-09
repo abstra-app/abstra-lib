@@ -6,6 +6,10 @@ from abstra_internals.entities.forms.page_response import PageResponse
 class StepsResponse:
     responses: List[PageResponse]
 
+    @property
+    def as_dict(self):
+        return self.acc
+
     def __init__(self):
         self.responses = []
         self.acc = {}
