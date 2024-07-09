@@ -36,7 +36,9 @@ class TestComparators(TestCase):
         self.assertEqual(is_gte(1).exp("column", 1), ('"column" >= $1', [1]))
 
     def test_is_in(self):
-        self.assertEqual(is_in([1, 2]).exp("column", 1), ('"column" IN $1', [[1, 2]]))
+        self.assertEqual(
+            is_in([1, 2]).exp("column", 1), ('"column" IN ($1, $2)', [1, 2])
+        )
 
     def test_is_lt(self):
         self.assertEqual(is_lt(1).exp("column", 1), ('"column" < $1', [1]))
@@ -49,7 +51,7 @@ class TestComparators(TestCase):
 
     def test_is_not_in(self):
         self.assertEqual(
-            is_not_in([1, 2]).exp("column", 1), ('"column" NOT IN $1', [[1, 2]])
+            is_not_in([1, 2]).exp("column", 1), ('"column" NOT IN ($1, $2)', [1, 2])
         )
 
     def test_is_not_like(self):

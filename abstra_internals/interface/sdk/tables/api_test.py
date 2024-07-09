@@ -9,6 +9,7 @@ from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.step import StepsResponse
 from abstra_internals.interface.sdk.tables.api import (
     _make_delete_query,
+    _make_insert_multiple_query,
     _make_insert_query,
     _make_row_dict,
     _make_select_query,
@@ -109,6 +110,40 @@ class TestTables(unittest.TestCase):
         )
         self.assertEqual(query, 'INSERT INTO "foo" ("bar") VALUES ($1) RETURNING *')
         self.assertEqual(params, ["2001-01-01T10:10:10"])
+
+    def test_insert_multiple(self):
+        query, params = _make_insert_multiple_query(
+            table="foo", values=[{"bar": "baz"}, {"bar": "cat"}]
+        )
+        self.assertEqual(
+            query, 'INSERT INTO "foo" ("bar") VALUES ($1), ($2) RETURNING *'
+        )
+        self.assertEqual(params, ["baz", "cat"])
+
+    def test_insert_multiple_with_empty_values(self):
+        query, params = _make_insert_multiple_query(table="foo", values=[])
+        self.assertEqual(query, 'INSERT INTO "foo" DEFAULT VALUES RETURNING *')
+        self.assertEqual(params, [])
+
+    def test_insert_multiple_with_missing_values(self):
+        query, params = _make_insert_multiple_query(
+            table="foo", values=[{"bar": "baz", "foo": 1}, {"foo": 2}]
+        )
+        self.assertEqual(
+            query,
+            'INSERT INTO "foo" ("bar", "foo") VALUES ($1, $2), (DEFAULT, $3) RETURNING *',
+        )
+        self.assertEqual(params, ["baz", 1, 2])
+
+    def test_insert_multiple_with_missing_and_nulls(self):
+        query, params = _make_insert_multiple_query(
+            table="foo", values=[{"bar": None, "foo": 1}, {"bar": "baz"}]
+        )
+        self.assertEqual(
+            query,
+            'INSERT INTO "foo" ("bar", "foo") VALUES ($1, $2), ($3, DEFAULT) RETURNING *',
+        )
+        self.assertEqual(params, [None, 1, "baz"])
 
     def test_insert_dict(self):
         query, params = _make_insert_query(

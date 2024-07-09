@@ -66,7 +66,8 @@ class is_in(Comparator):
         self.value = value
 
     def exp(self, column_name: str, idx: int) -> Tuple[str, list]:
-        return f"{quoted_identifier(column_name)} IN ${idx}", [self.value]
+        placeholders = ", ".join([f"${idx+i}" for i in range(len(self.value))])
+        return f"{quoted_identifier(column_name)} IN ({placeholders})", self.value
 
 
 class is_not_in(Comparator):
@@ -74,7 +75,8 @@ class is_not_in(Comparator):
         self.value = value
 
     def exp(self, column_name: str, idx: int) -> Tuple[str, list]:
-        return f"{quoted_identifier(column_name)} NOT IN ${idx}", [self.value]
+        placeholders = ", ".join([f"${idx+i}" for i in range(len(self.value))])
+        return f"{quoted_identifier(column_name)} NOT IN ({placeholders})", self.value
 
 
 class is_like(Comparator):
