@@ -199,3 +199,44 @@ def get_random_filepath(name=None):
     path = internal_path(name)
     path.parent.mkdir(exist_ok=True)
     return name, path
+
+
+CONFLICTING_STATIC_PATHS = [
+    # Player routes
+    "oidc-login-callback",
+    "oidc-logout-callback",
+    "login",
+    "_player/threads",
+    "threads",
+    # Editor routes
+    "_editor",
+    "_editor/stages",
+    "_editor/workflow",
+    "_editor/threads",
+    "_editor/style",
+    "_editor/requirements",
+    "_editor/env-vars",
+    "_editor/vs-code",
+    "_editor/access-control",
+    "_editor/project-login",
+]
+
+CONFLICTING_DYNAMIC_PATHS = [
+    # Player routes
+    "error/",
+    # Editor routes
+    "_editor/form/",
+    "_editor/job/",
+    "_editor/hook/",
+    "_editor/script/",
+]
+
+
+def generate_conflictless_path(path: str):
+    if path in CONFLICTING_STATIC_PATHS or any(
+        path.startswith(p) for p in CONFLICTING_DYNAMIC_PATHS
+    ):
+        random_suffix = str(uuid.uuid4())[:8]
+        return f"{path}-{random_suffix}"
+    else:
+        return path

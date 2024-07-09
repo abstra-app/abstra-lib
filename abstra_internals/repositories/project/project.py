@@ -15,7 +15,7 @@ from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
 from abstra_internals.settings import Settings
 from abstra_internals.utils import check_is_url, nested_get
-from abstra_internals.utils.file import traverse_code
+from abstra_internals.utils.file import generate_conflictless_path, traverse_code
 from abstra_internals.utils.format import normalize_path
 from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
@@ -460,7 +460,7 @@ class FormStage:
         return FormStage(
             id=_id,
             file=file,
-            path=to_kebab_case(file[:-3]),
+            path=generate_conflictless_path(to_kebab_case(file[:-3])),
             title=title,
             is_initial=True,
             workflow_transitions=[],
@@ -581,7 +581,7 @@ class FormStage:
             elif attr == "access_control":
                 self.access_control = AccessSettings.from_dict(value)
             elif attr == "path":
-                setattr(self, attr, normalize_path(value))
+                setattr(self, attr, generate_conflictless_path(normalize_path(value)))
             elif attr == "notification_trigger":
                 self.notification_trigger = NotificationTrigger(
                     variable_name=value["variable_name"], enabled=value["enabled"]

@@ -2,7 +2,12 @@ import unittest
 from pathlib import Path
 
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
-from abstra_internals.utils.file import files_from_directory, module2path, path2module
+from abstra_internals.utils.file import (
+    files_from_directory,
+    generate_conflictless_path,
+    module2path,
+    path2module,
+)
 from tests.fixtures import clear_dir, init_dir
 
 
@@ -113,3 +118,22 @@ class FilesFromDirectoryTest(unittest.TestCase):
         self.add_file(".gitignore", "ignored")
         files = files_from_directory(self.path)
         self.assertSamePaths(files, [self.abstra_json_path])
+
+
+class CreatePathTest(unittest.TestCase):
+    def test_without_conflict(self):
+        self.assertEqual(generate_conflictless_path("file"), "file")
+
+    def test_conflict_with_static_path(self):
+        path = "login"
+        generated_path = generate_conflictless_path(path)
+
+        self.assertNotEqual(generated_path, path)
+        self.assertIn(path + "-", generated_path)
+
+    def test_conflict_with_dynamic_path(self):
+        path = "error/some-error"
+        generated_path = generate_conflictless_path(path)
+
+        self.assertNotEqual(generated_path, path)
+        self.assertIn(path + "-", generated_path)
