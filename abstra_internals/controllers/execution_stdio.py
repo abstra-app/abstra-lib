@@ -4,6 +4,11 @@ from typing import Callable, List, Literal, Union
 
 import flask_sock
 
+from abstra_internals.controllers.execution_store import (
+    ExecutionNotFound,
+    ExecutionStore,
+)
+from abstra_internals.entities.execution import Execution
 from abstra_internals.env_masker import GLOBAL_MASKER
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
@@ -101,17 +106,17 @@ class StdioController:
             sys.stdout.flush()
             return len(text)
 
-    def _capture_stdio(self, type: Literal["stderr", "stdout"], text: str) -> str:
-        execution_dto = self.execution_repository.get_current()
-        if not execution_dto:
+    def _get_current_execution(self) -> Execution:
+        try:
+            return ExecutionStore.get_by_thread().execution
+        except ExecutionNotFound:
             raise UnboundPthread()
 
-        execution_id = execution_dto["id"]
-        stage_id = execution_dto["stage_id"]
-
-        self.execution_logs_repository.insert_stdio(execution_id, type, text)
+    def _capture_stdio(self, type: Literal["stderr", "stdout"], text: str) -> str:
+        execution = self._get_current_execution()
+        self.execution_logs_repository.insert_stdio(execution.id, type, text)
         self.broadcast(
-            type=type, log=text, execution_id=execution_id, stage_id=stage_id
+            type=type, log=text, execution_id=execution.id, stage_id=execution.stage_id
         )
 
-        return execution_id
+        return execution.id

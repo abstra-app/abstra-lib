@@ -4,10 +4,9 @@ from collections import deque
 import simplejson
 
 from abstra.forms import Page
-from abstra_internals.controllers.execution_client import (
-    ExecutionClientStore,
-    FormClient,
-)
+from abstra_internals.controllers.execution_client import FormClient
+from abstra_internals.controllers.execution_store import ExecutionStore
+from abstra_internals.entities.execution import Execution, RequestContext
 
 
 class MockWS:
@@ -28,11 +27,23 @@ class MockWS:
 class TestReactive(unittest.TestCase):
     def setUp(self):
         self.mock_ws = MockWS()
-        self.form_client = FormClient(self.mock_ws, {}, production_mode=False)  # type: ignore
-        ExecutionClientStore.set(self.form_client)
+        request_context = RequestContext(
+            body="", query_params={}, headers={}, method="GET"
+        )
+        self.form_client = FormClient(
+            request_context=request_context,
+            production_mode=False,
+            ws=self.mock_ws,  # type: ignore
+        )
+        execution = Execution.create(
+            request_context=request_context,
+            stage_run_id="mock_sr_id",
+            stage_id="mock_stage_id",
+        )
+        ExecutionStore.set(execution, self.form_client)
 
     def tearDown(self) -> None:
-        ExecutionClientStore.clear()
+        ExecutionStore.clear()
 
     def test_rendering_with_static_part_initial_value(self):
         self.mock_ws.add_browser_message(

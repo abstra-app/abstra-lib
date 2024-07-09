@@ -2,10 +2,9 @@ import unittest
 from unittest.mock import ANY
 
 from abstra.forms import ListItemSchema, Page
-from abstra_internals.controllers.execution_client import (
-    ExecutionClientStore,
-    FormClient,
-)
+from abstra_internals.controllers.execution_client import FormClient
+from abstra_internals.controllers.execution_store import ExecutionStore
+from abstra_internals.entities.execution import Execution, RequestContext
 from abstra_internals.widgets.library import ListInput
 
 default_text_input = {
@@ -26,15 +25,23 @@ default_text_input = {
 class TestListInput(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
-        self.form_client = FormClient(
-            ws=None,  # type: ignore
-            request_context={},  # type: ignore
-            production_mode=False,
+        request_context = RequestContext(
+            body="", query_params={}, headers={}, method="GET"
         )
-        ExecutionClientStore.set(self.form_client)
+        self.client = FormClient(
+            request_context=request_context,
+            production_mode=False,
+            ws=None,  # type: ignore
+        )
+        execution = Execution.create(
+            request_context=request_context,
+            stage_run_id="mock_sr_id",
+            stage_id="mock_stage_id",
+        )
+        ExecutionStore.set(execution, self.client)
 
     def tearDown(self) -> None:
-        ExecutionClientStore.clear()
+        ExecutionStore.clear()
         return super().tearDown()
 
     def test_empty_case(self):

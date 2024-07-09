@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
-from abstra_internals.entities.execution import ExecutionDTO
+from abstra_internals.entities.execution import Execution
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
 from abstra_internals.repositories.notifications import NotificationRepository
@@ -35,18 +35,16 @@ class WorkflowEngine(IWorkflowEngine):
         self.execution_logs_repository = execution_logs_repository
 
     @threaded
-    def handle_execution_end(self, execution_dto: ExecutionDTO):
+    def handle_execution_end(self, execution: Execution):
         project = ProjectRepository.load()
 
-        stage = project.get_action(execution_dto["stage_id"])
-
+        stage = project.get_action(execution.stage_id)
         if not stage:
-            raise Exception(f"Stage {execution_dto['stage_id']} not found")
+            raise Exception(f"Stage {execution.stage_id} not found")
 
-        stage_run = self.stage_run_repository.get(execution_dto["stage_run_id"])
-        status = execution_dto["status"]
+        stage_run = self.stage_run_repository.get(execution.stage_run_id)
 
-        transition_type = f"{stage.type_name}s:{status}"
+        transition_type = f"{stage.type_name}s:{execution.status}"
         next_stage_run_dtos = self._follow_action_transitions(
             stage, stage_run, transition_type
         )

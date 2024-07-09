@@ -1,21 +1,30 @@
 import unittest
 
 from abstra.forms import ListItemSchema, Page
-from abstra_internals.controllers.execution_client import (
-    ExecutionClientStore,
-    FormClient,
-)
+from abstra_internals.controllers.execution_client import FormClient
+from abstra_internals.controllers.execution_store import ExecutionStore
+from abstra_internals.entities.execution import Execution, RequestContext
 
 
 class TestPage(unittest.TestCase):
     def setUp(self) -> None:
-        self.client = FormClient(ws=None, request_context={}, production_mode=False)  # type: ignore
-        ExecutionClientStore.set(self.client)
-        return super().setUp()
+        request_context = RequestContext(
+            body="", query_params={}, headers={}, method="GET"
+        )
+        self.client = FormClient(
+            request_context=request_context,
+            production_mode=False,
+            ws=None,  # type: ignore
+        )
+        execution = Execution.create(
+            request_context=request_context,
+            stage_run_id="mock_sr_id",
+            stage_id="mock_stage_id",
+        )
+        ExecutionStore.set(execution, self.client)
 
     def tearDown(self) -> None:
-        ExecutionClientStore.clear()
-        return super().tearDown()
+        ExecutionStore.clear()
 
     def test_reactive_list_dropdown(self):
         schema = ListItemSchema().read_dropdown("dropdown", ["foo", "bar"])

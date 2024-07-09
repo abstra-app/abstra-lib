@@ -15,7 +15,7 @@ class Serializable(Protocol):
 T = TypeVar("T", bound=Serializable)
 
 
-class FileStore(Generic[T]):
+class FileManager(Generic[T]):
     def __init__(self, directory: str, model: Type[T]):
         self.directory = directory
         self.model = model

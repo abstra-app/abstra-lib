@@ -65,7 +65,7 @@ class ExecutionController:
         execution = Execution.create(
             stage_run_id=self.target_stage_run_id,
             request_context=self.request,
-            stage=self.stage,
+            stage_id=self.stage.id,
         )
 
         if not self.stage_run_repository.acquire_lock(

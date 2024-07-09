@@ -4,11 +4,8 @@ from uuid import uuid4
 
 import flask
 
-from abstra_internals.utils.datetime import to_utc_iso_string
+from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
 from abstra_internals.utils.dict import filter_non_string_values
-
-# Avoid circular import due to repo and entity being in the same file
-ActionStage = Any
 
 
 class RequestContext(TypedDict):
@@ -30,34 +27,27 @@ def context_from_flask(request: flask.Request) -> RequestContext:
 ExecutionStatus = Literal["running", "failed", "finished", "abandoned"]
 
 
-class ExecutionDTO(TypedDict):
+class Execution:
     id: str
     stage_id: str
-    created_at: str
     stage_run_id: str
-    status: ExecutionStatus
-    context: Optional[RequestContext]
-
-
-class Execution:
-    _status: ExecutionStatus = "running"
-    id: str
+    _status: ExecutionStatus
     created_at: datetime.datetime
-    stage: ActionStage
-    stage_run_id: str
     request_context: Optional[RequestContext] = None
 
     def __init__(
         self,
         *,
         id: str,
+        stage_id: str,
         stage_run_id: str,
-        stage: ActionStage,
+        status: ExecutionStatus,
         created_at: datetime.datetime,
         request_context: Optional[RequestContext],
     ) -> None:
         self.id = id
-        self.stage = stage
+        self._status = status
+        self.stage_id = stage_id
         self.created_at = created_at
         self.stage_run_id = stage_run_id
         self.request_context = request_context
@@ -66,16 +56,17 @@ class Execution:
     def create(
         cls,
         *,
+        stage_id: str,
         stage_run_id: str,
-        stage: ActionStage,
         request_context: Optional[RequestContext],
     ):
         return cls(
-            id=uuid4().__str__(),
-            created_at=datetime.datetime.now(),
-            stage=stage,
+            stage_id=stage_id,
             stage_run_id=stage_run_id,
             request_context=request_context,
+            status="running",
+            id=uuid4().__str__(),
+            created_at=datetime.datetime.now(),
         )
 
     def set_status(self, status: ExecutionStatus) -> None:
@@ -84,12 +75,27 @@ class Execution:
 
         self._status = status
 
-    def to_dto(self) -> ExecutionDTO:
-        return ExecutionDTO(
+    @property
+    def status(self) -> ExecutionStatus:
+        return self._status
+
+    def to_dto(self):
+        return dict(
             id=self.id,
-            status=self._status,
-            stage_id=self.stage.id,
-            context=self.request_context,
-            stage_run_id=self.stage_run_id,
-            created_at=to_utc_iso_string(self.created_at),
+            status=self.status,
+            stageId=self.stage_id,
+            stageRunId=self.stage_run_id,
+            context=self.request_context or {},
+            createdAt=to_utc_iso_string(self.created_at),
+        )
+
+    @classmethod
+    def from_dto(cls, dto: Dict[str, Any]):
+        return cls(
+            id=dto["id"],
+            status=dto["status"],
+            stage_id=dto["stageId"],
+            stage_run_id=dto["stageRunId"],
+            request_context=dto["context"],
+            created_at=from_utc_iso_string(dto["createdAt"]),
         )

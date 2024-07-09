@@ -3,17 +3,16 @@ from io import BytesIO
 from typing import Dict, List, Optional, Tuple, Union
 
 from abstra_internals.contract.forms import ValidationResult
-from abstra_internals.controllers.execution_client import (
-    ClientNotFound,
-    ExecutionClientStore,
-    HookClient,
+from abstra_internals.controllers.execution_client import HookClient
+from abstra_internals.controllers.execution_store import (
+    ExecutionNotFound,
+    ExecutionStore,
 )
-from abstra_internals.entities.execution import ExecutionDTO
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.project.project import ProjectRepository
-from abstra_internals.repositories.stage_run import StageRunRepository
+from abstra_internals.repositories.stage_run import StageRun, StageRunRepository
 from abstra_internals.utils import is_json_serializable
 from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 from abstra_internals.utils.json import to_json_serializable
@@ -22,8 +21,8 @@ from abstra_internals.utils.json import to_json_serializable
 class HookSDKController:
     def get_current_client(self) -> HookClient:
         try:
-            return ExecutionClientStore.get_hook_client()
-        except ClientNotFound:
+            return ExecutionStore.get_hook_client()
+        except ExecutionNotFound:
             raise user_exceptions.UnboundSDK()
 
     def set_response(self, status: int, body: str, headers: Dict[str, str]):
@@ -63,8 +62,8 @@ class HookSDKController:
 class FormSDKController:
     def __init__(self) -> None:
         try:
-            self.client = ExecutionClientStore.get_form_client()
-        except ClientNotFound:
+            self.client = ExecutionStore.get_form_client()
+        except ExecutionNotFound:
             raise user_exceptions.UnboundSDK()
 
     def get_user(self, force_refresh: bool) -> Optional[UserClaims]:
@@ -125,36 +124,23 @@ class WorkflowSDKController:
         self.project_repo = project_repository
         self.project = project_repository.load()
 
-    def get_execution_dto(self) -> ExecutionDTO:
-        dto = self.execution_repo.get_current()
-        if not dto:
+    def _get_current_stage_run(self) -> StageRun:
+        try:
+            execution = ExecutionStore.get_by_thread().execution
+            return self.stage_run_repo.get(execution.stage_run_id)
+        except ExecutionNotFound:
             raise user_exceptions.UnboundSDK()
-        return dto
 
     def get_data(self, key: Optional[str]) -> Union[Dict[str, object], object]:
-        execution_dto = self.get_execution_dto()
-
-        if not execution_dto["stage_run_id"]:
-            raise user_exceptions.UnsetThread()
-
-        stage_run = self.stage_run_repo.get(execution_dto["stage_run_id"])
-
-        if key:
-            return stage_run.data.get(key)
-
-        return stage_run.data
+        stage_run = self._get_current_stage_run()
+        return stage_run.data if not key else stage_run.data.get(key)
 
     def set_data(self, key: str, value: object) -> None:
-        execution_dto = self.get_execution_dto()
         value = to_json_serializable(value)
-
         if not is_json_serializable(value):
             raise TypeError()
 
-        if not execution_dto["stage_run_id"]:
-            raise user_exceptions.UnsetThread()
-
-        stage_run = self.stage_run_repo.get(execution_dto["stage_run_id"])
+        stage_run = self._get_current_stage_run()
 
         stage_run.data[key] = value
         self.stage_run_repo.update_data(stage_run.id, stage_run.data)

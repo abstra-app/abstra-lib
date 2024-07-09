@@ -6,8 +6,8 @@ from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.controllers.execution_client import (
     ClientAbandoned,
     ExecutionClient,
-    ExecutionClientStore,
 )
+from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.entities.execution import Execution
 from abstra_internals.logger import AbstraLogger
@@ -26,15 +26,16 @@ def ExecutionTarget(
     stage_run_repository: StageRunRepository,
     execution_repository: ExecutionRepository,
 ):
+    ExecutionStore.set(execution, client)
+
     try:
-        execution_repository.create(execution.to_dto())
+        execution_repository.create(execution)
         client.handle_start(execution.id)
-        ExecutionClientStore.set(client)
 
         status, exception = _execute_code(stage.file_path)
         stage_run_repository.change_status(execution.stage_run_id, status)
         execution.set_status(status)
-        execution_repository.update(execution.to_dto())
+        execution_repository.update(execution)
 
         if exception:
             print_exception(exception)
@@ -42,12 +43,11 @@ def ExecutionTarget(
         else:
             client.handle_success()
 
-        workflow_engine.handle_execution_end(execution.to_dto())
+        workflow_engine.handle_execution_end(execution)
     except Exception as e:
         AbstraLogger.capture_exception(e)
     finally:
-        execution_repository.free_current()
-        ExecutionClientStore.clear()
+        ExecutionStore.clear()
 
 
 def _execute_without_exit(filepath: Path):

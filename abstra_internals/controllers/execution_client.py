@@ -1,5 +1,4 @@
 import abc
-from queue import Queue
 from typing import Dict, List, Optional, TypedDict
 
 import flask_sock
@@ -8,7 +7,6 @@ from abstra_internals.contract import forms_contract
 from abstra_internals.contract.forms import BrowserMessageTypes
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.utils import deserialize, serialize
-from abstra_internals.utils.pthread_store import PThreadStore
 
 
 class ClientAbandoned(Exception):
@@ -43,10 +41,8 @@ class ExecutionClient(abc.ABC):
         raise NotImplementedError()
 
 
+# TODO: inherit all clients from BasicClient - same constructor
 class BasicClient(ExecutionClient):
-    def __init__(self) -> None:
-        self._queue = Queue(maxsize=1)
-
     def handle_lock_failed(self, status: str) -> None:
         pass
 
@@ -67,7 +63,6 @@ class HookClient(ExecutionClient):
     def __init__(self, request_context: RequestContext) -> None:
         self.response = Response(status=200, body="", headers={})
         self.request_context = request_context
-        self._queue = Queue(maxsize=1)
 
     def handle_lock_failed(self, status: str) -> None:
         self.response["status"] = 423
@@ -105,7 +100,6 @@ class FormClient(ExecutionClient):
     ) -> None:
         self._request_context = request_context
         self._production_mode = production_mode
-        self._queue = Queue(maxsize=1)
         self._ws = ws
 
     def request_mount_page(
@@ -237,44 +231,3 @@ class FormClient(ExecutionClient):
             self._ws.send(str_data)
         except flask_sock.ConnectionClosed:
             raise ClientAbandoned()
-
-
-class ClientTypeMismatch(Exception):
-    pass
-
-
-class ClientNotFound(Exception):
-    pass
-
-
-class ExecutionClientStore:
-    store: PThreadStore[ExecutionClient] = PThreadStore()
-
-    @classmethod
-    def set(cls, client: ExecutionClient):
-        cls.store.set(client)
-
-    @classmethod
-    def get(cls) -> ExecutionClient:
-        client = cls.store.get()
-        if not client:
-            raise ClientNotFound()
-        return client
-
-    @classmethod
-    def get_hook_client(cls) -> HookClient:
-        client = cls.get()
-        if not isinstance(client, HookClient):
-            raise ClientTypeMismatch
-        return client
-
-    @classmethod
-    def get_form_client(cls) -> FormClient:
-        client = cls.get()
-        if not isinstance(client, FormClient):
-            raise ClientTypeMismatch
-        return client
-
-    @classmethod
-    def clear(cls):
-        cls.store.clear()
