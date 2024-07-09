@@ -34,10 +34,10 @@ class GunicornOptionsBuilder:
         )
 
         # update executions
-        for execution_dto in killed_executions:
+        for execution in killed_executions:
             # Add log entry
             err_log = StdioLogEntry(
-                execution_id=execution_dto["id"],
+                execution_id=execution.id,
                 event="stderr",
                 payload={"text": "Aborted: Server reached its memory limit"},
                 created_at=datetime.datetime.now(),
@@ -47,11 +47,11 @@ class GunicornOptionsBuilder:
 
             # Update execution status
             self.main_controller.execution_repository.set_failure_by_id(
-                execution_id=execution_dto["id"]
+                execution_id=execution.id
             )
 
             self.main_controller.stage_run_repository.change_status(
-                execution_dto["stage_run_id"], "failed", execution_dto["id"]
+                execution.stage_run_id, "failed", execution.id
             )
 
     #### HOOKS

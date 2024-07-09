@@ -1,8 +1,10 @@
+from datetime import datetime
 from unittest import TestCase
 
 from abstra_internals.entities.execution import Execution, RequestContext
 from abstra_internals.repositories.project.project import HookStage
 from abstra_internals.utils import is_serializable
+from abstra_internals.utils.datetime import from_utc_iso_string
 
 
 class ExecutionTest(TestCase):
@@ -22,17 +24,20 @@ class ExecutionTest(TestCase):
         )
 
         execution = Execution.create(
-            stage=mock_stage, request_context=request, stage_run_id="mock_sr_id"
+            stage_id=mock_stage.id, request_context=request, stage_run_id="mock_sr_id"
         )
 
         dto = execution.to_dto()
 
-        self.assertEqual(dto["stage_id"], "mock_hook_id")
-        self.assertEqual(dto["stage_run_id"], "mock_sr_id")
+        self.assertEqual(dto["stageId"], "mock_hook_id")
+        self.assertEqual(dto["stageRunId"], "mock_sr_id")
         self.assertEqual(dto["context"], request)
         self.assertEqual(dto["status"], "running")
-        self.assertIsNotNone(dto["created_at"])
         self.assertIsNotNone(dto["id"])
+
+        created_at = dto["createdAt"]
+        self.assertIsNotNone(created_at)
+        self.assertIsInstance(from_utc_iso_string(created_at), datetime)  # type: ignore
 
     def test_dto_is_serializable(self):
         mock_stage = HookStage.create(
@@ -50,7 +55,7 @@ class ExecutionTest(TestCase):
         )
 
         execution = Execution.create(
-            stage=mock_stage, request_context=resquest, stage_run_id="mock_sr_id"
+            stage_id=mock_stage.id, request_context=resquest, stage_run_id="mock_sr_id"
         )
 
         dto = execution.to_dto()

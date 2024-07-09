@@ -169,6 +169,7 @@ class MainController:
 
     def reset_repositories(self):
         self.stage_run_repository.clear()
+        self.execution_repository.clear()
 
     def _ensure_abstra_in_requirements(self):
         requirements = self.requirements_repository.load()

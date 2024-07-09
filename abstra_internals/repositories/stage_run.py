@@ -12,7 +12,7 @@ from pydantic.dataclasses import dataclass
 from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
 from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
 from abstra_internals.utils.dot_abstra import STAGE_RUNS_FOLDER
-from abstra_internals.utils.file_store import FileStore
+from abstra_internals.utils.file_manager import FileManager
 from abstra_internals.utils.filter import FilterCondition, evaluate_filter_condition
 from abstra_internals.utils.validate import validate_json
 
@@ -326,13 +326,13 @@ class StageRunRepository(ABC):
 
 class LocalStageRunRepository(StageRunRepository):
     def __init__(self):
-        self.store = FileStore(directory=STAGE_RUNS_FOLDER, model=StageRun)
+        self.manager = FileManager(directory=STAGE_RUNS_FOLDER, model=StageRun)
 
     def clear(self):
-        self.store.clear()
+        self.manager.clear()
 
     def get(self, id: str) -> StageRun:
-        stage_run = self.store.load(id)
+        stage_run = self.manager.load(id)
         if stage_run is None:
             raise Exception(f"StageRun with id {id} not found")
 
@@ -341,7 +341,7 @@ class LocalStageRunRepository(StageRunRepository):
     def find(self, filter: GetStageRunByQueryFilter) -> List[StageRun]:
         results: List[StageRun] = []
 
-        for stage_run in self.store.load_all():
+        for stage_run in self.manager.load_all():
             if filter.stage and stage_run.stage not in filter.stage:
                 continue
 
@@ -367,7 +367,7 @@ class LocalStageRunRepository(StageRunRepository):
         return results
 
     def remove(self, id: str) -> None:
-        self.store.delete(id)
+        self.manager.delete(id)
 
     @staticmethod
     def _compare_data(data: dict, filter: dict) -> bool:
@@ -401,7 +401,7 @@ class LocalStageRunRepository(StageRunRepository):
         pagination: Pagination,
     ) -> PaginatedListResponse:
         filter_matches = self.find(filter)
-        parent_ids = set(u.parent_id for u in self.store.load_all())
+        parent_ids = set(u.parent_id for u in self.manager.load_all())
 
         leaves = sorted(
             [
@@ -422,7 +422,7 @@ class LocalStageRunRepository(StageRunRepository):
         )
 
     def count_leaves_by_status(self) -> List[CountStageRunsByStatus]:
-        all_stage_runs = self.store.load_all()
+        all_stage_runs = self.manager.load_all()
         parent_ids = set(u.parent_id for u in all_stage_runs)
         leaves = [
             stage_run for stage_run in all_stage_runs if stage_run.id not in parent_ids
@@ -443,7 +443,7 @@ class LocalStageRunRepository(StageRunRepository):
         self, filter: GetStageRunByQueryFilter, pagination: Pagination
     ) -> PaginatedListResponse:
         filter_matches = self.find(filter)
-        parent_ids = set(u.parent_id for u in self.store.load_all())
+        parent_ids = set(u.parent_id for u in self.manager.load_all())
 
         past = sorted(
             [stage_run for stage_run in filter_matches if stage_run.id in parent_ids],
@@ -471,7 +471,7 @@ class LocalStageRunRepository(StageRunRepository):
             updated_at=datetime.now(),
         )
 
-        self.store.save(stage_run.id, stage_run)
+        self.manager.save(stage_run.id, stage_run)
 
         return stage_run
 
@@ -486,7 +486,7 @@ class LocalStageRunRepository(StageRunRepository):
             updated_at=datetime.now(),
         )
 
-        self.store.save(stage_run.id, stage_run)
+        self.manager.save(stage_run.id, stage_run)
 
         return stage_run
 
@@ -502,7 +502,7 @@ class LocalStageRunRepository(StageRunRepository):
                 updated_at=datetime.now(),
             )
             created.append(stage_run)
-            self.store.save(stage_run.id, stage_run)
+            self.manager.save(stage_run.id, stage_run)
         return created
 
     def change_status(
@@ -519,7 +519,7 @@ class LocalStageRunRepository(StageRunRepository):
 
         if status in status_transitions.get(stage_run.status, []):
             stage_run.status = status
-            self.store.save(id, stage_run)
+            self.manager.save(id, stage_run)
             return True
 
         return False
@@ -546,7 +546,7 @@ class LocalStageRunRepository(StageRunRepository):
         if parent_is_iterator:
             forked.data["item"] = stage_run.data["item"]
 
-        self.store.save(forked.id, forked)
+        self.manager.save(forked.id, forked)
 
         return forked
 
@@ -554,7 +554,7 @@ class LocalStageRunRepository(StageRunRepository):
         stage_run = self.get(stage_run_id)
         stage_run.updated_at = datetime.now()
         stage_run.data = data
-        self.store.save(stage_run_id, stage_run)
+        self.manager.save(stage_run_id, stage_run)
         return True
 
 
