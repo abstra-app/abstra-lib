@@ -1226,20 +1226,28 @@ class Project:
         stage.path = new_path
 
     def update_stage(self, stage: ActionStage, changes: Dict[str, Any]) -> ActionStage:
+        # This guarantees that the updated stage will be the one from the project
+        project_stage = self.get_action(stage.id)
+
+        if project_stage is None:
+            raise StageNotFoundError(f"Stage with id '{stage.id}' not found")
+
         new_path = changes.get("path")
 
         if new_path:
-            if not isinstance(stage, FormStage) and not isinstance(stage, HookStage):
+            if not isinstance(project_stage, FormStage) and not isinstance(
+                project_stage, HookStage
+            ):
                 raise Exception(
-                    f"Stage with id {id} is a {type(stage)} does not have a path"
+                    f"Stage with id {id} is a {type(project_stage)} does not have a path"
                 )
 
             normalized_path = normalize_path(new_path)
-            self.update_path(stage, normalized_path)
+            self.update_path(project_stage, normalized_path)
 
-        stage.update(changes)
+        project_stage.update(changes)
 
-        return stage
+        return project_stage
 
     def delete_stage(self, id: str, remove_file: bool = False):
         if remove_file:
