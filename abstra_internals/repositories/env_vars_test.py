@@ -18,19 +18,19 @@ class TestEnvVarsRepository(TestCase):
         self.assertEqual(self.env_var_repo.list(), [])
 
     def test_load(self):
-        var = AbstraLibApiEditorEnvVarsModel(key="key", value="value")
-        self.env_var_repo.set(var)
+        var = AbstraLibApiEditorEnvVarsModel(name="key", value="value")
+        self.env_var_repo.set(name=var.name, value=var.value)
         self.assertEqual(self.env_var_repo.list(), [var])
 
     def test_set(self):
-        var = AbstraLibApiEditorEnvVarsModel(key="key", value="value")
-        self.env_var_repo.set(var)
+        var = AbstraLibApiEditorEnvVarsModel(name="key", value="value")
+        self.env_var_repo.set(name=var.name, value=var.value)
         self.assertEqual(self.env_var_repo.list(), [var])
 
     def test_unset(self):
-        var = AbstraLibApiEditorEnvVarsModel(key="key", value="value")
-        self.env_var_repo.set(var)
-        self.env_var_repo.unset(var)
+        var = AbstraLibApiEditorEnvVarsModel(name="key", value="value")
+        self.env_var_repo.set(name=var.name, value=var.value)
+        self.env_var_repo.unset(name=var.name)
         self.assertEqual(self.env_var_repo.list(), [])
 
     def test_check_no_file_is_valid(self):

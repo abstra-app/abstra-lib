@@ -2,7 +2,6 @@ import webbrowser
 from pathlib import Path
 from typing import List, Set
 
-from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
 from abstra_internals.repositories.env_vars import EnvVarsRepository
 
@@ -13,10 +12,7 @@ class AddEnvToEnvFile(LinterFix):
         self.env_var = env_var
 
     def fix(self):
-        env_var = self.env_var
-        EnvVarsRepository.set(
-            AbstraLibApiEditorEnvVarsModel(key=env_var, value=">> REPLACE ME <<")
-        )
+        EnvVarsRepository.set(self.env_var, value=">> REPLACE ME <<")
         env_uri = EnvVarsRepository.get_env_var_path().absolute().as_uri()
         webbrowser.open(env_uri)
 
@@ -35,7 +31,7 @@ class MissingEnv(LinterRule):
         env_vars_in_code_dict = EnvVarsRepository.get_env_vars_in_code()
         env_vars_in_code: Set[str] = set(env_vars_in_code_dict.keys())
         env_vars_in_env_file: Set[str] = set(
-            [ev.key for ev in EnvVarsRepository.list()]
+            [ev.name for ev in EnvVarsRepository.list()]
         )
         missing_env_vars = env_vars_in_code - env_vars_in_env_file
 
