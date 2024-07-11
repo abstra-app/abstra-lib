@@ -1,6 +1,7 @@
 from typing import List
 
 from abstra_internals.linter.linter import LinterRule
+from abstra_internals.linter.rules.conflicting_path import ConflictingPath
 from abstra_internals.linter.rules.duplicate_package_in_requirements import (
     DuplicatePackagesInRequirements,
 )
@@ -33,4 +34,5 @@ rules: List[LinterRule] = [
     NewVersionOfAbstraAvailable(),
     UnsetGetData(),
     EnvFileChanged(),
+    ConflictingPath(),
 ]

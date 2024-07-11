@@ -232,10 +232,14 @@ CONFLICTING_DYNAMIC_PATHS = [
 ]
 
 
-def generate_conflictless_path(path: str):
-    if path in CONFLICTING_STATIC_PATHS or any(
+def is_path_in_conflict(path: str):
+    return path in CONFLICTING_STATIC_PATHS or any(
         path.startswith(p) for p in CONFLICTING_DYNAMIC_PATHS
-    ):
+    )
+
+
+def generate_conflictless_path(path: str):
+    if is_path_in_conflict(path):
         random_suffix = str(uuid.uuid4())[:8]
         return f"{path}-{random_suffix}"
     else:
