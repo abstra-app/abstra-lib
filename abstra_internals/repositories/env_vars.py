@@ -21,7 +21,7 @@ class EnvVarsRepository:
         return [
             AbstraLibApiEditorEnvVarsModel.from_dict(
                 {
-                    "key": k,
+                    "name": k,
                     "value": v,
                 }
             )
@@ -29,16 +29,12 @@ class EnvVarsRepository:
         ]
 
     @staticmethod
-    def set(env_var: AbstraLibApiEditorEnvVarsModel) -> AbstraLibApiEditorEnvVarsModel:
-        set_key(EnvVarsRepository.get_env_var_path(), env_var.key, env_var.value)
-        return env_var
+    def set(name: str, value: str):
+        set_key(EnvVarsRepository.get_env_var_path(), name, value)
 
     @staticmethod
-    def unset(
-        env_var: AbstraLibApiEditorEnvVarsModel,
-    ) -> AbstraLibApiEditorEnvVarsModel:
-        unset_key(EnvVarsRepository.get_env_var_path(), env_var.key)
-        return env_var
+    def unset(name: str):
+        unset_key(EnvVarsRepository.get_env_var_path(), name)
 
     @staticmethod
     def check() -> bool:

@@ -1,8 +1,63 @@
+from dataclasses import dataclass
+from typing import Any, Dict, List, Literal, Union
+
 import flask
 
-from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
+
+
+@dataclass
+class CreateEnvVarBody:
+    change: Literal["create"]
+    name: str
+    value: str
+
+    @staticmethod
+    def from_dict(data: Dict[str, str]) -> "CreateEnvVarBody":
+        return CreateEnvVarBody(change="create", name=data["name"], value=data["value"])
+
+
+@dataclass
+class UpdateEnvVarBody:
+    change: Literal["update"]
+    name: str
+    value: str
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "UpdateEnvVarBody":
+        return UpdateEnvVarBody(change="update", name=data["name"], value=data["value"])
+
+
+@dataclass
+class DeleteEnvVarBody:
+    change: Literal["delete"]
+    name: str
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "DeleteEnvVarBody":
+        return DeleteEnvVarBody(change="delete", name=data["name"])
+
+
+EnvVarChange = Union[CreateEnvVarBody, UpdateEnvVarBody, DeleteEnvVarBody]
+
+
+@dataclass
+class PatchClientEnvVarBody:
+    changes: List[EnvVarChange]
+
+    @staticmethod
+    def from_dict(data: List[Dict[str, Any]]) -> "PatchClientEnvVarBody":
+        changes = []
+        for item in data:
+            change_type = item["change"]
+            if change_type == "create":
+                changes.append(CreateEnvVarBody.from_dict(item))
+            elif change_type == "update":
+                changes.append(UpdateEnvVarBody.from_dict(item))
+            elif change_type == "delete":
+                changes.append(DeleteEnvVarBody.from_dict(item))
+        return PatchClientEnvVarBody(changes=changes)
 
 
 def get_editor_bp(main_controller: MainController):
@@ -15,22 +70,21 @@ def get_editor_bp(main_controller: MainController):
             env_var.to_dict() for env_var in main_controller.env_vars_repository.list()
         ]
 
-    @bp.post("/")
+    @bp.patch("/")
     @usage
-    def _set_env_var():
+    def _change_env_vars():
         if flask.request.json is None:
             flask.abort(400)
-        env_var = main_controller.env_vars_repository.set(
-            AbstraLibApiEditorEnvVarsModel.from_dict(flask.request.json)
-        )
-        return env_var.to_dict()
 
-    @bp.delete("/<key>")
-    @usage
-    def _unset_env_var(key: str):
-        env_var = main_controller.env_vars_repository.unset(
-            AbstraLibApiEditorEnvVarsModel(key=key, value="")
-        )
-        return env_var.to_dict()
+        body = PatchClientEnvVarBody.from_dict(flask.request.json)
+        for change in body.changes:
+            if change.change == "create" or change.change == "update":
+                main_controller.env_vars_repository.set(
+                    name=change.name, value=change.value
+                )
+            elif change.change == "delete":
+                main_controller.env_vars_repository.unset(name=change.name)
+
+        return {"status": "ok"}
 
     return bp
