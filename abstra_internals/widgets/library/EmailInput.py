@@ -1,9 +1,12 @@
+import re
+from typing import List
 from abstra_internals.widgets.widget_base import Input
 
 
 class EmailInput(Input):
     type = 'email-input'
     empty_value = ''
+    value: str
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
@@ -30,3 +33,14 @@ class EmailInput(Input):
 
     def serialize_value(self) ->str:
         return self.value if self.value else ''
+
+    def validate(self) ->List[str]:
+        errors = super().validate()
+        if len(self.value) == 0:
+            return errors
+        is_valid_email = bool(re.search(
+            '^(([^<>()[\\]\\\\.,;:\\s@"]+(\\.[^<>()[\\]\\\\.,;:\\s@"]+)*)|(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$'
+            , self.value.strip().lower()))
+        if not is_valid_email:
+            errors.append(self.invalid_email_message)
+        return errors
