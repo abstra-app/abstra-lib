@@ -24,11 +24,31 @@ def _build_function_tool_call(format: Dict[str, object]) -> Dict[str, object]:
 AcceptedPrompts = Union[str, io.IOBase, pathlib.Path]
 
 
+def normalize_format(format: Dict[str, object]) -> Dict[str, object]:
+    for key, value in format.items():
+        if isinstance(value, str):
+            format[key] = {"type": value}
+        elif isinstance(value, list):
+            format[key] = {"enum": value}
+        elif value is bool:
+            format[key] = {"type": "boolean"}
+        elif value is int:
+            format[key] = {"type": "integer"}
+        elif value is float:
+            format[key] = {"type": "number"}
+        elif value is str:
+            format[key] = {"type": "string"}
+        else:
+            format[key] = value
+    return format
+
+
 def prompt(
     prompt: Union[AcceptedPrompts, List[AcceptedPrompts]],
     instructions: List[str] = [],
     format: Optional[Dict[str, object]] = None,
 ):
+    format = normalize_format(format) if format else None
     messages = []
     for instruction in instructions:
         messages.append(
