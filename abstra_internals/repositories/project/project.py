@@ -659,6 +659,7 @@ class StyleSettings:
     main_color: Optional[str]
     font_family: Optional[str]
     font_color: Optional[str]
+    language: Optional[str]
 
     @property
     def as_dict(self):
@@ -671,6 +672,7 @@ class StyleSettings:
             "main_color": self.main_color,
             "font_color": self.font_color,
             "font_family": self.font_family,
+            "language": self.language,
         }
 
     @property
@@ -701,6 +703,7 @@ class StyleSettings:
             font_color=data.get("font_color", defaultValue.font_color),
             logo_url=data.get("logo_url", defaultValue.logo_url),
             theme=data.get("theme", defaultValue.theme),
+            language=data.get("language", defaultValue.language),
         )
 
     @staticmethod
@@ -713,6 +716,7 @@ class StyleSettings:
             font_color=None,
             logo_url=None,
             theme=None,
+            language="en",
         )
 
 
