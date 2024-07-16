@@ -29,11 +29,15 @@ class Input(Widget):
         super().__init__()
         self.key = key
 
+    def _has_changes(self, old_value, new_value):
+        is_empty = old_value is None and new_value == self.empty_value
+        return old_value != new_value and not is_empty
+
     def set_value(self, value, set_errors=False):
         old_value = self.value if hasattr(self, "value") else None
         self.value = value
 
-        if set_errors and old_value != value:
+        if set_errors and self._has_changes(old_value, value):
             self.set_errors()
 
     def validate(self) -> List[str]:

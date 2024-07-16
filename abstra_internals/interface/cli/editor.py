@@ -1,5 +1,4 @@
 import logging
-import os
 import threading
 import webbrowser
 
@@ -25,9 +24,6 @@ def editor(
 ):
     serve_message()
     check_latest_version()
-
-    # used to block hackerforms lib from opening
-    os.environ["ABSTRA_SERVER"] = "true"
 
     controller = MainController()
     controller.reset_repositories()
