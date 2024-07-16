@@ -3142,7 +3142,7 @@ metadata = {
                 "description": "The following example demonstrate some of the available functionality for read_number",
                 "iframeHeight": "122px",
                 "key": "example1",
-                "code": 'from hackeforms import read_number_slider\n\nage = read_number_slider("Set volume")\n',
+                "code": 'from abstra.forms import read_number_slider\n\nage = read_number_slider("Set volume")\n',
             }
         ],
     },
