@@ -299,24 +299,6 @@ class StageRunRepository(ABC):
     def update_data(self, stage_run_id: str, data: dict) -> bool:
         raise NotImplementedError()
 
-    def get_not_abandoned_stage_run(
-        self, stage_run: StageRun, stage_id: str
-    ) -> StageRun:
-        if stage_run.status != "abandoned":
-            return stage_run
-
-        filter = GetStageRunByQueryFilter()
-        filter.parent_id = stage_run.id
-        filter.stage = stage_id
-
-        next_matches = self.find(filter)
-
-        assert (
-            len(next_matches) == 1
-        ), "Internal error: abandoned stage run does not have exactly one child"
-
-        return self.get_not_abandoned_stage_run(next_matches[0], stage_id)
-
     def acquire_lock(self, stage_run_id: str, execution_id: str) -> bool:
         return self.change_status(stage_run_id, "running", execution_id)
 
