@@ -2,6 +2,7 @@ import base64
 import os
 import re
 import socket
+import sys
 import typing as t
 from contextlib import closing
 from uuid import uuid4
@@ -128,3 +129,7 @@ def get_internal_id(obj: object, ensure=True) -> str:
         setattr(obj, key, uuid4().__str__())
 
     return getattr(obj, key)
+
+
+def get_local_python_version():
+    return f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
