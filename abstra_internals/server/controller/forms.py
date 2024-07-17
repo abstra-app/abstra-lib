@@ -8,7 +8,14 @@ from abstra_internals.controllers.execution import (
     LockFailedException,
     UnsetThreadException,
 )
-from abstra_internals.controllers.execution_client import FormClient
+from abstra_internals.controllers.execution_client_form import (
+    FormClient,
+    FormWebsocketReasons,
+)
+from abstra_internals.controllers.execution_store import (
+    ExecutionStore,
+    ExecutionStoreException,
+)
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.controller.main import MainController
@@ -23,45 +30,54 @@ def get_editor_bp(controller: MainController):
     @sock.route("/socket")
     def _websocket(ws: flask_sock.Server):
         try:
-            request_context = context_from_flask(flask.request)
+            request = context_from_flask(flask.request)
 
             id = flask.request.args.get("id")
             if id is None:
-                return
+                return ws.close(reason=FormWebsocketReasons.FormNotFound)
 
             form = controller.get_form(id)
             if not form:
-                return
+                return ws.close(reason=FormWebsocketReasons.FormNotFound)
 
-            is_detached = flask.request.args.get(
-                "detached", default=False, type=is_it_true
-            )
+            if execution_id := flask.request.args.get("previous_execution_id"):
+                try:
+                    client = ExecutionStore.get_form_client_by_execution_id(
+                        execution_id
+                    )
+                except ExecutionStoreException:
+                    return ws.close(reason=FormWebsocketReasons.ReconnectFailed)
+            else:
+                is_detached = flask.request.args.get(
+                    "detached", default=False, type=is_it_true
+                )
 
-            client = FormClient(
-                ws=ws, request_context=request_context, production_mode=False
-            )
+                client = FormClient(request_context=request, production_mode=False)
 
-            Controller = (
-                DetachedExecutionController if is_detached else ExecutionController
-            )
+                Controller = (
+                    DetachedExecutionController if is_detached else ExecutionController
+                )
 
-            Controller(
-                stage=form,
-                client=client,
-                request=request_context,
-                workflow_engine=controller.workflow_engine,
-                execution_repository=controller.execution_repository,
-                stage_run_repository=controller.stage_run_repository,
-                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            ).run().wait()
-        except LockFailedException:
-            pass
-        except UnsetThreadException:
-            pass
+                try:
+                    Controller(
+                        stage=form,
+                        client=client,
+                        request=request,
+                        workflow_engine=controller.workflow_engine,
+                        execution_repository=controller.execution_repository,
+                        stage_run_repository=controller.stage_run_repository,
+                        target_stage_run_id=flask.request.args.get(
+                            STAGE_RUN_ID_PARAM_KEY
+                        ),
+                    ).run()
+                except LockFailedException:
+                    return ws.close(reason=FormWebsocketReasons.LockFailed)
+                except UnsetThreadException:
+                    return ws.close(reason=FormWebsocketReasons.UnsetThread)
+
+            client.sync_and_wait(ws)
         except Exception as e:
             AbstraLogger.capture_exception(e)
-        finally:
-            ws.close(message="Done")
 
     @bp.get("/")
     @usage
