@@ -4,8 +4,10 @@ from abstra_internals.controllers.execution import (
     STAGE_RUN_ID_PARAM_KEY,
     DetachedExecutionController,
     ExecutionController,
+    LockFailedException,
+    UnsetThreadException,
 )
-from abstra_internals.controllers.execution_client import HookClient
+from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
@@ -72,15 +74,18 @@ def get_editor_bp(controller: MainController):
 
         client = HookClient(request_context)
 
-        ExecutionController(
-            stage=hook,
-            client=client,
-            request=request_context,
-            workflow_engine=controller.workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
-            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-        ).run().wait()
+        try:
+            ExecutionController(
+                stage=hook,
+                client=client,
+                request=request_context,
+                workflow_engine=controller.workflow_engine,
+                stage_run_repository=controller.stage_run_repository,
+                execution_repository=controller.execution_repository,
+                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
+            ).run().wait()
+        except (LockFailedException, UnsetThreadException):
+            return flask.Response(status=423)
 
         return {
             "body": client.response["body"],
@@ -99,15 +104,18 @@ def get_editor_bp(controller: MainController):
 
         client = HookClient(request_context)
 
-        DetachedExecutionController(
-            stage=hook,
-            client=client,
-            request=request_context,
-            target_stage_run_id=None,
-            workflow_engine=controller.workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
-        ).run().wait()
+        try:
+            DetachedExecutionController(
+                stage=hook,
+                client=client,
+                request=request_context,
+                target_stage_run_id=None,
+                workflow_engine=controller.workflow_engine,
+                stage_run_repository=controller.stage_run_repository,
+                execution_repository=controller.execution_repository,
+            ).run().wait()
+        except (LockFailedException, UnsetThreadException):
+            return flask.Response(status=423)
 
         return {
             "body": client.response["body"],

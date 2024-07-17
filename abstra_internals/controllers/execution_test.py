@@ -5,7 +5,7 @@ from abstra_internals.controllers.execution import (
     DetachedExecutionController,
     ExecutionController,
 )
-from abstra_internals.controllers.execution_client import HookClient
+from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.repositories.execution import EditorExecutionRepository

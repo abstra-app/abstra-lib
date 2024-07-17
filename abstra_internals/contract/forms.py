@@ -11,7 +11,6 @@ class ValidationResult(TypedDict):
 
 
 BrowserMessageTypes = Literal[
-    "execution:start",
     "auth:saved-jwt",
     "form:user-event",
     "form:page-response",
@@ -20,8 +19,8 @@ BrowserMessageTypes = Literal[
 ]
 
 PythonMessageType = Literal[
-    "execution:lock-failed",
     "execution:started",
+    "execution:reconnected",
     "execution:ended",
     "execution:stdout",
     "execution:stderr",
@@ -47,7 +46,7 @@ class Message:
         self.production_mode = production_mode
         self.make_debug_data()
 
-    def to_json(self) -> Dict[str, Union[str, dict]]:
+    def to_dict(self) -> Dict[str, Union[str, dict]]:
         return {"type": self.type, **self.data}
 
     def make_debug_data(self):
@@ -91,24 +90,24 @@ class ExecuteJSRequestMessage(Message):
         super().__init__({"code": code, "context": context}, production_mode)
 
 
-class ExecutionLockFailedMessage(Message):
-    type = "execution:lock-failed"
+class ExecutionStartedMessage(Message):
+    type = "execution:started"
 
-    def __init__(self, status: Optional[str], production_mode: bool):
-        super().__init__({"status": status}, production_mode)
+    def __init__(self, execution_id: str, production_mode: bool):
+        super().__init__({"executionId": execution_id}, production_mode)
+
+
+class ExecutionReconnectedMessage(Message):
+    type = "execution:reconnected"
+
+    def __init__(self, production_mode: bool):
+        super().__init__({}, production_mode)
 
 
 @dataclass
 class CloseDTO:
     exit_status: Literal["SUCCESS", "EXCEPTION"]
     exception: Optional[Union[Exception, None]] = None
-
-
-class ExecutionStartedMessage(Message):
-    type = "execution:started"
-
-    def __init__(self, execution_id: str, production_mode: bool):
-        super().__init__({"executionId": execution_id}, production_mode)
 
 
 class ExecutionEndedMessage(Message):
