@@ -9,7 +9,6 @@ from abstra_internals.threaded import threaded
 from abstra_internals.utils import (
     get_local_python_version,
     get_local_user_id,
-    is_dev_env,
     is_test_env,
 )
 from abstra_internals.utils.packages import get_local_package_version
@@ -17,7 +16,7 @@ from abstra_internals.utils.packages import get_local_package_version
 
 @threaded
 def send_usage(data, header):
-    if is_test_env() or is_dev_env():
+    if is_test_env():
         return
 
     api_url = f"{CLOUD_API_CLI_URL}/editor/usage"

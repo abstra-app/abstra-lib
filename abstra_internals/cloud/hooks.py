@@ -8,6 +8,7 @@ from abstra_internals.environment import (
     THREADS,
     WORKER_CLASS,
     WORKER_TEMP_DIR,
+    WORKERS,
     set_SERVER_UUID,
     set_WORKER_UUID,
 )
@@ -72,7 +73,7 @@ class GunicornOptionsBuilder:
     def build(self):
         return {
             "bind": f":{DEFAULT_PORT or 8002}",
-            "workers": 1,
+            "workers": WORKERS,
             "threads": THREADS,
             "worker_class": WORKER_CLASS,
             "worker_tmp_dir": WORKER_TEMP_DIR,

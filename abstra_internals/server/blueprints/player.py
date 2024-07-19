@@ -7,15 +7,10 @@ from abstra_internals.controllers.execution import (
     LockFailedException,
     UnsetThreadException,
 )
-from abstra_internals.controllers.execution_client import BasicClient
-from abstra_internals.controllers.execution_client_form import (
+from abstra_internals.controllers.execution_client import (
+    BasicClient,
     FormClient,
-    FormWebsocketReasons,
-)
-from abstra_internals.controllers.execution_client_hook import HookClient
-from abstra_internals.controllers.execution_store import (
-    ExecutionStore,
-    ExecutionStoreException,
+    HookClient,
 )
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.environment import (
@@ -108,47 +103,41 @@ def get_player_bp(controller: MainController):
     @sock.route("/_socket")
     @guard.socket_by(QueryArgSelector("id"))
     def _websocket(ws: flask_sock.Server):
-        request = context_from_flask(flask.request)
+        request_context = context_from_flask(flask.request)
 
         try:
             id = flask.request.args.get("id")
             if id is None:
-                return ws.close(reason=FormWebsocketReasons.FormNotFound)
+                return
 
             form = controller.get_form(id)
             if not form:
-                return ws.close(reason=FormWebsocketReasons.FormNotFound)
+                return
 
-            if execution_id := flask.request.args.get("previous_execution_id"):
-                try:
-                    client = ExecutionStore.get_form_client_by_execution_id(
-                        execution_id
-                    )
-                except ExecutionStoreException:
-                    return ws.close(reason=FormWebsocketReasons.ReconnectFailed)
-            else:
-                client = FormClient(request_context=request, production_mode=True)
-                try:
-                    ExecutionController(
-                        stage=form,
-                        client=client,
-                        request=request,
-                        workflow_engine=controller.workflow_engine,
-                        stage_run_repository=controller.stage_run_repository,
-                        execution_repository=controller.execution_repository,
-                        target_stage_run_id=flask.request.args.get(
-                            STAGE_RUN_ID_PARAM_KEY
-                        ),
-                    ).run()
-                except LockFailedException:
-                    return ws.close(reason=FormWebsocketReasons.LockFailed)
-                except UnsetThreadException:
-                    return ws.close(reason=FormWebsocketReasons.UnsetThread)
+            client = FormClient(
+                request_context=request_context,
+                production_mode=True,
+                ws=ws,
+            )
 
-            client.sync_and_wait(ws)
+            ExecutionController(
+                stage=form,
+                client=client,
+                request=request_context,
+                workflow_engine=controller.workflow_engine,
+                stage_run_repository=controller.stage_run_repository,
+                execution_repository=controller.execution_repository,
+                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
+            ).run().wait()
 
+        except LockFailedException:
+            pass
+        except UnsetThreadException:
+            pass
         except Exception as e:
             AbstraLogger.capture_exception(e)
+        finally:
+            ws.close(message="Done")
 
     @bp.put("/_files")
     def _upload_file():
@@ -207,18 +196,15 @@ def get_player_bp(controller: MainController):
 
         client = HookClient(request_context)
 
-        try:
-            ExecutionController(
-                stage=hook,
-                client=client,
-                request=request_context,
-                workflow_engine=controller.workflow_engine,
-                stage_run_repository=controller.stage_run_repository,
-                execution_repository=controller.execution_repository,
-                target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            ).run().wait()
-        except (LockFailedException, UnsetThreadException):
-            return flask.Response(status=423)
+        ExecutionController(
+            stage=hook,
+            client=client,
+            request=request_context,
+            workflow_engine=controller.workflow_engine,
+            stage_run_repository=controller.stage_run_repository,
+            execution_repository=controller.execution_repository,
+            target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
+        ).run().wait()
 
         return flask.Response(
             status=client.response["status"],
