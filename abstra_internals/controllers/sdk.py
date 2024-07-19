@@ -3,7 +3,7 @@ from io import BytesIO
 from typing import Dict, List, Optional, Tuple, Union
 
 from abstra_internals.contract.forms import ValidationResult
-from abstra_internals.controllers.execution_client_hook import HookClient
+from abstra_internals.controllers.execution_client import HookClient
 from abstra_internals.controllers.execution_store import (
     ExecutionNotFound,
     ExecutionStore,
@@ -109,7 +109,7 @@ class FormSDKController:
         self.client.request_page_update(widgets, validation, event_seq)
 
     def next_message(self) -> Dict:
-        return self.client.next_message()
+        return self.client.wait_for_message()
 
 
 class WorkflowSDKController:

@@ -1,4 +1,5 @@
 import sys
+from threading import Event
 from typing import Callable, List, Literal, Union
 
 import flask_sock
@@ -15,19 +16,38 @@ from abstra_internals.server.controller.main import MainController
 from abstra_internals.utils import serialize
 
 
+class StdioListener:
+    def __init__(self, ws: flask_sock.Server):
+        self._close_event = Event()
+        self._ws = ws
+
+    def wait_for_close(self):
+        self._close_event.wait()
+
+    def close(self):
+        self._close_event.set()
+
+    def dispatch(self, message: str):
+        try:
+            if not self._close_event.is_set():
+                self._ws.send(message)
+        except Exception:
+            self.close()
+
+
 class UnboundPthread(Exception):
     pass
 
 
 class StdioController:
-    listeners: List[flask_sock.Server] = []
+    listeners: List[StdioListener] = []
 
     @classmethod
-    def register(cls, listener: flask_sock.Server):
+    def register(cls, listener: StdioListener):
         cls.listeners.append(listener)
 
     @classmethod
-    def unregister(cls, listener: flask_sock.Server):
+    def unregister(cls, listener: StdioListener):
         cls.listeners.remove(listener)
 
     @classmethod
@@ -43,10 +63,7 @@ class StdioController:
             dict(type=type, log=log, execution_id=execution_id, stage_id=stage_id)
         )
         for listener in cls.listeners:
-            try:
-                listener.send(msg)
-            except Exception:
-                pass
+            listener.dispatch(msg)
 
     def __init__(
         self,

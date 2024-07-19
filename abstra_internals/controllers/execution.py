@@ -55,6 +55,7 @@ class ExecutionController:
     def run(self):
         if not self.target_stage_run_id:
             if not ProjectRepository.load().is_initial(self.stage):
+                self.client.handle_unset_thread()
                 raise UnsetThreadException()
 
             self.target_stage_run_id = self.stage_run_repository.create_initial(
@@ -70,10 +71,12 @@ class ExecutionController:
         if not self.stage_run_repository.acquire_lock(
             stage_run_id=self.target_stage_run_id, execution_id=execution.id
         ):
+            self.client.handle_lock_failed(self.target_stage_run_id)
             raise LockFailedException()
 
         self.pthread = Thread(
             target=ExecutionTarget,
+            name=self.stage.title,
             kwargs=dict(
                 stage=self.stage,
                 client=self.client,
@@ -82,7 +85,6 @@ class ExecutionController:
                 stage_run_repository=self.stage_run_repository,
                 execution_repository=self.execution_repository,
             ),
-            name=f"{self.stage.title} - {execution.short_id}",
         )
 
         self.pthread.start()
