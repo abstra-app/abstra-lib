@@ -3,7 +3,7 @@
 
 
 # flake8: noqa
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Optional, Any
 import io
 
 from abstra_internals.interface.sdk.forms.reactive import Reactive
@@ -65,7 +65,7 @@ class WidgetSchema:
   def get_input_widgets(self):
     return list(filter(lambda widget: isinstance(widget, Input), self.widgets))
 
-  def render(self, context={}):
+  def render(self, context: Optional[Dict]=None):
     output = []
     for widget in self.widgets:
         rendered_widget = widget.render(context or {})
