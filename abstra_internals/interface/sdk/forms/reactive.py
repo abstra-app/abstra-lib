@@ -1,12 +1,16 @@
-import typing
+from typing import TYPE_CHECKING, Callable, Optional
+
+if TYPE_CHECKING:
+    from abstra_internals.interface.sdk.forms import Page
 
 from abstra_internals.widgets.widget_base import Input
 
 
 class Reactive(Input):
     type = "reactive"
+    page: Optional["Page"]
 
-    def __init__(self, callback: typing.Callable, **kwargs):
+    def __init__(self, callback: Callable, **kwargs):
         self.set_props(dict(callback=callback, **kwargs))
         self.page = None
 
