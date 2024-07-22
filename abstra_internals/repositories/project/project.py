@@ -655,6 +655,7 @@ class StyleSettings:
     name: str
     theme: Optional[str]
     logo_url: Optional[str]
+    favicon_url: Optional[str]
     brand_name: Optional[str]
     main_color: Optional[str]
     font_family: Optional[str]
@@ -668,6 +669,7 @@ class StyleSettings:
             "name": self.name,
             "theme": self.theme,
             "logo_url": self.logo_url,
+            "favicon_url": self.favicon_url,
             "brand_name": self.brand_name,
             "main_color": self.main_color,
             "font_color": self.font_color,
@@ -683,7 +685,15 @@ class StyleSettings:
             logo_url = "/_assets/logo"
         else:
             logo_url = None
-        return {**self.as_dict, "logo_url": logo_url}
+
+        if isinstance(self.favicon_url, str) and check_is_url(self.favicon_url):
+            favicon_url = self.favicon_url
+        elif self.favicon_url:
+            favicon_url = "/_assets/favicon.ico"
+        else:
+            favicon_url = None
+
+        return {**self.as_dict, "logo_url": logo_url, "favicon_url": favicon_url}
 
     def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
@@ -702,6 +712,7 @@ class StyleSettings:
             main_color=data.get("main_color", defaultValue.main_color),
             font_color=data.get("font_color", defaultValue.font_color),
             logo_url=data.get("logo_url", defaultValue.logo_url),
+            favicon_url=data.get("favicon_url", defaultValue.favicon_url),
             theme=data.get("theme", defaultValue.theme),
             language=data.get("language", defaultValue.language),
         )
@@ -715,6 +726,7 @@ class StyleSettings:
             main_color=None,
             font_color=None,
             logo_url=None,
+            favicon_url=None,
             theme=None,
             language="en",
         )

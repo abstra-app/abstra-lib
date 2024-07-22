@@ -158,6 +158,17 @@ def get_player_bp(controller: MainController):
     def _get_file(path):
         return flask.send_file(controller.get_file(path))
 
+    @bp.get("/_assets/favicon.ico")
+    def _favicon():
+        favicon_path = controller.get_workspace().favicon_url
+        if not favicon_path:
+            return _logo()
+
+        if check_is_url(favicon_path):
+            return flask.redirect(favicon_path)
+
+        return send_from_dist(favicon_path, dist_folder=Settings.root_path)
+
     @bp.get("/_assets/logo")
     def _logo():
         logo_path = controller.get_workspace().logo_url
@@ -168,10 +179,6 @@ def get_player_bp(controller: MainController):
             return flask.redirect(logo_path)
 
         return send_from_dist(logo_path, dist_folder=Settings.root_path)
-
-    @bp.get("/favicon.ico")
-    def _favicon():
-        return _logo()
 
     @bp.get("/_assets/background")
     def _background():
