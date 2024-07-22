@@ -79,6 +79,10 @@ class Execution:
     def status(self) -> ExecutionStatus:
         return self._status
 
+    @property
+    def short_id(self) -> str:
+        return self.id[:8]
+
     def to_dto(self):
         return dict(
             id=self.id,

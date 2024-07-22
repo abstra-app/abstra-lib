@@ -2,19 +2,21 @@ import threading
 from dataclasses import dataclass
 from typing import List
 
-from abstra_internals.controllers.execution_client import (
-    ExecutionClient,
-    FormClient,
-    HookClient,
-)
+from abstra_internals.controllers.execution_client import ExecutionClient
+from abstra_internals.controllers.execution_client_form import FormClient
+from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.entities.execution import Execution
 
 
-class ExecutionNotFound(Exception):
+class ExecutionStoreException(Exception):
     pass
 
 
-class ClientTypeMismatch(Exception):
+class ExecutionNotFound(ExecutionStoreException):
+    pass
+
+
+class ClientTypeMismatch(ExecutionStoreException):
     pass
 
 
@@ -67,12 +69,12 @@ class ExecutionStore:
     def get_hook_client(cls) -> HookClient:
         client = cls.get_by_thread().client
         if not isinstance(client, HookClient):
-            raise ClientTypeMismatch
+            raise ClientTypeMismatch()
         return client
 
     @classmethod
     def get_form_client(cls) -> FormClient:
         client = cls.get_by_thread().client
         if not isinstance(client, FormClient):
-            raise ClientTypeMismatch
+            raise ClientTypeMismatch()
         return client
