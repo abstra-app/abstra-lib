@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import Literal, Optional, Tuple
 
 from abstra_internals.compatibility.compat_traceback import print_exception
-from abstra_internals.controllers.execution_client import (
-    ClientAbandoned,
-    ExecutionClient,
-)
+from abstra_internals.controllers.execution_client import ExecutionClient
+from abstra_internals.controllers.execution_client_form import ClientAbandoned
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.entities.execution import Execution
@@ -38,7 +36,6 @@ def ExecutionTarget(
         execution_repository.update(execution)
 
         if exception:
-            print_exception(exception)
             client.handle_failure(exception)
         else:
             client.handle_success()
@@ -67,9 +64,10 @@ def _execute_code(filepath: Path) -> Result:
     try:
         _execute_without_exit(filepath)
         return "finished", None
-    except ClientAbandoned:
-        return "abandoned", None
+    except ClientAbandoned as e:
+        return "abandoned", e
     except Exception as e:
+        print_exception(e)
         return "failed", e
     finally:
         gc.collect()

@@ -8,7 +8,7 @@ from abstra_internals.controllers.execution import (
     LockFailedException,
     UnsetThreadException,
 )
-from abstra_internals.controllers.execution_client import FormClient
+from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.controller.main import MainController

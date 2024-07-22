@@ -76,7 +76,6 @@ class ExecutionController:
 
         self.pthread = Thread(
             target=ExecutionTarget,
-            name=self.stage.title,
             kwargs=dict(
                 stage=self.stage,
                 client=self.client,
@@ -85,6 +84,7 @@ class ExecutionController:
                 stage_run_repository=self.stage_run_repository,
                 execution_repository=self.execution_repository,
             ),
+            name=f"{self.stage.title} - {execution.short_id}",
         )
 
         self.pthread.start()

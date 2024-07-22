@@ -5,7 +5,7 @@ from abstra_internals.controllers.execution import (
     DetachedExecutionController,
     ExecutionController,
 )
-from abstra_internals.controllers.execution_client import HookClient
+from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.usage import usage
