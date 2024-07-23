@@ -1,4 +1,5 @@
 import inspect
+from functools import wraps
 from typing import Any, Callable, Tuple
 
 import requests
@@ -25,6 +26,7 @@ def send_usage(data, header):
 
 
 def usage(func: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(func)
     def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
         arg_names = inspect.getfullargspec(func).args
         arg_values = dict(zip(arg_names, args))
@@ -39,8 +41,5 @@ def usage(func: Callable[..., Any]) -> Callable[..., Any]:
         headers = {"apiKey": get_credentials()}
         send_usage(metric_data, headers)
         return func(*args, **kwargs)
-
-    original_route_name = func.__name__
-    wrapper.__name__ = f"{original_route_name}_usage_wrapper"
 
     return wrapper
