@@ -10,9 +10,10 @@ from abstra_internals.utils.string import to_snake_case
 
 def _build_function_tool_call(format: Dict[str, object]) -> Dict[str, object]:
     variable_names = list(format.keys())
-    function_name = "get_" + "_and_".join(variable_names)
+    description = "get_" + "_and_".join(variable_names)
     return {
-        "name": to_snake_case(function_name),
+        "name": "get_parameters",
+        "description": to_snake_case(description),
         "parameters": {
             "type": "object",
             "properties": format,
