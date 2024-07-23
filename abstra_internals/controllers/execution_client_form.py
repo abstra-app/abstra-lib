@@ -50,7 +50,7 @@ class FormClient(ExecutionClient):
         except flask_sock.ConnectionClosed:
             raise ClientAbandoned()
 
-    def _wait_for_message(self, *target_types: Optional[BrowserMessageTypes]) -> Dict:
+    def _wait_for_message(self, *target_types: BrowserMessageTypes) -> Dict:
         ignored_types = ["execution:heartbeat", "debug:close-attempt"]
 
         while True:
