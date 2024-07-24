@@ -24,7 +24,7 @@ class CurrencyInput(Input):
         self.disabled = props.get('disabled', False)
 
     def _validate_number_min_max(self) ->List[str]:
-        if type(self.value) != int and type(self.value) != float:
+        if type(self.value) is not int and type(self.value) is not float:
             return []
         if hasattr(self, 'min'
             ) and self.min is not None and self.value < self.min:

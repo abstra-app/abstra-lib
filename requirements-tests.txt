@@ -1,5 +1,5 @@
 pandas
 plotly
 pytest==7.1.2
-ruff
+ruff==0.5.4
 Pillow
