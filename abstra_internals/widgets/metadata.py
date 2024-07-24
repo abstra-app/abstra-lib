@@ -3866,7 +3866,7 @@ metadata = {
                 "description": "The following example demonstrate some of the available functionality for read_richtext",
                 "iframeHeight": "206px",
                 "key": "example1",
-                "code": 'read_richtext("Write here your bio")\n',
+                "code": 'from abstra.forms import read_richtext\n\nread_richtext("Write here your bio")\n',
             }
         ],
     },
@@ -5219,7 +5219,7 @@ metadata = {
                 "description": "The following example demonstrate some of the available functionality for display_pandas",
                 "iframeHeight": "348px",
                 "key": "example1",
-                "code": "from abstra.forms import display_pandas\n\ndisplay_pandas(df)\n",
+                "code": 'import pandas as pd\nfrom abstra.forms import display_pandas\n\ndf = pd.DataFrame.from_dict(\n    {\n        "A": [1, 2, 3, 4],\n        "B": [5, 6, 7, 8],\n        "C": [9, 10, 11, 12],\n    }\n)\n\ndisplay_pandas(df)\n',
             }
         ],
     },
@@ -5368,7 +5368,7 @@ metadata = {
                 "description": "You can customize the current and total number of steps. Also the message of each step",
                 "iframeHeight": "124px",
                 "key": "example2",
-                "code": 'from time import sleep\n\nfor i in range(10):\n    display_progress(i, 10, text="Computing values")\n\n    sleep(1)  # Do some computation\n',
+                "code": 'from time import sleep\n\nfrom abstra.forms import display_progress\n\nfor i in range(10):\n    display_progress(i, 10, text="Computing values")\n\n    sleep(1)  # Do some computation\n',
             },
         ],
     },
