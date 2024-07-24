@@ -67,6 +67,10 @@ def get_player_bp(controller: MainController):
     access_control_bp = access_control_controller.get_player_bp(controller)
     bp.register_blueprint(access_control_bp, url_prefix="/_access-control")
 
+    @bp.route("/_healthcheck")
+    def _healthcheck():
+        return "ok"
+
     @bp.get("/_workspace")
     def _get_workspace():
         auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)

@@ -4,7 +4,6 @@ fire>=0.5.0
 Flask>=2.2.2
 Flask-Cors>=4.0.0
 flask-sock>=0.6.0
-flask-talisman>=1.1.0
 jedi>=0.19.0
 multipart>=0.2.4
 progress>=1.6
