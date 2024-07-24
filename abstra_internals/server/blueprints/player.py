@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import flask
 import flask_sock
 
@@ -38,6 +40,7 @@ from abstra_internals.server.guards.role_guard import (
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.utils import check_is_url
+from abstra_internals.utils.file import path2module
 
 
 def get_player_bp(controller: MainController):
@@ -257,5 +260,13 @@ def get_player_bp(controller: MainController):
     def spa(filename: str):
         res = send_from_dist(filename, "player.html")
         return res
+
+    setup_hook = Path("__setup__.py")
+    if setup_hook.exists():
+        module = __import__(path2module(setup_hook))
+        if hasattr(module, "setup"):
+            module.setup(bp)
+        else:
+            print(f"Could not find setup function in {setup_hook}")
 
     return bp
