@@ -126,19 +126,7 @@ class CloudExecutionRepository(ExecutionRepository):
 
         res.raise_for_status()
 
-        return [
-            Execution.from_dto(
-                dict(
-                    id=cloud_dto["id"],
-                    status=cloud_dto["status"],
-                    stage_id=cloud_dto["stageId"],
-                    created_at=cloud_dto["createdAt"],
-                    stage_run_id=cloud_dto["stageRunId"],
-                    request_context=cloud_dto["context"],
-                )
-            )
-            for cloud_dto in res.json()
-        ]
+        return [Execution.from_dto(dto) for dto in res.json()]
 
     def clear(self):
         raise NotImplementedError()
