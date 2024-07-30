@@ -11,6 +11,7 @@ from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 GIT_FOLDER = ".git"
 ABSTRA_IGNORE = ".abstraignore"
+ABSTRA_TABLES_FILE = "abstra-tables.json"
 
 
 def is_relative_path(path: str) -> bool:
