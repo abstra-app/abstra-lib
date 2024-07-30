@@ -1,3 +1,5 @@
+from typing import Optional
+
 import requests
 
 from abstra_internals.contracts_generated import (
@@ -10,13 +12,17 @@ from abstra_internals.logger import AbstraLogger
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:
     url = f"{CLOUD_API_ENDPOINT}/cli/builds"
-    data = requests.post(url=url, headers=headers).json()
+    r = requests.post(url=url, headers=headers)
+    if not r.ok:
+        raise Exception(f"Failed to create build: {r.text}")
+
+    data = r.json()
     return CloudApiCliBuildCreateResponse.from_dict(data)
 
 
-def update_build(build_id: str, headers: dict):
+def update_build(build_id: str, headers: dict, error: Optional[str] = None):
     url = f"{CLOUD_API_ENDPOINT}/cli/builds/{build_id}"
-    requests.patch(url=url, headers=headers)
+    requests.patch(url=url, headers=headers, json=dict(error=error)).raise_for_status()
 
 
 def get_api_key_info(headers: dict) -> dict:
@@ -26,6 +32,7 @@ def get_api_key_info(headers: dict) -> dict:
     except Exception as e:
         AbstraLogger.capture_exception(e)
         return {"logged": False, "reason": "CONNECTION_ERROR"}
+
     if response.ok:
         response_data = CloudApiCliApiKeyInfoResponse.from_dict(response.json())
         return {"logged": True, "info": response_data.to_dict()}
