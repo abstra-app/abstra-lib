@@ -72,6 +72,15 @@ class FilesFromDirectoryTest(unittest.TestCase):
         files = files_from_directory(self.path)
         self.assertSamePaths(files, [tracked, self.abstra_json_path])
 
+    def test_ignore_file_pattern(self):
+        self.add_file(".abstraignore", "~$*.xlsx")
+        self.add_file("~$file.xlsx", "foo")
+        self.add_file("~$planilha.xlsx", "foo")
+        tracked = self.add_file("tracked", "bar")
+
+        files = files_from_directory(self.path)
+        self.assertSamePaths(files, [tracked, self.abstra_json_path])
+
     def test_ignore_empty(self):
         self.add_folder("ignored")
         self.add_folder("empty")
