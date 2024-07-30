@@ -7,6 +7,7 @@ import requests
 
 from abstra_internals.cloud_api import create_build, update_build
 from abstra_internals.credentials import resolve_headers
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
 from abstra_internals.utils.file import files_from_directory
 
@@ -36,9 +37,15 @@ def deploy():
         return
 
     data = create_build(headers)
-    url = data.url
-    build_id = data.build_id
 
-    zip_path = _generate_zip_file()
-    _upload_file(url=url, file_path=zip_path)
-    update_build(headers=headers, build_id=build_id)
+    try:
+        zip_path = _generate_zip_file()
+        _upload_file(url=data.url, file_path=zip_path)
+        update_build(headers=headers, build_id=data.build_id)
+    except Exception as e:
+        update_build(
+            headers=headers, build_id=data.build_id, error="Failed to upload files"
+        )
+        print("Failed to deploy project", e)
+        AbstraLogger.capture_exception(e)
+        raise e
