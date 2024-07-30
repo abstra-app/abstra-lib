@@ -14,8 +14,7 @@ from abstra_internals.interface.cli.tables_messages import (
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
-
-ABSTRA_RESTORE_TABLES_FILE = "abstra-tables.json"
+from abstra_internals.utils.file import ABSTRA_TABLES_FILE
 
 
 def dump():
@@ -25,7 +24,7 @@ def dump():
         res = requests.get(url, headers=headers)
         res_json = res.json()
         json_str = json.dumps(res_json, indent=2)
-        Settings.root_path.joinpath(ABSTRA_RESTORE_TABLES_FILE).write_text(
+        Settings.root_path.joinpath(ABSTRA_TABLES_FILE).write_text(
             json_str, encoding="utf-8"
         )
         num_tables = len(res_json["tables"])
@@ -39,9 +38,9 @@ def restore():
     headers = resolve_headers()
     url = f"{CLOUD_API_CLI_URL}/tables/restore"
     try:
-        json_content = Settings.root_path.joinpath(
-            ABSTRA_RESTORE_TABLES_FILE
-        ).read_text(encoding="utf-8")
+        json_content = Settings.root_path.joinpath(ABSTRA_TABLES_FILE).read_text(
+            encoding="utf-8"
+        )
         tables_to_restore = json.loads(json_content)
         res = requests.post(url, json=tables_to_restore, headers=headers)
         if res.status_code == 400:
