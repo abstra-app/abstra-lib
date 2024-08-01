@@ -1,6 +1,5 @@
 from abstra_internals.repositories.ai import ai_api_http_client_factory
 from abstra_internals.repositories.authn import authn_repository_factory
-from abstra_internals.repositories.connectors import connectors_api_http_client_factory
 from abstra_internals.repositories.env_vars import env_vars_repository_factory
 from abstra_internals.repositories.execution import execution_repository_factory
 from abstra_internals.repositories.execution_logs import (
@@ -14,7 +13,6 @@ from abstra_internals.repositories.stage_run import stage_run_repository_factory
 from abstra_internals.repositories.tables import tables_api_http_client_factory
 from abstra_internals.repositories.users import users_repository_factory
 
-connectors_api_http_client = connectors_api_http_client_factory()
 execution_logs_repository = execution_logs_repository_factory()
 requirements_repository = requirements_repository_factory()
 notification_repository = notification_repository_factory()
@@ -30,7 +28,6 @@ ai_repository = ai_api_http_client_factory()
 
 
 __all__ = [
-    "connectors_api_http_client",
     "execution_logs_repository",
     "notification_repository",
     "tables_api_http_client",
