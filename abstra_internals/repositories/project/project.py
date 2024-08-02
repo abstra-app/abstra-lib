@@ -14,6 +14,7 @@ from abstra_internals.contracts_generated import CommonUser
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
 from abstra_internals.settings import Settings
+from abstra_internals.templates import generate_getting_started_project
 from abstra_internals.utils import check_is_url, nested_get
 from abstra_internals.utils.file import generate_conflictless_path, traverse_code
 from abstra_internals.utils.format import normalize_path
@@ -1434,3 +1435,7 @@ class ProjectRepository:
             cls.initialize()
         else:
             cls.migrate_config_file(verbose=verbose)
+
+    @classmethod
+    def generate_getting_started_project(cls):
+        generate_getting_started_project(Settings.root_path)

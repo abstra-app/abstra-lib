@@ -1,0 +1,83 @@
+{
+  "workspace": {
+    "id": null,
+    "name": "Untitled Workspace",
+    "theme": null,
+    "logo_url": null,
+    "favicon_url": null,
+    "brand_name": null,
+    "main_color": null,
+    "font_color": null,
+    "font_family": null,
+    "language": "en"
+  },
+  "kanban": {
+    "access_control": {
+      "is_public": false,
+      "required_roles": []
+    }
+  },
+  "home": {
+    "access_control": {
+      "is_public": true,
+      "required_roles": []
+    }
+  },
+  "jobs": [],
+  "hooks": [],
+  "forms": [
+    {
+      "id": "d75c348e-629d-4528-9db2-f0c716116dcf",
+      "path": "employee-info-form",
+      "title": "Employee Info Form",
+      "is_initial": true,
+      "auto_start": false,
+      "allow_restart": false,
+      "end_message": null,
+      "start_message": null,
+      "error_message": null,
+      "welcome_title": null,
+      "timeout_message": null,
+      "start_button_text": null,
+      "restart_button_text": null,
+      "file": "employee_info_form.py",
+      "workflow_position": [
+        300.0,
+        0.0
+      ],
+      "transitions": [
+        {
+          "target_id": "f6cb5e02-15ab-4fe2-b6a5-39d723892697",
+          "target_type": "scripts",
+          "type": "forms:finished",
+          "id": "hgbtu2x",
+          "condition_value": null
+        }
+      ],
+      "notification_trigger": {
+        "variable_name": "assignee_emails",
+        "enabled": false
+      },
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    }
+  ],
+  "scripts": [
+    {
+      "id": "f6cb5e02-15ab-4fe2-b6a5-39d723892697",
+      "file": "send_welcome_email.py",
+      "title": "Send Welcome Email",
+      "is_initial": false,
+      "workflow_position": [
+        696.0,
+        0.0
+      ],
+      "transitions": []
+    }
+  ],
+  "iterators": [],
+  "conditions": [],
+  "version": "11.0"
+}
