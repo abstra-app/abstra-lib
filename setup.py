@@ -42,7 +42,7 @@ setup(
     },
     package_data={
         "abstra_statics": ["dist/**/*", "dist/*"],
-        "abstra_internals": ["templates/*"],
+        "abstra_internals": ["templates/*", "templates/**/*"],
     },
     packages=find_packages(exclude=["tests"]),
     install_requires=REQUIREMENTS,
