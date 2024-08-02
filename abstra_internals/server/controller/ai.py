@@ -4,7 +4,12 @@ from typing import Any, Dict, List
 
 import flask
 
-from abstra_internals.cloud_api import create_thread, generate_project, get_ai_messages
+from abstra_internals.cloud_api import (
+    cancel_all,
+    create_thread,
+    generate_project,
+    get_ai_messages,
+)
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.repositories.project.json_migrations import get_latest_version
 from abstra_internals.repositories.project.project import Project, ProjectRepository
@@ -38,6 +43,12 @@ class AiController:
         if headers is None:
             return None
         return create_thread(headers)
+
+    def cancel_all(self, thread_id: str):
+        headers = resolve_headers()
+        if headers is None:
+            return None
+        return cancel_all(headers, thread_id)
 
     def generate_project(self, prompt: str, tries: int = 0):
         headers = resolve_headers() or {}
@@ -108,6 +119,20 @@ def get_editor_bp(main_controller: MainController):
             flask.abort(403)
         return thread
 
+    @bp.post("/cancel-all")
+    @usage
+    def _cancel_all():
+        body = flask.request.json
+        if not body:
+            flask.abort(400)
+        thread_id = body.get("threadId")
+        if not thread_id:
+            flask.abort(400)
+        thread = controller.cancel_all(thread_id)
+        if not thread:
+            flask.abort(403)
+        return thread
+
     @bp.post("/generate")
     @usage
     def _generate():
@@ -120,6 +145,23 @@ def get_editor_bp(main_controller: MainController):
             flask.abort(400)
 
         controller.generate_project(prompt)
+        return {"success": True}
+
+    @bp.post("/vote")
+    def _vote():
+        body = flask.request.json
+        if not body:
+            flask.abort(400)
+        vote = body.get("vote")
+        question = body.get("question")
+        answer = body.get("answer")
+        context = body.get("context")
+
+        @usage
+        def ai_vote(vote, question, answer, context):
+            return
+
+        ai_vote(vote, question, answer, context)
         return {"success": True}
 
     return bp

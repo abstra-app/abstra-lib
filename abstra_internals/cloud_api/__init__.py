@@ -59,6 +59,11 @@ def create_thread(headers: dict):
     return requests.post(url, headers=headers).json()
 
 
+def cancel_all(headers: dict, thread_id: str):
+    url = f"{CLOUD_API_ENDPOINT}/cli/ai/cancel-all"
+    return requests.post(url, headers=headers, json={"threadId": thread_id}).json()
+
+
 def get_project_info(headers):
     url = f"{CLOUD_API_ENDPOINT}/cli/project"
     return requests.get(url, headers=headers).json()
