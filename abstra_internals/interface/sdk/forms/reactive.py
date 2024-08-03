@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING, Callable, Optional
 
+from abstra_internals.widgets.widget_base import Input
+
 if TYPE_CHECKING:
     from abstra_internals.interface.sdk.forms import Page
-
-from abstra_internals.widgets.widget_base import Input
 
 
 class Reactive(Input):
@@ -54,3 +54,33 @@ class Reactive(Input):
             return parsed
         else:
             return {}
+
+
+def reactive(func):
+    from abstra_internals.interface.sdk.forms import Page
+
+    def _partial(ans):
+        page = Page(context=ans)
+
+        class ProxyPage:
+            def __getattribute__(self, key):
+                original_attr = result = page.__getattribute__(key)
+
+                def call_and_return(*args, **kwargs):
+                    original_attr(*args, **kwargs)
+                    widget = page.widgets[-1]
+                    if isinstance(widget, Input):
+                        return ans.get(widget.key)
+                    else:
+                        return result
+
+                if callable(original_attr):
+                    return call_and_return
+                else:
+                    return original_attr
+
+        fp = ProxyPage()
+        func(fp)
+        return page
+
+    return Page().reactive(_partial)
