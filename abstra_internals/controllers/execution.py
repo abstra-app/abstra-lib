@@ -2,9 +2,7 @@ import json
 from threading import Thread
 from typing import Optional
 
-from abstra_internals.controllers.execution_client import (
-    ExecutionClient,
-)
+from abstra_internals.controllers.execution_client import ExecutionClient
 from abstra_internals.controllers.execution_target import ExecutionTarget
 from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
@@ -61,6 +59,10 @@ class ExecutionController:
             self.target_stage_run_id = self.stage_run_repository.create_initial(
                 self.stage.id
             ).id
+
+        self.target_stage_run_id = self.stage_run_repository.ensure_not_abandoned(
+            self.target_stage_run_id
+        )
 
         execution = Execution.create(
             stage_run_id=self.target_stage_run_id,

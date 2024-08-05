@@ -260,6 +260,16 @@ class StageRunRepository(ABC):
     def create_next(self, parent: StageRun, dtos: List[Dict]) -> List[StageRun]:
         raise NotImplementedError()
 
+    def ensure_not_abandoned(self, stage_run_id: str) -> str:
+        stage_run = self.get(stage_run_id)
+        while stage_run.is_abandoned:
+            children = self.find(GetStageRunByQueryFilter(parent_id=stage_run.id))
+            assert len(children) <= 1
+            if len(children) == 0:
+                return stage_run.id
+            stage_run = children[0]
+        return stage_run.id
+
     @abstractmethod
     def fork(
         self,

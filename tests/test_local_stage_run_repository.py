@@ -267,3 +267,46 @@ class TestLocalStageRunRepository(TestCase):
         self.assertEqual(retry2.status, "waiting")
         self.assertEqual(retry2.data, {"a": 1, "b": 3, "c": 4})
         self.assertEqual(retry2.stage, "bar")
+
+    def test_ensure_not_abandoned_if_not_abandoned(self):
+        parent = self.repository.create_initial("parent")
+
+        stage_run_id = self.repository.ensure_not_abandoned(parent.id)
+
+        self.assertEqual(stage_run_id, parent.id)
+
+    def test_ensure_not_abandoned_if_abandoned(self):
+        parent = self.repository.create_initial("parent")
+        child = self.repository.create_next(parent, [dict(stage="foo")])[0]
+
+        has_changed = self.repository.change_status(child.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child.id, "abandoned")
+        self.assertTrue(has_changed)
+
+        stage_run_id = self.repository.ensure_not_abandoned(child.id)
+
+        self.assertNotEqual(stage_run_id, parent.id)
+
+    def test_ensure_not_abandoned_if_multiple_abandoned(self):
+        parent = self.repository.create_initial("parent")
+        child1 = self.repository.create_next(parent, [dict(stage="foo")])[0]
+
+        has_changed = self.repository.change_status(child1.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child1.id, "abandoned")
+        self.assertTrue(has_changed)
+
+        child2 = self.repository.create_next(parent, [dict(stage="bar")])[0]
+
+        has_changed = self.repository.change_status(child2.id, "running")
+        self.assertTrue(has_changed)
+
+        has_changed = self.repository.change_status(child2.id, "abandoned")
+        self.assertTrue(has_changed)
+
+        stage_run_id = self.repository.ensure_not_abandoned(child2.id)
+
+        self.assertNotEqual(stage_run_id, parent.id)

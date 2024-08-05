@@ -133,8 +133,9 @@ class WorkflowEngine(IWorkflowEngine):
         for stage_run in self.stage_run_repository.create_next(
             parent_stage_run, stage_run_dtos
         ):
-            self._send_waiting_thread_notification(stage_run)
             self._consume(stage_run)
+            if not parent_stage_run.is_abandoned:
+                self._send_waiting_thread_notification(stage_run)
 
     def _consume(self, stage_run: StageRun):
         stage = self._get_stage(stage_run.stage)
