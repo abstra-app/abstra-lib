@@ -23,6 +23,7 @@ from abstra_internals.environment import (
 )
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.logger import AbstraLogger
+from abstra_internals.server.cache.control import Cache
 from abstra_internals.server.controller import (
     access_control as access_control_controller,
 )
@@ -45,6 +46,7 @@ from abstra_internals.utils.file import path2module
 
 def get_player_bp(controller: MainController):
     guard = Guard(controller.users_repository, enabled=IS_PRODUCTION)
+    cache = Cache(enabled=IS_PRODUCTION)
 
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
@@ -164,6 +166,7 @@ def get_player_bp(controller: MainController):
         return flask.send_file(controller.get_file(path))
 
     @bp.get("/_assets/favicon.ico")
+    @cache.assets()
     def _favicon():
         favicon_path = controller.get_workspace().favicon_url
         if not favicon_path:
@@ -175,6 +178,7 @@ def get_player_bp(controller: MainController):
         return send_from_dist(favicon_path, dist_folder=Settings.root_path)
 
     @bp.get("/_assets/logo")
+    @cache.assets()
     def _logo():
         logo_path = controller.get_workspace().logo_url
         if not logo_path:
@@ -186,6 +190,7 @@ def get_player_bp(controller: MainController):
         return send_from_dist(logo_path, dist_folder=Settings.root_path)
 
     @bp.get("/_assets/background")
+    @cache.assets()
     def _background():
         background_path = controller.get_workspace().theme
 
@@ -256,11 +261,13 @@ def get_player_bp(controller: MainController):
         return {"status": "running"}
 
     @bp.get("/")
+    @cache.statics()
     def index():
         res = send_from_dist("player.html", "player.html")
         return res
 
     @bp.get("/<path:filename>")
+    @cache.statics()
     def spa(filename: str):
         res = send_from_dist(filename, "player.html")
         return res

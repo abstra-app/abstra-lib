@@ -19,6 +19,7 @@ def send_from_dist(
     mimetypes.add_type("application/javascript", ".js")
     mimetypes.add_type("text/css", ".css")
     mimetypes.add_type("text/html", ".html")
+
     try:
         return flask.send_from_directory(dist_folder, filename)
     except wz_ex.NotFound:
