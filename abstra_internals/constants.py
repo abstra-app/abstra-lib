@@ -15,4 +15,7 @@ def get_persistent_dir() -> pathlib.Path:
 
 
 def get_project_url() -> str:
-    return PROJECT_URL or f"http://0.0.0.0:{Settings.server_port}"
+    return PROJECT_URL or f"http://localhost:{Settings.server_port}"
+
+
+STAGE_RUN_ID_PARAM_KEY = "abstra-run-id"

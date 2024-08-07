@@ -13,8 +13,6 @@ from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
 
-STAGE_RUN_ID_PARAM_KEY = "abstra-run-id"
-
 
 class LockFailedException(Exception):
     pass

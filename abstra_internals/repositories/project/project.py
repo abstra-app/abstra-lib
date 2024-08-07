@@ -10,7 +10,9 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.constants import get_project_url
 from abstra_internals.contracts_generated import CommonUser
+from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
 from abstra_internals.settings import Settings
@@ -26,6 +28,15 @@ ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
 ControlStage = Union["IteratorStage", "ConditionStage"]
 WorkflowStage = Union[ActionStage, ControlStage]
 SecuredStage = Union["FormStage", "Home", "KanbanView"]
+
+Languages = Literal[
+    "en",
+    "pt",
+    "de",
+    "es",
+    "fr",
+    "hi",
+]
 
 
 @dataclass
@@ -661,7 +672,7 @@ class StyleSettings:
     main_color: Optional[str]
     font_family: Optional[str]
     font_color: Optional[str]
-    language: Optional[str]
+    language: Optional[Languages]
 
     @property
     def as_dict(self):
@@ -677,6 +688,21 @@ class StyleSettings:
             "font_family": self.font_family,
             "language": self.language,
         }
+
+    @property
+    def email_name(self):
+        return self.brand_name or "Abstra Project"
+
+    @property
+    def email_logo_url(self):
+        if self.logo_url:
+            if check_is_url(self.logo_url):
+                return self.logo_url
+
+            if IS_PRODUCTION:
+                return f"{get_project_url()}/_assets/logo"
+
+        return "https://abstra-cloud-assets.s3.us-east-1.amazonaws.com/logo-small-256px.png"
 
     @property
     def browser_runner_dto(self):

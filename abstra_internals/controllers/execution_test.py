@@ -8,9 +8,9 @@ from abstra_internals.controllers.execution import (
 from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
 from abstra_internals.entities.execution import RequestContext
+from abstra_internals.repositories.email import TestEmailRepository
 from abstra_internals.repositories.execution import EditorExecutionRepository
 from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
-from abstra_internals.repositories.notifications import LocalNotificationRepository
 from abstra_internals.repositories.project.project import (
     HookStage,
     ProjectRepository,
@@ -28,7 +28,7 @@ class ExecutionControllerTest(TestCase):
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-            notification_repository=LocalNotificationRepository(),
+            email_repository=TestEmailRepository(),
             execution_logs_repository=LocalExecutionLogsRepository(),
         )
 

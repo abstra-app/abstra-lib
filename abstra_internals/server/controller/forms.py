@@ -1,8 +1,8 @@
 import flask
 import flask_sock
 
+from abstra_internals.constants import STAGE_RUN_ID_PARAM_KEY
 from abstra_internals.controllers.execution import (
-    STAGE_RUN_ID_PARAM_KEY,
     DetachedExecutionController,
     ExecutionController,
     LockFailedException,

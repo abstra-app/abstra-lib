@@ -3,10 +3,11 @@ from typing import Dict, List, Optional
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
+from abstra_internals.email_templates import thread_waiting_template
 from abstra_internals.entities.execution import Execution
+from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
-from abstra_internals.repositories.notifications import NotificationRepository
 from abstra_internals.repositories.project.project import (
     ActionStage,
     ConditionStage,
@@ -26,12 +27,12 @@ class WorkflowEngine(IWorkflowEngine):
         self,
         stage_run_repository: StageRunRepository,
         execution_repository: ExecutionRepository,
-        notification_repository: NotificationRepository,
+        email_repository: EmailRepository,
         execution_logs_repository: ExecutionLogsRepository,
     ):
         self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
-        self.notification_repository = notification_repository
+        self.email_repository = email_repository
         self.execution_logs_repository = execution_logs_repository
 
     @threaded
@@ -116,14 +117,10 @@ class WorkflowEngine(IWorkflowEngine):
         if not recipient_emails:
             return
 
-        title = stage_run.data.get("_thread_title", "Untitled task")
-
-        self.notification_repository.notify_waiting_thread(
-            recipient_emails=recipient_emails,
-            stage_run_id=stage_run.id,
-            stage_name=stage.title,
-            stage_path=stage.path,
-            stage_run_title=title,
+        self.email_repository.send(
+            thread_waiting_template.generate_email(
+                recipient_emails=recipient_emails, stage_run=stage_run, form=stage
+            )
         )
 
     def _pub(self, parent_stage_run: StageRun, stage_run_dtos: List[Dict]):

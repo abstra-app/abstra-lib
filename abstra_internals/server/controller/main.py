@@ -21,21 +21,23 @@ from abstra_internals.credentials import (
 )
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.repositories import (
-    authn_repository,
+    email_repository,
     env_vars_repository,
     execution_logs_repository,
     execution_repository,
-    notification_repository,
+    jwt_repository,
+    kv_repository,
     requirements_repository,
     roles_repository,
     stage_run_repository,
     users_repository,
 )
-from abstra_internals.repositories.authn import AuthnRepository
+from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.env_vars import EnvVarsRepository
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
-from abstra_internals.repositories.notifications import NotificationRepository
+from abstra_internals.repositories.jwt_signer import JWTRepository
+from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.repositories.project.project import (
     ActionStage,
     FormStage,
@@ -115,15 +117,16 @@ class DoubleTransitionError(Exception):
 
 
 class MainController:
+    kv_repository: KVRepository
+    jwt_repository: JWTRepository
+    email_repository: EmailRepository
     workflow_engine: IWorkflowEngine
     users_repository: UsersRepository
     roles_repository: RolesRepository
-    authn_repository: AuthnRepository
     env_vars_repository: EnvVarsRepository
     stage_run_repository: StageRunRepository
     execution_repository: ExecutionRepository
     requirements_repository: RequirementsRepository
-    notification_repository: NotificationRepository
     execution_logs_repository: ExecutionLogsRepository
 
     def __init__(self):
@@ -138,18 +141,19 @@ class MainController:
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=stage_run_repository,
             execution_repository=execution_repository,
-            notification_repository=notification_repository,
+            email_repository=email_repository,
             execution_logs_repository=execution_logs_repository,
         )
 
+        self.kv_repository = kv_repository
+        self.jwt_repository = jwt_repository
+        self.email_repository = email_repository
         self.users_repository = users_repository
         self.roles_repository = roles_repository
-        self.authn_repository = authn_repository
         self.env_vars_repository = env_vars_repository
         self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
         self.requirements_repository = requirements_repository
-        self.notification_repository = notification_repository
         self.execution_logs_repository = execution_logs_repository
 
     def deploy(self):

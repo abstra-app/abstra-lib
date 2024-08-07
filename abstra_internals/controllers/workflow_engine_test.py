@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
+from abstra_internals.repositories.email import TestEmailRepository
 from abstra_internals.repositories.execution import EditorExecutionRepository
 from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
-from abstra_internals.repositories.notifications import LocalNotificationRepository
 from abstra_internals.repositories.project.project import (
     ConditionStage,
     FormStage,
@@ -21,7 +21,7 @@ class ActionTransitionsTest(TestCase):
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=self.repository,
             execution_repository=EditorExecutionRepository(),
-            notification_repository=LocalNotificationRepository(),
+            email_repository=TestEmailRepository(),
             execution_logs_repository=LocalExecutionLogsRepository(),
         )
 
@@ -81,7 +81,7 @@ class ConditionTransitionsTest(TestCase):
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=self.repository,
             execution_repository=EditorExecutionRepository(),
-            notification_repository=LocalNotificationRepository(),
+            email_repository=TestEmailRepository(),
             execution_logs_repository=LocalExecutionLogsRepository(),
         )
 
@@ -279,7 +279,7 @@ class IteratorTransitionsTest(TestCase):
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=self.repository,
             execution_repository=EditorExecutionRepository(),
-            notification_repository=LocalNotificationRepository(),
+            email_repository=TestEmailRepository(),
             execution_logs_repository=LocalExecutionLogsRepository(),
         )
 
