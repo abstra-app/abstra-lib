@@ -1,8 +1,9 @@
 import ast
+import os
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-from dotenv import dotenv_values, parser, set_key, unset_key
+from dotenv import dotenv_values, load_dotenv, parser, set_key, unset_key
 
 from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
 from abstra_internals.repositories.project.project import ProjectRepository
@@ -31,10 +32,12 @@ class EnvVarsRepository:
     @staticmethod
     def set(name: str, value: str):
         set_key(EnvVarsRepository.get_env_var_path(), name, value)
+        load_dotenv(EnvVarsRepository.get_env_var_path(), override=True)
 
     @staticmethod
     def unset(name: str):
         unset_key(EnvVarsRepository.get_env_var_path(), name)
+        del os.environ[name]
 
     @staticmethod
     def check() -> bool:

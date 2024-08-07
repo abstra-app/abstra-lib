@@ -1,28 +1,29 @@
 import os
 from typing import List
 
-from abstra_internals.editor_reloader import LocalReloader
+from dotenv import load_dotenv
+
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
+from abstra_internals.repositories.env_vars import EnvVarsRepository
 from abstra_internals.settings import Settings
 
 
-class ReloadServer(LinterFix):
-    label = "Reload server"
+class LoadEnvVars(LinterFix):
+    label = "Load environment variables"
 
     def fix(self):
-        LocalReloader.reload()
+        load_dotenv(Settings.root_path / ".env", override=True)
 
 
 class EnvFileChangeFound(LinterIssue):
     def __init__(self) -> None:
-        self.label = "Your .env file was updated. Please restart your development server to ensure consistency."
-        self.fixes = [ReloadServer()]
+        self.label = "Your .env file was updated. Please load the new environment variables to ensure consistency."
+        self.fixes = [LoadEnvVars()]
 
 
 class EnvFileChanged(LinterRule):
     label = "Changes to .env file detected"
     type = "bug"
-    initial_last_modified = None
     initial_file_exists = None
 
     def find_issues(self) -> List[LinterIssue]:
@@ -32,16 +33,14 @@ class EnvFileChanged(LinterRule):
         if EnvFileChanged.initial_file_exists is None:
             EnvFileChanged.initial_file_exists = current_file_exists
             if current_file_exists:
-                EnvFileChanged.initial_last_modified = os.path.getmtime(env_file)
                 return []
 
         if EnvFileChanged.initial_file_exists != current_file_exists:
             return [EnvFileChangeFound()]
 
-        if (
-            EnvFileChanged.initial_last_modified
-            and EnvFileChanged.initial_last_modified < os.path.getmtime(env_file)
-        ):
-            return [EnvFileChangeFound()]
+        env_vars = EnvVarsRepository.list()
+        for env in env_vars:
+            if env.value != os.getenv(env.name):
+                return [EnvFileChangeFound()]
 
         return []
