@@ -65,6 +65,50 @@ class TestListInput(unittest.TestCase):
             [{"foo": "bar"}],
         )
 
+    def test_simple_case_with_empty_required_field(self):
+        schema = ListItemSchema().read("foo", required=True)
+        input = ListInput("key", schema)
+
+        input.set_value([{"foo": ""}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], ["i18n_error_invalid_list_item"])
+
+        input.set_value([{"foo": "bar"}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], [])
+
+    def test_multiple_required_fields(self):
+        schema = ListItemSchema().read("foo", required=True).read("bar", required=True)
+        input = ListInput("key", schema)
+
+        input.set_value([{"foo": "baz", "bar": ""}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], ["i18n_error_invalid_list_item"])
+
+        input.set_value([{"foo": "baz", "bar": "qux"}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], [])
+
+    def test_required_and_optional_fields(self):
+        schema = ListItemSchema().read("foo", required=True).read("bar", required=False)
+        input = ListInput("key", schema)
+
+        input.set_value([{"foo": "baz", "bar": ""}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], [])
+
+    def test_multiple_items(self):
+        schema = ListItemSchema().read("foo", required=True).read("bar", required=False)
+        input = ListInput("key", schema)
+
+        input.set_value([{"foo": "baz", "bar": ""}, {"foo": "qux", "bar": "quux"}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], [])
+
+        input.set_value([{"foo": "baz", "bar": ""}, {"foo": "", "bar": ""}])
+        input.set_errors()
+        self.assertEqual(input.render({})["errors"], ["i18n_error_invalid_list_item"])
+
     def test_list_with_reactive(self):
         schema = ListItemSchema().reactive(lambda _: Page().read("foo"))
         list_input = ListInput("key", schema, initial_value=[dict(foo="bar")])

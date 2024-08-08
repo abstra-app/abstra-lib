@@ -37,9 +37,32 @@ class ListInput(Input):
             return ['i18n_error_max_list']
         return []
 
+    def _get_inputs(self):
+        inputs = []
+        for schema in self.schemas:
+            inputs.extend(schema.get_input_widgets())
+        return inputs
+
+    def _validate_each(self) ->List[str]:
+        inputs = self._get_inputs()
+        for input in inputs:
+            input.set_errors()
+        if self._has_errors():
+            return ['i18n_error_invalid_list_item']
+        return []
+
+    def _has_errors(self) ->bool:
+        inputs = self._get_inputs()
+        for input in inputs:
+            has_errors = len(input.validate()) > 0
+            if has_errors:
+                return True
+        return False
+
     @property
     def validators(self):
-        return super().validators + [self._validate_list_min_max]
+        return super().validators + [self._validate_list_min_max] + [self.
+            _validate_each]
 
     def render(self, ctx: dict):
         schemas = [schema.render(ctx) for schema in self.schemas]
@@ -50,6 +73,8 @@ class ListInput(Input):
             disabled, 'schemas': schemas, 'value': self.serialize_value()}
 
     def set_value(self, value: List, set_errors=False):
+        if not self._has_errors():
+            self.errors = []
         if not value:
             value = []
         self.value = value
