@@ -44,7 +44,7 @@ def convert_file(file: Union[str, io.IOBase, pathlib.Path]) -> str:
 
 def download_to_path(url: str) -> pathlib.Path:
     execution_id = ExecutionStore.get_by_thread().execution.id
-    save_dir = get_persistent_dir() / ".uploads" / execution_id
+    save_dir = get_persistent_dir() / "_uploads" / execution_id
     save_dir.mkdir(parents=True, exist_ok=True)
     save_path = save_dir / url.split("/")[-1]
 
