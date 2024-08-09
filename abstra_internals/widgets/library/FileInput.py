@@ -46,7 +46,7 @@ class FileInput(Input):
             else:
                 return value
         if isinstance(value, FileResponse):
-            return value.url
+            return value._url
         if isinstance(value, BufferedReader):
             return upload_file(value)
         if isinstance(value, TextIOWrapper):
@@ -59,5 +59,5 @@ class FileInput(Input):
 
     def parse_value(self, value: Optional[List[str]]) ->Union[FileResponse,
         List[FileResponse], None]:
-        file_responses = [FileResponse(item) for item in value or []]
+        file_responses = [FileResponse(url) for url in value or []]
         return self.multiple_handler.value_to_list_or_value(file_responses)

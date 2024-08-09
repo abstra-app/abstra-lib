@@ -392,7 +392,7 @@ def read_file(label: str, **kwargs):
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
-          A dictionary contains the file uploaded by the user, represented as FileResponse(file: TemporaryFile, content: bytes). If the multiple flag is set as True, it might contain a list of FileResponses.
+          A object containing the file uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.
     """
 
     

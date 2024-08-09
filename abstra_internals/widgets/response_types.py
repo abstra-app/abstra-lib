@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from io import BufferedReader
-from tempfile import _TemporaryFileWrapper
+from pathlib import Path
 from typing import Union
 
-from abstra_internals.widgets.file_utils import download_file
+from abstra_internals.widgets.file_utils import download_to_path
 
 
 def to_datetime(value: Union[str, datetime]) -> datetime:
@@ -92,27 +92,34 @@ class FileResponse:
     """A file response from the user
 
     Attributes:
-        file (file): The file object
-        url (str): The url of the file
+        name (str): The name of the file
+        file (BufferedReader): The file object
         content (bytes): The content of the file
+        path (pathlib.Path): The Path object pointing to the file
     """
 
-    __file = None
+    _path = None
 
-    def __init__(self, url):
-        self.url = url
-        self.name = url.split("/")[-1]
+    def __init__(self, url: str):
+        self._url = url
+
+    @property
+    def name(self) -> str:
+        return self.path.name
 
     @property
     def content(self):
-        with open(self.file.name, "rb") as f:
-            return f.read()
+        return self.path.read_bytes()
 
     @property
-    def file(self) -> Union[BufferedReader, _TemporaryFileWrapper]:
-        if not self.__file:
-            self.__file = download_file(self.url)
-        return self.__file
+    def file(self) -> BufferedReader:
+        return self.path.open("rb")
+
+    @property
+    def path(self) -> Path:
+        if not self._path:
+            self._path = download_to_path(self._url)
+        return self._path
 
 
 @dataclass

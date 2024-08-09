@@ -11,7 +11,7 @@ from abstra_internals.widgets.response_types import FileResponse, PhoneResponse
 
 def to_json_serializable(data):
     if isinstance(data, FileResponse):
-        return data.url
+        return data.path.as_posix()
     elif isinstance(data, PhoneResponse):
         return data.masked
     elif isinstance(data, PageResponse):

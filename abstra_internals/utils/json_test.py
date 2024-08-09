@@ -6,7 +6,7 @@ from uuid import UUID
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.step import StepsResponse
 from abstra_internals.utils.json import to_json_serializable
-from abstra_internals.widgets.response_types import FileResponse, PhoneResponse
+from abstra_internals.widgets.response_types import PhoneResponse
 
 
 class TestToJsonSerializable(TestCase):
@@ -84,10 +84,6 @@ class TestToJsonSerializable(TestCase):
         self.assertEqual(
             to_json_serializable(uuid), "123e4567-e89b-12d3-a456-426614174000"
         )
-
-    def test_file_response(self):
-        file_response = FileResponse("foo.txt")
-        self.assertEqual(to_json_serializable(file_response), "foo.txt")
 
     def test_phone_response(self):
         phone_response = PhoneResponse(

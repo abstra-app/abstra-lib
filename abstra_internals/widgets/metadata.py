@@ -2237,7 +2237,7 @@ metadata = {
             "returns": [
                 {
                     "typeName": "Union[FileResponse, List[FileResponse]]",
-                    "typeDescription": "A dictionary contains the file uploaded by the user, represented as FileResponse(file: TemporaryFile, content: bytes). If the multiple flag is set as True, it might contain a list of FileResponses.",
+                    "typeDescription": "A object containing the file uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.",
                 }
             ],
         },

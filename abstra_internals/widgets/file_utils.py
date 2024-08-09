@@ -1,8 +1,12 @@
 import io
 import pathlib
-import tempfile
+import shutil
 from typing import Union
 
+import requests
+
+from abstra_internals.constants import get_persistent_dir
+from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.utils.file import (
     get_random_filepath,
     internal_path,
@@ -38,24 +42,25 @@ def convert_file(file: Union[str, io.IOBase, pathlib.Path]) -> str:
     raise ValueError(f"Cannot convert {type(file)}")
 
 
-def download_file(
-    url: str,
-) -> Union[io.BufferedReader, tempfile._TemporaryFileWrapper]:
-    import requests
+def download_to_path(url: str) -> pathlib.Path:
+    execution_id = ExecutionStore.get_by_thread().execution.id
+    save_dir = get_persistent_dir() / ".uploads" / execution_id
+    save_dir.mkdir(parents=True, exist_ok=True)
+    save_path = save_dir / url.split("/")[-1]
 
     if url.startswith("http://") or url.startswith("https://"):
-        f = tempfile.NamedTemporaryFile()
-        with requests.get(url, stream=True) as r:
+        with save_path.open("wb") as f, requests.get(url, stream=True) as r:
             r.raise_for_status()
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
-        f.seek(0)
 
-        return f
+        return save_path
 
     elif url.startswith("/_files/"):
-        name = url[len("/_files/") :]
-        path = internal_path(name)
-        return open(path, "rb")
+        tmp_name = url[len("/_files/") :]
+        path = internal_path(tmp_name)
+        shutil.copy(path, save_path)
+
+        return save_path
 
     raise ValueError(f"Cannot download {url}")
