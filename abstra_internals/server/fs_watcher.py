@@ -3,7 +3,6 @@ import threading
 import time
 from datetime import datetime
 
-from abstra_internals.logger import AbstraLogger
 from abstra_internals.modules import reload_project_local_modules
 from abstra_internals.repositories.project.project import Project, ProjectRepository
 
@@ -26,8 +25,7 @@ def reload_files_on_change(project: Project, last_change: float):
     try:
         reload_project_local_modules()
         return True
-    except Exception as e:
-        AbstraLogger.capture_exception(e)
+    except Exception:
         return False
 
 
@@ -40,8 +38,7 @@ def files_changed_polling_loop():
             has_reloaded = reload_files_on_change(project, last_change)
             if has_reloaded:
                 last_change = datetime.now().timestamp()
-        except Exception as e:
-            AbstraLogger.capture_exception(e)
+        except Exception:
             pass
         time.sleep(1)
 

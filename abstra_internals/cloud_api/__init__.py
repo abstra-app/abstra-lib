@@ -51,19 +51,27 @@ def get_ai_messages(messages, stage, thread_id, headers: dict):
 def generate_project(prompt: str, abstra_json_version: str, headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/generate"
     body = {"prompt": prompt, "version": abstra_json_version}
-    return requests.post(url, headers=headers, json=body).json()
+    r = requests.post(url, headers=headers, json=body)
+    r.raise_for_status()
+    return r.json()
 
 
 def create_thread(headers: dict):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/thread"
-    return requests.post(url, headers=headers).json()
+    r = requests.post(url, headers=headers)
+    r.raise_for_status()
+    return r.json()
 
 
 def cancel_all(headers: dict, thread_id: str):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/cancel-all"
-    return requests.post(url, headers=headers, json={"threadId": thread_id}).json()
+    r = requests.post(url, headers=headers, json={"threadId": thread_id})
+    r.raise_for_status()
+    return r.json()
 
 
 def get_project_info(headers):
     url = f"{CLOUD_API_ENDPOINT}/cli/project"
-    return requests.get(url, headers=headers).json()
+    r = requests.get(url, headers=headers)
+    r.raise_for_status()
+    return r.json()

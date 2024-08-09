@@ -22,6 +22,7 @@ def dump():
     url = f"{CLOUD_API_CLI_URL}/tables/dump"
     try:
         res = requests.get(url, headers=headers)
+        res.raise_for_status()
         res_json = res.json()
         json_str = json.dumps(res_json, indent=2)
         Settings.root_path.joinpath(ABSTRA_TABLES_FILE).write_text(
@@ -46,6 +47,7 @@ def restore():
         if res.status_code == 400:
             zod_error_message()
             return
+        res.raise_for_status()
         num_tables = len(tables_to_restore["tables"])
         restore_message(num_tables)
     except FileNotFoundError:

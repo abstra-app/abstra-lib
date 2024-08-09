@@ -56,7 +56,7 @@ class ProductionMembersRepository(MembersRepository):
 
     def _get_user_by_email(self, email: str):
         r = self._request("GET", "/", params={"email": email}, raise_for_status=False)
-        if r.status_code == 404:
+        if not r.ok:
             return None
         return r.json()
 

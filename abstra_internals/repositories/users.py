@@ -92,13 +92,13 @@ class ProductionUsersRepository(UsersRepository):
 
     def get_user(self, email: str) -> Optional[CommonUser]:
         r = self._request("GET", "/", params={"email": email}, raise_for_status=False)
-        if r.status_code == 404:
+        if not r.ok:
             return None
         return CommonUser.from_dict(r.json())
 
     def insert_user(self, email: str) -> bool:
         r = self._request("POST", "/", body={"email": email}, raise_for_status=False)
-        return r.status_code == 201
+        return r.ok
 
 
 def users_repository_factory() -> UsersRepository:
