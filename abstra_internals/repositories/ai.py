@@ -12,24 +12,32 @@ class AiApiHttpClient(ABC):
         self.url = f"{base_url}/ai"
 
     @abstractmethod
-    def prompt(self, messages: List[Any], tools: List[Any]) -> requests.Response:
+    def prompt(
+        self, messages: List[Any], tools: List[Any], temperature: float
+    ) -> requests.Response:
         raise NotImplementedError()
 
 
 class ProductionAiApiHttpClient(AiApiHttpClient):
-    def prompt(self, messages: List[Any], tools: List[Any]) -> requests.Response:
+    def prompt(
+        self, messages: List[Any], tools: List[Any], temperature: float
+    ) -> requests.Response:
         body = {
             "messages": messages,
             "tools": tools,
+            "temperature": temperature,
         }
         return requests.post(f"{self.url}/prompt", headers=SIDECAR_HEADERS, json=body)
 
 
 class LocalAiApiHttpClient(AiApiHttpClient):
-    def prompt(self, messages: List[Any], tools: List[Any]) -> requests.Response:
+    def prompt(
+        self, messages: List[Any], tools: List[Any], temperature: float
+    ) -> requests.Response:
         body = {
             "messages": messages,
             "tools": tools,
+            "temperature": temperature,
         }
         headers = resolve_headers()
         if headers is None:

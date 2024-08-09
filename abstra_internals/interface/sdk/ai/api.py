@@ -48,7 +48,10 @@ def prompt(
     prompt: Union[AcceptedPrompts, List[AcceptedPrompts]],
     instructions: List[str] = [],
     format: Optional[Dict[str, object]] = None,
+    temperature: float = 1.0,
 ):
+    if temperature < 0.0 or temperature > 2.0:
+        raise ValueError("Temperature must be between 0.0 and 2.0")
     format = normalize_format(format) if format else None
     messages = []
     for instruction in instructions:
@@ -89,7 +92,7 @@ def prompt(
         function = _build_function_tool_call(format)
         tools.append({"type": "function", "function": function})
 
-    response = ai_repository.prompt(messages, tools).json()
+    response = ai_repository.prompt(messages, tools, temperature).json()
 
     if response.get("error"):
         raise Exception(response["error"])
