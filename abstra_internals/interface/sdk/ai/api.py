@@ -46,7 +46,7 @@ def normalize_format(format: Dict[str, object]) -> Dict[str, object]:
 
 def prompt(
     prompt: Union[AcceptedPrompts, List[AcceptedPrompts]],
-    instructions: List[str] = [],
+    instructions: Union[str, List[str]] = [],
     format: Optional[Dict[str, object]] = None,
     temperature: float = 1.0,
 ):
@@ -54,6 +54,8 @@ def prompt(
         raise ValueError("Temperature must be between 0.0 and 2.0")
     format = normalize_format(format) if format else None
     messages = []
+    if isinstance(instructions, str):
+        instructions = [instructions]
     for instruction in instructions:
         messages.append(
             {
