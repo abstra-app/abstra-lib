@@ -123,7 +123,6 @@ class TestListInput(unittest.TestCase):
             [dict(foo="bar")],
         )
 
-    @unittest.skip("TODO: Known issue")
     def test_add_item(self):
         schema = ListItemSchema().reactive(lambda _: Page().read("foo"))
 

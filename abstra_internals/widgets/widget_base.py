@@ -11,6 +11,21 @@ class Widget(ABC):
     def set_props(self, props):
         raise NotImplementedError("set_props not implemented")
 
+    def is_equal_to(self, other: "Widget"):
+        if type(self) is not type(other):
+            return False
+
+        self_render = self.render({})
+        other_render = other.render({})
+
+        ignore_keys = ["value", "errors"]
+
+        for key in self_render:
+            if key not in ignore_keys and self_render[key] != other_render.get(key):
+                return False
+
+        return True
+
 
 class Output(Widget):
     type: str

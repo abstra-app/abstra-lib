@@ -7,6 +7,7 @@ from abstra.forms import Page
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.entities.execution import Execution, RequestContext
+from tests.fixtures import clear_dir, init_dir
 
 
 class MockWS:
@@ -26,6 +27,7 @@ class MockWS:
 
 class TestReactive(unittest.TestCase):
     def setUp(self):
+        self.root = init_dir()
         self.mock_ws = MockWS()
         request_context = RequestContext(
             body="", query_params={}, headers={}, method="GET"
@@ -43,6 +45,7 @@ class TestReactive(unittest.TestCase):
         ExecutionStore.set(execution, self.form_client)
 
     def tearDown(self) -> None:
+        clear_dir(self.root)
         ExecutionStore.clear()
 
     def test_rendering_with_static_part_initial_value(self):
@@ -51,7 +54,7 @@ class TestReactive(unittest.TestCase):
         )
 
         def render(partial):
-            return Page().read("b", initial_value=partial["a"])
+            return Page().read("b", initial_value=partial.get("a"))
 
         ans = Page().read("a", initial_value="x").reactive(render).run()
 
@@ -66,3 +69,44 @@ class TestReactive(unittest.TestCase):
         # Checking browser sent message
         self.assertEqual(ans.get("a"), "1")
         self.assertEqual(ans.get("b"), "2")
+
+    def test_render_properly(self):
+        def render(partial):
+            if partial.get("key") == "1":
+                return Page().display("a")
+            return Page().display("b")
+
+        page = Page().read("input", key="key").reactive(render)
+
+        page.set_values({"key": "1"})
+
+        self.assertEqual(
+            page.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "key",
+                    "label": "input",
+                    "mask": None,
+                    "placeholder": "",
+                    "required": True,
+                    "type": "text-input",
+                    "value": "1",
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "a",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+        page.set_values({"key": "2"})
+
+        second_widget = page.render({})[1]
+
+        self.assertEqual(second_widget.get("text"), "b")

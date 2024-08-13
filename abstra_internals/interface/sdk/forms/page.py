@@ -181,3 +181,16 @@ class Page(WidgetSchema):
                 validation_message = validation_response
 
         return {"status": validation_status, "message": validation_message}
+
+    def is_equal_to(self, page: "Page") -> bool:
+        if len(self.widgets) != len(page.widgets):
+            return False
+
+        for widget1, widget2 in zip(self.widgets, page.widgets):
+            if type(widget1) is not type(widget2):
+                return False
+
+            if not widget1.is_equal_to(widget2):
+                return False
+
+        return True

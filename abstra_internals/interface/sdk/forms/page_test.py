@@ -42,3 +42,21 @@ class TestPage(unittest.TestCase):
         parsed_value = page.parse_value(browser_input)
 
         self.assertEqual(parsed_value, {"list": [{"dropdown": "bar"}]})
+
+    def test_compare_page_with_same_widgets(self):
+        page = Page().read("foo")
+        other_page = Page().read("foo")
+
+        self.assertTrue(page.is_equal_to(other_page))
+
+    def test_comparte_page_with_different_widgets(self):
+        page = Page().read("foo")
+        other_page = Page().read("bar")
+
+        self.assertFalse(page.is_equal_to(other_page))
+
+    def test_compare_page_with_different_number_of_widgets(self):
+        page = Page().read("foo")
+        other_page = Page().read("foo").read("bar")
+
+        self.assertFalse(page.is_equal_to(other_page))

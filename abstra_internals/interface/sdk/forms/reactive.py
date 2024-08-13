@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 class Reactive(Input):
     type = "reactive"
     page: Optional["Page"]
+    callback: Callable[[dict], "Page"]
 
     def __init__(self, callback: Callable, **kwargs):
         self.set_props(dict(callback=callback, **kwargs))
@@ -17,23 +18,36 @@ class Reactive(Input):
     def has_errors(self):
         return self.page.has_errors() if self.page else False
 
+    def _are_pages_different(self, page1: Optional["Page"], page2: Optional["Page"]):
+        if page1 is None:
+            return page2 is not None
+
+        if page2 is None:
+            return True
+
+        return not page1.is_equal_to(page2)
+
     def render(self, ctx: dict):
         payload = {}
         payload.update(self.value)
         payload.update(ctx)
-        self.page = self.callback(payload)
+        new_page = self.callback(payload)
+
+        if self._are_pages_different(self.page, new_page):
+            self.page = new_page
+            new_page.set_values(self.value)
+
         if self.page is None:
             return []
-
-        if self.value:
-            self.page.set_values(self.value)
-            self.page.set_errors()
 
         return self.page.render(ctx)
 
     def set_value(self, value, set_errors=False):
         self.value = value
-        if hasattr(self, "page") and self.page:
+        if not hasattr(self, "page") or self.page is None:
+            self.page = self.callback({})
+
+        if self.page:
             self.page.set_values(value)
 
     def serialize_value(self):
