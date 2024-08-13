@@ -5,7 +5,6 @@ from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import flask
 import pkg_resources
-from werkzeug.datastructures import FileStorage
 
 from abstra_internals.cloud_api import (
     get_api_key_info,
@@ -65,8 +64,6 @@ from abstra_internals.templates import (
 from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
 from abstra_internals.utils.file import (
     files_from_directory,
-    get_random_filepath,
-    internal_path,
     module2path,
     path2module,
 )
@@ -481,12 +478,3 @@ class MainController:
     def get_access_control_by_stage_id(self, id):
         project = ProjectRepository.load()
         return project.get_access_control_by_stage_id(id)
-
-    # files
-    def save_file(self, file: FileStorage, filename: str):
-        name, path = get_random_filepath(filename)
-        file.save(path)
-        return name
-
-    def get_file(self, path: str):
-        return internal_path(path)

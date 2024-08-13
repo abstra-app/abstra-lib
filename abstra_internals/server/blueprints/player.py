@@ -41,7 +41,11 @@ from abstra_internals.server.guards.role_guard import (
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.utils import check_is_url
-from abstra_internals.utils.file import path2module
+from abstra_internals.utils.file import (
+    get_random_filepath,
+    get_tmp_upload_dir,
+    path2module,
+)
 
 
 def get_player_bp(controller: MainController):
@@ -158,12 +162,14 @@ def get_player_bp(controller: MainController):
 
         paths = []
         for file in files.values():
-            paths.append(controller.save_file(file, filename))
+            name, path = get_random_filepath(filename)
+            file.save(path)
+            paths.append(name)
         return paths
 
     @bp.get("/_files/<path:path>")
     def _get_file(path):
-        return flask.send_file(controller.get_file(path))
+        return flask.send_from_directory(get_tmp_upload_dir(), path)
 
     @bp.get("/_assets/favicon.ico")
     @cache.assets()

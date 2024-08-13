@@ -181,14 +181,14 @@ def traverse_code(
             raise e
 
 
-def _ensure_uploaded_files_dir():
+def get_tmp_upload_dir():
     uploaded_files_dir = Path(tempfile.gettempdir(), "_uploaded_files")
     uploaded_files_dir.mkdir(exist_ok=True)
     return uploaded_files_dir
 
 
 def internal_path(name: str):
-    uploaded_files_dir = _ensure_uploaded_files_dir()
+    uploaded_files_dir = get_tmp_upload_dir()
     return uploaded_files_dir.joinpath(name)
 
 
