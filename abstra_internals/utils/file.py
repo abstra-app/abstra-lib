@@ -187,17 +187,12 @@ def get_tmp_upload_dir():
     return uploaded_files_dir
 
 
-def internal_path(name: str):
-    uploaded_files_dir = get_tmp_upload_dir()
-    return uploaded_files_dir.joinpath(name)
-
-
 def get_random_filepath(name=None):
     if name is None:
         name = str(uuid.uuid4())
     else:
         name = str(uuid.uuid4()) + "/" + Path(name).name
-    path = internal_path(name)
+    path = get_tmp_upload_dir() / name
     path.parent.mkdir(exist_ok=True)
     return name, path
 

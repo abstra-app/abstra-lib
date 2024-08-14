@@ -14,6 +14,14 @@ def get_persistent_dir() -> pathlib.Path:
     return dir
 
 
+def get_public_dir() -> pathlib.Path:
+    return get_persistent_dir() / "_public"
+
+
+def get_uploads_dir() -> pathlib.Path:
+    return get_persistent_dir() / "_uploads"
+
+
 def get_project_url() -> str:
     return PROJECT_URL or f"http://localhost:{Settings.server_port}"
 

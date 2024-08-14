@@ -5,11 +5,11 @@ from typing import Union
 
 import requests
 
-from abstra_internals.constants import get_persistent_dir
+from abstra_internals.constants import get_uploads_dir
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.utils.file import (
     get_random_filepath,
-    internal_path,
+    get_tmp_upload_dir,
 )
 from abstra_internals.widgets.apis import upload_file
 
@@ -44,7 +44,7 @@ def convert_file(file: Union[str, io.IOBase, pathlib.Path]) -> str:
 
 def download_to_path(url: str) -> pathlib.Path:
     execution_id = ExecutionStore.get_by_thread().execution.id
-    save_dir = get_persistent_dir() / "_uploads" / execution_id
+    save_dir = get_uploads_dir() / execution_id
     save_dir.mkdir(parents=True, exist_ok=True)
     save_path = save_dir / url.split("/")[-1]
 
@@ -58,7 +58,7 @@ def download_to_path(url: str) -> pathlib.Path:
 
     elif url.startswith("/_files/"):
         tmp_name = url[len("/_files/") :]
-        path = internal_path(tmp_name)
+        path = get_tmp_upload_dir() / tmp_name
         shutil.copy(path, save_path)
 
         return save_path

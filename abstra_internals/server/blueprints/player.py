@@ -3,7 +3,7 @@ from pathlib import Path
 import flask
 import flask_sock
 
-from abstra_internals.constants import STAGE_RUN_ID_PARAM_KEY
+from abstra_internals.constants import STAGE_RUN_ID_PARAM_KEY, get_public_dir
 from abstra_internals.controllers.execution import (
     ExecutionController,
     LockFailedException,
@@ -170,6 +170,10 @@ def get_player_bp(controller: MainController):
     @bp.get("/_files/<path:path>")
     def _get_file(path):
         return flask.send_from_directory(get_tmp_upload_dir(), path)
+
+    @bp.get("/_public/<path:path>")
+    def _get_public_file(path):
+        return flask.send_from_directory(get_public_dir(), path)
 
     @bp.get("/_assets/favicon.ico")
     @cache.assets()
