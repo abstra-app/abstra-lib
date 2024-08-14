@@ -1,4 +1,5 @@
 from abstra_internals.repositories.ai import ai_api_http_client_factory
+from abstra_internals.repositories.connectors import connectors_repository_factory
 from abstra_internals.repositories.email import email_repository_factory
 from abstra_internals.repositories.env_vars import env_vars_repository_factory
 from abstra_internals.repositories.execution import execution_repository_factory
@@ -27,6 +28,7 @@ ai_repository = ai_api_http_client_factory()
 lock_repository = lock_repository_factory()
 jwt_repository = jwt_repository_factory()
 kv_repository = kv_repository_factory()
+connectors_repository = connectors_repository_factory()
 
 
 __all__ = [
@@ -42,4 +44,5 @@ __all__ = [
     "jwt_repository",
     "ai_repository",
     "kv_repository",
+    "connectors_repository",
 ]

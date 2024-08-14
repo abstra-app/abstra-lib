@@ -24,3 +24,9 @@ class ThreadNotFound(Exception):
 
 class IncompatibleStage(Exception):
     pass
+
+
+class MissingDependencyError(Exception):
+    def __init__(self, package: str):
+        self.message = f"The package {package} is required to use this feature. Please install it by running `pip install {package}` and add it to your requirements."
+        super().__init__(self.message)
