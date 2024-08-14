@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 from abstra_internals.widgets.widget_base import Input
 
 if TYPE_CHECKING:
-    from abstra_internals.interface.sdk.forms import Page
+    from abstra_internals.interface.sdk.forms.page import Page
 
 
 class Reactive(Input):
@@ -71,7 +71,7 @@ class Reactive(Input):
 
 
 def reactive(func):
-    from abstra_internals.interface.sdk.forms import Page
+    from abstra_internals.interface.sdk.forms.page import Page
 
     def _partial(ans):
         page = Page(context=ans)

@@ -111,7 +111,7 @@ class FormClient(ExecutionClient):
     def handle_valid_jwt(self):
         self._user_code_send(forms_contract.AuthValidJWTMessage(self._production_mode))
 
-    def request_execute_js(self, code: str, context: dict = {}):
+    def request_execute_js(self, code: str, context: dict):
         self._user_code_send(
             forms_contract.ExecuteJSRequestMessage(code, context, self._production_mode)
         )

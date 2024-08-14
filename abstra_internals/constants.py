@@ -6,6 +6,13 @@ from abstra_internals.utils.dot_abstra import PERSISTENT_DIR
 
 
 def get_persistent_dir() -> pathlib.Path:
+    """
+    Get the path to the persistent directory
+
+    Returns:
+        pathlib.Path: Path to the persistent directory
+    """
+
     if FILES_FOLDER:
         return pathlib.Path(FILES_FOLDER)
 
@@ -15,14 +22,35 @@ def get_persistent_dir() -> pathlib.Path:
 
 
 def get_public_dir() -> pathlib.Path:
+    """
+    Get the path to the public directory
+
+    Returns:
+        pathlib.Path: Path to the public directory
+    """
+
     return get_persistent_dir() / "_public"
 
 
 def get_uploads_dir() -> pathlib.Path:
+    """
+    Get the path to the uploads directory
+
+    Returns:
+        pathlib.Path: Path to the uploads directory
+    """
+
     return get_persistent_dir() / "_uploads"
 
 
 def get_project_url() -> str:
+    """
+    Get the project URL. localhost if running locally
+
+    Returns:
+        str: Project URL
+    """
+
     return PROJECT_URL or f"http://localhost:{Settings.server_port}"
 
 

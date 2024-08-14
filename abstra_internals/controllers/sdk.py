@@ -78,7 +78,7 @@ class FormSDKController:
 
         return claims
 
-    def execute_js(self, code: str, context: dict = {}):
+    def execute_js(self, code: str, context: dict):
         return self.client.request_execute_js(code, context)
 
     def redirect(self, url: str, query_params: Optional[Dict[str, str]] = None) -> None:
