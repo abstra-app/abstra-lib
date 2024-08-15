@@ -34,6 +34,8 @@ class TimeInput(Input):
                 self.value.split(':')[1])}
         if isinstance(self.value, datetime.time):
             return {'hour': self.value.hour, 'minute': self.value.minute}
+        if self.value is None:
+            return self.empty_value
         return {'hour': 0, 'minute': 0}
 
     def parse_value(self, value) ->Optional[datetime.time]:
