@@ -22,6 +22,12 @@ class ThreadNotFound(Exception):
         super().__init__(self.message)
 
 
+class GetUserFailed(Exception):
+    def __init__(self):
+        self.message = "Failed to get the current user."
+        super().__init__(self.message)
+
+
 class IncompatibleStage(Exception):
     pass
 

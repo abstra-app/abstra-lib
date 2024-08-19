@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple, Union
 
 from abstra_internals.controllers.sdk import HookSDKController
 from abstra_internals.utils import serialize
+from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 
 
 def get_raw_request() -> Tuple[str, Dict[str, str], Dict[str, str]]:
@@ -20,4 +21,7 @@ def send_response(body="", status_code=200, headers={}) -> None:
 
 
 def send_json(data={}, status_code=200, headers={}):
+    if CaseInsensitiveDict(**headers).get("Content-Type") is None:
+        headers["Content-Type"] = "application/json"
+
     send_response(serialize(data), status_code, headers)

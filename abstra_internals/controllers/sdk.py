@@ -66,16 +66,15 @@ class FormSDKController:
         except ExecutionNotFound:
             raise user_exceptions.UnboundSDK()
 
-    def get_user(self, force_refresh: bool) -> Optional[UserClaims]:
+    def get_user(self, force_refresh: bool) -> UserClaims:
         data = self.client.request_auth(force_refresh)
         claims = UserClaims.from_jwt(data["jwt"])
 
         if not claims:
             self.client.handle_invalid_jwt()
-            return None
+            raise user_exceptions.GetUserFailed()
 
         self.client.handle_valid_jwt()
-
         return claims
 
     def execute_js(self, code: str, context: dict):

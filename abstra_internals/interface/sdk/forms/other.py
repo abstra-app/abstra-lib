@@ -1,11 +1,11 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from abstra_internals.controllers.sdk import FormSDKController
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.proxy import ReadOnlyProxyDict
 
 
-def get_user(refresh: bool = False) -> Union[UserClaims, None]:
+def get_user(refresh: bool = False) -> UserClaims:
     """
     Get the current user
 
