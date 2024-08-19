@@ -19,8 +19,8 @@ class TestStart(unittest.TestCase):
         self.assertTrue((self.root / "abstra.json").exists())
         self.assertTrue((self.root / ".abstraignore").exists())
         self.assertTrue((self.root / ".gitignore").exists())
-        self.assertTrue((self.root / "employee_info_form.py").exists())
-        self.assertTrue((self.root / "send_welcome_email.py").exists())
+        self.assertTrue((self.root / "application_form.py").exists())
+        self.assertTrue((self.root / "application_review.py").exists())
 
     def test_dont_generate_project_if_there_is_a_project_in_directory(self):
         self.root = init_dir()
@@ -28,7 +28,7 @@ class TestStart(unittest.TestCase):
         self.assertTrue((self.root / "abstra.json").exists())
 
         start()
-        self.assertFalse((self.root / "employee_info_form.py").exists())
+        self.assertFalse((self.root / "application_form.py").exists())
 
     def test_create_project_with_credentials(self):
         self.root = Path(tempfile.mkdtemp())

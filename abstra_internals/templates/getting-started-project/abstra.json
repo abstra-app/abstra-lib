@@ -2,13 +2,13 @@
   "workspace": {
     "id": null,
     "name": "Untitled Workspace",
-    "theme": null,
-    "logo_url": null,
+    "theme": "#ffffff",
+    "logo_url": "https://seeklogo.com/images/D/Dunder_Mifflin-logo-4AD9504DD3-seeklogo.com.png",
     "favicon_url": null,
-    "brand_name": null,
-    "main_color": null,
+    "brand_name": "Application Workflow (Abstra Start Sample Project)",
+    "main_color": "#003085",
     "font_color": null,
-    "font_family": null,
+    "font_family": "Roboto",
     "language": "en"
   },
   "kanban": {
@@ -19,7 +19,7 @@
   },
   "home": {
     "access_control": {
-      "is_public": true,
+      "is_public": false,
       "required_roles": []
     }
   },
@@ -27,30 +27,30 @@
   "hooks": [],
   "forms": [
     {
-      "id": "d75c348e-629d-4528-9db2-f0c716116dcf",
-      "path": "employee-info-form",
-      "title": "Employee Info Form",
+      "id": "fd8aad93-a812-418b-bc97-0683ad998deb",
+      "path": "apply",
+      "title": "Apply to Dunder Mifflin",
       "is_initial": true,
       "auto_start": false,
       "allow_restart": false,
-      "end_message": null,
-      "start_message": null,
+      "end_message": "We are processing your application. Check your email for Michael's decision.",
+      "start_message": "Fill in this form and find if you'd be hired to work alongside Michael, Jim, Pam, Kevin, Dwight & the gang. ",
       "error_message": null,
-      "welcome_title": null,
+      "welcome_title": "Apply to work at Dunder Mifflin ",
       "timeout_message": null,
       "start_button_text": null,
       "restart_button_text": null,
-      "file": "employee_info_form.py",
+      "file": "application_form.py",
       "workflow_position": [
-        300.0,
-        0.0
+        48.0,
+        -216.0
       ],
       "transitions": [
         {
-          "target_id": "f6cb5e02-15ab-4fe2-b6a5-39d723892697",
+          "target_id": "9f715346-fd5d-48b3-afad-215bb2ae9c00",
           "target_type": "scripts",
           "type": "forms:finished",
-          "id": "hgbtu2x",
+          "id": "v3s2dmo",
           "condition_value": null
         }
       ],
@@ -59,20 +59,20 @@
         "enabled": false
       },
       "access_control": {
-        "is_public": false,
+        "is_public": true,
         "required_roles": []
       }
     }
   ],
   "scripts": [
     {
-      "id": "f6cb5e02-15ab-4fe2-b6a5-39d723892697",
-      "file": "send_welcome_email.py",
-      "title": "Send Welcome Email",
+      "id": "9f715346-fd5d-48b3-afad-215bb2ae9c00",
+      "file": "application_review.py",
+      "title": "Application Review",
       "is_initial": false,
       "workflow_position": [
-        696.0,
-        0.0
+        612.0,
+        -216.0
       ],
       "transitions": []
     }
