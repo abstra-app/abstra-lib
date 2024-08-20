@@ -3,13 +3,17 @@
 
 
 # flake8: noqa
-from typing import List, Union, Dict, Optional, Any
+from typing import List, Union, Dict, Optional, Any, TYPE_CHECKING
 import io
 
 from abstra_internals.interface.sdk.forms.reactive import Reactive
 from abstra_internals.widgets.library import *
 from abstra_internals.widgets import Input, Output
-from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame, AbstraOption
+from abstra_internals.widgets.types import AbstraOption
+
+if TYPE_CHECKING:
+    from pandas import DataFrame
+    from plotly.graph_objects import Figure
 
 
 class WidgetSchema:
@@ -748,12 +752,12 @@ class WidgetSchema:
     return self
 
     
-  def read_pandas_row_selection(self, df: PandasDataFrame, **kwargs):
+  def read_pandas_row_selection(self, df: "DataFrame", **kwargs):
     
     """Enables selection of rows from a displayed pandas DataFrame table.
 
         Position Args: 
-		df (PandasDataFrame): The pandas dataframe to be displayed
+		df ("DataFrame"): The pandas dataframe to be displayed
 		
         Keyword Args: 
 		display_index (bool): Whether to show a index column. Defaults to False.
@@ -1258,12 +1262,12 @@ class WidgetSchema:
     return self
 
     
-  def display_pandas(self, df: PandasDataFrame, **kwargs):
+  def display_pandas(self, df: "DataFrame", **kwargs):
     
     """Display a pandas dataframe to the user
 
         Position Args: 
-		df (PandasDataFrame): The dataframe to display to the user
+		df ("DataFrame"): The dataframe to display to the user
 		
         Keyword Args: 
 		display_index (bool): Whether to show a index column. Defaults to False.
@@ -1284,12 +1288,12 @@ class WidgetSchema:
     return self
 
     
-  def display_plotly(self, fig: PlotlyFigure, **kwargs):
+  def display_plotly(self, fig: "Figure", **kwargs):
     
     """Displays a Plotly figure.
 
         Position Args: 
-		fig (PlotlyFigure): The figure to display to the user
+		fig ("Figure"): The figure to display to the user
 		
         Keyword Args: 
 		label (str): The label to display to the user

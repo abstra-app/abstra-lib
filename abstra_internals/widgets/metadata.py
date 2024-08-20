@@ -3163,7 +3163,7 @@ metadata = {
                 {
                     "argName": "df",
                     "description": "The pandas dataframe to be displayed",
-                    "typeName": "PandasDataFrame",
+                    "typeName": '"DataFrame"',
                     "isKwarg": False,
                     "default": None,
                 },
@@ -5119,7 +5119,7 @@ metadata = {
                 {
                     "argName": "df",
                     "description": "The dataframe to display to the user",
-                    "typeName": "PandasDataFrame",
+                    "typeName": '"DataFrame"',
                     "isKwarg": False,
                     "default": None,
                 },
@@ -5234,7 +5234,7 @@ metadata = {
                 {
                     "argName": "fig",
                     "description": "The figure to display to the user",
-                    "typeName": "PlotlyFigure",
+                    "typeName": '"Figure"',
                     "isKwarg": False,
                     "default": None,
                 },

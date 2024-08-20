@@ -1,7 +1,10 @@
 
-from typing import Any, Dict, List
-from abstra_internals.widgets.types import PandasDataFrame, AbstraOption
+from typing import Any, Dict, List, TYPE_CHECKING
+from abstra_internals.widgets.types import AbstraOption
 from abstra_internals.interface.sdk.forms.page import Page
+
+if TYPE_CHECKING:
+    from pandas import DataFrame
 
 def get_single_value(answer: Dict):
     return list(answer.values())[0]
@@ -576,12 +579,12 @@ def read_number_slider(label: str, **kwargs):
     return get_single_value(Page().read_number_slider(label, **kwargs).run(button_text))
 
 
-def read_pandas_row_selection(df: PandasDataFrame, **kwargs):
+def read_pandas_row_selection(df: "DataFrame", **kwargs):
   
     """Enables selection of rows from a displayed pandas DataFrame table.
 
         Position Args: 
-		df (PandasDataFrame): The pandas dataframe to be displayed
+		df ("DataFrame"): The pandas dataframe to be displayed
 		
         Keyword Args: 
 		display_index (bool): Whether to show a index column. Defaults to False.

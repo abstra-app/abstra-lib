@@ -6,6 +6,8 @@ import pathlib
 import re
 from typing import Union
 
+from PIL.Image import Image
+
 from abstra_internals.utils.file import get_random_filepath
 
 BASE_64_PREFIX = "data:image/png;base64,"
@@ -26,7 +28,7 @@ def is_base_64(unknown_string: str) -> bool:
         return False
 
 
-def to_base64(file: Union[str, io.IOBase, pathlib.Path]) -> Union[str, None]:
+def to_base64(file: Union[str, io.IOBase, pathlib.Path, Image]) -> Union[str, None]:
     if not file:
         return ""
 
@@ -50,8 +52,7 @@ def to_base64(file: Union[str, io.IOBase, pathlib.Path]) -> Union[str, None]:
         # path to file
         return f"{BASE_64_PREFIX}{file}"
 
-    # PILImage. TODO: check with isinstance without external dependency
-    if hasattr(file, "save"):
+    if isinstance(file, Image):
         _, file_path = get_random_filepath()
         file.save(str(file_path))
         with file_path.open("rb") as f:

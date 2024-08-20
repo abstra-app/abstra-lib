@@ -4,6 +4,7 @@ import shutil
 from typing import Union
 
 import requests
+from PIL.Image import Image
 
 from abstra_internals.constants import get_uploads_dir
 from abstra_internals.controllers.execution_store import ExecutionStore
@@ -14,7 +15,7 @@ from abstra_internals.utils.file import (
 from abstra_internals.widgets.apis import upload_file
 
 
-def convert_file(file: Union[str, io.IOBase, pathlib.Path]) -> str:
+def convert_file(file: Union[str, io.IOBase, pathlib.Path, Image]) -> str:
     if not file:
         return ""
 
@@ -29,8 +30,7 @@ def convert_file(file: Union[str, io.IOBase, pathlib.Path]) -> str:
         # path to file
         return upload_file(open(file, "rb"))
 
-    # PILImage. TODO: check with isinstance without external dependency
-    if hasattr(file, "save"):
+    if isinstance(file, Image):
         _, file_path = get_random_filepath()
         file.save(str(file_path))
         return upload_file(open(file_path, "rb"))

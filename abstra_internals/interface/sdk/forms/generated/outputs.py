@@ -1,8 +1,11 @@
 
 import io
-from typing import Union
-from abstra_internals.widgets.types import PlotlyFigure, PandasDataFrame
+from typing import Union, TYPE_CHECKING
 from abstra_internals.interface.sdk.forms.page import Page
+
+if TYPE_CHECKING:
+    from pandas import DataFrame
+    from plotly.graph_objects import Figure
 
 
 def display_file(file: Union[str, io.IOBase], **kwargs):
@@ -159,12 +162,12 @@ def display_markdown(text: str, **kwargs):
     end_program = kwargs.get("end_program", False)
     return Page().display_markdown(text, **kwargs).run(button_text, end_program=end_program)
 
-def display_pandas(df: PandasDataFrame, **kwargs):
+def display_pandas(df: "DataFrame", **kwargs):
   
     """Display a pandas dataframe to the user
 
         Position Args: 
-		df (PandasDataFrame): The dataframe to display to the user
+		df ("DataFrame"): The dataframe to display to the user
 		
         Keyword Args: 
 		display_index (bool): Whether to show a index column. Defaults to False.
@@ -184,12 +187,12 @@ def display_pandas(df: PandasDataFrame, **kwargs):
     end_program = kwargs.get("end_program", False)
     return Page().display_pandas(df, **kwargs).run(button_text, end_program=end_program)
 
-def display_plotly(fig: PlotlyFigure, **kwargs):
+def display_plotly(fig: "Figure", **kwargs):
   
     """Displays a Plotly figure.
 
         Position Args: 
-		fig (PlotlyFigure): The figure to display to the user
+		fig ("Figure"): The figure to display to the user
 		
         Keyword Args: 
 		label (str): The label to display to the user
