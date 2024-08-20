@@ -1,6 +1,6 @@
 import inspect
 from functools import wraps
-from typing import Any, Callable, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 import requests
 
@@ -17,12 +17,20 @@ from abstra_internals.utils.packages import get_local_package_version
 
 
 @threaded
-def send_usage(data, header):
+def send_usage(payload: Dict):
     if is_test_env() or is_dev_env():
         return
 
+    data = {
+        "payload": payload,
+        "userId": get_local_user_id(),
+        "pythonVersion": get_local_python_version(),
+        "abstraVersion": str(get_local_package_version()),
+    }
+
+    headers = {"apiKey": get_credentials()}
     api_url = f"{CLOUD_API_CLI_URL}/editor/usage"
-    requests.post(api_url, json=data, headers=header)
+    requests.post(api_url, json=data, headers=headers)
 
 
 def usage(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -31,15 +39,11 @@ def usage(func: Callable[..., Any]) -> Callable[..., Any]:
         arg_names = inspect.getfullargspec(func).args
         arg_values = dict(zip(arg_names, args))
 
-        metric_data = {
-            "userId": get_local_user_id(),
-            "payload": {**arg_values, **kwargs, **{"event": func.__name__}},
-            "abstraVersion": str(get_local_package_version()),
-            "pythonVersion": get_local_python_version(),
-        }
-
-        headers = {"apiKey": get_credentials()}
-        send_usage(metric_data, headers)
+        send_usage({**arg_values, **kwargs, **{"event": func.__name__}})
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def track_usage(*, event: str, payload: Dict):
+    send_usage({**payload, "event": event})

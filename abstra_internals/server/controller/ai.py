@@ -16,7 +16,7 @@ from abstra_internals.repositories.project.project import Project, ProjectReposi
 from abstra_internals.server.controller.linters import fix_all_linters
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import Settings
-from abstra_internals.usage import usage
+from abstra_internals.usage import track_usage, usage
 
 
 @dataclass
@@ -157,11 +157,11 @@ def get_editor_bp(main_controller: MainController):
         answer = body.get("answer")
         context = body.get("context")
 
-        @usage
-        def ai_vote(vote, question, answer, context):
-            return
+        track_usage(
+            event="ai_vote",
+            payload=dict(vote=vote, question=question, answer=answer, context=context),
+        )
 
-        ai_vote(vote, question, answer, context)
         return {"success": True}
 
     return bp
