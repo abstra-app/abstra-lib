@@ -45,7 +45,10 @@ class Reactive(Input):
     def set_value(self, value, set_errors=False):
         self.value = value
         if not hasattr(self, "page") or self.page is None:
-            self.page = self.callback({})
+            try:
+                self.page = self.callback({})
+            except Exception:
+                self.page = None
 
         if self.page:
             self.page.set_values(value)
