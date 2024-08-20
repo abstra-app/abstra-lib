@@ -952,14 +952,14 @@ class Home:
     def from_dict(data: dict):
         return Home(
             access_control=AccessSettings.from_dict(
-                data.get("access_control", {"is_public": True, "required_roles": []})
+                data.get("access_control", {"is_public": False, "required_roles": []})
             ),
         )
 
     @staticmethod
     def create():
         return Home(
-            access_control=AccessSettings(is_public=True, required_roles=[]),
+            access_control=AccessSettings(is_public=False, required_roles=[]),
         )
 
     @property

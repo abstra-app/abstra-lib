@@ -362,11 +362,11 @@ class TestRequirementsApi(TestCase):
             },
             {
                 "email": NOT_A_USER_EMAIL,
-                "accessible_stages_ids": ["home", "public_form_id"],
+                "accessible_stages_ids": [],
             },
             {
                 "email": None,  ##Logged off user
-                "accessible_stages_ids": ["home", "public_form_id"],
+                "accessible_stages_ids": [],
             },
         ]
 
