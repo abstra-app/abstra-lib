@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class Reactive(Input):
     type = "reactive"
     page: Optional["Page"]
-    callback: Callable[[dict], "Page"]
+    callback: Callable[[dict], Optional["Page"]]
 
     def __init__(self, callback: Callable, **kwargs):
         self.set_props(dict(callback=callback, **kwargs))
@@ -35,7 +35,9 @@ class Reactive(Input):
 
         if self._are_pages_different(self.page, new_page):
             self.page = new_page
-            new_page.set_values(self.value)
+
+            if self.page is not None:
+                self.page.set_values(self.value)
 
         if self.page is None:
             return []
