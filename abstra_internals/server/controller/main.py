@@ -415,17 +415,13 @@ class MainController:
         if not stage:
             raise Exception(f"Stage with id {id} not found")
 
-        code_content = changes.get("code_content")
-        if code_content:
+        if code_content := changes.pop("code_content", None):
             Settings.root_path.joinpath(stage.file_path).write_text(
                 code_content, encoding="utf-8"
             )
-            del changes["code_content"]
 
-        test_data = changes.get("test_data")
-        if test_data:
+        if test_data := changes.pop("test_data", None):
             self.write_test_data(test_data)
-            del changes["test_data"]
 
         stage = project.update_stage(stage, changes)
         ProjectRepository.save(project)
