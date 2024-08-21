@@ -17,6 +17,7 @@ from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
     ProjectRepository,
+    ScriptStage,
     WorkflowStage,
 )
 from abstra_internals.repositories.stage_run import (
@@ -173,6 +174,13 @@ class KanbanController:
     def get_job(self, id: str):
         stage = self._get_project().get_stage(id)
         if not stage or not isinstance(stage, JobStage):
+            return None
+
+        return stage
+
+    def get_script(self, id: str):
+        stage = self._get_project().get_stage(id)
+        if not stage or not isinstance(stage, ScriptStage):
             return None
 
         return stage
@@ -340,6 +348,31 @@ def get_editor_bp(main_controller: MainController):
 
         return {"status": "running"}
 
+    @bp.post("/scripts/<path:id>/continue")
+    def _continue_script(id: str):
+        script = controller.get_script(id)
+        if not script:
+            flask.abort(404)
+
+        if flask.request.json is None:
+            flask.abort(400)
+
+        stage_run_id = flask.request.json.get("stage_run_id")
+        if not stage_run_id:
+            flask.abort(400)
+
+        ExecutionController(
+            stage=script,
+            request=None,
+            client=BasicClient(),
+            target_stage_run_id=stage_run_id,
+            workflow_engine=main_controller.workflow_engine,
+            stage_run_repository=main_controller.stage_run_repository,
+            execution_repository=main_controller.execution_repository,
+        ).run()
+
+        return {"status": "running"}
+
     return bp
 
 
@@ -411,6 +444,32 @@ def get_player_bp(main_controller: MainController):
             stage=job,
             client=BasicClient(),
             target_stage_run_id=None,
+            workflow_engine=main_controller.workflow_engine,
+            stage_run_repository=main_controller.stage_run_repository,
+            execution_repository=main_controller.execution_repository,
+        ).run()
+
+        return {"status": "running"}
+
+    @bp.post("/scripts/<path:id>/continue")
+    @guard.by(StageIdSelector("kanban"))
+    def _continue_script(id: str):
+        script = controller.get_script(id)
+        if not script:
+            flask.abort(404)
+
+        if flask.request.json is None:
+            flask.abort(400)
+
+        stage_run_id = flask.request.json.get("stage_run_id")
+        if not stage_run_id:
+            flask.abort(400)
+
+        ExecutionController(
+            stage=script,
+            request=None,
+            client=BasicClient(),
+            target_stage_run_id=stage_run_id,
             workflow_engine=main_controller.workflow_engine,
             stage_run_repository=main_controller.stage_run_repository,
             execution_repository=main_controller.execution_repository,
