@@ -30,9 +30,9 @@ class MultipleChoiceInput(Input):
         return {'type': self.type, 'key': self.key, 'label': self.label,
             'options': self.options_handler.serialized_options(), 'hint':
             self.hint, 'multiple': self.multiple, 'value': self.
-            serialize_value(), 'required': self.required and not self.
-            multiple, 'fullWidth': self.full_width, 'min': self.min, 'max':
-            self.max, 'disabled': self.disabled, 'errors': self.errors}
+            serialize_value(), 'required': self.required, 'fullWidth': self
+            .full_width, 'min': self.min, 'max': self.max, 'disabled': self
+            .disabled, 'errors': self.errors}
 
     def validate(self) ->List[str]:
         return self.multiple_handler.validate(self.value)
