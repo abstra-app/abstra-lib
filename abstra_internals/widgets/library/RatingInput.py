@@ -1,9 +1,10 @@
+from typing import Optional
 from abstra_internals.widgets.widget_base import Input
 
 
 class RatingInput(Input):
     type = 'rating-input'
-    empty_value = 0
+    empty_value = None
 
     def __init__(self, key: str, label: str, **kwargs):
         super().__init__(key)
@@ -26,5 +27,5 @@ class RatingInput(Input):
             max, 'char': self.char, 'disabled': self.disabled, 'errors':
             self.errors}
 
-    def serialize_value(self) ->float:
-        return self.value or 0
+    def serialize_value(self) ->Optional[float]:
+        return self.value
