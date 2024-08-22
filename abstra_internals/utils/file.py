@@ -4,6 +4,7 @@ import os
 import re
 import tempfile
 import uuid
+import warnings
 from pathlib import Path
 from typing import Generator, Optional, Union
 
@@ -148,6 +149,14 @@ def _get_file_path(
         )
 
     return file_path
+
+
+def silent_traverse_code(
+    path: Path, raise_on_syntax_errors=False
+) -> Generator[Path, None, None]:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        yield from traverse_code(path, raise_on_syntax_errors)
 
 
 def traverse_code(

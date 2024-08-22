@@ -4,7 +4,7 @@ from typing import List
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
 from abstra_internals.repositories.project.project import ProjectRepository
-from abstra_internals.utils.file import traverse_code
+from abstra_internals.utils.file import silent_traverse_code
 
 
 class OpenBrokenFile(LinterFix):
@@ -34,7 +34,7 @@ class SyntaxErrors(LinterRule):
         project = ProjectRepository.load()
         for entrypoint in project.iter_entrypoints():
             try:
-                for _ in traverse_code(entrypoint, raise_on_syntax_errors=True):
+                for _ in silent_traverse_code(entrypoint, raise_on_syntax_errors=True):
                     pass
             except SyntaxError as e:
                 self.error = e

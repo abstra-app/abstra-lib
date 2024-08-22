@@ -18,7 +18,7 @@ from abstra_internals.repositories.project import json_migrations
 from abstra_internals.settings import Settings
 from abstra_internals.templates import generate_getting_started_project
 from abstra_internals.utils import check_is_url, nested_get
-from abstra_internals.utils.file import generate_conflictless_path, traverse_code
+from abstra_internals.utils.file import generate_conflictless_path, silent_traverse_code
 from abstra_internals.utils.format import normalize_path
 from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
@@ -1059,7 +1059,7 @@ class Project:
     @property
     def project_files(self) -> Generator[Path, None, None]:
         for entrypoint in self.iter_entrypoints():
-            yield from traverse_code(entrypoint)
+            yield from silent_traverse_code(entrypoint)
 
     @property
     def project_local_dependencies(self) -> Generator[Path, None, None]:
