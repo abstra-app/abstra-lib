@@ -16,7 +16,7 @@ from abstra_internals.repositories.project.project import Project, ProjectReposi
 from abstra_internals.server.controller.linters import fix_all_linters
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import Settings
-from abstra_internals.usage import track_usage, usage
+from abstra_internals.usage import editor_manual_usage, editor_usage
 
 
 @dataclass
@@ -96,7 +96,7 @@ def get_editor_bp(main_controller: MainController):
     controller = AiController(main_controller)
 
     @bp.post("/message")
-    @usage
+    @editor_usage
     def _get_next_message():
         body = flask.request.json
         if not body:
@@ -112,7 +112,7 @@ def get_editor_bp(main_controller: MainController):
         return flask.Response(streamer, mimetype="text/event-stream")
 
     @bp.post("/thread")
-    @usage
+    @editor_usage
     def _create_thread():
         thread = controller.create_thread()
         if not thread:
@@ -120,7 +120,7 @@ def get_editor_bp(main_controller: MainController):
         return thread
 
     @bp.post("/cancel-all")
-    @usage
+    @editor_usage
     def _cancel_all():
         body = flask.request.json
         if not body:
@@ -134,7 +134,7 @@ def get_editor_bp(main_controller: MainController):
         return thread
 
     @bp.post("/generate")
-    @usage
+    @editor_usage
     def _generate():
         body = flask.request.json
         if not body:
@@ -157,7 +157,7 @@ def get_editor_bp(main_controller: MainController):
         answer = body.get("answer")
         context = body.get("context")
 
-        track_usage(
+        editor_manual_usage(
             event="ai_vote",
             payload=dict(vote=vote, question=question, answer=answer, context=context),
         )

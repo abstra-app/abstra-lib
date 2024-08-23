@@ -6,7 +6,7 @@ from abstra_internals.controllers.execution import (
 )
 from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
 
@@ -14,7 +14,7 @@ def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_jobs", __name__)
 
     @bp.get("/<path:id>")
-    @usage
+    @editor_usage
     def _get_job(id: str):
         job = controller.get_job(id)
         if not job:
@@ -22,12 +22,12 @@ def get_editor_bp(controller: MainController):
         return job.editor_dto
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_jobs():
         return [f.editor_dto for f in controller.get_jobs()]
 
     @bp.post("/")
-    @usage
+    @editor_usage
     def _create_job():
         data = flask.request.json
         if not data:
@@ -41,7 +41,7 @@ def get_editor_bp(controller: MainController):
         return job.editor_dto
 
     @bp.put("/<path:id>")
-    @usage
+    @editor_usage
     def _update_stage(id: str):
         data = flask.request.json
         if not data:
@@ -51,7 +51,7 @@ def get_editor_bp(controller: MainController):
         return job.editor_dto if job else None
 
     @bp.delete("/<path:id>")
-    @usage
+    @editor_usage
     def _delete_job(id: str):
         remove_file = flask.request.args.get(
             "remove_file", default=False, type=is_it_true
@@ -60,7 +60,7 @@ def get_editor_bp(controller: MainController):
         return {"success": True}
 
     @bp.post("/<path:id>/run")
-    @usage
+    @editor_usage
     def _run_job(id: str):
         job = controller.get_job(id)
         if not job:
@@ -79,7 +79,7 @@ def get_editor_bp(controller: MainController):
         return {"ok": True}
 
     @bp.post("/<path:id>/test")
-    @usage
+    @editor_usage
     def _test_job(id: str):
         job = controller.get_job(id)
         if not job:

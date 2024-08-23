@@ -9,7 +9,7 @@ from abstra_internals.repositories.stage_run import (
     StageRunRepository,
 )
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 class StageRunsController:
@@ -64,21 +64,21 @@ def get_editor_bp(main_controller: MainController):
     controller = StageRunsController(main_controller.stage_run_repository)
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_leaf_stage_runs():
         filter = GetStageRunByQueryFilter.from_dict(flask.request.args)
         pagination = Pagination.from_dict(flask.request.args)
         return controller.get_leaf_stage_runs(filter, pagination)
 
     @bp.get("/past")
-    @usage
+    @editor_usage
     def _get_past_stage_runs():
         filter = GetStageRunByQueryFilter.from_dict(flask.request.args)
         pagination = Pagination.from_dict(flask.request.args)
         return controller.get_past_stage_runs(filter, pagination)
 
     @bp.post("/fork")
-    @usage
+    @editor_usage
     def _fork():
         data = flask.request.json
         if not data:
@@ -90,7 +90,7 @@ def get_editor_bp(main_controller: MainController):
         return controller.fork(stage_run_id, custom_thread_data)
 
     @bp.post("/retry")
-    @usage
+    @editor_usage
     def _retry():
         data = flask.request.json
         if not data:

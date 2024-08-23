@@ -8,19 +8,19 @@ from abstra_internals.templates import (
     new_job_code,
     new_script_code,
 )
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_workspace", __name__)
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_workspace():
         return controller.get_workspace().as_dict
 
     @bp.put("/")
-    @usage
+    @editor_usage
     def _update_workspace():
         if not flask.request.json:
             flask.abort(400)
@@ -28,12 +28,12 @@ def get_editor_bp(controller: MainController):
         return controller.get_workspace().as_dict
 
     @bp.get("/root")
-    @usage
+    @editor_usage
     def _get_workspace_root_path():
         return str(Settings.root_path.absolute())
 
     @bp.post("/open-file")
-    @usage
+    @editor_usage
     def _open_file():
         if not flask.request.json:
             flask.abort(400)
@@ -43,7 +43,7 @@ def get_editor_bp(controller: MainController):
         return {"success": True}
 
     @bp.post("/init-file")
-    @usage
+    @editor_usage
     def _init_file():
         if not flask.request.json:
             flask.abort(400)
@@ -83,12 +83,12 @@ def get_editor_bp(controller: MainController):
         return {"exists": controller.check_file(file_path)}
 
     @bp.get("/read-test-data")
-    @usage
+    @editor_usage
     def _read_test_data():
         return controller.read_test_data()
 
     @bp.post("/write-test-data")
-    @usage
+    @editor_usage
     def _write_test_data():
         if not flask.request.json:
             flask.abort(400)
@@ -97,14 +97,14 @@ def get_editor_bp(controller: MainController):
         return {"success": True}
 
     @bp.get("/files")
-    @usage
+    @editor_usage
     def _list_files():
         path = flask.request.args.get("path", ".")
         mode = flask.request.args.get("mode", "file")
         return controller.list_files(path, mode)
 
     @bp.post("/deploy")
-    @usage
+    @editor_usage
     def _deploy():
         controller.deploy()
         return {"success": True}

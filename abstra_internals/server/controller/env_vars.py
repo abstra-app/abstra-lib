@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Literal, Union
 import flask
 
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 @dataclass
@@ -71,7 +71,7 @@ def get_editor_bp(main_controller: MainController):
         ]
 
     @bp.patch("/")
-    @usage
+    @editor_usage
     def _change_env_vars():
         if flask.request.json is None:
             flask.abort(400)

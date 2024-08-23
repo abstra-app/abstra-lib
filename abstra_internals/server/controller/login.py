@@ -1,19 +1,19 @@
 import flask
 
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_login", __name__)
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_login():
         return controller.get_login()
 
     @bp.post("/")
-    @usage
+    @editor_usage
     def _create_login():
         data = flask.request.json
         if not data:
@@ -22,7 +22,7 @@ def get_editor_bp(controller: MainController):
         return controller.create_login(data["token"])
 
     @bp.delete("/")
-    @usage
+    @editor_usage
     def _delete_login():
         return controller.delete_login()
 

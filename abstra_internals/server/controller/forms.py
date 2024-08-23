@@ -12,7 +12,7 @@ from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
 
@@ -64,12 +64,12 @@ def get_editor_bp(controller: MainController):
             ws.close(message="Done")
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_forms():
         return [f.editor_dto for f in controller.get_forms()]
 
     @bp.get("/<path:id>")
-    @usage
+    @editor_usage
     def _get_form(id: str):
         form = controller.get_form(id)
         if not form:
@@ -77,7 +77,7 @@ def get_editor_bp(controller: MainController):
         return form.editor_dto
 
     @bp.delete("/<path:id>")
-    @usage
+    @editor_usage
     def _delete_form(id: str):
         remove_file = flask.request.args.get(
             "remove_file", default=False, type=is_it_true
@@ -86,7 +86,7 @@ def get_editor_bp(controller: MainController):
         return {"success": True}
 
     @bp.post("/")
-    @usage
+    @editor_usage
     def _create_form():
         data = flask.request.json
         if not data:
@@ -100,7 +100,7 @@ def get_editor_bp(controller: MainController):
         return form.editor_dto
 
     @bp.put("/<path:id>")
-    @usage
+    @editor_usage
     def _update_form(id: str):
         data = flask.request.json
         if not data:

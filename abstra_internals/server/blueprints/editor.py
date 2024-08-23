@@ -23,7 +23,7 @@ from abstra_internals.server.controller import workflows as workflows_controller
 from abstra_internals.server.controller import workspace as workspace_controller
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.utils import send_from_dist
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 def __get_api_bp(controller: MainController):
@@ -96,7 +96,7 @@ def get_editor_bp(controller: MainController):
     bp.register_blueprint(api_bp, url_prefix="/api")
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _spa_index():
         return send_from_dist("editor.html", "editor.html")
 

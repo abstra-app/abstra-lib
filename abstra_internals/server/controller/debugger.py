@@ -12,7 +12,7 @@ from abstra_internals.debugger.vscode import (
 )
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import Settings
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 # Debugger
@@ -41,7 +41,7 @@ def get_editor_bp(controller: MainController):
         return get_debugger_status()
 
     @bp.post("/vscode-launch")
-    @usage
+    @editor_usage
     def _create_vscode_launch():
         return create_vscode_launch()
 

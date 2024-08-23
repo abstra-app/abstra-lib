@@ -19,7 +19,7 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.server.controller.main import MainController, UnknownNodeTypeError
 from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 # workflow visual editor
@@ -314,7 +314,7 @@ def get_editor_bp(_: MainController):
             return str(e), 500
 
     @bp.put("/")
-    @usage
+    @editor_usage
     def _update_workflow():
         try:
             payload = flask.request.json

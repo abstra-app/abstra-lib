@@ -8,7 +8,7 @@ from abstra_internals.controllers.execution import (
 from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
 
@@ -16,7 +16,7 @@ def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_hooks", __name__)
 
     @bp.route("/<path:id>", methods=["GET"])
-    @usage
+    @editor_usage
     def _get_hook(id: str):
         hook = controller.get_hook(id)
         if not hook:
@@ -24,12 +24,12 @@ def get_editor_bp(controller: MainController):
         return hook.editor_dto
 
     @bp.route("/", methods=["GET"])
-    @usage
+    @editor_usage
     def _get_hooks():
         return [f.editor_dto for f in controller.get_hooks()]
 
     @bp.route("/", methods=["POST"])
-    @usage
+    @editor_usage
     def _create_hook():
         data = flask.request.json
         if not data:
@@ -43,7 +43,7 @@ def get_editor_bp(controller: MainController):
         return hook.editor_dto
 
     @bp.route("/<path:id>", methods=["PUT"])
-    @usage
+    @editor_usage
     def _update_hook(id: str):
         changes = flask.request.json
         if not changes:
@@ -53,7 +53,7 @@ def get_editor_bp(controller: MainController):
         return hook.editor_dto if hook else None
 
     @bp.route("/<path:id>", methods=["DELETE"])
-    @usage
+    @editor_usage
     def _delete_hook(id: str):
         remove_file = flask.request.args.get(
             "remove_file", default=False, type=is_it_true
@@ -62,7 +62,7 @@ def get_editor_bp(controller: MainController):
         return {"success": True}
 
     @bp.route("/<path:id>/run", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
-    @usage
+    @editor_usage
     def _run_hook(id: str):
         hook = controller.get_hook(id)
         if not hook:
@@ -89,7 +89,7 @@ def get_editor_bp(controller: MainController):
         }
 
     @bp.route("/<path:id>/test", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
-    @usage
+    @editor_usage
     def _test_hook(id: str):
         hook = controller.get_hook(id)
         if not hook:

@@ -1,7 +1,7 @@
 import flask
 
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 def get_editor_bp(controller: MainController):
@@ -13,7 +13,7 @@ def get_editor_bp(controller: MainController):
         return controller.requirements_repository.load().to_dict()
 
     @bp.post("/")
-    @usage
+    @editor_usage
     def _create_requirement():
         data = flask.request.json
 
@@ -29,7 +29,7 @@ def get_editor_bp(controller: MainController):
         return requirements.to_dict()
 
     @bp.delete("/<name>")
-    @usage
+    @editor_usage
     def _delete_requirement(name: str):
         requirements = controller.requirements_repository.load()
         requirements.delete(name)

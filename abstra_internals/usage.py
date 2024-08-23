@@ -16,8 +16,9 @@ from abstra_internals.utils import (
 from abstra_internals.utils.packages import get_local_package_version
 
 
+# EDITOR
 @threaded
-def send_usage(payload: Dict):
+def send_editor_usage(payload: Dict):
     if is_test_env() or is_dev_env():
         return
 
@@ -33,17 +34,17 @@ def send_usage(payload: Dict):
     requests.post(api_url, json=data, headers=headers)
 
 
-def usage(func: Callable[..., Any]) -> Callable[..., Any]:
+def editor_usage(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
         arg_names = inspect.getfullargspec(func).args
         arg_values = dict(zip(arg_names, args))
 
-        send_usage({**arg_values, **kwargs, **{"event": func.__name__}})
+        send_editor_usage({**arg_values, **kwargs, **{"event": func.__name__}})
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def track_usage(*, event: str, payload: Dict):
-    send_usage({**payload, "event": event})
+def editor_manual_usage(*, event: str, payload: Dict):
+    send_editor_usage({**payload, "event": event})

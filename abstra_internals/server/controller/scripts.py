@@ -6,7 +6,7 @@ from abstra_internals.controllers.execution import (
 )
 from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
 
@@ -14,7 +14,7 @@ def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor_scripts", __name__)
 
     @bp.get("/<path:id>")
-    @usage
+    @editor_usage
     def _get_script(id: str):
         script = controller.get_script(id)
         if not script:
@@ -22,12 +22,12 @@ def get_editor_bp(controller: MainController):
         return script.editor_dto
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_scripts():
         return [f.editor_dto for f in controller.get_scripts()]
 
     @bp.post("/")
-    @usage
+    @editor_usage
     def _create_script():
         data = flask.request.json
         if not data:
@@ -41,7 +41,7 @@ def get_editor_bp(controller: MainController):
         return script.editor_dto
 
     @bp.put("/<path:id>")
-    @usage
+    @editor_usage
     def _update_script(id: str):
         data = flask.request.json
         if not data:
@@ -51,7 +51,7 @@ def get_editor_bp(controller: MainController):
         return script.editor_dto if script else None
 
     @bp.delete("/<path:id>")
-    @usage
+    @editor_usage
     def _delete_script(id: str):
         remove_file = flask.request.args.get(
             "remove_file", default=False, type=is_it_true
@@ -60,7 +60,7 @@ def get_editor_bp(controller: MainController):
         return {"success": True}
 
     @bp.post("/<path:id>/test")
-    @usage
+    @editor_usage
     def _test_script(id: str):
         script = controller.get_script(id)
         if not script:
@@ -79,7 +79,7 @@ def get_editor_bp(controller: MainController):
         return {"ok": True}
 
     @bp.post("/<path:id>/run")
-    @usage
+    @editor_usage
     def _run_script(id: str):
         script = controller.get_script(id)
         if not script:

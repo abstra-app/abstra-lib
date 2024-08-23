@@ -4,19 +4,19 @@ from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.guards.role_guard import Guard
-from abstra_internals.usage import usage
+from abstra_internals.usage import editor_usage
 
 
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("access_control", __name__)
 
     @bp.get("/")
-    @usage
+    @editor_usage
     def _get_project_level_access_control():
         return controller.list_access_controls()
 
     @bp.put("/")
-    @usage
+    @editor_usage
     def _update_access_controls():
         changes = flask.request.json
         if not changes:
