@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from abstra_internals.utils.format import normalize_path
+from abstra_internals.utils.format import normalize_path, pip_name
 
 
 class NormalizePathTest(TestCase):
@@ -29,3 +29,12 @@ class NormalizePathTest(TestCase):
         self.assertEqual(
             normalize_path("domain1/domain2/domain3"), "domain1/domain2/domain3"
         )
+
+
+class PipNameTest(TestCase):
+    def test_uppercase_letters(self):
+        self.assertEqual(pip_name("HelLo"), "hello")
+        self.assertEqual(pip_name("Pandas"), "pandas")
+        self.assertEqual(pip_name("google-cloud"), "google-cloud")
+        self.assertEqual(pip_name("google_cloud"), "google-cloud")
+        self.assertEqual(pip_name("Google_Cloud"), "google-cloud")

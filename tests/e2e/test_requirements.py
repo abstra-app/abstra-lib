@@ -62,3 +62,15 @@ class TestRequirementsApi(TestCase):
             "/_editor/api/requirements/recommendations"
         ).get_json()
         self.assertEqual(recommendation[0]["name"], "pandas")
+
+    def test_get_requirements_recommendation_already_met(self):
+        Path("requirements.txt").write_text("Pillow")
+        script = self.controller.create_script("New script", "script.py")
+        Path(script.file_path).write_text("import pandas as pd\nfrom PIL import Image")
+
+        recommendation = self.client.get(
+            "/_editor/api/requirements/recommendations"
+        ).get_json()
+
+        self.assertEqual(len(recommendation), 1)
+        self.assertEqual(recommendation[0]["name"], "pandas")

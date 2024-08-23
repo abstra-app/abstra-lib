@@ -12,6 +12,7 @@ from pkg_resources import get_distribution
 
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
+from abstra_internals.utils.format import pip_name
 
 
 def check_package(package_name) -> Literal["builtin", "installed", "unknown"]:
@@ -216,12 +217,12 @@ class RequirementsRepository:
             except SyntaxError:
                 continue
 
-        already_added = set([lib.name for lib in cls.load().libraries])
+        already_added = set([pip_name(lib.name) for lib in cls.load().libraries])
 
         return [
             module
             for module in imported_modules
-            if module.requirement.name not in already_added
+            if pip_name(module.requirement.name) not in already_added
         ]
 
     @classmethod
