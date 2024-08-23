@@ -207,6 +207,9 @@ def get_player_bp(controller: MainController):
         if not background_path:
             return flask.abort(404)
 
+        if check_is_url(background_path):
+            return flask.redirect(background_path)
+
         return send_from_dist(background_path, dist_folder=Settings.root_path)
 
     @bp.route("/_hooks/<path:path>", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
