@@ -47,6 +47,8 @@ class PhoneInput(Input):
             self.value = self.parse_value(value)
         elif value is None:
             self.value = self.empty_value
+        if set_errors:
+            self.set_errors()
 
     def serialize_value(self):
         if isinstance(self.value, dict):
