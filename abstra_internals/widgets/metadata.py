@@ -1093,23 +1093,6 @@ metadata = {
             },
             {
                 "props": {
-                    "label": "",
-                    "options": [
-                        {
-                            "label": "I have read and agree to the [terms of services](https://example.com)",
-                            "value": "agree",
-                        }
-                    ],
-                    "value": [],
-                },
-                "name": "Use markdown in options",
-                "description": "Use markdown syntax to customize the options.",
-                "iframeHeight": "96px",
-                "key": "example3",
-                "code": 'from abstra.forms import read_checklist\n\nans = read_checklist(\n    "",\n    [\n        {\n            "label": "I have read and agree to the [terms of services](https://example.com)",\n            "value": "agree",\n        },\n    ],\n    min=1,\n)\n',
-            },
-            {
-                "props": {
                     "label": "What are your favorite programming languages? Choose up to 3.",
                     "options": [
                         {"label": "Python", "value": "Python"},
@@ -1123,7 +1106,7 @@ metadata = {
                 "name": "Set the range of selections",
                 "description": "Set the minimum and maximum number of selections.",
                 "iframeHeight": "318px",
-                "key": "example4",
+                "key": "example3",
                 "code": 'from abstra.forms import read_checklist\n\nans = read_checklist(\n    "What are your favorite programming languages? Choose up to 3.",\n    ["Python", "JavaScript", "Go", "Elixir", "Haskell"],\n    min=1,\n    max=3,\n)\n',
             },
         ],
