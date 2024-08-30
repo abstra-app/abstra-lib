@@ -31,7 +31,7 @@ def generate_email(email: str, code: str) -> EmailParams:
     translations = get_translation(project.workspace.language or "en")
 
     content = template.format(
-        authenticate_with=translations.confirm_login_at(project.workspace.email_name),
+        authenticate_with=translations.confirm_login_at(project.workspace.project_name),
         enter_confirmation_code=translations.enter_verification_code(),
         code=code,
         this_code_expires=translations.this_code_expires(),
@@ -42,7 +42,7 @@ def generate_email(email: str, code: str) -> EmailParams:
     return EmailParams(
         kind="passwordless",
         to=[email],
-        subject=translations.confirm_login_at(project.workspace.email_name),
+        subject=translations.confirm_login_at(project.workspace.project_name),
         body=html,
         is_html=True,
     )

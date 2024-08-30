@@ -69,7 +69,4 @@ html_template = """
 
 
 def style_wrap(content: str, style: StyleSettings):
-    return html_template.format(
-        content=content,
-        logo_url=style.email_logo_url,
-    )
+    return html_template.format(content=content, logo_url=style.project_logo_url)

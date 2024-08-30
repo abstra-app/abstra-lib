@@ -30,6 +30,8 @@ class TestCRUDFiles(unittest.TestCase):
             [
                 dict(path="requirements.txt", name="requirements.txt", type="file"),
                 dict(path="abstra.json", name="abstra.json", type="file"),
+                dict(name="favicon.ico", path="favicon.ico", type="file"),
+                dict(name="logo.png", path="logo.png", type="file"),
             ],
         )
 

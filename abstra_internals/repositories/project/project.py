@@ -10,7 +10,7 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
-from abstra_internals.constants import get_project_url
+from abstra_internals.constants import ABSTRA_LOGO_URL, get_project_url
 from abstra_internals.contracts_generated import CommonUser
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
@@ -665,6 +665,7 @@ class Sidebar:
 @dataclass
 class StyleSettings:
     name: str
+    language: Languages
     theme: Optional[str]
     logo_url: Optional[str]
     favicon_url: Optional[str]
@@ -672,29 +673,13 @@ class StyleSettings:
     main_color: Optional[str]
     font_family: Optional[str]
     font_color: Optional[str]
-    language: Optional[Languages]
 
     @property
-    def as_dict(self):
-        return {
-            "id": None,
-            "name": self.name,
-            "theme": self.theme,
-            "logo_url": self.logo_url,
-            "favicon_url": self.favicon_url,
-            "brand_name": self.brand_name,
-            "main_color": self.main_color,
-            "font_color": self.font_color,
-            "font_family": self.font_family,
-            "language": self.language,
-        }
-
-    @property
-    def email_name(self):
+    def project_name(self):
         return self.brand_name or "Abstra Project"
 
     @property
-    def email_logo_url(self):
+    def project_logo_url(self):
         if self.logo_url:
             if check_is_url(self.logo_url):
                 return self.logo_url
@@ -702,7 +687,14 @@ class StyleSettings:
             if IS_PRODUCTION:
                 return f"{get_project_url()}/_assets/logo"
 
-        return "https://abstra-cloud-assets.s3.us-east-1.amazonaws.com/logo-small-256px.png"
+        return ABSTRA_LOGO_URL
+
+    @property
+    def as_dict(self):
+        default_value = StyleSettings.defaultValue()
+        return {
+            k: v or default_value.__dict__.get(k, v) for k, v in self.__dict__.items()
+        }
 
     @property
     def browser_runner_dto(self):
@@ -745,11 +737,25 @@ class StyleSettings:
         )
 
     @staticmethod
+    def create():
+        return StyleSettings(
+            name="Workspace",
+            font_family=None,
+            brand_name="Abstra Project",
+            main_color=None,
+            font_color=None,
+            logo_url="./logo.png",
+            favicon_url="./favicon.ico",
+            theme=None,
+            language="en",
+        )
+
+    @staticmethod
     def defaultValue():
         return StyleSettings(
-            name="Untitled Workspace",
+            name="Workspace",
             font_family=None,
-            brand_name=None,
+            brand_name="",
             main_color=None,
             font_color=None,
             logo_url=None,
@@ -1378,7 +1384,7 @@ class Project:
     @staticmethod
     def create():
         return Project(
-            workspace=StyleSettings.defaultValue(),
+            workspace=StyleSettings.create(),
             scripts=[],
             forms=[],
             hooks=[],

@@ -9,7 +9,7 @@ def generate_email(to: List[str], message: str, title: str) -> EmailParams:
     project = ProjectRepository.load()
     translations = get_translation(project.workspace.language or "en")
 
-    subject = translations.message_from(project.workspace.email_name)
+    subject = translations.message_from(project.workspace.project_name)
     if title:
         subject += f": {title}"
 
