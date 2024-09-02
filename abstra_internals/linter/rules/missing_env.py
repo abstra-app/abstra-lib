@@ -8,7 +8,7 @@ from abstra_internals.repositories.env_vars import EnvVarsRepository
 
 class AddEnvToEnvFile(LinterFix):
     def __init__(self, env_var: str):
-        self.label = f"Add {env_var} to .env file"
+        self.label = "Add env_var to .env file"
         self.env_var = env_var
 
     def fix(self):
