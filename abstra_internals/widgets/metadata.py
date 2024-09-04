@@ -57,13 +57,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -451,13 +444,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -603,13 +589,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -844,13 +823,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -992,13 +964,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -1178,13 +1143,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -1284,13 +1242,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -1404,13 +1355,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -1533,13 +1477,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -1772,13 +1709,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -1908,13 +1838,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -2074,13 +1997,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -2194,13 +2110,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -2343,13 +2252,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -2466,13 +2368,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -2633,13 +2528,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -2821,13 +2709,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -2949,13 +2830,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -3073,13 +2947,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -3227,13 +3094,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "button_text",
@@ -3421,13 +3281,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -3546,13 +3399,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -3677,13 +3523,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -3801,13 +3640,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -3910,13 +3742,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -4032,13 +3857,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -4152,13 +3970,6 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
-                },
-                {
                     "argName": "full_width",
                     "description": "Whether the input should use full screen width. Defaults to False.",
                     "typeName": "bool",
@@ -4261,13 +4072,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -4388,13 +4192,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",
@@ -4520,13 +4317,6 @@ metadata = {
                     "typeName": "str",
                     "isKwarg": True,
                     "default": "None",
-                },
-                {
-                    "argName": "end_program",
-                    "description": "Whether the program should end after the widget is shown. Defaults to False.",
-                    "typeName": "bool",
-                    "isKwarg": True,
-                    "default": "False",
                 },
                 {
                     "argName": "full_width",

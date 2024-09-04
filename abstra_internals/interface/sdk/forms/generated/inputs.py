@@ -23,7 +23,6 @@ def read_appointment(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -50,7 +49,6 @@ def read_camera(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -81,7 +79,6 @@ def read_cards(label: str, options: list, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -107,7 +104,6 @@ def read_checkbox(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -136,7 +132,6 @@ def read_checklist(label: str, options: List[AbstraOption], **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -164,7 +159,6 @@ def read_cnpj(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -191,7 +185,6 @@ def read_code(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -219,7 +212,6 @@ def read_cpf(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -249,7 +241,6 @@ def read_currency(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -302,7 +293,6 @@ def read_date(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -333,7 +323,6 @@ def read_dropdown(label: str, options: List[AbstraOption], **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -361,7 +350,6 @@ def read_email(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -390,7 +378,6 @@ def read_file(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -418,7 +405,6 @@ def read_image(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -447,7 +433,6 @@ def read_list(item_schema: Any, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -477,7 +462,6 @@ def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -507,7 +491,6 @@ def read_nps(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -536,7 +519,6 @@ def read_number(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -565,7 +547,6 @@ def read_number_slider(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -598,7 +579,6 @@ def read_pandas_row_selection(df: "DataFrame", **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
@@ -632,7 +612,6 @@ def read_password(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -660,7 +639,6 @@ def read_phone(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -688,7 +666,6 @@ def read_rating(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -715,7 +692,6 @@ def read_richtext(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -742,7 +718,6 @@ def read_tag(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -770,7 +745,6 @@ def read(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -797,7 +771,6 @@ def read_textarea(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -824,7 +797,6 @@ def read_time(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -852,7 +824,6 @@ def read_toggle(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
@@ -880,7 +851,6 @@ def read_video(label: str, **kwargs):
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
-		end_program (bool): Whether the program should end after the widget is shown. Defaults to False.
 		full_width (bool): Whether the input should use full screen width. Defaults to False.
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
