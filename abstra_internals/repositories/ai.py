@@ -27,7 +27,9 @@ class ProductionAiApiHttpClient(AiApiHttpClient):
             "tools": tools,
             "temperature": temperature,
         }
-        return requests.post(f"{self.url}/prompt", headers=SIDECAR_HEADERS, json=body)
+        r = requests.post(f"{self.url}/prompt", headers=SIDECAR_HEADERS, json=body)
+        r.raise_for_status()
+        return r
 
 
 class LocalAiApiHttpClient(AiApiHttpClient):
@@ -42,7 +44,9 @@ class LocalAiApiHttpClient(AiApiHttpClient):
         headers = resolve_headers()
         if headers is None:
             raise Exception("You must be logged in to use AI")
-        return requests.post(f"{self.url}/prompt", headers=headers, json=body)
+        r = requests.post(f"{self.url}/prompt", headers=headers, json=body)
+        r.raise_for_status()
+        return r
 
 
 def ai_api_http_client_factory() -> AiApiHttpClient:
