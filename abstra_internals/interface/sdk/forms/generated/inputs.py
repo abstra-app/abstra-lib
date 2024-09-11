@@ -374,6 +374,8 @@ def read_file(label: str, **kwargs):
 		initial_value (str): The initial value to display to the user. Defaults to "".
 		multiple (bool): Whether the user will be allowed to upload multiple files. Defaults to False.
 		accepted_formats (list): The specific file types that the input should accept. Defaults to [], accepting all file formats.
+		min (number): The minimal amount of files that should be submitted. Only applied if multiple is True. Defaults to None.
+		max (number): The maximum amount of files that should be submitted. Only applied if multiple is True. Defaults to None.
 		max_file_size (float): Maximum size allowed to be transfered in total in MB.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.

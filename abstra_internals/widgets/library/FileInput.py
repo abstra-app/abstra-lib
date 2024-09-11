@@ -25,19 +25,21 @@ class FileInput(Input):
         self.disabled = props.get('disabled', False)
         self.max_file_size = props.get('max_file_size', None)
         self.multiple = props.get('multiple', False)
+        self.min = props.get('min', None)
+        self.max = props.get('max', None)
         self.accepted_formats = props.get('accepted_formats', [])
         self.value = props.get('initial_value', self.empty_value)
-        self.multiple_handler = MultipleHandler(self.multiple, required=
-            self.required)
+        self.multiple_handler = MultipleHandler(self.multiple, self.min,
+            self.max, required=self.required)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'hint': self.hint,
             'label': self.label, 'value': self.serialize_value(),
-            'required': self.required, 'multiple': self.multiple,
-            'acceptedFormats': self.accepted_formats, 'acceptedMimeTypes':
-            self.get_mime_types, 'fullWidth': self.full_width, 'disabled':
-            self.disabled, 'maxFileSize': self.max_file_size, 'errors':
-            self.errors}
+            'required': self.required, 'multiple': self.multiple, 'min':
+            self.min, 'max': self.max, 'acceptedFormats': self.
+            accepted_formats, 'acceptedMimeTypes': self.get_mime_types,
+            'fullWidth': self.full_width, 'disabled': self.disabled,
+            'maxFileSize': self.max_file_size, 'errors': self.errors}
 
     @staticmethod
     def __get_file_uri(value: Union[FileResponse, str, BufferedReader,
@@ -66,6 +68,7 @@ class FileInput(Input):
 
     def validate(self) ->List[str]:
         errors = super().validate()
+        errors.extend(self.multiple_handler.validate(self.value))
         if not self.value:
             return errors
         if isinstance(self.value, list):
