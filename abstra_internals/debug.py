@@ -2,7 +2,6 @@ import inspect
 import traceback
 import typing
 from dataclasses import dataclass
-from types import TracebackType
 
 from abstra_internals.settings import Settings
 from abstra_internals.utils.file import is_relative_path
@@ -18,12 +17,6 @@ def representations(locals: typing.Dict):
         except Exception:
             pass
     return result
-
-
-def traceback_to_infos(
-    traceback: typing.Union[TracebackType, None],
-) -> typing.List[inspect.FrameInfo]:
-    return inspect.getouterframes(traceback.tb_frame) if traceback else []
 
 
 def _make_debug_item_from_info(info: inspect.FrameInfo):
