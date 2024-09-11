@@ -45,10 +45,8 @@ class AiController:
         return create_thread(headers)
 
     def cancel_all(self, thread_id: str):
-        headers = resolve_headers()
-        if headers is None:
-            return None
-        return cancel_all(headers, thread_id)
+        if headers := resolve_headers():
+            cancel_all(headers, thread_id)
 
     def generate_project(self, prompt: str, tries: int = 0):
         headers = resolve_headers() or {}
@@ -128,10 +126,8 @@ def get_editor_bp(main_controller: MainController):
         thread_id = body.get("threadId")
         if not thread_id:
             flask.abort(400)
-        thread = controller.cancel_all(thread_id)
-        if not thread:
-            flask.abort(403)
-        return thread
+        controller.cancel_all(thread_id)
+        return {"success": True}
 
     @bp.post("/generate")
     @editor_usage

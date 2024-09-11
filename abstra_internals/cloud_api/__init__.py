@@ -67,7 +67,6 @@ def cancel_all(headers: dict, thread_id: str):
     url = f"{CLOUD_API_ENDPOINT}/cli/ai/cancel-all"
     r = requests.post(url, headers=headers, json={"threadId": thread_id})
     r.raise_for_status()
-    return r.json()
 
 
 def get_project_info(headers):
