@@ -67,7 +67,7 @@ class FileInput(Input):
         return self.multiple_handler.value_to_list_or_value(file_responses)
 
     def validate(self) ->List[str]:
-        errors = super().validate()
+        errors = []
         errors.extend(self.multiple_handler.validate(self.value))
         if not self.value:
             return errors
