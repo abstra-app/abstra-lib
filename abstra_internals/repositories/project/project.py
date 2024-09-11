@@ -16,7 +16,11 @@ from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
 from abstra_internals.settings import Settings
-from abstra_internals.templates import generate_getting_started_project
+from abstra_internals.templates import (
+    abstra_favicon,
+    abstra_logo,
+    generate_getting_started_project,
+)
 from abstra_internals.utils import check_is_url, nested_get
 from abstra_internals.utils.file import generate_conflictless_path, silent_traverse_code
 from abstra_internals.utils.format import normalize_path
@@ -1420,6 +1424,17 @@ class ProjectRepository:
     def initialize(cls):
         if not cls.exists():  # double check
             cls.save(Project.create())
+            cls.add_assets()
+
+    @classmethod
+    def add_assets(cls):
+        logo_path = Settings.root_path / "logo.png"
+        if not logo_path.exists():
+            logo_path.write_bytes(abstra_logo)
+
+        favicon_path = Settings.root_path / "favicon.ico"
+        if not favicon_path.exists():
+            favicon_path.write_bytes(abstra_favicon)
 
     @classmethod
     def exists(cls):

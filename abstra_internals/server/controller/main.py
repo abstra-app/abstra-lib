@@ -55,7 +55,6 @@ from abstra_internals.server.controller.linters import check_linters
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
     ensure_abstraignore,
-    ensure_assets,
     ensure_gitignore,
     new_form_code,
     new_hook_code,
@@ -135,7 +134,6 @@ class MainController:
         requirements_repository.save(requirements)
         ensure_abstraignore(Settings.root_path)
         ensure_gitignore(Settings.root_path)
-        ensure_assets(Settings.root_path)
 
         self.workflow_engine = WorkflowEngine(
             stage_run_repository=stage_run_repository,

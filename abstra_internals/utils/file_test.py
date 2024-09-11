@@ -48,7 +48,11 @@ class FilesFromDirectoryTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.path = init_dir()
-        self.abstra_json_path = self.path.joinpath("abstra.json")
+        self.initial_files = [
+            self.path.joinpath("abstra.json"),
+            self.path.joinpath("logo.png"),
+            self.path.joinpath("favicon.ico"),
+        ]
 
     def tearDown(self) -> None:
         clear_dir(self.path)
@@ -58,19 +62,19 @@ class FilesFromDirectoryTest(unittest.TestCase):
 
     def test_empty_directory(self):
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [self.abstra_json_path])
+        self.assertSamePaths(files, [*self.initial_files])
 
     def test_no_ignore(self):
         filepath = self.add_file("foo", "bar")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [filepath, self.abstra_json_path])
+        self.assertSamePaths(files, [filepath, *self.initial_files])
 
     def test_ignore_file(self):
         self.add_file(".abstraignore", "ignored")
         self.add_file("ignored", "foo")
         tracked = self.add_file("tracked", "bar")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [tracked, self.abstra_json_path])
+        self.assertSamePaths(files, [tracked, *self.initial_files])
 
     def test_ignore_file_pattern(self):
         self.add_file(".abstraignore", "~$*.xlsx")
@@ -79,14 +83,14 @@ class FilesFromDirectoryTest(unittest.TestCase):
         tracked = self.add_file("tracked", "bar")
 
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [tracked, self.abstra_json_path])
+        self.assertSamePaths(files, [tracked, *self.initial_files])
 
     def test_ignore_empty(self):
         self.add_folder("ignored")
         self.add_folder("empty")
         self.add_file(".abstraignore", "ignored")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [self.abstra_json_path])
+        self.assertSamePaths(files, [*self.initial_files])
 
     def test_ignore_folder(self):
         ignored = self.add_folder("ignored")
@@ -97,36 +101,36 @@ class FilesFromDirectoryTest(unittest.TestCase):
         tracked = self.add_file("tracked", "tracked", path=folder)
         self.add_file(".abstraignore", "ignored\nignored2/")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [tracked, self.abstra_json_path])
+        self.assertSamePaths(files, [tracked, *self.initial_files])
 
     def test_ignore_wildcard(self):
         self.add_file("ignored.ipynb", "foo")
         tracked = self.add_file("tracked", "bar")
         self.add_file(".abstraignore", "*.ipynb")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [tracked, self.abstra_json_path])
+        self.assertSamePaths(files, [tracked, *self.initial_files])
 
     def test_ignore_abstra_folder(self):
         abstra = self.add_folder(DOT_ABSTRA_FOLDER_NAME)
         self.add_file("credentials", "SECRET", path=abstra)
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [self.abstra_json_path])
+        self.assertSamePaths(files, [*self.initial_files])
 
     def test_ignore_git_folder(self):
         git = self.add_folder(".git")
         self.add_file("somefile", "somecontent", path=git)
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [self.abstra_json_path])
+        self.assertSamePaths(files, [*self.initial_files])
 
     def test_ignore_abstra_ignore_file(self):
         self.add_file(".abstraignore", "ignored")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [self.abstra_json_path])
+        self.assertSamePaths(files, [*self.initial_files])
 
     def test_ignore_git_ignore_file(self):
         self.add_file(".gitignore", "ignored")
         files = files_from_directory(self.path)
-        self.assertSamePaths(files, [self.abstra_json_path])
+        self.assertSamePaths(files, [*self.initial_files])
 
 
 class CreatePathTest(unittest.TestCase):

@@ -26,16 +26,6 @@ abstra_logo = (pathlib.Path(__file__).parent / "abstra_logo.png").read_bytes()
 abstra_favicon = (pathlib.Path(__file__).parent / "abstra_favicon.ico").read_bytes()
 
 
-def ensure_assets(dir: pathlib.Path):
-    logo_path = dir / "logo.png"
-    if not logo_path.exists():
-        logo_path.write_bytes(abstra_logo)
-
-    favicon_path = dir / "favicon.ico"
-    if not favicon_path.exists():
-        favicon_path.write_bytes(abstra_favicon)
-
-
 def ensure_abstraignore(dir: pathlib.Path):
     path = dir / ".abstraignore"
     if not path.exists():
