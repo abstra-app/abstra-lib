@@ -2,6 +2,7 @@ from io import BufferedReader, TextIOWrapper
 from pathlib import Path
 from typing import List, Optional, Union
 from abstra_internals.widgets.apis import upload_file
+from abstra_internals.widgets.file_utils import extension_to_mime
 from abstra_internals.widgets.response_types import FileResponse
 from abstra_internals.widgets.widget_base import Input, MultipleHandler
 
@@ -33,9 +34,10 @@ class FileInput(Input):
         return {'type': self.type, 'key': self.key, 'hint': self.hint,
             'label': self.label, 'value': self.serialize_value(),
             'required': self.required, 'multiple': self.multiple,
-            'acceptedFormats': self.accepted_formats, 'fullWidth': self.
-            full_width, 'disabled': self.disabled, 'maxFileSize': self.
-            max_file_size, 'errors': self.errors}
+            'acceptedFormats': self.accepted_formats, 'acceptedMimeTypes':
+            self.get_mime_types, 'fullWidth': self.full_width, 'disabled':
+            self.disabled, 'maxFileSize': self.max_file_size, 'errors':
+            self.errors}
 
     @staticmethod
     def __get_file_uri(value: Union[FileResponse, str, BufferedReader,
@@ -61,3 +63,34 @@ class FileInput(Input):
         List[FileResponse], None]:
         file_responses = [FileResponse(url) for url in value or []]
         return self.multiple_handler.value_to_list_or_value(file_responses)
+
+    def validate(self) ->List[str]:
+        errors = super().validate()
+        if not self.value:
+            return errors
+        if isinstance(self.value, list):
+            for file in self.value:
+                errors.extend(self._validate_file_extension(file))
+        else:
+            errors.extend(self._validate_file_extension(self.value))
+        return errors
+
+    @property
+    def accepted_formats_without_dot(self) ->List[str]:
+        return [extension.replace('.', '') for extension in self.
+            accepted_formats]
+
+    def _validate_file_extension(self, file: FileResponse) ->List[str]:
+        if not self.accepted_formats:
+            return []
+        file_extension = file._url.split('.')[-1]
+        if file_extension not in self.accepted_formats_without_dot:
+            return ['i18n_error_invalid_file_format']
+        return []
+
+    @property
+    def get_mime_types(self) ->str:
+        if not self.accepted_formats:
+            return '*'
+        return ','.join(extension_to_mime(ext) for ext in self.accepted_formats
+            )

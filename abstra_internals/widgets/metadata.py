@@ -2139,6 +2139,7 @@ metadata = {
                 {"argName": "value", "typeName": ["array"]},
                 {"argName": "multiple", "typeName": "boolean"},
                 {"argName": "acceptedFormats", "typeName": "array"},
+                {"argName": "acceptedMimeTypes", "typeName": "string"},
                 {"argName": "maxFileSize", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
