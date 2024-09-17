@@ -1,11 +1,13 @@
 import inspect
 from functools import wraps
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
+import flask
 import requests
 
 from abstra_internals.credentials import get_credentials
-from abstra_internals.environment import CLOUD_API_CLI_URL
+from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.threaded import threaded
 from abstra_internals.utils import (
     get_local_python_version,
@@ -48,3 +50,31 @@ def editor_usage(func: Callable[..., Any]) -> Callable[..., Any]:
 
 def editor_manual_usage(*, event: str, payload: Dict):
     send_editor_usage({**payload, "event": event})
+
+
+# PLAYER
+def send_player_usage(*, event: str, payload: Dict, auth: Optional[str] = None):
+    if SIDECAR_URL is None:
+        return
+
+    body = dict(event=event, payload=payload)
+    if auth is not None:
+        if claims := UserClaims.from_jwt(auth.split(" ")[1]):
+            body["auth"] = claims.email
+
+    requests.post(f"{SIDECAR_URL}/usage/event", headers=SIDECAR_HEADERS, json=body)
+
+
+def player_usage(func: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(func)
+    def wrapper(*args: Tuple[Any], **kwargs: Any) -> Any:
+        auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
+        arg_names = inspect.getfullargspec(func).args
+        arg_values = dict(zip(arg_names, args))
+
+        send_player_usage(
+            auth=auth, event=func.__name__, payload={**arg_values, **kwargs}
+        )
+        return func(*args, **kwargs)
+
+    return wrapper

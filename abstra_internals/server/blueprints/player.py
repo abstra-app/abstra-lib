@@ -40,6 +40,7 @@ from abstra_internals.server.guards.role_guard import (
 )
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
+from abstra_internals.usage import player_usage
 from abstra_internals.utils import check_is_url
 from abstra_internals.utils.file import (
     get_random_filepath,
@@ -84,6 +85,7 @@ def get_player_bp(controller: MainController):
 
     @bp.get("/_pages/<string:path>")
     @guard.by(PathArgSelector("path"))
+    @player_usage
     def _get_page(path):
         form = controller.get_form_by_path(path)
         if not form:
@@ -151,6 +153,7 @@ def get_player_bp(controller: MainController):
             ws.close(message="Done")
 
     @bp.put("/_files")
+    @player_usage
     def _upload_file():
         files = flask.request.files
         filename = flask.request.form.get("filename")
