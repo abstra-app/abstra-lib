@@ -242,7 +242,7 @@ def select_one(table: str, *, where: typing.Optional[dict] = None):
     return rows[0]
 
 
-def select_by_id(table: str, id: int):
+def select_by_id(table: str, id: str):
     return select_one(table, where={"id": id})
 
 
@@ -262,14 +262,14 @@ def update(table: str, set: typing.Any, where: typing.Any):
     return _run(query, params)
 
 
-def update_by_id(table: str, id: int, values: typing.Any):
+def update_by_id(table: str, id: str, values: typing.Any):
     rows = update(table, _make_row_dict(values), {"id": id})
     if len(rows) == 0:
         return None
     return rows[0]
 
 
-def delete_by_id(table: str, id: int):
+def delete_by_id(table: str, id: str):
     rows = delete(table, {"id": id})
     if len(rows) == 0:
         return None
