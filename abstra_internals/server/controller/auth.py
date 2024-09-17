@@ -13,7 +13,6 @@ from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.jwt_signer import JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import player_usage
 from abstra_internals.utils.email import is_valid_email
 
 
@@ -125,7 +124,6 @@ def get_player_bp(main_controller: MainController):
     )
 
     @bp.post("/authenticate")
-    @player_usage
     def _authenticate():
         data = flask.request.get_json(force=True)
         if not data:
@@ -142,7 +140,6 @@ def get_player_bp(main_controller: MainController):
         return {"ok": True}
 
     @bp.post("/verify")
-    @player_usage
     def _verify():
         data = flask.request.get_json(force=True)
         if not data:
@@ -160,7 +157,6 @@ def get_player_bp(main_controller: MainController):
         return {"jwt": jwt}
 
     @bp.post("/oidc-verify")
-    @player_usage
     def _oidc_access():
         data = flask.request.get_json(force=True)
         if not data:

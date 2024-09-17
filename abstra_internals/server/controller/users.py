@@ -3,7 +3,6 @@ import flask
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import player_usage
 
 
 class UserController:
@@ -22,7 +21,6 @@ def get_player_bp(main_controller: MainController):
     bp = flask.Blueprint("playerUsers", __name__)
 
     @bp.post("/sign-up")
-    @player_usage
     def _signup_user():
         auth = flask.request.headers.get(USER_AUTH_HEADER_KEY)
         if auth is None:

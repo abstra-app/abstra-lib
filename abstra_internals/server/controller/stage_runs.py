@@ -2,7 +2,6 @@ from typing import Optional
 
 import flask
 
-from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.stage_run import (
     GetStageRunByQueryFilter,
@@ -10,8 +9,7 @@ from abstra_internals.repositories.stage_run import (
     StageRunRepository,
 )
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
-from abstra_internals.usage import editor_usage, player_usage
+from abstra_internals.usage import editor_usage
 
 
 class StageRunsController:
@@ -109,11 +107,7 @@ def get_player_bp(main_controller: MainController):
     bp = flask.Blueprint("player_stage_runs", __name__)
     controller = StageRunsController(main_controller.stage_run_repository)
 
-    guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
-
     @bp.post("/retry")
-    @guard.by(StageIdSelector("kanban"))
-    @player_usage
     def _retry():
         data = flask.request.json
         if not data:
