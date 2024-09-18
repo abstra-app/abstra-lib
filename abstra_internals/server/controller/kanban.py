@@ -30,6 +30,7 @@ from abstra_internals.repositories.stage_run import (
 from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.controller.workflows import get_path, make_stage_dto
 from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
+from abstra_internals.usage import player_usage
 from abstra_internals.utils.datetime import to_utc_iso_string
 
 
@@ -388,6 +389,7 @@ def get_player_bp(main_controller: MainController):
     )
     bp = flask.Blueprint("kanban", __name__)
 
+    # 1s pooling in this route
     @bp.get("/stages")
     @guard.by(StageIdSelector("kanban"))
     def _get_stages():
@@ -400,6 +402,7 @@ def get_player_bp(main_controller: MainController):
         n = int(flask.request.args.get("n", 3))
         return get_path(n)
 
+    # 1s pooling in this route
     @bp.post("/")
     @guard.by(StageIdSelector("kanban"))
     def _get_kanban():
@@ -408,6 +411,7 @@ def get_player_bp(main_controller: MainController):
         req = DataRequest.from_dict(flask.request.json)
         return controller.get_data(req).to_dict()
 
+    # 1s pooling in this route
     @bp.post("/count")
     @guard.by(StageIdSelector("kanban"))
     def _count_by_status():
@@ -415,6 +419,7 @@ def get_player_bp(main_controller: MainController):
 
     @bp.get("/logs/<stage_run_id>")
     @guard.by(StageIdSelector("kanban"))
+    @player_usage
     def _get_ancestor_logs(stage_run_id: str):
         project = project_repository.load()
 
@@ -434,6 +439,7 @@ def get_player_bp(main_controller: MainController):
 
     @bp.post("/jobs/<path:id>/start")
     @guard.by(StageIdSelector("kanban"))
+    @player_usage
     def _start_job(id: str):
         job = controller.get_job(id)
         if not job:
@@ -453,6 +459,7 @@ def get_player_bp(main_controller: MainController):
 
     @bp.post("/scripts/<path:id>/continue")
     @guard.by(StageIdSelector("kanban"))
+    @player_usage
     def _continue_script(id: str):
         script = controller.get_script(id)
         if not script:
