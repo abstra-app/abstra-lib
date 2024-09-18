@@ -94,7 +94,7 @@ def prompt(
         function = _build_function_tool_call(format)
         tools.append({"type": "function", "function": function})
 
-    response = ai_repository.prompt(messages, tools, temperature).json()
+    response = ai_repository.prompt(messages, tools, temperature)
 
     if response.get("error"):
         raise Exception(response["error"])
