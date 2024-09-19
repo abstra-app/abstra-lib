@@ -1,5 +1,6 @@
 import json
 import shutil
+import time
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import ANY
@@ -7,7 +8,6 @@ from unittest.mock import ANY
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
-from tests.utils.pthread import wait_all_threads
 
 
 def sort_response(response: dict):
@@ -120,47 +120,69 @@ class TestFork(TestCase):
 
         # Run job a
         self.client.post("/_editor/api/jobs/job_a/run")
-        wait_all_threads()
 
-        first_kanban_state = self.client.post(
-            "/_editor/api/kanban",
-            json={
-                "filter": {
-                    "stage": ["job_a", "hook_b", "script_c"],
-                    "data": {},
-                    "status": [],
-                    "search": "",
+        # Check job a finished - wait for "hook b waiting"
+        for _ in range(10):
+            first_kanban_state = self.client.post(
+                "/_editor/api/kanban",
+                json={
+                    "filter": {
+                        "stage": ["job_a", "hook_b", "script_c"],
+                        "data": {},
+                        "status": [],
+                        "search": "",
+                    },
+                    "limit": 10,
+                    "offset": 0,
                 },
-                "limit": 10,
-                "offset": 0,
-            },
-        )
+            )
 
-        assert len(first_kanban_state.get_json()["stage_run_cards"]) == 1
-        hook_b_thread_id = first_kanban_state.get_json()["stage_run_cards"][0]["id"]
+            cards = first_kanban_state.get_json()["stage_run_cards"]
+
+            if (
+                len(cards) == 1
+                and cards[0]["stage"] == "hook_b"
+                and cards[0]["status"] == "waiting"
+            ):
+                break
+
+            time.sleep(0.5)
+        else:
+            assert False, "Job a did not finish or hook b did not wait"
 
         # Run hook b
         self.client.post(
-            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + hook_b_thread_id,
+            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + cards[0]["id"]
         )
-        wait_all_threads()
 
         # Check scripts finished
-        second_kanban_state = self.client.post(
-            "/_editor/api/kanban",
-            json={
-                "filter": {
-                    "stage": ["job_a", "hook_b", "script_c"],
-                    "data": {},
-                    "status": [],
-                    "search": "",
+        for _ in range(10):
+            second_kanban_state = self.client.post(
+                "/_editor/api/kanban",
+                json={
+                    "filter": {
+                        "stage": ["job_a", "hook_b", "script_c"],
+                        "data": {},
+                        "status": [],
+                        "search": "",
+                    },
+                    "limit": 10,
+                    "offset": 0,
                 },
-                "limit": 10,
-                "offset": 0,
-            },
-        )
+            )
 
-        self.assertEqual(second_kanban_state.status_code, 200)
+            cards = second_kanban_state.get_json()["stage_run_cards"]
+
+            if (
+                len(cards) == 1
+                and cards[0]["stage"] == "script_c"
+                and cards[0]["status"] == "finished"
+            ):
+                break
+
+            time.sleep(0.5)
+        else:
+            assert False, "Hook b did not finish or script c did not run/finish"
 
         second_kanban_state_json = second_kanban_state.get_json()
         self.assertEqual(

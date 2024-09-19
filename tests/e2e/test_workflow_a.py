@@ -1,4 +1,5 @@
 import shutil
+import time
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import ANY
@@ -6,7 +7,6 @@ from unittest.mock import ANY
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
-from tests.utils.pthread import wait_all_threads
 
 
 def sort_response(response: dict):
@@ -226,26 +226,36 @@ class TestWorkflowA(TestCase):
 
         # Run job
         run_response = self.client.post("/_editor/api/jobs/job_a/run")
-        wait_all_threads()
-
         self.assertEqual(run_response.status_code, 200)
 
-        # Check hook is waiting
-        response = self.client.post(
-            "/_editor/api/kanban",
-            json={
-                "filter": {
-                    "stage": ["job_a", "hook_b", "script_c", "script_d"],
-                    "data": {},
-                    "status": [],
-                    "search": "",
+        for _ in range(10):
+            # Check hook is waiting
+            response = self.client.post(
+                "/_editor/api/kanban",
+                json={
+                    "filter": {
+                        "stage": ["job_a", "hook_b", "script_c", "script_d"],
+                        "data": {},
+                        "status": [],
+                        "search": "",
+                    },
+                    "limit": 10,
+                    "offset": 0,
                 },
-                "limit": 10,
-                "offset": 0,
-            },
-        )
+            )
 
-        self.assertEqual(response.status_code, 200)
+            cards = response.get_json()["stage_run_cards"]
+
+            if (
+                len(cards) == 1
+                and cards[0]["stage"] == "hook_b"
+                and cards[0]["status"] == "waiting"
+            ):
+                break
+
+            time.sleep(0.1)
+        else:
+            self.fail("Hook did not become waiting")
 
         self.assertEqual(
             sort_response(response.get_json()),
@@ -285,49 +295,74 @@ class TestWorkflowA(TestCase):
 
         # Run job and hook
         self.client.post("/_editor/api/jobs/job_a/run")
-        wait_all_threads()
 
-        first_kanban_state = self.client.post(
-            "/_editor/api/kanban",
-            json={
-                "filter": {
-                    "stage": ["job_a", "hook_b", "script_c", "script_d"],
-                    "data": {},
-                    "status": [],
-                    "search": "",
+        for _ in range(10):
+            response = self.client.post(
+                "/_editor/api/kanban",
+                json={
+                    "filter": {
+                        "stage": ["job_a", "hook_b", "script_c", "script_d"],
+                        "data": {},
+                        "status": [],
+                        "search": "",
+                    },
+                    "limit": 10,
+                    "offset": 0,
                 },
-                "limit": 10,
-                "offset": 0,
-            },
-        )
+            )
 
-        assert len(first_kanban_state.get_json()["stage_run_cards"]) == 1
-        hook_b_thread_id = first_kanban_state.get_json()["stage_run_cards"][0]["id"]
+            cards = response.get_json()["stage_run_cards"]
+
+            if (
+                len(cards) == 1
+                and cards[0]["stage"] == "hook_b"
+                and cards[0]["status"] == "waiting"
+            ):
+                break
+
+            time.sleep(0.1)
+        else:
+            self.fail("Hook did not become waiting")
 
         self.client.post(
-            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + hook_b_thread_id,
+            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + cards[0]["id"]
         )
-        wait_all_threads()
+
+        for _ in range(10):
+            response = self.client.post(
+                "/_editor/api/kanban",
+                json={
+                    "filter": {
+                        "stage": ["job_a", "hook_b", "script_c", "script_d"],
+                        "data": {},
+                        "status": [],
+                        "search": "",
+                    },
+                    "limit": 10,
+                    "offset": 0,
+                },
+            )
+
+            first_kanban_state_json = response.get_json()
+            cards = first_kanban_state_json["stage_run_cards"]
+
+            if (
+                len(cards) == 2
+                and cards[0]["stage"] == "script_d"
+                and cards[0]["status"] == "finished"
+                and cards[1]["stage"] == "script_c"
+                and cards[1]["status"] == "finished"
+            ):
+                break
+
+            time.sleep(0.1)
+        else:
+            self.fail("Scripts did not run")
 
         # Check scripts ran
-        first_kanban_state = self.client.post(
-            "/_editor/api/kanban",
-            json={
-                "filter": {
-                    "stage": ["job_a", "hook_b", "script_c", "script_d"],
-                    "data": {},
-                    "status": [],
-                    "search": "",
-                },
-                "limit": 10,
-                "offset": 0,
-            },
-        )
-
-        self.assertEqual(first_kanban_state.status_code, 200)
 
         self.assertEqual(
-            sort_response(first_kanban_state.get_json()),
+            sort_response(first_kanban_state_json),
             sort_response(
                 {
                     "not_found_stages": [],
@@ -411,7 +446,6 @@ class TestWorkflowA(TestCase):
         # Job A
         job_a_response = self.client.post("/_editor/api/jobs/job_a/test")
         self.assertEqual(job_a_response.status_code, 200)
-        wait_all_threads()
         self.assertEqual(
             (Path(self.root) / "job_a.log").read_text(), "job ran successfully"
         )
@@ -422,13 +456,11 @@ class TestWorkflowA(TestCase):
         self.assertEqual(
             hook_b_response.json, {"body": "foo", "headers": {}, "status": 234}
         )
-        wait_all_threads()
         self.assertEqual((Path(self.root) / "hook_b.log").read_text(), "some test data")
 
         # Script C
         script_c_response = self.client.post("/_editor/api/scripts/script_c/test")
         self.assertEqual(script_c_response.status_code, 200)
-        wait_all_threads()
         self.assertEqual(
             (Path(self.root) / "script_c.log").read_text(), "some test data"
         )
@@ -436,7 +468,6 @@ class TestWorkflowA(TestCase):
         # Script D
         script_d_response = self.client.post("/_editor/api/scripts/script_d/test")
         self.assertEqual(script_d_response.status_code, 200)
-        wait_all_threads()
         self.assertEqual(
             (Path(self.root) / "script_d.log").read_text(),
             "job a set this\nscript d set this",
