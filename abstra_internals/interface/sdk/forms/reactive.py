@@ -89,7 +89,7 @@ def reactive(func):
                     original_attr(*args, **kwargs)
                     widget = page.widgets[-1]
                     if isinstance(widget, Input):
-                        return ans.get(widget.key)
+                        return ans.get(widget.key, widget.value)
                     else:
                         return result
 
