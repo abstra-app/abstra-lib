@@ -8,7 +8,7 @@ from abstra_internals.contracts_generated import (
 from abstra_internals.credentials import (
     resolve_headers,
 )
-from abstra_internals.environment import CLOUD_API_ENDPOINT
+from abstra_internals.environment import CLOUD_API_CLI_URL
 
 
 class RolesRepository:
@@ -17,7 +17,7 @@ class RolesRepository:
         return resolve_headers()
 
     def get_roles(self) -> List[CommonRole]:
-        url = f"{CLOUD_API_ENDPOINT}/cli/roles"
+        url = f"{CLOUD_API_CLI_URL}/roles"
         if not self.headers:
             return []
         response = requests.get(url, headers=self.headers)

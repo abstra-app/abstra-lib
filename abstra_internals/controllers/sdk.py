@@ -51,12 +51,21 @@ class HookSDKController:
             return body, query, headers
 
     def _multipart_form_parse(self, body: str, headers: dict):
-        from multipart import MultipartParser, parse_options_header, to_bytes
+        from multipart import (
+            MultipartParser,
+            MultipartPart,
+            parse_options_header,
+            to_bytes,
+        )
 
         _, options = parse_options_header(headers["Content-Type"])
         boundary = options["boundary"].encode("utf-8")
         p = MultipartParser(BytesIO(to_bytes(body)), boundary)  # TODO: direct from fs
-        return [{"name": i.name, "value": i.value} for i in p]
+        return [
+            {"name": i.name, "value": i.value}
+            for i in p
+            if isinstance(i, MultipartPart)
+        ]
 
 
 class FormSDKController:
