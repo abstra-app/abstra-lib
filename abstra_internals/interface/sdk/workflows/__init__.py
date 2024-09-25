@@ -23,14 +23,5 @@ def set_data(key: str, value: object):
     sdk_controller.set_data(key, value)
 
 
-def get_execution_id() -> str:
-    sdk_controller = WorkflowSDKController(
-        stage_run_repository=stage_run_repository,
-        execution_repository=execution_repository,
-        project_repository=ProjectRepository(),
-    )
-    return sdk_controller.get_execution_id()
-
-
 def set_title(title: str):
     set_data("_thread_title", title)

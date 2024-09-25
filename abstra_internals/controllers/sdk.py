@@ -152,6 +152,3 @@ class WorkflowSDKController:
 
         stage_run.data[key] = value
         self.stage_run_repo.update_data(stage_run.id, stage_run.data)
-
-    def get_execution_id(self) -> str:
-        return ExecutionStore.get_by_thread().execution.id
