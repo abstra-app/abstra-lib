@@ -1,0 +1,2 @@
+import{cI as n}from"./vue-router.462557a9.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},r=new Error().stack;r&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[r]="eee064c9-bff6-4a7d-a7f3-db6219a2445a",e._sentryDebugIdIdentifier="sentry-dbid-eee064c9-bff6-4a7d-a7f3-db6219a2445a")}catch{}})();const o=(e,r,d)=>{n.error({message:e,description:r,onClick:d})};export{o as p};
+//# sourceMappingURL=popupNotifcation.f30d1abe.js.map
