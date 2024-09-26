@@ -299,3 +299,11 @@ class TablesExecutionError(Exception):  # public api
         self.query = query
         self.params = params
         self.errors = errors
+
+    def __str__(self):
+        return (
+            f"There was an error executing your query\n"
+            f"Error(s): {', '.join(self.errors)}\n"
+            f"Query: {self.query}\n"
+            f"Parameters: {self.params}"
+        )
