@@ -13,6 +13,7 @@ from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.stage_run import StageRun, StageRunRepository
+from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.utils import is_json_serializable
 from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 from abstra_internals.utils.json import to_json_serializable
@@ -69,7 +70,9 @@ class HookSDKController:
 
 
 class FormSDKController:
-    def __init__(self) -> None:
+    def __init__(self, users_repository: UsersRepository) -> None:
+        self.users_repository = users_repository
+
         try:
             self.client = ExecutionStore.get_form_client()
         except ExecutionNotFound:
@@ -82,6 +85,9 @@ class FormSDKController:
         if not claims:
             self.client.handle_invalid_jwt()
             raise user_exceptions.GetUserFailed()
+
+        if user := self.users_repository.get_user(claims.email):
+            claims.add_roles(user.roles)
 
         self.client.handle_valid_jwt()
         return claims

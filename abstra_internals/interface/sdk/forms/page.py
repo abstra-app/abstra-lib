@@ -6,6 +6,7 @@ from abstra_internals.controllers.sdk import FormSDKController
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
 from abstra_internals.interface.sdk.forms.reactive import Reactive
+from abstra_internals.repositories import users_repository
 from abstra_internals.widgets.prop_check import validate_widget_props
 from abstra_internals.widgets.widget_base import Input
 
@@ -33,7 +34,7 @@ class Page(WidgetSchema):
         self._end_program = end_program
         self._reactive_polling_interval = reactive_polling_interval
         self._context = context or {}
-        self._sdk_controller = FormSDKController()
+        self._sdk_controller = FormSDKController(users_repository=users_repository)
 
     def run(
         self,

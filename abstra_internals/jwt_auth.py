@@ -41,6 +41,13 @@ class UserClaims:
     def email(self) -> str:
         return self.claims["email"]
 
+    def add_roles(self, roles: typing.List[str]) -> None:
+        self.claims["roles"] = roles
+
+    @property
+    def roles(self) -> typing.List[str]:
+        return self.claims.get("roles", [])
+
     @classmethod
     def from_jwt(cls, jwt_str: str) -> typing.Optional["UserClaims"]:
         claims = decode_jwt(jwt_str)
