@@ -7,6 +7,7 @@ from abstra.forms import Page
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.entities.execution import Execution, RequestContext
+from abstra_internals.interface.sdk.forms.reactive import reactive
 from tests.fixtures import clear_dir, init_dir
 
 
@@ -110,3 +111,442 @@ class TestReactive(unittest.TestCase):
         second_widget = page.render({})[1]
 
         self.assertEqual(second_widget.get("text"), "b")
+
+    def test_reactive_decorator(self):
+        @reactive
+        def render(p):
+            age = p.read_number("age", key="age")
+
+            if age is not None and age > 60:
+                p.display("if")
+            else:
+                p.display("else")
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 0,
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "else",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+        render.set_values({"age": 61})
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 61,
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "if",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+        render.set_values({"age": 59})
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 59,
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "else",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+    def test_initial_value(self):
+        @reactive
+        def render(p):
+            age = p.read_number("age", key="age", initial_value=61)
+
+            if age is not None and age > 60:
+                p.display("if")
+            else:
+                p.display("else")
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 61,
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "if",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+    def test_initial_value_in_rendered_widgets(self):
+        @reactive
+        def render(p):
+            age = p.read_number("age", key="age", initial_value=61)
+
+            if age is not None and age > 60:
+                p.read("if", initial_value="if value")
+            else:
+                p.read("else", initial_value="else value")
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 61,
+                },
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "if",
+                    "label": "if",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "text-input",
+                    "mask": None,
+                    "value": "if value",
+                },
+            ],
+        )
+
+        render.set_values({"age": 59})
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 59,
+                },
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "else",
+                    "label": "else",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "text-input",
+                    "mask": None,
+                    "value": "else value",
+                },
+            ],
+        )
+
+        render.set_values({"age": 58, "else": "new value"})
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 58,
+                },
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "else",
+                    "label": "else",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "text-input",
+                    "mask": None,
+                    "value": "new value",
+                },
+            ],
+        )
+
+        render.set_values({"age": 65, "else": "new value"})
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "age",
+                    "label": "age",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "number-input",
+                    "max": None,
+                    "min": None,
+                    "value": 65,
+                },
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "if",
+                    "label": "if",
+                    "placeholder": "",
+                    "required": True,
+                    "type": "text-input",
+                    "mask": None,
+                    "value": "if value",
+                },
+            ],
+        )
+
+    def test_with_other_types_of_initial_value(self):
+        @reactive
+        def render(p):
+            checked = p.read_checkbox("checked", key="checked")
+
+            if checked:
+                p.display("if")
+            else:
+                p.display("else")
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "checked",
+                    "label": "checked",
+                    "required": True,
+                    "type": "checkbox-input",
+                    "value": False,
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "else",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+        render.set_values({"checked": True})
+
+        self.assertEqual(
+            render.render({}),
+            [
+                {
+                    "disabled": False,
+                    "errors": [],
+                    "fullWidth": False,
+                    "hint": None,
+                    "key": "checked",
+                    "label": "checked",
+                    "required": True,
+                    "type": "checkbox-input",
+                    "value": True,
+                },
+                {
+                    "fullWidth": False,
+                    "size": "medium",
+                    "text": "if",
+                    "type": "text-output",
+                },
+            ],
+        )
+
+    def test_widgets_with_options_handler(self):
+        @reactive
+        def render(p):
+            num = p.read_number("Number", initial_value=10)
+
+            if num == 10:
+                p.read_checklist(
+                    "Checklist", options=["A", "B", "C"], initial_value=["B"]
+                )
+                p.read_dropdown(
+                    "Choose a color", ["Red", "Green", "Blue"], initial_value="Blue"
+                )
+                p.read_multiple_choice(
+                    "Which programming language do you prefer?",
+                    ["Python", "JavaScript"],
+                    initial_value="Python",
+                )
+
+        widgets = render.render({})
+        self.assertEqual(
+            widgets[0],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Number",
+                "label": "Number",
+                "max": None,
+                "min": None,
+                "required": True,
+                "placeholder": "",
+                "type": "number-input",
+                "value": 10,
+            },
+        )
+
+        self.assertEqual(
+            widgets[1],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Checklist",
+                "label": "Checklist",
+                "max": 3,
+                "min": 0,
+                "options": [
+                    {"label": "A", "value": "0"},
+                    {"label": "B", "value": "1"},
+                    {"label": "C", "value": "2"},
+                ],
+                "required": True,
+                "type": "checklist-input",
+                "value": ["1"],
+            },
+        )
+
+        self.assertEqual(
+            widgets[2],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Choose a color",
+                "label": "Choose a color",
+                "max": None,
+                "min": None,
+                "multiple": False,
+                "placeholder": "",
+                "options": [
+                    {"label": "Red", "value": "0"},
+                    {"label": "Green", "value": "1"},
+                    {"label": "Blue", "value": "2"},
+                ],
+                "required": True,
+                "type": "dropdown-input",
+                "value": ["2"],
+            },
+        )
+
+        self.assertEqual(
+            widgets[3],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Which programming language do you prefer?",
+                "label": "Which programming language do you prefer?",
+                "max": None,
+                "min": None,
+                "multiple": False,
+                "options": [
+                    {"label": "Python", "value": "0"},
+                    {"label": "JavaScript", "value": "1"},
+                ],
+                "required": True,
+                "type": "multiple-choice-input",
+                "value": ["0"],
+            },
+        )

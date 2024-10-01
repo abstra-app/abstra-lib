@@ -63,7 +63,9 @@ class WidgetSchema:
         if isinstance(input, Reactive):
             answer = {**answer, **input.parse_value(form_answers)}
         elif isinstance(input, Input):
-            answer[input.key] = input.parse_value(form_answers.get(input.key))
+            answer[input.key] = input.parse_value(
+              form_answers.get(input.key, input.serialize_value())
+            )
     return answer
 
   def get_input_widgets(self):

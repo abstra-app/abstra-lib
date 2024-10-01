@@ -129,6 +129,8 @@ class OptionsHandler:
         return [self._value_from_id(id) for id in ids]
 
     def _value_from_id(self, id: str) -> object:
+        if id not in self._mappedOptions:
+            return None
         return self._mappedOptions[id]["value"]
 
     def _id_from_value(self, value: object) -> Optional[str]:

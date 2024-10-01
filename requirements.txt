@@ -22,6 +22,6 @@ pydantic>=2.6.4
 packaging
 sentry_sdk[flask]
 jsonpath-ng>=1.6.1
-gunicorn
+gunicorn==23.0.0
 userpath
 Pillow
