@@ -3,6 +3,7 @@ from typing import Literal
 
 import pkg_resources
 import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.utils import is_dev_env, is_test_env
@@ -39,6 +40,9 @@ class AbstraLogger:
                 enable_tracing=True,
                 release=pkg_resources.get_distribution("abstra").version,
                 shutdown_timeout=0,
+                disabled_integrations=[
+                    LoggingIntegration(),
+                ],
             )
         except Exception:
             print("[ABSTRA_LOGGER]Error reporting has been turned off.")
