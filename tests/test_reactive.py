@@ -550,3 +550,152 @@ class TestReactive(unittest.TestCase):
                 "value": ["0"],
             },
         )
+
+    def test_dropdown_input(self):
+        orgs = [
+            {
+                "name": "org 1",
+                "projects": [
+                    {"name": "project 1"},
+                    {"name": "project 2"},
+                    {"name": "project 3"},
+                ],
+            },
+            {
+                "name": "org 2",
+                "projects": [
+                    {"name": "project 4"},
+                    {"name": "project 5"},
+                ],
+            },
+            {
+                "name": "org 3",
+                "projects": [
+                    {"name": "project 5"},
+                    {"name": "project 1"},
+                ],
+            },
+        ]
+
+        @reactive
+        def render(p):
+            org = p.read_dropdown(
+                "Org",
+                [{"label": org.get("name"), "value": org} for org in orgs],
+                initial_value=orgs[0],
+            )
+
+            print([org.get("projects")[0].get("name")] if org is not None else None)
+
+            p.read_dropdown(
+                "Proj",
+                (
+                    [
+                        {"label": proj.get("name"), "value": proj}
+                        for proj in org.get("projects")
+                    ]
+                    if org is not None
+                    else []
+                ),
+                initial_value=org.get("projects")[0] if org is not None else None,
+            )
+
+        widgets = render.render({})
+
+        self.assertEqual(
+            widgets[0],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Org",
+                "label": "Org",
+                "max": None,
+                "min": None,
+                "multiple": False,
+                "options": [
+                    {"label": "org 1", "value": "0"},
+                    {"label": "org 2", "value": "1"},
+                    {"label": "org 3", "value": "2"},
+                ],
+                "placeholder": "",
+                "required": True,
+                "type": "dropdown-input",
+                "value": ["0"],
+            },
+        )
+
+        self.assertEqual(
+            widgets[1],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Proj",
+                "label": "Proj",
+                "max": None,
+                "min": None,
+                "multiple": False,
+                "options": [
+                    {"label": "project 1", "value": "0"},
+                    {"label": "project 2", "value": "1"},
+                    {"label": "project 3", "value": "2"},
+                ],
+                "placeholder": "",
+                "required": True,
+                "type": "dropdown-input",
+                "value": ["0"],
+            },
+        )
+
+        render.set_values({"Org": orgs[1]})
+        widgets = render.render({})
+
+        self.assertEqual(
+            widgets[0],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Org",
+                "label": "Org",
+                "max": None,
+                "min": None,
+                "multiple": False,
+                "options": [
+                    {"label": "org 1", "value": "0"},
+                    {"label": "org 2", "value": "1"},
+                    {"label": "org 3", "value": "2"},
+                ],
+                "placeholder": "",
+                "required": True,
+                "type": "dropdown-input",
+                "value": ["1"],
+            },
+        )
+
+        self.assertEqual(
+            widgets[1],
+            {
+                "disabled": False,
+                "errors": [],
+                "fullWidth": False,
+                "hint": None,
+                "key": "Proj",
+                "label": "Proj",
+                "max": None,
+                "min": None,
+                "multiple": False,
+                "options": [
+                    {"label": "project 4", "value": "0"},
+                    {"label": "project 5", "value": "1"},
+                ],
+                "placeholder": "",
+                "required": True,
+                "type": "dropdown-input",
+                "value": ["0"],
+            },
+        )
