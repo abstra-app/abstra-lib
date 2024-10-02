@@ -37,6 +37,10 @@ class ExecutionRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
+        raise NotImplementedError()
+
+    @abstractmethod
     def clear(self):
         raise NotImplementedError()
 
@@ -57,6 +61,9 @@ class EditorExecutionRepository(ExecutionRepository):
     def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
     ) -> List[Execution]:
+        raise NotImplementedError()
+
+    def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
         raise NotImplementedError()
 
     def clear(self):
@@ -120,6 +127,20 @@ class CloudExecutionRepository(ExecutionRepository):
                 appId=app_id,
                 status=status,
                 workerId=worker_id,
+            ),
+            headers=self.headers,
+        )
+
+        res.raise_for_status()
+
+        return [Execution.from_dto(dto) for dto in res.json()]
+
+    def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
+        res = requests.get(
+            f"{self.url}/executions",
+            params=dict(
+                appId=app_id,
+                status=status,
             ),
             headers=self.headers,
         )
