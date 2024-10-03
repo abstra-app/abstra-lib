@@ -14,6 +14,8 @@ from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.project.project import ActionStage
 from abstra_internals.repositories.stage_run import StageRunRepository
 
+DEFAULT_STATUS = "failed"
+
 
 def ExecutionTarget(
     *,
@@ -25,25 +27,31 @@ def ExecutionTarget(
     execution_repository: ExecutionRepository,
 ):
     ExecutionStore.set(execution, client)
+    status = DEFAULT_STATUS
 
     try:
         execution_repository.create(execution)
+
         client.handle_start(execution.id)
 
         status, exception = _execute_code(stage.file_path)
-        stage_run_repository.change_status(execution.stage_run_id, status)
-        execution.set_status(status)
-        execution_repository.update(execution)
-
         if exception:
             client.handle_failure(exception)
         else:
             client.handle_success()
 
-        workflow_engine.handle_execution_end(execution)
+    except ClientAbandoned:
+        status = "abandoned"
     except Exception as e:
+        status = "failed"
         AbstraLogger.capture_exception(e)
     finally:
+        stage_run_repository.change_status(execution.stage_run_id, status)
+        execution.set_status(status)
+        execution_repository.update(execution)
+
+        workflow_engine.handle_execution_end(execution)
+
         ExecutionStore.clear()
 
 
