@@ -1,8 +1,8 @@
 import gc
+import traceback
 from pathlib import Path
 from typing import Literal, Optional, Tuple
 
-from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.controllers.execution_client import ExecutionClient
 from abstra_internals.controllers.execution_client_form import ClientAbandoned
 from abstra_internals.controllers.execution_store import ExecutionStore
@@ -60,6 +60,13 @@ def _execute_without_exit(filepath: Path):
 Result = Tuple[Literal["finished", "abandoned", "failed"], Optional[Exception]]
 
 
+def print_exception(exception, entrypoint: str):
+    tb = exception.__traceback__
+    while tb and tb.tb_frame.f_code.co_filename not in entrypoint:
+        tb = tb.tb_next
+    traceback.print_exception(type(exception), exception, tb)
+
+
 def _execute_code(filepath: Path) -> Result:
     try:
         _execute_without_exit(filepath)
@@ -67,7 +74,7 @@ def _execute_code(filepath: Path) -> Result:
     except ClientAbandoned as e:
         return "abandoned", e
     except Exception as e:
-        print_exception(e)
+        print_exception(e, entrypoint=str(filepath))
         return "failed", e
     finally:
         gc.collect()

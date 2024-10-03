@@ -1,11 +1,11 @@
 import sys
+import traceback
 from typing import Literal
 
 import pkg_resources
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from abstra_internals.compatibility.compat_traceback import print_exception
 from abstra_internals.utils import is_dev_env, is_test_env
 
 
@@ -17,7 +17,7 @@ class DevSDK:
     @classmethod
     def capture_exception(cls, exception: Exception):
         print("[ABSTRA_LOGGER] Exception captured:", file=sys.stderr)
-        print_exception(exception)
+        traceback.print_exception(type(exception), exception, exception.__traceback__)
 
     @classmethod
     def capture_message(cls, message):
