@@ -28,7 +28,7 @@ class TestStageRunLifecycle(unittest.TestCase):
         self.controller.stage_run_repository.clear()
         return super().tearDown()
 
-    def test_switches_to_running(self):
+    def test_switches_to_running_and_then_finished(self):
         random = uuid4().hex
 
         self.hook.file_path.write_text(sleeping_code)
@@ -48,3 +48,18 @@ class TestStageRunLifecycle(unittest.TestCase):
 
         self.assertEqual(len(stage_runs), 1)
         self.assertEqual(stage_runs[0]["status"], "running")
+
+        for _ in range(10):
+            stage_runs_response = self.flask_client.get("/_editor/api/stage_runs")
+            stage_runs = stage_runs_response.get_json()
+
+            if stage_runs[0]["status"] == "finished":
+                break
+
+            sleep(0.1)
+        else:
+            self.fail("Hook did not become finished")
+
+        # Resolves race condition of thread execution: guarantee that the
+        # handle_execution_end will run before the test ends
+        sleep(0.5)

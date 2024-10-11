@@ -46,13 +46,16 @@ def ExecutionTarget(
         status = "failed"
         AbstraLogger.capture_exception(e)
     finally:
-        stage_run_repository.change_status(execution.stage_run_id, status)
-        execution.set_status(status)
-        execution_repository.update(execution)
+        try:
+            stage_run_repository.change_status(execution.stage_run_id, status)
+            execution.set_status(status)
+            execution_repository.update(execution)
 
-        workflow_engine.handle_execution_end(execution)
-
-        ExecutionStore.clear()
+            workflow_engine.handle_execution_end(execution)
+        except Exception as e_final:
+            AbstraLogger.capture_exception(e_final)
+        finally:
+            ExecutionStore.clear()
 
 
 def _execute_without_exit(filepath: Path):
