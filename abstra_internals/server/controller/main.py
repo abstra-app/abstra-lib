@@ -28,6 +28,7 @@ from abstra_internals.repositories import (
     kv_repository,
     requirements_repository,
     roles_repository,
+    stage_run_repository,
     users_repository,
 )
 from abstra_internals.repositories.email import EmailRepository
@@ -48,10 +49,7 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.repositories.requirements import RequirementsRepository
 from abstra_internals.repositories.roles import RolesRepository
-from abstra_internals.repositories.stage_run import (
-    StageRunRepository,
-    stage_run_repository_factory,
-)
+from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.server.controller.linters import check_linters
 from abstra_internals.settings import Settings
@@ -138,7 +136,7 @@ class MainController:
         ensure_gitignore(Settings.root_path)
 
         self.workflow_engine = WorkflowEngine(
-            stage_run_repository=stage_run_repository_factory(),
+            stage_run_repository=stage_run_repository,
             execution_repository=execution_repository,
             email_repository=email_repository,
             execution_logs_repository=execution_logs_repository,
@@ -150,7 +148,7 @@ class MainController:
         self.users_repository = users_repository
         self.roles_repository = roles_repository
         self.env_vars_repository = env_vars_repository
-        self.stage_run_repository = stage_run_repository_factory()
+        self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
         self.requirements_repository = requirements_repository
         self.execution_logs_repository = execution_logs_repository
