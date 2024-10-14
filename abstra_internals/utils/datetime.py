@@ -10,3 +10,7 @@ def from_utc_iso_string(isostring: str) -> datetime:
     return datetime.strptime(isostring, "%Y-%m-%dT%H:%M:%S.%fZ").replace(
         tzinfo=timezone.utc
     )
+
+
+def now_str():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -13,6 +13,7 @@ from abstra_internals.modules import import_as_new
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.project.project import ActionStage
 from abstra_internals.repositories.stage_run import StageRunRepository
+from abstra_internals.utils.datetime import now_str
 
 DEFAULT_STATUS = "failed"
 
@@ -30,6 +31,8 @@ def ExecutionTarget(
     status = DEFAULT_STATUS
 
     try:
+        print(f"[ABSTRA] {now_str()} - Execution started")
+
         execution_repository.create(execution)
 
         client.handle_start(execution.id)
@@ -46,6 +49,8 @@ def ExecutionTarget(
         status = "failed"
         AbstraLogger.capture_exception(e)
     finally:
+        print(f"[ABSTRA] {now_str()} - Execution {status}")
+
         try:
             stage_run_repository.change_status(execution.stage_run_id, status)
             execution.set_status(status)
