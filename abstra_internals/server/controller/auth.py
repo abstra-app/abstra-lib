@@ -13,7 +13,7 @@ from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.jwt_signer import JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.server.controller.main import MainController
-from abstra_internals.usage import player_usage
+from abstra_internals.usage import send_player_usage
 from abstra_internals.utils.email import is_valid_email
 
 
@@ -104,16 +104,16 @@ class AuthController:
             AbstraLogger.capture_exception(e)
             return 500, None
 
-    def oidc_verify(self, access_token: str) -> Optional[str]:
+    def oidc_verify(self, access_token: str) -> Tuple[Optional[str], Optional[str]]:
         try:
             email = get_oidc_userinfo_email(access_token)
             if not email:
-                return None
+                return None, None
 
-            return self.jwt_repository.sign(email)
+            return self.jwt_repository.sign(email), email
         except Exception as e:
             AbstraLogger.capture_exception(e)
-            return None
+            return None, None
 
 
 def get_player_bp(main_controller: MainController):
@@ -125,7 +125,6 @@ def get_player_bp(main_controller: MainController):
     )
 
     @bp.post("/authenticate")
-    @player_usage
     def _authenticate():
         data = flask.request.get_json(force=True)
         if not data:
@@ -139,10 +138,10 @@ def get_player_bp(main_controller: MainController):
         if not ok:
             return flask.abort(400)
 
+        send_player_usage(event="_authenticate", payload={"email": email})
         return {"ok": True}
 
     @bp.post("/verify")
-    @player_usage
     def _verify():
         data = flask.request.get_json(force=True)
         if not data:
@@ -157,11 +156,11 @@ def get_player_bp(main_controller: MainController):
         if not jwt:
             return flask.abort(status)
 
+        send_player_usage(event="_verify", payload={"email": email})
         return {"jwt": jwt}
 
     @bp.post("/oidc-verify")
-    @player_usage
-    def _oidc_access():
+    def _oidc_verify():
         data = flask.request.get_json(force=True)
         if not data:
             return flask.abort(400)
@@ -170,10 +169,11 @@ def get_player_bp(main_controller: MainController):
         if not access_token:
             return flask.abort(400)
 
-        jwt = controller.oidc_verify(access_token)
+        jwt, email = controller.oidc_verify(access_token)
         if not jwt:
             return flask.abort(404)
 
+        send_player_usage(event="_oidc_verify", payload={"email": email})
         return {"jwt": jwt}
 
     return bp

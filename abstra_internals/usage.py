@@ -53,6 +53,7 @@ def editor_manual_usage(*, event: str, payload: Dict):
 
 
 # PLAYER
+@threaded
 def send_player_usage(*, event: str, payload: Dict, auth: Optional[str] = None):
     if SIDECAR_URL is None:
         return
