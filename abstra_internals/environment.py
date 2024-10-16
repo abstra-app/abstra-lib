@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+from uuid import uuid4
 
 WORKERS = os.getenv("ABSTRA_WORKERS", 2)
 THREADS = os.getenv("ABSTRA_THREADS", 20)
@@ -32,8 +34,8 @@ def WORKER_UUID():
     return os.getenv(__WORKER_UUID_ENV__)
 
 
-def set_WORKER_UUID(worker_uuid: str):
-    os.environ[__WORKER_UUID_ENV__] = worker_uuid
+def set_WORKER_UUID(worker_uuid: Optional[str] = None):
+    os.environ[__WORKER_UUID_ENV__] = worker_uuid or uuid4().__str__()
 
 
 __SERVER_UUID_ENV__ = "ABSTRA_SERVER_UUID"
@@ -43,8 +45,8 @@ def SERVER_UUID():
     return os.getenv(__SERVER_UUID_ENV__)
 
 
-def set_SERVER_UUID(server_uuid: str):
-    os.environ[__SERVER_UUID_ENV__] = server_uuid
+def set_SERVER_UUID(server_uuid: Optional[str] = None):
+    os.environ[__SERVER_UUID_ENV__] = server_uuid or uuid4().__str__()
 
 
 def OIDC_CLIENT_ID():

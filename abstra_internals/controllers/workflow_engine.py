@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional
 
 from abstra_internals.controllers.execution import ExecutionController
-from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.email_templates import thread_waiting_template
 from abstra_internals.entities.execution import Execution
@@ -30,10 +29,10 @@ class WorkflowEngine(IWorkflowEngine):
         email_repository: EmailRepository,
         execution_logs_repository: ExecutionLogsRepository,
     ):
+        self.execution_logs_repository = execution_logs_repository
         self.stage_run_repository = stage_run_repository
         self.execution_repository = execution_repository
         self.email_repository = email_repository
-        self.execution_logs_repository = execution_logs_repository
 
     @threaded
     def handle_execution_end(self, execution: Execution):
@@ -124,9 +123,6 @@ class WorkflowEngine(IWorkflowEngine):
         )
 
     def _pub(self, parent_stage_run: StageRun, stage_run_dtos: List[Dict]):
-        # As we don't have a queue yet, we just create the next stage runs
-        # and consume them immediatelly
-
         for stage_run in self.stage_run_repository.create_next(
             parent_stage_run, stage_run_dtos
         ):
@@ -147,14 +143,14 @@ class WorkflowEngine(IWorkflowEngine):
 
     def run_script(self, stage: ScriptStage, stage_run: StageRun):
         ExecutionController(
-            stage=stage,
-            request=None,
-            client=BasicClient(),
             workflow_engine=self,
-            target_stage_run_id=stage_run.id,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        ).run()
+        ).run(
+            wait=False,
+            stage=stage,
+            target_stage_run_id=stage_run.id,
+        )
 
     def run_control(self, stage: ControlStage, stage_run: StageRun):
         next_stage_run_dtos: List[Dict] = []

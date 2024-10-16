@@ -130,3 +130,6 @@ venv.bak/
 
 # version
 VERSION
+
+# docker
+.docker

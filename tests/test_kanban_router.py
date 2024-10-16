@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from abstra_internals.controllers.kanban import DataRequest, DataRequestFilter
 from abstra_internals.repositories.project.project import (
     HookStage,
     ProjectRepository,
@@ -7,7 +8,6 @@ from abstra_internals.repositories.project.project import (
     WorkflowTransition,
 )
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from abstra_internals.server.controller.kanban import DataRequest, DataRequestFilter
 from abstra_internals.utils.datetime import to_utc_iso_string
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 

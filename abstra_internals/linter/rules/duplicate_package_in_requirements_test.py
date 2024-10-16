@@ -1,10 +1,10 @@
 from unittest import TestCase
 
+from abstra_internals.controllers.main import MainController
 from abstra_internals.linter.rules.duplicate_package_in_requirements import (
     DuplicatePackagesInRequirements,
 )
 from abstra_internals.repositories.requirements import RequirementsRepository
-from abstra_internals.server.controller.main import MainController
 from tests.fixtures import clear_dir, init_dir
 
 

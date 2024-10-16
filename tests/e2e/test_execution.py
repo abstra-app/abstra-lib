@@ -1,7 +1,7 @@
 import unittest
 from uuid import uuid4
 
-from abstra_internals.server.controller.main import MainController
+from abstra_internals.controllers.main import MainController
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 happy_case = """

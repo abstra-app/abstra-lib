@@ -7,11 +7,11 @@ from abstra_internals.controllers.execution_store import (
     ExecutionNotFound,
     ExecutionStore,
 )
+from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution import Execution
 from abstra_internals.env_masker import GLOBAL_MASKER
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.server.controller.main import MainController
 from abstra_internals.utils import serialize
 
 

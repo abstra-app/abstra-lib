@@ -3,11 +3,11 @@ from unittest import TestCase
 import pkg_resources
 from pkg_resources import get_distribution as gd
 
+from abstra_internals.controllers.main import MainController
 from abstra_internals.linter.rules.missing_abstra_in_requirements import (
     AbstraVersionInRequirementsIsBehindInstalled,
     MissingAbstraInRequirements,
 )
-from abstra_internals.server.controller.main import MainController
 from tests.fixtures import clear_dir, init_dir
 
 

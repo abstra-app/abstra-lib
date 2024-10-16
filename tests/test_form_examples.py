@@ -2,8 +2,8 @@ import json
 import unittest
 from pathlib import Path
 
+from abstra_internals.controllers.main import MainController
 from abstra_internals.repositories.project.project import FormStage, NotificationTrigger
-from abstra_internals.server.controller.main import MainController
 from abstra_internals.stdio_patcher import StdioPatcher
 from tests.fixtures import clear_dir, init_dir
 from tests.utils import assert_form
@@ -18,7 +18,7 @@ class TestFormExamples(unittest.TestCase):
         )
         self.root = init_dir()
         main_controller = MainController()
-        StdioPatcher.apply(debug=True, main_controller=main_controller)
+        StdioPatcher.apply(main_controller=main_controller)
 
     def tearDown(self) -> None:
         clear_dir(self.root)

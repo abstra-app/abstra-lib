@@ -1,9 +1,9 @@
 from abstra_internals.cloud.application import CustomApplication
-from abstra_internals.cloud.hooks import GunicornOptionsBuilder
+from abstra_internals.cloud.ghooks import GunicornOptionsBuilder
+from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DEFAULT_PORT
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.apps import get_cloud_app
-from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import SettingsController
 from abstra_internals.stdio_patcher import StdioPatcher
 

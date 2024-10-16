@@ -3,32 +3,33 @@ from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
 
+from abstra_internals.controllers.main import MainController
+from abstra_internals.fs_watcher import reload_files_on_change
 from abstra_internals.repositories.project.project import (
     HookStage,
     Project,
     ProjectRepository,
 )
-from abstra_internals.server.fs_watcher import reload_files_on_change
 from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
 
 
 class TestHotReloadLocalModules(TestCase):
     def setUp(self):
         self.root = init_dir()
-        self.project = Project.create()
 
-        file = "hook.py"
         hook = HookStage(
             id="hook1",
-            file=file,
             path="hook",
+            file="hook.py",
             title="Hook 1",
             workflow_transitions=[],
             workflow_position=(0, 0),
         )
-        self.project.hooks.append(hook)
-        ProjectRepository.save(self.project)
+        project = Project.create()
+        project.hooks.append(hook)
+        ProjectRepository.save(project)
 
+        self.controller = MainController()
         self.client = get_editor_flask_client()
 
     def tearDown(self) -> None:
@@ -45,7 +46,7 @@ class TestHotReloadLocalModules(TestCase):
         time.sleep(0.5)
         hook_path.touch()
 
-        has_reloaded = reload_files_on_change(self.project, first_write)
+        has_reloaded = reload_files_on_change(self.controller, first_write)
         self.assertFalse(has_reloaded)
 
         second_response = self.client.post("/_hooks/hook")
@@ -65,7 +66,7 @@ class TestHotReloadLocalModules(TestCase):
         time.sleep(0.5)
         dependency_path.touch()
 
-        has_reloaded = reload_files_on_change(self.project, first_write)
+        has_reloaded = reload_files_on_change(self.controller, first_write)
         self.assertTrue(has_reloaded)
 
         second_response = self.client.post("/_hooks/hook")

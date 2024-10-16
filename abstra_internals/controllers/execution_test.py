@@ -1,12 +1,10 @@
 from pathlib import Path
 from unittest import TestCase
 
-from abstra_internals.controllers.execution import (
-    DetachedExecutionController,
-    ExecutionController,
-)
+from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
+from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
 from abstra_internals.entities.execution import RequestContext
 from abstra_internals.repositories.email import TestEmailRepository
 from abstra_internals.repositories.execution import EditorExecutionRepository
@@ -30,6 +28,10 @@ class ExecutionControllerTest(TestCase):
             execution_repository=self.execution_repository,
             email_repository=TestEmailRepository(),
             execution_logs_repository=LocalExecutionLogsRepository(),
+        )
+
+        self.detached_workflow_engine = DetachedWorkflowEngine(
+            stage_run_repository=self.stage_run_repository
         )
 
         self.request_context = RequestContext(
@@ -60,26 +62,26 @@ class ExecutionControllerTest(TestCase):
 
     def test_run_initial_returns_dto(self):
         ExecutionController(
-            stage=self.stage,
-            client=self.hook_client,
-            target_stage_run_id=None,
-            request=self.request_context,
             workflow_engine=self.workflow_engine,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        ).run().wait()
+        ).run(
+            stage=self.stage,
+            client=self.hook_client,
+            request=self.request_context,
+        )
 
         self.assertEqual(self.hook_client.response["status"], 200)
 
     def test_run_detached_returns_dto(self):
-        DetachedExecutionController(
-            stage=self.stage,
-            client=self.hook_client,
-            target_stage_run_id=None,
-            request=self.request_context,
-            workflow_engine=self.workflow_engine,
+        ExecutionController(
+            workflow_engine=self.detached_workflow_engine,
             stage_run_repository=self.stage_run_repository,
             execution_repository=self.execution_repository,
-        ).run().wait()
+        ).test(
+            stage=self.stage,
+            client=self.hook_client,
+            request=self.request_context,
+        )
 
         self.assertEqual(self.hook_client.response["status"], 200)

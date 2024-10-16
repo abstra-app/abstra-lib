@@ -4,9 +4,9 @@ import tempfile
 import typing
 from pathlib import Path
 
+from abstra_internals.controllers.main import MainController
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.apps import get_cloud_app, get_local_app
-from abstra_internals.server.controller.main import MainController
 from abstra_internals.settings import SettingsController
 
 

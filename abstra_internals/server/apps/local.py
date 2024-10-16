@@ -3,10 +3,10 @@ import threading
 import flask
 import flask_cors
 
+from abstra_internals.controllers.main import MainController
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.blueprints.editor import get_editor_bp
 from abstra_internals.server.blueprints.player import get_player_bp
-from abstra_internals.server.controller.main import MainController
 
 
 def get_local_app(controller: MainController) -> flask.Flask:

@@ -1,8 +1,8 @@
 from unittest import TestCase
 
+from abstra_internals.controllers.kanban import KanbanController
 from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from abstra_internals.server.controller.kanban import KanbanController
 from tests.fixtures import clear_dir, init_dir
 
 

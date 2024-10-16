@@ -1,8 +1,8 @@
 import unittest
 
 from abstra.forms import display
+from abstra_internals.controllers.main import MainController
 from abstra_internals.interface.sdk.user_exceptions import UnboundSDK
-from abstra_internals.server.controller.main import MainController
 from tests.fixtures import clear_dir, init_dir
 
 

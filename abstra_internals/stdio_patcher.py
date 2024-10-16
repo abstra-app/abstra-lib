@@ -1,7 +1,7 @@
 import sys
 
 from abstra_internals.controllers.execution_stdio import StdioController
-from abstra_internals.server.controller.main import MainController
+from abstra_internals.controllers.main import MainController
 
 
 class UnboundPthread(Exception):

@@ -4,13 +4,9 @@ import unittest
 from collections import deque
 from json import dumps, loads
 
-from abstra_internals.controllers.execution import DetachedExecutionController
-from abstra_internals.controllers.execution_client import BasicClient
-from abstra_internals.controllers.workflow_engine import WorkflowEngine
-from abstra_internals.entities.execution import RequestContext
-from abstra_internals.repositories.email import TestEmailRepository
+from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
 from abstra_internals.repositories.execution import EditorExecutionRepository
-from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
 from abstra_internals.repositories.project.project import FormStage
 from abstra_internals.repositories.stage_run import LocalStageRunRepository
 
@@ -72,26 +68,19 @@ def assert_form(
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     ws = MockWebSocket(browser_msgs)
 
-    request_data = RequestContext(body="{}", headers={}, method="GET", query_params={})
-
     stage_run_repository = LocalStageRunRepository()
     execution_repository = EditorExecutionRepository()
-    workflow_engine = WorkflowEngine(
+    workflow_engine = DetachedWorkflowEngine(
         stage_run_repository=stage_run_repository,
-        execution_repository=execution_repository,
-        email_repository=TestEmailRepository(),
-        execution_logs_repository=LocalExecutionLogsRepository(),
     )
 
-    DetachedExecutionController(
-        stage=form_json,
-        request=request_data,
-        client=BasicClient(),
-        target_stage_run_id=None,
+    ExecutionController(
         workflow_engine=workflow_engine,
         stage_run_repository=stage_run_repository,
         execution_repository=execution_repository,
-    ).run()
+    ).test(
+        stage=form_json,
+    )
 
     for msg in iter_messages(ws, msgs, test_case):
         pass

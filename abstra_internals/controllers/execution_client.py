@@ -23,8 +23,7 @@ class ExecutionClient(abc.ABC):
         raise NotImplementedError()
 
 
-# TODO: inherit all clients from BasicClient - same constructor
-class BasicClient(ExecutionClient):
+class HeadlessClient(ExecutionClient):
     def handle_lock_failed(self, status: str) -> None:
         pass
 

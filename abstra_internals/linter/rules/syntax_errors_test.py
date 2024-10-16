@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest import TestCase
 
+from abstra_internals.controllers.main import MainController
 from abstra_internals.linter.rules.syntax_errors import SyntaxErrors
-from abstra_internals.server.controller.main import MainController
 from tests.fixtures import clear_dir, init_dir
 
 

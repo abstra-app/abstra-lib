@@ -9,9 +9,9 @@ from abstra_internals.controllers.execution import (
     LockFailedException,
     UnsetThreadException,
 )
-from abstra_internals.controllers.execution_client import BasicClient
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_client_hook import HookClient
+from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution import context_from_flask
 from abstra_internals.environment import (
     BUILD_ID,
@@ -24,20 +24,17 @@ from abstra_internals.environment import (
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.cache.control import Cache
-from abstra_internals.server.controller import (
-    access_control as access_control_controller,
-)
-from abstra_internals.server.controller import auth as auth_controller
-from abstra_internals.server.controller import kanban as kanban_controller
-from abstra_internals.server.controller import stage_runs as stage_runs_controller
-from abstra_internals.server.controller import users as user_controller
-from abstra_internals.server.controller import workflows as workflows_controller
-from abstra_internals.server.controller.main import MainController
 from abstra_internals.server.guards.role_guard import (
     Guard,
     PathArgSelector,
     QueryArgSelector,
 )
+from abstra_internals.server.routes import access_control as ac_router
+from abstra_internals.server.routes import auth as auth_router
+from abstra_internals.server.routes import kanban as kanban_router
+from abstra_internals.server.routes import stage_runs as stage_runs_router
+from abstra_internals.server.routes import users as user_router
+from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.usage import player_usage
@@ -56,22 +53,22 @@ def get_player_bp(controller: MainController):
     bp = flask.Blueprint("player", __name__)
     sock = flask_sock.Sock(bp)
 
-    auth_bp = auth_controller.get_player_bp(controller)
+    auth_bp = auth_router.get_player_bp(controller)
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
 
-    user_bp = user_controller.get_player_bp(controller)
+    user_bp = user_router.get_player_bp(controller)
     bp.register_blueprint(user_bp, url_prefix="/_user")
 
-    kanban_bp = kanban_controller.get_player_bp(controller)
+    kanban_bp = kanban_router.get_player_bp(controller)
     bp.register_blueprint(kanban_bp, url_prefix="/_kanban")
 
-    workflow_bp = workflows_controller.get_player_bp(controller)
+    workflow_bp = workflows_router.get_player_bp(controller)
     bp.register_blueprint(workflow_bp, url_prefix="/_workflows")
 
-    stage_run_bp = stage_runs_controller.get_player_bp(controller)
+    stage_run_bp = stage_runs_router.get_player_bp(controller)
     bp.register_blueprint(stage_run_bp, url_prefix="/_stage-runs")
 
-    access_control_bp = access_control_controller.get_player_bp(controller)
+    access_control_bp = ac_router.get_player_bp(controller)
     bp.register_blueprint(access_control_bp, url_prefix="/_access-control")
 
     @bp.route("/_healthcheck")
@@ -134,14 +131,15 @@ def get_player_bp(controller: MainController):
             )
 
             ExecutionController(
-                stage=form,
-                client=client,
-                request=request_context,
                 workflow_engine=controller.workflow_engine,
                 stage_run_repository=controller.stage_run_repository,
                 execution_repository=controller.execution_repository,
+            ).run(
+                stage=form,
+                client=client,
+                request=request_context,
                 target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-            ).run().wait()
+            )
 
         except LockFailedException:
             pass
@@ -230,14 +228,15 @@ def get_player_bp(controller: MainController):
         client = HookClient(request_context)
 
         ExecutionController(
-            stage=hook,
-            client=client,
-            request=request_context,
             workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
+        ).run(
+            stage=hook,
+            client=client,
+            request=request_context,
             target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-        ).run().wait()
+        )
 
         return flask.Response(
             status=client.response["status"],
@@ -265,14 +264,13 @@ def get_player_bp(controller: MainController):
             flask.abort(404)
 
         ExecutionController(
-            request=None,
-            stage=job,
-            client=BasicClient(),
-            target_stage_run_id=None,
             workflow_engine=controller.workflow_engine,
             stage_run_repository=controller.stage_run_repository,
             execution_repository=controller.execution_repository,
-        ).run()
+        ).run(
+            stage=job,
+            wait=False,
+        )
 
         return {"status": "running"}
 

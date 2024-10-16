@@ -20,7 +20,7 @@ def serialize(obj, **kwargs):
     return simplejson.dumps(obj, ignore_nan=True, **kwargs)
 
 
-def deserialize(st) -> object:
+def deserialize(st) -> t.Any:
     return simplejson.loads(st)
 
 

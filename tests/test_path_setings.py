@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from abstra_internals.server.controller.main import MainController
+from abstra_internals.controllers.main import MainController
 from tests.fixtures import clear_dir, init_dir
 
 
