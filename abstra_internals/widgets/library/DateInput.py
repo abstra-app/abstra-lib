@@ -29,7 +29,10 @@ class DateInput(Input):
 
     def serialize_value(self) ->str:
         if isinstance(self.value, datetime.date):
-            return self.value.isoformat()
+            date = self.value.isoformat()
+            if 'T' in date:
+                return date.split('T')[0]
+            return date
         if isinstance(self.value, time.struct_time):
             return datetime.datetime.fromtimestamp(time.mktime(self.value)
                 ).date().isoformat()
