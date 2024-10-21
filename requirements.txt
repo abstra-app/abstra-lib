@@ -25,3 +25,4 @@ jsonpath-ng>=1.6.1
 gunicorn==23.0.0
 userpath
 Pillow
+puremagic==1.28

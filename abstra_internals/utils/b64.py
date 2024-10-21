@@ -1,11 +1,11 @@
 import base64
 import binascii
-import imghdr
 import io
 import pathlib
 import re
 from typing import Union
 
+import puremagic
 from PIL.Image import Image
 
 from abstra_internals.utils.file import get_random_filepath
@@ -19,7 +19,7 @@ def is_base_64(unknown_string: str) -> bool:
         unknown_string = unknown_string.split(",")[1]
     try:
         base64_bytes = base64.b64decode(unknown_string, validate=True)
-        image_type = imghdr.what(None, h=base64_bytes)
+        image_type = puremagic.what(None, h=base64_bytes)
         if image_type in ["jpeg", "png", "gif", "bmp", "webp"]:
             return True
         else:
