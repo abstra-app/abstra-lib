@@ -1,5 +1,6 @@
 import ast
 import importlib.util
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,11 +9,24 @@ from tempfile import mkdtemp
 from typing import Dict, List, Literal, Mapping, Optional, Set
 
 from importlib_metadata import packages_distributions
-from pkg_resources import get_distribution
+from pkg_resources import DistributionNotFound, get_distribution, working_set
 
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.format import pip_name
+
+
+def stream_output(cmd: List[str]):
+    process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
+    if process.stdout is None:
+        return
+    for line in iter(process.stdout.readline, ""):
+        yield line
+    code = process.wait()
+    if code != 0:
+        yield "__ABSTRA_STREAM_ERROR__"
 
 
 def check_package(package_name) -> Literal["builtin", "installed", "unknown"]:
@@ -51,7 +65,11 @@ class Requirement:
             return None
 
     def to_dict(self):
-        return {"name": self.name, "version": self.version}
+        return {
+            "name": self.name,
+            "version": self.version,
+            "installed_version": self.installed_version(),
+        }
 
     @staticmethod
     def from_dict(data: dict):
@@ -59,6 +77,34 @@ class Requirement:
 
     def __hash__(self) -> int:
         return hash(f"{self.name}/{self.version}")
+
+    @staticmethod
+    def installed() -> List["Requirement"]:
+        output = subprocess.check_output([sys.executable, "-m", "pip", "freeze"])
+        lines = output.decode("utf-8").splitlines()
+        reqs = [Requirement.from_text(line) for line in lines]
+        return [req for req in reqs if req is not None]
+
+    def installed_version(self):
+        try:
+            return get_distribution(self.name).version
+        except DistributionNotFound:
+            return None
+
+    def install(self):
+        if self.installed_version():
+            return
+        yield from stream_output(
+            [sys.executable, "-m", "pip", "install", self.to_text()]
+        )
+
+    def uninstall(self):
+        if not self.installed_version():
+            return
+        yield from stream_output(
+            [sys.executable, "-m", "pip", "uninstall", "-y", self.name]
+        )
+        working_set.by_key.pop(self.name, None)  # dirty hack
 
 
 @dataclass
@@ -114,6 +160,8 @@ class Requirements:
         return Requirements(libraries=[Requirement.from_dict(lib) for lib in data])
 
     def add(self, name: str, version: Optional[str] = None):
+        if self.has(name, version):
+            return
         self.libraries.append(Requirement(name=name, version=version))
 
     def update(self, name: str, version: str):

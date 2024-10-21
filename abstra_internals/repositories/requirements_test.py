@@ -83,7 +83,10 @@ class TestRequirementsRepository(TestCase):
                     Requirement(name="bar", version="1.0.0"),
                 ]
             ).to_dict(),
-            [{"name": "foo", "version": None}, {"name": "bar", "version": "1.0.0"}],
+            [
+                {"installed_version": None, "name": "foo", "version": None},
+                {"installed_version": None, "name": "bar", "version": "1.0.0"},
+            ],
         )
 
     def test_from_dict(self):
@@ -108,6 +111,11 @@ class TestRequirementsRepository(TestCase):
             requirements.libraries,
             [Requirement(name="foo"), Requirement(name="bar", version="1.0.0")],
         )
+
+    def test_add_no_duplicates(self):
+        requirements = Requirements(libraries=[Requirement(name="foo")])
+        requirements.add("foo")
+        self.assertEqual(requirements.libraries, [Requirement(name="foo")])
 
     def test_valid_has_without_version(self):
         requirements = Requirements(libraries=[Requirement(name="foo")])
@@ -179,3 +187,15 @@ class TestRequirementsRepository(TestCase):
         requirements = Requirements(libraries=[Requirement(name="foo")])
         requirements.update("bar", "0.0.1")
         self.assertEqual(requirements.libraries, [Requirement(name="foo")])
+
+    def test_is_installed_when_installed(self):
+        req = Requirement(name="requests")
+        self.assertIsNotNone(req.installed_version())
+
+    def test_is_installed_when_not_installed(self):
+        req = Requirement(name="not_installed")
+        self.assertIsNone(req.installed_version())
+
+    def test_is_installed_when_installed_with_different_version(self):
+        req = Requirement(name="requests", version="0.0.1234")
+        self.assertNotEqual(req.installed_version(), req.version)

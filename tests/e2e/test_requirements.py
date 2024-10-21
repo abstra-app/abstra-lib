@@ -24,7 +24,10 @@ class TestRequirementsApi(TestCase):
         requirements = self.client.get("/_editor/api/requirements").get_json()
         self.assertEqual(
             requirements,
-            [{"name": "foo", "version": "1.0.0"}, {"name": "bar", "version": None}],
+            [
+                {"name": "foo", "version": "1.0.0", "installed_version": None},
+                {"name": "bar", "version": None, "installed_version": None},
+            ],
         )
 
     def test_post_requirement(self):
@@ -36,7 +39,10 @@ class TestRequirementsApi(TestCase):
             for requirement in requirements
             if requirement["name"] != "abstra"
         ]
-        self.assertEqual(non_abstra_requirements, [{"name": "foo", "version": None}])
+        self.assertEqual(
+            non_abstra_requirements,
+            [{"installed_version": None, "name": "foo", "version": None}],
+        )
 
         self.assertTrue(Path("requirements.txt").exists())
 
@@ -44,7 +50,9 @@ class TestRequirementsApi(TestCase):
         Path("requirements.txt").write_text("foo==1.0.0\nbar\n\n# baz")
         self.client.delete("/_editor/api/requirements/foo")
         requirements = self.client.get("/_editor/api/requirements").get_json()
-        self.assertEqual(requirements, [{"name": "bar", "version": None}])
+        self.assertEqual(
+            requirements, [{"installed_version": None, "name": "bar", "version": None}]
+        )
         self.assertTrue(Path("requirements.txt").exists())
         self.assertEqual(Path("requirements.txt").read_text(encoding="utf-8"), "bar")
 
