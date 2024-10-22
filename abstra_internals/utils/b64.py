@@ -3,10 +3,11 @@ import binascii
 import io
 import pathlib
 import re
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
+if TYPE_CHECKING:
+    from PIL.Image import Image
 import puremagic
-from PIL.Image import Image
 
 from abstra_internals.utils.file import get_random_filepath
 
@@ -28,7 +29,7 @@ def is_base_64(unknown_string: str) -> bool:
         return False
 
 
-def to_base64(file: Union[str, io.IOBase, pathlib.Path, Image]) -> Union[str, None]:
+def to_base64(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> Union[str, None]:
     if not file:
         return ""
 
@@ -51,6 +52,8 @@ def to_base64(file: Union[str, io.IOBase, pathlib.Path, Image]) -> Union[str, No
 
         # path to file
         return f"{BASE_64_PREFIX}{file}"
+
+    from PIL.Image import Image
 
     if isinstance(file, Image):
         _, file_path = get_random_filepath()

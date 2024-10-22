@@ -1,10 +1,12 @@
 import io
 import pathlib
 import shutil
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import requests
-from PIL.Image import Image
+
+if TYPE_CHECKING:
+    from PIL.Image import Image
 
 from abstra_internals.constants import get_uploads_dir
 from abstra_internals.controllers.execution_store import ExecutionStore
@@ -284,7 +286,7 @@ FILE_TYPES = {
 }
 
 
-def convert_file(file: Union[str, io.IOBase, pathlib.Path, Image]) -> str:
+def convert_file(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> str:
     if not file:
         return ""
 
@@ -298,6 +300,8 @@ def convert_file(file: Union[str, io.IOBase, pathlib.Path, Image]) -> str:
 
         # path to file
         return upload_file(open(file, "rb"))
+
+    from PIL.Image import Image
 
     if isinstance(file, Image):
         _, file_path = get_random_filepath()
