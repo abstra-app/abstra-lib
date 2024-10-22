@@ -16,7 +16,7 @@ from abstra_internals.environment import (
     set_WORKER_UUID,
 )
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.execution_logs import StdioLogEntry
+from abstra_internals.repositories.execution_logs import LogEntry
 from abstra_internals.utils import get_internal_id
 
 
@@ -66,7 +66,7 @@ class GunicornOptionsBuilder:
             # update executions
             for execution in killed_executions:
                 # Add log entry
-                err_log = StdioLogEntry(
+                err_log = LogEntry(
                     execution_id=execution.id,
                     created_at=datetime.datetime.now(),
                     payload={"text": text},
@@ -100,7 +100,7 @@ class GunicornOptionsBuilder:
             # update executions
             for execution in exited_execs:
                 # Add log entry
-                err_log = StdioLogEntry(
+                err_log = LogEntry(
                     execution_id=execution.id,
                     created_at=datetime.datetime.now(),
                     payload={"text": "[ABORTED] Server exited"},

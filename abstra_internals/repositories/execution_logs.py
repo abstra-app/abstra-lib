@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 import requests
 
@@ -16,37 +16,8 @@ from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_stri
 from abstra_internals.utils.dot_abstra import LOCAL_LOGS_FOLDER
 
 
-class LogEntryFactory:
-    @staticmethod
-    def from_dto(dto: Dict) -> "LogEntry":
-        if dto.get("event") == "stdout" or dto.get("event") == "stderr":
-            return StdioLogEntry(
-                execution_id=dto["executionId"],
-                created_at=from_utc_iso_string(dto["createdAt"]),
-                event=dto["event"],
-                payload=dto["payload"],
-                sequence=dto["sequence"],
-            )
-        elif dto.get("event") == "form-message":
-            return FormEventLogEntry(
-                execution_id=dto["executionId"],
-                created_at=from_utc_iso_string(dto["createdAt"]),
-                payload=dto["payload"],
-                sequence=dto["sequence"],
-            )
-        elif dto.get("event") == "unhandled-exception":
-            return UnhandledExceptionLogEntry(
-                execution_id=dto["executionId"],
-                created_at=from_utc_iso_string(dto["createdAt"]),
-                payload=dto["payload"],
-                sequence=dto["sequence"],
-            )
-        else:
-            raise Exception("Invalid log entry type")
-
-
 @dataclass
-class StdioLogEntry:
+class LogEntry:
     execution_id: str
     created_at: datetime
     event: Literal["stderr", "stdout"]
@@ -62,45 +33,21 @@ class StdioLogEntry:
             "sequence": self.sequence,
         }
 
-
-@dataclass
-class FormEventLogEntry:
-    execution_id: str
-    created_at: datetime
-    sequence: int
-    payload: Dict[Literal["messageType", "messagePayload"], Union[str, Dict]]
-    event: Literal["form-message"] = "form-message"
-
-    def to_dto(self) -> Dict[str, Any]:
-        return {
-            "executionId": self.execution_id,
-            "createdAt": to_utc_iso_string(self.created_at),
-            "event": self.event,
-            "payload": self.payload,
-            "sequence": self.sequence,
-        }
+    @staticmethod
+    def from_dto(dto: Dict) -> "LogEntry":
+        if dto.get("event") == "stdout" or dto.get("event") == "stderr":
+            return LogEntry(
+                execution_id=dto["executionId"],
+                created_at=from_utc_iso_string(dto["createdAt"]),
+                event=dto["event"],
+                payload=dto["payload"],
+                sequence=dto["sequence"],
+            )
+        else:
+            raise Exception("Invalid log entry type")
 
 
-@dataclass
-class UnhandledExceptionLogEntry:
-    execution_id: str
-    created_at: datetime
-    payload: Dict[Literal["text"], str]
-    sequence: int
-    event: Literal["unhandled-exception"] = "unhandled-exception"
-
-    def to_dto(self) -> Dict[str, Any]:
-        return {
-            "executionId": self.execution_id,
-            "createdAt": to_utc_iso_string(self.created_at),
-            "event": self.event,
-            "payload": self.payload,
-            "sequence": self.sequence,
-        }
-
-
-LogEntry = Union[StdioLogEntry, FormEventLogEntry, UnhandledExceptionLogEntry]
-LogEvent = Literal["stdout", "stderr", "form-message", "unhandled-exception"]
+LogEvent = Literal["stdout", "stderr"]
 LogsDTO = TypedDict("LogsDTO", {"type": str, "text": str})
 
 
@@ -115,7 +62,7 @@ class ExecutionLogsRepository(ABC):
         self, execution_id: str, event: Literal["stdout", "stderr"], text: str
     ):
         self.save(
-            StdioLogEntry(
+            LogEntry(
                 execution_id=execution_id,
                 created_at=datetime.now(),
                 event=event,
@@ -140,9 +87,6 @@ class ExecutionLogsRepository(ABC):
         logs = self.get(execution_id)
         output: List[LogsDTO] = []
         for entry in logs:
-            if isinstance(entry, FormEventLogEntry):
-                continue
-
             text = entry.payload.get("text")
             if not text:
                 continue
@@ -195,7 +139,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
                     dto = json.loads(line)
                     if event and dto["event"] != event:
                         continue
-                    logs.append(LogEntryFactory.from_dto(dto))
+                    logs.append(LogEntry.from_dto(dto))
                 return logs
         except Exception as e:
             AbstraLogger.capture_exception(e)
@@ -238,7 +182,7 @@ class RemoteExecutionLogsRepository(ExecutionLogsRepository):
 
         response.raise_for_status()
 
-        return [LogEntryFactory.from_dto(log) for log in response.json()]
+        return [LogEntry.from_dto(log) for log in response.json()]
 
 
 def execution_logs_repository_factory() -> ExecutionLogsRepository:

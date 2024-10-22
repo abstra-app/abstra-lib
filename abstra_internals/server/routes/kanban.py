@@ -9,8 +9,6 @@ from abstra_internals.controllers.workflows import get_path, make_stage_dto
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.repositories.execution_logs import (
     LogEntry,
-    StdioLogEntry,
-    UnhandledExceptionLogEntry,
 )
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.stage_run import StageRun
@@ -54,10 +52,7 @@ def get_editor_bp(main_controller: MainController):
         project = project_repository.load()
 
         def kanban_log_filter(log: LogEntry):
-            return (
-                isinstance(log, StdioLogEntry)
-                or isinstance(log, UnhandledExceptionLogEntry)
-            ) and log.payload["text"].strip() != ""
+            return (isinstance(log, LogEntry)) and log.payload["text"].strip() != ""
 
         def entry_from_run(stage_run: StageRun, logs: List[LogEntry]):
             stage = project.get_stage(stage_run.stage)
