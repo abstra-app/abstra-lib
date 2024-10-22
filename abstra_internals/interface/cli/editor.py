@@ -37,9 +37,6 @@ def editor(
         kwargs=dict(controller=controller),
     ).start()
 
-    if not reloading:
-        browser_open_editor()
-
     if load_dotenv:
         _load_dotenv(Settings.root_path / ".env")
 
@@ -53,5 +50,8 @@ def editor(
     server = make_server(host=HOST, port=Settings.server_port, threaded=True, app=app)
 
     LocalReloader.set_server(server)
+
+    if not reloading:
+        browser_open_editor()
 
     server.serve_forever()
