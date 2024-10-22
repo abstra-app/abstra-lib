@@ -1,0 +1,2 @@
+import"./vue-router.c501632a.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="8eec7c15-2d11-49a3-a64c-1559e396170d",e._sentryDebugIdIdentifier="sentry-dbid-8eec7c15-2d11-49a3-a64c-1559e396170d")}catch{}})();const c=(...e)=>window.fetch(...e);export{c as l};
+//# sourceMappingURL=fetch.8a78e708.js.map
