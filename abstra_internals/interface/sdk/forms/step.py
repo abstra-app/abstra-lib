@@ -109,13 +109,13 @@ def run_back_page(
     responses: StepsResponse,
 ):
     steps_info = get_page_info(steps, next_page)
-    old_response: PageResponse = responses.pop()
+    responses.pop()
     response = (
-        next_page.run(context=old_response, steps_info=steps_info)
+        next_page.run(context=responses.acc, steps_info=steps_info)
         if steps_info["current"] == 1
         else next_page.run(
             actions=["i18n_back_action", "i18n_next_action"],
-            context=old_response,
+            context=responses.acc,
             steps_info=steps_info,
         )
     )

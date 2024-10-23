@@ -36,7 +36,7 @@ class StepsResponse:
             elif isinstance(res, dict):
                 self.acc.update(res)
 
-    def pop(self, i: int = -1) -> PageResponse:
-        step_response = self.responses.pop(i)
+    def pop(self) -> PageResponse:
+        step_response = self.responses.pop()
         self.__update_acc()
         return step_response
