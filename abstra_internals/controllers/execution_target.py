@@ -31,9 +31,8 @@ def ExecutionTarget(
     status = DEFAULT_STATUS
 
     try:
-        print(f"[ABSTRA] {now_str()} - Execution started")
-
         execution_repository.create(execution)
+        print(f"[ABSTRA] {now_str()} - Execution started")
 
         client.handle_start(execution.id)
 

@@ -1,0 +1,41 @@
+ARG PYTHON_VERSION="3.9"
+ARG DEBIAN_VERSION="bullseye"
+
+FROM --platform=linux/x86_64 python:${PYTHON_VERSION}-slim-${DEBIAN_VERSION} AS base
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV PORT 8002
+ENV WORKERS 2
+ENV THREADS 20
+
+# Install system dependencies
+RUN apt-get update -y --fix-missing
+RUN apt-get install -y htop vim git curl
+
+# Install extra dependencies before implementing presets
+RUN apt-get install --no-install-suggests --no-install-recommends -y poppler-utils ffmpeg libsm6 libxext6
+
+# Install extra dependencies for the project
+COPY ./requirements-tests.txt /requirements-tests.txt
+RUN pip install --no-cache-dir --compile -r /requirements-tests.txt
+
+RUN mkdir /abstra-lib
+
+# copy setup files
+COPY ./setup.py /abstra-lib/setup.py
+COPY ./README.md /abstra-lib/README.md
+
+# copy and install requirements
+COPY ./requirements.txt /abstra-lib/requirements.txt
+RUN pip install --no-cache-dir --compile -r /abstra-lib/requirements.txt
+
+# copy the modules
+COPY ./abstra /abstra-lib/abstra
+COPY ./abstra_internals /abstra-lib/abstra_internals
+COPY ./abstra_statics /abstra-lib/abstra_statics
+
+# install the package
+RUN pip install -e /abstra-lib
+
+# mounted at runtime
+WORKDIR /project
