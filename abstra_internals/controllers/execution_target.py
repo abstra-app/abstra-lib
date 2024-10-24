@@ -75,9 +75,10 @@ def _execute_without_exit(filepath: Path):
 Result = Tuple[Literal["finished", "abandoned", "failed"], Optional[Exception]]
 
 
-def print_exception(exception, entrypoint: str):
+def print_exception(exception: Exception, entrypoint: Path):
     tb = exception.__traceback__
-    while tb and tb.tb_frame.f_code.co_filename not in entrypoint:
+    # tb.tb_frame.f_code.co_filename returns "c:" instead of "C:" on Windows
+    while tb and str(entrypoint).lower() != tb.tb_frame.f_code.co_filename.lower():
         tb = tb.tb_next
     traceback.print_exception(type(exception), exception, tb)
 
@@ -89,7 +90,7 @@ def _execute_code(filepath: Path) -> Result:
     except ClientAbandoned as e:
         return "abandoned", e
     except Exception as e:
-        print_exception(e, entrypoint=str(filepath))
+        print_exception(e, entrypoint=filepath)
         return "failed", e
     finally:
         gc.collect()
