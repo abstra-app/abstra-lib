@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Set
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.env_vars import EnvVarsRepository
+from abstra_internals.services.env_vars import EnvVarsRepository
 
 
 class AddEnvToEnvFile(LinterFix):

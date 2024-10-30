@@ -131,9 +131,8 @@ def get_player_bp(controller: MainController):
             )
 
             ExecutionController(
+                repositories=controller.repositories,
                 workflow_engine=controller.workflow_engine,
-                stage_run_repository=controller.stage_run_repository,
-                execution_repository=controller.execution_repository,
             ).run(
                 stage=form,
                 client=client,
@@ -228,9 +227,8 @@ def get_player_bp(controller: MainController):
         client = HookClient(request_context)
 
         ExecutionController(
+            repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
         ).run(
             stage=hook,
             client=client,
@@ -264,9 +262,8 @@ def get_player_bp(controller: MainController):
             flask.abort(404)
 
         ExecutionController(
+            repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
         ).run(
             stage=job,
             wait=False,

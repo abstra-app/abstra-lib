@@ -1,4 +1,3 @@
-import unittest
 from unittest.mock import ANY
 
 from abstra.forms import ListItemSchema, Page
@@ -6,6 +5,7 @@ from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.entities.execution import Execution, RequestContext
 from abstra_internals.widgets.library import ListInput
+from tests.fixtures import BaseTest
 
 default_text_input = {
     "type": "text-input",
@@ -22,8 +22,9 @@ default_text_input = {
 }
 
 
-class TestListInput(unittest.TestCase):
+class TestListInput(BaseTest):
     def setUp(self):
+        super().setUp()
         self.maxDiff = None
         request_context = RequestContext(
             body="", query_params={}, headers={}, method="GET"
@@ -38,7 +39,7 @@ class TestListInput(unittest.TestCase):
             stage_run_id="mock_sr_id",
             stage_id="mock_stage_id",
         )
-        ExecutionStore.set(execution, self.client)
+        ExecutionStore.set(execution, self.client, self.repositories)
 
     def tearDown(self) -> None:
         ExecutionStore.clear()

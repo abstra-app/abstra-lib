@@ -1,8 +1,6 @@
-import unittest
 from uuid import uuid4
 
-from abstra_internals.controllers.main import MainController
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 happy_case = """
 import abstra.hooks as ah
@@ -20,15 +18,11 @@ sys.exit(1)
 """
 
 
-class TestExecution(unittest.TestCase):
+class TestExecution(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.controller = MainController()
+        super().setUp()
         self.hook = self.controller.create_hook("New hook", "hook.py")
-        self.flask_client = get_editor_flask_client()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        self.flask_client = self.get_editor_flask_client()
 
     def test_happy_case(self):
         random = uuid4().hex

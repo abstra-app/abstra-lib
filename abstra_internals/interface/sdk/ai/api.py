@@ -3,7 +3,7 @@ import json
 import pathlib
 from typing import Dict, List, Optional, Union
 
-from abstra_internals.repositories import ai_repository
+from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.utils.b64 import is_base_64, to_base64
 from abstra_internals.utils.string import to_snake_case
 
@@ -94,7 +94,8 @@ def prompt(
         function = _build_function_tool_call(format)
         tools.append({"type": "function", "function": function})
 
-    response = ai_repository.prompt(messages, tools, temperature)
+    sdk_ctx = ExecutionStore.get_by_thread()
+    response = sdk_ctx.repositories.ai.prompt(messages, tools, temperature)
 
     if response.get("error"):
         raise Exception(response["error"])

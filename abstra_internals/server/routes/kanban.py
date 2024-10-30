@@ -75,9 +75,8 @@ def get_editor_bp(main_controller: MainController):
             flask.abort(404)
 
         ExecutionController(
+            repositories=main_controller.repositories,
             workflow_engine=main_controller.workflow_engine,
-            stage_run_repository=main_controller.stage_run_repository,
-            execution_repository=main_controller.execution_repository,
         ).run(
             wait=False,
             stage=job,
@@ -99,9 +98,8 @@ def get_editor_bp(main_controller: MainController):
             flask.abort(400)
 
         ExecutionController(
+            repositories=main_controller.repositories,
             workflow_engine=main_controller.workflow_engine,
-            stage_run_repository=main_controller.stage_run_repository,
-            execution_repository=main_controller.execution_repository,
         ).run(
             wait=False,
             stage=script,
@@ -182,9 +180,8 @@ def get_player_bp(main_controller: MainController):
             flask.abort(404)
 
         ExecutionController(
+            repositories=main_controller.repositories,
             workflow_engine=main_controller.workflow_engine,
-            stage_run_repository=main_controller.stage_run_repository,
-            execution_repository=main_controller.execution_repository,
         ).run(
             wait=False,
             stage=job,
@@ -208,9 +205,8 @@ def get_player_bp(main_controller: MainController):
             flask.abort(400)
 
         ExecutionController(
+            repositories=main_controller.repositories,
             workflow_engine=main_controller.workflow_engine,
-            stage_run_repository=main_controller.stage_run_repository,
-            execution_repository=main_controller.execution_repository,
         ).run(
             wait=False,
             stage=script,

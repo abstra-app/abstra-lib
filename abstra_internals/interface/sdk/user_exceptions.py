@@ -1,9 +1,3 @@
-class UnboundSDK(Exception):
-    def __init__(self):
-        self.message = "Files importing Abstra SDK must be run from the Abstra Editor."
-        super().__init__(self.message)
-
-
 class UnsetThread(Exception):
     def __init__(self):
         self.message = ""
@@ -36,3 +30,7 @@ class MissingDependencyError(Exception):
     def __init__(self, package: str):
         self.message = f"The package {package} is required to use this feature. Please install it by running `pip install {package}` and add it to your requirements."
         super().__init__(self.message)
+
+
+class ExecutionNotFound(Exception):
+    pass

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS
 
 
 @dataclass
@@ -47,10 +47,3 @@ class LocalConnectorsRepository(ConnectorsRepository):
         if headers is None:
             raise Exception("You must be logged in to execute a table query")
         return headers
-
-
-def connectors_repository_factory() -> ConnectorsRepository:
-    if SIDECAR_URL is None:
-        return LocalConnectorsRepository(CLOUD_API_CLI_URL)
-    else:
-        return ProductionConnectorsRepository(SIDECAR_URL)

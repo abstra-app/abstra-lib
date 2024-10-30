@@ -1,11 +1,9 @@
+from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.interface.sdk.user_exceptions import MissingDependencyError
-from abstra_internals.repositories.connectors import ConnectorsRepository
 from abstra_internals.utils.datetime import from_utc_iso_string
 
 
-def create_abstra_google_credentials(
-    repository: ConnectorsRepository, connection_name: str
-):
+def create_abstra_google_credentials(connection_name: str):
     try:
         from google.auth.credentials import (  # type: ignore
             Credentials as BaseCredentials,
@@ -14,11 +12,9 @@ def create_abstra_google_credentials(
         raise MissingDependencyError("google-auth")
 
     class AbstraGoogleCredentials(BaseCredentials):
-        def __init__(
-            self, repository: ConnectorsRepository, connection_name: str
-        ) -> None:
+        def __init__(self, connection_name: str) -> None:
             super().__init__()
-            self.repository = repository
+            self.repository = ExecutionStore.get_by_thread().repositories.connectors
             self.connection_name = connection_name
 
         def refresh(self, request):
@@ -27,4 +23,4 @@ def create_abstra_google_credentials(
             self.expiry = from_utc_iso_string(dto.expiresAt)
             self.expiry = self.expiry.replace(tzinfo=None)
 
-    return AbstraGoogleCredentials(repository, connection_name)
+    return AbstraGoogleCredentials(connection_name)

@@ -1,39 +1,16 @@
 import time
 from datetime import datetime
 from pathlib import Path
-from unittest import TestCase
 
-from abstra_internals.controllers.main import MainController
 from abstra_internals.fs_watcher import reload_files_on_change
-from abstra_internals.repositories.project.project import (
-    HookStage,
-    Project,
-    ProjectRepository,
-)
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 
-class TestHotReloadLocalModules(TestCase):
+class TestHotReloadLocalModules(BaseTest):
     def setUp(self):
-        self.root = init_dir()
-
-        hook = HookStage(
-            id="hook1",
-            path="hook",
-            file="hook.py",
-            title="Hook 1",
-            workflow_transitions=[],
-            workflow_position=(0, 0),
-        )
-        project = Project.create()
-        project.hooks.append(hook)
-        ProjectRepository.save(project)
-
-        self.controller = MainController()
-        self.client = get_editor_flask_client()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        super().setUp()
+        self.controller.create_hook("hook", "hook.py")
+        self.client = self.get_editor_flask_client()
 
     def test_do_not_update_modules_when_changing_entrypoint(self):
         _create_base_files()

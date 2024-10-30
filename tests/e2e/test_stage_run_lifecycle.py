@@ -1,10 +1,8 @@
-import unittest
 from time import sleep
 from uuid import uuid4
 
-from abstra_internals.controllers.main import MainController
 from abstra_internals.threaded import threaded
-from tests.fixtures import get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 sleeping_code = """
 import abstra.hooks as ah
@@ -16,17 +14,11 @@ ah.send_response(headers["authorization"])
 """
 
 
-class TestStageRunLifecycle(unittest.TestCase):
+class TestStageRunLifecycle(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.controller = MainController()
-        self.controller.stage_run_repository.clear()
+        super().setUp()
+        self.flask_client = self.get_editor_flask_client()
         self.hook = self.controller.create_hook("New hook", "hook.py")
-        self.flask_client = get_editor_flask_client()
-
-    def tearDown(self) -> None:
-        self.controller.stage_run_repository.clear()
-        return super().tearDown()
 
     def test_switches_to_running_and_then_finished(self):
         random = uuid4().hex
@@ -59,7 +51,3 @@ class TestStageRunLifecycle(unittest.TestCase):
             sleep(0.1)
         else:
             self.fail("Hook did not become finished")
-
-        # Resolves race condition of thread execution: guarantee that the
-        # handle_execution_end will run before the test ends
-        sleep(0.5)

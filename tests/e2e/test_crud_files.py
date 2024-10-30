@@ -1,16 +1,12 @@
-import unittest
 from os.path import join
 
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 
-class TestCRUDFiles(unittest.TestCase):
+class TestCRUDFiles(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.client = get_editor_flask_client()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        super().setUp()
+        self.client = self.get_editor_flask_client()
 
     def test_api_update(self):
         self.client.put(

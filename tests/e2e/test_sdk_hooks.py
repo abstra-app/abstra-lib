@@ -1,9 +1,6 @@
-import unittest
 from uuid import uuid4
 
-from abstra_internals.controllers.main import MainController
-from tests.fixtures import get_editor_flask_client, init_dir
-from tests.test_local_stage_run_repository import clear_dir
+from tests.fixtures import BaseTest
 
 code_headers = """
 import abstra.hooks as ah
@@ -14,15 +11,11 @@ ah.send_response(headers["authorization"])
 """
 
 
-class TestHooksSDK(unittest.TestCase):
+class TestHooksSDK(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.controller = MainController()
+        super().setUp()
         self.hook = self.controller.create_hook("New hook", "hook.py")
-        self.flask_client = get_editor_flask_client()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        self.flask_client = self.get_editor_flask_client()
 
     def test_insensitive_headers(self):
         random = uuid4().hex

@@ -1,12 +1,10 @@
 import shutil
 import time
 from pathlib import Path
-from unittest import TestCase
 from unittest.mock import ANY
 
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 
 def sort_response(response: dict):
@@ -20,18 +18,12 @@ def sort_response(response: dict):
     return response
 
 
-class TestWorkflowA(TestCase):
+class TestWorkflowA(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.stage_run_repository = LocalStageRunRepository()
-        self.client = get_editor_flask_client()
+        super().setUp()
         self.maxDiff = None
-
+        self.client = self.get_editor_flask_client()
         (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
-
-    def tearDown(self) -> None:
-        self.stage_run_repository.clear()
-        clear_dir(self.root)
 
     def create_project_a_py_files(self):
         shutil.copytree(

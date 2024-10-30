@@ -1,17 +1,17 @@
 import json
+from dataclasses import dataclass
 from io import BytesIO
 from typing import Dict, List, Optional, Tuple, Union
 
 from abstra_internals.contract.forms import ValidationResult
+from abstra_internals.controllers.execution_client import ExecutionClient
+from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_client_hook import HookClient
-from abstra_internals.controllers.execution_store import (
-    ExecutionNotFound,
-    ExecutionStore,
-)
+from abstra_internals.entities.execution import Execution
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.execution import ExecutionRepository
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.stage_run import StageRun, StageRunRepository
 from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.utils import is_json_serializable
@@ -19,18 +19,36 @@ from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 from abstra_internals.utils.json import to_json_serializable
 
 
+@dataclass
+class ExecutionSDKContext:
+    repositories: Repositories
+    client: ExecutionClient
+    execution: Execution
+    thread_id: int
+
+    def __post_init__(self):
+        self.workflow_sdk = WorkflowSDKController(
+            self.execution,
+            self.repositories.stage_run,
+            self.repositories.execution,
+        )
+
+        if isinstance(self.client, FormClient):
+            self.form_sdk = FormSDKController(self.client, self.repositories.users)
+
+        if isinstance(self.client, HookClient):
+            self.hook_sdk = HookSDKController(self.client)
+
+
 class HookSDKController:
-    def get_current_client(self) -> HookClient:
-        try:
-            return ExecutionStore.get_hook_client()
-        except ExecutionNotFound:
-            raise user_exceptions.UnboundSDK()
+    def __init__(self, client: HookClient) -> None:
+        self.client = client
 
     def set_response(self, status: int, body: str, headers: Dict[str, str]):
-        self.get_current_client().set_response(status, body, headers)
+        self.client.set_response(status, body, headers)
 
     def get_raw_request(self) -> Tuple[str, Dict[str, str], CaseInsensitiveDict]:
-        request = self.get_current_client().get_request()
+        request = self.client.get_request()
         return (
             request["body"],
             request["query_params"],
@@ -70,13 +88,9 @@ class HookSDKController:
 
 
 class FormSDKController:
-    def __init__(self, users_repository: UsersRepository) -> None:
+    def __init__(self, client: FormClient, users_repository: UsersRepository) -> None:
         self.users_repository = users_repository
-
-        try:
-            self.client = ExecutionStore.get_form_client()
-        except ExecutionNotFound:
-            raise user_exceptions.UnboundSDK()
+        self.client = client
 
     def get_user(self, force_refresh: bool) -> UserClaims:
         data = self.client.request_auth(force_refresh)
@@ -129,21 +143,16 @@ class FormSDKController:
 class WorkflowSDKController:
     def __init__(
         self,
+        execution: Execution,
         stage_run_repository: StageRunRepository,
         execution_repository: ExecutionRepository,
-        project_repository: ProjectRepository,
     ) -> None:
+        self.execution = execution
         self.stage_run_repo = stage_run_repository
         self.execution_repo = execution_repository
-        self.project_repo = project_repository
-        self.project = project_repository.load()
 
     def _get_current_stage_run(self) -> StageRun:
-        try:
-            execution = ExecutionStore.get_by_thread().execution
-            return self.stage_run_repo.get(execution.stage_run_id)
-        except ExecutionNotFound:
-            raise user_exceptions.UnboundSDK()
+        return self.stage_run_repo.get(self.execution.stage_run_id)
 
     def get_data(self, key: Optional[str]) -> Union[Dict[str, object], object]:
         stage_run = self._get_current_stage_run()

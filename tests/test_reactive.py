@@ -1,4 +1,3 @@
-import unittest
 from collections import deque
 
 import simplejson
@@ -8,7 +7,7 @@ from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.entities.execution import Execution, RequestContext
 from abstra_internals.interface.sdk.forms.reactive import reactive
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import BaseTest
 
 
 class MockWS:
@@ -26,9 +25,9 @@ class MockWS:
         self.browser_messages.append(message)
 
 
-class TestReactive(unittest.TestCase):
+class TestReactive(BaseTest):
     def setUp(self):
-        self.root = init_dir()
+        super().setUp()
         self.mock_ws = MockWS()
         request_context = RequestContext(
             body="", query_params={}, headers={}, method="GET"
@@ -43,11 +42,11 @@ class TestReactive(unittest.TestCase):
             stage_run_id="mock_sr_id",
             stage_id="mock_stage_id",
         )
-        ExecutionStore.set(execution, self.form_client)
+        ExecutionStore.set(execution, self.form_client, self.repositories)
 
     def tearDown(self) -> None:
-        clear_dir(self.root)
         ExecutionStore.clear()
+        super().tearDown()
 
     def test_rendering_with_static_part_initial_value(self):
         self.mock_ws.add_browser_message(

@@ -1,18 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import List
 
 import requests
 
-from abstra_internals.entities.execution import (
-    Execution,
-    ExecutionStatus,
-)
-from abstra_internals.environment import (
-    SERVER_UUID,
-    SIDECAR_HEADERS,
-    SIDECAR_URL,
-    WORKER_UUID,
-)
+from abstra_internals.entities.execution import Execution, ExecutionStatus
+from abstra_internals.environment import SERVER_UUID, SIDECAR_HEADERS, WORKER_UUID
 from abstra_internals.utils.dot_abstra import EXECUTIONS_FOLDER
 from abstra_internals.utils.file_manager import FileManager
 
@@ -45,7 +37,7 @@ class ExecutionRepository(ABC):
         raise NotImplementedError()
 
 
-class EditorExecutionRepository(ExecutionRepository):
+class LocalExecutionRepository(ExecutionRepository):
     def __init__(self):
         self.manager = FileManager(directory=EXECUTIONS_FOLDER, model=Execution)
 
@@ -70,14 +62,9 @@ class EditorExecutionRepository(ExecutionRepository):
         self.manager.clear()
 
 
-class CloudExecutionRepository(ExecutionRepository):
-    def __init__(
-        self,
-        url: str,
-        headers: Dict[str, str],
-    ):
+class ProductionExecutionRepository(ExecutionRepository):
+    def __init__(self, url: str):
         self.url = url
-        self.headers = headers
 
     def create(self, execution: Execution) -> None:
         request_dto = dict(
@@ -89,7 +76,7 @@ class CloudExecutionRepository(ExecutionRepository):
         res = requests.post(
             f"{self.url}/executions",
             json=request_dto,
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         res.raise_for_status()
@@ -104,7 +91,7 @@ class CloudExecutionRepository(ExecutionRepository):
         res = requests.patch(
             f"{self.url}/executions/{execution.id}",
             json=request_dto,
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         res.raise_for_status()
@@ -113,7 +100,7 @@ class CloudExecutionRepository(ExecutionRepository):
         res = requests.patch(
             f"{self.url}/executions/{execution_id}",
             json=dict(status="failed"),
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         res.raise_for_status()
@@ -128,7 +115,7 @@ class CloudExecutionRepository(ExecutionRepository):
                 status=status,
                 workerId=worker_id,
             ),
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         res.raise_for_status()
@@ -142,7 +129,7 @@ class CloudExecutionRepository(ExecutionRepository):
                 appId=app_id,
                 status=status,
             ),
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         res.raise_for_status()
@@ -151,13 +138,3 @@ class CloudExecutionRepository(ExecutionRepository):
 
     def clear(self):
         raise NotImplementedError()
-
-
-def execution_repository_factory() -> ExecutionRepository:
-    if SIDECAR_URL:
-        return CloudExecutionRepository(
-            url=SIDECAR_URL,
-            headers=SIDECAR_HEADERS,
-        )
-    else:
-        return EditorExecutionRepository()

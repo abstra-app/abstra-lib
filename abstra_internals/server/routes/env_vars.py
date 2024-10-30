@@ -2,6 +2,7 @@ import flask
 
 from abstra_internals.controllers.env_vars import PatchClientEnvVarBody
 from abstra_internals.controllers.main import MainController
+from abstra_internals.services.env_vars import EnvVarsRepository
 from abstra_internals.usage import editor_usage
 
 
@@ -11,9 +12,7 @@ def get_editor_bp(main_controller: MainController):
     # 1s pooling in this route
     @bp.get("/")
     def _get_env_vars():
-        return [
-            env_var.to_dict() for env_var in main_controller.env_vars_repository.list()
-        ]
+        return [env_var.to_dict() for env_var in EnvVarsRepository.list()]
 
     @bp.patch("/")
     @editor_usage
@@ -24,11 +23,9 @@ def get_editor_bp(main_controller: MainController):
         body = PatchClientEnvVarBody.from_dict(flask.request.json)
         for change in body.changes:
             if change.change == "create" or change.change == "update":
-                main_controller.env_vars_repository.set(
-                    name=change.name, value=change.value
-                )
+                EnvVarsRepository.set(name=change.name, value=change.value)
             elif change.change == "delete":
-                main_controller.env_vars_repository.unset(name=change.name)
+                EnvVarsRepository.unset(name=change.name)
 
         return {"status": "ok"}
 

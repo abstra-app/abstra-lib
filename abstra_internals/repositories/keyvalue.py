@@ -2,10 +2,7 @@ import abc
 
 import requests
 
-from abstra_internals.environment import (
-    SIDECAR_HEADERS,
-    SIDECAR_URL,
-)
+from abstra_internals.environment import SIDECAR_HEADERS
 
 
 class KVRepository(abc.ABC):
@@ -54,10 +51,3 @@ class LocalKVRepository(KVRepository):
 
     def set(self, key: str, value: str):
         self.kvs[key] = value
-
-
-def kv_repository_factory() -> KVRepository:
-    if SIDECAR_URL is None:
-        return LocalKVRepository()
-    else:
-        return ProductionKVRepository(SIDECAR_URL)

@@ -4,7 +4,7 @@ from typing import List, Optional
 from dotenv import load_dotenv
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.env_vars import EnvVarsRepository
+from abstra_internals.services.env_vars import EnvVarsRepository
 from abstra_internals.settings import Settings
 
 

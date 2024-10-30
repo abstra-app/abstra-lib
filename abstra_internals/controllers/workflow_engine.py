@@ -4,9 +4,7 @@ from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.email_templates import thread_waiting_template
 from abstra_internals.entities.execution import Execution
-from abstra_internals.repositories.email import EmailRepository
-from abstra_internals.repositories.execution import ExecutionRepository
-from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
     ActionStage,
     ConditionStage,
@@ -17,22 +15,13 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
     WorkflowStage,
 )
-from abstra_internals.repositories.stage_run import StageRun, StageRunRepository
+from abstra_internals.repositories.stage_run import StageRun
 from abstra_internals.threaded import threaded
 
 
 class WorkflowEngine(IWorkflowEngine):
-    def __init__(
-        self,
-        stage_run_repository: StageRunRepository,
-        execution_repository: ExecutionRepository,
-        email_repository: EmailRepository,
-        execution_logs_repository: ExecutionLogsRepository,
-    ):
-        self.execution_logs_repository = execution_logs_repository
-        self.stage_run_repository = stage_run_repository
-        self.execution_repository = execution_repository
-        self.email_repository = email_repository
+    def __init__(self, repositories: Repositories):
+        self.repositories = repositories
 
     @threaded
     def handle_execution_end(self, execution: Execution):
@@ -42,7 +31,7 @@ class WorkflowEngine(IWorkflowEngine):
         if not stage:
             raise Exception(f"Stage {execution.stage_id} not found")
 
-        stage_run = self.stage_run_repository.get(execution.stage_run_id)
+        stage_run = self.repositories.stage_run.get(execution.stage_run_id)
 
         transition_type = f"{stage.type_name}s:{execution.status}"
         next_stage_run_dtos = self._follow_action_transitions(
@@ -116,14 +105,14 @@ class WorkflowEngine(IWorkflowEngine):
         if not recipient_emails:
             return
 
-        self.email_repository.send(
+        self.repositories.email.send(
             thread_waiting_template.generate_email(
                 recipient_emails=recipient_emails, stage_run=stage_run, form=stage
             )
         )
 
     def _pub(self, parent_stage_run: StageRun, stage_run_dtos: List[Dict]):
-        for stage_run in self.stage_run_repository.create_next(
+        for stage_run in self.repositories.stage_run.create_next(
             parent_stage_run, stage_run_dtos
         ):
             self._consume(stage_run)
@@ -144,8 +133,7 @@ class WorkflowEngine(IWorkflowEngine):
     def run_script(self, stage: ScriptStage, stage_run: StageRun):
         ExecutionController(
             workflow_engine=self,
-            stage_run_repository=self.stage_run_repository,
-            execution_repository=self.execution_repository,
+            repositories=self.repositories,
         ).run(
             wait=False,
             stage=stage,
@@ -154,7 +142,7 @@ class WorkflowEngine(IWorkflowEngine):
 
     def run_control(self, stage: ControlStage, stage_run: StageRun):
         next_stage_run_dtos: List[Dict] = []
-        self.stage_run_repository.change_status(stage_run.id, "running")
+        self.repositories.stage_run.change_status(stage_run.id, "running")
 
         if isinstance(stage, ConditionStage):
             next_stage_run_dtos = self._follow_condition_transitions(stage, stage_run)
@@ -162,5 +150,5 @@ class WorkflowEngine(IWorkflowEngine):
         if isinstance(stage, IteratorStage):
             next_stage_run_dtos = self._follow_iterator_transitions(stage, stage_run)
 
-        self.stage_run_repository.change_status(stage_run.id, "finished")
+        self.repositories.stage_run.change_status(stage_run.id, "finished")
         self._pub(stage_run, next_stage_run_dtos)

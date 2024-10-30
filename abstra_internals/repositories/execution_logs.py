@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 import requests
 
-from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.serializer import SerializationHelper
 from abstra_internals.threaded import threaded
@@ -146,10 +146,12 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
             return []
 
 
-class RemoteExecutionLogsRepository(ExecutionLogsRepository):
-    def __init__(self, url: str, headers: Dict[str, str]):
+class ProductionExecutionLogsRepository(ExecutionLogsRepository):
+    def __init__(
+        self,
+        url: str,
+    ):
         self.url = url
-        self.headers = headers
         self.sequence = 0
 
     @threaded
@@ -164,7 +166,7 @@ class RemoteExecutionLogsRepository(ExecutionLogsRepository):
         res = requests.post(
             f"{self.url}/executions/{log_entry.execution_id}/logs",
             json=dto,
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         res.raise_for_status()
@@ -177,16 +179,9 @@ class RemoteExecutionLogsRepository(ExecutionLogsRepository):
         response = requests.get(
             f"{self.url}/executions/{execution_id}/logs",
             params={"event": event} if event else None,
-            headers=self.headers,
+            headers=SIDECAR_HEADERS,
         )
 
         response.raise_for_status()
 
         return [LogEntry.from_dto(log) for log in response.json()]
-
-
-def execution_logs_repository_factory() -> ExecutionLogsRepository:
-    if SIDECAR_URL:
-        return RemoteExecutionLogsRepository(url=SIDECAR_URL, headers=SIDECAR_HEADERS)
-    else:
-        return LocalExecutionLogsRepository()

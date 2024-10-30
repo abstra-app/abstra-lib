@@ -6,9 +6,8 @@ from json import dumps, loads
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
-from abstra_internals.repositories.execution import EditorExecutionRepository
 from abstra_internals.repositories.project.project import FormStage
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
+from tests.fixtures import BaseTest
 
 
 class MockWebSocket:
@@ -59,7 +58,7 @@ def iter_messages(
 
 
 def assert_form(
-    test_case: unittest.TestCase,
+    test_case: BaseTest,
     form_json: FormStage,
     msg_list: list,
     execution_id: str,
@@ -68,16 +67,9 @@ def assert_form(
     browser_msgs = [msg[1] for msg in msgs if msg[0] == "browser"]
     ws = MockWebSocket(browser_msgs)
 
-    stage_run_repository = LocalStageRunRepository()
-    execution_repository = EditorExecutionRepository()
-    workflow_engine = DetachedWorkflowEngine(
-        stage_run_repository=stage_run_repository,
-    )
-
     ExecutionController(
-        workflow_engine=workflow_engine,
-        stage_run_repository=stage_run_repository,
-        execution_repository=execution_repository,
+        repositories=test_case.repositories,
+        workflow_engine=DetachedWorkflowEngine(test_case.repositories),
     ).test(
         stage=form_json,
     )

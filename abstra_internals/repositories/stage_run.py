@@ -9,7 +9,7 @@ import requests
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
-from abstra_internals.environment import SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS
 from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
 from abstra_internals.utils.dot_abstra import STAGE_RUNS_FOLDER
 from abstra_internals.utils.file_manager import FileManager
@@ -550,7 +550,10 @@ class LocalStageRunRepository(StageRunRepository):
         return True
 
 
-class RemoteStageRunRepository(StageRunRepository):
+class ProductionStageRunRepository(StageRunRepository):
+    def __init__(self, url: str):
+        self.url = url
+
     def _request(
         self,
         method: str,
@@ -562,7 +565,7 @@ class RemoteStageRunRepository(StageRunRepository):
         headers: Mapping[str, str] = SIDECAR_HEADERS
         r = requests.request(
             method=method,
-            url=f"{SIDECAR_URL}/stage-runs{path}",
+            url=f"{self.url}/stage-runs{path}",
             headers=headers,
             json=body,
             params=params,
@@ -676,10 +679,3 @@ class RemoteStageRunRepository(StageRunRepository):
         r.raise_for_status()
 
         return True
-
-
-def stage_run_repository_factory() -> StageRunRepository:
-    if SIDECAR_URL is None:
-        return LocalStageRunRepository()
-    else:
-        return RemoteStageRunRepository()

@@ -1,18 +1,12 @@
 from pathlib import Path
-from unittest import TestCase
 
-from abstra_internals.controllers.main import MainController
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 
-class TestRequirementsApi(TestCase):
+class TestRequirementsApi(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.client = get_editor_flask_client()
-        self.controller = MainController()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        super().setUp()
+        self.client = self.get_editor_flask_client()
 
     def test_initial_requirements(self):
         requirements = self.client.get("/_editor/api/requirements").get_json()

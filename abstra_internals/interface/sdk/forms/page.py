@@ -2,11 +2,10 @@ import sys
 from typing import Callable, Dict, List, Optional, Union
 
 from abstra_internals.contract import forms_contract
-from abstra_internals.controllers.sdk import FormSDKController
+from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
 from abstra_internals.interface.sdk.forms.reactive import Reactive
-from abstra_internals.repositories import users_repository
 from abstra_internals.widgets.prop_check import validate_widget_props
 from abstra_internals.widgets.widget_base import Input
 
@@ -34,7 +33,10 @@ class Page(WidgetSchema):
         self._end_program = end_program
         self._reactive_polling_interval = reactive_polling_interval
         self._context = context or {}
-        self._sdk_controller = FormSDKController(users_repository=users_repository)
+
+    @property
+    def controller(self):
+        return ExecutionStore.get_by_thread().form_sdk
 
     def run(
         self,
@@ -83,7 +85,7 @@ class Page(WidgetSchema):
         self._check_widget_props(rendered_page)
 
         if self._is_progress_screen():
-            self._sdk_controller.request_mount_page(
+            self.controller.request_mount_page(
                 widgets=rendered_page,
                 actions=[],
                 end_program=end_program,
@@ -92,7 +94,7 @@ class Page(WidgetSchema):
             )
             return PageResponse({}, "")
 
-        self._sdk_controller.request_mount_page(
+        self.controller.request_mount_page(
             widgets=rendered_page,
             actions=self._actions_property(actions, end_program),
             end_program=end_program,
@@ -112,7 +114,7 @@ class Page(WidgetSchema):
 
     def _handle_page_user_events(self, validate_func: Optional[Callable]):
         while True:
-            response = self._sdk_controller.next_message()
+            response = self.controller.next_message()
 
             self.update(response.get("payload"))
 
@@ -133,7 +135,7 @@ class Page(WidgetSchema):
 
             rendered_page = self.render(self._context)
 
-            self._sdk_controller.request_page_update(
+            self.controller.request_page_update(
                 widgets=rendered_page,
                 validation=validation_result,
                 event_seq=response["seq"],

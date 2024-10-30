@@ -1,16 +1,11 @@
-import unittest
-
-from abstra_internals.controllers.main import MainController
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest, clear_dir
 
 
-class TestHookExecution(unittest.TestCase):
+class TestHookExecution(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-
-        controller = MainController()
-        self.hook = controller.create_hook("New hook", "hook.py")
-        self.flask_client = get_editor_flask_client()
+        super().setUp()
+        self.hook = self.controller.create_hook("New hook", "hook.py")
+        self.flask_client = self.get_editor_flask_client()
 
     def tearDown(self) -> None:
         clear_dir(self.root)

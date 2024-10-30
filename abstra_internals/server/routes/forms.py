@@ -42,9 +42,8 @@ def get_editor_bp(controller: MainController):
 
             if is_detached:
                 ExecutionController(
+                    repositories=controller.repositories,
                     workflow_engine=controller.detached_workflow_engine,
-                    execution_repository=controller.execution_repository,
-                    stage_run_repository=controller.stage_run_repository,
                 ).test(
                     stage=form,
                     client=client,
@@ -52,9 +51,8 @@ def get_editor_bp(controller: MainController):
                 )
             else:
                 ExecutionController(
+                    repositories=controller.repositories,
                     workflow_engine=controller.workflow_engine,
-                    execution_repository=controller.execution_repository,
-                    stage_run_repository=controller.stage_run_repository,
                 ).run(
                     stage=form,
                     client=client,

@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from abstra_internals.controllers.kanban import DataRequest, DataRequestFilter
 from abstra_internals.repositories.project.project import (
     HookStage,
@@ -7,28 +5,21 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
     WorkflowTransition,
 )
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
 from abstra_internals.utils.datetime import to_utc_iso_string
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 
-class TestKanbanRouter(TestCase):
+class TestKanbanRouter(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.client = get_editor_flask_client()
-        self.stage_run_repository = LocalStageRunRepository()
-        self.stage_run_repository.clear()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
-        del self.client
+        super().setUp()
+        self.client = self.get_editor_flask_client()
 
     def test_ancestors_logs(self):
         project = ProjectRepository.load()
         stage = HookStage.create(title="test", file="test.py")
         project.add_stage(stage)
         ProjectRepository.save(project)
-        initial = self.stage_run_repository.create_initial(stage.id)
+        initial = self.repositories.stage_run.create_initial(stage.id)
         res = self.client.get("/_editor/api/kanban/logs/" + initial.id)
         self.assertEqual(res.status_code, 200)
         assert res.json is not None
@@ -56,7 +47,7 @@ class TestKanbanRouter(TestCase):
         stage = HookStage.create(title="test", file="test.py")
         project.add_stage(stage)
         ProjectRepository.save(project)
-        stage_run = self.stage_run_repository.create_initial(stage.id)
+        stage_run = self.repositories.stage_run.create_initial(stage.id)
         res = self.client.post(
             "/_editor/api/kanban",
             json=DataRequest(
@@ -105,7 +96,7 @@ class TestKanbanRouter(TestCase):
         project.add_stage(hook)
 
         ProjectRepository.save(project)
-        stage_run = self.stage_run_repository.create_initial(hook.id)
+        stage_run = self.repositories.stage_run.create_initial(hook.id)
         res = self.client.post(
             "/_editor/api/kanban",
             json=DataRequest(

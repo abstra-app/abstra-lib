@@ -17,20 +17,10 @@ T = TypeVar("T", bound=Serializable)
 
 
 class FileManager(Generic[T]):
-    locks = {}
-
-    @classmethod
-    def _get_or_create_lock(cls, directory: str) -> threading.RLock:
-        lock = cls.locks.get(directory)
-        if lock is None:
-            lock = threading.RLock()
-            cls.locks[directory] = lock
-        return lock
-
     def __init__(self, directory: str, model: Type[T]):
+        self.lock = threading.RLock()
         self.directory = directory
         self.model = model
-        self.lock = FileManager._get_or_create_lock(self.directory)
 
     @property
     def directory_path(self) -> Path:

@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.requirements import (
+from abstra_internals.services.requirements import (
     RequirementRecommendation,
     RequirementsRepository,
 )

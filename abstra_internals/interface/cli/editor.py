@@ -10,6 +10,7 @@ from abstra_internals.editor_reloader import LocalReloader
 from abstra_internals.environment import HOST
 from abstra_internals.fs_watcher import files_changed_polling_loop
 from abstra_internals.interface.cli.messages import serve_message
+from abstra_internals.repositories.factory import get_local_repositories
 from abstra_internals.server.apps import get_local_app
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
@@ -25,7 +26,7 @@ def editor(
     serve_message()
     check_latest_version()
 
-    controller = MainController()
+    controller = MainController(repositories=get_local_repositories())
     controller.reset_repositories()
     StdioPatcher.apply(controller)
 

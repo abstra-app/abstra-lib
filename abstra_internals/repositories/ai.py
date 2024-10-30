@@ -5,7 +5,7 @@ from typing import Any, List
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS
 
 
 class AiApiHttpClient(ABC):
@@ -50,10 +50,3 @@ class LocalAiApiHttpClient(AiApiHttpClient):
             return response
         except json.JSONDecodeError:
             raise Exception(f"Error parsing JSON: {response.text}")
-
-
-def ai_api_http_client_factory() -> AiApiHttpClient:
-    if SIDECAR_URL is None:
-        return LocalAiApiHttpClient(CLOUD_API_CLI_URL)
-    else:
-        return ProductionAiApiHttpClient(SIDECAR_URL)

@@ -10,9 +10,8 @@ from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.entities.execution import Execution
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.modules import import_as_new
-from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import ActionStage
-from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.utils.datetime import now_str
 
 DEFAULT_STATUS = "failed"
@@ -23,15 +22,14 @@ def ExecutionTarget(
     stage: ActionStage,
     execution: Execution,
     client: ExecutionClient,
+    repositories: Repositories,
     workflow_engine: IWorkflowEngine,
-    stage_run_repository: StageRunRepository,
-    execution_repository: ExecutionRepository,
 ):
-    ExecutionStore.set(execution, client)
+    ExecutionStore.set(execution, client, repositories)
     status = DEFAULT_STATUS
 
     try:
-        execution_repository.create(execution)
+        repositories.execution.create(execution)
         print(f"[ABSTRA] {now_str()} - Execution started")
 
         client.handle_start(execution.id)
@@ -51,9 +49,9 @@ def ExecutionTarget(
         print(f"[ABSTRA] {now_str()} - Execution {status}")
 
         try:
-            stage_run_repository.change_status(execution.stage_run_id, status)
+            repositories.stage_run.change_status(execution.stage_run_id, status)
             execution.set_status(status)
-            execution_repository.update(execution)
+            repositories.execution.update(execution)
 
             workflow_engine.handle_execution_end(execution)
         except Exception as e_final:

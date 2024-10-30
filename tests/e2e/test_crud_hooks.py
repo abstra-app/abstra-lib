@@ -2,16 +2,13 @@ import pathlib
 import unittest
 
 from abstra_internals.templates import new_hook_code
-from tests.fixtures import clear_dir, get_editor_flask_client, init_dir
+from tests.fixtures import BaseTest
 
 
-class TestCRUDHooks(unittest.TestCase):
+class TestCRUDHooks(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.client = get_editor_flask_client()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        super().setUp()
+        self.client = self.get_editor_flask_client()
 
     def test_api_list(self):
         hooks = self.client.get("/_editor/api/hooks/").get_json()

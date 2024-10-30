@@ -4,12 +4,8 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import flask
-import pkg_resources
 
-from abstra_internals.cloud_api import (
-    get_api_key_info,
-    get_project_info,
-)
+from abstra_internals.cloud_api import get_api_key_info, get_project_info
 from abstra_internals.controllers.linters import check_linters
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
 from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
@@ -21,22 +17,10 @@ from abstra_internals.credentials import (
     set_credentials,
 )
 from abstra_internals.interface.cli.deploy import deploy
-from abstra_internals.repositories import (
-    email_repository,
-    env_vars_repository,
-    execution_logs_repository,
-    execution_repository,
-    jwt_repository,
-    kv_repository,
-    requirements_repository,
-    roles_repository,
-    stage_run_repository,
-    users_repository,
-)
 from abstra_internals.repositories.email import EmailRepository
-from abstra_internals.repositories.env_vars import EnvVarsRepository
 from abstra_internals.repositories.execution import ExecutionRepository
 from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.jwt_signer import JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.repositories.project.project import (
@@ -49,10 +33,10 @@ from abstra_internals.repositories.project.project import (
     StyleSettingsWithSidebar,
     WorkflowStage,
 )
-from abstra_internals.repositories.requirements import RequirementsRepository
 from abstra_internals.repositories.roles import RolesRepository
 from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.repositories.users import UsersRepository
+from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
     ensure_abstraignore,
@@ -63,11 +47,7 @@ from abstra_internals.templates import (
     new_script_code,
 )
 from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
-from abstra_internals.utils.file import (
-    files_from_directory,
-    module2path,
-    path2module,
-)
+from abstra_internals.utils.file import files_from_directory, module2path, path2module
 from abstra_internals.utils.validate import validate_json
 
 
@@ -121,43 +101,30 @@ class MainController:
     workflow_engine: IWorkflowEngine
     users_repository: UsersRepository
     roles_repository: RolesRepository
-    env_vars_repository: EnvVarsRepository
     stage_run_repository: StageRunRepository
     execution_repository: ExecutionRepository
-    requirements_repository: RequirementsRepository
     detached_workflow_engine: DetachedWorkflowEngine
     execution_logs_repository: ExecutionLogsRepository
 
-    def __init__(self):
+    def __init__(self, repositories: Repositories):
         ProjectRepository.initialize_or_migrate()
 
-        requirements = requirements_repository.load()
-        requirements.ensure("abstra", pkg_resources.get_distribution("abstra").version)
-        requirements_repository.save(requirements)
+        RequirementsRepository.ensure("abstra")
         ensure_abstraignore(Settings.root_path)
         ensure_gitignore(Settings.root_path)
 
-        self.workflow_engine = WorkflowEngine(
-            stage_run_repository=stage_run_repository,
-            execution_repository=execution_repository,
-            email_repository=email_repository,
-            execution_logs_repository=execution_logs_repository,
-        )
+        self.repositories = repositories
+        self.workflow_engine = WorkflowEngine(repositories)
+        self.detached_workflow_engine = DetachedWorkflowEngine(repositories)
 
-        self.detached_workflow_engine = DetachedWorkflowEngine(
-            stage_run_repository=stage_run_repository
-        )
-
-        self.kv_repository = kv_repository
-        self.jwt_repository = jwt_repository
-        self.email_repository = email_repository
-        self.users_repository = users_repository
-        self.roles_repository = roles_repository
-        self.env_vars_repository = env_vars_repository
-        self.stage_run_repository = stage_run_repository
-        self.execution_repository = execution_repository
-        self.requirements_repository = requirements_repository
-        self.execution_logs_repository = execution_logs_repository
+        self.kv_repository = repositories.kv
+        self.jwt_repository = repositories.jwt
+        self.email_repository = repositories.email
+        self.users_repository = repositories.users
+        self.roles_repository = repositories.roles
+        self.stage_run_repository = repositories.stage_run
+        self.execution_repository = repositories.execution
+        self.execution_logs_repository = repositories.execution_logs
 
     def deploy(self):
         rules = check_linters()
@@ -177,11 +144,6 @@ class MainController:
     def reset_repositories(self):
         self.stage_run_repository.clear()
         self.execution_repository.clear()
-
-    def _ensure_abstra_in_requirements(self):
-        requirements = self.requirements_repository.load()
-        requirements.ensure("abstra", pkg_resources.get_distribution("abstra").version)
-        self.requirements_repository.save(requirements)
 
     def get_workspace(self) -> StyleSettingsWithSidebar:
         project = ProjectRepository.load()

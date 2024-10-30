@@ -1,7 +1,7 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
-from abstra_internals.repositories.requirements import Requirement
+from abstra_internals.services.requirements import Requirement, RequirementsRepository
 from abstra_internals.usage import editor_usage
 
 
@@ -11,7 +11,7 @@ def get_editor_bp(controller: MainController):
     # 1s pooling in this route
     @bp.get("/")
     def _get_requirements():
-        return controller.requirements_repository.load().to_dict()
+        return RequirementsRepository.load().to_dict()
 
     @bp.post("/")
     @editor_usage
@@ -24,9 +24,9 @@ def get_editor_bp(controller: MainController):
         name = data["name"]
         version = data.get("version")
 
-        requirements = controller.requirements_repository.load()
+        requirements = RequirementsRepository.load()
         requirements.add(name, version)
-        controller.requirements_repository.save(requirements)
+        RequirementsRepository.save(requirements)
         return requirements.to_dict()
 
     @bp.post("/install")
@@ -38,9 +38,9 @@ def get_editor_bp(controller: MainController):
         streamer = req.install()
         if streamer is None:
             flask.abort(403)
-        reqs = controller.requirements_repository.load()
+        reqs = RequirementsRepository.load()
         reqs.add(req.name, req.version)
-        controller.requirements_repository.save(reqs)
+        RequirementsRepository.save(reqs)
         return flask.Response(streamer, mimetype="text/event-stream")
 
     @bp.post("/<name>/uninstall")
@@ -49,24 +49,22 @@ def get_editor_bp(controller: MainController):
         streamer = req.uninstall()
         if streamer is None:
             flask.abort(403)
-        reqs = controller.requirements_repository.load()
+        reqs = RequirementsRepository.load()
         reqs.delete(name)
-        controller.requirements_repository.save(reqs)
+        RequirementsRepository.save(reqs)
         return flask.Response(streamer, mimetype="text/event-stream")
 
     @bp.delete("/<name>")
     @editor_usage
     def _delete_requirement(name: str):
-        requirements = controller.requirements_repository.load()
+        requirements = RequirementsRepository.load()
         requirements.delete(name)
-        controller.requirements_repository.save(requirements)
+        RequirementsRepository.save(requirements)
         return requirements.to_dict()
 
     # 1s pooling in this route
     @bp.get("/recommendations")
     def _get_requirements_recommendation():
-        return [
-            r.to_dict() for r in controller.requirements_repository.get_recommendation()
-        ]
+        return [r.to_dict() for r in RequirementsRepository.get_recommendation()]
 
     return bp

@@ -1,41 +1,28 @@
-from unittest import TestCase
-
-from abstra_internals.controllers.main import MainController
 from abstra_internals.linter.rules.duplicate_package_in_requirements import (
     DuplicatePackagesInRequirements,
 )
-from abstra_internals.repositories.requirements import RequirementsRepository
-from tests.fixtures import clear_dir, init_dir
+from abstra_internals.services.requirements import RequirementsRepository
+from tests.fixtures import BaseTest
 
 
-class TestDuplicatePackagesInRequirements(TestCase):
-    def setUp(self) -> None:
-        self.root = init_dir()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
-
+class TestDuplicatePackagesInRequirements(BaseTest):
     def test_default_valid(self):
-        MainController()
         issues = DuplicatePackagesInRequirements().find_issues()
         self.assertEqual(len(issues), 0)
 
     def test_valid_with_no_requirements_file(self):
-        MainController()
         requirements_txt = self.root / "requirements.txt"
         requirements_txt.unlink()
         issues = DuplicatePackagesInRequirements().find_issues()
         self.assertEqual(len(issues), 0)
 
     def test_valid_with_no_duplicates(self):
-        MainController()
         requirements_txt = self.root / "requirements.txt"
         requirements_txt.write_text("abstra==1.0.0\nflask==1.0.0")
         issues = DuplicatePackagesInRequirements().find_issues()
         self.assertEqual(len(issues), 0)
 
     def test_invalid_with_equal_duplicates(self):
-        MainController()
         requirements_txt = self.root / "requirements.txt"
         requirements_txt.write_text("abstra==1.0.0\nabstra==1.0.0")
         issues = DuplicatePackagesInRequirements().find_issues()
@@ -48,7 +35,6 @@ class TestDuplicatePackagesInRequirements(TestCase):
         self.assertEqual(len(issues), 0)
 
     def test_invalid_with_distinct_versions_choose_first(self):
-        MainController()
         requirements_txt = self.root / "requirements.txt"
         requirements_txt.write_text("abstra==1.0.0\nabstra==2.0.0")
         issues = DuplicatePackagesInRequirements().find_issues()
@@ -66,7 +52,6 @@ class TestDuplicatePackagesInRequirements(TestCase):
         self.assertEqual(requirements.libraries[0].version, "1.0.0")
 
     def test_invalid_with_distinct_versions_choose_second(self):
-        MainController()
         requirements_txt = self.root / "requirements.txt"
         requirements_txt.write_text("abstra==1.0.0\nabstra==2.0.0")
         issues = DuplicatePackagesInRequirements().find_issues()

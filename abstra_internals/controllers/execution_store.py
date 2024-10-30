@@ -1,35 +1,17 @@
 import threading
-from dataclasses import dataclass
 from typing import List
 
 from abstra_internals.controllers.execution_client import ExecutionClient
-from abstra_internals.controllers.execution_client_form import FormClient
-from abstra_internals.controllers.execution_client_hook import HookClient
+from abstra_internals.controllers.sdk import ExecutionSDKContext
 from abstra_internals.entities.execution import Execution
+from abstra_internals.interface.sdk.user_exceptions import ExecutionNotFound
+from abstra_internals.repositories.factory import Repositories
 
 
-class ExecutionStoreException(Exception):
-    pass
-
-
-class ExecutionNotFound(ExecutionStoreException):
-    pass
-
-
-class ClientTypeMismatch(ExecutionStoreException):
-    pass
-
-
-@dataclass
-class ExecutionStoreData:
-    client: ExecutionClient
-    execution: Execution
-    thread_id: int
-
-
+# TODO: add context manager
 class ExecutionStore:
     rlock = threading.RLock()
-    store: List[ExecutionStoreData] = []
+    store: List[ExecutionSDKContext] = []
 
     @classmethod
     def clear(cls):
@@ -38,18 +20,21 @@ class ExecutionStore:
             cls.store.remove(data)
 
     @classmethod
-    def set(cls, execution: Execution, client: ExecutionClient):
+    def set(
+        cls, execution: Execution, client: ExecutionClient, repositories: Repositories
+    ):
         with cls.rlock:
             cls.store.append(
-                ExecutionStoreData(
+                ExecutionSDKContext(
                     thread_id=threading.get_ident(),
+                    repositories=repositories,
                     execution=execution,
                     client=client,
                 )
             )
 
     @classmethod
-    def get_by_thread(cls) -> ExecutionStoreData:
+    def get_by_thread(cls) -> ExecutionSDKContext:
         thread_id = threading.get_ident()
         with cls.rlock:
             for data in cls.store:
@@ -58,23 +43,9 @@ class ExecutionStore:
             raise ExecutionNotFound()
 
     @classmethod
-    def get_by_execution_id(cls, execution_id: str) -> ExecutionStoreData:
+    def get_by_execution_id(cls, execution_id: str) -> ExecutionSDKContext:
         with cls.rlock:
             for data in cls.store:
                 if data.execution.id == execution_id:
                     return data
             raise ExecutionNotFound()
-
-    @classmethod
-    def get_hook_client(cls) -> HookClient:
-        client = cls.get_by_thread().client
-        if not isinstance(client, HookClient):
-            raise ClientTypeMismatch()
-        return client
-
-    @classmethod
-    def get_form_client(cls) -> FormClient:
-        client = cls.get_by_thread().client
-        if not isinstance(client, FormClient):
-            raise ClientTypeMismatch()
-        return client

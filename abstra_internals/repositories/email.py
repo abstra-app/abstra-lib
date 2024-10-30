@@ -5,7 +5,7 @@ from typing import List, Literal
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS
 
 Kind = Literal["passwordless", "thread-waiting", "message"]
 
@@ -63,10 +63,3 @@ class LocalEmailRepository(EmailRepository):
 class TestEmailRepository(EmailRepository):
     def send(self, param: EmailParams):
         pass
-
-
-def email_repository_factory() -> EmailRepository:
-    if SIDECAR_URL is None:
-        return LocalEmailRepository(CLOUD_API_CLI_URL)
-    else:
-        return ProductionEmailRepository(SIDECAR_URL)

@@ -1,7 +1,7 @@
 from typing import List
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.requirements import RequirementsRepository
+from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.utils import packages as pkg_utils
 
 

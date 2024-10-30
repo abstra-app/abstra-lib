@@ -63,9 +63,8 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
 
         ExecutionController(
+            repositories=controller.repositories,
             workflow_engine=controller.detached_workflow_engine,
-            execution_repository=controller.execution_repository,
-            stage_run_repository=controller.stage_run_repository,
         ).test(
             stage=script,
         )
@@ -88,9 +87,8 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
 
         ExecutionController(
+            repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
         ).run(
             stage=script,
             target_stage_run_id=stage_run_id,

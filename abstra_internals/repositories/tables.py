@@ -4,7 +4,7 @@ import typing
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import SIDECAR_HEADERS
 
 
 class TablesApiHttpClient(abc.ABC):
@@ -30,10 +30,3 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
         if headers is None:
             raise Exception("You must be logged in to execute a table query")
         return requests.post(self.execute_url, headers=headers, json=body)
-
-
-def tables_api_http_client_factory() -> TablesApiHttpClient:
-    if SIDECAR_URL is None:
-        return LocalTablesApiHttpClient(CLOUD_API_CLI_URL)
-    else:
-        return ProductionTablesApiHttpClient(SIDECAR_URL)

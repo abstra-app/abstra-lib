@@ -70,9 +70,8 @@ def get_editor_bp(controller: MainController):
         client = HookClient(request_context)
 
         ExecutionController(
+            repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
         ).run(
             stage=hook,
             client=client,
@@ -98,9 +97,8 @@ def get_editor_bp(controller: MainController):
         client = HookClient(request_context)
 
         ExecutionController(
+            repositories=controller.repositories,
             workflow_engine=controller.detached_workflow_engine,
-            stage_run_repository=controller.stage_run_repository,
-            execution_repository=controller.execution_repository,
         ).test(
             stage=hook,
             client=client,

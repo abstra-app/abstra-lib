@@ -9,11 +9,7 @@ if TYPE_CHECKING:
     from PIL.Image import Image
 
 from abstra_internals.constants import get_uploads_dir
-from abstra_internals.controllers.execution_store import ExecutionStore
-from abstra_internals.utils.file import (
-    get_random_filepath,
-    get_tmp_upload_dir,
-)
+from abstra_internals.utils.file import get_random_filepath, get_tmp_upload_dir
 from abstra_internals.widgets.apis import upload_file
 
 FILE_TYPES = {
@@ -316,6 +312,9 @@ def convert_file(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> str:
 
 
 def download_to_path(url: str) -> pathlib.Path:
+    # circular import
+    from abstra_internals.controllers.execution_store import ExecutionStore
+
     execution_id = ExecutionStore.get_by_thread().execution.id
     save_dir = get_uploads_dir() / execution_id
     save_dir.mkdir(parents=True, exist_ok=True)

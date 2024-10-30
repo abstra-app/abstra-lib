@@ -9,12 +9,11 @@ from abstra_internals.controllers.execution_client import (
 from abstra_internals.controllers.execution_target import ExecutionTarget
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.entities.execution import Execution, RequestContext
-from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
     ActionStage,
     ProjectRepository,
 )
-from abstra_internals.repositories.stage_run import StageRunRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
 
@@ -43,13 +42,11 @@ class ExecutionController:
     def __init__(
         self,
         *,
+        repositories: Repositories,
         workflow_engine: IWorkflowEngine,
-        stage_run_repository: StageRunRepository,
-        execution_repository: ExecutionRepository,
     ) -> None:
+        self.repositories = repositories
         self.workflow_engine = workflow_engine
-        self.stage_run_repository = stage_run_repository
-        self.execution_repository = execution_repository
 
     def run(
         self,
@@ -68,9 +65,11 @@ class ExecutionController:
                 client.handle_unset_thread()
                 raise UnsetThreadException()
 
-            target_stage_run_id = self.stage_run_repository.create_initial(stage.id).id
+            target_stage_run_id = self.repositories.stage_run.create_initial(
+                stage.id
+            ).id
 
-        target_stage_run_id = self.stage_run_repository.ensure_not_abandoned(
+        target_stage_run_id = self.repositories.stage_run.ensure_not_abandoned(
             target_stage_run_id
         )
 
@@ -80,7 +79,7 @@ class ExecutionController:
             stage_id=stage.id,
         )
 
-        if not self.stage_run_repository.acquire_lock(
+        if not self.repositories.stage_run.acquire_lock(
             stage_run_id=target_stage_run_id, execution_id=execution.id
         ):
             client.handle_lock_failed(target_stage_run_id)
@@ -92,9 +91,8 @@ class ExecutionController:
                 stage=stage,
                 client=client,
                 execution=execution,
+                repositories=self.repositories,
                 workflow_engine=self.workflow_engine,
-                stage_run_repository=self.stage_run_repository,
-                execution_repository=self.execution_repository,
             ),
             name=f"{stage.title} - {execution.short_id}",
         )
@@ -109,7 +107,7 @@ class ExecutionController:
         client: Optional[ExecutionClient] = None,
         request: Optional[RequestContext] = None,
     ):
-        detached_stage_run = self.stage_run_repository.create_detached(
+        detached_stage_run = self.repositories.stage_run.create_detached(
             thread_data=read_test_data(),
             stage_id=stage.id,
         )

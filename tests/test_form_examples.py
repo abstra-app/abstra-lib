@@ -1,28 +1,25 @@
 import json
-import unittest
 from pathlib import Path
 
-from abstra_internals.controllers.main import MainController
 from abstra_internals.repositories.project.project import FormStage, NotificationTrigger
 from abstra_internals.stdio_patcher import StdioPatcher
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import BaseTest
 from tests.utils import assert_form
 
 
-class TestFormExamples(unittest.TestCase):
+class TestFormExamples(BaseTest):
     def setUp(self) -> None:
+        super().setUp()
         self.base_path = (
             Path(Path(__file__).parent, "./resources/test_form_examples")
             .absolute()
             .resolve()
         )
-        self.root = init_dir()
-        main_controller = MainController()
-        StdioPatcher.apply(main_controller=main_controller)
+        StdioPatcher.apply(main_controller=self.controller)
 
     def tearDown(self) -> None:
-        clear_dir(self.root)
         StdioPatcher.reset()
+        super().tearDown()
 
     def assertFormExample(self, example_name: str):
         code_path = f"./{example_name}/code.py"

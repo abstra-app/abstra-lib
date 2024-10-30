@@ -4,11 +4,7 @@ import datetime
 import jwt
 import requests
 
-from abstra_internals.environment import (
-    PROJECT_ID,
-    SIDECAR_HEADERS,
-    SIDECAR_URL,
-)
+from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
 from abstra_internals.utils import generate_n_digit_code
 
 
@@ -63,10 +59,3 @@ class LocalJWTRepository(JWTRepository):
 
     def sanitize_code(self, code: str) -> str:
         return "000000"
-
-
-def jwt_repository_factory() -> JWTRepository:
-    if SIDECAR_URL is None:
-        return LocalJWTRepository()
-    else:
-        return ProductionJWTRepository(SIDECAR_URL)

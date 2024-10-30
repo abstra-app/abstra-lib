@@ -1,13 +1,13 @@
-import unittest
-
 from abstra.forms import ListItemSchema, Page
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.entities.execution import Execution, RequestContext
+from tests.fixtures import BaseTest
 
 
-class TestPage(unittest.TestCase):
+class TestPage(BaseTest):
     def setUp(self) -> None:
+        super().setUp()
         request_context = RequestContext(
             body="", query_params={}, headers={}, method="GET"
         )
@@ -21,10 +21,11 @@ class TestPage(unittest.TestCase):
             stage_run_id="mock_sr_id",
             stage_id="mock_stage_id",
         )
-        ExecutionStore.set(execution, self.client)
+        ExecutionStore.set(execution, self.client, self.repositories)
 
     def tearDown(self) -> None:
         ExecutionStore.clear()
+        super().tearDown()
 
     def test_reactive_list_dropdown(self):
         schema = ListItemSchema().read_dropdown("dropdown", ["foo", "bar"])

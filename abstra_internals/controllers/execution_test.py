@@ -1,38 +1,20 @@
 from pathlib import Path
-from unittest import TestCase
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
 from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
 from abstra_internals.entities.execution import RequestContext
-from abstra_internals.repositories.email import TestEmailRepository
-from abstra_internals.repositories.execution import EditorExecutionRepository
-from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
-from abstra_internals.repositories.project.project import (
-    HookStage,
-    ProjectRepository,
-)
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
-from tests.fixtures import clear_dir, init_dir
+from abstra_internals.repositories.project.project import HookStage, ProjectRepository
+from tests.fixtures import BaseTest
 
 
-class ExecutionControllerTest(TestCase):
+class ExecutionControllerTest(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.stage_run_repository = LocalStageRunRepository()
-        self.execution_repository = EditorExecutionRepository()
+        super().setUp()
+        self.workflow_engine = WorkflowEngine(self.repositories)
 
-        self.workflow_engine = WorkflowEngine(
-            stage_run_repository=self.stage_run_repository,
-            execution_repository=self.execution_repository,
-            email_repository=TestEmailRepository(),
-            execution_logs_repository=LocalExecutionLogsRepository(),
-        )
-
-        self.detached_workflow_engine = DetachedWorkflowEngine(
-            stage_run_repository=self.stage_run_repository
-        )
+        self.detached_workflow_engine = DetachedWorkflowEngine(self.repositories)
 
         self.request_context = RequestContext(
             body={"a": 1}.__str__(),
@@ -54,17 +36,9 @@ class ExecutionControllerTest(TestCase):
 
         self.hook_client = HookClient(self.request_context)
 
-        return super().setUp()
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
-        return super().tearDown()
-
     def test_run_initial_returns_dto(self):
         ExecutionController(
-            workflow_engine=self.workflow_engine,
-            stage_run_repository=self.stage_run_repository,
-            execution_repository=self.execution_repository,
+            repositories=self.repositories, workflow_engine=self.workflow_engine
         ).run(
             stage=self.stage,
             client=self.hook_client,
@@ -75,9 +49,8 @@ class ExecutionControllerTest(TestCase):
 
     def test_run_detached_returns_dto(self):
         ExecutionController(
+            repositories=self.repositories,
             workflow_engine=self.detached_workflow_engine,
-            stage_run_repository=self.stage_run_repository,
-            execution_repository=self.execution_repository,
         ).test(
             stage=self.stage,
             client=self.hook_client,

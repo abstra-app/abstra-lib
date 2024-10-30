@@ -1,6 +1,7 @@
 import typing
 from dataclasses import is_dataclass
 
+from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.interface.sdk.tables import comparators as cmp
 from abstra_internals.interface.sdk.tables.utils import (
     WithAsDict,
@@ -11,9 +12,9 @@ from abstra_internals.interface.sdk.tables.utils import (
 
 
 def _execute(query: str, params: typing.List):  # private api
-    from abstra_internals.repositories import tables_api_http_client
-
-    r = tables_api_http_client.execute(query=query, params=params)
+    r = ExecutionStore.get_by_thread().repositories.tables.execute(
+        query=query, params=params
+    )
     if not r.ok:
         raise Exception(f"Error executing query {query}: {r.text}")
     response = r.json()

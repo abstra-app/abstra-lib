@@ -1,14 +1,11 @@
-from unittest import TestCase
-
 import pkg_resources
 from pkg_resources import get_distribution as gd
 
-from abstra_internals.controllers.main import MainController
 from abstra_internals.linter.rules.missing_abstra_in_requirements import (
     AbstraVersionInRequirementsIsBehindInstalled,
     MissingAbstraInRequirements,
 )
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import BaseTest
 
 
 def mock_get_distribution(name):
@@ -18,20 +15,15 @@ def mock_get_distribution(name):
         return gd(name)
 
 
-pkg_resources.get_distribution = mock_get_distribution
-
-
-class MissingAbstraInRequirementsTest(TestCase):
+class MissingAbstraInRequirementsTest(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
+        super().setUp()
+        self.old_get_distribution = pkg_resources.get_distribution
+        pkg_resources.get_distribution = mock_get_distribution
 
     def tearDown(self) -> None:
-        clear_dir(self.root)
-
-    def test_missing_abstra_in_requirements_valid_default(self):
-        MainController()
-        rule = MissingAbstraInRequirements()
-        self.assertEqual(len(rule.find_issues()), 0)
+        pkg_resources.get_distribution = self.old_get_distribution
+        super().tearDown()
 
     def test_missing_abstra_in_requirements_valid_with_requirements(self):
         rule = MissingAbstraInRequirements()

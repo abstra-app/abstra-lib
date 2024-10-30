@@ -1,9 +1,4 @@
-from unittest import TestCase
-
 from abstra_internals.controllers.workflow_engine import WorkflowEngine
-from abstra_internals.repositories.email import TestEmailRepository
-from abstra_internals.repositories.execution import EditorExecutionRepository
-from abstra_internals.repositories.execution_logs import LocalExecutionLogsRepository
 from abstra_internals.repositories.project.project import (
     ConditionStage,
     FormStage,
@@ -12,18 +7,13 @@ from abstra_internals.repositories.project.project import (
     NotificationTrigger,
     WorkflowTransition,
 )
-from abstra_internals.repositories.stage_run import LocalStageRunRepository
+from tests.fixtures import BaseTest
 
 
-class ActionTransitionsTest(TestCase):
+class ActionTransitionsTest(BaseTest):
     def setUp(self) -> None:
-        self.repository = LocalStageRunRepository()
-        self.workflow_engine = WorkflowEngine(
-            stage_run_repository=self.repository,
-            execution_repository=EditorExecutionRepository(),
-            email_repository=TestEmailRepository(),
-            execution_logs_repository=LocalExecutionLogsRepository(),
-        )
+        super().setUp()
+        self.workflow_engine = WorkflowEngine(self.repositories)
 
     def test_advances_when_finished(self):
         stage = JobStage(
@@ -41,7 +31,7 @@ class ActionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={})
+        stage_run = self.repositories.stage_run.create_initial(stage="1", data={})
         result = self.workflow_engine._follow_action_transitions(
             stage, stage_run, "jobs:finished"
         )
@@ -68,22 +58,17 @@ class ActionTransitionsTest(TestCase):
                 enabled=False,
             ),
         )
-        stage_run = self.repository.create_initial(stage="1", data={})
+        stage_run = self.repositories.stage_run.create_initial(stage="1", data={})
         result = self.workflow_engine._follow_action_transitions(
             stage, stage_run, "forms:abandoned"
         )
         self.assertEqual(result, [dict(stage="1", data={})])
 
 
-class ConditionTransitionsTest(TestCase):
+class ConditionTransitionsTest(BaseTest):
     def setUp(self) -> None:
-        self.repository = LocalStageRunRepository()
-        self.workflow_engine = WorkflowEngine(
-            stage_run_repository=self.repository,
-            execution_repository=EditorExecutionRepository(),
-            email_repository=TestEmailRepository(),
-            execution_logs_repository=LocalExecutionLogsRepository(),
-        )
+        super().setUp()
+        self.workflow_engine = WorkflowEngine(self.repositories)
 
     def test_not_match_when_no_transitions(self):
         stage = ConditionStage(
@@ -93,7 +78,9 @@ class ConditionTransitionsTest(TestCase):
             workflow_transitions=[],
         )
 
-        stage_run = self.repository.create_initial(stage="1", data={"foo": "bar"})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="1", data={"foo": "bar"}
+        )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -112,7 +99,7 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={})
+        stage_run = self.repositories.stage_run.create_initial(stage="1", data={})
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -131,7 +118,9 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={"foo": "bar"})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="1", data={"foo": "bar"}
+        )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": "bar"})])
 
@@ -150,7 +139,7 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(
+        stage_run = self.repositories.stage_run.create_initial(
             stage="1", data={"foo": {"bar": "afulepa"}}
         )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
@@ -173,7 +162,9 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={"foo": 1})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="1", data={"foo": 1}
+        )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": 1})])
 
@@ -192,7 +183,7 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={})
+        stage_run = self.repositories.stage_run.create_initial(stage="1", data={})
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={})])
 
@@ -211,7 +202,9 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={"foo": None})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="1", data={"foo": None}
+        )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": None})])
 
@@ -230,7 +223,9 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={"foo": None})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="1", data={"foo": None}
+        )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": None})])
 
@@ -249,7 +244,7 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={})
+        stage_run = self.repositories.stage_run.create_initial(stage="1", data={})
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={})])
 
@@ -268,20 +263,17 @@ class ConditionTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="1", data={"foo": ""})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="1", data={"foo": ""}
+        )
         result = self.workflow_engine._follow_condition_transitions(stage, stage_run)
         self.assertEqual(result, [dict(stage="target_id", data={"foo": ""})])
 
 
-class IteratorTransitionsTest(TestCase):
+class IteratorTransitionsTest(BaseTest):
     def setUp(self) -> None:
-        self.repository = LocalStageRunRepository()
-        self.workflow_engine = WorkflowEngine(
-            stage_run_repository=self.repository,
-            execution_repository=EditorExecutionRepository(),
-            email_repository=TestEmailRepository(),
-            execution_logs_repository=LocalExecutionLogsRepository(),
-        )
+        super().setUp()
+        self.workflow_engine = WorkflowEngine(self.repositories)
 
     def test_simple_foreach(self):
         stage = IteratorStage(
@@ -298,7 +290,9 @@ class IteratorTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="s1", data={"foo": [1, 2, 3]}
+        )
         result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(
             result,
@@ -324,7 +318,7 @@ class IteratorTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(
+        stage_run = self.repositories.stage_run.create_initial(
             stage="s1", data={"foo": {"bar": [1, 2, 3]}}
         )
         result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
@@ -352,7 +346,9 @@ class IteratorTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="s1", data={"foo": 1})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="s1", data={"foo": 1}
+        )
         result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -371,7 +367,7 @@ class IteratorTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="s1", data={})
+        stage_run = self.repositories.stage_run.create_initial(stage="s1", data={})
         result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(result, [])
 
@@ -391,7 +387,9 @@ class IteratorTransitionsTest(TestCase):
                 )
             ],
         )
-        stage_run = self.repository.create_initial(stage="s1", data={"foo": [1, 2, 3]})
+        stage_run = self.repositories.stage_run.create_initial(
+            stage="s1", data={"foo": [1, 2, 3]}
+        )
         result = self.workflow_engine._follow_iterator_transitions(stage, stage_run)
         self.assertEqual(
             result,

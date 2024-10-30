@@ -1,10 +1,16 @@
+import io
 import unittest
 from dataclasses import dataclass
 from datetime import datetime
+from typing import List
 from uuid import UUID
 
+import requests
+
 from abstra.tables import insert
-from abstra_internals import repositories
+from abstra_internals.controllers.execution_client_form import FormClient
+from abstra_internals.controllers.execution_store import ExecutionStore
+from abstra_internals.entities.execution import Execution, RequestContext
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.step import StepsResponse
 from abstra_internals.interface.sdk.tables.api import (
@@ -16,40 +22,46 @@ from abstra_internals.interface.sdk.tables.api import (
     _make_update_query,
     serialize,
 )
-from tests.fixtures import clear_dir, init_dir
+from abstra_internals.repositories.tables import TablesApiHttpClient
+from tests.fixtures import BaseTest
 
 
-@dataclass
-class MockResponse:
-    ok: bool
+class MockTablesApi(TablesApiHttpClient):
+    def __init__(self):
+        super().__init__("FAKE_URL")
 
-    def json(self):
-        return dict(
-            errors=None,
-            returns=dict(
-                result=[{"bar": "baz", "car": "cat"}],
-                fields=[{"name": "bar"}, {"name": "car"}],
-            ),
+    def execute(self, query: str, params: List) -> requests.Response:
+        resp = requests.Response()
+        resp.status_code = 200
+        resp.raw = io.BytesIO(
+            b'{"errors": null, "returns": {"result": [{"bar": "baz", "car": "cat"}], "fields": [{"name": "bar"}, {"name": "car"}]}}'
         )
 
-    def __getitem__(self, key):
-        return self.json()[key]
+        return resp
 
 
-class MockTablesApi:
-    def execute(self, query, params):
-        return MockResponse(ok=True)
-
-
-repositories.tables_api_http_client = MockTablesApi()
-
-
-class TestTables(unittest.TestCase):
+class TestTables(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
+        super().setUp()
+        self.repositories.tables = MockTablesApi()
+        request_context = RequestContext(
+            body="", query_params={}, headers={}, method="GET"
+        )
+        self.client = FormClient(
+            request_context=request_context,
+            production_mode=False,
+            ws=None,  # type: ignore
+        )
+        execution = Execution.create(
+            request_context=None,
+            stage_run_id="mock_sr_id",
+            stage_id="mock_stage_id",
+        )
+        ExecutionStore.set(execution, self.client, self.repositories)
 
     def tearDown(self) -> None:
-        clear_dir(self.root)
+        ExecutionStore.clear()
+        super().tearDown()
 
     def test_select(self):
         query, params = _make_select_query(table="foo")
