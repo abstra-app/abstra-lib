@@ -14,6 +14,7 @@ from abstra_internals.server.routes import linters as linters_router
 from abstra_internals.server.routes import login as login_router
 from abstra_internals.server.routes import pysa as pysa_router
 from abstra_internals.server.routes import requirements as requirements_router
+from abstra_internals.server.routes import resources as resources_router
 from abstra_internals.server.routes import roles as roles_router
 from abstra_internals.server.routes import scripts as scripts_router
 from abstra_internals.server.routes import stage_runs as stage_runs_router
@@ -53,6 +54,9 @@ def __get_api_bp(controller: MainController):
 
     requirements_bp = requirements_router.get_editor_bp(controller)
     bp.register_blueprint(requirements_bp, url_prefix="/requirements")
+
+    resources_bp = resources_router.get_editor_bp(controller)
+    bp.register_blueprint(resources_bp, url_prefix="/resources")
 
     debugger_bp = debugger_router.get_editor_bp(controller)
     bp.register_blueprint(debugger_bp, url_prefix="/debugger")

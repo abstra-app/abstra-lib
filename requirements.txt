@@ -26,3 +26,4 @@ gunicorn==23.0.0
 userpath
 Pillow
 puremagic==1.28
+psutil

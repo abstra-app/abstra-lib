@@ -11,6 +11,7 @@ from abstra_internals.environment import HOST
 from abstra_internals.fs_watcher import files_changed_polling_loop
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.repositories.factory import get_local_repositories
+from abstra_internals.resources_watcher import resources_polling_loop
 from abstra_internals.server.apps import get_local_app
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
@@ -35,6 +36,14 @@ def editor(
         daemon=True,
         name="file_watcher",
         target=files_changed_polling_loop,
+        kwargs=dict(controller=controller),
+    ).start()
+
+    # watch_resources
+    threading.Thread(
+        daemon=True,
+        name="resources_watcher",
+        target=resources_polling_loop,
         kwargs=dict(controller=controller),
     ).start()
 
