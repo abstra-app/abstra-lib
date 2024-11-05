@@ -132,6 +132,32 @@ class FilesFromDirectoryTest(unittest.TestCase):
         files = files_from_directory(self.path)
         self.assertSamePaths(files, [*self.initial_files])
 
+    def test_ignore_abstra_subpath(self):
+        self.add_file(".abstraignore", "ignored")
+        tracked_1 = self.add_file("ignored_i_should_not_be", "bar")
+        tracked_2 = self.add_file("i_should_not_be_ignored", "bar")
+        tracked_3 = self.add_file("be_ignored_i_shoul_not_be", "bar")
+        files = files_from_directory(self.path)
+        self.assertSamePaths(
+            files, [tracked_1, tracked_2, tracked_3, *self.initial_files]
+        )
+
+    def test_ignore_abstra_files_on_folder(self):
+        self.add_file(".abstraignore", "*/ignored")
+        self.add_folder("whatever")
+        self.add_file("ignored", "foo", self.path.joinpath("whatever"))
+        tracked = self.add_file("tracked", "bar", self.path.joinpath("whatever"))
+        files = files_from_directory(self.path)
+        self.assertSamePaths(files, [tracked, *self.initial_files])
+
+    def test_ignore_abstra_files_on_folder_windows(self):
+        self.add_file(".abstraignore", "*\\ignored")
+        self.add_folder("whatever")
+        self.add_file("ignored", "foo", self.path.joinpath("whatever"))
+        tracked = self.add_file("tracked", "bar", self.path.joinpath("whatever"))
+        files = files_from_directory(self.path)
+        self.assertSamePaths(files, [tracked, *self.initial_files])
+
 
 class CreatePathTest(unittest.TestCase):
     def test_without_conflict(self):

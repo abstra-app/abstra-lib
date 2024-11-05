@@ -1,5 +1,4 @@
 import ast
-import fnmatch
 import os
 import re
 import tempfile
@@ -19,6 +18,17 @@ def is_relative_path(path: str) -> bool:
     return not path.startswith("<") and not path.startswith("/")
 
 
+def make_ignore_regex(path: str) -> re.Pattern:
+    posix_path = path.replace("\\", "/")
+
+    ignore_regex = r"^" + re.escape(posix_path).replace(r"\*", ".*").replace(r"\?", ".")
+
+    if not posix_path.endswith("/"):
+        ignore_regex += r"(/|$)"
+
+    return re.compile(ignore_regex)
+
+
 def get_ignore_files(dir: Path):
     GITIGNORE = dir.joinpath(".gitignore")
     IGNOREFILE = dir.joinpath(ABSTRA_IGNORE)
@@ -32,14 +42,14 @@ def get_ignore_files(dir: Path):
     elif GITIGNORE.exists():
         ignored.extend(GITIGNORE.read_text(encoding="utf-8").split("\n"))
     return [
-        re.compile(fnmatch.translate(f"{p}*"))
+        make_ignore_regex(p)
         for p in ignored
         if p and not p.startswith("#") and not p.startswith("!")
     ]
 
 
 def should_ignore(ignored_paths, _path: Path):
-    path = str(_path)
+    path = _path.as_posix()
     for ignored_path in ignored_paths:
         if ignored_path.search(path):
             return True
