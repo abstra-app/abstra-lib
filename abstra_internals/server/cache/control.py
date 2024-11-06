@@ -12,7 +12,7 @@ class CacheControl(Protocol):
 @dataclass
 class NoCache:
     def __str__(self):
-        return ""
+        return "no-store, no-cache, must-revalidate, max-age=0"
 
 
 @dataclass
@@ -72,7 +72,7 @@ class Cache:
         if not self.enabled:
             return CacheCommand(NoCache(), NoCache())
 
-        if request.content_type == "text/html":
+        if "text/html" in request.content_type:
             return CacheCommand(NoCache(), PublicCache())
 
         return CacheCommand(PublicCache(86400), PublicCache())
