@@ -1,43 +1,54 @@
-import os
+import threading
 import time
-from datetime import datetime
+from typing import Optional
 
-from abstra_internals.controllers.main import MainController
+from watchdog.events import FileModifiedEvent, FileSystemEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+
 from abstra_internals.modules import reload_project_local_modules
 
-
-def has_local_dependencies_changed(
-    controller: MainController, last_change: float
-) -> bool:
-    for file in controller.get_project_local_dependencies():
-        if not file.exists():
-            continue
-
-        st_mtime = os.stat(file).st_mtime
-        if st_mtime > last_change:
-            return True
-    return False
+IGNORED_FILES = [".abstra/resources.dat", ".abstra/", "abstra.json"]
+DEBOUNCE_DELAY = 0.5
 
 
-def reload_files_on_change(controller: MainController, last_change: float):
-    if not has_local_dependencies_changed(controller, last_change):
-        return False
+class FileChangeEventHandler(FileSystemEventHandler):
+    def __init__(self):
+        super().__init__()
+        self._debounce_timer: Optional[threading.Timer] = None
 
-    try:
-        reload_project_local_modules()
-        return True
-    except Exception:
-        return False
+    def on_modified(self, event: FileSystemEvent):
+        has_ignored_paths = any(
+            ignored_file in str(event.src_path) for ignored_file in IGNORED_FILES
+        )
 
+        if not isinstance(event, FileModifiedEvent) or has_ignored_paths:
+            return
 
-def files_changed_polling_loop(*, controller: MainController):
-    last_change = datetime.now().timestamp()
+        if self._debounce_timer is not None:
+            self._debounce_timer.cancel()
 
-    while True:
+        self._debounce_timer = threading.Timer(
+            DEBOUNCE_DELAY, self.reload_files_on_change
+        )
+        self._debounce_timer.start()
+
+    def reload_files_on_change(self):
         try:
-            has_reloaded = reload_files_on_change(controller, last_change)
-            if has_reloaded:
-                last_change = datetime.now().timestamp()
+            reload_project_local_modules()
         except Exception:
             pass
-        time.sleep(1)
+
+
+def watch_file_change_events(path: str):
+    event_handler = FileChangeEventHandler()
+
+    observer = Observer()
+    observer.schedule(event_handler, path=path, recursive=True)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()

@@ -9,7 +9,7 @@ from abstra_internals.controllers.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
 from abstra_internals.editor_reloader import LocalReloader
 from abstra_internals.environment import HOST
-from abstra_internals.fs_watcher import files_changed_polling_loop
+from abstra_internals.fs_watcher import watch_file_change_events
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import EditorConsumer
@@ -41,12 +41,12 @@ def start_consumer(controller: MainController):
     return consumer, th
 
 
-def start_file_watcher(controller: MainController):
+def start_file_watcher():
     threading.Thread(
         daemon=True,
         name="file_watcher",
-        target=files_changed_polling_loop,
-        kwargs=dict(controller=controller),
+        target=watch_file_change_events,
+        kwargs=dict(path=str(Settings.root_path)),
     ).start()
 
 
@@ -73,7 +73,7 @@ def editor(
     AbstraLogger.init("local")
 
     start_consumer(controller)
-    start_file_watcher(controller)
+    start_file_watcher()
     start_resources_watcher(controller)
 
     if load_dotenv:
