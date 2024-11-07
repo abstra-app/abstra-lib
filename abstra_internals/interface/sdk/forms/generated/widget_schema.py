@@ -567,7 +567,7 @@ class WidgetSchema:
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
-          A dict containing the image file uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of images in case of multiple flag set as True
+          A dict containing the image file uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.
     """
 
     
@@ -1063,7 +1063,7 @@ class WidgetSchema:
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
-          A dict containing the video uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of videos in case of multiple flag set as True
+          A dict containing the video uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.
     """
 
     
