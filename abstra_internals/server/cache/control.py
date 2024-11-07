@@ -67,14 +67,14 @@ class Cache:
         return CacheCommand(PublicCache(1800), PublicCache())
 
     def __statics_policy(
-        self, request: flask.Request, __: flask.Response
+        self, _: flask.Request, response: flask.Response
     ) -> CacheCommand:
         if not self.enabled:
             return CacheCommand(NoCache(), NoCache())
 
         if (
-            isinstance(request.content_type, str)
-            and "text/html" in request.content_type
+            isinstance(response.content_type, str)
+            and "text/html" in response.content_type
         ):
             return CacheCommand(NoCache(), PublicCache())
 
