@@ -72,7 +72,10 @@ class Cache:
         if not self.enabled:
             return CacheCommand(NoCache(), NoCache())
 
-        if "text/html" in request.content_type:
+        if (
+            isinstance(request.content_type, str)
+            and "text/html" in request.content_type
+        ):
             return CacheCommand(NoCache(), PublicCache())
 
         return CacheCommand(PublicCache(86400), PublicCache())
