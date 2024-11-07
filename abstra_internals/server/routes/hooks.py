@@ -99,11 +99,7 @@ def get_editor_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.detached_workflow_engine,
-        ).test(
-            stage=hook,
-            client=client,
-            request=request_context,
-        )
+        ).test(stage=hook, client=client, request=request_context)
 
         return {
             "body": client.response["body"],

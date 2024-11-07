@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from abstra_internals.controllers.kanban import (
     DataRequest,
     KanbanController,
@@ -16,26 +14,21 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.repositories.stage_run import (
     CountStageRunsByStatus,
-    LocalStageRunRepository,
 )
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import BaseTest
 
 
-class KanbanTests(TestCase):
+class KanbanTests(BaseTest):
     def setUp(self):
-        self.root = init_dir()
+        super().setUp()
 
-        self.stage_run_repository = LocalStageRunRepository()
-        self.controller = KanbanController(
+        self.kanban_controller = KanbanController(
             execution_logs_repository=LocalExecutionLogsRepository(),
-            stage_run_repository=self.stage_run_repository,
+            stage_run_repository=self.repositories.stage_run,
         )
 
-    def tearDown(self) -> None:
-        clear_dir(self.root)
-
     def test_get_data_empty(self):
-        data = self.controller.get_data(
+        data = self.kanban_controller.get_data(
             DataRequest.from_dict(
                 {
                     "selection": [],
@@ -73,10 +66,10 @@ class KanbanTests(TestCase):
         project.add_stage(job)
         project.add_stage(form)
         ProjectRepository.save(project)
-        job_stage_run = self.stage_run_repository.create_initial("job")
-        form_stage_run = self.stage_run_repository.create_initial("form")
+        job_stage_run = self.repositories.stage_run.create_initial("job")
+        form_stage_run = self.repositories.stage_run.create_initial("form")
 
-        data = self.controller.get_data(
+        data = self.kanban_controller.get_data(
             DataRequest.from_dict(
                 {
                     "selection": [],
@@ -137,10 +130,10 @@ class KanbanTests(TestCase):
         project.add_stage(job)
         project.add_stage(form)
         ProjectRepository.save(project)
-        job_stage_run = self.stage_run_repository.create_initial("job")
-        self.stage_run_repository.create_initial("form")
+        job_stage_run = self.repositories.stage_run.create_initial("job")
+        self.repositories.stage_run.create_initial("form")
 
-        data = self.controller.get_data(
+        data = self.kanban_controller.get_data(
             DataRequest.from_dict(
                 {
                     "limit": 10,
@@ -183,15 +176,15 @@ class KanbanTests(TestCase):
         )
         project.add_stage(job)
         ProjectRepository.save(project)
-        job_stage_run_1 = self.stage_run_repository.create_initial(
+        job_stage_run_1 = self.repositories.stage_run.create_initial(
             "job", {"foo": "bar"}
         )
-        job_stage_run_2 = self.stage_run_repository.create_initial(
+        job_stage_run_2 = self.repositories.stage_run.create_initial(
             "job", {"foo": "contains bar"}
         )
-        self.stage_run_repository.create_initial("job", {"foo": "baz"})
+        self.repositories.stage_run.create_initial("job", {"foo": "baz"})
 
-        data = self.controller.get_data(
+        data = self.kanban_controller.get_data(
             DataRequest.from_dict(
                 {
                     "limit": 10,
@@ -247,7 +240,7 @@ class KanbanTests(TestCase):
         project.add_stage(job)
         ProjectRepository.save(project)
 
-        rtvd = self.controller.get_job("job")
+        rtvd = self.kanban_controller.get_job("job")
 
         self.assertEqual(rtvd, job)
 
@@ -267,13 +260,13 @@ class KanbanTests(TestCase):
         )
         project.add_stage(form)
         ProjectRepository.save(project)
-        self.stage_run_repository.create_initial("form")
+        self.repositories.stage_run.create_initial("form")
 
-        count = self.controller.count_by_status()
+        count = self.kanban_controller.count_by_status()
 
         self.assertEqual(count, [CountStageRunsByStatus("form", 1, "waiting")])
 
-        count = self.controller.count_by_status()
+        count = self.kanban_controller.count_by_status()
 
         self.assertEqual(count, [CountStageRunsByStatus("form", 1, "waiting")])
 
@@ -302,23 +295,23 @@ class KanbanTests(TestCase):
         project.add_stage(form)
         project.add_stage(job)
         ProjectRepository.save(project)
-        form_sr1 = self.stage_run_repository.create_initial("form")
-        form_sr2 = self.stage_run_repository.create_initial("form")
-        form_sr3 = self.stage_run_repository.create_initial("form")
-        form_sr4 = self.stage_run_repository.create_initial("form")
-        job_sr1 = self.stage_run_repository.create_initial("job")
-        _job_sr2 = self.stage_run_repository.create_initial("job")
+        form_sr1 = self.repositories.stage_run.create_initial("form")
+        form_sr2 = self.repositories.stage_run.create_initial("form")
+        form_sr3 = self.repositories.stage_run.create_initial("form")
+        form_sr4 = self.repositories.stage_run.create_initial("form")
+        job_sr1 = self.repositories.stage_run.create_initial("job")
+        _job_sr2 = self.repositories.stage_run.create_initial("job")
 
-        self.stage_run_repository.change_status(form_sr1.id, "running")
-        self.stage_run_repository.change_status(form_sr2.id, "running")
-        self.stage_run_repository.change_status(form_sr3.id, "running")
-        self.stage_run_repository.change_status(form_sr4.id, "running")
-        self.stage_run_repository.change_status(job_sr1.id, "running")
+        self.repositories.stage_run.change_status(form_sr1.id, "running")
+        self.repositories.stage_run.change_status(form_sr2.id, "running")
+        self.repositories.stage_run.change_status(form_sr3.id, "running")
+        self.repositories.stage_run.change_status(form_sr4.id, "running")
+        self.repositories.stage_run.change_status(job_sr1.id, "running")
 
-        self.stage_run_repository.change_status(form_sr3.id, "finished")
-        self.stage_run_repository.change_status(form_sr4.id, "failed")
+        self.repositories.stage_run.change_status(form_sr3.id, "finished")
+        self.repositories.stage_run.change_status(form_sr4.id, "failed")
 
-        count = self.controller.count_by_status()
+        count = self.kanban_controller.count_by_status()
 
         expected = [
             CountStageRunsByStatus("form", 2, "running"),

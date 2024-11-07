@@ -264,10 +264,7 @@ def get_player_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-        ).run(
-            stage=job,
-            wait=False,
-        )
+        ).submit(stage=job)
 
         return {"status": "running"}
 

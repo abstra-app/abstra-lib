@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import jwt
 
 from abstra_internals.environment import PROJECT_ID, PUBLIC_KEY
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.utils.email import is_valid_email
 
 USER_AUTH_HEADER_KEY = "Authorization"
@@ -22,7 +23,7 @@ def decode_jwt(jwt_str: str):
         )
 
     except Exception as e:
-        print("error decoding jwt", e)
+        AbstraLogger.capture_exception(e)
         return None
 
 

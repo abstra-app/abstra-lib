@@ -8,6 +8,20 @@ from abstra_internals.settings import Settings
 from abstra_internals.utils.dot_abstra import RESOURCES_FILE
 
 
+def get_usage_recursive(pid: int):
+    p = psutil.Process(pid)
+
+    cpu = p.cpu_percent()
+    mem = int(p.memory_info().rss / 1024 / 1024)
+
+    for child in p.children():
+        ch_cpu, ch_mem = get_usage_recursive(child.pid)
+        cpu += ch_cpu
+        mem += ch_mem
+
+    return cpu, mem
+
+
 class ResourcesRepository:
     lock = threading.RLock()
 
@@ -26,10 +40,7 @@ class ResourcesRepository:
     @classmethod
     def save_usage(cls):
         with cls.lock:
-            p = psutil.Process(os.getpid())
-
-            mem = int(p.memory_info().rss / 1024 / 1024)
-            cpu = p.cpu_percent()
+            cpu, mem = get_usage_recursive(os.getpid())
 
             with cls.get_file().open("a") as f:
                 f.write(f"{mem} {cpu}\n")

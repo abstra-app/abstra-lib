@@ -1,6 +1,7 @@
 import os
-from typing import Optional
-from uuid import uuid4
+
+LOGLEVEL = os.getenv("ABSTRA_LOGLEVEL", "WARNING")
+LOGFORMAT = "[%(name)s][%(levelname)s][%(process)d]%(message)s"
 
 WORKERS = os.getenv("ABSTRA_WORKERS", 2)
 THREADS = os.getenv("ABSTRA_THREADS", 20)
@@ -17,6 +18,8 @@ PROJECT_URL = os.getenv("ABSTRA_PROJECT_URL")
 IS_PRODUCTION = os.getenv("ABSTRA_ENVIRONMENT") == "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 
+DISABLE_STDIO_PATCH = os.getenv("ABSTRA_DISABLE_STDIO_PATCH", "false") == "true"
+
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 
@@ -27,6 +30,12 @@ SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
 
+RABBITMQ_EXECUTION_QUEUE = os.getenv("ABSTRA_RABBITMQ_EXECUTION_QUEUE", "executions")
+RABBITMQ_DEFAUT_EXCHANGE = os.getenv("ABSTRA_RABBITMQ_DEFAUT_EXCHANGE", "")
+RABBITMQ_CONNECTION_URI = os.getenv("ABSTRA_RABBITMQ_CONNECTION_URI")
+QUEUE_CONCURRENCY = int(os.getenv("ABSTRA_QUEUE_CONCURRENCY", 2))
+
+
 __WORKER_UUID_ENV__ = "ABSTRA_WORKER_UUID"
 
 
@@ -34,8 +43,8 @@ def WORKER_UUID():
     return os.getenv(__WORKER_UUID_ENV__)
 
 
-def set_WORKER_UUID(worker_uuid: Optional[str] = None):
-    os.environ[__WORKER_UUID_ENV__] = worker_uuid or uuid4().__str__()
+def set_WORKER_UUID(worker_uuid: str):
+    os.environ[__WORKER_UUID_ENV__] = worker_uuid
 
 
 __SERVER_UUID_ENV__ = "ABSTRA_SERVER_UUID"
@@ -45,8 +54,8 @@ def SERVER_UUID():
     return os.getenv(__SERVER_UUID_ENV__)
 
 
-def set_SERVER_UUID(server_uuid: Optional[str] = None):
-    os.environ[__SERVER_UUID_ENV__] = server_uuid or uuid4().__str__()
+def set_SERVER_UUID(server_uuid: str):
+    os.environ[__SERVER_UUID_ENV__] = server_uuid
 
 
 def OIDC_CLIENT_ID():

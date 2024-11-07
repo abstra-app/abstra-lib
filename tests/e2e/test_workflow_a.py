@@ -3,28 +3,10 @@ import time
 from pathlib import Path
 from unittest.mock import ANY
 
-from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
-from tests.fixtures import BaseTest
+from tests.fixtures import BaseWorkflowTest, sort_response
 
 
-def sort_response(response: dict):
-    response["stage_run_cards"] = sorted(
-        response["stage_run_cards"], key=lambda x: x["stage"]
-    )
-    for stage_run_card in response["stage_run_cards"]:
-        stage_run_card["content"] = sorted(
-            stage_run_card["content"], key=lambda x: x["key"]
-        )
-    return response
-
-
-class TestWorkflowA(BaseTest):
-    def setUp(self) -> None:
-        super().setUp()
-        self.maxDiff = None
-        self.client = self.get_editor_flask_client()
-        (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
-
+class TestWorkflowA(BaseWorkflowTest):
     def create_project_a_py_files(self):
         shutil.copytree(
             Path(__file__).parent / "assets" / "project_a",
@@ -220,7 +202,7 @@ class TestWorkflowA(BaseTest):
         run_response = self.client.post("/_editor/api/jobs/job_a/run")
         self.assertEqual(run_response.status_code, 200)
 
-        for _ in range(10):
+        for _ in range(20):
             # Check hook is waiting
             response = self.client.post(
                 "/_editor/api/kanban",
@@ -245,7 +227,7 @@ class TestWorkflowA(BaseTest):
             ):
                 break
 
-            time.sleep(0.1)
+            time.sleep(0.2)
         else:
             self.fail("Hook did not become waiting")
 
@@ -288,7 +270,7 @@ class TestWorkflowA(BaseTest):
         # Run job and hook
         self.client.post("/_editor/api/jobs/job_a/run")
 
-        for _ in range(10):
+        for _ in range(20):
             response = self.client.post(
                 "/_editor/api/kanban",
                 json={
@@ -312,7 +294,7 @@ class TestWorkflowA(BaseTest):
             ):
                 break
 
-            time.sleep(0.1)
+            time.sleep(0.2)
         else:
             self.fail("Hook did not become waiting")
 
@@ -320,7 +302,7 @@ class TestWorkflowA(BaseTest):
             "/_editor/api/hooks/hook_b/run?abstra-run-id=" + cards[0]["id"]
         )
 
-        for _ in range(10):
+        for _ in range(20):
             response = self.client.post(
                 "/_editor/api/kanban",
                 json={
@@ -347,7 +329,7 @@ class TestWorkflowA(BaseTest):
             ):
                 break
 
-            time.sleep(0.1)
+            time.sleep(0.2)
         else:
             self.fail("Scripts did not run")
 

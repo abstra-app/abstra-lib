@@ -1,8 +1,9 @@
 import json
-import threading
 from pathlib import Path
 from typing import Generic, List, Optional, Protocol, Type, TypeVar
 
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.settings import Settings
 
 
@@ -17,8 +18,8 @@ T = TypeVar("T", bound=Serializable)
 
 
 class FileManager(Generic[T]):
-    def __init__(self, directory: str, model: Type[T]):
-        self.lock = threading.RLock()
+    def __init__(self, mp_context: MPContext, directory: str, model: Type[T]):
+        self.lock = mp_context.RLock()
         self.directory = directory
         self.model = model
 
@@ -68,7 +69,8 @@ class FileManager(Generic[T]):
                 try:
                     dto = json.load(f)
                     return self.model.from_dto(dto)
-                except Exception:
+                except Exception as e:
+                    AbstraLogger.capture_exception(e)
                     self.delete(id)
 
         return None

@@ -4,14 +4,11 @@ import flask
 import flask_cors
 
 from abstra_internals.controllers.main import MainController
-from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.blueprints.editor import get_editor_bp
 from abstra_internals.server.blueprints.player import get_player_bp
 
 
 def get_local_app(controller: MainController) -> flask.Flask:
-    AbstraLogger.init("local")
-
     app = flask.Flask(__name__)
     app.config["SOCK_SERVER_OPTIONS"] = {"subprotocols": ["default"]}
     app.url_map.strict_slashes = False

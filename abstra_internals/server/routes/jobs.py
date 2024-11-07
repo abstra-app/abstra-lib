@@ -65,9 +65,7 @@ def get_editor_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-        ).run(
-            stage=job,
-        )
+        ).run(stage=job)
 
         return {"ok": True}
 
@@ -81,9 +79,7 @@ def get_editor_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.detached_workflow_engine,
-        ).test(
-            stage=job,
-        )
+        ).test(stage=job)
 
         return {"ok": True}
 

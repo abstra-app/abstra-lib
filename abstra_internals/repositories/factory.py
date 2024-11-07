@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 
-from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_URL
+from abstra_internals.environment import (
+    CLOUD_API_CLI_URL,
+    RABBITMQ_CONNECTION_URI,
+    SIDECAR_URL,
+)
 from abstra_internals.repositories.ai import (
     AiApiHttpClient,
     LocalAiApiHttpClient,
@@ -36,6 +40,16 @@ from abstra_internals.repositories.keyvalue import (
     LocalKVRepository,
     ProductionKVRepository,
 )
+from abstra_internals.repositories.multiprocessing import (
+    ForkserverContextRepository,
+    MPContextReposity,
+    SpawnContextReposity,
+)
+from abstra_internals.repositories.producer import (
+    LocalProducerRepository,
+    ProducerRepository,
+    ProductionProducerRepository,
+)
 from abstra_internals.repositories.roles import (
     LocalRolesRepository,
     ProductionRolesRepository,
@@ -60,40 +74,47 @@ from abstra_internals.repositories.users import (
 
 @dataclass
 class Repositories:
-    ai: AiApiHttpClient
-    connectors: ConnectorsRepository
-    email: EmailRepository
     execution_logs: ExecutionLogsRepository
+    connectors: ConnectorsRepository
     execution: ExecutionRepository
+    mp_context: MPContextReposity
+    stage_run: StageRunRepository
+    producer: ProducerRepository
+    tables: TablesApiHttpClient
+    email: EmailRepository
+    users: UsersRepository
+    roles: RolesRepository
+    ai: AiApiHttpClient
     jwt: JWTRepository
     kv: KVRepository
-    roles: RolesRepository
-    stage_run: StageRunRepository
-    tables: TablesApiHttpClient
-    users: UsersRepository
 
 
 def get_local_repositories():
+    mp_context = SpawnContextReposity()
+
     return Repositories(
+        execution=LocalExecutionRepository(mp_context.get_context()),
+        stage_run=LocalStageRunRepository(mp_context.get_context()),
+        producer=LocalProducerRepository(mp_context.get_context()),
         connectors=LocalConnectorsRepository(CLOUD_API_CLI_URL),
         tables=LocalTablesApiHttpClient(CLOUD_API_CLI_URL),
         email=LocalEmailRepository(CLOUD_API_CLI_URL),
         roles=LocalRolesRepository(CLOUD_API_CLI_URL),
         ai=LocalAiApiHttpClient(CLOUD_API_CLI_URL),
         execution_logs=LocalExecutionLogsRepository(),
-        execution=LocalExecutionRepository(),
-        stage_run=LocalStageRunRepository(),
         users=LocalUsersRepository(),
         jwt=LocalJWTRepository(),
         kv=LocalKVRepository(),
+        mp_context=mp_context,
     )
 
 
 def get_prodution_repositories():
-    if SIDECAR_URL is None:
-        raise Exception("Sidecar URL is not set")
+    if SIDECAR_URL is None or RABBITMQ_CONNECTION_URI is None:
+        raise Exception("Production urls are not set")
 
     return Repositories(
+        producer=ProductionProducerRepository(RABBITMQ_CONNECTION_URI),
         execution_logs=ProductionExecutionLogsRepository(SIDECAR_URL),
         connectors=ProductionConnectorsRepository(SIDECAR_URL),
         execution=ProductionExecutionRepository(SIDECAR_URL),
@@ -105,4 +126,5 @@ def get_prodution_repositories():
         ai=ProductionAiApiHttpClient(SIDECAR_URL),
         jwt=ProductionJWTRepository(SIDECAR_URL),
         kv=ProductionKVRepository(SIDECAR_URL),
+        mp_context=ForkserverContextRepository(),
     )

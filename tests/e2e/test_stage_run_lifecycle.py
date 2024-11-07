@@ -17,8 +17,8 @@ ah.send_response(headers["authorization"])
 class TestStageRunLifecycle(BaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.flask_client = self.get_editor_flask_client()
         self.hook = self.controller.create_hook("New hook", "hook.py")
+        self.client = self.get_editor_flask_client()
 
     def test_switches_to_running_and_then_finished(self):
         random = uuid4().hex
@@ -27,7 +27,7 @@ class TestStageRunLifecycle(BaseTest):
 
         @threaded
         def async_hook_call():
-            return self.flask_client.post(
+            return self.client.post(
                 f"/_hooks/{self.hook.path}", headers={"Authorization": random}
             )
 
@@ -35,19 +35,19 @@ class TestStageRunLifecycle(BaseTest):
 
         sleep(0.1)
 
-        stage_runs_response = self.flask_client.get("/_editor/api/stage_runs")
+        stage_runs_response = self.client.get("/_editor/api/stage_runs")
         stage_runs = stage_runs_response.get_json()
 
         self.assertEqual(len(stage_runs), 1)
         self.assertEqual(stage_runs[0]["status"], "running")
 
-        for _ in range(10):
-            stage_runs_response = self.flask_client.get("/_editor/api/stage_runs")
+        for _ in range(20):
+            stage_runs_response = self.client.get("/_editor/api/stage_runs")
             stage_runs = stage_runs_response.get_json()
 
             if stage_runs[0]["status"] == "finished":
                 break
 
-            sleep(0.1)
+            sleep(0.2)
         else:
             self.fail("Hook did not become finished")

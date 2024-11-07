@@ -1,3 +1,4 @@
+import datetime
 import pkgutil
 import webbrowser
 from pathlib import Path
@@ -19,10 +20,14 @@ from abstra_internals.credentials import (
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import ExecutionRepository
-from abstra_internals.repositories.execution_logs import ExecutionLogsRepository
+from abstra_internals.repositories.execution_logs import (
+    ExecutionLogsRepository,
+    LogEntry,
+)
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.jwt_signer import JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
+from abstra_internals.repositories.producer import ProducerRepository
 from abstra_internals.repositories.project.project import (
     ActionStage,
     FormStage,
@@ -101,6 +106,7 @@ class MainController:
     workflow_engine: IWorkflowEngine
     users_repository: UsersRepository
     roles_repository: RolesRepository
+    producer_repository: ProducerRepository
     stage_run_repository: StageRunRepository
     execution_repository: ExecutionRepository
     detached_workflow_engine: DetachedWorkflowEngine
@@ -122,6 +128,7 @@ class MainController:
         self.email_repository = repositories.email
         self.users_repository = repositories.users
         self.roles_repository = repositories.roles
+        self.producer_repository = repositories.producer
         self.stage_run_repository = repositories.stage_run
         self.execution_repository = repositories.execution
         self.execution_logs_repository = repositories.execution_logs
@@ -442,3 +449,56 @@ class MainController:
     def get_access_control_by_stage_id(self, id):
         project = ProjectRepository.load()
         return project.get_access_control_by_stage_id(id)
+
+    # Worker lifecycle
+
+    def child_exit(self, *, app_id: str, worker_id: str, err_msg: str):
+        killed_executions = self.execution_repository.find_by_worker(
+            worker_id=worker_id,
+            status="running",
+            app_id=app_id,
+        )
+
+        # update executions
+        for execution in killed_executions:
+            # Add log entry
+            err_log = LogEntry(
+                execution_id=execution.id,
+                created_at=datetime.datetime.now(),
+                payload={"text": err_msg},
+                sequence=999999,
+                event="stderr",
+            )
+            self.execution_logs_repository.save(err_log)
+
+            # Update execution status
+            self.execution_repository.set_failure_by_id(execution_id=execution.id)
+
+            self.stage_run_repository.change_status(
+                execution.stage_run_id, "failed", execution.id
+            )
+
+    def self_exit(self, *, app_id: str, err_msg: str):
+        exited_execs = self.execution_repository.find_by_app(
+            status="running",
+            app_id=app_id,
+        )
+
+        # update executions
+        for execution in exited_execs:
+            # Add log entry
+            err_log = LogEntry(
+                execution_id=execution.id,
+                created_at=datetime.datetime.now(),
+                payload={"text": err_msg},
+                sequence=999999,
+                event="stderr",
+            )
+            self.execution_logs_repository.save(err_log)
+
+            # Update execution status
+            self.execution_repository.set_failure_by_id(execution_id=execution.id)
+
+            self.stage_run_repository.change_status(
+                execution.stage_run_id, "failed", execution.id
+            )

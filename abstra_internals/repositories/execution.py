@@ -5,6 +5,7 @@ import requests
 
 from abstra_internals.entities.execution import Execution, ExecutionStatus
 from abstra_internals.environment import SERVER_UUID, SIDECAR_HEADERS, WORKER_UUID
+from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.utils.dot_abstra import EXECUTIONS_FOLDER
 from abstra_internals.utils.file_manager import FileManager
 
@@ -38,8 +39,10 @@ class ExecutionRepository(ABC):
 
 
 class LocalExecutionRepository(ExecutionRepository):
-    def __init__(self):
-        self.manager = FileManager(directory=EXECUTIONS_FOLDER, model=Execution)
+    def __init__(self, mp_context: MPContext):
+        self.manager = FileManager(
+            mp_context, directory=EXECUTIONS_FOLDER, model=Execution
+        )
 
     def create(self, execution: Execution) -> None:
         self.manager.save(execution.id, execution)
@@ -53,10 +56,10 @@ class LocalExecutionRepository(ExecutionRepository):
     def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
     ) -> List[Execution]:
-        raise NotImplementedError()
+        return []
 
     def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
-        raise NotImplementedError()
+        return []
 
     def clear(self):
         self.manager.clear()

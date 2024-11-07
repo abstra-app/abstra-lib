@@ -3,6 +3,7 @@ import importlib.util as imp_util
 import sys
 from pathlib import Path
 
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.utils.file import path2module
 
@@ -42,5 +43,7 @@ def reload_project_local_modules():
                     Path(module.__spec__.cached).unlink(missing_ok=True)
                 importlib.reload(module)
         except Exception as e:
-            print(f"Could not reload module from {file} with the following error:", e)
+            AbstraLogger.error(
+                f"Could not reload module from {file} with the following error: {e}"
+            )
             continue

@@ -2,6 +2,7 @@ import sys
 
 from abstra_internals.controllers.execution_stdio import StdioController
 from abstra_internals.controllers.main import MainController
+from abstra_internals.environment import DISABLE_STDIO_PATCH
 
 
 class UnboundPthread(Exception):
@@ -14,6 +15,9 @@ class StdioPatcher:
 
     @classmethod
     def apply(cls, main_controller: MainController):
+        if DISABLE_STDIO_PATCH:
+            return
+
         stdio_controller = StdioController(
             sys_stderr_write=cls.original_sys_stderr_write,
             sys_stdout_write=cls.original_sys_stdout_write,

@@ -8,10 +8,12 @@ from pathlib import Path
 from unittest import TestCase
 
 from abstra_internals.controllers.main import MainController
+from abstra_internals.interface.cli.editor import start_consumer
 from abstra_internals.repositories.factory import get_local_repositories
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.apps import get_cloud_app, get_local_app
 from abstra_internals.settings import SettingsController
+from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 
 def rm_tree(pth: Path):
@@ -57,9 +59,21 @@ def wait_non_daemon_threads():
             break
 
 
+def sort_response(response: dict):
+    response["stage_run_cards"] = sorted(
+        response["stage_run_cards"], key=lambda x: x["stage"]
+    )
+    for stage_run_card in response["stage_run_cards"]:
+        stage_run_card["content"] = sorted(
+            stage_run_card["content"], key=lambda x: x["key"]
+        )
+    return response
+
+
 class BaseTest(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
         self.repositories = get_local_repositories()
         self.controller = MainController(self.repositories)
 
@@ -72,3 +86,16 @@ class BaseTest(TestCase):
 
     def get_cloud_flask_client(self):
         return get_cloud_app(self.controller).test_client()
+
+
+class BaseWorkflowTest(BaseTest):
+    def setUp(self) -> None:
+        super().setUp()
+        self.maxDiff = None
+        self.client = self.get_editor_flask_client()
+        self.consumer, self.thread = start_consumer(self.controller)
+
+    def tearDown(self) -> None:
+        self.consumer.stop()
+        self.thread.join()
+        super().tearDown()

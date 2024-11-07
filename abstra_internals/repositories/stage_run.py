@@ -10,11 +10,11 @@ from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
 from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
 from abstra_internals.utils.dot_abstra import STAGE_RUNS_FOLDER
 from abstra_internals.utils.file_manager import FileManager
 from abstra_internals.utils.filter import FilterCondition, evaluate_filter_condition
-from abstra_internals.utils.validate import validate_json
 
 Status = Literal["waiting", "running", "finished", "failed", "abandoned"]
 
@@ -270,15 +270,6 @@ class StageRunRepository(ABC):
             stage_run = children[0]
         return stage_run.id
 
-    @abstractmethod
-    def fork(
-        self,
-        stage_run: StageRun,
-        parent_is_iterator: bool,
-        custom_thread_data: Optional[str],
-    ) -> StageRun:
-        raise NotImplementedError()
-
     def retry(self, stage_run_id: str) -> StageRun:
         stage_run = self.get(stage_run_id)
 
@@ -317,8 +308,10 @@ class StageRunRepository(ABC):
 
 
 class LocalStageRunRepository(StageRunRepository):
-    def __init__(self):
-        self.manager = FileManager(directory=STAGE_RUNS_FOLDER, model=StageRun)
+    def __init__(self, mp_context: MPContext):
+        self.manager = FileManager(
+            mp_context, directory=STAGE_RUNS_FOLDER, model=StageRun
+        )
 
     def clear(self):
         self.manager.clear()
@@ -516,32 +509,6 @@ class LocalStageRunRepository(StageRunRepository):
 
         return False
 
-    def fork(
-        self,
-        stage_run: StageRun,
-        parent_is_iterator: bool,
-        custom_thread_data: Optional[str] = None,
-    ) -> StageRun:
-        if stage_run.parent_id is None:
-            return self.create_initial(stage_run.stage, {})
-
-        parent_stage_run = self.get(stage_run.parent_id)
-        new_stage_run = stage_run.clone_to_waiting()
-        forked, *_ = self.create_next(parent_stage_run, [new_stage_run.to_dto()])
-
-        forked.data = parent_stage_run.data
-
-        if custom_thread_data:
-            validate_json(custom_thread_data)
-            forked.data = json.loads(custom_thread_data)
-
-        if parent_is_iterator:
-            forked.data["item"] = stage_run.data["item"]
-
-        self.manager.save(forked.id, forked)
-
-        return forked
-
     def update_data(self, stage_run_id: str, data: dict) -> bool:
         stage_run = self.get(stage_run_id)
         stage_run.updated_at = datetime.now()
@@ -661,14 +628,6 @@ class ProductionStageRunRepository(StageRunRepository):
     def find_past(
         self, filter: GetStageRunByQueryFilter, pagination: Pagination
     ) -> PaginatedListResponse:
-        raise NotImplementedError()
-
-    def fork(
-        self,
-        stage_run: StageRun,
-        parent_is_iterator: bool,
-        custom_thread_data: Optional[str],
-    ) -> StageRun:
         raise NotImplementedError()
 
     def update_data(self, stage_run_id: str, data: dict) -> bool:
