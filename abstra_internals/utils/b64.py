@@ -46,6 +46,12 @@ def to_base64(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> Union[str, 
         return f"{BASE_64_PREFIX}{base64_file}"
 
     if isinstance(file, str):
+        if pathlib.Path(file).exists():
+            with open(file, "rb") as f:
+                file_content = f.read()
+                base64_file = base64.b64encode(file_content).decode("utf-8")
+                return f"{BASE_64_PREFIX}{base64_file}"
+
         # URL or base64 encoded string
         if file.startswith("http") or file.startswith("data:"):
             return file

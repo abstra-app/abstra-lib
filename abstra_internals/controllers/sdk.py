@@ -7,6 +7,7 @@ from abstra_internals.contract.forms import ValidationResult
 from abstra_internals.controllers.execution_client import ExecutionClient
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.execution_client_hook import HookClient
+from abstra_internals.controllers.sdk_ai import AiSDKController
 from abstra_internals.entities.execution import Execution
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.jwt_auth import UserClaims
@@ -27,6 +28,10 @@ class ExecutionSDKContext:
     thread_id: int
 
     def __post_init__(self):
+        self.ai_sdk = AiSDKController(
+            self.repositories.ai,
+        )
+
         self.workflow_sdk = WorkflowSDKController(
             self.execution,
             self.repositories.stage_run,

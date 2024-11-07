@@ -28,3 +28,4 @@ Pillow
 pika==1.3.2
 puremagic==1.28
 psutil
+pypdfium2
