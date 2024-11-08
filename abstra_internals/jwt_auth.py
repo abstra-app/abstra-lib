@@ -12,15 +12,13 @@ API_AUTH_HEADER_KEY = "Api-Authorization"
 AUTHOR_AUTH_HEADER_KEY = "Author-Authorization"
 
 
-def decode_jwt(jwt_str: str):
+def decode_jwt(jwt_str: str, aud=PROJECT_ID):
     try:
         if PUBLIC_KEY:
             return jwt.decode(
-                jwt_str, key=PUBLIC_KEY, algorithms=["RS256"], audience=PROJECT_ID
+                jwt_str, key=PUBLIC_KEY, algorithms=["RS256"], audience=aud
             )
-        return jwt.decode(
-            jwt_str, options={"verify_signature": False}, audience=PROJECT_ID
-        )
+        return jwt.decode(jwt_str, options={"verify_signature": False}, audience=aud)
 
     except Exception as e:
         AbstraLogger.capture_exception(e)

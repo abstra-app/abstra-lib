@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from abstra_internals.environment import (
     CLOUD_API_CLI_URL,
+    EDITOR_MODE,
     RABBITMQ_CONNECTION_URI,
     SIDECAR_URL,
 )
@@ -31,9 +32,11 @@ from abstra_internals.repositories.execution_logs import (
     ProductionExecutionLogsRepository,
 )
 from abstra_internals.repositories.jwt_signer import (
+    EditorJWTRepository,
     JWTRepository,
     LocalJWTRepository,
     ProductionJWTRepository,
+    get_editor_jwt_repository,
 )
 from abstra_internals.repositories.keyvalue import (
     KVRepository,
@@ -87,9 +90,14 @@ class Repositories:
     ai: AiApiHttpClient
     jwt: JWTRepository
     kv: KVRepository
+    roles: RolesRepository
+    stage_run: StageRunRepository
+    tables: TablesApiHttpClient
+    users: UsersRepository
+    editor_jwt: EditorJWTRepository
 
 
-def get_local_repositories():
+def get_editor_repositories():
     mp_context = SpawnContextReposity()
 
     return Repositories(
@@ -105,11 +113,12 @@ def get_local_repositories():
         users=LocalUsersRepository(),
         jwt=LocalJWTRepository(),
         kv=LocalKVRepository(),
+        editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
     )
 
 
-def get_prodution_repositories():
+def get_prodution_app_repositories():
     if SIDECAR_URL is None or RABBITMQ_CONNECTION_URI is None:
         raise Exception("Production urls are not set")
 
@@ -126,5 +135,6 @@ def get_prodution_repositories():
         ai=ProductionAiApiHttpClient(SIDECAR_URL),
         jwt=ProductionJWTRepository(SIDECAR_URL),
         kv=ProductionKVRepository(SIDECAR_URL),
+        editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=ForkserverContextRepository(),
     )

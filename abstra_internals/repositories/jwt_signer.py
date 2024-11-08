@@ -1,10 +1,13 @@
 import abc
 import datetime
+from functools import lru_cache
+from typing import Optional
 
 import jwt
 import requests
 
 from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
+from abstra_internals.jwt_auth import decode_jwt
 from abstra_internals.utils import generate_n_digit_code
 
 
@@ -59,3 +62,39 @@ class LocalJWTRepository(JWTRepository):
 
     def sanitize_code(self, code: str) -> str:
         return "000000"
+
+
+class EditorJWTRepository(abc.ABC):
+    def verify(self, token: Optional[str]) -> bool:
+        raise NotImplementedError()
+
+    def decode(self, token: str) -> Optional[dict]:
+        raise NotImplementedError()
+
+
+class LocalEditorJWTRepository(EditorJWTRepository):
+    def verify(self, token: Optional[str]) -> bool:
+        return True
+
+    def decode(self, token: str) -> Optional[dict]:
+        return decode_jwt(token, aud=f"web-editor-{PROJECT_ID}")
+
+
+class WebEditorJWTRepository(EditorJWTRepository):
+    @lru_cache(maxsize=10)
+    def __verify(self, token: str) -> bool:
+        return self.decode(token) is not None
+
+    def verify(self, token: Optional[str]) -> bool:
+        if not token:
+            return False
+        return self.__verify(token)
+
+    def decode(self, token: str):
+        return decode_jwt(token, aud=f"web-editor-{PROJECT_ID}")
+
+
+def get_editor_jwt_repository(mode) -> EditorJWTRepository:
+    if mode == "web":
+        return WebEditorJWTRepository()
+    return LocalEditorJWTRepository()

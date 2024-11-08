@@ -25,7 +25,10 @@ from abstra_internals.repositories.execution_logs import (
     LogEntry,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.jwt_signer import JWTRepository
+from abstra_internals.repositories.jwt_signer import (
+    EditorJWTRepository,
+    JWTRepository,
+)
 from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.repositories.producer import ProducerRepository
 from abstra_internals.repositories.project.project import (
@@ -111,6 +114,7 @@ class MainController:
     execution_repository: ExecutionRepository
     detached_workflow_engine: DetachedWorkflowEngine
     execution_logs_repository: ExecutionLogsRepository
+    web_editor_repository: EditorJWTRepository
 
     def __init__(self, repositories: Repositories):
         ProjectRepository.initialize_or_migrate()
@@ -132,6 +136,7 @@ class MainController:
         self.stage_run_repository = repositories.stage_run
         self.execution_repository = repositories.execution
         self.execution_logs_repository = repositories.execution_logs
+        self.web_editor_repository = repositories.editor_jwt
 
     def deploy(self):
         rules = check_linters()

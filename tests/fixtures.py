@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.interface.cli.editor import start_consumer
-from abstra_internals.repositories.factory import get_local_repositories
+from abstra_internals.repositories.factory import get_editor_repositories
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.server.apps import get_cloud_app, get_local_app
 from abstra_internals.settings import SettingsController
@@ -73,8 +73,8 @@ def sort_response(response: dict):
 class BaseTest(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        self.repositories = get_editor_repositories()
         (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
-        self.repositories = get_local_repositories()
         self.controller = MainController(self.repositories)
 
     def tearDown(self) -> None:
