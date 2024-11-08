@@ -17,6 +17,10 @@ class NonCleanExit(Exception):
     pass
 
 
+# should be smaller than the RabbitMQ consumer timeout (24h now)
+PROCESS_TIMEOUT = 6 * 60 * 60
+
+
 def PreExecController(
     *,
     controller: MainController,
@@ -49,7 +53,12 @@ def PreExecController(
         )
 
         p.start()
-        p.join()
+        p.join(timeout=PROCESS_TIMEOUT)
+        consumer.done_callback(msg)
+
+        if p.is_alive():
+            p.terminate()
+            raise NonCleanExit(f"Worker took too long to complete ({PROCESS_TIMEOUT})")
 
         if p.exitcode != 0:
             err_msg = f"Worker exited with status ({p.exitcode})"
@@ -57,8 +66,6 @@ def PreExecController(
                 err_msg += ": Server reached its memory limit"
 
             raise NonCleanExit(err_msg)
-
-        consumer.done_callback(msg)
     except Exception as e:
         AbstraLogger.error(f"[{head_id}] PreExecController ERROR: aborting consumer")
         AbstraLogger.capture_exception(e)
@@ -89,11 +96,14 @@ class Arbiter:
 def ExecutionConsumer(consumer: Consumer, controller: MainController):
     with Arbiter(controller) as arbiter:
         with ThreadPoolExecutor(max_workers=QUEUE_CONCURRENCY) as executor:
-            for msg in consumer.iter():
-                executor.submit(
-                    PreExecController,
-                    arbiter_uuid=arbiter.uuid,
-                    controller=controller,
-                    consumer=consumer,
-                    msg=msg,
-                )
+            try:
+                for msg in consumer.iter():
+                    executor.submit(
+                        PreExecController,
+                        arbiter_uuid=arbiter.uuid,
+                        controller=controller,
+                        consumer=consumer,
+                        msg=msg,
+                    )
+            except Exception as e:
+                AbstraLogger.capture_exception(e)
