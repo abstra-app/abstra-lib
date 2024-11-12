@@ -1,10 +1,9 @@
 import time
 
-from abstra_internals.controllers.main import MainController
 from abstra_internals.services.resources import ResourcesRepository
 
 
-def resources_polling_loop(*, controller: MainController):
+def resources_polling_loop():
     ResourcesRepository.clear_resources()
     while True:
         try:

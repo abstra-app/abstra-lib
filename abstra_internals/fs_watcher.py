@@ -6,6 +6,7 @@ from watchdog.events import FileModifiedEvent, FileSystemEvent, FileSystemEventH
 from watchdog.observers import Observer
 
 from abstra_internals.modules import reload_project_local_modules
+from abstra_internals.settings import Settings
 
 IGNORED_FILES = [".abstra/resources.dat", ".abstra/", "abstra.json"]
 DEBOUNCE_DELAY = 0.5
@@ -39,11 +40,11 @@ class FileChangeEventHandler(FileSystemEventHandler):
             pass
 
 
-def watch_file_change_events(path: str):
+def watch_file_change_events():
     event_handler = FileChangeEventHandler()
 
     observer = Observer()
-    observer.schedule(event_handler, path=path, recursive=True)
+    observer.schedule(event_handler, path=str(Settings.root_path), recursive=True)
     observer.start()
 
     try:

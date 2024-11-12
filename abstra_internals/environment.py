@@ -1,7 +1,11 @@
 import os
 
-LOGLEVEL = os.getenv("ABSTRA_LOGLEVEL", "WARNING")
-LOGFORMAT = "[%(name)s][%(levelname)s][%(process)d]%(message)s"
+DEFAULT_LOGLEVEL = "WARNING"
+LOGLEVEL = lambda: os.getenv("ABSTRA_LOGLEVEL", DEFAULT_LOGLEVEL)  # noqa: E731
+
+PROCESS_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s][%(process)d]%(message)s"
+DEFAULT_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
+LOGFORMAT = lambda: os.getenv("ABSTRA_LOGFORMAT", DEFAULT_LOGFORMAT)  # noqa: E731
 
 WORKERS = os.getenv("ABSTRA_WORKERS", 2)
 THREADS = os.getenv("ABSTRA_THREADS", 20)
@@ -37,11 +41,11 @@ RABBITMQ_DEFAUT_EXCHANGE = os.getenv("ABSTRA_RABBITMQ_DEFAUT_EXCHANGE", "")
 RABBITMQ_CONNECTION_URI = os.getenv("ABSTRA_RABBITMQ_CONNECTION_URI")
 QUEUE_CONCURRENCY = int(os.getenv("ABSTRA_QUEUE_CONCURRENCY", 2))
 
+OIDC_CLIENT_ID = lambda: os.getenv("ABSTRA_OIDC_CLIENT_ID")  # noqa: E731
+OIDC_AUTHORITY = lambda: os.getenv("ABSTRA_OIDC_AUTHORITY")  # noqa: E731
+
 __WORKER_UUID_ENV__ = "ABSTRA_WORKER_UUID"
-
-
-def WORKER_UUID():
-    return os.getenv(__WORKER_UUID_ENV__)
+WORKER_UUID = lambda: os.getenv(__WORKER_UUID_ENV__)  # noqa: E731
 
 
 def set_WORKER_UUID(worker_uuid: str):
@@ -49,19 +53,8 @@ def set_WORKER_UUID(worker_uuid: str):
 
 
 __SERVER_UUID_ENV__ = "ABSTRA_SERVER_UUID"
-
-
-def SERVER_UUID():
-    return os.getenv(__SERVER_UUID_ENV__)
+SERVER_UUID = lambda: os.getenv(__SERVER_UUID_ENV__)  # noqa: E731
 
 
 def set_SERVER_UUID(server_uuid: str):
     os.environ[__SERVER_UUID_ENV__] = server_uuid
-
-
-def OIDC_CLIENT_ID():
-    return os.getenv("ABSTRA_OIDC_CLIENT_ID")
-
-
-def OIDC_AUTHORITY():
-    return os.getenv("ABSTRA_OIDC_AUTHORITY")

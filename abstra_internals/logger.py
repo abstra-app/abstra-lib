@@ -8,9 +8,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 from abstra_internals.environment import LOGFORMAT, LOGLEVEL
 from abstra_internals.utils import is_dev_env, is_test_env
 
-
-def abstra_logger():
-    return logging.getLogger("abstra")
+internal_logger = lambda: logging.getLogger("abstra_internal")  # noqa: E731
 
 
 class DevSDK:
@@ -20,13 +18,13 @@ class DevSDK:
 
     @classmethod
     def capture_exception(cls, exception: BaseException):
-        abstra_logger().exception(
+        internal_logger().exception(
             msg=f"[ABSTRA_LOGGER] Exception captured: {exception}"
         )
 
     @classmethod
     def capture_message(cls, message):
-        abstra_logger().info(f"[ABSTRA_LOGGER] Message captured: {message}")
+        internal_logger().info(f"[ABSTRA_LOGGER] Message captured: {message}")
 
     @classmethod
     def flush(cls):
@@ -42,8 +40,11 @@ class AbstraLogger:
     @classmethod
     def init(cls, environment: Optional[Environment]):
         cls.environment = environment or "local"
-        logging.basicConfig(level=LOGLEVEL, format=LOGFORMAT)
-        logging.getLogger("pika").setLevel(logging.WARNING)  # TEMP
+        logging.basicConfig(level=LOGLEVEL(), format=LOGFORMAT())
+
+        # Silence verbose dependencies
+        logging.getLogger("pika").setLevel(logging.WARNING)
+        logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
         try:
             cls.get_sdk().init(
@@ -59,7 +60,7 @@ class AbstraLogger:
                 ],
             )
         except Exception:
-            abstra_logger().error(
+            internal_logger().error(
                 "[ABSTRA_LOGGER] Error reporting has been turned off."
             )
 
@@ -75,19 +76,19 @@ class AbstraLogger:
 
     @classmethod
     def warning(cls, message: str):
-        abstra_logger().warning(message)
+        internal_logger().warning(message)
 
     @classmethod
     def info(cls, message: str):
-        abstra_logger().info(message)
+        internal_logger().info(message)
 
     @classmethod
     def debug(cls, message: str):
-        abstra_logger().debug(message)
+        internal_logger().debug(message)
 
     @classmethod
     def error(cls, message: str):
-        abstra_logger().error(message)
+        internal_logger().error(message)
 
     @classmethod
     def get_sdk(cls):
