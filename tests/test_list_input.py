@@ -18,6 +18,8 @@ default_text_input = {
     "fullWidth": False,
     "mask": None,
     "disabled": False,
+    "maxLength": None,
+    "minLength": None,
     "errors": [],
 }
 
@@ -168,6 +170,8 @@ class TestListInput(BaseTest):
                                 "required": True,
                                 "hint": None,
                                 "fullWidth": False,
+                                "maxLength": None,
+                                "minLength": None,
                                 "mask": None,
                                 "disabled": False,
                                 "errors": [],
