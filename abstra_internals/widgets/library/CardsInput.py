@@ -1,5 +1,5 @@
 from typing import List, Optional, TypedDict
-from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.widgets.file_utils import upload_widget_file
 from abstra_internals.widgets.widget_base import Input, MultipleHandler
 
 
@@ -25,8 +25,8 @@ class CardsInput(Input):
 
     def set_props(self, props):
         self.label = props.get('label', 'Label')
-        self.options = [{**opt, 'image': convert_file(opt.get('image'))} for
-            opt in props.get('options', [])]
+        self.options = [{**opt, 'image': upload_widget_file(opt.get('image'
+            ))} for opt in props.get('options', [])]
         self.searchable = props.get('searchable', False)
         self.required = props.get('required', True)
         self.hint = props.get('hint', None)

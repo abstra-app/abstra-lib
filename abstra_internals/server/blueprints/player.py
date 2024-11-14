@@ -39,11 +39,7 @@ from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.usage import player_usage
 from abstra_internals.utils import check_is_url
-from abstra_internals.utils.file import (
-    get_random_filepath,
-    get_tmp_upload_dir,
-    path2module,
-)
+from abstra_internals.utils.file import get_tmp_upload_dir, path2module, upload_file
 
 
 def get_player_bp(controller: MainController):
@@ -160,12 +156,7 @@ def get_player_bp(controller: MainController):
         if len(files) == 0:
             flask.abort(400)
 
-        paths = []
-        for file in files.values():
-            name, path = get_random_filepath(filename)
-            file.save(path)
-            paths.append(name)
-        return paths
+        return [upload_file(file) for file in files.values()]
 
     @bp.get("/_files/<path:path>")
     def _get_file(path):

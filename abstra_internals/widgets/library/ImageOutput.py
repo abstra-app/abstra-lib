@@ -1,6 +1,6 @@
 import io
 from typing import Union
-from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.widgets.file_utils import upload_widget_file
 from abstra_internals.widgets.widget_base import Output
 
 
@@ -11,7 +11,7 @@ class ImageOutput(Output):
         self.set_props(dict(image=image, **kwargs))
 
     def set_props(self, props):
-        self.image = convert_file(props.get('image', None))
+        self.image = upload_widget_file(props.get('image', None))
         self.subtitle = props.get('subtitle', '')
         self.full_width = props.get('full_width', False)
         self.label = props.get('label', '')

@@ -1,8 +1,7 @@
 from io import BufferedReader, TextIOWrapper
 from pathlib import Path
 from typing import List, Optional, Union
-from abstra_internals.widgets.apis import upload_file
-from abstra_internals.widgets.file_utils import extension_to_mime
+from abstra_internals.utils.file import extension_to_mime, upload_file
 from abstra_internals.widgets.response_types import FileResponse
 from abstra_internals.widgets.widget_base import Input, MultipleHandler
 
