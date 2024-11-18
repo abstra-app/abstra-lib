@@ -510,7 +510,7 @@ def upload_file(file: t.Union[str, FileStorage, io.IOBase, pathlib.Path]):
         return public_path(name)
 
     if isinstance(file, FileStorage):
-        name, path = get_random_filepath(file.name)
+        name, path = get_random_filepath(file.filename)
         file.save(path)
         return public_path(name)
 

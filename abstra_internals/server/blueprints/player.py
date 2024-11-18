@@ -149,10 +149,6 @@ def get_player_bp(controller: MainController):
     @player_usage
     def _upload_file():
         files = flask.request.files
-        filename = flask.request.form.get("filename")
-        if filename is None:
-            flask.abort(400)
-
         if len(files) == 0:
             flask.abort(400)
 
