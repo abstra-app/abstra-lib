@@ -34,3 +34,7 @@ class MissingDependencyError(Exception):
 
 class ExecutionNotFound(Exception):
     pass
+
+
+class BadSendResponse(Exception):
+    pass
