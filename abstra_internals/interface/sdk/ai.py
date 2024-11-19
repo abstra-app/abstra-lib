@@ -1,13 +1,7 @@
-import io
-import pathlib
 from typing import Dict, List, Optional, TypeVar, Union
 
 from abstra_internals.controllers.execution_store import ExecutionStore
-
-Prompt = Union[str, io.IOBase, pathlib.Path]
-InputFile = Union[str, pathlib.Path, io.IOBase]
-Format = Dict[str, object]
-
+from abstra_internals.controllers.sdk_ai import Format, Prompt
 
 T = TypeVar("T")
 

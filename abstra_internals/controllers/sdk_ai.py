@@ -4,12 +4,14 @@ import pathlib
 from typing import Dict, List, Optional, Union
 
 import pypdfium2 as pdfium
+from PIL.Image import Image
 
+import abstra_internals.utils.b64 as b64
 from abstra_internals.repositories.ai import AiApiHttpClient
-from abstra_internals.utils.b64 import is_base_64, to_base64
 from abstra_internals.utils.string import to_snake_case
+from abstra_internals.widgets.response_types import FileResponse
 
-Prompt = Union[str, io.IOBase, pathlib.Path]
+Prompt = Union[str, io.IOBase, pathlib.Path, FileResponse]
 Format = Dict[str, object]
 
 
@@ -43,14 +45,97 @@ class AiSDKController:
             images.append(image_io)
         return images
 
-    def _prompt_is_valid_file(self, prompt: Prompt) -> bool:
-        if isinstance(prompt, (io.IOBase, pathlib.Path)) or is_base_64(prompt):
-            return True
+    def _make_image_url_message(self, url: str):
+        return {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": url,
+                    },
+                },
+            ],
+        }
+
+    def _make_text_message(self, text: str):
+        return {
+            "role": "user",
+            "content": text,
+        }
+
+    def _try_extract_images(self, input: io.IOBase) -> Optional[List[io.BytesIO]]:
+        try:
+            images = self._extract_pdf_images(input)
+            return images
+        except Exception:
+            return None
+
+    def _make_messages(self, prompt: Prompt) -> List:
+        if isinstance(prompt, pathlib.Path):
+            with prompt.open("rb") as f:
+                if images := self._try_extract_images(f):
+                    return [
+                        self._make_image_url_message(b64.encode_base_64(image))
+                        for image in images
+                    ]
+
+                encoded_str = b64.encode_base_64(f)
+                return [self._make_image_url_message(encoded_str)]
+
+        if isinstance(prompt, FileResponse):
+            file = prompt.file
+            if images := self._try_extract_images(file):
+                return [
+                    self._make_image_url_message(b64.encode_base_64(image))
+                    for image in images
+                ]
+
+            encoded_str = b64.encode_base_64(file)
+            return [self._make_image_url_message(encoded_str)]
+
+        if isinstance(prompt, io.IOBase):
+            prompt.seek(0)
+            if images := self._try_extract_images(prompt):
+                return [
+                    self._make_image_url_message(b64.encode_base_64(image))
+                    for image in images
+                ]
+            encoded_str = b64.encode_base_64(prompt)
+            return [self._make_image_url_message(encoded_str)]
+
+        if isinstance(prompt, str) and (
+            b64.is_base_64(prompt) or prompt.startswith("http")
+        ):
+            if prompt.endswith(".pdf"):
+                raise ValueError("PDF URLs are not supported")
+
+            return [self._make_image_url_message(prompt)]
 
         try:
-            return pathlib.Path(prompt).exists()
-        except Exception:
-            return False
+            if isinstance(prompt, str) and pathlib.Path(prompt).exists():
+                with open(prompt, "rb") as f:
+                    if images := self._try_extract_images(f):
+                        return [
+                            self._make_image_url_message(b64.encode_base_64(image))
+                            for image in images
+                        ]
+                    encoded_str = b64.encode_base_64(f)
+                    return [self._make_image_url_message(encoded_str)]
+        except OSError:  # Path contructor can raise OSError on long strings
+            pass
+
+        if isinstance(prompt, Image):
+            image_io = io.BytesIO()
+            prompt.save(image_io, format="PNG")
+            image_io.seek(0)
+            encoded_str = b64.encode_base_64(image_io)
+            return [self._make_image_url_message(encoded_str)]
+
+        if isinstance(prompt, str):
+            return [self._make_text_message(prompt)]
+
+        raise ValueError(f"Invalid prompt: {prompt}")
 
     def prompt(
         self,
@@ -70,53 +155,7 @@ class AiSDKController:
             )
 
         for prompt in prompts:
-            if self._prompt_is_valid_file(prompt):
-                try:
-                    images = self._extract_pdf_images(prompt)
-                except pdfium.PdfiumError:
-                    # If the file is not a PDF, read it as a single image
-                    images = [prompt]
-                except FileNotFoundError:
-                    raise FileNotFoundError(f"File not found: {prompt}")
-                except Exception as e:
-                    raise Exception(f"Error reading file: {e}")
-
-                for image in images:
-                    base_64_image = to_base64(image)
-                    messages.append(
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": base_64_image,
-                                    },
-                                },
-                            ],
-                        }
-                    )
-            elif isinstance(prompt, str) and is_base_64(prompt):
-                messages.append(
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": prompt,
-                                },
-                            },
-                        ],
-                    }
-                )
-            elif isinstance(prompt, str):
-                messages.append(
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
-                )
+            messages.extend(self._make_messages(prompt))
 
         tools = []
         if format:
