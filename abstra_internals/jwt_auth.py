@@ -20,6 +20,8 @@ def decode_jwt(jwt_str: str, aud=PROJECT_ID):
             )
         return jwt.decode(jwt_str, options={"verify_signature": False}, audience=aud)
 
+    except jwt.ExpiredSignatureError:
+        return None
     except Exception as e:
         AbstraLogger.capture_exception(e)
         return None
