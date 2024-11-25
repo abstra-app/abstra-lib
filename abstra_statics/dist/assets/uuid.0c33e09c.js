@@ -1,0 +1,2 @@
+import"./vue-router.3d174294.js";(function(){try{var x=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},e=new Error().stack;e&&(x._sentryDebugIds=x._sentryDebugIds||{},x._sentryDebugIds[e]="40812c59-66ec-4111-a418-c3fc83ef304e",x._sentryDebugIdIdentifier="sentry-dbid-40812c59-66ec-4111-a418-c3fc83ef304e")}catch{}})();const r=()=>"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(x){const e=Math.random()*16|0;return(x=="x"?e:e&3|8).toString(16)});export{r as u};
+//# sourceMappingURL=uuid.0c33e09c.js.map
