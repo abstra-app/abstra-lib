@@ -218,6 +218,9 @@ class MainController:
     def check_file(self, file_path: str):
         return Settings.root_path.joinpath(file_path).is_file()
 
+    def check_files(self, file_paths: List[str]):
+        return {file_path: self.check_file(file_path) for file_path in file_paths}
+
     def list_files(self, path: str = ".", mode: str = "file"):
         parent_path = Settings.root_path.joinpath(path)
         if mode in ["file", "image", "python-file"]:
