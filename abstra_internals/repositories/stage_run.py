@@ -130,7 +130,7 @@ class StageRun:
     data: dict
     status: Status
     created_at: datetime = Field(serialization_alias="createdAt")
-    updated_at: datetime = Field(default=None, serialization_alias="updatedAt")
+    updated_at: datetime = Field(default=None, serialization_alias="updatedAt")  # type: ignore
     parent_id: Optional[str] = Field(default=None, serialization_alias="parentId")
     execution_id: Optional[str] = Field(default=None, serialization_alias="executionId")
 
