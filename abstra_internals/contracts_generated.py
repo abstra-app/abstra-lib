@@ -6,6 +6,111 @@ Source code: [monorepo]/contracts/generator.py
 import typing
 from dataclasses import dataclass
 
+CloudApiCliApiKeyInfoResponseAuthorId = str
+
+CloudApiCliApiKeyInfoResponseProjectId = str
+
+CloudApiCliApiKeyInfoResponseEmail = str
+
+CloudApiCliApiKeyInfoResponseIntercomHash = str
+
+
+@dataclass
+class CloudApiCliApiKeyInfoResponse:
+    author_id: CloudApiCliApiKeyInfoResponseAuthorId
+    project_id: CloudApiCliApiKeyInfoResponseProjectId
+    email: CloudApiCliApiKeyInfoResponseEmail
+    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "authorId": self.author_id,
+            "projectId": self.project_id,
+            "email": self.email,
+            "intercomHash": self.intercom_hash,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "CloudApiCliApiKeyInfoResponse":
+        return CloudApiCliApiKeyInfoResponse(
+            author_id=str(data["authorId"]),
+            project_id=str(data["projectId"]),
+            email=str(data["email"]),
+            intercom_hash=str(data["intercomHash"]),
+        )
+
+
+CloudApiCliBuildCreateResponseUrl = str
+
+CloudApiCliBuildCreateResponseBuildId = str
+
+
+@dataclass
+class CloudApiCliBuildCreateResponse:
+    url: CloudApiCliBuildCreateResponseUrl
+    build_id: CloudApiCliBuildCreateResponseBuildId
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "url": self.url,
+            "buildId": self.build_id,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "CloudApiCliBuildCreateResponse":
+        return CloudApiCliBuildCreateResponse(
+            url=str(data["url"]),
+            build_id=str(data["buildId"]),
+        )
+
+
+CommonUserId = str
+
+CommonUserEmail = str
+
+CommonUserRolesItem = str
+
+CommonUserRoles = typing.List[CommonUserRolesItem]
+
+CommonUserProjectId = str
+
+CommonUserCreatedAt = str
+
+
+@dataclass
+class CommonUser:
+    id: CommonUserId
+    email: CommonUserEmail
+    roles: CommonUserRoles
+    project_id: CommonUserProjectId
+    created_at: CommonUserCreatedAt
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "id": self.id,
+            "email": self.email,
+            "roles": self.roles,
+            "projectId": self.project_id,
+            "createdAt": self.created_at,
+        }
+
+    @staticmethod
+    def from_dict(data: typing.Dict[str, typing.Any]) -> "CommonUser":
+        return CommonUser(
+            id=str(data["id"]),
+            email=str(data["email"]),
+            roles=[str(item) for item in data["roles"]],
+            project_id=str(data["projectId"]),
+            created_at=str(data["createdAt"]),
+        )
+
+
+CloudApiCliUserGetResponse = CommonUser
+
 CommonRoleDescription = str
 
 CloudApiCliRoleUpdateRequestDescription = CommonRoleDescription
@@ -119,111 +224,6 @@ class CloudApiCliRoleCreateRequest:
 
 
 CloudApiCliRoleCreateResponse = CommonRole
-
-CommonUserId = str
-
-CommonUserEmail = str
-
-CommonUserRolesItem = str
-
-CommonUserRoles = typing.List[CommonUserRolesItem]
-
-CommonUserProjectId = str
-
-CommonUserCreatedAt = str
-
-
-@dataclass
-class CommonUser:
-    id: CommonUserId
-    email: CommonUserEmail
-    roles: CommonUserRoles
-    project_id: CommonUserProjectId
-    created_at: CommonUserCreatedAt
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "id": self.id,
-            "email": self.email,
-            "roles": self.roles,
-            "projectId": self.project_id,
-            "createdAt": self.created_at,
-        }
-
-    @staticmethod
-    def from_dict(data: typing.Dict[str, typing.Any]) -> "CommonUser":
-        return CommonUser(
-            id=str(data["id"]),
-            email=str(data["email"]),
-            roles=[str(item) for item in data["roles"]],
-            project_id=str(data["projectId"]),
-            created_at=str(data["createdAt"]),
-        )
-
-
-CloudApiCliUserGetResponse = CommonUser
-
-CloudApiCliBuildCreateResponseUrl = str
-
-CloudApiCliBuildCreateResponseBuildId = str
-
-
-@dataclass
-class CloudApiCliBuildCreateResponse:
-    url: CloudApiCliBuildCreateResponseUrl
-    build_id: CloudApiCliBuildCreateResponseBuildId
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "url": self.url,
-            "buildId": self.build_id,
-        }
-
-    @staticmethod
-    def from_dict(
-        data: typing.Dict[str, typing.Any],
-    ) -> "CloudApiCliBuildCreateResponse":
-        return CloudApiCliBuildCreateResponse(
-            url=str(data["url"]),
-            build_id=str(data["buildId"]),
-        )
-
-
-CloudApiCliApiKeyInfoResponseAuthorId = str
-
-CloudApiCliApiKeyInfoResponseProjectId = str
-
-CloudApiCliApiKeyInfoResponseEmail = str
-
-CloudApiCliApiKeyInfoResponseIntercomHash = str
-
-
-@dataclass
-class CloudApiCliApiKeyInfoResponse:
-    author_id: CloudApiCliApiKeyInfoResponseAuthorId
-    project_id: CloudApiCliApiKeyInfoResponseProjectId
-    email: CloudApiCliApiKeyInfoResponseEmail
-    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "authorId": self.author_id,
-            "projectId": self.project_id,
-            "email": self.email,
-            "intercomHash": self.intercom_hash,
-        }
-
-    @staticmethod
-    def from_dict(
-        data: typing.Dict[str, typing.Any],
-    ) -> "CloudApiCliApiKeyInfoResponse":
-        return CloudApiCliApiKeyInfoResponse(
-            author_id=str(data["authorId"]),
-            project_id=str(data["projectId"]),
-            email=str(data["email"]),
-            intercom_hash=str(data["intercomHash"]),
-        )
-
 
 AbstraLibApiStageCardContentKey = str
 
@@ -538,6 +538,55 @@ AbstraLibApiStagesItem = AbstraLibApiStage
 
 AbstraLibApiStages = typing.List[AbstraLibApiStagesItem]
 
+AbstraLibApiPlayerUserSignupEmail = CommonUserEmail
+
+
+@dataclass
+class AbstraLibApiPlayerUserSignup:
+    email: AbstraLibApiPlayerUserSignupEmail
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "email": self.email,
+        }
+
+    @staticmethod
+    def from_dict(data: typing.Dict[str, typing.Any]) -> "AbstraLibApiPlayerUserSignup":
+        return AbstraLibApiPlayerUserSignup(
+            email=str(data["email"]),
+        )
+
+
+AbstraLibApiPlayerUserNavigationGuardStatus = typing.Union[
+    typing.Literal["ALLOWED"],
+    typing.Literal["UNAUTHORIZED"],
+    typing.Literal["FORBIDEN"],
+    typing.Literal["NOT_FOUND"],
+]
+
+AbstraLibApiPlayerUserNavigationGuardStatusValues: typing.List[
+    AbstraLibApiPlayerUserNavigationGuardStatus
+] = ["ALLOWED", "UNAUTHORIZED", "FORBIDEN", "NOT_FOUND"]
+
+
+@dataclass
+class AbstraLibApiPlayerUserNavigationGuard:
+    status: AbstraLibApiPlayerUserNavigationGuardStatus
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "status": self.status,
+        }
+
+    @staticmethod
+    def from_dict(
+        data: typing.Dict[str, typing.Any],
+    ) -> "AbstraLibApiPlayerUserNavigationGuard":
+        return AbstraLibApiPlayerUserNavigationGuard(
+            status=data["status"],
+        )
+
+
 AbstraLibApiEditorLintersRuleName = str
 
 AbstraLibApiEditorLintersRuleLabel = str
@@ -641,33 +690,6 @@ class AbstraLibApiEditorLintersRule:
         )
 
 
-AbstraLibApiEditorLintersFixResponseSuccess = bool
-
-
-@dataclass
-class AbstraLibApiEditorLintersFixResponse:
-    success: AbstraLibApiEditorLintersFixResponseSuccess
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "success": self.success,
-        }
-
-    @staticmethod
-    def from_dict(
-        data: typing.Dict[str, typing.Any],
-    ) -> "AbstraLibApiEditorLintersFixResponse":
-        return AbstraLibApiEditorLintersFixResponse(
-            success=bool(data["success"]),
-        )
-
-
-AbstraLibApiEditorLintersCheckResponseItem = AbstraLibApiEditorLintersRule
-
-AbstraLibApiEditorLintersCheckResponse = typing.List[
-    AbstraLibApiEditorLintersCheckResponseItem
-]
-
 AbstraLibApiEditorEnvVarsModelName = str
 
 AbstraLibApiEditorEnvVarsModelValue = str
@@ -704,50 +726,29 @@ AbstraLibApiEditorEnvVarsCreateRequest = AbstraLibApiEditorEnvVarsModel
 
 AbstraLibApiEditorEnvVarsCreateResponse = AbstraLibApiEditorEnvVarsModel
 
-AbstraLibApiPlayerUserSignupEmail = CommonUserEmail
+AbstraLibApiEditorLintersFixResponseSuccess = bool
 
 
 @dataclass
-class AbstraLibApiPlayerUserSignup:
-    email: AbstraLibApiPlayerUserSignupEmail
+class AbstraLibApiEditorLintersFixResponse:
+    success: AbstraLibApiEditorLintersFixResponseSuccess
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         return {
-            "email": self.email,
-        }
-
-    @staticmethod
-    def from_dict(data: typing.Dict[str, typing.Any]) -> "AbstraLibApiPlayerUserSignup":
-        return AbstraLibApiPlayerUserSignup(
-            email=str(data["email"]),
-        )
-
-
-AbstraLibApiPlayerUserNavigationGuardStatus = typing.Union[
-    typing.Literal["ALLOWED"],
-    typing.Literal["UNAUTHORIZED"],
-    typing.Literal["FORBIDEN"],
-    typing.Literal["NOT_FOUND"],
-]
-
-AbstraLibApiPlayerUserNavigationGuardStatusValues: typing.List[
-    AbstraLibApiPlayerUserNavigationGuardStatus
-] = ["ALLOWED", "UNAUTHORIZED", "FORBIDEN", "NOT_FOUND"]
-
-
-@dataclass
-class AbstraLibApiPlayerUserNavigationGuard:
-    status: AbstraLibApiPlayerUserNavigationGuardStatus
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        return {
-            "status": self.status,
+            "success": self.success,
         }
 
     @staticmethod
     def from_dict(
         data: typing.Dict[str, typing.Any],
-    ) -> "AbstraLibApiPlayerUserNavigationGuard":
-        return AbstraLibApiPlayerUserNavigationGuard(
-            status=data["status"],
+    ) -> "AbstraLibApiEditorLintersFixResponse":
+        return AbstraLibApiEditorLintersFixResponse(
+            success=bool(data["success"]),
         )
+
+
+AbstraLibApiEditorLintersCheckResponseItem = AbstraLibApiEditorLintersRule
+
+AbstraLibApiEditorLintersCheckResponse = typing.List[
+    AbstraLibApiEditorLintersCheckResponseItem
+]
