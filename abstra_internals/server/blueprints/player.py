@@ -33,7 +33,6 @@ from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import auth as auth_router
 from abstra_internals.server.routes import kanban as kanban_router
 from abstra_internals.server.routes import stage_runs as stage_runs_router
-from abstra_internals.server.routes import users as user_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
@@ -51,9 +50,6 @@ def get_player_bp(controller: MainController):
 
     auth_bp = auth_router.get_player_bp(controller)
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
-
-    user_bp = user_router.get_player_bp(controller)
-    bp.register_blueprint(user_bp, url_prefix="/_user")
 
     kanban_bp = kanban_router.get_player_bp(controller)
     bp.register_blueprint(kanban_bp, url_prefix="/_kanban")

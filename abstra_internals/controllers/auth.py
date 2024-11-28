@@ -9,6 +9,7 @@ from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.jwt_signer import JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
+from abstra_internals.repositories.users import UsersRepository
 
 
 def authn_kv_key(email: str) -> str:
@@ -43,6 +44,7 @@ def get_oidc_userinfo_email(access_token: str) -> typing.Optional[str]:
 class AuthController:
     kv_repository: KVRepository
     jwt_repository: JWTRepository
+    users_repository: UsersRepository
     email_repository: EmailRepository
 
     def __init__(
@@ -51,10 +53,16 @@ class AuthController:
         kv_repository: KVRepository,
         jwt_repository: JWTRepository,
         email_repository: EmailRepository,
+        users_repository: UsersRepository,
     ):
         self.kv_repository = kv_repository
         self.jwt_repository = jwt_repository
         self.email_repository = email_repository
+        self.users_repository = users_repository
+
+    def _sign_and_signup(self, email: str) -> str:
+        self.users_repository.insert_user(email)
+        return self.jwt_repository.sign(email)
 
     def authenticate(self, email: str) -> bool:
         try:
@@ -93,7 +101,7 @@ class AuthController:
             self.kv_repository.delete(key)
             self.kv_repository.delete(counter_key)
 
-            return 200, self.jwt_repository.sign(email)
+            return 200, self._sign_and_signup(email)
         except Exception as e:
             AbstraLogger.capture_exception(e)
             return 500, None
@@ -104,7 +112,7 @@ class AuthController:
             if not email:
                 return None, None
 
-            return self.jwt_repository.sign(email), email
+            return self._sign_and_signup(email), email
         except Exception as e:
             AbstraLogger.capture_exception(e)
             return None, None
