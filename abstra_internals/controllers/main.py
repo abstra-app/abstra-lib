@@ -2,7 +2,7 @@ import datetime
 import pkgutil
 import webbrowser
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import flask
 
@@ -168,10 +168,6 @@ class MainController:
     def get_action(self, id: str) -> Optional[ActionStage]:
         project = ProjectRepository.load()
         return project.get_action(id)
-
-    def get_project_local_dependencies(self) -> Generator[Path, None, None]:
-        project = ProjectRepository.load()
-        yield from project.project_local_dependencies
 
     def get_async_stage_ids(self):
         project = ProjectRepository.load()

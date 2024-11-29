@@ -5,7 +5,6 @@ from abstra_internals.linter.rules.conflicting_path import ConflictingPath
 from abstra_internals.linter.rules.duplicate_package_in_requirements import (
     DuplicatePackagesInRequirements,
 )
-from abstra_internals.linter.rules.env_file_changed import EnvFileChanged
 from abstra_internals.linter.rules.env_in_bundle import EnvInBundle
 from abstra_internals.linter.rules.missing_abstra_in_requirements import (
     MissingAbstraInRequirements,
@@ -33,6 +32,5 @@ rules: List[LinterRule] = [
     MissingEnv(),
     NewVersionOfAbstraAvailable(),
     UnsetGetData(),
-    EnvFileChanged(),
     ConflictingPath(),
 ]
