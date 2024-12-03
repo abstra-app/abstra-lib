@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 from typing import Dict, List, Literal, Mapping, Optional, Set
 
 from importlib_metadata import packages_distributions
-from pkg_resources import DistributionNotFound, get_distribution, working_set
+from pkg_resources import get_distribution, working_set
 
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
@@ -78,25 +78,11 @@ class Requirement:
     def __hash__(self) -> int:
         return hash(f"{self.name}/{self.version}")
 
-    @staticmethod
-    def installed() -> List["Requirement"]:
-        output = subprocess.check_output([sys.executable, "-m", "pip", "freeze"])
-        lines = output.decode("utf-8").splitlines()
-        reqs = [Requirement.from_text(line) for line in lines]
-        return [req for req in reqs if req is not None]
-
     def installed_version(self):
         try:
             return get_distribution(self.name).version
-        except DistributionNotFound:
+        except Exception:
             return None
-
-    def install(self):
-        if self.installed_version():
-            return
-        yield from stream_output(
-            [sys.executable, "-m", "pip", "install", self.to_text()]
-        )
 
     def uninstall(self):
         if not self.installed_version():
@@ -208,6 +194,18 @@ class Requirements:
             else:
                 duplicates[lib.name].append(lib)
         return {k: v for k, v in duplicates.items() if len(v) > 1}
+
+    def install(self):
+        yield from stream_output(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "-r",
+                str(RequirementsRepository.get_file_path()),
+            ]
+        )
 
 
 @dataclass

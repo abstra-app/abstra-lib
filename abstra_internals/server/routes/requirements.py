@@ -31,16 +31,11 @@ def get_editor_bp(controller: MainController):
 
     @bp.post("/install")
     def _install_requirements():
-        data = flask.request.json
-        if not data:
-            flask.abort(400)
-        req = Requirement.from_dict(data)
-        streamer = req.install()
+        requirements = RequirementsRepository.load()
+        streamer = requirements.install()
         if streamer is None:
             flask.abort(403)
-        reqs = RequirementsRepository.load()
-        reqs.add(req.name, req.version)
-        RequirementsRepository.save(reqs)
+
         return flask.Response(streamer, mimetype="text/event-stream")
 
     @bp.post("/<name>/uninstall")
