@@ -32,3 +32,13 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: "Wait for PyPI to update"
+        run: sleep 60
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.ABSTRA_BOT_PAT }}
+          repository: abstra-app/abstracloud
+          event-type: abstra-lib-release
