@@ -41,7 +41,7 @@ abstra serve ./your-project-directory
 ## 🧩 Workflow builder for Python
 
 
-Use Workflows to automate processes that require a mix of manual steps and integrations between systems.
+Use Workflows to automate processes that require a mix of manual steps and integrations between systems.   
 
 A Workflow is made up of Python-coded steps, which are then assembled visually in the editor. All steps share an environment, and can share variables and functions.
 
