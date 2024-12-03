@@ -25,38 +25,14 @@ class CLI(object):
         SettingsController.set_root_path(root_dir or select_dir())
         deploy()
 
-    def editor(
-        self,
-        root_dir: Optional[str] = None,
-        port: int = 3000,
-        debug=False,
-        load_dotenv=True,
-        reloading=False,
-    ):
+    def editor(self, root_dir: Optional[str] = None, port: int = 3000, headless=False):
         SettingsController.set_root_path(root_dir or select_dir())
         SettingsController.set_server_port(port)
-        editor(
-            debug=debug,
-            load_dotenv=load_dotenv,
-            reloading=reloading,
-        )
+        editor(headless=headless)
 
-    def serve(
-        self,
-        root_dir: Optional[str] = None,
-        port: int = 3000,
-        debug=False,
-        load_dotenv=True,
-        reloading=False,
-    ):
+    def serve(self, root_dir: Optional[str] = None, port: int = 3000, headless=False):
         print("This command is deprecated. Please use 'abstra editor' instead.")
-        self.editor(
-            root_dir=root_dir,
-            port=port,
-            debug=debug,
-            load_dotenv=load_dotenv,
-            reloading=reloading,
-        )
+        self.editor(root_dir=root_dir, port=port, headless=headless)
 
     def dump(self, root_dir: str = "."):
         SettingsController.set_root_path(root_dir)

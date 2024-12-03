@@ -13,7 +13,7 @@ from abstra_internals.usage import editor_usage, player_usage
 
 def get_editor_bp(main_controller: MainController):
     bp = flask.Blueprint("editor_stage_runs", __name__)
-    controller = StageRunsController(main_controller.stage_run_repository)
+    controller = StageRunsController(main_controller)
 
     @bp.get("/")
     @editor_usage
@@ -28,18 +28,6 @@ def get_editor_bp(main_controller: MainController):
         filter = GetStageRunByQueryFilter.from_dict(flask.request.args)
         pagination = Pagination.from_dict(flask.request.args)
         return controller.get_past_stage_runs(filter, pagination)
-
-    @bp.post("/fork")
-    @editor_usage
-    def _fork():
-        data = flask.request.json
-        if not data:
-            flask.abort(400)
-        stage_run_id = data.get("stage_run_id")
-        custom_thread_data = data.get("custom_thread_data")
-        if not stage_run_id:
-            flask.abort(400)
-        return controller.fork(stage_run_id, custom_thread_data)
 
     @bp.post("/retry")
     @editor_usage
@@ -57,7 +45,7 @@ def get_editor_bp(main_controller: MainController):
 
 def get_player_bp(main_controller: MainController):
     bp = flask.Blueprint("player_stage_runs", __name__)
-    controller = StageRunsController(main_controller.stage_run_repository)
+    controller = StageRunsController(main_controller)
 
     guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
 

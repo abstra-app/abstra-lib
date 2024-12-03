@@ -15,13 +15,13 @@ class TestHooksSDK(BaseTest):
     def setUp(self) -> None:
         super().setUp()
         self.hook = self.controller.create_hook("New hook", "hook.py")
-        self.flask_client = self.get_editor_flask_client()
+        self.client = self.get_editor_flask_client()
 
     def test_insensitive_headers(self):
         random = uuid4().hex
 
         self.hook.file_path.write_text(code_headers)
-        response = self.flask_client.post(
+        response = self.client.post(
             f"/_hooks/{self.hook.path}", headers={"Authorization": random}
         )
 

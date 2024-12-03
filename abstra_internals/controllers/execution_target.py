@@ -12,6 +12,7 @@ from abstra_internals.logger import AbstraLogger
 from abstra_internals.modules import import_as_new
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import ActionStage
+from abstra_internals.usage import execution_usage
 from abstra_internals.utils.datetime import now_str
 
 DEFAULT_STATUS = "failed"
@@ -81,6 +82,7 @@ def print_exception(exception: Exception, entrypoint: Path):
     traceback.print_exception(type(exception), exception, tb)
 
 
+@execution_usage
 def _execute_code(filepath: Path) -> Result:
     try:
         _execute_without_exit(filepath)

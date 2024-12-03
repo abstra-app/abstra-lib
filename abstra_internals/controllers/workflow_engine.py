@@ -134,11 +134,7 @@ class WorkflowEngine(IWorkflowEngine):
         ExecutionController(
             workflow_engine=self,
             repositories=self.repositories,
-        ).run(
-            wait=False,
-            stage=stage,
-            target_stage_run_id=stage_run.id,
-        )
+        ).submit(stage=stage, target_stage_run_id=stage_run.id)
 
     def run_control(self, stage: ControlStage, stage_run: StageRun):
         next_stage_run_dtos: List[Dict] = []

@@ -1,3 +1,3 @@
-from abstra_internals.interface.sdk.ai.api import prompt
+from abstra_internals.interface.sdk.ai import prompt
 
 __all__ = ["prompt"]

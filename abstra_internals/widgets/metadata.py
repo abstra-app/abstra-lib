@@ -2286,7 +2286,7 @@ metadata = {
             "returns": [
                 {
                     "typeName": "Union[FileResponse, List[FileResponse]]",
-                    "typeDescription": 'A dict containing the image file uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of images in case of multiple flag set as True',
+                    "typeDescription": "A dict containing the image file uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.",
                 }
             ],
         },
@@ -3852,6 +3852,20 @@ metadata = {
                     "default": "None",
                 },
                 {
+                    "argName": "maxLength",
+                    "description": "The maximum length of the input. Defaults to None.",
+                    "typeName": "int",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "minLength",
+                    "description": "The minimum length of the input. Defaults to None.",
+                    "typeName": "int",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
                     "argName": "disabled",
                     "description": "whether the input is disabled. Defaults to False.",
                     "typeName": "bool",
@@ -3897,6 +3911,8 @@ metadata = {
                 {"argName": "label", "typeName": "string"},
                 {"argName": "value", "typeName": "string"},
                 {"argName": "mask", "typeName": ["string", "null"]},
+                {"argName": "maxLength", "typeName": ["number", "null"]},
+                {"argName": "minLength", "typeName": ["number", "null"]},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -4353,7 +4369,7 @@ metadata = {
             "returns": [
                 {
                     "typeName": "Union[FileResponse, List[FileResponse]]",
-                    "typeDescription": 'A dict containing the video uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of videos in case of multiple flag set as True',
+                    "typeDescription": "A dict containing the video uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.",
                 }
             ],
         },

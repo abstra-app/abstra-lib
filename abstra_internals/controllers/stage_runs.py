@@ -1,26 +1,24 @@
-from typing import Optional
-
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.controllers.execution import ExecutionController
+from abstra_internals.controllers.main import MainController
 from abstra_internals.repositories.stage_run import (
     GetStageRunByQueryFilter,
     Pagination,
-    StageRunRepository,
 )
 
 
 class StageRunsController:
     def __init__(
         self,
-        stage_run_repository: StageRunRepository,
+        main_controller: MainController,
     ) -> None:
-        self.stage_run_repository = stage_run_repository
+        self.main_controller = main_controller
 
     def get_leaf_stage_runs(
         self, filter: GetStageRunByQueryFilter, pagination: Pagination
     ):
         return [
             stage_run.to_dto()
-            for stage_run in self.stage_run_repository.find_leaves(
+            for stage_run in self.main_controller.repositories.stage_run.find_leaves(
                 filter=filter, pagination=pagination
             ).stage_runs
         ]
@@ -30,26 +28,18 @@ class StageRunsController:
     ):
         return [
             stage_run.to_dto()
-            for stage_run in self.stage_run_repository.find_past(
+            for stage_run in self.main_controller.repositories.stage_run.find_past(
                 filter=filter, pagination=pagination
             ).stage_runs
         ]
 
-    def fork(self, stage_run_id: str, custom_thread_data: Optional[str]):
-        stage_run = self.stage_run_repository.get(stage_run_id)
-        project = ProjectRepository.load()
-        parent_is_iterator = False
-        previous_stages = project.get_previous_stages_ids(stage_run.stage)
-        some_is_iterator = False
-        for previous_stage in previous_stages:
-            previous_stage = project.get_stage(previous_stage)
-            if previous_stage and previous_stage.type_name == "iterator":
-                some_is_iterator = True
-        if some_is_iterator and "item" in stage_run.data:
-            parent_is_iterator = True
-        return self.stage_run_repository.fork(
-            stage_run, parent_is_iterator, custom_thread_data
-        ).to_dto()
-
     def retry(self, stage_run_id: str):
-        return self.stage_run_repository.retry(stage_run_id).to_dto()
+        stage_run = self.main_controller.repositories.stage_run.retry(stage_run_id)
+        stage = self.main_controller.get_action(stage_run.stage)
+        if stage and stage_run.stage in self.main_controller.get_async_stage_ids():
+            ExecutionController(
+                repositories=self.main_controller.repositories,
+                workflow_engine=self.main_controller.workflow_engine,
+            ).submit(stage=stage, target_stage_run_id=stage_run.id)
+
+        return stage_run.to_dto()

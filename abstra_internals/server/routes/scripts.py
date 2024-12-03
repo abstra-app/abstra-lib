@@ -65,9 +65,7 @@ def get_editor_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.detached_workflow_engine,
-        ).test(
-            stage=script,
-        )
+        ).test(stage=script)
 
         return {"ok": True}
 
@@ -89,10 +87,7 @@ def get_editor_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-        ).run(
-            stage=script,
-            target_stage_run_id=stage_run_id,
-        )
+        ).run(stage=script, target_stage_run_id=stage_run_id)
 
         return {"ok": True}
 

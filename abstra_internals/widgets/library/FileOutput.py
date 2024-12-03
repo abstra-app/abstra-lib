@@ -1,6 +1,6 @@
 import io
 from typing import Union
-from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.widgets.file_utils import upload_widget_file
 from abstra_internals.widgets.widget_base import Output
 
 
@@ -11,7 +11,7 @@ class FileOutput(Output):
         self.set_props(dict(file=file, **kwargs))
 
     def set_props(self, props):
-        self.file = convert_file(props.get('file', ''))
+        self.file = upload_widget_file(props.get('file', ''))
         self.download_text = props.get('download_text', 'Download')
         self.full_width = props.get('full_width', False)
 

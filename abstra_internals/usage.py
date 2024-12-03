@@ -1,6 +1,7 @@
 import inspect
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Tuple
+from pathlib import Path
+from typing import Any, Callable, Dict, Literal, Optional, Tuple
 
 import flask
 import requests
@@ -77,5 +78,32 @@ def player_usage(func: Callable[..., Any]) -> Callable[..., Any]:
             auth=auth, event=func.__name__, payload={**arg_values, **kwargs}
         )
         return func(*args, **kwargs)
+
+    return wrapper
+
+
+# Executions
+def _send_execution_usage(file: Path, status: str, exception: Optional[Exception]):
+    if SIDECAR_URL or is_test_env() or is_dev_env():
+        return
+
+    try:
+        editor_manual_usage(
+            event="execution_exception",
+            payload=dict(file=str(file), status=status, exception=str(exception)),
+        )
+    except Exception:
+        pass
+
+
+Result = Tuple[Literal["finished", "abandoned", "failed"], Optional[Exception]]
+
+
+def execution_usage(func: Callable[[Path], Result]) -> Callable[[Path], Result]:
+    @wraps(func)
+    def wrapper(file: Path) -> Result:
+        status, exception = func(file)
+        _send_execution_usage(file, status, exception)
+        return status, exception
 
     return wrapper

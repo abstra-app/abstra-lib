@@ -1,5 +1,4 @@
 import json
-from threading import Thread
 from typing import Optional
 
 from abstra_internals.controllers.execution_client import (
@@ -8,12 +7,9 @@ from abstra_internals.controllers.execution_client import (
 )
 from abstra_internals.controllers.execution_target import ExecutionTarget
 from abstra_internals.controllers.workflow_interface import IWorkflowEngine
-from abstra_internals.entities.execution import Execution, RequestContext
+from abstra_internals.entities.execution import Execution, PreExecution, RequestContext
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import (
-    ActionStage,
-    ProjectRepository,
-)
+from abstra_internals.repositories.project.project import ActionStage, ProjectRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
 
@@ -48,10 +44,23 @@ class ExecutionController:
         self.repositories = repositories
         self.workflow_engine = workflow_engine
 
+    def submit(
+        self,
+        stage: ActionStage,
+        request: Optional[RequestContext] = None,
+        target_stage_run_id: Optional[str] = None,
+    ):
+        return self.repositories.producer.submit(
+            PreExecution(
+                request=request,
+                stage_id=stage.id,
+                target_stage_run_id=target_stage_run_id,
+            )
+        )
+
     def run(
         self,
         *,
-        wait=True,
         stage: ActionStage,
         client: Optional[ExecutionClient] = None,
         request: Optional[RequestContext] = None,
@@ -85,21 +94,13 @@ class ExecutionController:
             client.handle_lock_failed(target_stage_run_id)
             raise LockFailedException()
 
-        pthread = Thread(
-            target=ExecutionTarget,
-            kwargs=dict(
-                stage=stage,
-                client=client,
-                execution=execution,
-                repositories=self.repositories,
-                workflow_engine=self.workflow_engine,
-            ),
-            name=f"{stage.title} - {execution.short_id}",
+        ExecutionTarget(
+            stage=stage,
+            client=client,
+            execution=execution,
+            repositories=self.repositories,
+            workflow_engine=self.workflow_engine,
         )
-
-        pthread.start()
-        if wait:
-            pthread.join()
 
     def test(
         self,

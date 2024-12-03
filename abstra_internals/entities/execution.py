@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import dataclass
 from typing import Any, Dict, Literal, Optional, TypedDict
 from uuid import uuid4
 
@@ -103,3 +104,10 @@ class Execution:
             request_context=dto["context"],
             created_at=from_utc_iso_string(dto["createdAt"]),
         )
+
+
+@dataclass
+class PreExecution:
+    stage_id: str
+    target_stage_run_id: Optional[str] = None
+    request: Optional[RequestContext] = None

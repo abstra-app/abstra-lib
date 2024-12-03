@@ -7,9 +7,7 @@ from abstra_internals.controllers.kanban import DataRequest, KanbanController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.workflows import get_path, make_stage_dto
 from abstra_internals.environment import IS_PRODUCTION
-from abstra_internals.repositories.execution_logs import (
-    LogEntry,
-)
+from abstra_internals.repositories.execution_logs import LogEntry
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.stage_run import StageRun
 from abstra_internals.server.guards.role_guard import Guard, StageIdSelector
@@ -17,8 +15,6 @@ from abstra_internals.usage import player_usage
 
 
 def get_editor_bp(main_controller: MainController):
-    project_repository = ProjectRepository
-
     controller = KanbanController(
         main_controller.stage_run_repository, main_controller.execution_logs_repository
     )
@@ -49,7 +45,7 @@ def get_editor_bp(main_controller: MainController):
     # 1s pooling in this route
     @bp.get("/logs/<stage_run_id>")
     def _get_ancestor_logs(stage_run_id: str):
-        project = project_repository.load()
+        project = ProjectRepository.load()
 
         def kanban_log_filter(log: LogEntry):
             return (isinstance(log, LogEntry)) and log.payload["text"].strip() != ""
@@ -77,34 +73,7 @@ def get_editor_bp(main_controller: MainController):
         ExecutionController(
             repositories=main_controller.repositories,
             workflow_engine=main_controller.workflow_engine,
-        ).run(
-            wait=False,
-            stage=job,
-        )
-
-        return {"status": "running"}
-
-    @bp.post("/scripts/<path:id>/continue")
-    def _continue_script(id: str):
-        script = controller.get_script(id)
-        if not script:
-            flask.abort(404)
-
-        if flask.request.json is None:
-            flask.abort(400)
-
-        stage_run_id = flask.request.json.get("stage_run_id")
-        if not stage_run_id:
-            flask.abort(400)
-
-        ExecutionController(
-            repositories=main_controller.repositories,
-            workflow_engine=main_controller.workflow_engine,
-        ).run(
-            wait=False,
-            stage=script,
-            target_stage_run_id=stage_run_id,
-        )
+        ).submit(stage=job)
 
         return {"status": "running"}
 
@@ -112,8 +81,6 @@ def get_editor_bp(main_controller: MainController):
 
 
 def get_player_bp(main_controller: MainController):
-    project_repository = ProjectRepository
-
     guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
 
     controller = KanbanController(
@@ -155,7 +122,7 @@ def get_player_bp(main_controller: MainController):
     @guard.by(StageIdSelector("kanban"))
     @player_usage
     def _get_ancestor_logs(stage_run_id: str):
-        project = project_repository.load()
+        project = ProjectRepository.load()
 
         def entry_from_run(stage_run: StageRun, logs: List[LogEntry]):
             stage = project.get_stage(stage_run.stage)
@@ -182,36 +149,7 @@ def get_player_bp(main_controller: MainController):
         ExecutionController(
             repositories=main_controller.repositories,
             workflow_engine=main_controller.workflow_engine,
-        ).run(
-            wait=False,
-            stage=job,
-        )
-
-        return {"status": "running"}
-
-    @bp.post("/scripts/<path:id>/continue")
-    @guard.by(StageIdSelector("kanban"))
-    @player_usage
-    def _continue_script(id: str):
-        script = controller.get_script(id)
-        if not script:
-            flask.abort(404)
-
-        if flask.request.json is None:
-            flask.abort(400)
-
-        stage_run_id = flask.request.json.get("stage_run_id")
-        if not stage_run_id:
-            flask.abort(400)
-
-        ExecutionController(
-            repositories=main_controller.repositories,
-            workflow_engine=main_controller.workflow_engine,
-        ).run(
-            wait=False,
-            stage=script,
-            target_stage_run_id=stage_run_id,
-        )
+        ).submit(stage=job)
 
         return {"status": "running"}
 

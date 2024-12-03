@@ -1,43 +1,61 @@
-import os
+import threading
 import time
-from datetime import datetime
+from pathlib import Path
+from typing import Optional
 
-from abstra_internals.controllers.main import MainController
+from dotenv import load_dotenv
+from watchdog.events import FileModifiedEvent, FileSystemEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+
 from abstra_internals.modules import reload_project_local_modules
+from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.settings import Settings
+
+IGNORED_FILES = [".abstra/resources.dat", ".abstra/", "abstra.json"]
+DEBOUNCE_DELAY = 0.5
 
 
-def has_local_dependencies_changed(
-    controller: MainController, last_change: float
-) -> bool:
-    for file in controller.get_project_local_dependencies():
-        if not file.exists():
-            continue
+class FileChangeEventHandler(FileSystemEventHandler):
+    def __init__(self):
+        super().__init__()
+        self._debounce_timer: Optional[threading.Timer] = None
 
-        st_mtime = os.stat(file).st_mtime
-        if st_mtime > last_change:
-            return True
-    return False
+    def on_modified(self, event: FileSystemEvent):
+        has_ignored_paths = any(
+            ignored_file in str(event.src_path) for ignored_file in IGNORED_FILES
+        )
+
+        if not isinstance(event, FileModifiedEvent) or has_ignored_paths:
+            return
+
+        if event.src_path.endswith(".env"):
+            load_dotenv(Settings.root_path / ".env", override=True)
+            return self.reload_files()
+
+        for dep in ProjectRepository.load().get_local_dependencies():
+            if dep.resolve() == Path(event.src_path).resolve():
+                return self.reload_files()
+
+    def reload_files(self):
+        if self._debounce_timer is not None:
+            self._debounce_timer.cancel()
+
+        self._debounce_timer = threading.Timer(
+            DEBOUNCE_DELAY, reload_project_local_modules
+        )
+        self._debounce_timer.start()
 
 
-def reload_files_on_change(controller: MainController, last_change: float):
-    if not has_local_dependencies_changed(controller, last_change):
-        return False
+def watch_file_change_events():
+    event_handler = FileChangeEventHandler()
+
+    observer = Observer()
+    observer.schedule(event_handler, path=str(Settings.root_path), recursive=True)
+    observer.start()
 
     try:
-        reload_project_local_modules()
-        return True
-    except Exception:
-        return False
-
-
-def files_changed_polling_loop(*, controller: MainController):
-    last_change = datetime.now().timestamp()
-
-    while True:
-        try:
-            has_reloaded = reload_files_on_change(controller, last_change)
-            if has_reloaded:
-                last_change = datetime.now().timestamp()
-        except Exception:
-            pass
-        time.sleep(1)
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()

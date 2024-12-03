@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import jwt
 
 from abstra_internals.environment import PROJECT_ID, PUBLIC_KEY
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.utils.email import is_valid_email
 
 USER_AUTH_HEADER_KEY = "Authorization"
@@ -11,18 +12,18 @@ API_AUTH_HEADER_KEY = "Api-Authorization"
 AUTHOR_AUTH_HEADER_KEY = "Author-Authorization"
 
 
-def decode_jwt(jwt_str: str):
+def decode_jwt(jwt_str: str, aud=PROJECT_ID):
     try:
         if PUBLIC_KEY:
             return jwt.decode(
-                jwt_str, key=PUBLIC_KEY, algorithms=["RS256"], audience=PROJECT_ID
+                jwt_str, key=PUBLIC_KEY, algorithms=["RS256"], audience=aud
             )
-        return jwt.decode(
-            jwt_str, options={"verify_signature": False}, audience=PROJECT_ID
-        )
+        return jwt.decode(jwt_str, options={"verify_signature": False}, audience=aud)
 
+    except jwt.ExpiredSignatureError:
+        return None
     except Exception as e:
-        print("error decoding jwt", e)
+        AbstraLogger.capture_exception(e)
         return None
 
 

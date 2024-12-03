@@ -1071,8 +1071,7 @@ class Project:
         for entrypoint in self.iter_entrypoints():
             yield from silent_traverse_code(entrypoint)
 
-    @property
-    def project_local_dependencies(self) -> Generator[Path, None, None]:
+    def get_local_dependencies(self) -> Generator[Path, None, None]:
         entrypoints = list(self.iter_entrypoints())
         for file in self.project_files:
             if file not in entrypoints:

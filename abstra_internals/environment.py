@@ -1,6 +1,11 @@
 import os
-from typing import Optional
-from uuid import uuid4
+
+DEFAULT_LOGLEVEL = "WARNING"
+LOGLEVEL = lambda: os.getenv("ABSTRA_LOGLEVEL", DEFAULT_LOGLEVEL)  # noqa: E731
+
+PROCESS_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s][%(process)d]%(message)s"
+DEFAULT_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
+LOGFORMAT = lambda: os.getenv("ABSTRA_LOGFORMAT", DEFAULT_LOGFORMAT)  # noqa: E731
 
 WORKERS = os.getenv("ABSTRA_WORKERS", 2)
 THREADS = os.getenv("ABSTRA_THREADS", 20)
@@ -17,6 +22,8 @@ PROJECT_URL = os.getenv("ABSTRA_PROJECT_URL")
 IS_PRODUCTION = os.getenv("ABSTRA_ENVIRONMENT") == "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 
+DISABLE_STDIO_PATCH = os.getenv("ABSTRA_DISABLE_STDIO_PATCH", "false") == "true"
+
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 
@@ -27,31 +34,27 @@ SIDECAR_SHARED_TOKEN = os.getenv("ABSTRA_SIDECAR_SHARED_TOKEN", "shared")
 SIDECAR_HEADERS = {"shared-token": SIDECAR_SHARED_TOKEN}
 SIDECAR_URL = os.getenv("ABSTRA_SIDECAR_URL")
 
+EDITOR_MODE = os.getenv("ABSTRA_EDITOR_MODE") or "local"
+
+RABBITMQ_EXECUTION_QUEUE = os.getenv("ABSTRA_RABBITMQ_EXECUTION_QUEUE", "executions")
+RABBITMQ_DEFAUT_EXCHANGE = os.getenv("ABSTRA_RABBITMQ_DEFAUT_EXCHANGE", "")
+RABBITMQ_CONNECTION_URI = os.getenv("ABSTRA_RABBITMQ_CONNECTION_URI")
+QUEUE_CONCURRENCY = int(os.getenv("ABSTRA_QUEUE_CONCURRENCY", 2))
+
+OIDC_CLIENT_ID = lambda: os.getenv("ABSTRA_OIDC_CLIENT_ID")  # noqa: E731
+OIDC_AUTHORITY = lambda: os.getenv("ABSTRA_OIDC_AUTHORITY")  # noqa: E731
+
 __WORKER_UUID_ENV__ = "ABSTRA_WORKER_UUID"
+WORKER_UUID = lambda: os.getenv(__WORKER_UUID_ENV__)  # noqa: E731
 
 
-def WORKER_UUID():
-    return os.getenv(__WORKER_UUID_ENV__)
-
-
-def set_WORKER_UUID(worker_uuid: Optional[str] = None):
-    os.environ[__WORKER_UUID_ENV__] = worker_uuid or uuid4().__str__()
+def set_WORKER_UUID(worker_uuid: str):
+    os.environ[__WORKER_UUID_ENV__] = worker_uuid
 
 
 __SERVER_UUID_ENV__ = "ABSTRA_SERVER_UUID"
+SERVER_UUID = lambda: os.getenv(__SERVER_UUID_ENV__)  # noqa: E731
 
 
-def SERVER_UUID():
-    return os.getenv(__SERVER_UUID_ENV__)
-
-
-def set_SERVER_UUID(server_uuid: Optional[str] = None):
-    os.environ[__SERVER_UUID_ENV__] = server_uuid or uuid4().__str__()
-
-
-def OIDC_CLIENT_ID():
-    return os.getenv("ABSTRA_OIDC_CLIENT_ID")
-
-
-def OIDC_AUTHORITY():
-    return os.getenv("ABSTRA_OIDC_AUTHORITY")
+def set_SERVER_UUID(server_uuid: str):
+    os.environ[__SERVER_UUID_ENV__] = server_uuid

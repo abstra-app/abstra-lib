@@ -11,6 +11,7 @@ def get_player_bp(main_controller: MainController):
     controller = AuthController(
         kv_repository=main_controller.kv_repository,
         jwt_repository=main_controller.jwt_repository,
+        users_repository=main_controller.users_repository,
         email_repository=main_controller.email_repository,
     )
 

@@ -33,17 +33,12 @@ from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import auth as auth_router
 from abstra_internals.server.routes import kanban as kanban_router
 from abstra_internals.server.routes import stage_runs as stage_runs_router
-from abstra_internals.server.routes import users as user_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.usage import player_usage
 from abstra_internals.utils import check_is_url
-from abstra_internals.utils.file import (
-    get_random_filepath,
-    get_tmp_upload_dir,
-    path2module,
-)
+from abstra_internals.utils.file import get_tmp_upload_dir, path2module, upload_file
 
 
 def get_player_bp(controller: MainController):
@@ -55,9 +50,6 @@ def get_player_bp(controller: MainController):
 
     auth_bp = auth_router.get_player_bp(controller)
     bp.register_blueprint(auth_bp, url_prefix="/_auth")
-
-    user_bp = user_router.get_player_bp(controller)
-    bp.register_blueprint(user_bp, url_prefix="/_user")
 
     kanban_bp = kanban_router.get_player_bp(controller)
     bp.register_blueprint(kanban_bp, url_prefix="/_kanban")
@@ -153,19 +145,10 @@ def get_player_bp(controller: MainController):
     @player_usage
     def _upload_file():
         files = flask.request.files
-        filename = flask.request.form.get("filename")
-        if filename is None:
-            flask.abort(400)
-
         if len(files) == 0:
             flask.abort(400)
 
-        paths = []
-        for file in files.values():
-            name, path = get_random_filepath(filename)
-            file.save(path)
-            paths.append(name)
-        return paths
+        return [upload_file(file) for file in files.values()]
 
     @bp.get("/_files/<path:path>")
     def _get_file(path):
@@ -264,10 +247,7 @@ def get_player_bp(controller: MainController):
         ExecutionController(
             repositories=controller.repositories,
             workflow_engine=controller.workflow_engine,
-        ).run(
-            stage=job,
-            wait=False,
-        )
+        ).submit(stage=job)
 
         return {"status": "running"}
 

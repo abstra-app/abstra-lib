@@ -12,7 +12,7 @@ class CacheControl(Protocol):
 @dataclass
 class NoCache:
     def __str__(self):
-        return ""
+        return "no-store, no-cache, must-revalidate, max-age=0"
 
 
 @dataclass
@@ -67,12 +67,15 @@ class Cache:
         return CacheCommand(PublicCache(1800), PublicCache())
 
     def __statics_policy(
-        self, request: flask.Request, __: flask.Response
+        self, _: flask.Request, response: flask.Response
     ) -> CacheCommand:
         if not self.enabled:
             return CacheCommand(NoCache(), NoCache())
 
-        if request.content_type == "text/html":
+        if (
+            isinstance(response.content_type, str)
+            and "text/html" in response.content_type
+        ):
             return CacheCommand(NoCache(), PublicCache())
 
         return CacheCommand(PublicCache(86400), PublicCache())

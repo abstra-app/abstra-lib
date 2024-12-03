@@ -4,7 +4,6 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
-from abstra_internals.server.routes import debugger as debugger_router
 from abstra_internals.server.routes import env_vars as envvars_router
 from abstra_internals.server.routes import forms as forms_router
 from abstra_internals.server.routes import hooks as hooks_router
@@ -19,6 +18,7 @@ from abstra_internals.server.routes import roles as roles_router
 from abstra_internals.server.routes import scripts as scripts_router
 from abstra_internals.server.routes import stage_runs as stage_runs_router
 from abstra_internals.server.routes import stdio as stdio_router
+from abstra_internals.server.routes import web_editor as web_editor_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.routes import workspace as workspace_router
 from abstra_internals.server.utils import send_from_dist
@@ -58,9 +58,6 @@ def __get_api_bp(controller: MainController):
     resources_bp = resources_router.get_editor_bp(controller)
     bp.register_blueprint(resources_bp, url_prefix="/resources")
 
-    debugger_bp = debugger_router.get_editor_bp(controller)
-    bp.register_blueprint(debugger_bp, url_prefix="/debugger")
-
     login_bp = login_router.get_editor_bp(controller)
     bp.register_blueprint(login_bp, url_prefix="/login")
 
@@ -88,6 +85,9 @@ def __get_api_bp(controller: MainController):
     stdio_bp = stdio_router.get_editor_bp(controller)
     bp.register_blueprint(stdio_bp, url_prefix="/stdio")
 
+    guard = web_editor_router.get_editor_api_guard(controller)
+    bp.before_request(guard)
+
     return bp
 
 
@@ -96,6 +96,9 @@ def get_editor_bp(controller: MainController):
 
     api_bp = __get_api_bp(controller)
     bp.register_blueprint(api_bp, url_prefix="/api")
+
+    web_editor_bp = web_editor_router.get_web_editor_bp(controller)
+    bp.register_blueprint(web_editor_bp, url_prefix="/web-editor")
 
     @bp.get("/")
     @editor_usage

@@ -3,6 +3,7 @@ import importlib.util as imp_util
 import sys
 from pathlib import Path
 
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.utils.file import path2module
 
@@ -25,22 +26,30 @@ def import_as_new(filepath: str):
 
 
 def reload_project_local_modules():
-    project = ProjectRepository.load()
+    try:
+        project = ProjectRepository.load()
 
-    for file in project.project_local_dependencies:
-        if not file.exists():
-            continue
+        for file in project.get_local_dependencies():
+            if not file.exists():
+                continue
 
-        module_name = path2module(file)
-        module = sys.modules.get(module_name)
+            module_name = path2module(file)
+            module = sys.modules.get(module_name)
 
-        try:
-            if module is None:
-                importlib.import_module(module_name)
-            else:
-                if module.__spec__ is not None and module.__spec__.cached is not None:
-                    Path(module.__spec__.cached).unlink(missing_ok=True)
-                importlib.reload(module)
-        except Exception as e:
-            print(f"Could not reload module from {file} with the following error:", e)
-            continue
+            try:
+                if module is None:
+                    importlib.import_module(module_name)
+                else:
+                    if (
+                        module.__spec__ is not None
+                        and module.__spec__.cached is not None
+                    ):
+                        Path(module.__spec__.cached).unlink(missing_ok=True)
+                    importlib.reload(module)
+            except Exception as e:
+                AbstraLogger.error(
+                    f"Could not reload module from {file} with the following error: {e}"
+                )
+                continue
+    except Exception:
+        pass

@@ -1,9 +1,9 @@
-from abstra_internals.cloud.application import CustomApplication
-from abstra_internals.cloud.ghooks import GunicornOptionsBuilder
+from abstra_internals.cloud.server_application import CustomApplication
+from abstra_internals.cloud.server_hooks import GunicornOptionsBuilder
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DEFAULT_PORT
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.factory import get_prodution_repositories
+from abstra_internals.repositories.factory import get_prodution_app_repositories
 from abstra_internals.server.apps import get_cloud_app
 from abstra_internals.settings import SettingsController
 from abstra_internals.stdio_patcher import StdioPatcher
@@ -11,10 +11,10 @@ from abstra_internals.stdio_patcher import StdioPatcher
 
 def run():
     AbstraLogger.init("cloud")
-    SettingsController.set_root_path(".")  # TODO: use CWD
+    SettingsController.set_root_path(".")
     SettingsController.set_server_port(DEFAULT_PORT)
 
-    controller = MainController(repositories=get_prodution_repositories())
+    controller = MainController(repositories=get_prodution_app_repositories())
     StdioPatcher.apply(controller)
 
     options = GunicornOptionsBuilder(controller).build()

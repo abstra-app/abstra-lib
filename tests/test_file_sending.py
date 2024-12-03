@@ -2,8 +2,8 @@ import io
 
 from abstra_internals.server.apps import get_local_app
 from abstra_internals.server.utils import send_from_dist
-from abstra_internals.widgets.apis import get_random_filepath
-from abstra_internals.widgets.file_utils import convert_file
+from abstra_internals.utils.file import get_random_filepath
+from abstra_internals.widgets.file_utils import upload_widget_file
 from tests.fixtures import BaseTest, clear_dir
 
 
@@ -52,11 +52,11 @@ class TestFileUtils(BaseTest):
 
 
 class TestFileUpload(BaseTest):
-    def test_convert_file_path(self):
+    def test_upload_widget_file_path(self):
         tmp_file = self.root.joinpath("tmp.txt")
         tmp_file.write_text("hello world")
 
-        external_path = convert_file(tmp_file)
+        external_path = upload_widget_file(tmp_file)
 
         # assert path format like /_files/uuid/filename
         self.assertTrue(external_path.startswith("/_files/"))
@@ -67,12 +67,12 @@ class TestFileUpload(BaseTest):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data, b"hello world")
 
-    def test_convert_file_buffered_reader(self):
+    def test_upload_widget_file_buffered_reader(self):
         tmp_file = self.root.joinpath("tmp.txt")
         tmp_file.write_text("hello world")
 
         with open(tmp_file, "rb") as f:
-            external_path = convert_file(f)
+            external_path = upload_widget_file(f)
 
         # assert path format like /_files/uuid/filename
         self.assertTrue(external_path.startswith("/_files/"))
@@ -83,8 +83,8 @@ class TestFileUpload(BaseTest):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data, b"hello world")
 
-    def test_convert_file_io(self):
-        external_path = convert_file(io.BytesIO(b"hello world"))
+    def test_upload_widget_file_io(self):
+        external_path = upload_widget_file(io.BytesIO(b"hello world"))
 
         # assert path format like /_files/uuid
         self.assertTrue(external_path.startswith("/_files/"))

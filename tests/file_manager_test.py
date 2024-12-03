@@ -1,10 +1,9 @@
 import json
-import unittest
 
 from pydantic.dataclasses import dataclass
 
 from abstra_internals.utils.file_manager import FileManager
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import BaseTest
 
 
 @dataclass
@@ -20,13 +19,13 @@ class MockModel:
         return MockModel(**dto)
 
 
-class TestFileManager(unittest.TestCase):
+class TestFileManager(BaseTest):
     def setUp(self) -> None:
-        self.root = init_dir()
-        self.manager = FileManager[MockModel](directory="test", model=MockModel)
-
-    def tearDown(self) -> None:
-        clear_dir(self.root)
+        super().setUp()
+        mp_context = self.repositories.mp_context.get_context()
+        self.manager = FileManager[MockModel](
+            mp_context, directory="test", model=MockModel
+        )
 
     def test_save_and_load(self):
         test_data = MockModel(name="John", age=30)

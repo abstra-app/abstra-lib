@@ -411,7 +411,7 @@ def read_image(label: str, **kwargs):
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
-          A dict containing the image file uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of images in case of multiple flag set as True
+          A dict containing the image file uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.
     """
 
     
@@ -744,6 +744,8 @@ def read(label: str, **kwargs):
 		initial_value (str): The initial value to display to the user. Defaults to "".
 		placeholder (str): The placeholder text to display to the user. Defaults to "Placeholder".
 		mask (str): A mask to apply to the input. Defaults to None.
+		maxLength (int): The maximum length of the input. Defaults to None.
+		minLength (int): The minimum length of the input. Defaults to None.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.
@@ -857,7 +859,7 @@ def read_video(label: str, **kwargs):
 		button_text (str): What text to display on the button when the widget is not part of a Page. Defaults to 'Next'.
 		
         Returns:
-          A dict containing the video uploaded by the user ({"file": file, "url": str, "content": bytes}) or a list of videos in case of multiple flag set as True
+          A dict containing the video uploaded by the user: FileResponse(path: Path, file: BufferedReader). If the multiple flag is set as True, it might contain a list of FileResponses.
     """
 
     
