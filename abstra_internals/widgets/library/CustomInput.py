@@ -26,7 +26,8 @@ class CustomInput(Input):
         return {'type': self.type, 'key': self.key, 'label': self.label,
             'value': self.serialize_value(), 'htmlBody': self.html_body,
             'height': self.height, 'htmlHead': self.html_head, 'css': self.
-            css, 'js': self.js, 'fullWidth': self.full_width}
+            css, 'js': self.js, 'fullWidth': self.full_width, 'errors':
+            self.errors}
 
     def parse_value(self, value) ->Any:
         return value
