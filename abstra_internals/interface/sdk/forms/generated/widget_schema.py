@@ -938,8 +938,8 @@ class WidgetSchema:
 		initial_value (str): The initial value to display to the user. Defaults to "".
 		placeholder (str): The placeholder text to display to the user. Defaults to "Placeholder".
 		mask (str): A mask to apply to the input. Defaults to None.
-		maxLength (int): The maximum length of the input. Defaults to None.
-		minLength (int): The minimum length of the input. Defaults to None.
+		max_length (int): The maximum length of the input. Defaults to None.
+		min_length (int): The minimum length of the input. Defaults to None.
 		disabled (bool): whether the input is disabled. Defaults to False.
 		required (Union[bool, str]): Whether the input is required or not eg. "this field is required". Defaults to True.
 		hint (str): A tooltip displayed to the user. Defaults to None.

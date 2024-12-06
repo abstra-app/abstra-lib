@@ -3852,14 +3852,14 @@ metadata = {
                     "default": "None",
                 },
                 {
-                    "argName": "maxLength",
+                    "argName": "max_length",
                     "description": "The maximum length of the input. Defaults to None.",
                     "typeName": "int",
                     "isKwarg": True,
                     "default": "None",
                 },
                 {
-                    "argName": "minLength",
+                    "argName": "min_length",
                     "description": "The minimum length of the input. Defaults to None.",
                     "typeName": "int",
                     "isKwarg": True,
