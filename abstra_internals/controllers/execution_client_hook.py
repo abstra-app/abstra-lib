@@ -1,42 +1,30 @@
-from typing import Dict, TypedDict
+from typing import Dict
 
 from abstra_internals.controllers.execution_client import ExecutionClient
-from abstra_internals.entities.execution import RequestContext
-
-
-class Response(TypedDict):
-    headers: Dict[str, str]
-    status: int
-    body: str
+from abstra_internals.entities.execution_context import HookContext, Request, Response
 
 
 class HookClient(ExecutionClient):
-    def __init__(self, request_context: RequestContext) -> None:
-        self.response = Response(status=200, body="", headers={})
-        self.request_context = request_context
+    context: HookContext
 
-    def handle_lock_failed(self, status: str) -> None:
-        self.response["status"] = 423
-        pass
+    def __init__(self, context: HookContext) -> None:
+        self.context = context
 
     def handle_failure(self, e: Exception) -> None:
-        self.response["status"] = 500
-        self.response["body"] = "An exception occurred during execution."
-        pass
+        self.set_response(500, "An exception occurred during execution.", {})
 
     def handle_success(self) -> None:
         pass
 
     def set_response(self, status: int, body: str, headers: Dict[str, str]) -> None:
-        self.response["headers"] = headers
-        self.response["status"] = status
-        self.response["body"] = body
+        self.context.response = Response(
+            status=status,
+            body=body,
+            headers=headers,
+        )
 
-    def get_request(self) -> RequestContext:
-        return self.request_context
+    def get_request(self) -> Request:
+        return self.context.request
 
     def handle_start(self, execution_id: str):
         pass
-
-    def handle_unset_thread(self):
-        self.response["status"] = 423

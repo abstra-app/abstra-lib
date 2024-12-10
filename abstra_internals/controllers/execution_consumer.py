@@ -45,9 +45,8 @@ def PreExecController(
                 worker_uuid=worker_uuid,
                 arbiter_uuid=arbiter_uuid,
                 root_path=Settings.root_path,
-                request=msg.preexecution.request,
+                request=msg.preexecution.context,
                 environment=AbstraLogger.environment,
-                target_stage_run_id=msg.preexecution.target_stage_run_id,
             ),
             name=f"Worker-{head_id}",
         )

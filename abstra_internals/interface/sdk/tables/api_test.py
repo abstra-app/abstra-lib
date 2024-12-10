@@ -9,8 +9,9 @@ import requests
 
 from abstra.tables import insert
 from abstra_internals.controllers.execution_client_form import FormClient
-from abstra_internals.controllers.execution_store import ExecutionStore
-from abstra_internals.entities.execution import Execution, RequestContext
+from abstra_internals.controllers.sdk_context import SDKContext
+from abstra_internals.entities.execution import Execution
+from abstra_internals.entities.execution_context import FormContext, Request
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.step import StepsResponse
 from abstra_internals.interface.sdk.tables.api import (
@@ -44,23 +45,22 @@ class TestTables(BaseTest):
     def setUp(self) -> None:
         super().setUp()
         self.repositories.tables = MockTablesApi()
-        request_context = RequestContext(
-            body="", query_params={}, headers={}, method="GET"
+        context = FormContext(
+            request=Request(body="", query_params={}, headers={}, method="GET"),
         )
         self.client = FormClient(
-            request_context=request_context,
-            production_mode=False,
             ws=None,  # type: ignore
+            context=context,
+            production_mode=False,
         )
         execution = Execution.create(
-            request_context=None,
-            stage_run_id="mock_sr_id",
+            context=context,
             stage_id="mock_stage_id",
         )
-        ExecutionStore.set(execution, self.client, self.repositories)
+        self.context = SDKContext(execution, self.client, self.repositories).__enter__()
 
     def tearDown(self) -> None:
-        ExecutionStore.clear()
+        self.context.__exit__(None, None, None)
         super().tearDown()
 
     def test_select(self):

@@ -2,8 +2,9 @@ from unittest.mock import ANY
 
 from abstra.forms import ListItemSchema, Page
 from abstra_internals.controllers.execution_client_form import FormClient
-from abstra_internals.controllers.execution_store import ExecutionStore
-from abstra_internals.entities.execution import Execution, RequestContext
+from abstra_internals.controllers.sdk_context import SDKContext
+from abstra_internals.entities.execution import Execution
+from abstra_internals.entities.execution_context import FormContext, Request
 from abstra_internals.widgets.library import ListInput
 from tests.fixtures import BaseTest
 
@@ -28,23 +29,24 @@ class TestListInput(BaseTest):
     def setUp(self):
         super().setUp()
         self.maxDiff = None
-        request_context = RequestContext(
-            body="", query_params={}, headers={}, method="GET"
+
+        context = FormContext(
+            request=Request(body="", query_params={}, headers={}, method="GET"),
         )
+
         self.client = FormClient(
-            request_context=request_context,
+            context=context,
             production_mode=False,
             ws=None,  # type: ignore
         )
         execution = Execution.create(
-            request_context=request_context,
-            stage_run_id="mock_sr_id",
+            context=context,
             stage_id="mock_stage_id",
         )
-        ExecutionStore.set(execution, self.client, self.repositories)
+        self.context = SDKContext(execution, self.client, self.repositories).__enter__()
 
     def tearDown(self) -> None:
-        ExecutionStore.clear()
+        self.context.__exit__(None, None, None)
         return super().tearDown()
 
     def test_empty_case(self):
@@ -140,7 +142,7 @@ class TestListInput(BaseTest):
         )
 
         self.assertEqual(
-            page.widgets[0].value,
+            page.widgets[0].value,  # type: ignore
             dict(list=[dict(list=[None])]),
         )
 

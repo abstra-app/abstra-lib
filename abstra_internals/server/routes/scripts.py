@@ -2,6 +2,7 @@ import flask
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.main import MainController
+from abstra_internals.entities.execution_context import ScriptContext
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
@@ -55,39 +56,26 @@ def get_editor_bp(controller: MainController):
         controller.delete_script(id, remove_file)
         return {"success": True}
 
-    @bp.post("/<path:id>/test")
-    @editor_usage
-    def _test_script(id: str):
-        script = controller.get_script(id)
-        if not script:
-            flask.abort(400)
-
-        ExecutionController(
-            repositories=controller.repositories,
-            workflow_engine=controller.detached_workflow_engine,
-        ).test(stage=script)
-
-        return {"ok": True}
-
     @bp.post("/<path:id>/run")
     @editor_usage
     def _run_script(id: str):
         script = controller.get_script(id)
         if not script:
-            flask.abort(404)
+            flask.abort(400)
 
         data = flask.request.json
         if not data:
             flask.abort(400)
-
-        stage_run_id = data.get("stage_run_id")
-        if not stage_run_id:
+        task_id = data.get("task_id")
+        if not task_id:
             flask.abort(400)
 
         ExecutionController(
             repositories=controller.repositories,
-            workflow_engine=controller.workflow_engine,
-        ).run(stage=script, target_stage_run_id=stage_run_id)
+        ).run(
+            stage=script,
+            context=ScriptContext(task_id=task_id),
+        )
 
         return {"ok": True}
 

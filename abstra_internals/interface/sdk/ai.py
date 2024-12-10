@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, TypeVar, Union
 
-from abstra_internals.controllers.execution_store import ExecutionStore
 from abstra_internals.controllers.sdk_ai import Format, Prompt
+from abstra_internals.controllers.sdk_context import SDKContextStore
 
 T = TypeVar("T")
 
@@ -46,6 +46,6 @@ def prompt(
     normalized_format = normalize_format(format) if format else None
     prompt_list = to_list(prompt)
 
-    return ExecutionStore.get_by_thread().ai_sdk.prompt(
+    return SDKContextStore.get_by_thread().ai_sdk.prompt(
         prompt_list, instructions_list, normalized_format, temperature
     )

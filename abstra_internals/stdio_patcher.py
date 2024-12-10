@@ -5,10 +5,6 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DISABLE_STDIO_PATCH
 
 
-class UnboundPthread(Exception):
-    pass
-
-
 class StdioPatcher:
     original_sys_stdout_write = sys.stdout.write
     original_sys_stderr_write = sys.stderr.write

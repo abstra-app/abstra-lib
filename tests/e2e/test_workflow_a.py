@@ -7,9 +7,12 @@ from tests.fixtures import BaseWorkflowTest, sort_response
 
 
 class TestWorkflowA(BaseWorkflowTest):
+    def setUp(self) -> None:
+        super().setUp()
+
     def create_project_a_py_files(self):
         shutil.copytree(
-            Path(__file__).parent / "assets" / "project_a",
+            Path(__file__).parent / "assets" / "legacy_project_a",
             self.root,
             dirs_exist_ok=True,
         )
@@ -20,19 +23,7 @@ class TestWorkflowA(BaseWorkflowTest):
                 "id": "1",
                 "type": "jobs:finished",
                 "sourceStageId": "job_a",
-                "targetStageId": "hook_b",
-            },
-            {
-                "id": "2",
-                "type": "hooks:finished",
-                "sourceStageId": "hook_b",
-                "targetStageId": "script_c",
-            },
-            {
-                "id": "3",
-                "type": "hooks:finished",
-                "sourceStageId": "hook_b",
-                "targetStageId": "script_d",
+                "targetStageId": "script_b",
             },
         ]
 
@@ -48,53 +39,19 @@ class TestWorkflowA(BaseWorkflowTest):
                 "props": {
                     "filename": "job_a.py",
                     "path": None,
-                    "variableName": None,
-                    "itemName": None,
-                },
-            },
-            {
-                "type": "hooks",
-                "id": "hook_b",
-                "title": "hook B",
-                "position": {
-                    "x": 10,
-                    "y": 10,
-                },
-                "props": {
-                    "filename": "hook_b.py",
-                    "path": "hook-b",
-                    "variableName": None,
-                    "itemName": None,
                 },
             },
             {
                 "type": "scripts",
-                "id": "script_c",
-                "title": "Script C",
+                "id": "script_b",
+                "title": "Script B",
                 "position": {
                     "x": 20,
                     "y": 20,
                 },
                 "props": {
-                    "filename": "script_c.py",
+                    "filename": "script_b.py",
                     "path": None,
-                    "variableName": None,
-                    "itemName": None,
-                },
-            },
-            {
-                "type": "scripts",
-                "id": "script_d",
-                "title": "Script D",
-                "position": {
-                    "x": 30,
-                    "y": 30,
-                },
-                "props": {
-                    "filename": "script_d.py",
-                    "path": None,
-                    "variableName": None,
-                    "itemName": None,
                 },
             },
         ]
@@ -123,77 +80,35 @@ class TestWorkflowA(BaseWorkflowTest):
                         "position": {"x": 0.0, "y": 0.0},
                         "props": {
                             "filename": "job_a.py",
-                            "itemName": None,
                             "path": None,
-                            "variableName": None,
                         },
                         "title": "Job A",
                         "type": "jobs",
                     },
                     {
-                        "id": "hook_b",
-                        "position": {"x": 10.0, "y": 10.0},
-                        "props": {
-                            "filename": "hook_b.py",
-                            "itemName": None,
-                            "path": "hook-b",
-                            "variableName": None,
-                        },
-                        "title": "hook B",
-                        "type": "hooks",
-                    },
-                    {
-                        "id": "script_c",
+                        "id": "script_b",
                         "position": {"x": 20.0, "y": 20.0},
                         "props": {
-                            "filename": "script_c.py",
-                            "itemName": None,
+                            "filename": "script_b.py",
                             "path": None,
-                            "variableName": None,
                         },
-                        "title": "Script C",
-                        "type": "scripts",
-                    },
-                    {
-                        "id": "script_d",
-                        "position": {"x": 30.0, "y": 30.0},
-                        "props": {
-                            "filename": "script_d.py",
-                            "itemName": None,
-                            "path": None,
-                            "variableName": None,
-                        },
-                        "title": "Script D",
+                        "title": "Script B",
                         "type": "scripts",
                     },
                 ],
                 "transitions": [
                     {
                         "id": "1",
-                        "props": {"conditionValue": None},
+                        "props": {"taskType": None},
                         "sourceStageId": "job_a",
-                        "targetStageId": "hook_b",
+                        "targetStageId": "script_b",
                         "type": "jobs:finished",
-                    },
-                    {
-                        "id": "2",
-                        "props": {"conditionValue": None},
-                        "sourceStageId": "hook_b",
-                        "targetStageId": "script_c",
-                        "type": "hooks:finished",
-                    },
-                    {
-                        "id": "3",
-                        "props": {"conditionValue": None},
-                        "sourceStageId": "hook_b",
-                        "targetStageId": "script_d",
-                        "type": "hooks:finished",
                     },
                 ],
             },
         )
 
-    def test_hook_is_waiting_after_job(self):
+    def test_basic_thread(self):
         # Setup
         self.create_project_a_py_files()
         self.create_stages_and_transitions()
@@ -202,247 +117,65 @@ class TestWorkflowA(BaseWorkflowTest):
         run_response = self.client.post("/_editor/api/jobs/job_a/run")
         self.assertEqual(run_response.status_code, 200)
 
-        for _ in range(20):
-            # Check hook is waiting
+        for _ in range(10):
+            # Check completed task in script stage
             response = self.client.post(
-                "/_editor/api/kanban",
+                "/_editor/api/tasks/list",
                 json={
                     "filter": {
-                        "stage": ["job_a", "hook_b", "script_c", "script_d"],
-                        "data": {},
+                        "stage": ["job_a", "script_b"],
                         "status": [],
-                        "search": "",
                     },
                     "limit": 10,
                     "offset": 0,
                 },
             )
 
-            cards = response.get_json()["stage_run_cards"]
-
+            tasks = response.get_json()["tasks"]
             if (
-                len(cards) == 1
-                and cards[0]["stage"] == "hook_b"
-                and cards[0]["status"] == "waiting"
+                len(tasks) == 1
+                and tasks[0]["targetStageId"] == "script_b"
+                and tasks[0]["status"] == "completed"
             ):
                 break
 
             time.sleep(0.2)
         else:
-            self.fail("Hook did not become waiting")
+            self.fail("Script did not completed task")
 
         self.assertEqual(
             sort_response(response.get_json()),
             sort_response(
                 {
-                    "not_found_stages": [],
-                    "stage_run_cards": [
+                    "tasks": [
                         {
-                            "content": [
-                                {
-                                    "key": "key_a",
-                                    "type": "text",
-                                    "value": "job a set this",
-                                },
-                                {
-                                    "key": "key_x",
-                                    "type": "text",
-                                    "value": "job a set this",
-                                },
-                            ],
-                            "created_at": ANY,
                             "id": ANY,
-                            "stage": "hook_b",
-                            "status": "waiting",
-                            "updated_at": ANY,
+                            "payload": {
+                                "_id": ANY,
+                                "key_a": "job a set this",
+                                "key_x": "job a set this",
+                            },
+                            "type": "success",
+                            "status": "completed",
+                            "sourceStageType": "job",
+                            "sourceStageTitle": "Job A",
+                            "targetStageId": "script_b",
+                            "targetStageType": "on-task",
+                            "targetStageTitle": "Script B",
+                            "created": {
+                                "at": ANY,
+                                "byExecutionId": ANY,
+                                "byStageId": "job_a",
+                            },
+                            "completed": {
+                                "at": ANY,
+                                "byExecutionId": ANY,
+                                "byStageId": "script_b",
+                            },
+                            "locked": None,
                         }
                     ],
-                    "total_count": 1,
+                    "totalCount": 1,
                 }
             ),
-        )
-
-    def test_scripts_ran_after_hook(self):
-        # Setup
-        self.create_project_a_py_files()
-        self.create_stages_and_transitions()
-
-        # Run job and hook
-        self.client.post("/_editor/api/jobs/job_a/run")
-
-        for _ in range(20):
-            response = self.client.post(
-                "/_editor/api/kanban",
-                json={
-                    "filter": {
-                        "stage": ["job_a", "hook_b", "script_c", "script_d"],
-                        "data": {},
-                        "status": [],
-                        "search": "",
-                    },
-                    "limit": 10,
-                    "offset": 0,
-                },
-            )
-
-            cards = response.get_json()["stage_run_cards"]
-
-            if (
-                len(cards) == 1
-                and cards[0]["stage"] == "hook_b"
-                and cards[0]["status"] == "waiting"
-            ):
-                break
-
-            time.sleep(0.2)
-        else:
-            self.fail("Hook did not become waiting")
-
-        self.client.post(
-            "/_editor/api/hooks/hook_b/run?abstra-run-id=" + cards[0]["id"]
-        )
-
-        for _ in range(20):
-            response = self.client.post(
-                "/_editor/api/kanban",
-                json={
-                    "filter": {
-                        "stage": ["job_a", "hook_b", "script_c", "script_d"],
-                        "data": {},
-                        "status": [],
-                        "search": "",
-                    },
-                    "limit": 10,
-                    "offset": 0,
-                },
-            )
-
-            first_kanban_state_json = response.get_json()
-            cards = first_kanban_state_json["stage_run_cards"]
-
-            if (
-                len(cards) == 2
-                and cards[0]["stage"] == "script_d"
-                and cards[0]["status"] == "finished"
-                and cards[1]["stage"] == "script_c"
-                and cards[1]["status"] == "finished"
-            ):
-                break
-
-            time.sleep(0.2)
-        else:
-            self.fail("Scripts did not run")
-
-        # Check scripts ran
-
-        self.assertEqual(
-            sort_response(first_kanban_state_json),
-            sort_response(
-                {
-                    "not_found_stages": [],
-                    "stage_run_cards": [
-                        {
-                            "content": [
-                                {
-                                    "key": "key_b",
-                                    "type": "text",
-                                    "value": "hook b set this",
-                                },
-                                {
-                                    "key": "key_a",
-                                    "type": "text",
-                                    "value": "job a set this",
-                                },
-                                {
-                                    "key": "key_x",
-                                    "type": "text",
-                                    "value": "job a set this",
-                                },
-                                {
-                                    "key": "key_d",
-                                    "type": "text",
-                                    "value": "job a set this\nscript d set this",
-                                },
-                            ],
-                            "created_at": ANY,
-                            "id": ANY,
-                            "stage": "script_d",
-                            "status": "finished",
-                            "updated_at": ANY,
-                        },
-                        {
-                            "content": [
-                                {
-                                    "key": "key_b",
-                                    "type": "text",
-                                    "value": "hook b set this",
-                                },
-                                {
-                                    "key": "key_a",
-                                    "type": "text",
-                                    "value": "job a set this",
-                                },
-                                {
-                                    "key": "key_x",
-                                    "type": "text",
-                                    "value": "job a set this",
-                                },
-                                {
-                                    "key": "key_c",
-                                    "type": "text",
-                                    "value": "job a set this\nscript c set this",
-                                },
-                            ],
-                            "created_at": ANY,
-                            "id": ANY,
-                            "stage": "script_c",
-                            "status": "finished",
-                            "updated_at": ANY,
-                        },
-                    ],
-                    "total_count": 2,
-                }
-            ),
-        )
-
-    def test_running_each_detached(self):
-        # Setup
-        self.create_project_a_py_files()
-        self.create_stages_and_transitions()
-        write_response = self.client.post(
-            "/_editor/api/workspace/write-test-data",
-            json={
-                "test_data": '{"key_x": "some test data", "key_a": "job a set this"}',
-            },
-        )
-        self.assertEqual(write_response.status_code, 200)
-
-        # Job A
-        job_a_response = self.client.post("/_editor/api/jobs/job_a/test")
-        self.assertEqual(job_a_response.status_code, 200)
-        self.assertEqual(
-            (Path(self.root) / "job_a.log").read_text(), "job ran successfully"
-        )
-
-        # Hook B
-        hook_b_response = self.client.post("/_editor/api/hooks/hook_b/test")
-        self.assertEqual(hook_b_response.status_code, 200)
-        self.assertEqual(
-            hook_b_response.json, {"body": "foo", "headers": {}, "status": 234}
-        )
-        self.assertEqual((Path(self.root) / "hook_b.log").read_text(), "some test data")
-
-        # Script C
-        script_c_response = self.client.post("/_editor/api/scripts/script_c/test")
-        self.assertEqual(script_c_response.status_code, 200)
-        self.assertEqual(
-            (Path(self.root) / "script_c.log").read_text(), "some test data"
-        )
-
-        # Script D
-        script_d_response = self.client.post("/_editor/api/scripts/script_d/test")
-        self.assertEqual(script_d_response.status_code, 200)
-        self.assertEqual(
-            (Path(self.root) / "script_d.log").read_text(),
-            "job a set this\nscript d set this",
         )

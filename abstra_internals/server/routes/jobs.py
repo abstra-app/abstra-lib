@@ -2,6 +2,7 @@ import flask
 
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.main import MainController
+from abstra_internals.entities.execution_context import JobContext
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
@@ -64,22 +65,10 @@ def get_editor_bp(controller: MainController):
 
         ExecutionController(
             repositories=controller.repositories,
-            workflow_engine=controller.workflow_engine,
-        ).run(stage=job)
-
-        return {"ok": True}
-
-    @bp.post("/<path:id>/test")
-    @editor_usage
-    def _test_job(id: str):
-        job = controller.get_job(id)
-        if not job:
-            flask.abort(404)
-
-        ExecutionController(
-            repositories=controller.repositories,
-            workflow_engine=controller.detached_workflow_engine,
-        ).test(stage=job)
+        ).run(
+            stage=job,
+            context=JobContext(),
+        )
 
         return {"ok": True}
 

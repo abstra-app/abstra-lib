@@ -1,4 +1,4 @@
-from abstra_internals.controllers.execution_store import ExecutionStore
+from abstra_internals.controllers.sdk_context import SDKContextStore
 from abstra_internals.interface.sdk.connectors.google_credentials import (
     create_abstra_google_credentials,
 )
@@ -6,8 +6,8 @@ from abstra_internals.repositories.connectors import AccessTokenDTO
 
 
 def get_access_token(name: str) -> AccessTokenDTO:
-    sdk_ctx = ExecutionStore.get_by_thread()
-    return sdk_ctx.repositories.connectors.get_access_token(name)
+    context = SDKContextStore.get_by_thread()
+    return context.repositories.connectors.get_access_token(name)
 
 
 def get_gsheets_credentials(connection_name: str = "google-sheets"):

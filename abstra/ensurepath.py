@@ -1,5 +1,5 @@
 import userpath
-from pip._internal.locations import get_bin_prefix, get_bin_user
+from pip._internal.locations import get_bin_prefix, get_bin_user  # type: ignore
 
 
 def main():

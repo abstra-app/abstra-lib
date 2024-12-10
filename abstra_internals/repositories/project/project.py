@@ -28,10 +28,8 @@ from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
 
 ServedStage = Union["FormStage", "HookStage"]
-ActionStage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
-ControlStage = Union["IteratorStage", "ConditionStage"]
-WorkflowStage = Union[ActionStage, ControlStage]
-SecuredStage = Union["FormStage", "Home", "KanbanView"]
+Stage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
+SecuredStage = Union["FormStage", "Home"]
 
 Languages = Literal[
     "en",
@@ -51,12 +49,12 @@ class NotificationTrigger:
     def validate_email(self, email: str) -> bool:
         return isinstance(email, str) and "@" in email
 
-    def get_recipients(self, thread_data: Dict[str, Any]) -> List[str]:
+    def get_recipients(self, task_payload: Dict[str, Any]) -> List[str]:
         variable_name = self.variable_name
         if not variable_name:
             return []
 
-        raw_value = nested_get(thread_data, variable_name)
+        raw_value = nested_get(task_payload, variable_name)
         if not raw_value:
             return []
 
@@ -79,7 +77,7 @@ class WorkflowTransition:
     target_id: str
     target_type: str
     type: str
-    condition_value: Optional[str] = None
+    task_type: Optional[str] = None
 
     def __post_init__(self):
         self.id = str(uuid.uuid4()) if self.id is None else self.id
@@ -88,11 +86,11 @@ class WorkflowTransition:
         if self.type != "conditions:patternMatched":
             return False
         if isinstance(variable_value, int) or isinstance(variable_value, float):
-            return self.condition_value == str(variable_value)
+            return self.task_type == str(variable_value)
         if isinstance(variable_value, str):
-            return self.condition_value == variable_value
+            return self.task_type == variable_value
         elif variable_value is None:
-            return self.condition_value is None or self.condition_value == ""
+            return self.task_type is None or self.task_type == ""
         else:
             print(f"Unknown type {type(variable_value)} for variable_value")
         return False
@@ -104,7 +102,7 @@ class WorkflowTransition:
             "target_type": self.target_type,
             "type": self.type,
             "id": self.id,
-            "condition_value": self.condition_value,
+            "task_type": self.task_type,
         }
 
     @staticmethod
@@ -116,7 +114,7 @@ class WorkflowTransition:
             target_type=data["target_type"],
             type=data["type"],
             id=data["id"],
-            condition_value=data.get("condition_value"),
+            task_type=data.get("task_type"),
         )
 
     @staticmethod
@@ -804,157 +802,6 @@ class TransitionNotFoundError(KeyError):
 
 
 @dataclass
-class IteratorStage:
-    id: str
-    variable_name: str
-    workflow_position: Tuple[float, float]
-    workflow_transitions: List[WorkflowTransition]
-    type_name: str = "iterator"
-    item_name: Optional[str] = "item"
-
-    @property
-    def title(self):
-        return self.variable_name
-
-    @property
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "variable_name": self.variable_name,
-            "workflow_position": self.workflow_position,
-            "transitions": [t.as_dict for t in self.workflow_transitions],
-            "item_name": self.item_name,
-        }
-
-    def get_items(self, thread_data: Dict[str, Any]) -> List:
-        variable_name = self.variable_name
-        if not variable_name:
-            return []
-
-        raw_value = nested_get(thread_data, variable_name)
-        if not isinstance(raw_value, list):
-            return []
-
-        return raw_value
-
-    @staticmethod
-    def from_dict(data: dict):
-        x, y = data["workflow_position"]
-        return IteratorStage(
-            id=data["id"],
-            variable_name=data["variable_name"],
-            item_name=data.get("item_name", "item"),
-            workflow_position=(x, y),
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
-        )
-
-
-@dataclass
-class ConditionStage:
-    id: str
-    variable_name: str
-    workflow_position: Tuple[float, float]
-    workflow_transitions: List[WorkflowTransition]
-    type_name: str = "condition"
-
-    @property
-    def title(self):
-        return self.variable_name
-
-    @property
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "variable_name": self.variable_name,
-            "workflow_position": self.workflow_position,
-            "transitions": [t.as_dict for t in self.workflow_transitions],
-        }
-
-    def get_condition(self, thread_data: Dict[str, Any]) -> Any:
-        variable_name = self.variable_name
-        if not variable_name:
-            return None
-
-        return nested_get(thread_data, variable_name)
-
-    @staticmethod
-    def from_dict(data: dict):
-        x, y = data["workflow_position"]
-        return ConditionStage(
-            id=data["id"],
-            variable_name=data["variable_name"],
-            workflow_position=(x, y),
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
-        )
-
-
-@dataclass
-class KanbanView:
-    access_control: AccessSettings
-
-    @staticmethod
-    def from_dict(data: dict):
-        return KanbanView(
-            access_control=AccessSettings.from_dict(
-                data.get("access_control", {"is_public": False, "required_roles": []})
-            ),
-        )
-
-    @staticmethod
-    def create():
-        return KanbanView(
-            access_control=AccessSettings(is_public=False, required_roles=[]),
-        )
-
-    @property
-    def as_dict(self):
-        return {"access_control": self.access_control.as_dict}
-
-    @property
-    def type_name(self):
-        return "kanban"
-
-    @property
-    def path(self):
-        return "threads"
-
-    @property
-    def title(self):
-        return "Threads"
-
-    @property
-    def id(self):
-        return "kanban"
-
-    def to_access_dto(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "type": self.type_name,
-            "is_public": self.access_control.is_public,
-            "required_roles": self.access_control.required_roles,
-        }
-
-    @property
-    def to_sidebar_item(self) -> SidebarItem:
-        return SidebarItem(
-            id=self.id,
-            name=self.title,
-            path=self.path,
-            type=self.type_name,
-        )
-
-    def update(self, id, changes: Dict[str, Any]):
-        if id == "access_control":
-            setattr(self, id, AccessSettings.from_dict(changes))
-
-
-@dataclass
 class Home:
     access_control: AccessSettings
 
@@ -1018,14 +865,11 @@ class Home:
 @dataclass
 class Project:
     workspace: StyleSettings
-    kanban: KanbanView
     home: Home
     scripts: List[ScriptStage]
     forms: List[FormStage]
     hooks: List[HookStage]
     jobs: List[JobStage]
-    iterators: List[IteratorStage]
-    conditions: List[ConditionStage]
 
     _graph: Graph
 
@@ -1044,26 +888,19 @@ class Project:
 
         return {
             "workspace": self.workspace.as_dict,
-            "kanban": self.kanban.as_dict,
             "home": self.home.as_dict,
             "jobs": [job.as_dict for job in self.jobs],
             "hooks": [hook.as_dict for hook in self.hooks],
             "forms": [form.as_dict for form in self.forms],
             "scripts": [script.as_dict for script in self.scripts],
-            "iterators": [i.as_dict for i in self.iterators],
-            "conditions": [c.as_dict for c in self.conditions],
         }
 
     @property
-    def actions(self) -> List[ActionStage]:
+    def workflow_stages(self) -> List[Stage]:
         return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
 
-    @property
-    def workflow_stages(self) -> List[WorkflowStage]:
-        return [*self.actions, *self.iterators, *self.conditions]
-
     def iter_entrypoints(self) -> Generator[Path, None, None]:
-        for stage in self.actions:
+        for stage in self.workflow_stages:
             yield Path(stage.file)
 
     @property
@@ -1083,10 +920,10 @@ class Project:
     def get_previous_stages_ids(self, id: str) -> List[str]:
         return [node.id for node in self._graph.previous_to(id)]
 
-    def is_initial(self, target_stage: ActionStage) -> bool:
+    def is_initial(self, target_stage: Stage) -> bool:
         return len(self._graph.previous_to(target_stage.id)) == 0
 
-    def add_stage(self, stage: WorkflowStage):
+    def add_stage(self, stage: Stage):
         if isinstance(stage, FormStage):
             self.forms.append(stage)
         elif isinstance(stage, HookStage):
@@ -1095,14 +932,10 @@ class Project:
             self.jobs.append(stage)
         elif isinstance(stage, ScriptStage):
             self.scripts.append(stage)
-        elif isinstance(stage, IteratorStage):
-            self.iterators.append(stage)
-        elif isinstance(stage, ConditionStage):
-            self.conditions.append(stage)
         else:
             raise Exception(f"Cannot add stage of type {type(stage)}")
 
-    def get_stage(self, id: str) -> Optional[WorkflowStage]:
+    def get_stage(self, id: str) -> Optional[Stage]:
         for stage in self.workflow_stages:
             if stage.id == id:
                 return stage
@@ -1123,7 +956,7 @@ class Project:
         )
 
     def get_access_control_by_stage_id(self, id: str) -> Optional[AccessSettings]:
-        for stage in [self.kanban, self.home, *self.forms, *self.jobs]:
+        for stage in [self.home, *self.forms, *self.jobs]:
             if stage.id == id:
                 return stage.access_control
         return None
@@ -1136,7 +969,7 @@ class Project:
 
     @property
     def secured_stages(self) -> List[SecuredStage]:
-        return [self.home, self.kanban, *self.forms]
+        return [self.home, *self.forms]
 
     def get_secured_stage(self, id: str) -> Optional[SecuredStage]:
         for stage in self.secured_stages:
@@ -1168,7 +1001,7 @@ class Project:
         stage = self.get_secured_stage(id)
         if not stage:
             raise StageNotFoundError(f"Stage with id '{id}' not found")
-        if isinstance(stage, (Home, KanbanView)):
+        if isinstance(stage, Home):
             stage.update("access_control", change)
             return stage.to_access_dto()
         stage = self.update_stage(stage, {"access_control": change})
@@ -1179,20 +1012,20 @@ class Project:
 
         return stage.to_access_dto()
 
-    def get_stage_raises(self, id: str) -> WorkflowStage:
+    def get_stage_raises(self, id: str) -> Stage:
         stage = self.get_stage(id)
         if not stage:
             raise StageNotFoundError(f"Stage with id '{id}' not found")
         return stage
 
-    def get_action(self, id: str) -> Optional[ActionStage]:
-        for stage in self.actions:
+    def get_action(self, id: str) -> Optional[Stage]:
+        for stage in self.workflow_stages:
             if stage.id == id:
                 return stage
 
         return None
 
-    def get_action_raises(self, id: str) -> ActionStage:
+    def get_action_raises(self, id: str) -> Stage:
         stage = self.get_action(id)
         if not stage:
             raise StageNotFoundError(f"Stage with id '{id}' not found")
@@ -1238,7 +1071,7 @@ class Project:
             if form.path == path:
                 return form
 
-    def get_stage_by_path(self, path: str) -> Optional[ActionStage]:
+    def get_stage_by_path(self, path: str) -> Optional[Stage]:
         for form in self.forms:
             if form.path == path:
                 return form
@@ -1249,8 +1082,8 @@ class Project:
 
         return None
 
-    def get_initial_stages(self) -> List[ActionStage]:
-        return [r for r in self.actions if self.is_initial(r)]
+    def get_initial_stages(self) -> List[Stage]:
+        return [r for r in self.workflow_stages if self.is_initial(r)]
 
     def delete_transition_by_target(self, target_id: str):
         for stage in self.workflow_stages:
@@ -1277,7 +1110,7 @@ class Project:
 
         stage.path = new_path
 
-    def update_stage(self, stage: ActionStage, changes: Dict[str, Any]) -> ActionStage:
+    def update_stage(self, stage: Stage, changes: Dict[str, Any]) -> Stage:
         # This guarantees that the updated stage will be the one from the project
         project_stage = self.get_action(stage.id)
 
@@ -1315,8 +1148,6 @@ class Project:
         self.hooks = [h for h in self.hooks if h.id != id]
         self.jobs = [j for j in self.jobs if j.id != id]
         self.scripts = [s for s in self.scripts if s.id != id]
-        self.iterators = [i for i in self.iterators if i.id != id]
-        self.conditions = [c for c in self.conditions if c.id != id]
 
     @staticmethod
     def __from_dict(data: dict):
@@ -1324,10 +1155,9 @@ class Project:
         nodes = []
         edges = []
 
-        control_keys = ["conditions", "iterators"]
         stage_keys = ["forms", "hooks", "scripts", "jobs"]
 
-        for key in stage_keys + control_keys:
+        for key in stage_keys:
             for stage in data[key]:
                 nodes.append(Node(id=stage["id"]))
                 for transition in stage.get("transitions", []):
@@ -1347,11 +1177,8 @@ class Project:
         forms = [FormStage.from_dict(form) for form in data["forms"]]
         hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
         jobs = [JobStage.from_dict(job) for job in data["jobs"]]
-        iterators = [IteratorStage.from_dict(i) for i in data["iterators"]]
-        conditions = [ConditionStage.from_dict(c) for c in data["conditions"]]
 
         workspace = StyleSettings.from_dict(data["workspace"])
-        kanban = KanbanView.from_dict(data.get("kanban", {}))
         home = Home.from_dict(data.get("home", {}))
 
         return Project(
@@ -1360,9 +1187,6 @@ class Project:
             forms=forms,
             hooks=hooks,
             jobs=jobs,
-            iterators=iterators,
-            conditions=conditions,
-            kanban=kanban,
             home=home,
             _graph=Graph.from_primitives(nodes=nodes, edges=edges),
         )
@@ -1392,16 +1216,13 @@ class Project:
             forms=[],
             hooks=[],
             jobs=[],
-            iterators=[],
-            conditions=[],
-            kanban=KanbanView.create(),
             home=Home.create(),
             _graph=Graph.from_primitives([], []),
         )
 
 
 def _update_file(
-    stage: ActionStage,
+    stage: Stage,
     new_file_relative: str,
 ):
     old_file = Settings.root_path.joinpath(stage.file)

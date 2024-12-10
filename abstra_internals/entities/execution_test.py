@@ -1,7 +1,8 @@
 from datetime import datetime
 from unittest import TestCase
 
-from abstra_internals.entities.execution import Execution, RequestContext
+from abstra_internals.entities.execution import Execution
+from abstra_internals.entities.execution_context import HookContext, Request, Response
 from abstra_internals.repositories.project.project import HookStage
 from abstra_internals.utils import is_serializable
 from abstra_internals.utils.datetime import from_utc_iso_string
@@ -16,22 +17,25 @@ class ExecutionTest(TestCase):
             workflow_position=(0, 1),
         )
 
-        request = RequestContext(
+        request = Request(
             body={"a": 1}.__str__(),
             headers={"auth": "secret_token"},
             query_params={"c": "3"},
             method="GET",
         )
 
-        execution = Execution.create(
-            stage_id=mock_stage.id, request_context=request, stage_run_id="mock_sr_id"
+        context = HookContext(
+            request=request, response=Response(headers={}, status=200, body="")
         )
 
-        dto = execution.to_dto()
+        execution: Execution[HookContext] = Execution.create(
+            stage_id=mock_stage.id, context=context
+        )
+
+        dto = execution.dump()
 
         self.assertEqual(dto["stageId"], "mock_hook_id")
-        self.assertEqual(dto["stageRunId"], "mock_sr_id")
-        self.assertEqual(dto["context"], request)
+        self.assertEqual(dto["context"], context.dump())
         self.assertEqual(dto["status"], "running")
         self.assertIsNotNone(dto["id"])
 
@@ -47,17 +51,20 @@ class ExecutionTest(TestCase):
             workflow_position=(0, 1),
         )
 
-        resquest = RequestContext(
-            body={"a": 1}.__str__(),
-            headers={"auth": "secret_token"},
-            query_params={"c": "3"},
-            method="GET",
+        context = HookContext(
+            request=Request(
+                body={"a": 1}.__str__(),
+                headers={"auth": "secret_token"},
+                query_params={"c": "3"},
+                method="GET",
+            ),
+            response=Response(headers={}, status=200, body=""),
         )
 
-        execution = Execution.create(
-            stage_id=mock_stage.id, request_context=resquest, stage_run_id="mock_sr_id"
+        execution: Execution[HookContext] = Execution.create(
+            stage_id=mock_stage.id, context=context
         )
 
-        dto = execution.to_dto()
+        dto = execution.dump()
 
         self.assertTrue(is_serializable(dto))

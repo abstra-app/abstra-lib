@@ -1,7 +1,5 @@
-from abstra_internals.controllers.execution_store import (
-    ExecutionStore,
-)
+from abstra_internals.controllers.sdk_context import SDKContextStore
 
 
 def get_execution_id() -> str:
-    return ExecutionStore.get_by_thread().execution.id
+    return SDKContextStore.get_execution().id

@@ -1,0 +1,120 @@
+
+{
+    "workspace": {
+      "name": "Workspace",
+      "language": "en",
+      "theme": null,
+      "logo_url": "./logo.png",
+      "favicon_url": "./favicon.ico",
+      "brand_name": "Abstra Project",
+      "main_color": null,
+      "font_family": null,
+      "font_color": null
+    },
+    "kanban": {
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    },
+    "home": {
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    },
+    "jobs": [],
+    "hooks": [],
+    "forms": [
+      {
+        "id": "d3b955cd-ed0a-4c4f-a33b-728bfefa1438",
+        "path": "form1",
+        "title": "form1",
+        "is_initial": true,
+        "auto_start": false,
+        "allow_restart": false,
+        "end_message": null,
+        "start_message": null,
+        "error_message": null,
+        "welcome_title": null,
+        "timeout_message": null,
+        "start_button_text": null,
+        "restart_button_text": null,
+        "file": "form1.py",
+        "workflow_position": [
+          180,
+          285
+        ],
+        "transitions": [
+          {
+            "target_id": "91934760-2a06-445f-90bb-47571bdf18d9",
+            "target_type": "conditions",
+            "type": "forms:finished",
+            "id": "f7cb09m",
+            "condition_value": null
+          }
+        ],
+        "notification_trigger": {
+          "variable_name": "assignee_emails",
+          "enabled": false
+        },
+        "access_control": {
+          "is_public": false,
+          "required_roles": []
+        }
+      }
+    ],
+    "scripts": [
+      {
+        "id": "64648fac-0263-4a7e-8011-80831ecbea54",
+        "file": "script1.py",
+        "title": "script1",
+        "is_initial": false,
+        "workflow_position": [
+          675,
+          180
+        ],
+        "transitions": []
+      },
+      {
+        "id": "85f091a6-6647-440d-a766-33d4e827b30d",
+        "file": "script2.py",
+        "title": "script2",
+        "is_initial": false,
+        "workflow_position": [
+          675,
+          405
+        ],
+        "transitions": []
+      }
+    ],
+    "iterators": [],
+    "conditions": [
+      {
+        "id": "91934760-2a06-445f-90bb-47571bdf18d9",
+        "variable_name": "var",
+        "workflow_position": [
+          450,
+          285
+        ],
+        "transitions": [
+          {
+            "target_id": "64648fac-0263-4a7e-8011-80831ecbea54",
+            "target_type": "scripts",
+            "type": "conditions:patternMatched",
+            "id": "4393rxy",
+            "condition_value": "true"
+          },
+          {
+            "target_id": "85f091a6-6647-440d-a766-33d4e827b30d",
+            "target_type": "scripts",
+            "type": "conditions:patternMatched",
+            "id": "d1kh7ud",
+            "condition_value": "false"
+          }
+        ]
+      }
+    ],
+    "version": "11.0"
+}
+    

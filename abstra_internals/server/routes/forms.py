@@ -1,15 +1,13 @@
 import flask
 import flask_sock
 
-from abstra_internals.constants import STAGE_RUN_ID_PARAM_KEY
-from abstra_internals.controllers.execution import (
-    ExecutionController,
-    LockFailedException,
-    UnsetThreadException,
-)
+from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution import context_from_flask
+from abstra_internals.entities.execution_context import (
+    FormContext,
+    extract_flask_request,
+)
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -22,7 +20,9 @@ def get_editor_bp(controller: MainController):
     @sock.route("/socket")
     def _websocket(ws: flask_sock.Server):
         try:
-            request_context = context_from_flask(flask.request)
+            context = FormContext(
+                request=extract_flask_request(flask.request),
+            )
 
             id = flask.request.args.get("id")
             if id is None:
@@ -32,37 +32,16 @@ def get_editor_bp(controller: MainController):
             if not form:
                 return
 
-            is_detached = flask.request.args.get(
-                "detached", default=False, type=is_it_true
+            client = FormClient(ws=ws, context=context, production_mode=False)
+
+            ExecutionController(
+                repositories=controller.repositories,
+            ).run(
+                stage=form,
+                client=client,
+                context=context,
             )
 
-            client = FormClient(
-                ws=ws, request_context=request_context, production_mode=False
-            )
-
-            if is_detached:
-                ExecutionController(
-                    repositories=controller.repositories,
-                    workflow_engine=controller.detached_workflow_engine,
-                ).test(
-                    stage=form,
-                    client=client,
-                    request=request_context,
-                )
-            else:
-                ExecutionController(
-                    repositories=controller.repositories,
-                    workflow_engine=controller.workflow_engine,
-                ).run(
-                    stage=form,
-                    client=client,
-                    request=request_context,
-                    target_stage_run_id=flask.request.args.get(STAGE_RUN_ID_PARAM_KEY),
-                )
-        except LockFailedException:
-            pass
-        except UnsetThreadException:
-            pass
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:

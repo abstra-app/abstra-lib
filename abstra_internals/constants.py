@@ -54,8 +54,6 @@ def get_project_url() -> str:
     return PROJECT_URL or f"http://localhost:{Settings.server_port}"
 
 
-STAGE_RUN_ID_PARAM_KEY = "abstra-run-id"
-
 ABSTRA_LOGO_URL = (
     "https://abstra-cloud-assets.s3.us-east-1.amazonaws.com/logo-small-256px.png"
 )

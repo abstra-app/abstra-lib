@@ -8,9 +8,6 @@ import flask
 
 from abstra_internals.cloud_api import get_api_key_info, get_project_info
 from abstra_internals.controllers.linters import check_linters
-from abstra_internals.controllers.workflow_engine import WorkflowEngine
-from abstra_internals.controllers.workflow_engine_detached import DetachedWorkflowEngine
-from abstra_internals.controllers.workflow_interface import IWorkflowEngine
 from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
@@ -19,7 +16,7 @@ from abstra_internals.credentials import (
 )
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.repositories.email import EmailRepository
-from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.execution import ExecutionFilter, ExecutionRepository
 from abstra_internals.repositories.execution_logs import (
     ExecutionLogsRepository,
     LogEntry,
@@ -32,17 +29,16 @@ from abstra_internals.repositories.jwt_signer import (
 from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.repositories.producer import ProducerRepository
 from abstra_internals.repositories.project.project import (
-    ActionStage,
     FormStage,
     HookStage,
     JobStage,
     ProjectRepository,
     ScriptStage,
+    Stage,
     StyleSettingsWithSidebar,
-    WorkflowStage,
 )
 from abstra_internals.repositories.roles import RolesRepository
-from abstra_internals.repositories.stage_run import StageRunRepository
+from abstra_internals.repositories.tasks import TasksRepository
 from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.settings import Settings
@@ -106,15 +102,13 @@ class MainController:
     kv_repository: KVRepository
     jwt_repository: JWTRepository
     email_repository: EmailRepository
-    workflow_engine: IWorkflowEngine
+    tasks_repository: TasksRepository
     users_repository: UsersRepository
     roles_repository: RolesRepository
     producer_repository: ProducerRepository
-    stage_run_repository: StageRunRepository
     execution_repository: ExecutionRepository
-    detached_workflow_engine: DetachedWorkflowEngine
-    execution_logs_repository: ExecutionLogsRepository
     web_editor_repository: EditorJWTRepository
+    execution_logs_repository: ExecutionLogsRepository
 
     def __init__(self, repositories: Repositories):
         ProjectRepository.initialize_or_migrate()
@@ -124,19 +118,17 @@ class MainController:
         ensure_gitignore(Settings.root_path)
 
         self.repositories = repositories
-        self.workflow_engine = WorkflowEngine(repositories)
-        self.detached_workflow_engine = DetachedWorkflowEngine(repositories)
 
         self.kv_repository = repositories.kv
         self.jwt_repository = repositories.jwt
         self.email_repository = repositories.email
         self.users_repository = repositories.users
         self.roles_repository = repositories.roles
+        self.tasks_repository = repositories.tasks
         self.producer_repository = repositories.producer
-        self.stage_run_repository = repositories.stage_run
         self.execution_repository = repositories.execution
-        self.execution_logs_repository = repositories.execution_logs
         self.web_editor_repository = repositories.editor_jwt
+        self.execution_logs_repository = repositories.execution_logs
 
     def deploy(self):
         rules = check_linters()
@@ -154,18 +146,18 @@ class MainController:
         deploy()
 
     def reset_repositories(self):
-        self.stage_run_repository.clear()
         self.execution_repository.clear()
+        self.tasks_repository.clear()
 
     def get_workspace(self) -> StyleSettingsWithSidebar:
         project = ProjectRepository.load()
         return project.get_workspace()
 
-    def get_stage(self, id: str) -> Optional[WorkflowStage]:
+    def get_stage(self, id: str) -> Optional[Stage]:
         project = ProjectRepository.load()
         return project.get_stage(id)
 
-    def get_action(self, id: str) -> Optional[ActionStage]:
+    def get_action(self, id: str) -> Optional[Stage]:
         project = ProjectRepository.load()
         return project.get_action(id)
 
@@ -387,7 +379,7 @@ class MainController:
         ProjectRepository.save(project)
         return job
 
-    def update_stage(self, id: str, changes: Dict[str, Any]) -> ActionStage:
+    def update_stage(self, id: str, changes: Dict[str, Any]) -> Stage:
         project = ProjectRepository.load()
         stage = project.get_action(id)
 
@@ -410,6 +402,10 @@ class MainController:
         project = ProjectRepository.load()
         project.delete_stage(id, remove_file)
         ProjectRepository.save(project)
+
+    def get_stages(self) -> List[Stage]:
+        project = ProjectRepository.load()
+        return project.workflow_stages
 
     # Login
     def get_credentials(self):
@@ -454,6 +450,13 @@ class MainController:
         project = ProjectRepository.load()
         return project.get_access_control_by_stage_id(id)
 
+    # logs
+    def get_executions(self, filter: ExecutionFilter):
+        return self.execution_repository.list(filter)
+
+    def get_logs(self, id: str):
+        return self.execution_logs_repository.get(id)
+
     # Worker lifecycle
 
     def child_exit(self, *, app_id: str, worker_id: str, err_msg: str):
@@ -478,9 +481,7 @@ class MainController:
             # Update execution status
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
 
-            self.stage_run_repository.change_status(
-                execution.stage_run_id, "failed", execution.id
-            )
+            self.tasks_repository.set_locked_tasks_to_pending(execution.id)
 
     def self_exit(self, *, app_id: str, err_msg: str):
         exited_execs = self.execution_repository.find_by_app(
@@ -503,6 +504,4 @@ class MainController:
             # Update execution status
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
 
-            self.stage_run_repository.change_status(
-                execution.stage_run_id, "failed", execution.id
-            )
+            self.tasks_repository.set_locked_tasks_to_pending(execution.id)

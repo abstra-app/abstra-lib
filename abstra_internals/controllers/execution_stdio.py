@@ -3,20 +3,15 @@ from typing import Callable, List, Literal, Union
 
 import flask_sock
 
-from abstra_internals.controllers.execution_store import (
-    ExecutionNotFound,
-    ExecutionStore,
-)
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution import Execution
+from abstra_internals.controllers.sdk_context import (
+    ExecutionNotFound,
+    SDKContextStore,
+)
 from abstra_internals.env_masker import GLOBAL_MASKER
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.utils import serialize
-
-
-class UnboundPthread(Exception):
-    pass
 
 
 class StdioController:
@@ -81,7 +76,7 @@ class StdioController:
             short_id = self._capture_stdio(type, text).split(sep="-")[0]
             term_output = f"[RUN {short_id}] {text}" if text.strip() else text
             sys_write(term_output)
-        except UnboundPthread:
+        except ExecutionNotFound:
             sys_write(text)
         except Exception as e:
             AbstraLogger.capture_exception(e)
@@ -89,14 +84,8 @@ class StdioController:
             sys.stdout.flush()
             return len(text)
 
-    def _get_current_execution(self) -> Execution:
-        try:
-            return ExecutionStore.get_by_thread().execution
-        except ExecutionNotFound:
-            raise UnboundPthread()
-
     def _capture_stdio(self, type: Literal["stderr", "stdout"], text: str) -> str:
-        execution = self._get_current_execution()
+        execution = SDKContextStore.get_execution()
         self.execution_logs_repository.insert_stdio(execution.id, type, text)
         self.broadcast(
             type=type, log=text, execution_id=execution.id, stage_id=execution.stage_id

@@ -1,18 +1,6 @@
-class UnsetThread(Exception):
+class UnboundSDK(Exception):
     def __init__(self):
-        self.message = ""
-        super().__init__(self.message)
-
-
-class ThreadAlreadyRunning(Exception):
-    def __init__(self):
-        self.message = "Thread already running."
-        super().__init__(self.message)
-
-
-class ThreadNotFound(Exception):
-    def __init__(self):
-        self.message = "Thread not found for the given filter."
+        self.message = "Files importing Abstra SDK must be run from the Abstra Editor."
         super().__init__(self.message)
 
 
@@ -22,8 +10,14 @@ class GetUserFailed(Exception):
         super().__init__(self.message)
 
 
-class IncompatibleStage(Exception):
+class IncompatibleSDK(Exception):
     pass
+
+
+class IncompatibleScriptSDK(IncompatibleSDK):
+    def __init__(self):
+        self.message = "`abstra.scripts` can only be used in script stages."
+        super().__init__(self.message)
 
 
 class MissingDependencyError(Exception):
@@ -34,6 +28,24 @@ class MissingDependencyError(Exception):
 
 class ExecutionNotFound(Exception):
     pass
+
+
+class TaskWriteAttempt(Exception):
+    def __init__(self):
+        self.message = "Task is read-only"
+        super().__init__(self.message)
+
+
+class TaskNotWaiting(Exception):
+    def __init__(self):
+        self.message = "Task is not in waiting status anymore"
+        super().__init__(self.message)
+
+
+class TaskInvalidStatus(Exception):
+    def __init__(self, status: str):
+        self.message = f"Can't update task to {status}"
+        super().__init__(self.message)
 
 
 class BadSendResponse(Exception):

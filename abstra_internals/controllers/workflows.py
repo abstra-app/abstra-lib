@@ -2,16 +2,14 @@ from typing import Dict, List, Optional, TypedDict
 
 from abstra_internals.controllers.main import UnknownNodeTypeError
 from abstra_internals.repositories.project.project import (
-    ConditionStage,
     FormStage,
     HookStage,
-    IteratorStage,
     JobStage,
     NotificationTrigger,
     Project,
     ProjectRepository,
     ScriptStage,
-    WorkflowStage,
+    Stage,
     WorkflowTransition,
 )
 
@@ -70,16 +68,10 @@ class StageDTO(TypedDict):
     props: Dict[str, Optional[str]]
 
 
-def make_stage_dto(stage: WorkflowStage) -> StageDTO:
+def make_stage_dto(stage: Stage) -> StageDTO:
     filename = None
     if isinstance(stage, (HookStage, ScriptStage, FormStage, JobStage)):
         filename = stage.file
-    variable_name = None
-    if isinstance(stage, (IteratorStage, ConditionStage)):
-        variable_name = stage.variable_name
-    item_name = None
-    if isinstance(stage, IteratorStage):
-        item_name = stage.item_name
     path = None
     if isinstance(stage, (FormStage, HookStage)):
         path = stage.path
@@ -93,9 +85,7 @@ def make_stage_dto(stage: WorkflowStage) -> StageDTO:
         ),
         props={
             "filename": filename,
-            "variableName": variable_name,
             "path": path,
-            "itemName": item_name,
         },
     )
 
@@ -104,12 +94,6 @@ def _make_workflow_dto(project: Project):
     stages = []
     for stage in project.workflow_stages:
         stage_dto = make_stage_dto(stage)
-
-        if isinstance(stage, IteratorStage) or isinstance(stage, ConditionStage):
-            stage_dto["props"]["variableName"] = stage.variable_name
-
-        if isinstance(stage, IteratorStage):
-            stage_dto["props"]["itemName"] = stage.item_name
 
         if (
             isinstance(stage, FormStage)
@@ -127,10 +111,10 @@ def _make_workflow_dto(project: Project):
     transitions = []
     for stage in project.workflow_stages:
         for transition in stage.workflow_transitions:
-            props: dict = {"conditionValue": None}
+            props: dict = {"taskType": None}
 
-            if transition.condition_value is not None:
-                props["conditionValue"] = transition.condition_value
+            if transition.task_type is not None:
+                props["taskType"] = transition.task_type
 
             transitions.append(
                 dict(
@@ -158,14 +142,7 @@ def update_workflow(workflow_state_dto: Dict):
                 stage_dto["position"]["x"],
                 stage_dto["position"]["y"],
             )
-            if not isinstance(stage, ConditionStage) and not isinstance(
-                stage, IteratorStage
-            ):
-                stage.title = stage_dto["title"]
-            if isinstance(stage, IteratorStage) or isinstance(stage, ConditionStage):
-                stage.variable_name = stage_dto["props"]["variableName"]
-            if isinstance(stage, IteratorStage):
-                stage.item_name = stage_dto["props"]["itemName"]
+            stage.title = stage_dto["title"]
             if (
                 isinstance(stage, FormStage)
                 or isinstance(stage, ScriptStage)
@@ -234,36 +211,6 @@ def update_workflow(workflow_state_dto: Dict):
                 workflow_transitions=[],
             )
             project.jobs.append(stage)
-        elif stage_dto["type"] == "iterators":
-            props = stage_dto.get("props", {})
-            variable_name = props.get("variableName", "")
-            item_name = props.get("itemName", "")
-
-            stage = IteratorStage(
-                id=stage_dto["id"],
-                workflow_position=(
-                    stage_dto["position"]["x"],
-                    stage_dto["position"]["y"],
-                ),
-                variable_name=variable_name,
-                workflow_transitions=[],
-                item_name=item_name,
-            )
-            project.add_stage(stage)
-        elif stage_dto["type"] == "conditions":
-            props = stage_dto.get("props", {})
-            variable_name = props.get("variableName", "")
-
-            stage = ConditionStage(
-                id=stage_dto["id"],
-                workflow_position=(
-                    stage_dto["position"]["x"],
-                    stage_dto["position"]["y"],
-                ),
-                variable_name=variable_name,
-                workflow_transitions=[],
-            )
-            project.add_stage(stage)
         else:
             raise UnknownNodeTypeError(stage_dto["type"])
 
@@ -276,7 +223,7 @@ def update_workflow(workflow_state_dto: Dict):
         stage.workflow_transitions = []
         for transition in workflow_state_dto["transitions"]:
             props = transition.get("props", {})
-            condition_value = props.get("conditionValue", None)
+            task_type = props.get("taskType", None)
             if transition["sourceStageId"] == stage.id:
                 target = project.get_stage(transition["targetStageId"])
                 assert target is not None
@@ -286,7 +233,7 @@ def update_workflow(workflow_state_dto: Dict):
                         type=transition["type"],
                         target_id=transition["targetStageId"],
                         target_type=target.type_name + "s",
-                        condition_value=condition_value,
+                        task_type=task_type,
                     )
                 )
 

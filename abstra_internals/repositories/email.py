@@ -7,7 +7,7 @@ import requests
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.environment import SIDECAR_HEADERS
 
-Kind = Literal["passwordless", "thread-waiting", "message"]
+Kind = Literal["passwordless", "task-waiting", "message"]
 
 
 @dataclass

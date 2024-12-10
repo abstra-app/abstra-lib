@@ -1,12 +1,13 @@
-import abstra.workflows as aw
 from abstra.messages import send_email
+from abstra.tasks import get_trigger_task, send_task
 
 ### Abstra Workflows is the easiest way to store and manage data across different parts of your workflow
 
-# Similar to the set_data function, you can use the abstra.workflows's get_data function to retrieve stored data:
-best_movie = aw.get_data("best_movie")
-interview_opt_in = aw.get_data("interview_opt_in")
-rating = aw.get_data("rating")
+# You can use the get_trigger_task function to get the task that triggered the script
+task = get_trigger_task()
+best_movie = task.best_movie
+interview_opt_in = task.interview_opt_in
+rating = task.rating
 
 reasons = []
 
@@ -46,7 +47,8 @@ else:
 
 # Store the application response for future use:
 if not reasons:
-    aw.set_data("approved", True)
+    send_task("approved", {})
 else:
-    aw.set_data("approved", False)
-    aw.set_data("reasons", reasons)
+    send_task("rejected", {"reasons": reasons})
+
+task.complete()

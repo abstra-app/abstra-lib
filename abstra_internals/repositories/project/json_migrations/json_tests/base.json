@@ -1,0 +1,32 @@
+{
+    "workspace": {
+      "name": "Workspace",
+      "language": "en",
+      "theme": null,
+      "logo_url": "./logo.png",
+      "favicon_url": "./favicon.ico",
+      "brand_name": "Abstra Project",
+      "main_color": null,
+      "font_family": null,
+      "font_color": null
+    },
+    "kanban": {
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    },
+    "home": {
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    },
+    "jobs": [],
+    "hooks": [],
+    "forms": [],
+    "scripts": [],
+    "iterators": [],
+    "conditions": [],
+    "version": "11.0"
+}

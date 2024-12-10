@@ -42,7 +42,12 @@ def get_api_key_info(headers: dict) -> dict:
 
 def get_ai_messages(messages, stage, thread_id, headers: dict):
     url = f"{CLOUD_API_CLI_URL}/ai/messages"
-    body = {"messages": messages, "runtime": stage, "threadId": thread_id}
+    body = {
+        "messages": messages,
+        "runtime": stage,
+        "threadId": thread_id,
+        "version": "v1",
+    }
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
         chunk_size=None
     )

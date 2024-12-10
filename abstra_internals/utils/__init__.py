@@ -24,14 +24,6 @@ def deserialize(st) -> t.Any:
     return simplejson.loads(st)
 
 
-def is_json_serializable(value):
-    try:
-        serialize(value)
-        return True
-    except TypeError:
-        return False
-
-
 def is_serializable(st):
     try:
         serialize(st)

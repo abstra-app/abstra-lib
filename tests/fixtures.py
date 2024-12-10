@@ -60,13 +60,12 @@ def wait_non_daemon_threads():
 
 
 def sort_response(response: dict):
-    response["stage_run_cards"] = sorted(
-        response["stage_run_cards"], key=lambda x: x["stage"]
-    )
-    for stage_run_card in response["stage_run_cards"]:
-        stage_run_card["content"] = sorted(
-            stage_run_card["content"], key=lambda x: x["key"]
-        )
+    response["tasks"] = sorted(response["tasks"], key=lambda x: x["targetStageId"])
+    return response
+
+
+def sort_response_by_payload(response: dict):
+    response["tasks"] = sorted(response["tasks"], key=lambda x: x["payload"]["i"])
     return response
 
 
@@ -74,7 +73,6 @@ class BaseTest(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.repositories = get_editor_repositories()
-        (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
         self.controller = MainController(self.repositories)
 
     def tearDown(self) -> None:
@@ -94,6 +92,7 @@ class BaseWorkflowTest(BaseTest):
         self.maxDiff = None
         self.client = self.get_editor_flask_client()
         self.consumer, self.thread = start_consumer(self.controller)
+        (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
         self.consumer.stop()

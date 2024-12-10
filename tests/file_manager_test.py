@@ -11,8 +11,11 @@ class MockModel:
     name: str
     age: int
 
-    def to_dto(self):
+    def dump(self):
         return self.__dict__
+
+    def dump_json(self, indent=4):
+        return json.dumps(self.dump(), indent=indent)
 
     @staticmethod
     def from_dto(dto):

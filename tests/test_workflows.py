@@ -41,8 +41,6 @@ class WorkflowTest(TestCase):
                     "props": {
                         "filename": "foo.py",
                         "path": "foo",
-                        "variableName": None,
-                        "itemName": None,
                     },
                     "position": {"x": 0, "y": 0},
                 }
@@ -63,8 +61,6 @@ class WorkflowTest(TestCase):
                     "props": {
                         "filename": "foo.py",
                         "path": "foo",
-                        "variableName": None,
-                        "itemName": None,
                     },
                     "position": {"x": 0, "y": 0},
                 },
@@ -74,8 +70,6 @@ class WorkflowTest(TestCase):
                     "props": {
                         "filename": "bar.py",
                         "path": "bar",
-                        "variableName": None,
-                        "itemName": None,
                     },
                     "title": "Bar",
                     "position": {"x": 0, "y": 0},
@@ -86,8 +80,8 @@ class WorkflowTest(TestCase):
                     "id": "foo",
                     "sourceStageId": "foo",
                     "targetStageId": "bar",
-                    "type": "forms:finished",
-                    "props": {"conditionValue": None},
+                    "type": "task",
+                    "props": {"taskType": None},
                 }
             ],
         }
@@ -111,8 +105,6 @@ class WorkflowTest(TestCase):
                     "props": {
                         "filename": "foo.py",
                         "path": "foo",
-                        "variableName": None,
-                        "itemName": None,
                     },
                     "title": "Foo",
                     "position": {"x": 0, "y": 0},
@@ -123,8 +115,6 @@ class WorkflowTest(TestCase):
                     "props": {
                         "filename": "bar.py",
                         "path": "bar",
-                        "variableName": None,
-                        "itemName": None,
                     },
                     "title": "Bar",
                     "position": {"x": 0, "y": 0},
@@ -135,8 +125,8 @@ class WorkflowTest(TestCase):
                     "id": "foo",
                     "sourceStageId": "foo",
                     "targetStageId": "bar",
-                    "type": "foo",
-                    "props": {"conditionValue": None},
+                    "type": "task",
+                    "props": {"taskType": None},
                 }
             ],
         }
@@ -155,10 +145,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     }
                 ],
@@ -178,10 +166,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     }
                 ],
@@ -209,10 +195,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     }
                 ],
@@ -233,8 +217,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "foo.py",
                             "path": "foo",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     }
                 ],
@@ -255,10 +237,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     }
                 ],
@@ -279,8 +259,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "bar.py",
                             "path": "bar",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     }
                 ],
@@ -301,10 +279,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     },
                     {
@@ -315,8 +291,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "bar.py",
                             "path": "bar",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     },
                 ],
@@ -334,10 +308,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     },
                     {
@@ -348,8 +320,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "bar.py",
                             "path": "bar",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     },
                 ],
@@ -358,8 +328,8 @@ class WorkflowTest(TestCase):
                         "id": "foo",
                         "sourceStageId": "foo",
                         "targetStageId": "bar",
-                        "type": "foo",
-                        "conditionValue": None,
+                        "type": "task",
+                        "taskType": None,
                     }
                 ],
             }
@@ -377,10 +347,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     },
                     {
@@ -391,8 +359,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "bar.py",
                             "path": "bar",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     },
                 ],
@@ -402,7 +368,7 @@ class WorkflowTest(TestCase):
                         "sourceStageId": "foo",
                         "targetStageId": "bar",
                         "type": "foo",
-                        "conditionValue": None,
+                        "taskType": None,
                     }
                 ],
             }
@@ -428,10 +394,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     },
                     {
@@ -442,8 +406,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "bar.py",
                             "path": "bar",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     },
                 ],
@@ -453,7 +415,7 @@ class WorkflowTest(TestCase):
                         "sourceStageId": "foo",
                         "targetStageId": "bar",
                         "type": "foo",
-                        "conditionValue": None,
+                        "taskType": None,
                     }
                 ],
             }
@@ -470,10 +432,8 @@ class WorkflowTest(TestCase):
                         "title": "Foo",
                         "position": {"x": 0, "y": 0},
                         "props": {
-                            "variableName": None,
                             "path": "foo",
                             "filename": "foo.py",
-                            "itemName": None,
                         },
                     },
                     {
@@ -484,8 +444,6 @@ class WorkflowTest(TestCase):
                         "props": {
                             "filename": "bar.py",
                             "path": "bar",
-                            "variableName": None,
-                            "itemName": None,
                         },
                     },
                 ],

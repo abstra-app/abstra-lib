@@ -41,6 +41,9 @@ from abstra_internals.repositories.project.json_migrations.migration_010 import 
 from abstra_internals.repositories.project.json_migrations.migration_011 import (
     Migration011,
 )
+from abstra_internals.repositories.project.json_migrations.migration_012 import (
+    Migration012,
+)
 from abstra_internals.utils.dot_abstra import CONFIG_FILE_BACKUPS
 
 MIGRATIONS: List[Type[Migration]] = [
@@ -55,6 +58,7 @@ MIGRATIONS: List[Type[Migration]] = [
     Migration009,
     Migration010,
     Migration011,
+    Migration012,
 ]
 
 

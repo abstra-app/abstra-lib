@@ -1,6 +1,6 @@
 import abstra.ai as ai
 import abstra.forms as af
-import abstra.workflows as aw
+from abstra.tasks import send_task
 
 ### 📌 Abstra Forms is the easiest way to create dynamic forms that allow users to interact with your Python script.
 
@@ -53,7 +53,12 @@ rating = af.read_rating(f"Rate this joke's funniness: {generated_joke}", char="�
 
 ### 📌 Abstra Workflows is a powerful tool that allows you to store and share data between different stages of your workflow
 
-# 💡 Use the set_data function to store data that you want to use later on:
-aw.set_data("best_movie", best_movie)
-aw.set_data("interview_opt_in", interview_opt_in)
-aw.set_data("rating", rating)
+# 💡 Use the send_task function to send data to be used in the next stages:
+send_task(
+    "data_collector",
+    {
+        "best_movie": best_movie,
+        "interview_opt_in": interview_opt_in,
+        "rating": rating,
+    },
+)

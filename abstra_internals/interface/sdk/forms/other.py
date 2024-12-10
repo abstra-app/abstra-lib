@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from abstra_internals.controllers.execution_store import ExecutionStore
+from abstra_internals.controllers.sdk_context import SDKContextStore
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.proxy import ReadOnlyProxyDict
 
@@ -16,7 +16,7 @@ def get_user(refresh: bool = False) -> UserClaims:
         Union[UserClaims, None]: User information
     """
 
-    return ExecutionStore.get_by_thread().form_sdk.get_user(force_refresh=refresh)
+    return SDKContextStore.get_by_thread().form_sdk.get_user(force_refresh=refresh)
 
 
 def execute_js(code: str, context: Optional[dict] = None):
@@ -31,7 +31,7 @@ def execute_js(code: str, context: Optional[dict] = None):
         Any: Result of the JavaScript code
     """
 
-    return ExecutionStore.get_by_thread().form_sdk.execute_js(code, context or {})
+    return SDKContextStore.get_by_thread().form_sdk.execute_js(code, context or {})
 
 
 def redirect(url: str, query_params: Optional[dict] = None) -> None:
@@ -45,7 +45,7 @@ def redirect(url: str, query_params: Optional[dict] = None) -> None:
     Returns:
         None
     """
-    ExecutionStore.get_by_thread().form_sdk.redirect(url, query_params)
+    SDKContextStore.get_by_thread().form_sdk.redirect(url, query_params)
 
 
 def get_query_params() -> Dict[str, str]:
@@ -56,7 +56,7 @@ def get_query_params() -> Dict[str, str]:
         Dict[str, str]: Query parameters
     """
 
-    return ExecutionStore.get_by_thread().form_sdk.get_query_params()
+    return SDKContextStore.get_by_thread().form_sdk.get_query_params()
 
 
 # legacy

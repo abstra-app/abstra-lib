@@ -5,7 +5,7 @@ from abstra_internals.repositories.project.json_migrations.migration_011 import 
 )
 
 
-class TestMigration07(TestCase):
+class TestMigration11(TestCase):
     def test_adds_language_to_english(self):
         m = Migration011(
             {

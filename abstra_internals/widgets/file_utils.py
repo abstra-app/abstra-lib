@@ -38,11 +38,13 @@ def upload_widget_file(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> st
 
 
 def download_to_path(url: str) -> pathlib.Path:
-    # circular import
-    from abstra_internals.controllers.execution_store import ExecutionStore
+    # TODO: circular import - god help me
+    from abstra_internals.controllers.sdk_context import (
+        SDKContextStore,
+    )
 
-    execution_id = ExecutionStore.get_by_thread().execution.id
-    save_dir = get_uploads_dir() / execution_id
+    execution = SDKContextStore.get_execution()
+    save_dir = get_uploads_dir() / execution.id
     save_dir.mkdir(parents=True, exist_ok=True)
     save_path = save_dir / url.split("/")[-1]
 

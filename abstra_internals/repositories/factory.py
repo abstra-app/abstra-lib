@@ -58,15 +58,15 @@ from abstra_internals.repositories.roles import (
     ProductionRolesRepository,
     RolesRepository,
 )
-from abstra_internals.repositories.stage_run import (
-    LocalStageRunRepository,
-    ProductionStageRunRepository,
-    StageRunRepository,
-)
 from abstra_internals.repositories.tables import (
     LocalTablesApiHttpClient,
     ProductionTablesApiHttpClient,
     TablesApiHttpClient,
+)
+from abstra_internals.repositories.tasks import (
+    LocalTasksRepository,
+    ProductionTasksRepository,
+    TasksRepository,
 )
 from abstra_internals.repositories.users import (
     LocalUsersRepository,
@@ -81,7 +81,6 @@ class Repositories:
     connectors: ConnectorsRepository
     execution: ExecutionRepository
     mp_context: MPContextReposity
-    stage_run: StageRunRepository
     producer: ProducerRepository
     tables: TablesApiHttpClient
     email: EmailRepository
@@ -91,7 +90,7 @@ class Repositories:
     jwt: JWTRepository
     kv: KVRepository
     roles: RolesRepository
-    stage_run: StageRunRepository
+    tasks: TasksRepository
     tables: TablesApiHttpClient
     users: UsersRepository
     editor_jwt: EditorJWTRepository
@@ -102,9 +101,9 @@ def get_editor_repositories():
 
     return Repositories(
         execution=LocalExecutionRepository(mp_context.get_context()),
-        stage_run=LocalStageRunRepository(mp_context.get_context()),
         producer=LocalProducerRepository(mp_context.get_context()),
         connectors=LocalConnectorsRepository(CLOUD_API_CLI_URL),
+        tasks=LocalTasksRepository(mp_context.get_context()),
         tables=LocalTablesApiHttpClient(CLOUD_API_CLI_URL),
         email=LocalEmailRepository(CLOUD_API_CLI_URL),
         roles=LocalRolesRepository(CLOUD_API_CLI_URL),
@@ -128,10 +127,10 @@ def get_prodution_app_repositories():
         connectors=ProductionConnectorsRepository(SIDECAR_URL),
         execution=ProductionExecutionRepository(SIDECAR_URL),
         tables=ProductionTablesApiHttpClient(SIDECAR_URL),
-        stage_run=ProductionStageRunRepository(SIDECAR_URL),
         email=ProductionEmailRepository(SIDECAR_URL),
         roles=ProductionRolesRepository(SIDECAR_URL),
         users=ProductionUsersRepository(SIDECAR_URL),
+        tasks=ProductionTasksRepository(SIDECAR_URL),
         ai=ProductionAiApiHttpClient(SIDECAR_URL),
         jwt=ProductionJWTRepository(SIDECAR_URL),
         kv=ProductionKVRepository(SIDECAR_URL),

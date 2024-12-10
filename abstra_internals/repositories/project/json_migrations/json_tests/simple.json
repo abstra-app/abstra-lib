@@ -1,0 +1,82 @@
+{
+    "workspace": {
+      "name": "Workspace",
+      "language": "en",
+      "theme": null,
+      "logo_url": "./logo.png",
+      "favicon_url": "./favicon.ico",
+      "brand_name": "Abstra Project",
+      "main_color": null,
+      "font_family": null,
+      "font_color": null
+    },
+    "kanban": {
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    },
+    "home": {
+      "access_control": {
+        "is_public": false,
+        "required_roles": []
+      }
+    },
+    "jobs": [],
+    "hooks": [],
+    "forms": [
+      {
+        "id": "d3b955cd-ed0a-4c4f-a33b-728bfefa1438",
+        "path": "form1",
+        "title": "form1",
+        "is_initial": true,
+        "auto_start": false,
+        "allow_restart": false,
+        "end_message": null,
+        "start_message": null,
+        "error_message": null,
+        "welcome_title": null,
+        "timeout_message": null,
+        "start_button_text": null,
+        "restart_button_text": null,
+        "file": "form1.py",
+        "workflow_position": [
+          315,
+          285
+        ],
+        "transitions": [
+          {
+            "target_id": "64648fac-0263-4a7e-8011-80831ecbea54",
+            "target_type": "scripts",
+            "type": "forms:finished",
+            "id": "6epmzwe",
+            "condition_value": null
+          }
+        ],
+        "notification_trigger": {
+          "variable_name": "assignee_emails",
+          "enabled": false
+        },
+        "access_control": {
+          "is_public": false,
+          "required_roles": []
+        }
+      }
+    ],
+    "scripts": [
+      {
+        "id": "64648fac-0263-4a7e-8011-80831ecbea54",
+        "file": "script1.py",
+        "title": "script1",
+        "is_initial": false,
+        "workflow_position": [
+          645,
+          285
+        ],
+        "transitions": []
+      }
+    ],
+    "iterators": [],
+    "conditions": [],
+    "version": "11.0"
+}

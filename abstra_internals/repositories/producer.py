@@ -9,7 +9,6 @@ from abstra_internals.environment import (
     RABBITMQ_EXECUTION_QUEUE,
 )
 from abstra_internals.repositories.multiprocessing import MPContext
-from abstra_internals.utils import serialize
 
 
 @dataclass
@@ -57,7 +56,7 @@ class ProductionProducerRepository(ProducerRepository):
             with connection.channel() as channel:
                 channel.queue_declare(queue=RABBITMQ_EXECUTION_QUEUE, durable=True)
                 channel.basic_publish(
-                    body=serialize(preexecution.__dict__),
+                    body=preexecution.model_dump_json(),
                     routing_key=RABBITMQ_EXECUTION_QUEUE,
                     exchange=RABBITMQ_DEFAUT_EXCHANGE,
                     properties=self.props,

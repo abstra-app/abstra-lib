@@ -1,7 +1,9 @@
-import abstra.workflows as aw
+from abstra.tasks import get_trigger_task, send_task
 
-# Use Scripts to run Python code after any workflow Stage
+# You can get the task that triggered this script execution
+task = get_trigger_task()
 
-# You can store data in the current thread,
-# so it will be available in the next stages
-aw.set_data("script_output", "Some data from the script!")
+task.complete()
+
+# And also send tasks to the next stages of your workflow
+send_task("confirmation", {"message": "Your request was approved"})

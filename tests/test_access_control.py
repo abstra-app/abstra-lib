@@ -16,14 +16,6 @@ class TestAccessControl(TestCase):
     def tearDown(self) -> None:
         clear_dir(self.root)
 
-    def test_non_public_kanban(self):
-        project = ProjectRepository.load()
-
-        self.assertEqual(
-            project.kanban.access_control.as_dict,
-            {"is_public": False, "required_roles": []},
-        )
-
     def test_defaults_on_create(self):
         project = ProjectRepository.load()
 
@@ -78,17 +70,6 @@ class TestAccessControl(TestCase):
         ProjectRepository.save(project)
         project = ProjectRepository.load()
 
-        project.update_access_controls(
-            [
-                {"id": "kanban", "is_public": False, "required_roles": ["admin"]},
-            ]
-        )
-
-        self.assertEqual(
-            project.kanban.access_control.as_dict,
-            {"is_public": False, "required_roles": ["admin"]},
-        )
-
         self.assertEqual(
             project.forms[0].access_control.as_dict,
             {"is_public": False, "required_roles": []},
@@ -96,11 +77,6 @@ class TestAccessControl(TestCase):
 
         ProjectRepository.save(project)
         project = ProjectRepository.load()
-
-        self.assertEqual(
-            project.kanban.access_control.as_dict,
-            {"is_public": False, "required_roles": ["admin"]},
-        )
 
         self.assertEqual(
             project.forms[0].access_control.as_dict,

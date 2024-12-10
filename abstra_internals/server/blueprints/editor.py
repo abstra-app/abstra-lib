@@ -5,19 +5,20 @@ from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
 from abstra_internals.server.routes import env_vars as envvars_router
+from abstra_internals.server.routes import executions as executions_router
 from abstra_internals.server.routes import forms as forms_router
 from abstra_internals.server.routes import hooks as hooks_router
 from abstra_internals.server.routes import jobs as jobs_router
-from abstra_internals.server.routes import kanban as kanban_router
 from abstra_internals.server.routes import linters as linters_router
 from abstra_internals.server.routes import login as login_router
+from abstra_internals.server.routes import logs as logs_router
 from abstra_internals.server.routes import pysa as pysa_router
 from abstra_internals.server.routes import requirements as requirements_router
 from abstra_internals.server.routes import resources as resources_router
 from abstra_internals.server.routes import roles as roles_router
 from abstra_internals.server.routes import scripts as scripts_router
-from abstra_internals.server.routes import stage_runs as stage_runs_router
 from abstra_internals.server.routes import stdio as stdio_router
+from abstra_internals.server.routes import tasks as tasks_router
 from abstra_internals.server.routes import web_editor as web_editor_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.routes import workspace as workspace_router
@@ -27,12 +28,6 @@ from abstra_internals.usage import editor_usage
 
 def __get_api_bp(controller: MainController):
     bp = flask.Blueprint("editor_api", __name__)
-
-    kanban_bp = kanban_router.get_editor_bp(controller)
-    bp.register_blueprint(kanban_bp, url_prefix="/kanban")
-
-    stage_run_bp = stage_runs_router.get_editor_bp(controller)
-    bp.register_blueprint(stage_run_bp, url_prefix="/stage_runs")
 
     workspace_bp = workspace_router.get_editor_bp(controller)
     bp.register_blueprint(workspace_bp, url_prefix="/workspace")
@@ -48,6 +43,12 @@ def __get_api_bp(controller: MainController):
 
     scripts_bp = scripts_router.get_editor_bp(controller)
     bp.register_blueprint(scripts_bp, url_prefix="/scripts")
+
+    executions_bp = executions_router.get_editor_bp(controller)
+    bp.register_blueprint(executions_bp, url_prefix="/executions")
+
+    logs_bp = logs_router.get_editor_bp(controller)
+    bp.register_blueprint(logs_bp, url_prefix="/logs")
 
     workflows_bp = workflows_router.get_editor_bp(controller)
     bp.register_blueprint(workflows_bp, url_prefix="/workflows")
@@ -84,6 +85,9 @@ def __get_api_bp(controller: MainController):
 
     stdio_bp = stdio_router.get_editor_bp(controller)
     bp.register_blueprint(stdio_bp, url_prefix="/stdio")
+
+    tasks_bp = tasks_router.get_editor_bp(controller)
+    bp.register_blueprint(tasks_bp, url_prefix="/tasks")
 
     guard = web_editor_router.get_editor_api_guard(controller)
     bp.before_request(guard)

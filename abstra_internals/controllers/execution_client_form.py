@@ -5,7 +5,7 @@ import flask_sock
 from abstra_internals.contract import forms_contract
 from abstra_internals.contract.forms import BrowserMessageTypes
 from abstra_internals.controllers.execution_client import ExecutionClient
-from abstra_internals.entities.execution import RequestContext
+from abstra_internals.entities.execution_context import FormContext
 from abstra_internals.utils import deserialize, serialize
 
 
@@ -14,13 +14,15 @@ class ClientAbandoned(Exception):
 
 
 class FormClient(ExecutionClient):
+    context: FormContext
+
     def __init__(
         self,
         ws: flask_sock.Server,
-        request_context: RequestContext,
+        context: FormContext,
         production_mode: bool,
     ) -> None:
-        self._request_context = request_context
+        self.context = context
         self._production_mode = production_mode
         self._ws = ws
 
@@ -95,7 +97,7 @@ class FormClient(ExecutionClient):
         )
 
     def get_query_params(self) -> Dict[str, str]:
-        return self._request_context.get("query_params", {})
+        return self.context.request.query_params
 
     def request_auth(self, refresh: bool = False):
         self._user_code_send(
@@ -127,7 +129,7 @@ class FormClient(ExecutionClient):
     def next_message(self) -> Dict:
         return self._wait_for_message("form:page-response", "form:user-event")
 
-    ## Target contrioller
+    ## Target controller
 
     def handle_start(self, execution_id: str):
         self._wait_for_message("execution:start")
@@ -144,13 +146,3 @@ class FormClient(ExecutionClient):
         self._send(
             forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
         )
-
-    # Outside target
-
-    ## Execution controller - anomaly
-
-    def handle_unset_thread(self):
-        self.handle_failure(Exception("Thread was unset"))
-
-    def handle_lock_failed(self, status: str) -> None:
-        self._send(forms_contract.ExecutionLockFailedMessage())

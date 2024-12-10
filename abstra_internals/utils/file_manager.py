@@ -1,18 +1,11 @@
 import json
 from pathlib import Path
-from typing import Generic, List, Optional, Protocol, Type, TypeVar
+from typing import Generic, List, Optional, Type, TypeVar
 
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.settings import Settings
-
-
-class Serializable(Protocol):
-    def to_dto(self) -> dict: ...
-
-    @staticmethod
-    def from_dto(dto: dict) -> "Serializable": ...
-
+from abstra_internals.utils.serializable import Serializable
 
 T = TypeVar("T", bound=Serializable)
 
@@ -32,7 +25,7 @@ class FileManager(Generic[T]):
             file_path = self._get_file_path(id)
 
             with file_path.open("w", encoding="utf-8") as f:
-                json.dump(data.to_dto(), f, indent=4)
+                f.write(data.dump_json())
 
     def load_all(self) -> List[T]:
         with self.lock:
@@ -68,7 +61,7 @@ class FileManager(Generic[T]):
             with file_path.open("r", encoding="utf-8") as f:
                 try:
                     dto = json.load(f)
-                    return self.model.from_dto(dto)
+                    return self.model(**dto)
                 except Exception as e:
                     AbstraLogger.capture_exception(e)
                     self.delete(id)

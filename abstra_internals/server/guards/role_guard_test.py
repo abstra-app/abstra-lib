@@ -113,21 +113,12 @@ class TestRequirementsApi(TestCase):
         project.forms.append(protected_form)
         project.forms.append(private_form)
 
-        project.kanban.access_control = AccessSettings(
-            is_public=False, required_roles=[WORKFLOW_VIEWER]
-        )
-
         ProjectRepository.save(project)
 
         guard = Guard(repo, enabled=True, auth_decoder=test_auth_decoder)
 
         app = Flask(__name__)
         bp = Blueprint("dummy", __name__)
-
-        @bp.route("/kanban")
-        @guard.by(StageIdSelector("kanban"))
-        def kanban():
-            return {"message": "OK"}
 
         @bp.route("/protected_form_id")
         @guard.by(StageIdSelector("protected_form_id"))
@@ -151,7 +142,6 @@ class TestRequirementsApi(TestCase):
             {
                 "email": TESTER_EMAIL,
                 "test_routes": {
-                    "/kanban": "200 OK",
                     "/protected_form_id": "200 OK",
                     "/_pages/public_form": "200 OK",
                     "/_pages/protected_form": "200 OK",
@@ -164,7 +154,6 @@ class TestRequirementsApi(TestCase):
             {
                 "email": ADMIN_EMAIL,
                 "test_routes": {
-                    "/kanban": "200 OK",
                     "/protected_form_id": "200 OK",
                     "/_pages/public_form": "200 OK",
                     "/_pages/protected_form": "200 OK",
@@ -177,7 +166,6 @@ class TestRequirementsApi(TestCase):
             {
                 "email": USER_EMAIL,
                 "test_routes": {
-                    "/kanban": "403 FORBIDDEN",
                     "/protected_form_id": "200 OK",
                     "/_pages/public_form": "200 OK",
                     "/_pages/protected_form": "200 OK",
@@ -190,7 +178,6 @@ class TestRequirementsApi(TestCase):
             {
                 "email": NOT_A_USER_EMAIL,
                 "test_routes": {
-                    "/kanban": "403 FORBIDDEN",
                     "/protected_form_id": "403 FORBIDDEN",
                     "/_pages/public_form": "200 OK",
                     "/_pages/protected_form": "403 FORBIDDEN",
@@ -212,7 +199,6 @@ class TestRequirementsApi(TestCase):
 
         ## Logged off user
         test_matrix = {
-            "/kanban": "401 UNAUTHORIZED",
             "/protected_form_id": "401 UNAUTHORIZED",
             "/_pages/public_form": "200 OK",
             "/_pages/protected_form": "401 UNAUTHORIZED",
@@ -323,10 +309,6 @@ class TestRequirementsApi(TestCase):
         project.forms.append(protected_form)
         project.forms.append(private_form)
 
-        project.kanban.access_control = AccessSettings(
-            is_public=False, required_roles=[WORKFLOW_VIEWER]
-        )
-
         ProjectRepository.save(project)
 
         guard = Guard(repo, enabled=True, auth_decoder=test_auth_decoder)
@@ -337,7 +319,6 @@ class TestRequirementsApi(TestCase):
                 "email": TESTER_EMAIL,
                 "accessible_stages_ids": [
                     "home",
-                    "kanban",
                     "public_form_id",
                     "protected_form_id",
                 ],
@@ -346,7 +327,6 @@ class TestRequirementsApi(TestCase):
                 "email": ADMIN_EMAIL,
                 "accessible_stages_ids": [
                     "home",
-                    "kanban",
                     "public_form_id",
                     "protected_form_id",
                     "private_form_id",

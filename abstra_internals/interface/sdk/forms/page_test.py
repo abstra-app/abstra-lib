@@ -1,30 +1,33 @@
 from abstra.forms import ListItemSchema, Page
 from abstra_internals.controllers.execution_client_form import FormClient
-from abstra_internals.controllers.execution_store import ExecutionStore
-from abstra_internals.entities.execution import Execution, RequestContext
+from abstra_internals.controllers.sdk_context import (
+    SDKContext,
+)
+from abstra_internals.entities.execution import Execution
+from abstra_internals.entities.execution_context import FormContext, Request
 from tests.fixtures import BaseTest
 
 
 class TestPage(BaseTest):
     def setUp(self) -> None:
         super().setUp()
-        request_context = RequestContext(
-            body="", query_params={}, headers={}, method="GET"
+        form_context = FormContext(
+            request=Request(body="", query_params={}, headers={}, method="GET"),
         )
+
         self.client = FormClient(
-            request_context=request_context,
+            context=form_context,
             production_mode=False,
             ws=None,  # type: ignore
         )
         execution = Execution.create(
-            request_context=request_context,
-            stage_run_id="mock_sr_id",
+            context=form_context,
             stage_id="mock_stage_id",
         )
-        ExecutionStore.set(execution, self.client, self.repositories)
+        self.context = SDKContext(execution, self.client, self.repositories).__enter__()
 
     def tearDown(self) -> None:
-        ExecutionStore.clear()
+        self.context.__exit__(None, None, None)
         super().tearDown()
 
     def test_reactive_list_dropdown(self):
