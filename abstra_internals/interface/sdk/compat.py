@@ -60,7 +60,9 @@ def use_legacy_threads(mode: Literal["scripts", "forms", "jobs", "hooks"]):
         pending_tasks = get_tasks()
         if len(pending_tasks) > 0:
             task = next(
-                t for t in pending_tasks if t["_id"] == url_params["abstra-run-id"]
+                t
+                for t in pending_tasks
+                if t.get_payload().get("_id") == url_params["abstra-run-id"]
             )
             execution.context.legacy_thread_data = task.get_payload()
 
