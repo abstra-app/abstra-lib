@@ -17,6 +17,7 @@ from abstra_internals.linter.rules.missing_packages_in_requirements import (
 from abstra_internals.linter.rules.new_version_of_abstra_available import (
     NewVersionOfAbstraAvailable,
 )
+from abstra_internals.linter.rules.psycopg2 import Psycopg2MustBeBinary
 from abstra_internals.linter.rules.syntax_errors import SyntaxErrors
 from abstra_internals.linter.rules.venv_in_bundle import VenvInBundle
 
@@ -31,4 +32,5 @@ rules: List[LinterRule] = [
     MissingEnv(),
     NewVersionOfAbstraAvailable(),
     ConflictingPath(),
+    Psycopg2MustBeBinary(),
 ]
