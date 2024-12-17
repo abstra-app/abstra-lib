@@ -15,6 +15,7 @@ from abstra_internals.utils.json import to_json_serializable
 class WorkflowModule(_ModuleType):
     set_data: Callable[[str, Any], None]
     get_data: Callable[[str], Any]
+    set_title: Callable[[str], None]
 
 
 def _set_data(varname: str, value: Any) -> None:
@@ -29,6 +30,10 @@ def _get_data(varname: str) -> Any:
         return value
     else:
         raise KeyError(f'Variable "{varname}" was not set with set_data before')
+
+
+def _set_title(title: str):
+    _set_data("_thread_title", title)
 
 
 def use_legacy_threads(mode: Literal["scripts", "forms", "jobs", "hooks"]):
@@ -73,6 +78,7 @@ def use_legacy_threads(mode: Literal["scripts", "forms", "jobs", "hooks"]):
 
     workflow.set_data = _set_data
     workflow.get_data = _get_data
+    workflow.set_title = _set_title
 
     sys.modules["abstra.workflows"] = workflow
 
