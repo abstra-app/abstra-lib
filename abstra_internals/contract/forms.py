@@ -31,16 +31,7 @@ class ValidationResult(TypedDict):
 
 ### ExecutionMessages
 
-PythonExecutionMessageType = Literal[
-    "execution:started", "execution:ended", "execution:lock-failed"
-]
-
-
-class ExecutionLockFailedMessage(Message):
-    type = "execution:lock-failed"
-
-    def __init__(self):
-        super().__init__({}, True)
+PythonExecutionMessageType = Literal["execution:started", "execution:ended"]
 
 
 class ExecutionStartedMessage(Message):
