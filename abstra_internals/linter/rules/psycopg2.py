@@ -22,8 +22,8 @@ class Psycopg2FoundWithoutBinary(LinterIssue):
 
 
 class Psycopg2MustBeBinary(LinterRule):
-    label: str = "The dependency psycopg2 must be in its binrary form"
-    type: str = "info"
+    label: str = "The dependency psycopg2 must be in its binary form"
+    type: str = "error"
 
     def find_issues(self) -> List[LinterIssue]:
         requirements = RequirementsRepository.load()
