@@ -448,8 +448,6 @@ def silent_traverse_code(
 def traverse_code(
     path: Path, raise_on_syntax_errors=False
 ) -> Generator[Path, None, None]:
-    yield path
-
     try:
         code = path.read_text(encoding="utf-8")
         parsed = ast.parse(code)
@@ -474,6 +472,8 @@ def traverse_code(
     except Exception as e:
         if raise_on_syntax_errors and isinstance(e, SyntaxError):
             raise e
+
+    yield path
 
 
 def get_tmp_upload_dir():
