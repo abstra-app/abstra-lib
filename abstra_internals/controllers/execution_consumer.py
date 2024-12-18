@@ -45,6 +45,7 @@ def PreExecController(
                 worker_uuid=worker_uuid,
                 arbiter_uuid=arbiter_uuid,
                 root_path=Settings.root_path,
+                server_port=Settings.server_port,
                 request=msg.preexecution.context,
                 environment=AbstraLogger.environment,
             ),

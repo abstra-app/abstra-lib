@@ -14,6 +14,7 @@ from abstra_internals.stdio_patcher import StdioPatcher
 def ExecutionProcess(
     *,
     root_path: str,
+    server_port: int,
     worker_uuid: str,
     arbiter_uuid: str,
     stage: Stage,
@@ -22,6 +23,7 @@ def ExecutionProcess(
     request: Optional[ClientContext] = None,
 ):
     Settings.set_root_path(root_path)
+    Settings.set_server_port(server_port, force=True)
     AbstraLogger.init(environment)
 
     set_WORKER_UUID(worker_uuid)

@@ -29,7 +29,7 @@ class SettingsController(object):
         SettingsController._root_path = root_path
 
     @staticmethod
-    def set_server_port(server_port: typing.Union[int, str, None]):
+    def set_server_port(server_port: typing.Union[int, str, None], force=False):
         port = 3000
         if isinstance(server_port, int):
             port = server_port
@@ -38,8 +38,10 @@ class SettingsController(object):
         elif DEFAULT_PORT:
             port = int(DEFAULT_PORT)
 
-        free_port = get_free_port(port)
-        SettingsController._server_port = free_port
+        if not force:
+            port = get_free_port(port)
+
+        SettingsController._server_port = port
 
     @property
     def root_path(self) -> pathlib.Path:
