@@ -16,6 +16,7 @@ from abstra_internals.entities.execution_context import (
 )
 from abstra_internals.environment import (
     BUILD_ID,
+    EDITOR_MODE,
     IS_PRODUCTION,
     OIDC_AUTHORITY,
     OIDC_CLIENT_ID,
@@ -92,6 +93,7 @@ def get_player_bp(controller: MainController):
                 "show_watermark": SHOW_WATERMARK,
                 "oidc_authority": OIDC_AUTHORITY(),
                 "oidc_client_id": OIDC_CLIENT_ID(),
+                "editor_mode": EDITOR_MODE,
             }
         )
 
