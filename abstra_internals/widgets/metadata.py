@@ -1538,15 +1538,10 @@ metadata = {
         "description": "Allows for a fully customizable widget with custom HTML, CSS, and JS.",
         "events": [
             {
-                "key": "custom-event",
-                "description": "Function or expression to be run when custom event is triggered",
-                "payloadSchema": [],
-            },
-            {
                 "key": "update:value",
                 "description": "Function or expression to be run when the input value changes",
                 "payloadSchema": [],
-            },
+            }
         ],
         "pythonAPI": {
             "name": "read_custom",
@@ -1601,6 +1596,13 @@ metadata = {
                     "argName": "height",
                     "description": "The widget's height",
                     "typeName": "int",
+                    "isKwarg": True,
+                    "default": "None",
+                },
+                {
+                    "argName": "change_event",
+                    "description": "The function to call whenever `changeEvent`is called",
+                    "typeName": "Callable",
                     "isKwarg": True,
                     "default": "None",
                 },

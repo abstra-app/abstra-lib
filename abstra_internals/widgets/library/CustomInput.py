@@ -18,6 +18,7 @@ class CustomInput(Input):
         self.js = props.get('js', '')
         self.value = props.get('initial_value', None)
         self.full_width = props.get('full_width', False)
+        self.change_event = props.get('change_event', None)
 
     def serialize_value(self) ->Any:
         return self.value
@@ -30,4 +31,7 @@ class CustomInput(Input):
             self.errors}
 
     def parse_value(self, value) ->Any:
-        return value
+        if self.change_event is not None:
+            self.value = self.change_event(value)
+        else:
+            self.value = value
