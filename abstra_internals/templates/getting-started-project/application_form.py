@@ -1,6 +1,9 @@
+from typing import List, Union
+
 import abstra.ai as ai
 import abstra.forms as af
 from abstra.tasks import send_task
+from abstra_internals.widgets.response_types import FileResponse
 
 ### 📌 Abstra Forms is the easiest way to create dynamic forms that allow users to interact with your Python script.
 
@@ -38,13 +41,24 @@ object_photo = af.read_camera(
     "Quick, take a photo of the object on your left. Do it now! 📸"
 )
 
+
+def process_photo(photo: Union[FileResponse, List[FileResponse]]) -> FileResponse:
+    if isinstance(photo, list):
+        if len(photo) > 0:
+            return photo[0]
+        else:
+            exit("No photo was submitted.")
+    else:
+        return photo
+
+
 ### 📌 Abstra AI is a powerful tool that allows you to prompt an AI model to extract data from images, generate text and more
 
 # 💡 Use the prompt function to send your prompt, attach files, add instructions and specify the response format:
 generated_joke = ai.prompt(
     [
         "Write the punchline that Michael Scott from Dunder Mifflin would say if he saw this object on someone's desk in their office. Make sure the joke includes a quirky, slightly deprecating derogatory observation.",
-        object_photo,
+        process_photo(object_photo),
     ],
     instructions="Only the punchline, and keep it office-friendly!",
 )

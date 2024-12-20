@@ -1,7 +1,9 @@
 
-from typing import Any, Dict, List, TYPE_CHECKING
+from typing import Any, Dict, List, Union, TYPE_CHECKING
 from abstra_internals.widgets.types import AbstraOption
+from abstra_internals.widgets.response_types import FileResponse, PhoneResponse, AppointmentSlot
 from abstra_internals.interface.sdk.forms.page import Page
+import datetime
 
 if TYPE_CHECKING:
     from pandas import DataFrame
@@ -10,7 +12,7 @@ def get_single_value(answer: Dict):
     return list(answer.values())[0]
 
 
-def read_appointment(label: str, **kwargs):
+def read_appointment(label: str, **kwargs) -> AppointmentSlot:
   
     """A calendar slot selection that allows users to select a time slot for an appointment.
 
@@ -36,7 +38,7 @@ def read_appointment(label: str, **kwargs):
     return get_single_value(Page().read_appointment(label, **kwargs).run(button_text))
 
 
-def read_camera(label: str, **kwargs):
+def read_camera(label: str, **kwargs) -> Union[FileResponse, List[FileResponse]]:
   
     """Captures and uploads a photo using the user's camera.
 
@@ -62,7 +64,7 @@ def read_camera(label: str, **kwargs):
     return get_single_value(Page().read_camera(label, **kwargs).run(button_text))
 
 
-def read_cards(label: str, options: list, **kwargs):
+def read_cards(label: str, options: list, **kwargs) -> Union[list, Any]:
   
     """Presents options as cards for the user. Cards may be selectable.
 
@@ -92,7 +94,7 @@ def read_cards(label: str, options: list, **kwargs):
     return get_single_value(Page().read_cards(label, options, **kwargs).run(button_text))
 
 
-def read_checkbox(label: str, **kwargs):
+def read_checkbox(label: str, **kwargs) -> bool:
   
     """Enables a selection through a single checkbox interaction.
 
@@ -117,7 +119,7 @@ def read_checkbox(label: str, **kwargs):
     return get_single_value(Page().read_checkbox(label, **kwargs).run(button_text))
 
 
-def read_checklist(label: str, options: List[AbstraOption], **kwargs):
+def read_checklist(label: str, options: List[AbstraOption], **kwargs) -> List[str]:
   
     """Displays a checklist allowing multiple item selections.
 
@@ -145,7 +147,7 @@ def read_checklist(label: str, options: List[AbstraOption], **kwargs):
     return get_single_value(Page().read_checklist(label, options, **kwargs).run(button_text))
 
 
-def read_cnpj(label: str, **kwargs):
+def read_cnpj(label: str, **kwargs) -> str:
   
     """CNPJ number input with validation and masking.
 
@@ -172,7 +174,7 @@ def read_cnpj(label: str, **kwargs):
     return get_single_value(Page().read_cnpj(label, **kwargs).run(button_text))
 
 
-def read_code(label: str, **kwargs):
+def read_code(label: str, **kwargs) -> str:
   
     """Accepts code input with syntax highlighting
 
@@ -198,7 +200,7 @@ def read_code(label: str, **kwargs):
     return get_single_value(Page().read_code(label, **kwargs).run(button_text))
 
 
-def read_cpf(label: str, **kwargs):
+def read_cpf(label: str, **kwargs) -> str:
   
     """CPF number input with validation and masking.
 
@@ -225,7 +227,7 @@ def read_cpf(label: str, **kwargs):
     return get_single_value(Page().read_cpf(label, **kwargs).run(button_text))
 
 
-def read_currency(label: str, **kwargs):
+def read_currency(label: str, **kwargs) -> float:
   
     """Enables monetary value input with currency formatting.
 
@@ -254,7 +256,7 @@ def read_currency(label: str, **kwargs):
     return get_single_value(Page().read_currency(label, **kwargs).run(button_text))
 
 
-def read_custom(html_body: str, **kwargs):
+def read_custom(html_body: str, **kwargs) -> Any:
   
     """Allows for a fully customizable widget with custom HTML, CSS, and JS.
 
@@ -281,7 +283,7 @@ def read_custom(html_body: str, **kwargs):
     return get_single_value(Page().read_custom(html_body, **kwargs).run(button_text))
 
 
-def read_date(label: str, **kwargs):
+def read_date(label: str, **kwargs) -> datetime.date:
   
     """Provides a date picker with calendar interface.
 
@@ -306,7 +308,7 @@ def read_date(label: str, **kwargs):
     return get_single_value(Page().read_date(label, **kwargs).run(button_text))
 
 
-def read_dropdown(label: str, options: List[AbstraOption], **kwargs):
+def read_dropdown(label: str, options: List[AbstraOption], **kwargs) -> str:
   
     """Provides a dropdown menu for single or multiple selections.
 
@@ -336,7 +338,7 @@ def read_dropdown(label: str, options: List[AbstraOption], **kwargs):
     return get_single_value(Page().read_dropdown(label, options, **kwargs).run(button_text))
 
 
-def read_email(label: str, **kwargs):
+def read_email(label: str, **kwargs) -> str:
   
     """ Collects and validates an email address.
 
@@ -363,7 +365,7 @@ def read_email(label: str, **kwargs):
     return get_single_value(Page().read_email(label, **kwargs).run(button_text))
 
 
-def read_file(label: str, **kwargs):
+def read_file(label: str, **kwargs) -> Union[FileResponse, List[FileResponse]]:
   
     """Enables file upload via file explorer.
 
@@ -393,7 +395,7 @@ def read_file(label: str, **kwargs):
     return get_single_value(Page().read_file(label, **kwargs).run(button_text))
 
 
-def read_image(label: str, **kwargs):
+def read_image(label: str, **kwargs) -> Union[FileResponse, List[FileResponse]]:
   
     """Allows for image file uploads with preview and validation.
 
@@ -420,7 +422,7 @@ def read_image(label: str, **kwargs):
     return get_single_value(Page().read_image(label, **kwargs).run(button_text))
 
 
-def read_list(item_schema: Any, **kwargs):
+def read_list(item_schema: Any, **kwargs) -> list:
   
     """Collects a dynamic list of values based on a specified schema.
 
@@ -448,7 +450,7 @@ def read_list(item_schema: Any, **kwargs):
     return get_single_value(Page().read_list(item_schema, **kwargs).run(button_text))
 
 
-def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
+def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs) -> Union[list, Any]:
   
     """Offers multiple choice selections with single or multi-select options.
 
@@ -477,7 +479,7 @@ def read_multiple_choice(label: str, options: List[AbstraOption], **kwargs):
     return get_single_value(Page().read_multiple_choice(label, options, **kwargs).run(button_text))
 
 
-def read_nps(label: str, **kwargs):
+def read_nps(label: str, **kwargs) -> int:
   
     """Captures Net Promoter Score feedback with a 0-10 rating scale.
 
@@ -506,7 +508,7 @@ def read_nps(label: str, **kwargs):
     return get_single_value(Page().read_nps(label, **kwargs).run(button_text))
 
 
-def read_number(label: str, **kwargs):
+def read_number(label: str, **kwargs) -> float:
   
     """Collects numeric input with optional min/max limits.
 
@@ -534,7 +536,7 @@ def read_number(label: str, **kwargs):
     return get_single_value(Page().read_number(label, **kwargs).run(button_text))
 
 
-def read_number_slider(label: str, **kwargs):
+def read_number_slider(label: str, **kwargs) -> float:
   
     """Provides a slider for selecting numerical values within a range.
 
@@ -562,7 +564,7 @@ def read_number_slider(label: str, **kwargs):
     return get_single_value(Page().read_number_slider(label, **kwargs).run(button_text))
 
 
-def read_pandas_row_selection(df: "DataFrame", **kwargs):
+def read_pandas_row_selection(df: "DataFrame", **kwargs) -> list:
   
     """Enables selection of rows from a displayed pandas DataFrame table.
 
@@ -593,7 +595,7 @@ def read_pandas_row_selection(df: "DataFrame", **kwargs):
     return get_single_value(Page().read_pandas_row_selection(df, **kwargs).run(button_text))
 
 
-def read_password(label: str, **kwargs):
+def read_password(label: str, **kwargs) -> str:
   
     """A password field, including strength validation options.
 
@@ -627,7 +629,7 @@ def read_password(label: str, **kwargs):
     return get_single_value(Page().read_password(label, **kwargs).run(button_text))
 
 
-def read_phone(label: str, **kwargs):
+def read_phone(label: str, **kwargs) -> PhoneResponse:
   
     """A phone inputs with country code and national number.
 
@@ -654,7 +656,7 @@ def read_phone(label: str, **kwargs):
     return get_single_value(Page().read_phone(label, **kwargs).run(button_text))
 
 
-def read_rating(label: str, **kwargs):
+def read_rating(label: str, **kwargs) -> float:
   
     """Collects user feedback with emoji icons.
 
@@ -681,7 +683,7 @@ def read_rating(label: str, **kwargs):
     return get_single_value(Page().read_rating(label, **kwargs).run(button_text))
 
 
-def read_richtext(label: str, **kwargs):
+def read_richtext(label: str, **kwargs) -> str:
   
     """Offers a rich text editor for formatted textual input.
 
@@ -707,7 +709,7 @@ def read_richtext(label: str, **kwargs):
     return get_single_value(Page().read_richtext(label, **kwargs).run(button_text))
 
 
-def read_tag(label: str, **kwargs):
+def read_tag(label: str, **kwargs) -> List[str]:
   
     """Enables input of tags or keywords with autocomplete suggestions.
 
@@ -733,7 +735,7 @@ def read_tag(label: str, **kwargs):
     return get_single_value(Page().read_tag(label, **kwargs).run(button_text))
 
 
-def read(label: str, **kwargs):
+def read(label: str, **kwargs) -> str:
   
     """Collects plain text input with customizable placeholders and validation.
 
@@ -762,7 +764,7 @@ def read(label: str, **kwargs):
     return get_single_value(Page().read(label, **kwargs).run(button_text))
 
 
-def read_textarea(label: str, **kwargs):
+def read_textarea(label: str, **kwargs) -> str:
   
     """Provides a text area for multi-line text input.
 
@@ -788,7 +790,7 @@ def read_textarea(label: str, **kwargs):
     return get_single_value(Page().read_textarea(label, **kwargs).run(button_text))
 
 
-def read_time(label: str, **kwargs):
+def read_time(label: str, **kwargs) -> datetime.time:
   
     """Allows selection of a specific time.
 
@@ -814,7 +816,7 @@ def read_time(label: str, **kwargs):
     return get_single_value(Page().read_time(label, **kwargs).run(button_text))
 
 
-def read_toggle(label: str, **kwargs):
+def read_toggle(label: str, **kwargs) -> bool:
   
     """Offers a toggle switch between two defined options.
 
@@ -841,7 +843,7 @@ def read_toggle(label: str, **kwargs):
     return get_single_value(Page().read_toggle(label, **kwargs).run(button_text))
 
 
-def read_video(label: str, **kwargs):
+def read_video(label: str, **kwargs) -> Union[FileResponse, List[FileResponse]]:
   
     """Facilitates video file uploads with preview and size validation.
 

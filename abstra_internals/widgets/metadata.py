@@ -607,7 +607,7 @@ metadata = {
             ],
             "returns": [
                 {
-                    "typeName": "Union[list, any]",
+                    "typeName": "Union[list, Any]",
                     "typeDescription": "The options/option selected by the user",
                 }
             ],
@@ -2563,7 +2563,7 @@ metadata = {
             ],
             "returns": [
                 {
-                    "typeName": "Union[list, any]",
+                    "typeName": "Union[list, Any]",
                     "typeDescription": "The values/value selected by the user",
                 }
             ],
