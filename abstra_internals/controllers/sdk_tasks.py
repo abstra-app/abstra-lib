@@ -34,15 +34,16 @@ class Task:
     def __getitem__(self, key: str) -> object:
         return self._dto.payload[key]
 
-    def __getattr__(self, key: str) -> object:
-        return self._dto.payload[key]
-
     def __setitem__(self, key: str, value: str) -> None:
         raise TaskWriteAttempt()
 
     @property
     def id(self) -> str:
         return self._dto.id
+
+    @property
+    def type(self) -> str:
+        return self._dto.type
 
     def get_payload(self) -> TaskPayload:
         return self._dto.payload

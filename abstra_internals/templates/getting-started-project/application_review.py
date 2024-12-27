@@ -5,9 +5,9 @@ from abstra.tasks import get_trigger_task, send_task
 
 # You can use the get_trigger_task function to get the task that triggered the script
 task = get_trigger_task()
-best_movie = task.best_movie
-interview_opt_in = task.interview_opt_in
-rating = task.rating
+best_movie = task["best_movie"]
+interview_opt_in = task["interview_opt_in"]
+rating = task["rating"]
 
 reasons = []
 
