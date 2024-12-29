@@ -1,25 +1,18 @@
 from typing import List
 
 from abstra_internals.linter.linter import LinterRule
-from abstra_internals.linter.rules.conflicting_path import ConflictingPath
-from abstra_internals.linter.rules.duplicate_package_in_requirements import (
-    DuplicatePackagesInRequirements,
-)
-from abstra_internals.linter.rules.env_in_bundle import EnvInBundle
-from abstra_internals.linter.rules.missing_abstra_in_requirements import (
-    MissingAbstraInRequirements,
-)
-from abstra_internals.linter.rules.missing_entrypoint import MissingEntrypoint
-from abstra_internals.linter.rules.missing_env import MissingEnv
-from abstra_internals.linter.rules.missing_packages_in_requirements import (
-    MissingPackagesInRequirements,
-)
-from abstra_internals.linter.rules.new_version_of_abstra_available import (
-    NewVersionOfAbstraAvailable,
-)
-from abstra_internals.linter.rules.psycopg2 import Psycopg2MustBeBinary
-from abstra_internals.linter.rules.syntax_errors import SyntaxErrors
-from abstra_internals.linter.rules.venv_in_bundle import VenvInBundle
+
+from .conflicting_path import ConflictingPath
+from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
+from .env_in_bundle import EnvInBundle
+from .missing_abstra_in_requirements import MissingAbstraInRequirements
+from .missing_entrypoint import MissingEntrypoint
+from .missing_env import MissingEnv
+from .missing_packages_in_requirements import MissingPackagesInRequirements
+from .new_version_of_abstra_available import NewVersionOfAbstraAvailable
+from .psycopg2 import Psycopg2MustBeBinary
+from .syntax_errors import SyntaxErrors
+from .venv_in_bundle import VenvInBundle
 
 rules: List[LinterRule] = [
     EnvInBundle(),

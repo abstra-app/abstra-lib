@@ -5,7 +5,6 @@ from abstra_internals.contract import forms_contract
 from abstra_internals.controllers.sdk_context import SDKContextStore
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
-from abstra_internals.interface.sdk.forms.reactive import Reactive
 from abstra_internals.widgets.prop_check import validate_widget_props
 from abstra_internals.widgets.widget_base import Input
 
@@ -70,14 +69,14 @@ class Page(WidgetSchema):
         if self._context:
             for widget in self.widgets:
                 if (
-                    not isinstance(widget, Reactive)
+                    widget.type != "reactive"
                     and isinstance(widget, Input)
                     and widget.key in self._context
                 ):
                     widget.value = self._context[widget.key]
 
         for widget in self.widgets:
-            if not isinstance(widget, Reactive) and isinstance(widget, Input):
+            if widget.type != "reactive" and isinstance(widget, Input):
                 self._context[widget.key] = widget.value
 
         rendered_page = self.render(context=self._context)

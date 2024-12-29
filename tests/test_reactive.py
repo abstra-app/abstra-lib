@@ -7,7 +7,7 @@ from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.sdk_context import SDKContext
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import FormContext, Request
-from abstra_internals.interface.sdk.forms.reactive import reactive
+from abstra_internals.interface.sdk.forms.reactive_func import reactive
 from tests.fixtures import BaseTest
 
 

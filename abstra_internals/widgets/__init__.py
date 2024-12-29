@@ -1,8 +1,8 @@
 import inspect
 
-from abstra_internals.widgets import library
-from abstra_internals.widgets.metadata_parsed import metadata_objects
-from abstra_internals.widgets.widget_base import Input, Output
+from . import library
+from .metadata_parsed import metadata_objects
+from .widget_base import Input, Output
 
 output_types = [
     w for w in library.__dict__.values() if inspect.isclass(w) and issubclass(w, Output)

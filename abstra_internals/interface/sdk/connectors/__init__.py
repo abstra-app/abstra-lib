@@ -1,8 +1,7 @@
 from abstra_internals.controllers.sdk_context import SDKContextStore
-from abstra_internals.interface.sdk.connectors.google_credentials import (
-    create_abstra_google_credentials,
-)
 from abstra_internals.repositories.connectors import AccessTokenDTO
+
+from .google_credentials import create_abstra_google_credentials
 
 
 def get_access_token(name: str) -> AccessTokenDTO:

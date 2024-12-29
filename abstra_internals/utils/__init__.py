@@ -1,5 +1,4 @@
 import base64
-import os
 import random
 import re
 import socket
@@ -106,17 +105,6 @@ def nested_get(data: t.Dict, path: str):
         return next(m.value for m in expr.find(data))
     except Exception:
         return None
-
-
-def is_test_env():
-    return "PYTEST_CURRENT_TEST" in os.environ
-
-
-def is_dev_env() -> bool:
-    dev_versions = ["0.0.0"]
-    from abstra_internals.utils.packages import get_local_package_version
-
-    return str(get_local_package_version()) in dev_versions
 
 
 def get_internal_id(obj: object, ensure=True) -> str:

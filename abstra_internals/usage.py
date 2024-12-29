@@ -10,12 +10,8 @@ from abstra_internals.credentials import get_credentials
 from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.threaded import threaded
-from abstra_internals.utils import (
-    get_local_python_version,
-    get_local_user_id,
-    is_dev_env,
-    is_test_env,
-)
+from abstra_internals.utils import get_local_python_version, get_local_user_id
+from abstra_internals.utils.env import is_dev_env, is_test_env
 from abstra_internals.utils.packages import get_local_package_version
 
 

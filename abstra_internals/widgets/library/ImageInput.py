@@ -1,4 +1,4 @@
-from abstra_internals.widgets.library.FileInput import FileInput
+from .FileInput import FileInput
 
 
 class ImageInput(FileInput):

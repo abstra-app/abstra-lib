@@ -4,7 +4,8 @@ from io import BufferedReader
 from pathlib import Path
 from typing import Union
 
-from abstra_internals.widgets.file_utils import download_to_path
+from .file_utils import download_to_path
+from .response_abc import AbstractFileResponse
 
 
 def to_datetime(value: Union[str, datetime]) -> datetime:
@@ -88,7 +89,7 @@ class AppointmentSlot:
         return self.__dict__.values()
 
 
-class FileResponse:
+class FileResponse(AbstractFileResponse):
     """A file response from the user
 
     Attributes:

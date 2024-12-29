@@ -6,6 +6,7 @@ import requests
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.settings import Settings
 from abstra_internals.utils import packages as pkg_utils
+from abstra_internals.utils import version as vsn_utils
 
 VersionStatus = Enum(
     "VersionStatus", ["UP_TO_DATE", "OUT_OF_DATE", "LATEST_IS_OUTDATED", "UNKNOWN"]
@@ -20,7 +21,7 @@ class PackageVersionManager:
         )
         self.current_local_version = pkg_utils.get_local_package_version(package_name)
         self.cached_latest_version = (
-            pkg_utils.get_cached_latest_version(Settings.root_path, package_name)
+            vsn_utils.get_cached_latest_version(Settings.root_path, package_name)
             or self.current_local_version
         )
 
@@ -33,7 +34,7 @@ class PackageVersionManager:
                 return VersionStatus.OUT_OF_DATE
 
             if self.current_local_version > self.cached_latest_version:
-                pkg_utils.update_cached_latest_version(
+                vsn_utils.update_cached_latest_version(
                     Settings.root_path, self.current_local_version, self.package_name
                 )
                 return VersionStatus.LATEST_IS_OUTDATED

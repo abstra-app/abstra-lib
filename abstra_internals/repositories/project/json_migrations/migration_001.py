@@ -1,8 +1,6 @@
 import uuid
 
-from abstra_internals.repositories.project.json_migrations.base_migration import (
-    Migration,
-)
+from .base_migration import Migration
 
 
 class Migration001(Migration):

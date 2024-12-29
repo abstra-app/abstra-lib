@@ -9,9 +9,9 @@ from PIL.Image import Image
 import abstra_internals.utils.b64 as b64
 from abstra_internals.repositories.ai import AiApiHttpClient
 from abstra_internals.utils.string import to_snake_case
-from abstra_internals.widgets.response_types import FileResponse
+from abstra_internals.widgets.response_abc import AbstractFileResponse
 
-Prompt = Union[str, io.IOBase, pathlib.Path, FileResponse]
+Prompt = Union[str, io.IOBase, pathlib.Path, AbstractFileResponse]
 Format = Dict[str, object]
 
 
@@ -83,7 +83,7 @@ class AiSDKController:
                 encoded_str = b64.encode_base_64(f)
                 return [self._make_image_url_message(encoded_str)]
 
-        if isinstance(prompt, FileResponse):
+        if isinstance(prompt, AbstractFileResponse):
             file = prompt.file
             if images := self._try_extract_images(file):
                 return [

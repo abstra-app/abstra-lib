@@ -1,7 +1,7 @@
 import typing
 from dataclasses import dataclass
 
-from abstra_internals.widgets.metadata import metadata
+from .metadata import metadata
 
 
 @dataclass

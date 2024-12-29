@@ -5,46 +5,21 @@ from pathlib import Path
 from typing import List, Type
 
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.project.json_migrations.base_migration import (
-    Migration,
-)
-from abstra_internals.repositories.project.json_migrations.migration_001 import (
-    Migration001,
-)
-from abstra_internals.repositories.project.json_migrations.migration_002 import (
-    Migration002,
-)
-from abstra_internals.repositories.project.json_migrations.migration_003 import (
-    Migration003,
-)
-from abstra_internals.repositories.project.json_migrations.migration_004 import (
-    Migration004,
-)
-from abstra_internals.repositories.project.json_migrations.migration_005 import (
-    Migration005,
-)
-from abstra_internals.repositories.project.json_migrations.migration_006 import (
-    Migration006,
-)
-from abstra_internals.repositories.project.json_migrations.migration_007 import (
-    Migration007,
-)
-from abstra_internals.repositories.project.json_migrations.migration_008 import (
-    Migration008,
-)
-from abstra_internals.repositories.project.json_migrations.migration_009 import (
-    Migration009,
-)
-from abstra_internals.repositories.project.json_migrations.migration_010 import (
-    Migration010,
-)
-from abstra_internals.repositories.project.json_migrations.migration_011 import (
-    Migration011,
-)
-from abstra_internals.repositories.project.json_migrations.migration_012 import (
-    Migration012,
-)
 from abstra_internals.utils.dot_abstra import CONFIG_FILE_BACKUPS
+
+from .base_migration import Migration
+from .migration_001 import Migration001
+from .migration_002 import Migration002
+from .migration_003 import Migration003
+from .migration_004 import Migration004
+from .migration_005 import Migration005
+from .migration_006 import Migration006
+from .migration_007 import Migration007
+from .migration_008 import Migration008
+from .migration_009 import Migration009
+from .migration_010 import Migration010
+from .migration_011 import Migration011
+from .migration_012 import Migration012
 
 MIGRATIONS: List[Type[Migration]] = [
     Migration001,

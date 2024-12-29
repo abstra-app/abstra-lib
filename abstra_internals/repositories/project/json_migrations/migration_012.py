@@ -2,11 +2,10 @@ import shutil
 from pathlib import Path
 
 from abstra_internals.interface.cli.deploy import _generate_zip_file
-from abstra_internals.repositories.project.json_migrations.base_migration import (
-    Migration,
-)
 from abstra_internals.settings import Settings
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
+
+from .base_migration import Migration
 
 
 def generate_compat_lines(script_type: str):
