@@ -5,7 +5,7 @@ import pkg_resources
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from abstra_internals.environment import LOGFORMAT, LOGLEVEL
+from abstra_internals.environment import LOGFORMAT, LOGLEVEL, NOISY_LOGLEVEL
 from abstra_internals.utils.env import is_dev_env, is_test_env
 
 internal_logger = lambda: logging.getLogger("abstra_internal")  # noqa: E731
@@ -43,8 +43,8 @@ class AbstraLogger:
         logging.basicConfig(level=LOGLEVEL(), format=LOGFORMAT())
 
         # Silence verbose dependencies
-        logging.getLogger("pika").setLevel(logging.WARNING)
-        logging.getLogger("werkzeug").setLevel(logging.WARNING)
+        logging.getLogger("pika").setLevel(NOISY_LOGLEVEL())
+        logging.getLogger("werkzeug").setLevel(NOISY_LOGLEVEL())
 
         try:
             cls.get_sdk().init(

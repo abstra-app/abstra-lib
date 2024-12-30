@@ -2,6 +2,7 @@ import os
 
 DEFAULT_LOGLEVEL = "WARNING"
 LOGLEVEL = lambda: os.getenv("ABSTRA_LOGLEVEL", DEFAULT_LOGLEVEL)  # noqa: E731
+NOISY_LOGLEVEL = lambda: os.getenv("ABSTRA_NOISY_LOGLEVEL", DEFAULT_LOGLEVEL)  # noqa: E731
 
 PROCESS_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s][%(process)d]%(message)s"
 DEFAULT_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"

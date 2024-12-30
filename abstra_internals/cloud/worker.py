@@ -3,7 +3,7 @@ from multiprocessing.forkserver import set_forkserver_preload
 from abstra_internals.controllers import execution_process
 from abstra_internals.controllers.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
-from abstra_internals.environment import RABBITMQ_CONNECTION_URI
+from abstra_internals.environment import DEFAULT_PORT, RABBITMQ_CONNECTION_URI
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import RabbitConsumer
 from abstra_internals.repositories.factory import get_prodution_app_repositories
@@ -15,6 +15,7 @@ def run():
     SignalHandlers.init()
     AbstraLogger.init("cloud")
     SettingsController.set_root_path(".")
+    SettingsController.set_server_port(DEFAULT_PORT)
 
     if not RABBITMQ_CONNECTION_URI:
         raise Exception("RABBITMQ_CONNECTION_URI not found")
