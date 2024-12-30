@@ -2,6 +2,7 @@ from typing import List
 
 from abstra_internals.linter.linter import LinterRule
 
+from .conflicting_name import ConflictingName
 from .conflicting_path import ConflictingPath
 from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
 from .env_in_bundle import EnvInBundle
@@ -26,4 +27,5 @@ rules: List[LinterRule] = [
     NewVersionOfAbstraAvailable(),
     ConflictingPath(),
     Psycopg2MustBeBinary(),
+    ConflictingName(),
 ]
