@@ -7,6 +7,7 @@ from abstra_internals.settings import Settings
 
 
 class AddPreffix(LinterFix):
+    label = "Fix conflicting name"
     preffix = "util_"
 
     def __init__(self, file: Path):
