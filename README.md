@@ -22,7 +22,7 @@ and much more! ⚡️
 
 ## 🚦 Getting started
 
-[![](./images/getting-started.png)](https://youtu.be/kkTRU8PS8cg)
+[![](./images/getting-started.png)](https://www.youtube.com/watch?v=ErBK49XO_mE&list=PLFPJgKA6K86ZdAHZ3aPWsrZHX_7jJ3Cc9)
 
 This package is compatible with Python >= 3.8
 
@@ -35,7 +35,7 @@ pip install abstra
 Run the CLI server in the directory where you'd like to create your Abstra project. This can be any folder:
 
 ```
-abstra serve ./your-project-directory
+abstra editor ./your-project-directory
 ```
 
 ## 🧩 Workflow builder for Python
