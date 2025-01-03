@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List, Optional, Tuple
 
 from abstra_internals.interface.sdk import user_exceptions
@@ -11,12 +12,16 @@ from abstra_internals.repositories.tasks import TaskDTO, TasksRepository
 class DataRequestFilter:
     stage: Optional[List[str]]
     status: Optional[List[str]]
+    start_date: Optional[str]
+    end_date: Optional[str]
 
     @staticmethod
     def from_dict(data: dict) -> "DataRequestFilter":
         return DataRequestFilter(
             stage=data.get("stage", None),
             status=data.get("status", None),
+            start_date=data.get("startDate", None),
+            end_date=data.get("endDate", None),
         )
 
     def to_dict(self) -> dict:
@@ -89,6 +94,18 @@ class TasksController:
             ):
                 continue
             if req and req.filter.status and task.status not in req.filter.status:
+                continue
+            if req and (
+                req.filter.start_date
+                and datetime.fromisoformat(task.created.at)
+                < datetime.fromisoformat(req.filter.start_date)
+            ):
+                continue
+            if req and (
+                req.filter.end_date
+                and datetime.fromisoformat(task.created.at)
+                > datetime.fromisoformat(req.filter.end_date)
+            ):
                 continue
 
             target_stage = self.get_stage(task.target_stage_id)
