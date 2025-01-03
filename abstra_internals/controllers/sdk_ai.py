@@ -36,7 +36,7 @@ class AiSDKController:
         images = []
         for page in pdfium.PdfDocument(file):
             bitmap = page.render(
-                scale=1,  # 72dpi resolution
+                scale=4,  # 288 dpi
                 rotation=0,
             )
             pil_image = bitmap.to_pil()
