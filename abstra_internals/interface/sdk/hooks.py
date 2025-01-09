@@ -10,6 +10,10 @@ def get_raw_request() -> Tuple[str, Dict[str, str], Dict[str, str]]:
     return SDKContextStore.get_by_thread().hook_sdk.get_raw_request()
 
 
+def get_email_request():
+    return SDKContextStore.get_by_thread().hook_sdk.get_email_request()
+
+
 def get_request() -> Tuple[Union[str, List, Dict], Dict[str, str], Dict[str, str]]:
     return SDKContextStore.get_by_thread().hook_sdk.get_request()
 

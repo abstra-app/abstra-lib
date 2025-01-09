@@ -1,4 +1,5 @@
 import datetime
+import json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Mapping, Optional, Union
 from uuid import uuid4
@@ -70,7 +71,9 @@ class TasksRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_pending_tasks(self, stage_id: str, limit: int) -> List[TaskDTO]:
+    def get_pending_tasks(
+        self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[TaskDTO]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -174,14 +177,29 @@ class LocalTasksRepository(TasksRepository):
 
         self.manager.save(task_id, task)
 
-    def get_pending_tasks(self, stage_id: str, limit: int) -> List[TaskDTO]:
+    def _where_matches(self, task: TaskDTO, where: Dict) -> bool:
+        payload = task.payload
+        for key, value in where.items():
+            if key not in payload or payload[key] != value:
+                return False
+        return True
+
+    def get_pending_tasks(
+        self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[TaskDTO]:
         all_tasks = self.manager.load_all()
         pending_tasks = [
             task
             for task in all_tasks
-            if task.target_stage_id == stage_id and task.status == "pending"
+            if task.target_stage_id == stage_id
+            and task.status == "pending"
+            and self._where_matches(task, where)
         ]
-        return pending_tasks[:limit]
+        pending_tasks = sorted(pending_tasks, key=lambda task: task.created.at)
+
+        if limit is None:
+            return pending_tasks[offset:]
+        return pending_tasks[offset : offset + limit]
 
     def get_stage_tasks(self, stage_id: str) -> List[TaskDTO]:
         all_tasks = self.manager.load_all()
@@ -310,15 +328,18 @@ class ProductionTasksRepository(TasksRepository):
 
         r.raise_for_status()
 
-    def get_pending_tasks(self, stage_id: str, limit: int) -> List[TaskDTO]:
+    def get_pending_tasks(
+        self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[TaskDTO]:
         r = self._request(
             "GET",
             path="/",
             params={
                 "stageId": stage_id,
                 "status": ["pending"],
-                "offset": 0,
                 "limit": limit,
+                "offset": offset,
+                "where": json.dumps(where),
             },
         )
         tasks = r.json()["tasks"]

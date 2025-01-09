@@ -1,8 +1,11 @@
+import base64
 import json
 from io import BytesIO
 from typing import Dict, List, Tuple, Union
 
 from abstra_internals.controllers.execution_client_hook import HookClient
+from abstra_internals.email_signer import verify_email
+from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 
 
@@ -35,7 +38,7 @@ class HookSDKController:
         except Exception:
             return body, query, headers
 
-    def _multipart_form_parse(self, body: str, headers: dict):
+    def _multipart_form_parse(self, body: str, headers: CaseInsensitiveDict):
         from multipart import (
             MultipartParser,
             MultipartPart,
@@ -51,3 +54,21 @@ class HookSDKController:
             for i in p
             if isinstance(i, MultipartPart)
         ]
+
+    def get_email_request(self):
+        body, _, headers = self.get_raw_request()
+        b64content: str = json.loads(body).get("content")
+        if not b64content:
+            raise Exception("Bad request")
+
+        signed_hash = headers.get("x-abstra-notification-signed-hash")
+        if not signed_hash and IS_PRODUCTION:
+            raise Exception("Email verification failed")
+
+        if signed_hash:
+            if not verify_email(jwt_header=signed_hash, content=b64content):
+                raise Exception("Email verification failed")
+
+        from mailparser import parse_from_string
+
+        return parse_from_string(base64.b64decode(b64content).decode("utf-8"))

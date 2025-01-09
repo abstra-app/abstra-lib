@@ -20,6 +20,8 @@ BUILD_ID = os.getenv("ABSTRA_BUILD_ID") or "dev"
 PROJECT_ID = os.getenv("ABSTRA_PROJECT_ID") or "dev-project-id"
 PROJECT_URL = os.getenv("ABSTRA_PROJECT_URL")
 
+EMAIL_JWT_AUDIENCE = f"abstra:email:{PROJECT_ID}"
+
 IS_PRODUCTION = os.getenv("ABSTRA_ENVIRONMENT") == "production"
 SHOW_WATERMARK = os.getenv("ABSTRA_SHOW_WATERMARK", "false") == "true"
 

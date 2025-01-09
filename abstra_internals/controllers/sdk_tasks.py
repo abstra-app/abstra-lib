@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from abstra_internals.email_templates import task_waiting_template
 from abstra_internals.entities.execution import Execution, PreExecution
@@ -137,12 +137,16 @@ class TasksSDKController:
                     )
                 )
 
-    def get_stage_pending_tasks(self, limit: int) -> List[Task]:
+    def get_stage_pending_tasks(
+        self, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[Task]:
         stage = self.project.get_stage(self.execution.stage_id)
         if not stage:
             raise Exception(f"Stage {self.execution.stage_id} not found")
 
-        dtos = self.repositories.tasks.get_pending_tasks(self.execution.stage_id, limit)
+        dtos = self.repositories.tasks.get_pending_tasks(
+            self.execution.stage_id, limit, offset, where
+        )
         return [Task(self, dto) for dto in dtos]
 
     def lock_task(self, task_id: str) -> None:

@@ -1,14 +1,22 @@
-from typing import List
+from typing import Iterator, List, Optional
 
 from abstra_internals.controllers.sdk_context import SDKContextStore
 from abstra_internals.controllers.sdk_tasks import Task
 from abstra_internals.repositories.tasks import TaskPayload
 from abstra_internals.utils.json import to_json_serializable
 
+BATCH_SIZE = 10
 
-def get_tasks(limit=100) -> List[Task]:
+
+def get_tasks(
+    limit: Optional[int] = None, offset=0, where: Optional[dict] = None
+) -> List[Task]:
     context = SDKContextStore.get_by_thread()
-    return context.task_sdk.get_stage_pending_tasks(limit)
+    if limit is None and where is None:
+        limit = 100
+    if where is None:
+        where = {}
+    return context.task_sdk.get_stage_pending_tasks(limit, offset, where)
 
 
 def send_task(type: str, payload: TaskPayload, show_warning=True) -> None:
@@ -22,3 +30,15 @@ def send_task(type: str, payload: TaskPayload, show_warning=True) -> None:
 def get_trigger_task() -> Task:
     context = SDKContextStore.get_by_thread()
     return context.task_sdk.get_trigger_task()
+
+
+def iter_tasks(where: Optional[dict] = None) -> Iterator[Task]:
+    if where is None:
+        where = {}
+    offset = 0
+    while True:
+        tasks = get_tasks(limit=BATCH_SIZE, offset=offset, where=where)
+        if not tasks:
+            break
+        yield from tasks
+        offset += BATCH_SIZE
