@@ -1,5 +1,6 @@
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, List, Optional, Union
 
+from abstra_internals.contract.forms import StepsInfo
 from abstra_internals.entities.forms.page_response import PageResponse
 from abstra_internals.entities.forms.steps_response import StepsResponse
 from abstra_internals.interface.sdk.forms.page import Page
@@ -8,7 +9,7 @@ Step = Union[Page, Callable]
 Steps = List[Step]
 
 
-def get_page_info(steps: Steps, current_page: Page) -> Dict:
+def get_page_info(steps: Steps, current_page: Page) -> StepsInfo:
     pages = [step for step in steps if isinstance(step, Page)]
     return {"current": pages.index(current_page) + 1, "total": len(pages)}
 

@@ -1,6 +1,6 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
-from abstra_internals.contract.forms import ValidationResult
+from abstra_internals.contract.forms import StepsInfo, ValidationResult
 from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.jwt_auth import UserClaims
@@ -41,7 +41,7 @@ class FormSDKController:
         actions: list,
         end_program: bool,
         reactive_polling_interval: int,
-        steps_info: Optional[List],
+        steps_info: Optional[StepsInfo],
     ):
         self.client.request_mount_page(
             widgets,

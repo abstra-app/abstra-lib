@@ -91,6 +91,11 @@ class FormUpdatePageMessage(Message):
         )
 
 
+class StepsInfo(TypedDict):
+    current: int
+    total: int
+
+
 class FormMountPageMessage(Message):
     type = "form:mount-page"
 
@@ -100,7 +105,7 @@ class FormMountPageMessage(Message):
         actions: List,
         end_program: bool,
         reactive_polling_interval: int,
-        steps: Optional[List],
+        steps: Optional[StepsInfo],
         production_mode: bool,
     ):
         super().__init__(

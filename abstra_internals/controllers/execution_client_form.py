@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import flask_sock
 
@@ -74,7 +74,7 @@ class FormClient(ExecutionClient):
         actions: list,
         end_program: bool,
         reactive_polling_interval: int,
-        steps_info: Optional[List],
+        steps_info: Optional[forms_contract.StepsInfo],
     ) -> None:
         self._user_code_send(
             forms_contract.FormMountPageMessage(
