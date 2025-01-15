@@ -152,14 +152,19 @@ class LocalExecutionRepository(ExecutionRepository):
                 )
             )
         ]
-        total_count = len(filtered_executions)
+        sorted_executions = sorted(
+            filtered_executions,
+            key=lambda execution: execution.created_at,
+            reverse=True,
+        )
+        total_count = len(sorted_executions)
         start_index = filter.offset if filter.offset else 0
         end_index = start_index + (
-            filter.limit if filter.limit else len(filtered_executions)
+            filter.limit if filter.limit else len(sorted_executions)
         )
 
         return ExecutionResponse(
-            executions=filtered_executions[start_index:end_index],
+            executions=sorted_executions[start_index:end_index],
             total_count=total_count,
         )
 
