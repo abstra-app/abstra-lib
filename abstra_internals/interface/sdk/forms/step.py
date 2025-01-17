@@ -14,25 +14,39 @@ def get_page_info(steps: Steps, current_page: Page) -> StepsInfo:
     return {"current": pages.index(current_page) + 1, "total": len(pages)}
 
 
-def run_steps(steps: Steps) -> StepsResponse:
+def run_steps(steps: Steps, initial_step=1, context={}) -> StepsResponse:
+    assert initial_step >= 1, "Initial step must be greater than or equal to 1"
+
     executed_steps: Steps = []  # stack
     responses: StepsResponse = StepsResponse()  # stack
-    steps_to_execute = steps[::-1]
 
-    if not steps_to_execute:
-        return responses
+    page_steps = [
+        (idx, step) for idx, step in enumerate(steps) if isinstance(step, Page)
+    ]
+    first_step_idx, first_step = page_steps[initial_step - 1]
+    steps_to_execute = []
+    for idx, step in enumerate(steps):
+        if idx < first_step_idx:
+            executed_steps.append(step)
+            responses.append(context)
+        elif idx == first_step_idx:
+            first_step = step
+        elif idx > first_step_idx:
+            steps_to_execute.append(step)
 
-    first_step = steps_to_execute.pop()
+    steps_to_execute.reverse()
+
+    assert first_step is not None
     if not isinstance(first_step, Page):
         raise ValueError("First step needs to be a Page")
-    response = run_page(steps, first_step, executed_steps, responses)
+    response = run_page(steps, first_step, executed_steps, responses, context)
 
     while steps_to_execute or response.action == "i18n_back_action":
         if steps_to_execute and response.action != "i18n_back_action":
             next_page = execute_functions(steps_to_execute, executed_steps, responses)
             if not next_page:
                 break
-            response = run_page(steps, next_page, executed_steps, responses)
+            response = run_page(steps, next_page, executed_steps, responses, context)
 
         if response.action == "i18n_back_action":
             response = go_back(steps, steps_to_execute, executed_steps, responses)
@@ -87,6 +101,7 @@ def run_page(
     next_page: Page,
     executed_steps: Steps,
     responses: StepsResponse,
+    context: dict,
 ) -> PageResponse:
     steps_info = get_page_info(steps, next_page)
     response = (

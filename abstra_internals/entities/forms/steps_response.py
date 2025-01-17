@@ -4,7 +4,7 @@ from abstra_internals.entities.forms.page_response import PageResponse
 
 
 class StepsResponse:
-    responses: List[PageResponse]
+    responses: List[Union[PageResponse, dict, None]]
 
     @property
     def as_dict(self):
@@ -24,7 +24,7 @@ class StepsResponse:
     def get(self, key: str, default=None):
         return self.acc.get(key, default)
 
-    def append(self, res: PageResponse):
+    def append(self, res: Union[PageResponse, dict, None]):
         self.responses.append(res)
         self.__update_acc()
 
@@ -36,7 +36,7 @@ class StepsResponse:
             elif isinstance(res, dict):
                 self.acc.update(res)
 
-    def pop(self) -> PageResponse:
+    def pop(self) -> Union[PageResponse, dict, None]:
         step_response = self.responses.pop()
         self.__update_acc()
         return step_response
