@@ -31,6 +31,8 @@ class FormContext(Serializable):
     request: Request
     sent_tasks: List[str] = Field(default_factory=list)
     legacy_thread_data: dict = Field(default_factory=dict)
+    is_test: bool = False
+    test_answers: List[str] = Field(default_factory=list)
 
 
 class ScriptContext(Serializable):

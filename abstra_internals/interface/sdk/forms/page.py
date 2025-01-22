@@ -10,6 +10,14 @@ from abstra_internals.widgets.prop_check import validate_widget_props
 from abstra_internals.widgets.widget_base import Input
 
 
+class FakePage:
+    def __init__(self, ans: str):
+        self.answer = ans
+
+    def run(self, *args, **kwargs):
+        return {"answer": self.answer}
+
+
 class Page(WidgetSchema):
     """A form page that can be displayed to the user
 
@@ -37,6 +45,16 @@ class Page(WidgetSchema):
     @property
     def controller(self):
         return SDKContextStore.get_by_thread().form_sdk
+
+    def __getattribute__(self, name):
+        context = SDKContextStore.get_by_thread()
+        is_test = context.form_sdk.client.context.is_test
+        test_answers = context.form_sdk.client.context.test_answers
+        if is_test and len(test_answers) == 0:
+            raise Exception("Not enough test answers")
+        if is_test:
+            return lambda label: FakePage(test_answers.pop(0))
+        return super().__getattribute__(name)
 
     def run(
         self,

@@ -135,14 +135,20 @@ class FormClient(ExecutionClient):
         self._wait_for_message("execution:start")
         self._send(forms_contract.ExecutionStartedMessage(execution_id))
 
+    def _teardown_test(self):
+        self.context.is_test = False
+        self.context.test_answers = []
+
     def handle_failure(self, e: Exception):
         close_dto = forms_contract.CloseDTO(exit_status="EXCEPTION", exception=e)
+        self._teardown_test()
         self._send(
             forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
         )
 
     def handle_success(self):
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
+        self._teardown_test()
         self._send(
             forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
         )
