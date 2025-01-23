@@ -870,3 +870,38 @@ def read_video(label: str, **kwargs) -> Union[FileResponse, List[FileResponse]]:
     button_text = kwargs.get("button_text", "i18n_next_action")
     return get_single_value(Page().read_video(label, **kwargs).run(button_text))
 
+
+
+__all__ = [
+    "read_appointment",
+    "read_camera",
+    "read_cards",
+    "read_checkbox",
+    "read_checklist",
+    "read_cnpj",
+    "read_code",
+    "read_cpf",
+    "read_currency",
+    "read_custom",
+    "read_date",
+    "read_dropdown",
+    "read_email",
+    "read_file",
+    "read_image",
+    "read_list",
+    "read_multiple_choice",
+    "read_nps",
+    "read_number",
+    "read_number_slider",
+    "read_pandas_row_selection",
+    "read_password",
+    "read_phone",
+    "read_rating",
+    "read_richtext",
+    "read_tag",
+    "read",
+    "read_textarea",
+    "read_time",
+    "read_toggle",
+    "read_video"
+]

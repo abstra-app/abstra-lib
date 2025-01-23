@@ -253,3 +253,18 @@ def display(text: str, **kwargs):
     button_text = kwargs.get("button_text", "i18n_next_action")
     end_program = kwargs.get("end_program", False)
     return Page().display(text, **kwargs).run(button_text, end_program=end_program)
+
+
+__all__ = [
+    "display_file",
+    "display_html",
+    "display_iframe",
+    "display_image",
+    "display_latex",
+    "display_link",
+    "display_markdown",
+    "display_pandas",
+    "display_plotly",
+    "display_progress",
+    "display"
+]
