@@ -1,0 +1,2 @@
+import{C as n,A as t}from"./CollapsePanel.ef8f596d.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},o=new Error().stack;o&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[o]="ac6f726a-97bc-4e99-9896-d5ef714ec610",e._sentryDebugIdIdentifier="sentry-dbid-ac6f726a-97bc-4e99-9896-d5ef714ec610")}catch{}})();n.Panel=t;n.install=function(e){return e.component(n.name,n),e.component(t.name,t),e};
+//# sourceMappingURL=index.51f64bb1.js.map
