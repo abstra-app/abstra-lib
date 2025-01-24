@@ -85,23 +85,23 @@ def use_legacy_threads(mode: Literal["scripts", "forms", "jobs", "hooks"]):
     try:
         exec(callee_code, callee.f_globals, callee.f_globals)
         send_task("success", execution.context.legacy_thread_data, show_warning=False)
+
         if task:
             task.complete()
+
     except SystemExit as e:
-        if e.code == 0:
-            send_task(
-                "success", execution.context.legacy_thread_data, show_warning=False
-            )
+        status = "success" if e.code == 0 else "failure"
+        send_task(status, execution.context.legacy_thread_data, show_warning=False)
+
         if task:
             task.complete()
-        else:
-            send_task(
-                "failure", execution.context.legacy_thread_data, show_warning=False
-            )
     except ClientAbandoned:
         pass
     except Exception as e:
         send_task("failure", execution.context.legacy_thread_data, show_warning=False)
-        raise e
 
+        if task:
+            task.complete()
+
+        raise e
     exit()
