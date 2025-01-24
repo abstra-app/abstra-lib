@@ -149,6 +149,18 @@ class TasksSDKController:
         )
         return [Task(self, dto) for dto in dtos]
 
+    def get_stage_sent_tasks(
+        self, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[Task]:
+        stage = self.project.get_stage(self.execution.stage_id)
+        if not stage:
+            raise Exception(f"Stage {self.execution.stage_id} not found")
+
+        dtos = self.repositories.tasks.get_sent_tasks(
+            self.execution.stage_id, limit, offset, where
+        )
+        return [Task(self, dto) for dto in dtos]
+
     def lock_task(self, task_id: str) -> None:
         self.repositories.tasks.lock_task(
             task_id, self.execution.id, self.execution.stage_id

@@ -77,6 +77,12 @@ class TasksRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def get_sent_tasks(
+        self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[TaskDTO]:
+        raise NotImplementedError()
+
+    @abstractmethod
     def get_stage_tasks(self, stage_id: str) -> List[TaskDTO]:
         raise NotImplementedError()
 
@@ -200,6 +206,21 @@ class LocalTasksRepository(TasksRepository):
         if limit is None:
             return pending_tasks[offset:]
         return pending_tasks[offset : offset + limit]
+
+    def get_sent_tasks(
+        self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[TaskDTO]:
+        all_tasks = self.manager.load_all()
+        sent_tasks = [
+            task
+            for task in all_tasks
+            if task.created.by_stage_id == stage_id and self._where_matches(task, where)
+        ]
+        sent_tasks = sorted(sent_tasks, key=lambda task: task.created.at)
+
+        if limit is None:
+            return sent_tasks[offset:]
+        return sent_tasks[offset : offset + limit]
 
     def get_stage_tasks(self, stage_id: str) -> List[TaskDTO]:
         all_tasks = self.manager.load_all()
@@ -337,6 +358,25 @@ class ProductionTasksRepository(TasksRepository):
             params={
                 "stageId": stage_id,
                 "status": ["pending"],
+                "sentBy": None,
+                "limit": limit,
+                "offset": offset,
+                "where": json.dumps(where),
+            },
+        )
+        tasks = r.json()["tasks"]
+        return [TaskDTO(**task) for task in tasks]
+
+    def get_sent_tasks(
+        self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
+    ) -> List[TaskDTO]:
+        r = self._request(
+            "GET",
+            path="/",
+            params={
+                "stageId": None,
+                "status": [],
+                "sentBy": stage_id,
                 "limit": limit,
                 "offset": offset,
                 "where": json.dumps(where),

@@ -42,3 +42,14 @@ def iter_tasks(where: Optional[dict] = None) -> Iterator[Task]:
             break
         yield from tasks
         offset += BATCH_SIZE
+
+
+def get_sent_tasks(
+    limit: Optional[int] = None, offset=0, where: Optional[dict] = None
+) -> List[Task]:
+    context = SDKContextStore.get_by_thread()
+    if limit is None and where is None:
+        limit = 100
+    if where is None:
+        where = {}
+    return context.task_sdk.get_stage_sent_tasks(limit, offset, where)
