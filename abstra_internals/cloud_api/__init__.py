@@ -1,13 +1,21 @@
-from typing import Optional
+import json
+from threading import Thread
+from time import sleep
+from typing import Any, Optional
 
 import requests
+import simple_websocket
+from colorama import Fore
+from pydantic import BaseModel
 
 from abstra_internals.contracts_generated import (
     CloudApiCliApiKeyInfoResponse,
     CloudApiCliBuildCreateResponse,
 )
-from abstra_internals.environment import CLOUD_API_CLI_URL
+from abstra_internals.credentials import resolve_headers
+from abstra_internals.environment import CLOUD_API_CLI_URL, CLOUD_API_ENDPOINT, HOST
 from abstra_internals.logger import AbstraLogger
+from abstra_internals.settings import Settings
 
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:
@@ -74,8 +82,106 @@ def cancel_all(headers: dict, thread_id: str):
     r.raise_for_status()
 
 
-def get_project_info(headers):
+def get_project_info(headers: dict):
     url = f"{CLOUD_API_CLI_URL}/project"
     r = requests.get(url, headers=headers)
     r.raise_for_status()
     return r.json()
+
+
+class TunnelRequest(BaseModel):
+    method: str
+    path: str
+    headers: dict
+    body: Optional[dict]
+    query: dict
+    sessionPath: str
+    requestId: str
+
+
+class TunnelResponse(BaseModel):
+    status: int
+    headers: dict
+    text: str
+    sessionPath: str
+    requestId: str
+
+
+class SessionPathMessage(BaseModel):
+    sessionPath: str
+
+
+def connect_tunnel():
+    url = f"{CLOUD_API_ENDPOINT}/tunnel/connect".replace("https://", "wss://").replace(
+        "http://", "ws://"
+    )
+
+    def loop():
+        while True:
+            headers = resolve_headers()
+            if headers is not None:
+                break
+            sleep(1)
+        ws = None
+        while True:
+            if ws is None:
+                try:
+                    ws = simple_websocket.Client(url, headers=headers)
+                except Exception:
+                    sleep(1)
+                    continue
+            try:
+                message = ws.receive()
+                assert isinstance(message, str)
+                message_dict = json.loads(message)
+                if "method" in message_dict:
+                    request = TunnelRequest.model_validate_json(message)
+                    kwargs: Any = dict(
+                        headers=request.headers,
+                        params=request.query,
+                        **dict(data=json.dumps(request.body) if request.body else {}),
+                    )
+                    if not request.path.startswith("/_hooks/"):
+                        response = TunnelResponse(
+                            status=403,
+                            headers={},
+                            text="Forbidden",
+                            sessionPath=request.sessionPath,
+                            requestId=request.requestId,
+                        )
+                        ws.send(response.model_dump_json())
+                    else:
+                        response = requests.request(
+                            request.method,
+                            f"http://{HOST}:{Settings.server_port}{request.path}",
+                            **kwargs,
+                        )
+                        response_json = TunnelResponse(
+                            status=response.status_code,
+                            headers=dict(response.headers),
+                            text=response.text,
+                            sessionPath=request.sessionPath,
+                            requestId=request.requestId,
+                        ).model_dump_json()
+                        ws.send(response_json)
+
+                else:
+                    session = SessionPathMessage.model_validate_json(message)
+                    print(
+                        f"Hooks can also be fired from {Fore.GREEN} {CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}/_hooks/:hook-path{Fore.RESET}"
+                    )
+            except simple_websocket.ConnectionClosed as e:
+                print(f"Connection closed: {e}")
+                ws = None
+            except simple_websocket.ConnectionError as e:
+                print(f"Connection error: {e}")
+                ws = None
+            except KeyboardInterrupt:
+                ws.close()
+                break
+            except Exception as e:
+                print(f"Error: {e}")
+                ws.close()
+                ws = None
+
+    Thread(target=loop).start()
