@@ -192,7 +192,7 @@ class TestWorkflowC(BaseWorkflowTest):
                                 "key_b": "script b set this",
                             },
                             "status": "pending",
-                            "sourceStageType": "on-task",
+                            "sourceStageType": "tasklet",
                             "sourceStageTitle": "Script B",
                             "targetStageId": "job_c",
                             "targetStageType": "job",

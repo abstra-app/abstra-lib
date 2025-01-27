@@ -71,7 +71,7 @@ class TasksController:
 
         return {
             "title": stage.title,
-            "type_name": "on-task" if stage.type_name == "script" else stage.type_name,
+            "type_name": "tasklet" if stage.type_name == "script" else stage.type_name,
         }
 
     def get_nullable_stage(self, stage_id: Optional[str]):

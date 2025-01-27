@@ -196,7 +196,7 @@ class TestWorkflowD(BaseWorkflowTest):
                             "sourceStageType": "job",
                             "sourceStageTitle": "Job A",
                             "targetStageId": "script_b",
-                            "targetStageType": "on-task",
+                            "targetStageType": "tasklet",
                             "targetStageTitle": "Script B",
                             "created": {
                                 "at": ANY,
