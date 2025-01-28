@@ -35,3 +35,4 @@ class CustomInput(Input):
             self.value = self.change_event(value)
         else:
             self.value = value
+        return self.value

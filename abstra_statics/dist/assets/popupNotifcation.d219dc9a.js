@@ -1,2 +1,0 @@
-import{cM as o}from"./index.fba49db2.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},r=new Error().stack;r&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[r]="c1f19b3d-1518-43e6-a260-f0ee745421e5",e._sentryDebugIdIdentifier="sentry-dbid-c1f19b3d-1518-43e6-a260-f0ee745421e5")}catch{}})();const d=(e,r,n)=>{o.error({message:e,description:r,onClick:n})};export{d as p};
-//# sourceMappingURL=popupNotifcation.d219dc9a.js.map
