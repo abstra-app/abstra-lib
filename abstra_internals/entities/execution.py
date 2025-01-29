@@ -4,7 +4,12 @@ from uuid import uuid4
 
 from pydantic import field_serializer
 
-from abstra_internals.entities.execution_context import ClientContext
+from abstra_internals.entities.execution_context import (
+    ClientContext,
+    FormExecutionMock,
+    HookExecutionMock,
+    ScriptExecutionMock,
+)
 from abstra_internals.utils.datetime import to_utc_iso_string
 from abstra_internals.utils.serializable import Serializable
 
@@ -35,6 +40,15 @@ class Execution(Serializable, Generic[T]):
             created_at=datetime.datetime.now(),
             updated_at=None,
         )
+
+    def teardown_tests(self):
+        self.context.mock_execution.test_pending_tasks = []
+        if isinstance(self.context.mock_execution, HookExecutionMock):
+            self.context.mock_execution.test_request = None
+        elif isinstance(self.context.mock_execution, FormExecutionMock):
+            self.context.mock_execution.test_answers = []
+        elif isinstance(self.context.mock_execution, ScriptExecutionMock):
+            self.context.mock_execution.test_trigger_task = None
 
     def set_status(self, status: ExecutionStatus) -> None:
         if status == "running":

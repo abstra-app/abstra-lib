@@ -43,6 +43,7 @@ def ExecutionTarget(
             status = "failed"
             AbstraLogger.capture_exception(e)
         finally:
+            execution.teardown_tests()
             print(f"[ABSTRA] {now_str()} - Execution {status}")
             try:
                 execution.set_status(status)

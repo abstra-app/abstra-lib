@@ -27,7 +27,15 @@ class HookSDKController:
     def get_request(
         self,
     ) -> Tuple[Union[str, List, Dict], Dict[str, str], CaseInsensitiveDict]:
-        body, query, headers = self.get_raw_request()
+        if self.client.context.mock_execution.test_request:
+            test_request = self.client.context.mock_execution.test_request
+            body, query, headers = (
+                test_request.body,
+                test_request.query_params,
+                CaseInsensitiveDict(test_request.headers),
+            )
+        else:
+            body, query, headers = self.get_raw_request()
         try:
             if "application/json" in headers["Content-Type"]:
                 return json.loads(body), query, headers

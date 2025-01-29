@@ -140,6 +140,12 @@ class TasksSDKController:
     def get_stage_pending_tasks(
         self, limit: Union[int, None], offset: int, where: Dict
     ) -> List[Task]:
+        if self.execution.context.mock_execution.test_pending_tasks:
+            return [
+                Task(self, task)
+                for task in self.execution.context.mock_execution.test_pending_tasks
+            ]
+
         stage = self.project.get_stage(self.execution.stage_id)
         if not stage:
             raise Exception(f"Stage {self.execution.stage_id} not found")
@@ -181,6 +187,9 @@ class TasksSDKController:
     def get_trigger_task(self) -> Task:
         if not isinstance(self.execution.context, ScriptContext):
             raise user_exceptions.IncompatibleScriptSDK()
+
+        if self.execution.context.mock_execution.test_trigger_task:
+            return Task(self, self.execution.context.mock_execution.test_trigger_task)
 
         dto = self.repositories.tasks.get_by_id(self.execution.context.task_id)
         return Task(self, dto)

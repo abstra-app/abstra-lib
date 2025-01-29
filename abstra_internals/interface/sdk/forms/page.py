@@ -67,9 +67,6 @@ class Page(WidgetSchema):
         self._context = context if context is not None else self._context
         validate = validate if validate is not None else self._validate
 
-        is_test = self.controller.client.context.is_test
-        test_answers = self.controller.client.context.test_answers
-
         if self._context:
             for widget in self.widgets:
                 if (
@@ -81,13 +78,11 @@ class Page(WidgetSchema):
 
         for widget in self.widgets:
             if widget.type != "reactive" and isinstance(widget, Input):
-                if is_test and len(test_answers) == 0:
-                    raise Exception("Not enough test answers")
-                if is_test:
-                    widget.value = test_answers.pop(0)
+                if self.controller.client.is_test:
+                    widget.value = self.controller.client.get_next_answer()
                 self._context[widget.key] = widget.value
 
-        if is_test:
+        if self.controller.client.is_test:
             return PageResponse(self._context, "")
 
         rendered_page = self.render(context=self._context)
