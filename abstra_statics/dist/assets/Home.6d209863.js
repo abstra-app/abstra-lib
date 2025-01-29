@@ -1,2 +1,0 @@
-import{a0 as t,r as s,o as r,c}from"./index.0e5627cd.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},o=new Error().stack;o&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[o]="5e555e0b-7c58-4b7e-b570-1f7e4d2ab8df",e._sentryDebugIdIdentifier="sentry-dbid-5e555e0b-7c58-4b7e-b570-1f7e4d2ab8df")}catch{}})();const d={};function _(e,o){const n=s("RouterView");return r(),c(n,{class:"router"})}const f=t(d,[["render",_],["__scopeId","data-v-3c2b9654"]]);export{f as default};
-//# sourceMappingURL=Home.6d209863.js.map
