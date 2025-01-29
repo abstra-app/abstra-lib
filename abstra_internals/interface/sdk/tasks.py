@@ -2,6 +2,7 @@ from typing import Iterator, List, Optional
 
 from abstra_internals.controllers.sdk_context import SDKContextStore
 from abstra_internals.controllers.sdk_tasks import Task
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.tasks import TaskPayload
 from abstra_internals.utils.json import to_json_serializable
 
@@ -12,10 +13,18 @@ def get_tasks(
     limit: Optional[int] = None, offset=0, where: Optional[dict] = None
 ) -> List[Task]:
     context = SDKContextStore.get_by_thread()
-    if limit is None and where is None:
-        limit = 100
     if where is None:
         where = {}
+
+    if limit is None or limit < 1:
+        limit = 100
+    else:
+        if limit > 10000:
+            limit = 10000
+            AbstraLogger.warning(
+                "get_tasks limit is too high, capping it to 10000. To iterate over all tasks, use iter_tasks"
+            )
+
     return context.task_sdk.get_stage_pending_tasks(limit, offset, where)
 
 
