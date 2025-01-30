@@ -943,17 +943,13 @@ class Project:
         return None
 
     def get_workspace(self):
-        sidebar = [
-            stage.to_sidebar_item.as_dict for stage in self.list_accessible_stages()
-        ]
+        sidebar = [stage.to_sidebar_item.as_dict for stage in self.secured_stages]
         return StyleSettingsWithSidebar.from_dict(
             {**self.workspace.as_dict, "sidebar": sidebar}
         )
 
     def default_sidebar(self) -> Sidebar:
-        return Sidebar(
-            items=[stage.to_sidebar_item for stage in self.list_accessible_stages()]
-        )
+        return Sidebar(items=[stage.to_sidebar_item for stage in self.secured_stages])
 
     def get_access_control_by_stage_id(self, id: str) -> Optional[AccessSettings]:
         for stage in [self.home, *self.forms, *self.jobs]:
@@ -975,18 +971,6 @@ class Project:
         for stage in self.secured_stages:
             if stage.id == id:
                 return stage
-
-    def list_accessible_stages(
-        self, initial_forms_only: bool = True
-    ) -> Generator[SecuredStage, None, None]:
-        for stage in self.secured_stages:
-            if (
-                initial_forms_only
-                and isinstance(stage, FormStage)
-                and not stage.is_initial
-            ):
-                continue
-            yield stage
 
     def update_access_controls(self, changes: List[Dict[str, Any]]):
         response = []

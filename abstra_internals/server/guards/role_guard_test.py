@@ -320,6 +320,7 @@ class TestRequirementsApi(TestCase):
                 "accessible_stages_ids": [
                     "home",
                     "public_form_id",
+                    "public_pependent_form",
                     "protected_form_id",
                 ],
             },
@@ -328,6 +329,7 @@ class TestRequirementsApi(TestCase):
                 "accessible_stages_ids": [
                     "home",
                     "public_form_id",
+                    "public_pependent_form",
                     "protected_form_id",
                     "private_form_id",
                 ],
@@ -337,6 +339,7 @@ class TestRequirementsApi(TestCase):
                 "accessible_stages_ids": [
                     "home",
                     "public_form_id",
+                    "public_pependent_form",
                     "protected_form_id",
                 ],
             },

@@ -122,7 +122,7 @@ class Guard:
         visible_sidebar = Sidebar(items=[])
         if not self.enable:
             visible_sidebar.items = [
-                stage.to_sidebar_item for stage in project.list_accessible_stages()
+                stage.to_sidebar_item for stage in project.secured_stages
             ]
             return StyleSettingsWithSidebar.from_dict(
                 {**project.workspace.as_dict, "sidebar": visible_sidebar.as_dict}
@@ -134,7 +134,7 @@ class Guard:
                 user = self.repository.get_user(claims.email)
 
         if project.home.access_control.should_allow(user):
-            stages = [stage for stage in project.list_accessible_stages()]
+            stages = [stage for stage in project.secured_stages]
             for stage in stages:
                 if stage.access_control.should_allow(user):
                     visible_sidebar.items.append(stage.to_sidebar_item)
