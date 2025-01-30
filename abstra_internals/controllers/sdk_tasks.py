@@ -45,6 +45,10 @@ class Task:
     def type(self) -> str:
         return self._dto.type
 
+    @property
+    def payload(self) -> TaskPayload:
+        return self._dto.payload
+
     def get_payload(self) -> TaskPayload:
         return self._dto.payload
 
