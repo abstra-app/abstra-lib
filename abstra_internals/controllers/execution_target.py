@@ -67,9 +67,32 @@ Result = Tuple[Literal["finished", "abandoned", "failed"], Optional[Exception]]
 
 def print_exception(exception: Exception, entrypoint: Path):
     tb = exception.__traceback__
-    # tb.tb_frame.f_code.co_filename returns "c:" instead of "C:" on Windows
-    while tb and str(entrypoint).lower() != tb.tb_frame.f_code.co_filename.lower():
+
+    abstra_entrypoint_index = 0
+    legacy_thread_index = 0
+    index = 0
+
+    while tb:
+        # find abstra entrypoint
+        if str(entrypoint).lower() == tb.tb_frame.f_code.co_filename.lower():
+            abstra_entrypoint_index = index
+
+        # find legacy threads, if used
+        if tb.tb_frame.f_code.co_name == "use_legacy_threads":
+            legacy_thread_index = index
+        index += 1
         tb = tb.tb_next
+
+    user_frame_index = max(abstra_entrypoint_index, legacy_thread_index) + 1
+
+    # reset traceback
+    tb = exception.__traceback__
+
+    # remove unwanted frames
+    for _ in range(user_frame_index):
+        if tb:
+            tb = tb.tb_next
+
     traceback.print_exception(type(exception), exception, tb)
 
 

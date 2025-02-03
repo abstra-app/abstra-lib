@@ -28,9 +28,13 @@ def _make_debug_item_from_info(info: inspect.FrameInfo):
     }
 
 
-def _make_debug_item_from_stack(frame_summary: traceback.FrameSummary):
+def _make_debug_item_from_stack(
+    frame_summary: traceback.FrameSummary, legacy_filename: str
+):
     return {
-        "filename": frame_summary.filename,
+        "filename": legacy_filename
+        if frame_summary.filename == "<string>"
+        else frame_summary.filename,
         "lineno": frame_summary.lineno,
         "name": frame_summary.name,
         "locals": representations(frame_summary.locals or {}),
@@ -55,12 +59,22 @@ def make_exception_debug_data(e: Exception):
         type(e), e, e.__traceback__, capture_locals=True
     ).stack
     root_path = str(Settings.root_path)
+
+    # TODO: remove this when we remove the legacy threads
+    filename = ""
+    frame_names = [frame.name for frame in frames]
+    if "use_legacy_threads" in frame_names:
+        first_legacy_index = frame_names.index("use_legacy_threads")
+        filename = frames[first_legacy_index - 1].filename
+
     return {
         "debug": {
             "stack": [
-                _make_debug_item_from_stack(info)
+                _make_debug_item_from_stack(info, filename)
                 for info in (frames)
-                if root_path in info.filename or is_relative_path(info.filename)
+                if root_path in info.filename
+                or is_relative_path(info.filename)
+                or info.filename == "<string>"
             ]
         }
     }
