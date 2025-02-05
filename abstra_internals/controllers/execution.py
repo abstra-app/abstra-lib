@@ -12,7 +12,7 @@ from abstra_internals.entities.execution_context import (
     ScriptContext,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import Stage
+from abstra_internals.repositories.project.project import Stage, StageWithFile
 
 
 class NotStartedException(Exception):
@@ -42,7 +42,7 @@ class ExecutionController:
     def run(
         self,
         *,
-        stage: Stage,
+        stage: StageWithFile,
         client: Optional[ExecutionClient] = None,
         context: Optional[ClientContext] = None,
     ):

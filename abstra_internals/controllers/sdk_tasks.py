@@ -1,22 +1,15 @@
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 
-from abstra_internals.email_templates import task_waiting_template
-from abstra_internals.entities.execution import Execution, PreExecution
+from abstra_internals.controllers.common.task_executors import TaskExecutor
+from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import ScriptContext
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.interface.sdk.user_exceptions import (
     TaskNotWaiting,
     TaskWriteAttempt,
 )
-from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import (
-    FormStage,
-    Project,
-    ProjectRepository,
-    ScriptStage,
-    Stage,
-)
+from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.tasks import TaskDTO, TaskLockFailed, TaskPayload
 
 
@@ -84,62 +77,13 @@ class TasksSDKController:
         self.execution = execution
         self.repositories = repositories
         self.project = ProjectRepository().load()
+        self.executor = TaskExecutor(repositories)
 
-    def _get_task_targets(
-        self,
-        current_stage: Stage,
-        type: str,
-        task_payload: TaskPayload,
-        project: Project,
-        show_warning: bool = True,
-    ) -> List[Tuple[Stage, dict]]:
-        targets = []
-
-        possible_transitions = list(
-            filter(
-                lambda t: True if not t.task_type else type == t.task_type,
-                current_stage.workflow_transitions,
-            )
+    def send_task(self, type: str, payload: TaskPayload) -> None:
+        stage = self.project.get_stage_raises(self.execution.stage_id)
+        self.executor.send_task(
+            type=type, current_stage=stage, payload=payload, execution=self.execution
         )
-
-        for transition in possible_transitions:
-            target_stage = project.get_stage(transition.target_id)
-            if not target_stage:
-                continue
-
-            targets.append((target_stage, task_payload))
-
-        if len(targets) == 0 and show_warning:
-            AbstraLogger.warning(
-                f"Task with payload {task_payload} was deleted, no transitions were satisfied with the type: {type}"
-            )
-
-        return targets
-
-    def send_task(self, type: str, payload: TaskPayload, show_warning=True) -> None:
-        current_stage = self.project.get_stage(self.execution.stage_id)
-
-        if not current_stage:
-            raise Exception(f"Stage {self.execution.stage_id} not found")
-
-        target_stages = self._get_task_targets(
-            current_stage, type, payload, self.project, show_warning=show_warning
-        )
-
-        for stage, task_payload in target_stages:
-            task = self.repositories.tasks.send_task(
-                type, task_payload, stage.id, current_stage.id, self.execution.id
-            )
-            self._send_waiting_thread_notification(task)
-            self.execution.context.sent_tasks.append(task.id)
-
-            if isinstance(stage, ScriptStage):
-                self.repositories.producer.submit(
-                    PreExecution(
-                        context=ScriptContext(task_id=task.id),
-                        stage_id=stage.id,
-                    )
-                )
 
     def get_stage_pending_tasks(
         self, limit: Union[int, None], offset: int, where: Dict
@@ -197,21 +141,3 @@ class TasksSDKController:
 
         dto = self.repositories.tasks.get_by_id(self.execution.context.task_id)
         return Task(self, dto)
-
-    def _send_waiting_thread_notification(self, task: TaskDTO):
-        stage = self.project.get_stage(task.target_stage_id)
-        if not stage:
-            raise Exception(f"Stage {task.target_stage_id} not found")
-
-        if not (isinstance(stage, FormStage) and stage.notification_trigger.enabled):
-            return
-
-        recipient_emails = stage.notification_trigger.get_recipients(task.payload)
-        if not recipient_emails:
-            return
-
-        self.repositories.email.send(
-            task_waiting_template.generate_email(
-                recipient_emails=recipient_emails, form=stage
-            )
-        )

@@ -20,6 +20,7 @@ from .migration_009 import Migration009
 from .migration_010 import Migration010
 from .migration_011 import Migration011
 from .migration_012 import Migration012
+from .migration_013 import Migration013
 
 MIGRATIONS: List[Type[Migration]] = [
     Migration001,
@@ -34,6 +35,7 @@ MIGRATIONS: List[Type[Migration]] = [
     Migration010,
     Migration011,
     Migration012,
+    Migration013,
 ]
 
 

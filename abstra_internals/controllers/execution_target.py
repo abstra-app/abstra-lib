@@ -10,7 +10,7 @@ from abstra_internals.entities.execution import Execution
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.modules import import_as_new
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import Stage
+from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.usage import execution_usage
 from abstra_internals.utils.datetime import now_str
 
@@ -19,7 +19,7 @@ DEFAULT_STATUS = "failed"
 
 def ExecutionTarget(
     *,
-    stage: Stage,
+    stage: StageWithFile,
     execution: Execution,
     client: ExecutionClient,
     repositories: Repositories,

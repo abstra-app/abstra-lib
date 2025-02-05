@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import List, Optional, Tuple
 
 from abstra_internals.interface.sdk import user_exceptions
-from abstra_internals.repositories.execution import ExecutionRepository
+from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import ProjectRepository
-from abstra_internals.repositories.tasks import TaskDTO, TasksRepository
+from abstra_internals.repositories.tasks import TaskDTO
 
 
 @dataclass
@@ -56,11 +56,9 @@ class ListTasksItem(TaskDTO):
 class TasksController:
     def __init__(
         self,
-        tasks_repo: TasksRepository,
-        execution_repo: ExecutionRepository,
+        repositories: Repositories,
     ) -> None:
-        self.task_repo = tasks_repo
-        self.execution_repo = execution_repo
+        self.repos = repositories
 
     def get_stage(self, stage_id: str):
         project = ProjectRepository().load()
@@ -86,7 +84,7 @@ class TasksController:
         self, req: Optional[DataRequest] = None
     ) -> Tuple[List[ListTasksItem], int]:
         items = []
-        for task in self.task_repo.get_all_tasks():
+        for task in self.repos.tasks.get_all_tasks():
             if (
                 req
                 and req.filter.stage
@@ -128,7 +126,7 @@ class TasksController:
 
     def get_stage_tasks(self, stage_id) -> List[ListTasksItem]:
         target_stage = self.get_stage(stage_id)
-        tasks = self.task_repo.get_stage_tasks(stage_id)
+        tasks = self.repos.tasks.get_stage_tasks(stage_id)
 
         if not target_stage["title"]:
             raise Exception(f"Stage {stage_id} not found")
@@ -151,7 +149,7 @@ class TasksController:
     def get_sent_tasks(self, stage_id) -> List[ListTasksItem]:
         all_tasks, _ = self.list_tasks()
         tasks_with_executions = [
-            (task, self.execution_repo.get(task.created.by_execution_id))
+            (task, self.repos.execution.get(task.created.by_execution_id))
             for task in all_tasks
             if task.created.by_execution_id is not None
         ]
@@ -174,12 +172,21 @@ class TasksController:
 
     def update_task_status(self, task_id: str, status: str) -> None:
         if status == "completed":
-            self.task_repo.complete_task(task_id, None, None)
+            self.repos.tasks.complete_task(task_id, None, None)
         elif status == "pending":
-            self.task_repo.set_task_to_pending(task_id)
+            self.repos.tasks.set_task_to_pending(task_id)
         else:
             raise user_exceptions.TaskInvalidStatus(status)
 
-    def create_task(self, name: str, stage_id: str, payload: dict) -> TaskDTO:
-        task = self.task_repo.send_task(name, payload, stage_id, None, None)
+    def create_task(
+        self,
+        name: str,
+        stage_id: str,
+        payload: dict,
+        source_stage_id: Optional[str] = None,
+        execution_id: Optional[str] = None,
+    ) -> TaskDTO:
+        task = self.repos.tasks.send_task(
+            name, payload, stage_id, source_stage_id, execution_id
+        )
         return task

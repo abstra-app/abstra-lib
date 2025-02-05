@@ -1,10 +1,4 @@
-from unittest import TestCase
-
-from abstra_internals.controllers.workflows import (
-    get_path,
-    get_workflow,
-    update_workflow,
-)
+from abstra_internals.controllers.workflows import WorkflowController
 from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
@@ -13,22 +7,23 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
     WorkflowTransition,
 )
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import BaseTest, clear_dir
 
 
-class WorkflowTest(TestCase):
+class WorkflowTest(BaseTest):
     def setUp(self):
-        self.root = init_dir()
+        super().setUp()
+        self.wf_controller = WorkflowController(self.repositories)
 
     def tearDown(self) -> None:
         clear_dir(self.root)
 
     def test_empty_project(self):
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, [])
 
     def test_get_empty(self):
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(workflow, {"stages": [], "transitions": []})
 
     def test_get_with_stages(self):
@@ -47,8 +42,8 @@ class WorkflowTest(TestCase):
             ],
             "transitions": [],
         }
-        update_workflow(initial_state)
-        workflow = get_workflow()
+        self.wf_controller.update_workflow(initial_state)
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(workflow, initial_state)
 
     def test_get_with_transitions(self):
@@ -86,7 +81,7 @@ class WorkflowTest(TestCase):
             ],
         }
 
-        updated_workflow = update_workflow(initial_state)
+        updated_workflow = self.wf_controller.update_workflow(initial_state)
 
         self.assertEqual(updated_workflow, initial_state)
 
@@ -94,7 +89,7 @@ class WorkflowTest(TestCase):
 
         self.assertEqual(len(project.forms[0].workflow_transitions), 1)
 
-        gotten_workflow = get_workflow()
+        gotten_workflow = self.wf_controller.get_workflow()
         self.assertEqual(gotten_workflow, initial_state)
 
         initial_state = {
@@ -131,12 +126,12 @@ class WorkflowTest(TestCase):
             ],
         }
 
-        updated_workflow = update_workflow(initial_state)
+        updated_workflow = self.wf_controller.update_workflow(initial_state)
 
         self.assertEqual(updated_workflow, initial_state)
 
     def test_update_add_stages(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -153,11 +148,11 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 1)
 
     def test_update_remove_stages(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -174,19 +169,19 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 1)
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [],
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 0)
 
     def test_update_change_stage_position(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -203,10 +198,10 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["position"], {"x": 0, "y": 0})
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -223,12 +218,12 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["position"], {"x": 1, "y": 1})
 
     def test_update_change_stage_title(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -245,10 +240,10 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["title"], "Foo")
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -265,12 +260,12 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["title"], "Bar")
 
     def test_update_add_transitions(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -297,9 +292,9 @@ class WorkflowTest(TestCase):
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["transitions"]), 0)
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -334,11 +329,11 @@ class WorkflowTest(TestCase):
                 ],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["transitions"]), 1)
 
     def test_update_remove_transitions(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -373,19 +368,19 @@ class WorkflowTest(TestCase):
                 ],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["transitions"]), 1)
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [],
                 "transitions": [],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["transitions"]), 0)
 
     def test_update_change_transition_type(self):
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -420,10 +415,10 @@ class WorkflowTest(TestCase):
                 ],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["transitions"]), 1)
         self.assertEqual(workflow["transitions"][0]["type"], "foo")
-        update_workflow(
+        self.wf_controller.update_workflow(
             {
                 "stages": [
                     {
@@ -457,7 +452,7 @@ class WorkflowTest(TestCase):
                 ],
             }
         )
-        workflow = get_workflow()
+        workflow = self.wf_controller.get_workflow()
         self.assertEqual(len(workflow["transitions"]), 1)
         self.assertEqual(workflow["transitions"][0]["type"], "bar")
 
@@ -477,7 +472,7 @@ class WorkflowTest(TestCase):
         project.forms.append(form)
         ProjectRepository.save(project)
 
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form"])
 
     def test_more_then_one_stage(self):
@@ -511,7 +506,7 @@ class WorkflowTest(TestCase):
         project.scripts.append(script)
         ProjectRepository.save(project)
 
-        path = get_path(2)
+        path = self.wf_controller.get_path(2)
         self.assertEqual(path, ["form", "script"])
 
     def test_more_stages_then_limit(self):
@@ -545,7 +540,7 @@ class WorkflowTest(TestCase):
         project.scripts.append(script)
         ProjectRepository.save(project)
 
-        path = get_path(1)
+        path = self.wf_controller.get_path(1)
         self.assertEqual(path, ["form"])
 
     def test_more_then_one_path(self):
@@ -611,7 +606,7 @@ class WorkflowTest(TestCase):
         project.scripts.append(script3)
         ProjectRepository.save(project)
 
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form0", "script2", "script3"])
 
     def test_more_than_one_initial_stage(self):
@@ -701,7 +696,7 @@ class WorkflowTest(TestCase):
         project.forms.append(form2)
         ProjectRepository.save(project)
 
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form1", "form2", "script2"])
 
     def test_disjointed_graphs(self):
@@ -804,7 +799,7 @@ class WorkflowTest(TestCase):
         project.forms.append(form3)
         ProjectRepository.save(project)
 
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form1", "form2", "form3"])
 
     def test_simple_loop(self):
@@ -862,7 +857,7 @@ class WorkflowTest(TestCase):
         project.scripts.append(script1)
         ProjectRepository.save(project)
 
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["job0", "form0", "script1"])
 
     def test_dont_enter_in_loops(self):
@@ -920,7 +915,7 @@ class WorkflowTest(TestCase):
         project.scripts.append(script1)
         ProjectRepository.save(project)
 
-        path = get_path(10)
+        path = self.wf_controller.get_path(10)
         self.assertEqual(path, ["job0", "form0", "script1"])
 
     def test_clips_the_largest_path(self):
@@ -1046,5 +1041,5 @@ class WorkflowTest(TestCase):
         project.scripts.append(script3)
         ProjectRepository.save(project)
 
-        path = get_path(3)
+        path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form0", "form1", "form2"])

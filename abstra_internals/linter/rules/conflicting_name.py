@@ -20,9 +20,8 @@ class AddPreffix(LinterFix):
 
         project = ProjectRepository.load()
 
-        for stage in project.workflow_stages:
-            if stage.file_path == self.file:
-                project.update_stage(stage, dict(file=str(new_file.name)))
+        for stage in project.get_stages_by_file_path(self.file):
+            project.update_stage(stage, dict(file=str(new_file.name)))
 
         ProjectRepository.save(project)
 

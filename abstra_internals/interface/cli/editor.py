@@ -6,6 +6,7 @@ from werkzeug.serving import make_server
 from abstra_internals.cloud_api import connect_tunnel
 from abstra_internals.controllers.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
+from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST
 from abstra_internals.fs_watcher import watch_file_change_events
 from abstra_internals.interface.cli.messages import serve_message
@@ -68,6 +69,9 @@ def editor(headless: bool):
     start_file_watcher()
     start_resources_watcher()
     start_consumer(controller)
+
+    role_client_controller = RoleClientController(controller.repositories)
+    role_client_controller.loop_sync_connection_pool()
 
     app = get_local_app(controller)
     server = make_server(host=HOST, port=Settings.server_port, threaded=True, app=app)

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
 from abstra_internals.repositories.project.project import (
@@ -7,7 +7,7 @@ from abstra_internals.repositories.project.project import (
     JobStage,
     ProjectRepository,
     ScriptStage,
-    Stage,
+    StageWithFile,
 )
 from abstra_internals.templates import (
     new_form_code,
@@ -20,11 +20,9 @@ from abstra_internals.templates import (
 class AddEntrypoint(LinterFix):
     label = "Add entrypoint"
     description = "Creates the .py file for the entrypoint"
-    stage: Union[FormStage, HookStage, JobStage, ScriptStage]
+    stage: StageWithFile
 
-    def __init__(
-        self, stage: Union[FormStage, HookStage, JobStage, ScriptStage]
-    ) -> None:
+    def __init__(self, stage: StageWithFile) -> None:
         self.stage = stage
 
     def make_label(self):
@@ -50,7 +48,7 @@ class AddEntrypoint(LinterFix):
 
 
 class NoEntrypointFound(LinterIssue):
-    def __init__(self, stage: Stage) -> None:
+    def __init__(self, stage: StageWithFile) -> None:
         self.label = f"The {stage.type_name} entitled {stage.title} points to a non-existent file: {stage.file}"
         self.fixes = [AddEntrypoint(stage)]
 

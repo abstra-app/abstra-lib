@@ -9,6 +9,7 @@ from abstra_internals.entities.execution_context import (
     extract_flask_request,
 )
 from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories.project.project import FormStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
@@ -91,6 +92,9 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
 
         form = controller.update_stage(id, data)
-        return form.editor_dto if form else None
+        if isinstance(form, FormStage):
+            return form.editor_dto
+        else:
+            return None
 
     return bp

@@ -13,7 +13,13 @@ from abstra_internals.contracts_generated import (
     CloudApiCliBuildCreateResponse,
 )
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import CLOUD_API_CLI_URL, CLOUD_API_ENDPOINT, HOST
+from abstra_internals.environment import (
+    CLOUD_API_CLI_URL,
+    CLOUD_API_ENDPOINT,
+    HOST,
+    IS_PRODUCTION,
+    PROJECT_ID,
+)
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
 
@@ -82,18 +88,32 @@ def cancel_all(headers: dict, thread_id: str):
     r.raise_for_status()
 
 
-def get_project_info(headers: dict):
-    url = f"{CLOUD_API_CLI_URL}/project"
+def get_project_info(headers: dict, project_id: Optional[str] = None):
+    if project_id:
+        url = f"{CLOUD_API_CLI_URL}/project/{project_id}"
+    else:
+        url = f"{CLOUD_API_CLI_URL}/project"
     r = requests.get(url, headers=headers)
     r.raise_for_status()
     return r.json()
+
+
+def get_project_id():
+    if IS_PRODUCTION:
+        return PROJECT_ID
+
+    else:
+        headers = resolve_headers()
+        if headers is None:
+            return None
+        return get_project_info(headers)["id"]
 
 
 class TunnelRequest(BaseModel):
     method: str
     path: str
     headers: dict
-    body: Optional[dict]
+    body: Optional[str]
     query: dict
     sessionPath: str
     requestId: str
@@ -139,13 +159,15 @@ def connect_tunnel():
                     kwargs: Any = dict(
                         headers=request.headers,
                         params=request.query,
-                        **dict(data=json.dumps(request.body) if request.body else {}),
+                        **dict(data=request.body if request.body else {}),
                     )
-                    if not request.path.startswith("/_hooks/"):
+                    if not request.path.startswith(
+                        "/_hooks/"
+                    ) and not request.path.startswith("/_tasks"):
                         response = TunnelResponse(
                             status=403,
                             headers={},
-                            text="Forbidden",
+                            text=f"Forbidden path: {request.path}",
                             sessionPath=request.sessionPath,
                             requestId=request.requestId,
                         )
@@ -166,9 +188,14 @@ def connect_tunnel():
                         ws.send(response_json)
 
                 else:
+                    global session
                     session = SessionPathMessage.model_validate_json(message)
+                    public_url = (
+                        f"{CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}"
+                    )
+                    Settings.set_public_url(public_url)
                     print(
-                        f"Hooks can also be fired from {Fore.GREEN} {CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}/_hooks/:hook-path{Fore.RESET}"
+                        f"Hooks can also be fired from {Fore.GREEN} {public_url}/_hooks/:hook-path{Fore.RESET}"
                     )
             except simple_websocket.ConnectionClosed as e:
                 print(f"Connection closed: {e}")
@@ -184,4 +211,4 @@ def connect_tunnel():
                 ws.close()
                 ws = None
 
-    Thread(target=loop).start()
+    Thread(target=loop, daemon=True).start()

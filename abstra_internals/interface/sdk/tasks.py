@@ -33,7 +33,7 @@ def send_task(type: str, payload: TaskPayload, show_warning=True) -> None:
     if not isinstance(payload, dict):
         raise Exception("Task payload must be a dictionary")
     serializable_payload = {k: to_json_serializable(v) for k, v in payload.items()}
-    context.task_sdk.send_task(type, serializable_payload, show_warning=show_warning)
+    context.task_sdk.send_task(type, serializable_payload)
 
 
 def get_trigger_task() -> Task:

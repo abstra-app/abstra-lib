@@ -22,10 +22,7 @@ from abstra_internals.repositories.execution_logs import (
     LogEntry,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.jwt_signer import (
-    EditorJWTRepository,
-    JWTRepository,
-)
+from abstra_internals.repositories.jwt_signer import EditorJWTRepository, JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
 from abstra_internals.repositories.producer import ProducerRepository
 from abstra_internals.repositories.project.project import (
@@ -35,6 +32,7 @@ from abstra_internals.repositories.project.project import (
     ProjectRepository,
     ScriptStage,
     Stage,
+    StageWithFile,
     StyleSettingsWithSidebar,
 )
 from abstra_internals.repositories.roles import RolesRepository
@@ -386,7 +384,9 @@ class MainController:
         if not stage:
             raise Exception(f"Stage with id {id} not found")
 
-        if code_content := changes.pop("code_content", None):
+        if isinstance(stage, StageWithFile) and (
+            code_content := changes.pop("code_content", None)
+        ):
             Settings.root_path.joinpath(stage.file_path).write_text(
                 code_content, encoding="utf-8"
             )

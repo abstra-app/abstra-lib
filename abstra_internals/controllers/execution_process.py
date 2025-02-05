@@ -5,7 +5,7 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution import ClientContext
 from abstra_internals.environment import set_SERVER_UUID, set_WORKER_UUID
 from abstra_internals.logger import AbstraLogger, Environment
-from abstra_internals.repositories.project.project import Stage
+from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
 
@@ -17,7 +17,7 @@ def ExecutionProcess(
     server_port: int,
     worker_uuid: str,
     arbiter_uuid: str,
-    stage: Stage,
+    stage: StageWithFile,
     controller: MainController,
     environment: Optional[Environment],
     request: Optional[ClientContext] = None,

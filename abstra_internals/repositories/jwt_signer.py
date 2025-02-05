@@ -53,7 +53,8 @@ class LocalJWTRepository(JWTRepository):
             payload={
                 "email": email,
                 "aud": PROJECT_ID,
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+                "exp": datetime.datetime.now(datetime.timezone.utc)
+                + datetime.timedelta(days=7),
             },
         )
 

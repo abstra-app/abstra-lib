@@ -38,7 +38,6 @@ class TestWorkflowA(BaseWorkflowTest):
                 },
                 "props": {
                     "filename": "job_a.py",
-                    "path": None,
                 },
             },
             {
@@ -51,7 +50,6 @@ class TestWorkflowA(BaseWorkflowTest):
                 },
                 "props": {
                     "filename": "script_b.py",
-                    "path": None,
                 },
             },
         ]
@@ -80,7 +78,6 @@ class TestWorkflowA(BaseWorkflowTest):
                         "position": {"x": 0.0, "y": 0.0},
                         "props": {
                             "filename": "job_a.py",
-                            "path": None,
                         },
                         "title": "Job A",
                         "type": "jobs",
@@ -90,7 +87,6 @@ class TestWorkflowA(BaseWorkflowTest):
                         "position": {"x": 20.0, "y": 20.0},
                         "props": {
                             "filename": "script_b.py",
-                            "path": None,
                         },
                         "title": "Script B",
                         "type": "scripts",
@@ -130,6 +126,7 @@ class TestWorkflowA(BaseWorkflowTest):
                     "offset": 0,
                 },
             )
+            self.assertEqual(response.status_code, 200)
 
             tasks = response.get_json()["tasks"]
             if (

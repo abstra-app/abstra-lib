@@ -3,6 +3,7 @@ import flask
 from abstra_internals.controllers.execution import ExecutionController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution_context import ScriptContext
+from abstra_internals.repositories.project.project import ScriptStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
 
@@ -45,7 +46,10 @@ def get_editor_bp(controller: MainController):
             flask.abort(400)
 
         script = controller.update_stage(id, data)
-        return script.editor_dto if script else None
+        if isinstance(script, ScriptStage):
+            return script.editor_dto
+        else:
+            return None
 
     @bp.delete("/<path:id>")
     @editor_usage

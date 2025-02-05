@@ -46,7 +46,6 @@ class TestWorkflowD(BaseWorkflowTest):
                 },
                 "props": {
                     "filename": "job_a.py",
-                    "path": None,
                 },
             },
             {
@@ -59,7 +58,6 @@ class TestWorkflowD(BaseWorkflowTest):
                 },
                 "props": {
                     "filename": "script_b.py",
-                    "path": None,
                 },
             },
             {
@@ -72,7 +70,6 @@ class TestWorkflowD(BaseWorkflowTest):
                 },
                 "props": {
                     "filename": "script_c.py",
-                    "path": None,
                 },
             },
         ]
@@ -101,7 +98,6 @@ class TestWorkflowD(BaseWorkflowTest):
                         "position": {"x": 0.0, "y": 0.0},
                         "props": {
                             "filename": "job_a.py",
-                            "path": None,
                         },
                         "title": "Job A",
                         "type": "jobs",
@@ -111,7 +107,6 @@ class TestWorkflowD(BaseWorkflowTest):
                         "position": {"x": 20.0, "y": 20.0},
                         "props": {
                             "filename": "script_b.py",
-                            "path": None,
                         },
                         "title": "Script B",
                         "type": "scripts",
@@ -121,7 +116,6 @@ class TestWorkflowD(BaseWorkflowTest):
                         "position": {"x": 40.0, "y": 40.0},
                         "props": {
                             "filename": "script_c.py",
-                            "path": None,
                         },
                         "title": "Script C",
                         "type": "scripts",

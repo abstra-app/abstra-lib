@@ -58,6 +58,14 @@ from abstra_internals.repositories.roles import (
     ProductionRolesRepository,
     RolesRepository,
 )
+from abstra_internals.repositories.services import (
+    LocalRoleAgentRepository,
+    LocalRoleClientRepository,
+    ProductionRoleAgentRepository,
+    ProductionRoleClientRepository,
+)
+from abstra_internals.repositories.services.roles.agent import RoleAgentRepository
+from abstra_internals.repositories.services.roles.client import RoleClientRepository
 from abstra_internals.repositories.tables import (
     LocalTablesApiHttpClient,
     ProductionTablesApiHttpClient,
@@ -94,6 +102,8 @@ class Repositories:
     tables: TablesApiHttpClient
     users: UsersRepository
     editor_jwt: EditorJWTRepository
+    role_agents: RoleAgentRepository
+    role_clients: RoleClientRepository
 
 
 def get_editor_repositories():
@@ -112,6 +122,8 @@ def get_editor_repositories():
         users=LocalUsersRepository(),
         jwt=LocalJWTRepository(),
         kv=LocalKVRepository(),
+        role_agents=LocalRoleAgentRepository(CLOUD_API_CLI_URL),
+        role_clients=LocalRoleClientRepository(CLOUD_API_CLI_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
     )
@@ -134,6 +146,8 @@ def get_prodution_app_repositories():
         ai=ProductionAiApiHttpClient(SIDECAR_URL),
         jwt=ProductionJWTRepository(SIDECAR_URL),
         kv=ProductionKVRepository(SIDECAR_URL),
+        role_agents=ProductionRoleAgentRepository(SIDECAR_URL),
+        role_clients=ProductionRoleClientRepository(SIDECAR_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=ForkserverContextRepository(),
     )

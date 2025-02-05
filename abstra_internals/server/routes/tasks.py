@@ -6,10 +6,7 @@ from abstra_internals.usage import editor_usage
 
 
 def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
-    controller = TasksController(
-        tasks_repo=main_controller.tasks_repository,
-        execution_repo=main_controller.execution_repository,
-    )
+    controller = TasksController(repositories=main_controller.repositories)
     bp = flask.Blueprint("tasks", __name__)
 
     @bp.post("/list")

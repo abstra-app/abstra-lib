@@ -4,6 +4,7 @@ import shutil
 import sys
 import tempfile
 import uuid
+from abc import ABC, abstractmethod
 from dataclasses import field
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
@@ -12,6 +13,7 @@ from pydantic.dataclasses import dataclass
 
 from abstra_internals.constants import ABSTRA_LOGO_URL, get_project_url
 from abstra_internals.contracts_generated import CommonUser
+from abstra_internals.entities.agents import AgentEntrypoint
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
@@ -28,7 +30,52 @@ from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
 
 ServedStage = Union["FormStage", "HookStage"]
-Stage = Union["FormStage", "HookStage", "JobStage", "ScriptStage"]
+StageType = Literal["form", "hook", "job", "script", "agent", "client"]
+
+
+class Stage(ABC):
+    id: str
+    title: str
+    workflow_transitions: List["WorkflowTransition"]
+    workflow_position: Tuple[float, float]
+    type_name: StageType
+
+    @property
+    @abstractmethod
+    def as_dict(self) -> dict:
+        pass
+
+    @property
+    @abstractmethod
+    def editor_dto(self) -> dict:
+        pass
+
+    @property
+    @abstractmethod
+    def admin_dto(self) -> dict:
+        pass
+
+    @abstractmethod
+    def update(self, changes: Dict[str, Any]):
+        pass
+
+    @abstractmethod
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)) -> "Stage":
+        pass
+
+    def __post_init__(self):
+        self.workflow_transitions = self.workflow_transitions or []
+
+
+class StageWithFile(Stage):
+    file: str
+
+    @property
+    @abstractmethod
+    def file_path(self) -> Path:
+        pass
+
+
 SecuredStage = Union["FormStage", "Home"]
 
 Languages = Literal[
@@ -82,18 +129,11 @@ class WorkflowTransition:
     def __post_init__(self):
         self.id = str(uuid.uuid4()) if self.id is None else self.id
 
-    def matches(self, variable_value):
-        if self.type != "conditions:patternMatched":
-            return False
-        if isinstance(variable_value, int) or isinstance(variable_value, float):
-            return self.task_type == str(variable_value)
-        if isinstance(variable_value, str):
-            return self.task_type == variable_value
-        elif variable_value is None:
-            return self.task_type is None or self.task_type == ""
-        else:
-            print(f"Unknown type {type(variable_value)} for variable_value")
-        return False
+    def matches(self, task_type: str):
+        if self.task_type is None or self.task_type.strip() == "":
+            return True
+        elif isinstance(task_type, str):
+            return self.task_type == task_type
 
     @property
     def as_dict(self) -> dict:
@@ -118,7 +158,7 @@ class WorkflowTransition:
         )
 
     @staticmethod
-    def default_type(source_type: Literal["form", "hook", "job", "script"]):
+    def default_type(source_type: StageType) -> str:
         if source_type == "form":
             return "forms:finished"
         elif source_type == "hook":
@@ -132,7 +172,7 @@ class WorkflowTransition:
 
 
 @dataclass
-class HookStage:
+class HookStage(StageWithFile):
     id: str
     file: str
     path: str
@@ -141,7 +181,7 @@ class HookStage:
     workflow_position: Tuple[float, float]
     is_initial: bool = True
     enabled: bool = False
-    type_name: Literal["hook"] = "hook"
+    type_name = "hook"
 
     @staticmethod
     def from_dict(dto: dict):
@@ -231,14 +271,14 @@ class HookStage:
 
 
 @dataclass
-class ScriptStage:
+class ScriptStage(StageWithFile):
     id: str
     file: str
     title: str
     workflow_transitions: List[WorkflowTransition]
     workflow_position: Tuple[float, float]
     is_initial: bool = True
-    type_name: Literal["script"] = "script"
+    type_name = "script"
 
     @staticmethod
     def create(
@@ -308,7 +348,7 @@ class ScriptStage:
             else:
                 raise Exception(f"Cannot update {attr} of script")
 
-    def duplicate(self, new_id: str, new_position: Tuple[int, int]):
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
         return self.from_dict(
             {
                 **self.as_dict,
@@ -353,14 +393,14 @@ class AccessSettings:
 
 
 @dataclass
-class JobStage:
+class JobStage(StageWithFile):
     id: str
     file: str
     title: str
     schedule: str
     workflow_position: Tuple[float, float]
     workflow_transitions: List[WorkflowTransition]
-    type_name: Literal["job"] = "job"
+    type_name = "job"
 
     is_initial = True
 
@@ -427,7 +467,7 @@ class JobStage:
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
-    def duplicate(self, new_id: str, new_position: Tuple[int, int]):
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
         return self.from_dict(
             {
                 **self.as_dict,
@@ -439,7 +479,7 @@ class JobStage:
 
 
 @dataclass
-class FormStage:
+class FormStage(StageWithFile):
     id: str
     file: str
     title: str
@@ -461,7 +501,7 @@ class FormStage:
         default_factory=lambda: AccessSettings(is_public=False, required_roles=[])
     )
 
-    type_name: Literal["form"] = "form"
+    type_name = "form"
 
     @staticmethod
     def create(
@@ -603,7 +643,7 @@ class FormStage:
             else:
                 raise Exception(f"Cannot update {attr} of form")
 
-    def duplicate(self, new_id: str, new_position: Tuple[int, int]):
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
         return self.from_dict(
             {
                 **self.as_dict,
@@ -621,6 +661,150 @@ class FormStage:
             "is_public": self.access_control.is_public,
             "required_roles": self.access_control.required_roles,
         }
+
+
+@dataclass
+class AgentStage(Stage):
+    id: str
+    title: str
+    project_id: Optional[str]
+    workflow_transitions: List[WorkflowTransition]
+    workflow_position: Tuple[float, float]
+    client_stage_id: Optional[str]
+    type_name = "agent"
+
+    @staticmethod
+    def from_dict(data: Dict):
+        x, y = data["workflow_position"]
+        return AgentStage(
+            id=data["id"],
+            title=data["title"],
+            project_id=data["project_id"],
+            client_stage_id=data["client_stage_id"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
+
+    @property
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "project_id": self.project_id,
+            "workflow_position": self.workflow_position,
+            "transitions": [t.as_dict for t in self.workflow_transitions],
+            "client_stage_id": self.client_stage_id,
+        }
+
+    def update(self, changes: Dict[str, Any]):
+        for attr, value in changes.items():
+            if attr in ["title", "project_id"]:
+                setattr(self, attr, value)
+            else:
+                raise Exception(f"Cannot update {attr} of agent")
+
+    @staticmethod
+    def create(title: str, project_id: str, id: Union[str, None] = None):
+        _id = id or str(uuid.uuid4())
+        return AgentStage(
+            id=_id,
+            title=title,
+            project_id=project_id,
+            client_stage_id="",
+            workflow_transitions=[],
+            workflow_position=(0, 0),
+        )
+
+    @property
+    def editor_dto(self):
+        return self.as_dict
+
+    @property
+    def admin_dto(self):
+        return {
+            "title": self.title,
+            "id": self.id,
+            "type": "agent",
+        }
+
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
+        return self.from_dict(
+            {
+                **self.as_dict,
+                "id": new_id,
+                "workflow_position": new_position,
+                "transitions": [],
+            }
+        )
+
+
+@dataclass
+class ClientStage(Stage):
+    id: str
+    title: str
+    workflow_transitions: List[WorkflowTransition]
+    workflow_position: Tuple[float, float]
+    type_name = "client"
+
+    @staticmethod
+    def from_dict(data: Dict):
+        x, y = data["workflow_position"]
+        return ClientStage(
+            id=data["id"],
+            title=data["title"],
+            workflow_position=(x, y),
+            workflow_transitions=[
+                WorkflowTransition.from_dict(t) for t in data["transitions"]
+            ],
+        )
+
+    @property
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "workflow_position": self.workflow_position,
+            "transitions": [t.as_dict for t in self.workflow_transitions],
+        }
+
+    def update(self, changes: Dict[str, Any]):
+        for attr, value in changes.items():
+            if attr in ["id", "title"]:
+                setattr(self, attr, value)
+            else:
+                raise Exception(f"Cannot update {attr} of script")
+
+    @property
+    def editor_dto(self):
+        return self.as_dict
+
+    @property
+    def admin_dto(self):
+        return {
+            "title": self.title,
+            "id": self.id,
+            "type": "client",
+        }
+
+    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
+        return self.from_dict(
+            {
+                **self.as_dict,
+                "id": new_id,
+                "workflow_position": new_position,
+                "transitions": [],
+            }
+        )
+
+    def get_agent_entrypoint(self):
+        return AgentEntrypoint(
+            title=self.title,
+            client_stage_id=self.id,
+            input_schemas=None,
+            output_schemas=None,
+        )
 
 
 @dataclass
@@ -870,6 +1054,8 @@ class Project:
     forms: List[FormStage]
     hooks: List[HookStage]
     jobs: List[JobStage]
+    agents: List[AgentStage]
+    clients: List[ClientStage]
 
     _graph: Graph
 
@@ -893,15 +1079,34 @@ class Project:
             "hooks": [hook.as_dict for hook in self.hooks],
             "forms": [form.as_dict for form in self.forms],
             "scripts": [script.as_dict for script in self.scripts],
+            "agents": [agent.as_dict for agent in self.agents],
+            "clients": [client.as_dict for client in self.clients],
         }
 
     @property
     def workflow_stages(self) -> List[Stage]:
-        return [*self.forms, *self.jobs, *self.hooks, *self.scripts]
+        return [
+            *self.forms,
+            *self.jobs,
+            *self.hooks,
+            *self.scripts,
+            *self.agents,
+            *self.clients,
+        ]
+
+    def get_stages_by_file_path(self, file_path: Path) -> List[StageWithFile]:
+        stage_with_file_classes = (FormStage, HookStage, JobStage, ScriptStage)
+        return [
+            stage
+            for stage in self.workflow_stages
+            if isinstance(stage, stage_with_file_classes)
+            and stage.file_path == file_path
+        ]
 
     def iter_entrypoints(self) -> Generator[Path, None, None]:
         for stage in self.workflow_stages:
-            yield Path(stage.file)
+            if isinstance(stage, StageWithFile):
+                yield Path(stage.file)
 
     @property
     def project_files(self) -> Generator[Path, None, None]:
@@ -932,6 +1137,10 @@ class Project:
             self.jobs.append(stage)
         elif isinstance(stage, ScriptStage):
             self.scripts.append(stage)
+        elif isinstance(stage, AgentStage):
+            self.agents.append(stage)
+        elif isinstance(stage, ClientStage):
+            self.clients.append(stage)
         else:
             raise Exception(f"Cannot add stage of type {type(stage)}")
 
@@ -1075,6 +1284,9 @@ class Project:
                 t for t in stage.workflow_transitions if t.target_id != target_id
             ]
 
+    def get_agent_entrypoints(self) -> List[AgentEntrypoint]:
+        return [client.get_agent_entrypoint() for client in self.clients]
+
     def update_path(self, stage: ServedStage, new_path: str):
         old_path = stage.path
 
@@ -1119,8 +1331,9 @@ class Project:
         return project_stage
 
     def delete_stage(self, id: str, remove_file: bool = False):
-        if remove_file:
-            stage = self.get_action(id)
+        stage = self.get_action(id)
+
+        if remove_file and isinstance(stage, StageWithFile):
             if not stage:
                 return
             path = Settings.root_path.joinpath(stage.file)
@@ -1132,6 +1345,8 @@ class Project:
         self.hooks = [h for h in self.hooks if h.id != id]
         self.jobs = [j for j in self.jobs if j.id != id]
         self.scripts = [s for s in self.scripts if s.id != id]
+        self.agents = [a for a in self.agents if a.id != id]
+        self.clients = [c for c in self.clients if c.id != id]
 
     @staticmethod
     def __from_dict(data: dict):
@@ -1139,7 +1354,7 @@ class Project:
         nodes = []
         edges = []
 
-        stage_keys = ["forms", "hooks", "scripts", "jobs"]
+        stage_keys = ["forms", "hooks", "scripts", "jobs", "agents", "clients"]
 
         for key in stage_keys:
             for stage in data[key]:
@@ -1161,6 +1376,8 @@ class Project:
         forms = [FormStage.from_dict(form) for form in data["forms"]]
         hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
         jobs = [JobStage.from_dict(job) for job in data["jobs"]]
+        agents = [AgentStage.from_dict(agent) for agent in data["agents"]]
+        clients = [ClientStage.from_dict(client) for client in data["clients"]]
 
         workspace = StyleSettings.from_dict(data["workspace"])
         home = Home.from_dict(data.get("home", {}))
@@ -1171,6 +1388,8 @@ class Project:
             forms=forms,
             hooks=hooks,
             jobs=jobs,
+            agents=agents,
+            clients=clients,
             home=home,
             _graph=Graph.from_primitives(nodes=nodes, edges=edges),
         )
@@ -1200,6 +1419,8 @@ class Project:
             forms=[],
             hooks=[],
             jobs=[],
+            agents=[],
+            clients=[],
             home=Home.create(),
             _graph=Graph.from_primitives([], []),
         )
@@ -1209,6 +1430,9 @@ def _update_file(
     stage: Stage,
     new_file_relative: str,
 ):
+    if not isinstance(stage, StageWithFile):
+        return
+
     old_file = Settings.root_path.joinpath(stage.file)
     new_file = Settings.root_path.joinpath(new_file_relative)
 
