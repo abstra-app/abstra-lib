@@ -45,4 +45,5 @@ def generate_email(email: str, code: str) -> EmailParams:
         subject=translations.confirm_login_at(project.workspace.project_name),
         body=html,
         is_html=True,
+        attachments=[],
     )

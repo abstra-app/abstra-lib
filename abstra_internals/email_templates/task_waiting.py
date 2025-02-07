@@ -36,4 +36,5 @@ def generate_email(recipient_emails: List[str], form: FormStage) -> EmailParams:
         subject=translations.form_is_waiting(form.title),
         body=html,
         is_html=True,
+        attachments=[],
     )
