@@ -231,6 +231,10 @@ def get_player_bp(controller: MainController):
             headers=context.response.headers,
         )
 
+    @bp.route("/_hooks", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
+    def root_hook_runner():
+        return hook_runner("")
+
     @bp.get("/_jobs")
     def list_jobs():
         if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
