@@ -1,7 +1,9 @@
 import ast
 import importlib.util
+import os
 import subprocess
 import sys
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import move
@@ -9,11 +11,14 @@ from tempfile import mkdtemp
 from typing import Dict, List, Literal, Mapping, Optional, Set
 
 from importlib_metadata import packages_distributions
+from pip._internal.cli.main import main as pip_main
 from pkg_resources import get_distribution, working_set
 
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.format import pip_name
+
+install_lock = threading.Lock()
 
 
 def stream_output(cmd: List[str]):
@@ -87,10 +92,32 @@ class Requirement:
     def uninstall(self):
         if not self.installed_version():
             return
+
+        if os.getenv("__STANDALONE_MODE__"):
+            yield from self.__uninstall_from_standalone()
+        else:
+            yield from self.__uninstall_from_lib()
+
+        working_set.by_key.pop(self.name, None)  # dirty hack
+
+    def __uninstall_from_standalone(self):
+        cmd = [
+            "uninstall",
+            "-y",
+            self.to_text(),
+            "--target",
+            os.environ["__STANDALONE_PACKAGES_FOLDER__"],
+        ]
+
+        if pip_main(cmd) != 0:
+            yield f"Failed to uninstall {self.to_text()} from standalone\n"
+        else:
+            yield "Uninstallation finished successfully\n\n"
+
+    def __uninstall_from_lib(self):
         yield from stream_output(
             [sys.executable, "-m", "pip", "uninstall", "-y", self.name]
         )
-        working_set.by_key.pop(self.name, None)  # dirty hack
 
 
 @dataclass
@@ -195,17 +222,45 @@ class Requirements:
                 duplicates[lib.name].append(lib)
         return {k: v for k, v in duplicates.items() if len(v) > 1}
 
+    def __install_from_lib(self):
+        cmd = [sys.executable, "-m", "pip", "install"]
+
+        for lib in self.libraries:
+            if lib.name == "abstra":
+                continue
+
+            cmd.append(lib.to_text())
+
+        yield from stream_output(cmd)
+
+    def __install_from_standalone(self):
+        # pip is not thread safe, but we can use a lock to avoid conflicts
+        print("Installing from standalone")
+        with install_lock:
+            for lib in self.libraries:
+                if lib.name == "abstra":
+                    continue
+
+                cmd = [
+                    "install",
+                    lib.to_text(),
+                    "--target",
+                    os.environ["__STANDALONE_PACKAGES_FOLDER__"],
+                ]
+
+                yield f"Installing {lib.to_text()} in abstra standalone...\n"
+
+                res = pip_main(cmd)
+                if res != 0:
+                    yield f"Failed to install {lib.name}=={lib.version}\n"
+                else:
+                    yield "Installation finished successfully\n\n"
+
     def install(self):
-        yield from stream_output(
-            [
-                sys.executable,
-                "-m",
-                "pip",
-                "install",
-                "-r",
-                str(RequirementsRepository.get_file_path()),
-            ]
-        )
+        if os.getenv("__STANDALONE_MODE__"):
+            yield from self.__install_from_standalone()
+        else:
+            yield from self.__install_from_lib()
 
 
 @dataclass
