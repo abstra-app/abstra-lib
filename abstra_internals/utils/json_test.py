@@ -3,8 +3,8 @@ from datetime import date, datetime
 from unittest import TestCase
 from uuid import UUID
 
-from abstra_internals.entities.forms.page_response import PageResponse
-from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra_internals.interface.sdk.forms.deprecated.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.deprecated.steps_response import StepsResponse
 from abstra_internals.utils.json import to_json_serializable
 from abstra_internals.widgets.response_types import PhoneResponse
 

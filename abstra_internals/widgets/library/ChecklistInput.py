@@ -8,7 +8,10 @@ class ChecklistInput(Input):
 
     def __init__(self, key: str, label: str, options: List[AbstraOption],
         **kwargs):
-        super().__init__(key)
+        initial_error = kwargs.get('errors', [])
+        if not isinstance(initial_error, list):
+            initial_error = [initial_error]
+        super().__init__(key, initial_error)
         self.set_props(dict(label=label, options=options, **kwargs))
 
     def set_props(self, props):

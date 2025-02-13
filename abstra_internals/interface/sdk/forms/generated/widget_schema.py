@@ -6,10 +6,10 @@
 from typing import List, Union, Dict, Optional, Any, TYPE_CHECKING
 import io
 
-from abstra_internals.interface.sdk.forms.reactive import Reactive
+from abstra_internals.interface.sdk.forms.deprecated.reactive import Reactive
 from abstra_internals.widgets.library import *
-from abstra_internals.widgets import Input, Output
 from abstra_internals.widgets.types import AbstraOption
+from abstra_internals.widgets.widget_base import Input, Output
 
 if TYPE_CHECKING:
     from pandas import DataFrame

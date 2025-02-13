@@ -2,10 +2,10 @@ from typing import Dict, Optional
 
 import flask_sock
 
-from abstra_internals.contract import forms_contract
-from abstra_internals.contract.forms import BrowserMessageTypes
 from abstra_internals.controllers.execution_client import ExecutionClient
 from abstra_internals.entities.execution_context import FormContext
+from abstra_internals.entities.forms.form_entity import RenderedForm
+from abstra_internals.interface.contract import forms_contract
 from abstra_internals.utils import deserialize, serialize
 
 
@@ -52,7 +52,9 @@ class FormClient(ExecutionClient):
         except flask_sock.ConnectionClosed:
             raise ClientAbandoned()
 
-    def _wait_for_message(self, *target_types: BrowserMessageTypes) -> Dict:
+    def _wait_for_message(
+        self, *target_types: forms_contract.BrowserMessageTypes
+    ) -> Dict:
         ignored_types = ["execution:heartbeat", "debug:close-attempt"]
 
         while True:
@@ -67,6 +69,23 @@ class FormClient(ExecutionClient):
     # Inside Target
 
     ## SDK
+
+    def request_render(self, rendered: RenderedForm, seq: int) -> None:
+        actions = (
+            None
+            if rendered["buttons"] is None
+            else list(map(lambda button: button.label, rendered["buttons"]))
+        )
+        self._user_code_send(
+            forms_contract.FormRenderMessage(
+                widgets=rendered["widgets"],
+                end_page=rendered["end_page"],
+                steps_info=rendered["steps_info"],
+                actions=actions,
+                seq=seq,
+                production_mode=self._production_mode,
+            )
+        )
 
     def request_mount_page(
         self,
@@ -126,8 +145,8 @@ class FormClient(ExecutionClient):
         _query_params = query_params if query_params is not None else {}
         self._user_code_send(forms_contract.RedirectRequestMessage(url, _query_params))
 
-    def next_message(self) -> Dict:
-        return self._wait_for_message("form:page-response", "form:user-event")
+    def next_user_message(self) -> Dict:
+        return self._wait_for_message("form:navigation", "form:input")
 
     ## Target controller
 

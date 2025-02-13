@@ -1,16 +1,18 @@
 import base64
 import json
 from io import BytesIO
-from typing import Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
-from abstra_internals.controllers.execution_client_hook import HookClient
 from abstra_internals.email_signer import verify_email
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 
+if TYPE_CHECKING:
+    from abstra_internals.controllers.execution_client_hook import HookClient
+
 
 class HookSDKController:
-    def __init__(self, client: HookClient) -> None:
+    def __init__(self, client: "HookClient") -> None:
         self.client = client
 
     def set_response(self, status: int, body: str, headers: Dict[str, str]):

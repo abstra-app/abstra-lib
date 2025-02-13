@@ -13,7 +13,10 @@ class PandasRowSelectionInput(Input):
     df: 'pd.DataFrame'
 
     def __init__(self, key: str, df: Any=None, **kwargs):
-        super().__init__(key)
+        initial_error = kwargs.get('errors', [])
+        if not isinstance(initial_error, list):
+            initial_error = [initial_error]
+        super().__init__(key, initial_error)
         self.set_props(dict(df=df, **kwargs))
 
     def set_props(self, props):

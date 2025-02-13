@@ -39,10 +39,13 @@ class Input(Widget):
     errors: List[str] = (lambda: [])()
     empty_value: Any = None
     required: Optional[Union[bool, str]] = None
+    initial_errors: List[str] = (lambda: [])()
 
-    def __init__(self, key: str) -> None:
+    def __init__(self, key: str, errors: Optional[List[str]]) -> None:
         super().__init__()
         self.key = key
+        self.initial_errors = errors or []
+        self.errors = errors or []
 
     def _has_changes(self, old_value, new_value):
         is_empty = old_value is None and new_value == self.empty_value
@@ -62,7 +65,7 @@ class Input(Widget):
         return errors
 
     def set_errors(self):
-        self.errors = self.validate()
+        self.errors = [*self.initial_errors, *self.validate()]
 
     def has_errors(self):
         return len(self.errors) > 0

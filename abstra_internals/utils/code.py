@@ -1,5 +1,7 @@
 import ast
-from typing import List, Optional
+import inspect
+import textwrap
+from typing import Callable, List, Optional
 
 
 class UsageVisitor(ast.NodeVisitor):
@@ -87,3 +89,13 @@ def subscript_called_args(
     visitor = SubscriptVisitor(package_path, object_name)
     visitor.visit(tree)
     return visitor.args if visitor.args else None
+
+
+def has_none_return(func: Callable) -> bool:
+    source = textwrap.dedent(inspect.getsource(func))
+    tree = ast.parse(source)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Return) and node.value is not None:
+            return False
+    return True

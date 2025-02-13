@@ -1,7 +1,7 @@
 
 import io
 from typing import Union, TYPE_CHECKING
-from abstra_internals.interface.sdk.forms.page import Page
+from abstra_internals.interface.sdk.forms.deprecated.page import Page
 
 if TYPE_CHECKING:
     from pandas import DataFrame

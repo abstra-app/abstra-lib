@@ -6,7 +6,10 @@ class CustomInput(Input):
     type = 'custom-input'
 
     def __init__(self, key: str, html_body: str, **kwargs):
-        super().__init__(key)
+        initial_error = kwargs.get('errors', [])
+        if not isinstance(initial_error, list):
+            initial_error = [initial_error]
+        super().__init__(key, initial_error)
         self.set_props(dict(html_body=html_body, **kwargs))
 
     def set_props(self, props):

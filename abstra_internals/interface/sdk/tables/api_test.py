@@ -12,8 +12,8 @@ from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.sdk_context import SDKContext
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import FormContext, Request
-from abstra_internals.entities.forms.page_response import PageResponse
-from abstra_internals.interface.sdk.forms.step import StepsResponse
+from abstra_internals.interface.sdk.forms.deprecated.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.deprecated.step import StepsResponse
 from abstra_internals.interface.sdk.tables.api import (
     _make_delete_query,
     _make_insert_multiple_query,

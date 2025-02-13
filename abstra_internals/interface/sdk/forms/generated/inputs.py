@@ -2,7 +2,7 @@
 from typing import Any, Dict, List, Union, TYPE_CHECKING
 from abstra_internals.widgets.types import AbstraOption
 from abstra_internals.widgets.response_types import FileResponse, PhoneResponse, AppointmentSlot
-from abstra_internals.interface.sdk.forms.page import Page
+from abstra_internals.interface.sdk.forms.deprecated.page import Page
 import datetime
 
 if TYPE_CHECKING:

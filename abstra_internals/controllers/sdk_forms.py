@@ -1,14 +1,24 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-from abstra_internals.contract.forms import StepsInfo, ValidationResult
-from abstra_internals.controllers.execution_client_form import FormClient
+from abstra_internals.entities.forms.form_entity import (
+    FormEntity,
+    Step,
+)
+from abstra_internals.entities.forms.form_state import State
+from abstra_internals.interface.contract.forms_contract import (
+    StepsInfo,
+    ValidationResult,
+)
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.users import UsersRepository
 
+if TYPE_CHECKING:
+    from abstra_internals.controllers.execution_client_form import FormClient
+
 
 class FormSDKController:
-    def __init__(self, client: FormClient, users_repository: UsersRepository) -> None:
+    def __init__(self, client: "FormClient", users_repository: UsersRepository) -> None:
         self.client = client
         self.users_repository = users_repository
 
@@ -35,6 +45,37 @@ class FormSDKController:
     def get_query_params(self) -> Dict[str, str]:
         return self.client.get_query_params()
 
+    def next_user_message(self) -> Dict:
+        return self.client.next_user_message()
+
+    def run_form(self, steps: List[Step], state: State, hide_steps: bool) -> Dict:
+        form = FormEntity(steps, state, hide_steps)
+        rendered = None
+        seq = 0
+
+        while rendered := form.run():
+            self.client.request_render(rendered, seq)
+
+            if rendered["yielding"]:
+                continue
+
+            if rendered["end_page"]:
+                break
+
+            response = self.client.next_user_message()
+
+            if "seq" in response:
+                seq = response["seq"]
+
+            if response["type"] == "form:input":
+                form.handle_input(response)
+            elif response["type"] == "form:navigation":
+                form.handle_navigation(response)
+            else:
+                raise ValueError(f"Invalid response type: {response['type']}")
+
+        return form.state.value
+
     def request_mount_page(
         self,
         widgets: list,
@@ -51,10 +92,8 @@ class FormSDKController:
             steps_info,
         )
 
+    # Deprecated by Forms v2
     def request_page_update(
         self, widgets: list, validation: ValidationResult, event_seq: int
     ):
         self.client.request_page_update(widgets, validation, event_seq)
-
-    def next_message(self) -> Dict:
-        return self.client.next_message()

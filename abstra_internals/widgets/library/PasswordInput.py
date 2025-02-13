@@ -5,7 +5,10 @@ class PasswordInput(Input):
     type = 'password-input'
 
     def __init__(self, key: str, label: str, **kwargs):
-        super().__init__(key)
+        initial_error = kwargs.get('errors', [])
+        if not isinstance(initial_error, list):
+            initial_error = [initial_error]
+        super().__init__(key, initial_error)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
