@@ -61,11 +61,15 @@ class TaskExecutor:
                 and stage.client_stage_id is not None
             ):
                 agent = self.repos.role_clients.get_agent(stage.project_id)
+
                 conn = next(
-                    c
-                    for c in self.repos.role_clients.get_connections()
-                    if c.agent_project_id == agent.project_id
-                    and c.client_stage_id == stage.id
+                    (
+                        c
+                        for c in self.repos.role_clients.get_connections()
+                        if c.agent_project_id == agent.project_id
+                        and c.client_stage_id == stage.id
+                    ),
+                    None,
                 )
 
                 assert conn is not None, "Connection for agent not found"

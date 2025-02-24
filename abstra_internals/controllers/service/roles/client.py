@@ -55,9 +55,8 @@ class RoleClientController(RoleCommonController):
                     and connection.agent_project_id == agent.project_id
                     and connection.client_stage_id == agent.id
                 ):
-                    self.repos.role_clients.update_connection(
-                        connection=connection,
-                        client_tasks_url=Settings.public_url + "/_tasks",
+                    self.repos.role_clients.update_or_create_connection(
+                        connection=connection
                     )
                     break
 
@@ -77,6 +76,7 @@ class RoleClientController(RoleCommonController):
                         time.sleep(60 * 5)
                     except Exception as e:
                         print(e)
+                        time.sleep(10)  # Delay retry to avoid spamming server
                         pass
                 else:
                     time.sleep(10)

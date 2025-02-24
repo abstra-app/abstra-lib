@@ -1,9 +1,16 @@
+from typing import TypedDict, Union
+
 import requests
 
 from abstra_internals.entities.agents import ConnectionModel
 from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
+
+
+class FailedResponse(TypedDict):
+    error: str
+    status_code: int
 
 
 class RoleAgentRepository(RoleCommonRepository):
@@ -73,7 +80,7 @@ class RoleAgentRepository(RoleCommonRepository):
 
     def update_connection_on_cloud(
         self, connection_token: str, client_tasks_url: str
-    ) -> ConnectionModel:
+    ) -> Union[ConnectionModel, FailedResponse]:
         """
         Used to update the callback url
         """
@@ -86,7 +93,17 @@ class RoleAgentRepository(RoleCommonRepository):
         }
         response = requests.patch(url, headers=headers, json=body)
 
-        response.raise_for_status()
+        if not response.ok:
+            error_message = (
+                response.json().get("error")
+                if "error" in response.json()
+                else response.text
+            )
+
+            return {
+                "status_code": response.status_code,
+                "error": error_message,
+            }
 
         self.fetch_connections()  # Refresh the cache
         return ConnectionModel.from_camel(response.json())

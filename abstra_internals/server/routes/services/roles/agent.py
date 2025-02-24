@@ -2,6 +2,7 @@ import flask
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.agent import RoleAgentController
+from abstra_internals.entities.agents import ConnectionModel
 from abstra_internals.repositories.project.project import ProjectRepository
 
 
@@ -59,11 +60,15 @@ def get_player_bp(main_controller: MainController) -> flask.Blueprint:
         client_tasks_url = flask.request.json["client_tasks_url"]
         assert client_tasks_url is not None, "client_tasks_url is required"
 
-        connection = controller.repos.role_agents.update_connection_on_cloud(
+        response = controller.repos.role_agents.update_connection_on_cloud(
             connection_token=auth,
             client_tasks_url=client_tasks_url,
         )
-        return connection.model_dump()
+
+        if isinstance(response, ConnectionModel):
+            return response.model_dump()
+        else:
+            return response["error"], response["status_code"]
 
     @bp.delete("/connection")
     def _delete_connection():

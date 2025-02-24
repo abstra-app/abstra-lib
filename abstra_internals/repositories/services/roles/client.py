@@ -16,6 +16,10 @@ from abstra_internals.repositories.services.roles.common import RoleCommonReposi
 from abstra_internals.settings import Settings
 
 
+class ConnectionNotFound(Exception):
+    pass
+
+
 class RoleClientRepository(RoleCommonRepository):
     _cached_agents: Optional[Dict[str, AgentModel]] = None
     _cached_connections: Optional[List[ConnectionModel]] = None
@@ -112,10 +116,38 @@ class RoleClientRepository(RoleCommonRepository):
                 client_tasks_url=client_tasks_url,
             ),
         )
-        response.raise_for_status()
+
+        if not response.ok:
+            if response.status_code == 404 and response.text == "Connection not found":
+                raise ConnectionNotFound()
+            raise Exception(response.text)
+
         connection = ConnectionModel.model_validate(response.json())
-        self._cached_connections = self.get_connections() + [connection]
+        self._cached_connections = [
+            c for c in self.get_connections() if c.token != connection.token
+        ] + [connection]
         return connection
+
+    def update_or_create_connection(
+        self, connection: ConnectionModel
+    ) -> ConnectionModel:
+        public_url = Settings.public_url
+        assert (
+            public_url is not None
+        ), "You should be connected to a tunnel to connect to an agent"
+
+        client_tasks_url = public_url + "/_tasks/client"
+        try:
+            return self.update_connection(connection, client_tasks_url)
+        except ConnectionNotFound:
+            self._cached_connections = [
+                c for c in self.get_connections() if c.token != connection.token
+            ]
+            return self.connect_to_agent(
+                agent_project_id=connection.agent_project_id,
+                client_stage_id=connection.client_stage_id,
+                agent_stage_id=connection.agent_stage_id,
+            )
 
     def delete_connection(self, connection: ConnectionModel):
         agent = self.get_agent(connection.agent_project_id)
