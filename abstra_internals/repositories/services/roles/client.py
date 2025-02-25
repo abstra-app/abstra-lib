@@ -118,7 +118,7 @@ class RoleClientRepository(RoleCommonRepository):
         )
 
         if not response.ok:
-            if response.status_code == 404 and response.text == "Connection not found":
+            if response.status_code == 404:
                 raise ConnectionNotFound()
             raise Exception(response.text)
 
