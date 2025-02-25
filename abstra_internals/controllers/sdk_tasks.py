@@ -68,7 +68,7 @@ class Task:
         if exc_type is None:
             self.complete()
         else:
-            self._controller.set_task_to_pending(self._dto.id)
+            self._controller.set_execution_locked_tasks_to_pending()
             return False
 
 
@@ -125,8 +125,8 @@ class TasksSDKController:
             task_id, self.execution.id, self.execution.stage_id
         )
 
-    def set_task_to_pending(self, task_id: str) -> None:
-        self.repositories.tasks.set_task_to_pending(task_id)
+    def set_execution_locked_tasks_to_pending(self) -> None:
+        self.repositories.tasks.set_locked_tasks_to_pending(self.execution.id)
 
     def get_all_tasks(self) -> List[Task]:
         dtos = self.repositories.tasks.get_all_tasks()
