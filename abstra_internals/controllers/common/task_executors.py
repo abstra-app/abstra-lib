@@ -29,6 +29,7 @@ class TaskExecutor:
         current_stage: Stage,
         payload: TaskPayload,
         execution: Optional[Execution] = None,
+        show_warning: bool = True,
     ) -> None:
         project = ProjectRepository.load()
         next_stages = [
@@ -36,6 +37,12 @@ class TaskExecutor:
             for t in current_stage.workflow_transitions
             if t.matches(type)
         ]
+
+        if len(next_stages) == 0 and show_warning:
+            print(
+                f"[WARNING] No transitions found for task type {type} in stage {current_stage.id}"
+            )
+            return
 
         for stage in next_stages:
             task = self.repos.tasks.send_task(

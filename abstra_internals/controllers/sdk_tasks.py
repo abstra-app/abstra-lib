@@ -79,10 +79,14 @@ class TasksSDKController:
         self.project = ProjectRepository().load()
         self.executor = TaskExecutor(repositories)
 
-    def send_task(self, type: str, payload: TaskPayload) -> None:
+    def send_task(self, type: str, payload: TaskPayload, show_warning: bool) -> None:
         stage = self.project.get_stage_raises(self.execution.stage_id)
         self.executor.send_task(
-            type=type, current_stage=stage, payload=payload, execution=self.execution
+            type=type,
+            current_stage=stage,
+            payload=payload,
+            execution=self.execution,
+            show_warning=show_warning,
         )
 
     def get_stage_pending_tasks(
