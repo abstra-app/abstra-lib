@@ -100,8 +100,6 @@ class FormEntity:
 
         renderer = TemplateRenderer(template)
         output = renderer.render(self.state)
-        init_state = renderer.parse_state({})
-        self.state.init_keys(init_state)
 
         return RenderedForm(
             widgets=output["widgets"],
@@ -133,8 +131,7 @@ class FormEntity:
 
             renderer = TemplateRenderer(template)
 
-            self.state.merge(renderer.parse_state(dto["payload"]))
-            self.state.touch_all()
+            self.state.update_values(renderer.parse_state(dto["payload"]))
 
             output = renderer.render(self.state)
 
@@ -161,4 +158,4 @@ class FormEntity:
         template, _ = result
         renderer = TemplateRenderer(template)
 
-        self.state.merge(renderer.parse_state(dto["payload"]))
+        self.state.update_values(renderer.parse_state(dto["payload"]))

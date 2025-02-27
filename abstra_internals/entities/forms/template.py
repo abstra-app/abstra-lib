@@ -49,7 +49,7 @@ class TemplateRenderer:
     def parse_state(self, raw_state: Dict) -> State:
         parsed = {}
         for widget in self.template:
-            if isinstance(widget, Input):
+            if isinstance(widget, Input) and widget.key in raw_state:
                 parsed[widget.key] = widget.parse_value(raw_state.get(widget.key))
         return State(parsed)
 
@@ -61,7 +61,7 @@ class TemplateRenderer:
                 value = state.get(widget.key)
                 if value is not None:
                     widget.set_value(value)
-                if state.touched(widget.key):
+                if widget.key in state:
                     widget.set_errors()
                 if widget.has_errors() > 0:
                     has_errors = True

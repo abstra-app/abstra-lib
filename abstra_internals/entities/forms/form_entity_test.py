@@ -15,7 +15,7 @@ from abstra_internals.entities.forms.template import (
     Template,
     TemplateGeneratorFunction,
 )
-from abstra_internals.widgets.library import ListInput, TextInput, TextOutput
+from abstra_internals.widgets.library import ListInput, TagInput, TextInput, TextOutput
 
 rendered_text_input = {
     "type": "text-input",
@@ -64,15 +64,24 @@ def compare_renders(rendered, expected):
     for i, widget in enumerate(rendered["widgets"]):
         for key, value in widget.items():
             if value != expected["widgets"][i][key]:
-                assert False, f"Widget {i} key {key} does not match.\nEXPECTED:\n{expected['widgets'][i][key]}\nGOT\n{value}"
+                assert False, f"WIDGET '{widget['key']}' (index {i}) | KEY '{key}'\nEXPECTED: {expected['widgets'][i][key]}\nGOT: {value}"
 
 
 def make_steps() -> Dict[str, Step]:
     def input_page(state: State) -> Template:
         return [TextInput(key="name", label="Name")]
 
+    def double_input_page(state: State) -> Template:
+        return [
+            TextInput(key="name", label="Name"),
+            TextInput(key="email", label="Email"),
+        ]
+
     def output_page(state: State) -> Template:
         return [TextOutput(str(state["name"]))]
+
+    def tag_input_page(state: State) -> Template:
+        return [TagInput(key="tags", label="Tags")]
 
     def reactive_page(state: State) -> Template:
         p: Template = [TextInput(key="name", label="Name")]
@@ -101,6 +110,8 @@ def make_steps() -> Dict[str, Step]:
 
     return {
         "input_page": PageStep(input_page),
+        "double_input_page": PageStep(double_input_page),
+        "tag_input_page": PageStep(tag_input_page),
         "output_page": PageStep(output_page),
         "reactive_page": PageStep(reactive_page),
         "list_page": PageStep(list_page),
@@ -216,14 +227,23 @@ class FormEntityTest(unittest.TestCase):
 
     def test_validation(self):
         all_steps = make_steps()
-        steps = [all_steps["input_page"]]
+        steps = [all_steps["double_input_page"]]
         form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
 
         compare_renders(
             rendered,
             {
-                "widgets": [rendered_text_input],
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                    },
+                    {
+                        **rendered_text_input,
+                        "key": "email",
+                        "label": "Email",
+                    },
+                ],
                 "end_page": False,
                 "steps_info": {"current": 1, "total": 1, "disabled": True},
                 "buttons": [NextButton()],
@@ -238,6 +258,27 @@ class FormEntityTest(unittest.TestCase):
         )
 
         rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "my name",
+                    },
+                    {
+                        **rendered_text_input,
+                        "key": "email",
+                        "label": "Email",
+                        "value": "",
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+            },
+        )
 
         form.handle_input(
             {
@@ -255,7 +296,13 @@ class FormEntityTest(unittest.TestCase):
                         **rendered_text_input,
                         "value": "",
                         "errors": ["i18n_error_required_field"],
-                    }
+                    },
+                    {
+                        **rendered_text_input,
+                        "key": "email",
+                        "label": "Email",
+                        "value": "",
+                    },
                 ],
                 "end_page": False,
                 "steps_info": {"current": 1, "total": 1, "disabled": True},
@@ -347,6 +394,114 @@ class FormEntityTest(unittest.TestCase):
                 "steps_info": {"current": 1, "total": 1, "disabled": True},
                 "buttons": [NextButton()],
             },
+        )
+
+        # delete string
+        form.handle_input(
+            {
+                "type": "form:input",
+                "payload": {"list": [{"name": ""}]},
+            }
+        )
+
+        rendered = form.run()
+
+        # validate error
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_list_input,
+                        "schemas": [
+                            [
+                                {
+                                    **rendered_text_input,
+                                    "value": "",
+                                    "errors": ["i18n_error_required_field"],
+                                }
+                            ]
+                        ],
+                        "errors": ["i18n_error_invalid_list_item"],
+                        "value": [{"name": ""}],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+            },
+        )
+
+    def test_tag_input(self):
+        all_steps = make_steps()
+        steps = [all_steps["tag_input_page"]]
+        form = FormEntity(steps, State(), force_hide_steps=False)
+
+        # Initial render
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        "type": "tag-input",
+                        "key": "tags",
+                        "label": "Tags",
+                        "value": [],
+                        "placeholder": "",
+                        "required": True,
+                        "hint": None,
+                        "fullWidth": False,
+                        "disabled": False,
+                        "errors": [],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+                "yielding": False,
+            },
+        )
+
+        # Add item
+        form.handle_input(
+            {
+                "type": "form:input",
+                "payload": {"tags": ["tag1"]},
+            }
+        )
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        "type": "tag-input",
+                        "key": "tags",
+                        "label": "Tags",
+                        "value": ["tag1"],
+                        "placeholder": "",
+                        "required": True,
+                        "hint": None,
+                        "fullWidth": False,
+                        "disabled": False,
+                        "errors": [],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+                "yielding": False,
+            },
+        )
+
+        form.handle_input(
+            {
+                "type": "form:input",
+                "payload": {"tags": ["tag1", "tag2"]},
+            }
         )
 
     def test_navigation(self):

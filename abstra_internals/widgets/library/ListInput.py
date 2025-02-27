@@ -192,11 +192,13 @@ class ListInput:
             if not value:
                 return self.empty_value
             for idx, item in enumerate(value):
+                state = State()
                 template = self.get_item_template(idx)
                 renderer = TemplateRenderer(template)
                 raw_value = item or {}
                 parsed = renderer.parse_state(raw_value)
-                parsed_values.append(parsed)
+                state.update_values(parsed)
+                parsed_values.append(state)
             return parsed_values
 
     def __new__(cls, key: str, item_schema: Any, **kwargs):

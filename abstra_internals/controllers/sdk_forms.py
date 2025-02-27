@@ -73,7 +73,7 @@ class FormSDKController:
             else:
                 raise ValueError(f"Invalid response type: {response['type']}")
 
-        return form.state.value
+        return form.state
 
     def request_mount_page(
         self,
