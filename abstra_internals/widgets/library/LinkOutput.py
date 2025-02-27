@@ -12,6 +12,7 @@ class LinkOutput(Output):
         self.link_text = props.get('link_text', 'Click here')
         self.same_tab = props.get('same_tab', False)
         self.full_width = props.get('full_width', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'linkText': self.link_text, 'linkUrl':

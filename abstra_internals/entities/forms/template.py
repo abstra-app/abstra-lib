@@ -1,18 +1,32 @@
 import copy
+from dataclasses import dataclass
 from typing import Callable, Dict, Generator, List, Optional, Tuple, TypedDict, Union
 
-from abstra_internals.entities.forms.form_state import Button, State
+from abstra_internals.entities.forms.form_state import State
 from abstra_internals.widgets.widget_base import Input, Widget
 
+
+@dataclass
+class Button:
+    label: str
+
+
+class NextButton(Button):
+    def __init__(self):
+        super().__init__("i18n_next_action")
+
+
+class BackButton(Button):
+    def __init__(self):
+        super().__init__("i18n_back_action")
+
+
 Template = List[Widget]
-TemplateFunc = Callable[
-    [State], Union[Template, Tuple[Template, Optional[List[Button]]]]
-]
-RawTemplate = Union[Template, TemplateFunc]
-GeneratorFunc = Callable[
-    [State],
-    Generator[Union[Template, Tuple[Template, Optional[List[Button]]]], None, None],
-]
+TemplateWithButtons = Tuple[Template, Optional[List[Button]]]
+
+TemplateFunction = Callable[[State], Union[Template, TemplateWithButtons]]
+TemplateGenerator = Generator[Union[Template, TemplateWithButtons], None, None]
+TemplateGeneratorFunction = Callable[[State], TemplateGenerator]
 
 
 LEGACY_CTX = {}

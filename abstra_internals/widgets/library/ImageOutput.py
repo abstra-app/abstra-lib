@@ -15,6 +15,7 @@ class ImageOutput(Output):
         self.subtitle = props.get('subtitle', '')
         self.full_width = props.get('full_width', False)
         self.label = props.get('label', '')
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'imageUrl': self.image, 'subtitle': self

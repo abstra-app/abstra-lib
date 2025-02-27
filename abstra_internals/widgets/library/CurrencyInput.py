@@ -8,10 +8,7 @@ class CurrencyInput(Input):
     empty_value = None
 
     def __init__(self, key: str, label: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
@@ -25,6 +22,7 @@ class CurrencyInput(Input):
         self.max = props.get('max')
         self.currency = props.get('currency', 'USD')
         self.disabled = props.get('disabled', False)
+        super().set_props(props)
 
     def _validate_number_min_max(self) ->List[str]:
         if type(self.value) is not int and type(self.value) is not float:

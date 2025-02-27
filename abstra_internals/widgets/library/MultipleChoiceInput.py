@@ -7,10 +7,7 @@ class MultipleChoiceInput(Input):
 
     def __init__(self, key: str, label: str, options: List[AbstraOption],
         **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, options=options, **kwargs))
 
     def set_props(self, props):
@@ -28,6 +25,7 @@ class MultipleChoiceInput(Input):
         self.multiple_handler = MultipleHandler(self.multiple, self.min,
             self.max, self.required)
         self.options_handler = OptionsHandler(self.options)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'label': self.label,

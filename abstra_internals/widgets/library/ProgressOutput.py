@@ -12,6 +12,7 @@ class ProgressOutput(Output):
         self.total = props.get('total', 0)
         self.text = props.get('text', '')
         self.full_width = props.get('full_width', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'current': self.current, 'total': self.

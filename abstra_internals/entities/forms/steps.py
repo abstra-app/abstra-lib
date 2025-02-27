@@ -1,45 +1,72 @@
-from typing import List, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
-from abstra_internals.entities.forms.form_state import Button, State
+from abstra_internals.entities.forms.form_state import State
 from abstra_internals.entities.forms.template import (
-    GeneratorFunc,
     Template,
-    TemplateFunc,
+    TemplateFunction,
+    TemplateGenerator,
+    TemplateGeneratorFunction,
+    TemplateWithButtons,
 )
-from abstra_internals.utils.code import has_none_return
+
+ComputationFunction = Callable[[State], None]
 
 
-class PageStep:
-    def __init__(self, func: TemplateFunc):
-        self.call = func
-        self.computation_step = has_none_return(func)
+class Step:
+    def run(self, state: State) -> Optional[TemplateWithButtons]:
+        raise NotImplementedError()
+
+    def normalize_result(
+        self, result: Optional[Union[Template, TemplateWithButtons]]
+    ) -> Optional[TemplateWithButtons]:
+        if result is None:
+            return None
+        if isinstance(result, tuple):
+            return result
+        if isinstance(result, list):
+            return result, None
+        raise ValueError(f"Invalid result type: {type(result)}")
 
 
-class GeneratorPageStep:
-    def __init__(self, func: GeneratorFunc):
+class PageStep(Step):
+    def __init__(self, func: TemplateFunction):
+        self.func = func
+
+    def run(self, state: State) -> Optional[TemplateWithButtons]:
+        return self.normalize_result(self.func(state))
+
+
+class ComputationStep(Step):
+    def __init__(self, func: ComputationFunction):
+        self.func = func
+
+    def run(self, state: State) -> Optional[TemplateWithButtons]:
+        self.func(state)
+        return None
+
+
+class GeneratorStep(ComputationStep):
+    generator: Optional[TemplateGenerator]
+
+    def __init__(self, func: TemplateGeneratorFunction):
         self.func = func
         self.generator = None
-        self.computation_step = False
 
-    def initialize_generator(self, state: State):
+    def get_generator(self, state: State):
         if self.generator is None:
             self.generator = self.func(state)
         return self.generator
 
-    def call(
-        self, state: State
-    ) -> Union[Template, Tuple[Template, Optional[List[Button]]]]:
-        generator = self.initialize_generator(state)
+    def run(self, state: State) -> Optional[TemplateWithButtons]:
+        generator = self.get_generator(state)
 
         try:
-            return next(generator)
+            return self.normalize_result(next(generator))
         except StopIteration:
-            return []
+            self.generator = None
+            return None
 
 
 class EndPageStep(PageStep):
-    def __init__(self, func: TemplateFunc):
+    def __init__(self, func: TemplateFunction):
         super().__init__(func)
-
-
-Step = Union[PageStep, EndPageStep, GeneratorPageStep]

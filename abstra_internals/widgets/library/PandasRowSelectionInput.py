@@ -13,10 +13,7 @@ class PandasRowSelectionInput(Input):
     df: 'pd.DataFrame'
 
     def __init__(self, key: str, df: Any=None, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(df=df, **kwargs))
 
     def set_props(self, props):
@@ -36,6 +33,7 @@ class PandasRowSelectionInput(Input):
         self.multiple_handler = MultipleHandler(self.multiple, self.min,
             self.max, self.required)
         self.page_size = props.get('page_size', DEFAULT_PAGE_SIZE)
+        super().set_props(props)
 
     def serialize_table(self):
         if self.df is None:

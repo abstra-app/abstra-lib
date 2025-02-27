@@ -14,11 +14,10 @@ from abstra_internals.interface.sdk.forms.other import (
 from abstra_internals.interface.sdk.forms.deprecated.page import Page
 from abstra_internals.interface.sdk.forms.deprecated.reactive_func import reactive
 from abstra_internals.interface.sdk.forms.deprecated.step import run_steps
-from abstra_internals.entities.forms.form_state import (
+from abstra_internals.entities.forms.template import (
     Button,
     NextButton,
     BackButton,
-    AutoNext,
 )
 
 from abstra_internals.widgets.library import *

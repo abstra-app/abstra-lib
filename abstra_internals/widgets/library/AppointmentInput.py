@@ -11,10 +11,7 @@ class AppointmentInput(Input):
     slots: List[AppointmentSlot]
 
     def __init__(self, key: str, label: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
@@ -26,6 +23,7 @@ class AppointmentInput(Input):
         self.value = self.load_initial_value(props.get('initial_value',
             self.empty_value))
         self.slots = AppointmentSlot.from_list(props.get('slots', []))
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'label': self.label,

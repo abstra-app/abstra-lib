@@ -48,8 +48,8 @@ class FormSDKController:
     def next_user_message(self) -> Dict:
         return self.client.next_user_message()
 
-    def run_form(self, steps: List[Step], state: State, hide_steps: bool) -> Dict:
-        form = FormEntity(steps, state, hide_steps)
+    def run_form(self, *, steps: List[Step], state: State, hide_steps: bool) -> Dict:
+        form = FormEntity(steps=steps, state=state, force_hide_steps=hide_steps)
         rendered = None
         seq = 0
 
@@ -64,8 +64,7 @@ class FormSDKController:
 
             response = self.client.next_user_message()
 
-            if "seq" in response:
-                seq = response["seq"]
+            seq = response.get("seq", seq)
 
             if response["type"] == "form:input":
                 form.handle_input(response)

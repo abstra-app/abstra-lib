@@ -13,6 +13,7 @@ class PlotlyOutput(Output):
         self.fig = props.get('fig', None)
         self.full_width = props.get('full_width', False)
         self.label = props.get('label', '')
+        super().set_props(props)
 
     def serialize_figure(self):
         if self.fig is None:

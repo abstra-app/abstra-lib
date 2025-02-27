@@ -18,6 +18,7 @@ class PandasOutput(Output):
         self.actions = props.get('actions', [])
         self.filterable = props.get('filterable', False)
         self.page_size = props.get('page_size', DEFAULT_PAGE_SIZE)
+        super().set_props(props)
 
     def serialize_table(self):
         if self.df is None:

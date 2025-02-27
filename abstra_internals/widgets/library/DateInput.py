@@ -10,10 +10,7 @@ class DateInput(Input):
     empty_value = None
 
     def __init__(self, key: str, label: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
@@ -23,6 +20,7 @@ class DateInput(Input):
         self.hint = props.get('hint', None)
         self.full_width = props.get('full_width', False)
         self.disabled = props.get('disabled', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'hint': self.hint,

@@ -14,6 +14,7 @@ class FileOutput(Output):
         self.file = upload_widget_file(props.get('file', ''))
         self.download_text = props.get('download_text', 'Download')
         self.full_width = props.get('full_width', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'fileUrl': self.file, 'downloadText':

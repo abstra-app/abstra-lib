@@ -8,10 +8,7 @@ class ChecklistInput(Input):
 
     def __init__(self, key: str, label: str, options: List[AbstraOption],
         **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, options=options, **kwargs))
 
     def set_props(self, props):
@@ -25,6 +22,7 @@ class ChecklistInput(Input):
         self.min = props.get('min', 0)
         self.max = props.get('max', len(self.options))
         self.options_handler = OptionsHandler(self.options)
+        super().set_props(props)
 
     def is_value_unset(self):
         return False

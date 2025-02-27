@@ -1,10 +1,20 @@
 import unittest
-from typing import Dict
+from typing import Dict, cast
 
 from abstra_internals.entities.forms.form_entity import FormEntity
-from abstra_internals.entities.forms.form_state import State
-from abstra_internals.entities.forms.steps import PageStep, Step
-from abstra_internals.entities.forms.template import Template
+from abstra_internals.entities.forms.steps import (
+    ComputationStep,
+    GeneratorStep,
+    PageStep,
+    Step,
+)
+from abstra_internals.entities.forms.template import (
+    BackButton,
+    NextButton,
+    State,
+    Template,
+    TemplateGeneratorFunction,
+)
 from abstra_internals.widgets.library import ListInput, TextInput, TextOutput
 
 rendered_text_input = {
@@ -50,6 +60,7 @@ def compare_renders(rendered, expected):
     assert rendered["end_page"] == expected["end_page"]
     assert rendered["steps_info"] == expected["steps_info"]
     assert len(rendered["widgets"]) == len(expected["widgets"])
+    assert rendered["buttons"] == expected.get("buttons", [])
     for i, widget in enumerate(rendered["widgets"]):
         for key, value in widget.items():
             if value != expected["widgets"][i][key]:
@@ -101,14 +112,15 @@ class FormEntityTest(unittest.TestCase):
     def test_input_page(self):
         all_steps = make_steps()
         steps = [all_steps["input_page"]]
-        form = FormEntity(steps, State())
+        form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
         compare_renders(
             rendered,
             {
                 "widgets": [rendered_text_input],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -131,21 +143,23 @@ class FormEntityTest(unittest.TestCase):
                     }
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
     def test_reactive_page(self):
         all_steps = make_steps()
         steps = [all_steps["reactive_page"]]
-        form = FormEntity(steps, State())
+        form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
         compare_renders(
             rendered,
             {
                 "widgets": [rendered_text_input],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -171,7 +185,8 @@ class FormEntityTest(unittest.TestCase):
                     },
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -194,14 +209,15 @@ class FormEntityTest(unittest.TestCase):
                     }
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
     def test_validation(self):
         all_steps = make_steps()
         steps = [all_steps["input_page"]]
-        form = FormEntity(steps, State())
+        form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
 
         compare_renders(
@@ -209,7 +225,8 @@ class FormEntityTest(unittest.TestCase):
             {
                 "widgets": [rendered_text_input],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -241,14 +258,15 @@ class FormEntityTest(unittest.TestCase):
                     }
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
     def test_list_page(self):
         all_steps = make_steps()
         steps = [all_steps["list_page"]]
-        form = FormEntity(steps, State())
+        form = FormEntity(steps, State(), force_hide_steps=False)
 
         # Initial render
         rendered = form.run()
@@ -261,7 +279,8 @@ class FormEntityTest(unittest.TestCase):
                     }
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -284,7 +303,8 @@ class FormEntityTest(unittest.TestCase):
                     }
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -324,14 +344,15 @@ class FormEntityTest(unittest.TestCase):
                     }
                 ],
                 "end_page": False,
-                "steps_info": {"current": 1, "total": 1, "disabled": False},
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
     def test_navigation(self):
         all_steps = make_steps()
         steps = [all_steps["input_page"], all_steps["output_page"]]
-        form = FormEntity(steps, State())
+        form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
         compare_renders(
             rendered,
@@ -339,6 +360,7 @@ class FormEntityTest(unittest.TestCase):
                 "widgets": [rendered_text_input],
                 "end_page": False,
                 "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
             },
         )
 
@@ -363,6 +385,7 @@ class FormEntityTest(unittest.TestCase):
                 ],
                 "end_page": False,
                 "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
             },
         )
 
@@ -387,5 +410,213 @@ class FormEntityTest(unittest.TestCase):
                 ],
                 "end_page": False,
                 "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+    def test_page_buttons(self):
+        all_steps = make_steps()
+        steps = [all_steps["input_page"], all_steps["output_page"]]
+        form = FormEntity(steps, State(), force_hide_steps=False)
+        rendered = form.run()
+        compare_renders(
+            rendered,
+            {
+                "widgets": [rendered_text_input],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                        "text": "test-name",
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
+            },
+        )
+
+    def test_computation_step(self):
+        def mock_compute(state):
+            state["computed"] = "computed"
+
+        all_steps = make_steps()
+        steps = [
+            all_steps["input_page"],
+            ComputationStep(mock_compute),
+            all_steps["output_page"],
+        ]
+        form = FormEntity(steps, State(), force_hide_steps=False)
+
+        rendered = form.run()
+        compare_renders(
+            rendered,
+            {
+                "widgets": [rendered_text_input],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                        "text": "test-name",
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        self.assertEqual(form.state["computed"], "computed")
+
+    def test_generator_step(self):
+        def mock_generator(state: State):
+            yield [TextOutput("test 1")]
+            yield [TextOutput("test 2")]
+
+        all_steps = make_steps()
+        steps = [
+            all_steps["input_page"],
+            GeneratorStep(cast(TemplateGeneratorFunction, mock_generator)),
+            all_steps["output_page"],
+        ]
+        form = FormEntity(steps, State(), force_hide_steps=False)
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [rendered_text_input],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                        "text": "test 1",
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [],
+            },
+        )
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                        "text": "test 2",
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [],
+            },
+        )
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                        "text": "test-name",
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_back_action",
+            }
+        )
+
+        rendered = form.run()
+
+        compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "test-name",
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
             },
         )

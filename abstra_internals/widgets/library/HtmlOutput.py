@@ -10,6 +10,7 @@ class HtmlOutput(Output):
     def set_props(self, props):
         self.html = props.get('html', '')
         self.full_width = props.get('full_width', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'html': self.html, 'fullWidth': self.

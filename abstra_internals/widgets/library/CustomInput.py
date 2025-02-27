@@ -6,10 +6,7 @@ class CustomInput(Input):
     type = 'custom-input'
 
     def __init__(self, key: str, html_body: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(html_body=html_body, **kwargs))
 
     def set_props(self, props):
@@ -22,6 +19,7 @@ class CustomInput(Input):
         self.value = props.get('initial_value', None)
         self.full_width = props.get('full_width', False)
         self.change_event = props.get('change_event', None)
+        super().set_props(props)
 
     def serialize_value(self) ->Any:
         return self.value

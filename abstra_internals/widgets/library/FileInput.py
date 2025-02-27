@@ -13,10 +13,7 @@ class FileInput(Input):
     multiple_handler: MultipleHandler
 
     def __init__(self, key: str, label: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
@@ -33,6 +30,7 @@ class FileInput(Input):
         self.value = props.get('initial_value', self.empty_value)
         self.multiple_handler = MultipleHandler(self.multiple, self.min,
             self.max, required=self.required)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'hint': self.hint,

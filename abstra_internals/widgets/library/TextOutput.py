@@ -11,6 +11,7 @@ class TextOutput(Output):
         self.text = str(props['text'])
         self.size = props.get('size', 'medium')
         self.full_width = props.get('full_width', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'text': self.text, 'size': self.size,

@@ -7,10 +7,7 @@ class NumberSliderInput(Input):
     empty_value = 0
 
     def __init__(self, key: str, label: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
@@ -25,6 +22,7 @@ class NumberSliderInput(Input):
         self.disabled = props.get('disabled', False)
         self.number_value_handler = NumberValueHandler(min=self.min, max=
             self.max, required=self.required)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'label': self.label,

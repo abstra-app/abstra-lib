@@ -10,6 +10,7 @@ class LatexOutput(Output):
     def set_props(self, props):
         self.text = props.get('text', '')
         self.full_width = props.get('full_width', False)
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'text': self.text, 'fullWidth': self.

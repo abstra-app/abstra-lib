@@ -1,29 +1,12 @@
-from dataclasses import dataclass
 from typing import Dict
-
-
-class AutoNext:
-    pass
-
-
-@dataclass
-class Button:
-    label: str
-
-
-class NextButton(Button):
-    def __init__(self):
-        super().__init__("i18n_next_action")
-
-
-class BackButton(Button):
-    def __init__(self):
-        super().__init__("i18n_back_action")
 
 
 class State(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def __getitem__(self, key):
+        return self.get(key, None)
 
     @property
     def _touched(self) -> Dict[str, bool]:
@@ -42,8 +25,6 @@ class State(dict):
                 for k, v in obj.items()
                 if k != "__touched"
             }
-        elif isinstance(obj, list):
-            return [self.clean_dict_from_touched(v) for v in obj]
         else:
             return obj
 

@@ -9,10 +9,7 @@ class PhoneInput(Input):
         country_code='', national_number='')
 
     def __init__(self, key: str, label: str, **kwargs):
-        initial_error = kwargs.get('errors', [])
-        if not isinstance(initial_error, list):
-            initial_error = [initial_error]
-        super().__init__(key, initial_error)
+        super().__init__(key)
         self.set_props(dict(label=label, **kwargs))
 
     def set_props(self, props):
@@ -25,6 +22,7 @@ class PhoneInput(Input):
         self.disabled = props.get('disabled', False)
         self.invalid_message = props.get('invalid_message',
             'i18n_error_invalid_phone_number')
+        super().set_props(props)
 
     def render(self, ctx: dict):
         return {'type': self.type, 'key': self.key, 'label': self.label,

@@ -33,6 +33,9 @@ class Output(Widget):
     def has_errors(self):
         return False
 
+    def set_props(self, props):
+        pass
+
 
 class Input(Widget):
     type: str
@@ -41,11 +44,16 @@ class Input(Widget):
     required: Optional[Union[bool, str]] = None
     initial_errors: List[str] = (lambda: [])()
 
-    def __init__(self, key: str, errors: Optional[List[str]]) -> None:
+    def __init__(self, key: str) -> None:
         super().__init__()
         self.key = key
-        self.initial_errors = errors or []
-        self.errors = errors or []
+
+    def set_props(self, props):
+        initial_error = props.get("errors", [])
+        if not isinstance(initial_error, list):
+            self.errors = (
+                [initial_error] if isinstance(initial_error, str) else initial_error
+            )
 
     def _has_changes(self, old_value, new_value):
         is_empty = old_value is None and new_value == self.empty_value

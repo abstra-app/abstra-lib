@@ -71,11 +71,7 @@ class FormClient(ExecutionClient):
     ## SDK
 
     def request_render(self, rendered: RenderedForm, seq: int) -> None:
-        actions = (
-            None
-            if rendered["buttons"] is None
-            else list(map(lambda button: button.label, rendered["buttons"]))
-        )
+        actions = list(map(lambda button: button.label, rendered["buttons"]))
         self._user_code_send(
             forms_contract.FormRenderMessage(
                 widgets=rendered["widgets"],
