@@ -17,9 +17,12 @@ from abstra_internals.entities.forms.template import (
     TemplateGeneratorFunction,
 )
 from abstra_internals.interface.sdk.forms.exceptions import InvalidRunInputError
+from abstra_internals.utils.code import always_returns_none
 from abstra_internals.widgets.widget_base import Input, Widget
 
-Runnable = Union[Step, TemplateFunction, Template, TemplateGeneratorFunction]
+Runnable = Union[
+    Step, TemplateFunction, Template, TemplateGeneratorFunction, types.FunctionType
+]
 
 
 class Form:
@@ -36,11 +39,14 @@ class Form:
         if isinstance(runnable, Step):
             return runnable
         elif self._is_widgets_list(runnable):
+            print("PageStep list")
             return PageStep(lambda _: cast(List, runnable))
         elif inspect.isgeneratorfunction(runnable):
             return GeneratorStep(runnable)
         elif isinstance(runnable, types.FunctionType):
-            return ComputationStep(runnable)
+            if always_returns_none(runnable):
+                return ComputationStep(runnable)
+            return PageStep(runnable)
 
         raise InvalidRunInputError(str(type(runnable)))
 

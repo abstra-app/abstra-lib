@@ -24,7 +24,7 @@ class BackButton(Button):
 Template = List[Widget]
 TemplateWithButtons = Tuple[Template, Optional[List[Button]]]
 
-TemplateFunction = Callable[[State], Union[Template, TemplateWithButtons]]
+TemplateFunction = Callable[[State], Optional[Union[Template, TemplateWithButtons]]]
 TemplateGenerator = Generator[Union[Template, TemplateWithButtons], None, None]
 TemplateGeneratorFunction = Callable[[State], TemplateGenerator]
 

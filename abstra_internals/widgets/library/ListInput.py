@@ -136,7 +136,7 @@ class ListInput:
                 result = self._raw_template(State(item_state))
                 if isinstance(result, tuple):
                     return result[0]
-                return result
+                return result or []
             return self._raw_template
 
         def set_props(self, props):

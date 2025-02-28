@@ -91,7 +91,7 @@ def subscript_called_args(
     return visitor.args if visitor.args else None
 
 
-def has_none_return(func: Callable) -> bool:
+def always_returns_none(func: Callable) -> bool:
     source = textwrap.dedent(inspect.getsource(func))
     tree = ast.parse(source)
 

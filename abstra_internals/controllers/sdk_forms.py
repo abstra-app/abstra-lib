@@ -48,7 +48,7 @@ class FormSDKController:
     def next_user_message(self) -> Dict:
         return self.client.next_user_message()
 
-    def run_form(self, *, steps: List[Step], state: State, hide_steps: bool) -> Dict:
+    def run_form(self, *, steps: List[Step], state: State, hide_steps: bool) -> State:
         form = FormEntity(steps=steps, state=state, force_hide_steps=hide_steps)
         rendered = None
         seq = 0
