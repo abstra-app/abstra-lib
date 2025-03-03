@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, TypedDict
 
 from abstra_internals.controllers.main import UnknownNodeTypeError
+from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
     AgentStage,
@@ -281,5 +282,7 @@ class WorkflowController:
                     )
 
         ProjectRepository.save(project)
+
+        RoleClientController(self.repos).sync_connection_pool()
 
         return self._make_workflow_dto(project)

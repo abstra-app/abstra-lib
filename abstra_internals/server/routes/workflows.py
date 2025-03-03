@@ -29,6 +29,7 @@ def get_editor_bp(main_controller: MainController):
             if payload is None:
                 raise Exception("No payload found")
             new_state = controller.update_workflow(payload)
+
             return new_state
         except Exception as e:
             AbstraLogger.capture_exception(e)

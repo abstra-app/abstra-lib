@@ -31,6 +31,7 @@ def rm_tree(pth: Path):
 def init_dir(path: typing.Optional[Path] = None):
     path = path or Path(tempfile.mkdtemp())
     SettingsController.set_root_path(path.as_posix())
+    SettingsController.set_public_url("foo")
     ProjectRepository.initialize()
 
     return path

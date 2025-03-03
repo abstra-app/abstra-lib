@@ -1,7 +1,7 @@
 import json
 from threading import Thread
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import requests
 import simple_websocket
@@ -131,7 +131,7 @@ class SessionPathMessage(BaseModel):
     sessionPath: str
 
 
-def connect_tunnel():
+def connect_tunnel(on_public_url_update: Optional[Callable[[], None]]):
     url = f"{CLOUD_API_ENDPOINT}/tunnel/connect".replace("https://", "wss://").replace(
         "http://", "ws://"
     )
@@ -194,6 +194,10 @@ def connect_tunnel():
                         f"{CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}"
                     )
                     Settings.set_public_url(public_url)
+
+                    if on_public_url_update:
+                        on_public_url_update()
+
                     print(
                         f"Hooks can also be fired from {Fore.GREEN} {public_url}/_hooks/:hook-path{Fore.RESET}"
                     )
