@@ -79,6 +79,8 @@ def editor(headless: bool):
     if not headless:
         browser_open_editor()
 
-    connect_tunnel(on_public_url_update=role_client_controller.sync_connection_pool)
+    connect_tunnel(
+        on_public_url_update=role_client_controller.safe_sync_connection_pool
+    )
 
     server.serve_forever()

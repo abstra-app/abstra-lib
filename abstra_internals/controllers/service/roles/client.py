@@ -32,7 +32,7 @@ class RoleClientController(RoleCommonController):
         )
 
     def sync_connection_pool(self):
-        if Settings.public_url is None:
+        if not Settings.has_public_url():
             return
 
         project = ProjectRepository.load()
@@ -66,6 +66,12 @@ class RoleClientController(RoleCommonController):
                     agent_project_id=agent.project_id,
                     client_stage_id=agent.id,
                 )
+
+    def safe_sync_connection_pool(self):
+        try:
+            self.sync_connection_pool()
+        except Exception as e:
+            print(e)
 
     def loop_sync_connection_pool(self):
         def loop():

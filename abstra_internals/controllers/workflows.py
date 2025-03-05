@@ -283,6 +283,6 @@ class WorkflowController:
 
         ProjectRepository.save(project)
 
-        RoleClientController(self.repos).sync_connection_pool()
+        RoleClientController(self.repos).safe_sync_connection_pool()
 
         return self._make_workflow_dto(project)

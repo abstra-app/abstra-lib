@@ -19,7 +19,7 @@ def run():
     StdioPatcher.apply(controller)
 
     role_client_controller = RoleClientController(controller.repositories)
-    role_client_controller.sync_connection_pool()
+    role_client_controller.safe_sync_connection_pool()
     role_client_controller.loop_sync_connection_pool()
 
     options = GunicornOptionsBuilder(controller).build()
