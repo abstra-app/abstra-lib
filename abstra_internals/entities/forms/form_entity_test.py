@@ -1015,3 +1015,31 @@ class FormEntityTest(unittest.TestCase):
                 "buttons": [NextButton()],
             },
         )
+
+    def test_for_loop_run(self):
+        def page_a(state: State) -> Template:
+            return [TextInput(key="name", label="Name")]
+
+        for i in range(2):
+            steps: List[Step] = [PageStep(page_a)]
+            form = FormEntity(steps, State(), force_hide_steps=False)
+            state = form.run()
+
+            self.compare_renders(
+                state,
+                {
+                    "widgets": [rendered_text_input],
+                    "end_page": False,
+                    "steps_info": {"current": 1, "total": 1, "disabled": True},
+                    "buttons": [NextButton()],
+                },
+            )
+
+            form.handle_input(
+                {
+                    "type": "form:input",
+                    "payload": {"name": "test"},
+                }
+            )
+
+            state = form.run()

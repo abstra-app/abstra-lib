@@ -21,6 +21,7 @@ class FormSDKController:
     def __init__(self, client: "FormClient", users_repository: UsersRepository) -> None:
         self.client = client
         self.users_repository = users_repository
+        self.seq = 0
 
     def get_user(self, force_refresh: bool) -> UserClaims:
         data = self.client.request_auth(force_refresh)
@@ -51,10 +52,9 @@ class FormSDKController:
     def run_form(self, *, steps: List[Step], state: State, hide_steps: bool) -> State:
         form = FormEntity(steps=steps, state=state, force_hide_steps=hide_steps)
         rendered = None
-        seq = 0
 
         while rendered := form.run():
-            self.client.request_render(rendered, seq)
+            self.client.request_render(rendered, self.seq)
 
             if rendered["yielding"]:
                 continue
@@ -64,7 +64,7 @@ class FormSDKController:
 
             response = self.client.next_user_message()
 
-            seq = response.get("seq", seq)
+            self.seq = response.get("seq", self.seq)
 
             if response["type"] == "form:input":
                 form.handle_input(response)
