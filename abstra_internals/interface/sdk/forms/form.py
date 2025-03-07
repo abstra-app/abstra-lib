@@ -16,9 +16,9 @@ from abstra_internals.entities.forms.template import (
     TemplateFunction,
     TemplateGeneratorFunction,
 )
+from abstra_internals.entities.forms.widgets.widget_base import BaseWidget, InputWidget
 from abstra_internals.interface.sdk.forms.exceptions import InvalidRunInputError
 from abstra_internals.utils.code import always_returns_none
-from abstra_internals.widgets.widget_base import Input, Widget
 
 Runnable = Union[
     Step, TemplateFunction, Template, TemplateGeneratorFunction, types.FunctionType
@@ -32,7 +32,7 @@ class Form:
 
     def _is_widgets_list(self, runnable: Runnable) -> bool:
         return isinstance(runnable, list) and all(
-            isinstance(w, Widget) for w in runnable
+            isinstance(w, BaseWidget) for w in runnable
         )
 
     def _create_step(self, runnable: Runnable) -> Step:
@@ -78,22 +78,22 @@ def run(
 
 @overload
 def run(
-    runnables: Widget,
+    runnables: BaseWidget,
     state: Optional[Dict] = None,
     hide_steps: bool = False,
 ) -> Optional[object]: ...
 
 
 def run(
-    runnables: Union[List[Runnable], Widget],
+    runnables: Union[List[Runnable], BaseWidget],
     state: Optional[Dict] = None,
     hide_steps: bool = False,
 ) -> Union[State, None, object]:
     # Single widget run
-    if isinstance(runnables, Widget):
+    if isinstance(runnables, BaseWidget):
         state = Form([[runnables]], initial_state=state, hide_steps=hide_steps).run()
-        if isinstance(runnables, Input):
-            return state[runnables.key]
+        if isinstance(runnables, InputWidget):
+            return state[runnables._key]
         return None
 
     return Form(runnables, initial_state=state, hide_steps=hide_steps).run()

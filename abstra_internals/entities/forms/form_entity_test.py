@@ -17,7 +17,7 @@ from abstra_internals.entities.forms.template import (
     Template,
     TemplateGeneratorFunction,
 )
-from abstra_internals.widgets.library import (
+from abstra_internals.entities.forms.widgets.library import (
     ListInput,
     PandasRowSelectionInput,
     TagInput,
@@ -147,7 +147,7 @@ def list_input_schema(item_state: State) -> Template:
 
 
 def list_page(state: State) -> Template:
-    return [ListInput(item_schema=list_input_schema, key="list")]
+    return [ListInput(template=list_input_schema, key="list")]
 
 
 list_page_step = PageStep(list_page)
@@ -156,7 +156,7 @@ list_page_step = PageStep(list_page)
 def list_and_input_page(state: State):
     return [
         TextInput(key="name", label="Name"),
-        ListInput(item_schema=list_input_schema, key="list"),
+        ListInput(template=list_input_schema, key="list"),
     ]
 
 
