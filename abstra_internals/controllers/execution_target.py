@@ -80,10 +80,11 @@ def print_exception(exception: Exception, entrypoint: Path):
         # find legacy threads, if used
         if tb.tb_frame.f_code.co_name == "use_legacy_threads":
             legacy_thread_index = index
+
         index += 1
         tb = tb.tb_next
 
-    user_frame_index = max(abstra_entrypoint_index, legacy_thread_index) + 1
+    user_frame_index = max(abstra_entrypoint_index, legacy_thread_index)
 
     # reset traceback
     tb = exception.__traceback__
