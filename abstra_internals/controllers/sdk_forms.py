@@ -22,6 +22,7 @@ class FormSDKController:
         self.client = client
         self.users_repository = users_repository
         self.seq = 0
+        self.reuse_cache = {}
 
     def get_user(self, force_refresh: bool) -> UserClaims:
         data = self.client.request_auth(force_refresh)
@@ -96,3 +97,13 @@ class FormSDKController:
         self, widgets: list, validation: ValidationResult, event_seq: int
     ):
         self.client.request_page_update(widgets, validation, event_seq)
+
+    def reuse(self, func, *args, **kwargs):
+        key = (func.__name__, args, frozenset(kwargs.items()))
+
+        if key in self.reuse_cache:
+            return self.reuse_cache[key]
+
+        result = func(*args, **kwargs)
+        self.reuse_cache[key] = result
+        return result
