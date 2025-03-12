@@ -53,7 +53,11 @@ def get_attachment_type(attachment_name: str) -> str:
 
 
 def generate_email(
-    to: List[str], message: str, title: str, attachments: List[Union[str, io.IOBase]]
+    to: List[str],
+    message: str,
+    title: str,
+    attachments: List[Union[str, io.IOBase]],
+    is_html: bool,
 ) -> EmailParams:
     project = ProjectRepository.load()
     translations = get_translation(project.workspace.language or "en")
@@ -80,5 +84,5 @@ def generate_email(
         subject=subject,
         body=message,
         attachments=parsed_attachments,
-        is_html=False,
+        is_html=is_html,
     )
