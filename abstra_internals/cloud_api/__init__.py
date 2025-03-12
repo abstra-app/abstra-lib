@@ -65,7 +65,7 @@ def get_ai_messages(
     execution_error,
     headers: dict,
 ):
-    url = "f{CLOUD_API_URL}/ai/messages"
+    url = f"{CLOUD_API_CLI_URL}/ai/messages"
     new_smart_chat_flag = os.getenv("USE_NEW_SMART_CHAT", "false") == "true"
     current_abstra_version = pkg_utils.get_local_package_version().base_version
     body = {
