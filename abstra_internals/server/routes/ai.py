@@ -17,7 +17,12 @@ def get_editor_bp(main_controller: MainController):
             flask.abort(400)
 
         streamer = controller.send_ai_message(
-            body["messages"], body["runtime"], body["threadId"]
+            body["messages"],
+            body["runtime"],
+            body["threadId"],
+            body["langGraphThreadId"],
+            body["code"],
+            body["executionError"],
         )
 
         if streamer is None:

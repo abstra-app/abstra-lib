@@ -31,9 +31,19 @@ class AiController:
     def __init__(self, controller: MainController):
         self.controller = controller
 
-    def send_ai_message(self, messages, stage, thread_id):
+    def send_ai_message(
+        self, messages, stage, thread_id, langgraph_thread_id, code, execution_error
+    ):
         headers = resolve_headers() or {}
-        yield from get_ai_messages(messages, stage, thread_id, headers)
+        yield from get_ai_messages(
+            messages,
+            stage,
+            thread_id,
+            langgraph_thread_id,
+            code,
+            execution_error,
+            headers,
+        )
 
     def create_thread(self):
         headers = resolve_headers()

@@ -1,4 +1,5 @@
 import json
+import os
 from threading import Thread
 from time import sleep
 from typing import Any, Callable, Optional
@@ -22,6 +23,7 @@ from abstra_internals.environment import (
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
+from abstra_internals.utils import packages as pkg_utils
 
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:
@@ -54,13 +56,27 @@ def get_api_key_info(headers: dict) -> dict:
         return {"logged": False, "reason": "INVALID_API_TOKEN"}
 
 
-def get_ai_messages(messages, stage, thread_id, headers: dict):
-    url = f"{CLOUD_API_CLI_URL}/ai/messages"
+def get_ai_messages(
+    messages,
+    stage,
+    thread_id,
+    langgraph_thread_id,
+    code,
+    execution_error,
+    headers: dict,
+):
+    url = "f{CLOUD_API_URL}/ai/messages"
+    new_smart_chat_flag = os.getenv("USE_NEW_SMART_CHAT", "false") == "true"
+    current_abstra_version = pkg_utils.get_local_package_version().base_version
     body = {
         "messages": messages,
         "runtime": stage,
         "threadId": thread_id,
-        "version": "v1",
+        "langGraphThreadId": langgraph_thread_id,
+        "code": code,
+        "executionError": execution_error,
+        "version": current_abstra_version,
+        "useNewSmartChat": new_smart_chat_flag,
     }
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
         chunk_size=None
