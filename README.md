@@ -58,4 +58,4 @@ With a Form, you can collect user input and use Python code to work with that in
 
 ## 🛟 Useful links
 
-[Website](https://abstra.io) | [Docs](https://docs.abstra.io) | [Cloud](https://cloud.abstra.io) | [Youtube](https://www.youtube.com/playlist?list=PLFPJgKA6K86ZdAHZ3aPWsrZHX_7jJ3Cc9) | [Privacy]([./PRIVACY.md](https://www.abstra.io/privacy-policy))
+[Website](https://abstra.io) | [Docs](https://abstra.io/docs) | [Cloud](https://cloud.abstra.io) | [Youtube](https://www.youtube.com/playlist?list=PLFPJgKA6K86ZdAHZ3aPWsrZHX_7jJ3Cc9) | [Privacy]([./PRIVACY.md](https://www.abstra.io/privacy-policy))
