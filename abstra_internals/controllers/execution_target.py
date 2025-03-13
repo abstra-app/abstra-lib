@@ -1,4 +1,5 @@
 import gc
+import os
 import traceback
 from pathlib import Path
 from typing import Literal, Optional, Tuple
@@ -65,33 +66,32 @@ def _execute_without_exit(filepath: Path):
 Result = Tuple[Literal["finished", "abandoned", "failed"], Optional[Exception]]
 
 
-def print_exception(exception: Exception, entrypoint: Path):
+def print_filtered_exception(exception: Exception, entrypoint: Path) -> None:
+    # normcase is used to make the paths case-insensitive and replace backslashes with slashes on Windows
+    normalized_entrypoint = os.path.normcase(str(entrypoint.resolve()))
+
+    entrypoint_frame_index = 0
+    legacy_thread_frame_index = 0
+
     tb = exception.__traceback__
-
-    abstra_entrypoint_index = 0
-    legacy_thread_index = 0
     index = 0
-
     while tb:
-        # find abstra entrypoint
-        if str(entrypoint).lower() == tb.tb_frame.f_code.co_filename.lower():
-            abstra_entrypoint_index = index
-
-        # find legacy threads, if used
+        frame_filename = os.path.normcase(
+            str(Path(tb.tb_frame.f_code.co_filename).resolve())
+        )
+        if frame_filename == normalized_entrypoint:
+            entrypoint_frame_index = index
         if tb.tb_frame.f_code.co_name == "use_legacy_threads":
-            legacy_thread_index = index
-
+            legacy_thread_frame_index = index
         index += 1
         tb = tb.tb_next
 
-    user_frame_index = max(abstra_entrypoint_index, legacy_thread_index)
+    user_frame_index = max(entrypoint_frame_index, legacy_thread_frame_index)
 
-    # reset traceback
+    # Reset traceback and skip frames before the user frame
     tb = exception.__traceback__
-
-    # remove unwanted frames
     for _ in range(user_frame_index):
-        if tb:
+        if tb is not None:
             tb = tb.tb_next
 
     traceback.print_exception(type(exception), exception, tb)
@@ -105,7 +105,7 @@ def _execute_code(filepath: Path) -> Result:
     except ClientAbandoned as e:
         return "abandoned", e
     except Exception as e:
-        print_exception(e, entrypoint=filepath)
+        print_filtered_exception(e, entrypoint=filepath)
         return "failed", e
     finally:
         gc.collect()
