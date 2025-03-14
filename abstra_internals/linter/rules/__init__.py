@@ -4,6 +4,7 @@ from abstra_internals.linter.linter import LinterRule
 
 from .conflicting_name import ConflictingName
 from .conflicting_path import ConflictingPath
+from .deprecated_functions import DeprecatedFunctionUsage
 from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
 from .env_in_bundle import EnvInBundle
 from .missing_abstra_in_requirements import MissingAbstraInRequirements
@@ -28,4 +29,5 @@ rules: List[LinterRule] = [
     ConflictingPath(),
     Psycopg2MustBeBinary(),
     ConflictingName(),
+    DeprecatedFunctionUsage(),
 ]

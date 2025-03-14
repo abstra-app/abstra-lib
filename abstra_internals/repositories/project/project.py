@@ -1108,6 +1108,11 @@ class Project:
             if isinstance(stage, StageWithFile):
                 yield Path(stage.file)
 
+    def iter_entrypointed_stages(self) -> Generator[Tuple[Path, Stage], None, None]:
+        for stage in self.workflow_stages:
+            if isinstance(stage, StageWithFile):
+                yield Path(stage.file), stage
+
     @property
     def project_files(self) -> Generator[Path, None, None]:
         for entrypoint in self.iter_entrypoints():

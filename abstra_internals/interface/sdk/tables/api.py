@@ -9,6 +9,7 @@ from abstra_internals.interface.sdk.tables.utils import (
     quoted_identifier,
     serialize,
 )
+from abstra_internals.utils.deprecated import deprecated
 
 
 def _execute(query: str, params: typing.List):  # private api
@@ -187,6 +188,11 @@ def _make_row_dict(data: typing.Any) -> typing.Dict[str, typing.Any]:
 
 
 # public
+def run_sql(query: str, params: typing.List = []):  # public api
+    return _run(query, params)
+
+
+@deprecated(new_function="run_sql")
 def run(query: str, params: typing.List = []):  # public api
     return _run(query, params)
 

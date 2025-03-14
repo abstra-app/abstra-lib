@@ -5,6 +5,7 @@ from abstra_internals.interface.sdk.tables.api import (
     insert,
     query_df,
     run,
+    run_sql,
     select,
     select_by_id,
     select_df,
@@ -32,6 +33,7 @@ from abstra_internals.interface.sdk.tables.comparators import (
 
 __all__ = [
     "run",
+    "run_sql",
     "query_df",
     "TablesExecutionError",
     "select",
