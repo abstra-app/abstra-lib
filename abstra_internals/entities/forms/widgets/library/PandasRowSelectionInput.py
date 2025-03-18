@@ -33,6 +33,7 @@ class PandasRowSelectionInput(InputWidget):
         page_size: int = 10,
         errors: Optional[Union[List[str], str]] = None,
         value: Optional[Union[List[Any], Any]] = None,
+        pagination_always_visible: bool = True,
     ):
         self.df = df
         self._key = key or label
@@ -54,6 +55,7 @@ class PandasRowSelectionInput(InputWidget):
         self.page_size = page_size
         self.errors = self._init_errors(errors)
         self.value = value
+        self.pagination_always_visible = pagination_always_visible
 
     def serialize_table(self):
         if self.df is None:
@@ -98,4 +100,5 @@ class PandasRowSelectionInput(InputWidget):
             "min": self.min,
             "max": self.max,
             "pageSize": self.page_size,
+            "paginationAlwaysVisible": self.pagination_always_visible,
         }

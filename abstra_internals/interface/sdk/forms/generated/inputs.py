@@ -574,6 +574,7 @@ def read_pandas_row_selection(df: "DataFrame", **kwargs) -> list:
 		
         Keyword Args: 
 		display_index (bool): Whether to show a index column. Defaults to False.
+		pagination_always_visible (bool): Whether to show the pagination controls when there is just a single page. Defaults to True.
 		label (str): The label to display to the user
 		initial_value (list): The initial value of the selection. Defaults to []
 		multiple (bool): Whether the user will be allowed to select multiple rows. Defaults to False.

@@ -82,6 +82,7 @@ rendered_pandas_row_selection_input = {
             {"index": 2, "name": "Charlie", "amount": 300},
         ],
     },
+    "paginationAlwaysVisible": True,
     "required": True,
     "fullWidth": True,
     "displayIndex": False,

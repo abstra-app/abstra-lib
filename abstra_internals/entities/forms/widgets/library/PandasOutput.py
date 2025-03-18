@@ -21,6 +21,7 @@ class PandasOutput(OutputWidget):
         display_index: bool = True,
         filterable: bool = True,
         page_size: int = 10,
+        pagination_always_visible: bool = True,
     ):
         self.label = label
         self.key = key
@@ -30,6 +31,7 @@ class PandasOutput(OutputWidget):
         self.display_index = display_index
         self.filterable = filterable
         self.page_size = page_size
+        self.pagination_always_visible = pagination_always_visible
 
     def serialize_table(self):
         if self.df is None:
@@ -56,4 +58,5 @@ class PandasOutput(OutputWidget):
             "actions": self.actions,
             "filterable": self.filterable,
             "pageSize": self.page_size,
+            "paginationAlwaysVisible": self.pagination_always_visible,
         }

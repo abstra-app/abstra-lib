@@ -3044,6 +3044,13 @@ metadata = {
                     "default": "False",
                 },
                 {
+                    "argName": "pagination_always_visible",
+                    "description": "Whether to show the pagination controls when there is just a single page. Defaults to True.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "True",
+                },
+                {
                     "argName": "label",
                     "description": "The label to display to the user",
                     "typeName": "str",
@@ -3146,6 +3153,7 @@ metadata = {
                 {"argName": "min", "typeName": ["number", "null"]},
                 {"argName": "max", "typeName": ["number", "null"]},
                 {"argName": "pageSize", "typeName": "number"},
+                {"argName": "paginationAlwaysVisible", "typeName": "boolean"},
                 {"argName": "key", "typeName": "string"},
                 {"argName": "disabled", "typeName": "boolean"},
                 {"argName": "errors", "typeName": "array"},
@@ -4939,6 +4947,13 @@ metadata = {
                     "default": "False",
                 },
                 {
+                    "argName": "pagination_always_visible",
+                    "description": "Whether to show the pagination controls when there is just a single page. Defaults to True.",
+                    "typeName": "bool",
+                    "isKwarg": True,
+                    "default": "True",
+                },
+                {
                     "argName": "label",
                     "description": "The label to display to the user",
                     "typeName": "str",
@@ -5001,6 +5016,7 @@ metadata = {
                 {"argName": "displayIndex", "typeName": "boolean"},
                 {"argName": "label", "typeName": "string"},
                 {"argName": "pageSize", "typeName": "number"},
+                {"argName": "paginationAlwaysVisible", "typeName": "boolean"},
                 {"argName": "actions", "typeName": "array"},
                 {"argName": "fullWidth", "typeName": "boolean"},
             ]

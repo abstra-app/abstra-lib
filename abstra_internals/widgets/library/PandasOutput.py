@@ -18,6 +18,8 @@ class PandasOutput(Output):
         self.actions = props.get('actions', [])
         self.filterable = props.get('filterable', False)
         self.page_size = props.get('page_size', DEFAULT_PAGE_SIZE)
+        self.pagination_always_visible = props.get('pagination_always_visible',
+            True)
         super().set_props(props)
 
     def serialize_table(self):
@@ -39,4 +41,5 @@ class PandasOutput(Output):
         return {'type': self.type, 'table': self.serialize_table(),
             'fullWidth': self.full_width, 'displayIndex': self.
             display_index, 'label': self.label, 'actions': self.actions,
-            'filterable': self.filterable, 'pageSize': self.page_size}
+            'filterable': self.filterable, 'pageSize': self.page_size,
+            'paginationAlwaysVisible': self.pagination_always_visible}

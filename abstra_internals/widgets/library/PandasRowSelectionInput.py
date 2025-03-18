@@ -32,6 +32,8 @@ class PandasRowSelectionInput(Input):
         self.max = props.get('max', None)
         self.multiple_handler = MultipleHandler(self.multiple, self.min,
             self.max, self.required)
+        self.pagination_always_visible = props.get('pagination_always_visible',
+            True)
         self.page_size = props.get('page_size', DEFAULT_PAGE_SIZE)
         super().set_props(props)
 
@@ -67,4 +69,5 @@ class PandasRowSelectionInput(Input):
             display_index, 'disabled': self.disabled, 'label': self.label,
             'multiple': self.multiple, 'filterable': self.filterable,
             'value': self.serialize_value(), 'errors': self.errors, 'min':
-            self.min, 'max': self.max, 'pageSize': self.page_size}
+            self.min, 'max': self.max, 'pageSize': self.page_size,
+            'paginationAlwaysVisible': self.pagination_always_visible}
