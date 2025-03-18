@@ -57,4 +57,10 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
         task = controller.create_task(name, stage_id, payload)
         return task.dump()
 
+    @bp.delete("/clear")
+    @editor_usage
+    def _clear_tasks():
+        controller.clear_tasks()
+        return {"success": True}
+
     return bp

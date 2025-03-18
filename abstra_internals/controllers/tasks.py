@@ -190,3 +190,6 @@ class TasksController:
             name, payload, stage_id, source_stage_id, execution_id
         )
         return task
+
+    def clear_tasks(self) -> None:
+        self.repos.tasks.clear()
