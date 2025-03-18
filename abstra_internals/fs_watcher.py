@@ -1,3 +1,5 @@
+import importlib
+import sys
 import threading
 import time
 from pathlib import Path
@@ -7,11 +9,11 @@ from dotenv import load_dotenv
 from watchdog.events import FileModifiedEvent, FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from abstra_internals.modules import reload_project_local_modules
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
 
-IGNORED_FILES = [".abstra/resources.dat", ".abstra/", "abstra.json"]
+IGNORED_FILES = [".abstra/resources.dat", ".abstra/", "abstra.json", "__pycache__"]
 DEBOUNCE_DELAY = 0.5
 
 
@@ -19,34 +21,54 @@ class FileChangeEventHandler(FileSystemEventHandler):
     def __init__(self):
         super().__init__()
         self._debounce_timer: Optional[threading.Timer] = None
+        self.dot_env_path = Settings.root_path / ".env"
 
     def on_modified(self, event: FileSystemEvent):
-        has_ignored_paths = any(
-            ignored_file in str(event.src_path) for ignored_file in IGNORED_FILES
-        )
+        filepath = Path(event.src_path)
 
-        if not isinstance(event, FileModifiedEvent) or has_ignored_paths:
+        if self.should_ignore_event(event) or self.should_ignore_path(filepath):
             return
 
-        if event.src_path.endswith(".env"):
-            load_dotenv(Settings.root_path / ".env", override=True)
-            return self.reload_files()
+        if filepath.resolve() == self.dot_env_path.resolve():
+            AbstraLogger.info("Reloading .env and all modules")
+            load_dotenv(self.dot_env_path, override=True)
+            for dep in ProjectRepository.load().get_local_dependencies():
+                self.reload_module(dep)
+            return
 
-        for dep in ProjectRepository.load().get_local_dependencies():
-            if dep.resolve() == Path(event.src_path).resolve():
-                return self.reload_files()
+        resolved_deps = [
+            dep.resolve() for dep in ProjectRepository.load().get_local_dependencies()
+        ]
 
-    def reload_files(self):
-        if self._debounce_timer is not None:
-            self._debounce_timer.cancel()
+        if filepath.resolve() in resolved_deps:
+            AbstraLogger.info(f"Reloading modified module: {filepath}")
+            self.reload_module(filepath)
+            return
 
-        self._debounce_timer = threading.Timer(
-            DEBOUNCE_DELAY, reload_project_local_modules
-        )
-        self._debounce_timer.start()
+    def reload_module(self, file: Path):
+        module_name = file.stem
+        module = sys.modules.get(module_name)
+
+        try:
+            if module is None:
+                importlib.import_module(module_name)
+            else:
+                if module.__spec__ is not None and module.__spec__.cached is not None:
+                    Path(module.__spec__.cached).unlink(missing_ok=True)
+                importlib.reload(module)
+        except Exception as e:
+            AbstraLogger.error(
+                f"Could not reload module from {file} with the following error: {e}"
+            )
+
+    def should_ignore_path(self, path: Path) -> bool:
+        return any(ignored_file in str(path) for ignored_file in IGNORED_FILES)
+
+    def should_ignore_event(self, event: FileSystemEvent) -> bool:
+        return not isinstance(event, (FileModifiedEvent))
 
 
-def watch_file_change_events():
+def run_watcher():
     event_handler = FileChangeEventHandler()
 
     observer = Observer()

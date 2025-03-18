@@ -8,7 +8,7 @@ from abstra_internals.controllers.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST
-from abstra_internals.fs_watcher import watch_file_change_events
+from abstra_internals.fs_watcher import run_watcher
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import EditorConsumer
@@ -44,7 +44,7 @@ def start_file_watcher():
     threading.Thread(
         daemon=True,
         name="file_watcher",
-        target=watch_file_change_events,
+        target=run_watcher,
     ).start()
 
 
