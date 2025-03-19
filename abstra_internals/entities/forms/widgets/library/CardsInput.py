@@ -21,6 +21,7 @@ class CardsInput(InputWidget):
     value: Union[List[CardOption], CardOption, None]
     multiple: bool = False
     multiple_handler: MultipleHandler
+    value: Union[List[CardOption], CardOption, None]
 
     def __init__(
         self,
@@ -38,7 +39,6 @@ class CardsInput(InputWidget):
         min: Optional[int] = None,
         max: Optional[int] = None,
         errors: Optional[Union[List[str], str]] = None,
-        value: Optional[Union[List[CardOption], CardOption]] = None,
     ):
         self.label = label
         self._key = key or label
@@ -61,7 +61,7 @@ class CardsInput(InputWidget):
             self.multiple, self.min, self.max, self.required
         )
         self.errors = self._init_errors(errors)
-        self.value = value
+        self.value = None
 
     def render(self):
         return {

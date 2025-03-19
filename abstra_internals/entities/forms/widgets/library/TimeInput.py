@@ -14,7 +14,6 @@ class TimeInput(InputWidget):
         label: str,
         *,
         key: Optional[str] = None,
-        value: Optional[datetime.time] = None,
         required: bool = True,
         hint: Optional[str] = None,
         full_width: bool = False,
@@ -24,7 +23,7 @@ class TimeInput(InputWidget):
     ):
         self.label = label
         self._key = key or label
-        self.value = value
+        self.value = None
         self.required = required
         self.hint = hint
         self.full_width = full_width

@@ -20,7 +20,6 @@ class AppointmentInput(InputWidget):
         disabled: bool = False,
         slots: Optional[List[AppointmentSlot]] = None,
         errors: Optional[Union[List[str], str]] = None,
-        value: Optional[Union[AppointmentSlot, dict, Tuple[datetime, datetime]]] = None,
     ) -> None:
         self.label = label
         self._key = key or label
@@ -30,7 +29,7 @@ class AppointmentInput(InputWidget):
         self.disabled = disabled
         self.slots = AppointmentSlot.from_list(slots or [])
         self.errors = self._init_errors(errors)
-        self.value = value
+        self.value = None
 
     @property
     def value(self) -> Optional[AppointmentSlot]:

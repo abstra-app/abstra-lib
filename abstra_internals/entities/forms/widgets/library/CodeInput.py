@@ -17,7 +17,6 @@ class CodeInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: str = "",
         errors: Optional[Union[List[str], str]] = None,
     ):
         self.label = label
@@ -27,7 +26,7 @@ class CodeInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value
+        self.value = ""
         self.errors = self._init_errors(errors)
 
     def render(self):

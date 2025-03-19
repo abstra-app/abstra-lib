@@ -23,7 +23,6 @@ class NumberSliderInput(InputWidget):
         max: Optional[float] = None,
         step: Optional[float] = None,
         errors: Optional[Union[List[str], str]] = None,
-        value: float = 0,
     ):
         self.label = label
         self._key = key or label
@@ -35,7 +34,7 @@ class NumberSliderInput(InputWidget):
         self.max = max
         self.step = step
         self.errors = self._init_errors(errors)
-        self.value = value
+        self.value = 0
         self.number_value_handler = NumberValueHandler(
             min=self.min, max=self.max, required=self.required
         )

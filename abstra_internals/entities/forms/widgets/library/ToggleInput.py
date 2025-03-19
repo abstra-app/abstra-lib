@@ -19,13 +19,12 @@ class ToggleInput(InputWidget):
         full_width: bool = False,
         disabled: bool = False,
         errors: Optional[Union[List[str], str]] = None,
-        value: bool = False,
     ):
         self.label = label
         self._key = key or label
         self.on_text = on_text
         self.off_text = off_text
-        self.value = value
+        self.value = False
         self.required = required
         self.hint = hint
         self.full_width = full_width

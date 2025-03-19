@@ -17,7 +17,6 @@ class TextInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: str = "",
         errors: Optional[Union[List[str], str]] = None,
         mask: Optional[str] = None,
         max_length: Optional[int] = None,
@@ -30,7 +29,7 @@ class TextInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value
+        self.value = ""
         self.errors = self._init_errors(errors)
         self.mask = mask
         self.max_length = max_length

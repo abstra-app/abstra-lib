@@ -12,7 +12,6 @@ class RatingInput(InputWidget):
         label: str,
         *,
         key: Optional[str] = None,
-        value: Optional[float] = None,
         required: bool = True,
         hint: Optional[str] = None,
         full_width: bool = False,
@@ -23,7 +22,7 @@ class RatingInput(InputWidget):
     ):
         self.label = label
         self._key = key or label
-        self.value = value
+        self.value = None
         self.required = required
         self.hint = hint
         self.full_width = full_width

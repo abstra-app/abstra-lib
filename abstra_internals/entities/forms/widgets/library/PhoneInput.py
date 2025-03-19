@@ -19,7 +19,6 @@ class PhoneInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: Optional[PhoneResponse] = None,
         errors: Optional[str] = None,
         invalid_message: Optional[str] = None,
     ):
@@ -30,7 +29,7 @@ class PhoneInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value or self.make_empty()
+        self.value = self.make_empty()
         self.errors = self._init_errors(errors)
         self.invalid_message = invalid_message
 

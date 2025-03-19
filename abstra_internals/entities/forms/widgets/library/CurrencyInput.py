@@ -17,7 +17,6 @@ class CurrencyInput(InputWidget):
         placeholder: Optional[str] = "",
         full_width: bool = False,
         disabled: bool = False,
-        value: Optional[float] = None,
         min: Optional[float] = None,
         max: Optional[float] = None,
         currency: str = "USD",
@@ -30,7 +29,7 @@ class CurrencyInput(InputWidget):
         self.placeholder = placeholder
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value
+        self.value = None
         self.min = min
         self.max = max
         self.currency = currency

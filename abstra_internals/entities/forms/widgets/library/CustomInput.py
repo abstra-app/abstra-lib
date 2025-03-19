@@ -17,7 +17,6 @@ class CustomInput(InputWidget):
         height: int = 200,
         css: str = "",
         js: str = "",
-        value: Any = None,
         full_width: bool = False,
         change_event: Optional[Callable] = None,
     ):
@@ -28,7 +27,7 @@ class CustomInput(InputWidget):
         self.height = height
         self.css = css
         self.js = js
-        self.value = value
+        self.value = None
         self.full_width = full_width
         self.change_event = change_event
 

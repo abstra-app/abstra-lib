@@ -17,7 +17,6 @@ class TagInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: Optional[List[str]] = None,
         errors: Optional[Union[List[str], str]] = None,
     ):
         self.label = label
@@ -27,7 +26,7 @@ class TagInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value or []
+        self.value = []
         self.errors = self._init_errors(errors)
 
     def is_value_unset(self):

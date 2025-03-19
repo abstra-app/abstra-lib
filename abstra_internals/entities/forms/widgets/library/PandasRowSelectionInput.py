@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class PandasRowSelectionInput(InputWidget):
     type = "pandas-row-selection-input"
-    value: Union[List[Any], Any] = None
+    value: Union[List[Any], Any]
 
     def __init__(
         self,
@@ -32,7 +32,6 @@ class PandasRowSelectionInput(InputWidget):
         max: Optional[int] = None,
         page_size: int = 10,
         errors: Optional[Union[List[str], str]] = None,
-        value: Optional[Union[List[Any], Any]] = None,
         pagination_always_visible: bool = True,
     ):
         self.df = df
@@ -54,7 +53,7 @@ class PandasRowSelectionInput(InputWidget):
         )
         self.page_size = page_size
         self.errors = self._init_errors(errors)
-        self.value = value
+        self.value = None
         self.pagination_always_visible = pagination_always_visible
 
     def serialize_table(self):

@@ -20,7 +20,6 @@ class EmailInput(InputWidget):
         invalid_email_message: str = "i18n_error_invalid_email",
         disabled: bool = False,
         errors: Optional[Union[List[str], str]] = None,
-        value: str = "",
     ):
         self.label = label
         self._key = key or label
@@ -30,7 +29,7 @@ class EmailInput(InputWidget):
         self.full_width = full_width
         self.invalid_email_message = invalid_email_message
         self.disabled = disabled
-        self.value = value
+        self.value = ""
         self.errors = self._init_errors(errors)
 
     def render(self):

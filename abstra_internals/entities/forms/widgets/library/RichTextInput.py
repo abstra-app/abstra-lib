@@ -17,7 +17,6 @@ class RichTextInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: str = "",
     ):
         self.label = label
         self._key = key or label
@@ -26,7 +25,7 @@ class RichTextInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value
+        self.value = ""
 
     def render(self):
         return {

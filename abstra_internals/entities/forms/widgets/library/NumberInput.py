@@ -24,7 +24,6 @@ class NumberInput(InputWidget):
         min: Optional[float] = None,
         max: Optional[float] = None,
         errors: Optional[Union[List[str], str]] = None,
-        value: Optional[float] = None,
     ):
         self.label = label
         self._key = key or label
@@ -40,7 +39,7 @@ class NumberInput(InputWidget):
         self.number_value_handler = NumberValueHandler(
             min=self.min, max=self.max, required=self.required
         )
-        self.value = value
+        self.value = None
 
     def render(self):
         return {

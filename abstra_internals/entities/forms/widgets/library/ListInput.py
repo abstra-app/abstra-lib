@@ -26,11 +26,10 @@ class ListInput(InputWidget):
         required: bool = True,
         disabled: bool = False,
         errors: Optional[Union[List[str], str]] = None,
-        value: Optional[List[State]] = None,
     ):
         self._key = key
         self._raw_template = template
-        self.value = value or []
+        self.value = []
         self.min = min
         self.max = max
         self.hint = hint

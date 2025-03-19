@@ -17,7 +17,6 @@ class CheckboxInput(InputWidget):
         full_width: bool = False,
         disabled: bool = False,
         errors: Optional[Union[list, str]] = None,
-        value: bool = False,
     ):
         self.label = label
         self._key = key or label
@@ -26,7 +25,7 @@ class CheckboxInput(InputWidget):
         self.full_width = full_width
         self.disabled = disabled
         self.errors = self._init_errors(errors)
-        self.value = value
+        self.value = False
 
     def render(self):
         return {

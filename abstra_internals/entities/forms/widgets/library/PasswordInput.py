@@ -28,11 +28,10 @@ class PasswordInput(InputWidget):
         disabled: bool = False,
         secret: bool = False,
         errors: Optional[Union[List[str], str]] = None,
-        value: str = "",
     ):
         self.label = label
         self._key = key or label
-        self.value = value
+        self.value = ""
         self.hint = hint
         self.required = required
         self.full_width = full_width
@@ -49,7 +48,6 @@ class PasswordInput(InputWidget):
         self.disabled = disabled
         self.secret = secret
         self.errors = self._init_errors(errors)
-        self.value = value
 
     def render(self):
         return {

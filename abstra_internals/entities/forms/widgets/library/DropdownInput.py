@@ -12,7 +12,7 @@ class DropdownInput(InputWidget):
     type = "dropdown-input"
     multiple_handler: MultipleHandler
     options_handler: OptionsHandler
-    value: Union[List[object], object]
+    value: Union[List[object], object, None]
 
     def __init__(
         self,
@@ -29,7 +29,6 @@ class DropdownInput(InputWidget):
         min: Optional[int] = None,
         max: Optional[int] = None,
         errors: Optional[Union[List[object], object]] = None,
-        value: Union[List[str], None] = None,
     ):
         self.label = label
         self._key = key or label
@@ -42,7 +41,7 @@ class DropdownInput(InputWidget):
         self.multiple = multiple
         self.min = min
         self.max = max
-        self.value = value
+        self.value = None
         self.multiple_handler = MultipleHandler(
             self.multiple, self.min, self.max, self.required
         )

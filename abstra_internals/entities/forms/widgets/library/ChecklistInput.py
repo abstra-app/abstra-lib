@@ -21,7 +21,6 @@ class ChecklistInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: Optional[List[object]] = None,
         min: int = 0,
         max: Optional[int] = None,
         errors: Optional[List[str]] = None,
@@ -29,7 +28,7 @@ class ChecklistInput(InputWidget):
         self.label = label
         self._key = key or label
         self.options = options
-        self.value = value or []
+        self.value = []
         self.required = required
         self.hint = hint
         self.full_width = full_width
@@ -38,9 +37,6 @@ class ChecklistInput(InputWidget):
         self.max = max or len(self.options)
         self.options_handler = OptionsHandler(self.options)
         self.errors = self._init_errors(errors)
-
-    def is_value_unset(self):
-        return False
 
     def _validate_required(self) -> List[str]:
         if not self.required and len(self.value) == 0:

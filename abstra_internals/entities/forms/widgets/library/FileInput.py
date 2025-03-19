@@ -14,6 +14,7 @@ class FileInput(InputWidget):
     type = "file-input"
     multiple: bool = False
     multiple_handler: MultipleHandler
+    value: Union[FileResponse, List[FileResponse], None]
 
     def __init__(
         self,
@@ -29,7 +30,6 @@ class FileInput(InputWidget):
         min: Optional[int] = None,
         max: Optional[int] = None,
         accepted_formats: Optional[List[str]] = None,
-        initial_value: Optional[List[str]] = None,
         errors: Optional[Union[List[str], str]] = None,
     ):
         self.label = label
@@ -46,7 +46,7 @@ class FileInput(InputWidget):
         self.multiple_handler = MultipleHandler(
             self.multiple, self.min, self.max, self.required
         )
-        self.value = self.parse_value(initial_value)
+        self.value = None
         self.errors = self._init_errors(errors)
 
     def render(self):

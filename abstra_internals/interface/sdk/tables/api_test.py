@@ -256,7 +256,7 @@ class TestTables(BaseTest):
         self.assertEqual(params, [123456, 888])
 
     def test_escaping_table_name(self):
-        query, params = _make_delete_query(
+        query, _ = _make_delete_query(
             table='table "with" quotes', values={'"tangerina"': "123456"}
         )
         self.assertEqual(
@@ -266,12 +266,10 @@ class TestTables(BaseTest):
 
     # security tests
     def test_delete_sql_injection(self):
-        query, params1 = _make_delete_query(
+        query, _ = _make_delete_query(
             table="fruits", values={"tangerina": "12345678; DROP TABLE fruits"}
         )
-        query2, params2 = _make_delete_query(
-            table="fruits", values={"tangerina": "123456"}
-        )
+        query2, _ = _make_delete_query(table="fruits", values={"tangerina": "123456"})
         self.assertEqual(query, query2)
 
     def test_delete_without_values(self):

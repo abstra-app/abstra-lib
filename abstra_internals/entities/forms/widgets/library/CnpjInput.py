@@ -17,7 +17,6 @@ class CnpjInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: str = "",
         invalid_message: Optional[str] = "i18n_error_invalid_cnpj",
         errors: Optional[Union[List[str], str]] = None,
     ):
@@ -28,7 +27,7 @@ class CnpjInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value
+        self.value = ""
         self.invalid_message = invalid_message
         self.errors = self._init_errors(errors)
 

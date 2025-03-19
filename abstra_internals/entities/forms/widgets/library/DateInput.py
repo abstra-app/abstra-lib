@@ -19,7 +19,6 @@ class DateInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        value: Optional[datetime.date] = None,
         errors: Optional[Union[List[str], str]] = None,
     ):
         self.label = label
@@ -28,7 +27,7 @@ class DateInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.value = value
+        self.value = None
         self.errors = self._init_errors(errors)
 
     def render(self):
