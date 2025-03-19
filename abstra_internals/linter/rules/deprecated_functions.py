@@ -47,7 +47,7 @@ class DeprecatedFunctionUsage(LinterRule):
 
         for entrypoint, stage in project.iter_entrypointed_stages():
             try:
-                with open(entrypoint, "r") as file:
+                with open(entrypoint, "r", encoding="utf-8") as file:
                     source_code = file.read()
                     tree = ast.parse(source_code)
 
