@@ -38,6 +38,11 @@ class TaskDTO(Serializable):
     completed: Optional[TaskEventDetails]
 
 
+class ExecutionTasksResponse(Serializable):
+    trigger_task: Optional[TaskDTO]
+    sent_tasks: List[TaskDTO]
+
+
 class TasksRepository(ABC):
     @abstractmethod
     def send_task(
@@ -88,6 +93,10 @@ class TasksRepository(ABC):
 
     @abstractmethod
     def get_all_tasks(self) -> List[TaskDTO]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_execution_sent_tasks(self, execution_id: str) -> List[TaskDTO]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -231,6 +240,12 @@ class LocalTasksRepository(TasksRepository):
 
     def get_all_tasks(self) -> List[TaskDTO]:
         return self.manager.load_all()
+
+    def get_execution_sent_tasks(self, execution_id: str) -> List[TaskDTO]:
+        all_tasks = self.manager.load_all()
+        return [
+            task for task in all_tasks if task.created.by_execution_id == execution_id
+        ]
 
     def set_locked_tasks_to_pending(self, execution_id: str) -> None:
         all_tasks = self.manager.load_all()
@@ -396,6 +411,9 @@ class ProductionTasksRepository(TasksRepository):
         return TaskDTO(**task)
 
     def get_all_tasks(self) -> List[TaskDTO]:
+        raise NotImplementedError()
+
+    def get_execution_sent_tasks(self, execution_id: str) -> List[TaskDTO]:
         raise NotImplementedError()
 
     def set_locked_tasks_to_pending(self, execution_id: str) -> None:

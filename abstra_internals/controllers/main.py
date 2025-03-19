@@ -14,6 +14,7 @@ from abstra_internals.credentials import (
     resolve_headers,
     set_credentials,
 )
+from abstra_internals.entities.execution_context import ScriptContext
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import ExecutionFilter, ExecutionRepository
@@ -36,7 +37,7 @@ from abstra_internals.repositories.project.project import (
     StyleSettingsWithSidebar,
 )
 from abstra_internals.repositories.roles import RolesRepository
-from abstra_internals.repositories.tasks import TasksRepository
+from abstra_internals.repositories.tasks import ExecutionTasksResponse, TasksRepository
 from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.settings import Settings
@@ -453,6 +454,20 @@ class MainController:
 
     def get_logs(self, id: str):
         return self.execution_logs_repository.get(id)
+
+    def get_execution_tasks(self, execution_id: str) -> ExecutionTasksResponse:
+        execution = self.execution_repository.get(execution_id)
+
+        trigger_task = None
+        if isinstance(execution.context, ScriptContext):
+            trigger_task = self.tasks_repository.get_by_id(execution.context.task_id)
+
+        sent_tasks = self.tasks_repository.get_execution_sent_tasks(execution_id)
+
+        return ExecutionTasksResponse(
+            trigger_task=trigger_task,
+            sent_tasks=sent_tasks,
+        )
 
     # Worker lifecycle
 

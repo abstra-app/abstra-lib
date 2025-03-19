@@ -20,4 +20,10 @@ def get_editor_bp(controller: MainController):
         stages = controller.get_stages()
         return [stage.as_dict for stage in stages]
 
+    @bp.get("/<execution_id>/tasks")
+    @editor_usage
+    def _get_execution_tasks(execution_id):
+        tasks = controller.get_execution_tasks(execution_id)
+        return tasks.dump()
+
     return bp
