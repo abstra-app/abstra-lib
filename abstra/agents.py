@@ -15,4 +15,12 @@ def get_connections(role: Literal["client", "agent"]) -> List[ConnectionModel]:
         )
 
 
+def validate_token(token: str):
+    return SDKContextStore.get_by_thread().repositories.agents.validate_token(token)
+
+
+def accept_connection(token: str):
+    return SDKContextStore.get_by_thread().repositories.agents.accept_connection(token)
+
+
 __all__ = ["get_connections"]

@@ -6,6 +6,11 @@ from abstra_internals.environment import (
     RABBITMQ_CONNECTION_URI,
     SIDECAR_URL,
 )
+from abstra_internals.repositories.agents import (
+    AgentsRepository,
+    LocalAgentsRepository,
+    ProductionAgentsRepository,
+)
 from abstra_internals.repositories.ai import (
     AiApiHttpClient,
     LocalAiApiHttpClient,
@@ -104,6 +109,7 @@ class Repositories:
     editor_jwt: EditorJWTRepository
     role_agents: RoleAgentRepository
     role_clients: RoleClientRepository
+    agents: AgentsRepository
 
 
 def get_editor_repositories():
@@ -126,6 +132,7 @@ def get_editor_repositories():
         role_clients=LocalRoleClientRepository(CLOUD_API_CLI_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
+        agents=LocalAgentsRepository(CLOUD_API_CLI_URL),
     )
 
 
@@ -150,4 +157,5 @@ def get_prodution_app_repositories():
         role_clients=ProductionRoleClientRepository(SIDECAR_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=ForkserverContextRepository(),
+        agents=ProductionAgentsRepository(SIDECAR_URL),
     )
