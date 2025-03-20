@@ -39,7 +39,6 @@ class Form:
         if isinstance(runnable, Step):
             return runnable
         elif self._is_widgets_list(runnable):
-            print("PageStep list")
             return PageStep(lambda _: cast(List, runnable))
         elif inspect.isgeneratorfunction(runnable):
             return GeneratorStep(runnable)

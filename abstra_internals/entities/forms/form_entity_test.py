@@ -309,11 +309,12 @@ class FormEntityTest(unittest.TestCase):
             },
         )
 
-    def test_validation(self):
+    def test_input_validation(self):
         steps: List[Step] = [double_input_step]
         form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
 
+        # First render
         self.compare_renders(
             rendered,
             {
@@ -333,6 +334,7 @@ class FormEntityTest(unittest.TestCase):
             },
         )
 
+        # Fill first input
         form.handle_input(
             {
                 "type": "form:input",
@@ -342,6 +344,7 @@ class FormEntityTest(unittest.TestCase):
 
         rendered = form.run()
 
+        # No errors
         self.compare_renders(
             rendered,
             {
@@ -363,6 +366,7 @@ class FormEntityTest(unittest.TestCase):
             },
         )
 
+        # Clear input
         form.handle_input(
             {
                 "type": "form:input",
@@ -371,6 +375,7 @@ class FormEntityTest(unittest.TestCase):
         )
         rendered = form.run()
 
+        # Validate error
         self.compare_renders(
             rendered,
             {
@@ -390,6 +395,188 @@ class FormEntityTest(unittest.TestCase):
                 "end_page": False,
                 "steps_info": {"current": 1, "total": 1, "disabled": True},
                 "buttons": [NextButton()],
+            },
+        )
+
+    def test_navigation_validation(self):
+        steps: List[Step] = [
+            input_page_step,
+            double_input_step,
+        ]
+        form = FormEntity(steps, State(), force_hide_steps=False)
+        rendered = form.run()
+
+        # First render
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [rendered_text_input],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # Attempt to advance without filling the input
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        # Validate error
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "",
+                        "errors": ["i18n_error_required_field"],
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # Fill input
+
+        form.handle_input(
+            {
+                "type": "form:input",
+                "payload": {"name": "test-name"},
+            }
+        )
+
+        rendered = form.run()
+
+        # No errors
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "test-name",
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # Advance
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        # Next page
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "test-name",
+                    },
+                    {
+                        **rendered_text_input,
+                        "key": "email",
+                        "label": "Email",
+                        "value": "",
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
+            },
+        )
+
+        # Go Back
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_back_action",
+            }
+        )
+
+        rendered = form.run()
+
+        # Previous page
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "test-name",
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # Advance
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        # Advance
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {"name": "test-name"},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        # Validate error
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "value": "test-name",
+                    },
+                    {
+                        **rendered_text_input,
+                        "key": "email",
+                        "label": "Email",
+                        "value": "",
+                        "errors": ["i18n_error_required_field"],
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
             },
         )
 
@@ -748,7 +935,6 @@ class FormEntityTest(unittest.TestCase):
         form = FormEntity(steps, State(), force_hide_steps=False)
         rendered = form.run()
 
-        print(rendered)
         self.compare_renders(
             rendered,
             {

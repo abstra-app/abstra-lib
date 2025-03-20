@@ -10,5 +10,4 @@ class State(dict):
 
     def update_values(self, other: Dict):
         for key, value in other.items():
-            if value != self.get(key):
-                self[key] = value
+            self[key] = value

@@ -43,10 +43,19 @@ class TemplateRenderer:
         # Avoids using mutable objects as widgets currently have a internal state
         return copy.deepcopy(self._raw_template)
 
-    def parse_state(self, raw_state: Dict) -> State:
+    def make_partial_state(self, raw_state: Dict) -> State:
         parsed = {}
         for idx, widget in enumerate(self.template):
             if isinstance(widget, InputWidget) and widget.key(idx) in raw_state:
+                parsed[widget.key(idx)] = widget.parse_value(
+                    raw_state.get(widget.key(idx))
+                )
+        return State(parsed)
+
+    def make_state(self, raw_state: Dict) -> State:
+        parsed = {}
+        for idx, widget in enumerate(self.template):
+            if isinstance(widget, InputWidget):
                 parsed[widget.key(idx)] = widget.parse_value(
                     raw_state.get(widget.key(idx))
                 )
