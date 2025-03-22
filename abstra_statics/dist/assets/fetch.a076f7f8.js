@@ -1,2 +1,0 @@
-import"./index.1a1f6336.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="5c2d7056-bcf9-4b53-be52-e98ced04773b",e._sentryDebugIdIdentifier="sentry-dbid-5c2d7056-bcf9-4b53-be52-e98ced04773b")}catch{}})();const b=(...e)=>window.fetch(...e);export{b as l};
-//# sourceMappingURL=fetch.a076f7f8.js.map
