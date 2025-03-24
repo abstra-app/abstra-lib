@@ -64,6 +64,7 @@ def get_ai_messages(
     code,
     execution_error,
     headers: dict,
+    env_vars_keys,
 ):
     url = f"{CLOUD_API_CLI_URL}/ai/messages"
     new_smart_chat_flag = os.getenv("USE_NEW_SMART_CHAT", "false") == "true"
@@ -77,6 +78,7 @@ def get_ai_messages(
         "executionError": execution_error,
         "version": current_abstra_version,
         "useNewSmartChat": new_smart_chat_flag,
+        "envVars": env_vars_keys,
     }
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
         chunk_size=None

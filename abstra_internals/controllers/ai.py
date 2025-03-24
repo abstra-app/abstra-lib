@@ -13,6 +13,7 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.repositories.project.json_migrations import get_latest_version
 from abstra_internals.repositories.project.project import Project, ProjectRepository
+from abstra_internals.services.env_vars import EnvVarsRepository
 from abstra_internals.settings import Settings
 
 
@@ -35,6 +36,7 @@ class AiController:
         self, messages, stage, thread_id, langgraph_thread_id, code, execution_error
     ):
         headers = resolve_headers() or {}
+        env_vars_keys = EnvVarsRepository.list_keys()
         yield from get_ai_messages(
             messages,
             stage,
@@ -43,6 +45,7 @@ class AiController:
             code,
             execution_error,
             headers,
+            env_vars_keys,
         )
 
     def create_thread(self):

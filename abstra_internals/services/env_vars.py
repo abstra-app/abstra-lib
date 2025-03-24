@@ -30,6 +30,10 @@ class EnvVarsRepository:
         ]
 
     @staticmethod
+    def list_keys() -> List[str]:
+        return list(dotenv_values(EnvVarsRepository.get_env_var_path()).keys())
+
+    @staticmethod
     def set(name: str, value: str):
         set_key(EnvVarsRepository.get_env_var_path(), name, value)
         load_dotenv(EnvVarsRepository.get_env_var_path(), override=True)
