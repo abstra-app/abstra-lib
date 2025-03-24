@@ -93,7 +93,7 @@ class Requirement:
         if not self.installed_version():
             return
 
-        if os.getenv("__STANDALONE_MODE__"):
+        if os.getenv("ABSTRA_RUNNING_IN_WINDOWS_APP"):
             yield from self.__uninstall_from_standalone()
         else:
             yield from self.__uninstall_from_lib()
@@ -106,7 +106,7 @@ class Requirement:
             "-y",
             self.to_text(),
             "--target",
-            os.environ["__STANDALONE_PACKAGES_FOLDER__"],
+            os.environ["ABSTRA_BUNDLED_APP_PACKAGES_FOLDER"],
         ]
 
         if pip_main(cmd) != 0:
@@ -245,7 +245,7 @@ class Requirements:
                     "install",
                     lib.to_text(),
                     "--target",
-                    os.environ["__STANDALONE_PACKAGES_FOLDER__"],
+                    os.environ["ABSTRA_BUNDLED_APP_PACKAGES_FOLDER"],
                 ]
 
                 yield f"Installing {lib.to_text()} in abstra standalone...\n"
@@ -257,7 +257,7 @@ class Requirements:
                     yield "Installation finished successfully\n\n"
 
     def install(self):
-        if os.getenv("__STANDALONE_MODE__"):
+        if os.getenv("ABSTRA_RUNNING_IN_WINDOWS_APP"):
             yield from self.__install_from_standalone()
         else:
             yield from self.__install_from_lib()

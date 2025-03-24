@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from abstra_internals.linter.linter import LinterRule
@@ -16,7 +17,7 @@ from .psycopg2 import Psycopg2MustBeBinary
 from .syntax_errors import SyntaxErrors
 from .venv_in_bundle import VenvInBundle
 
-rules: List[LinterRule] = [
+core_rules: List[LinterRule] = [
     EnvInBundle(),
     VenvInBundle(),
     MissingPackagesInRequirements(),
@@ -25,9 +26,15 @@ rules: List[LinterRule] = [
     MissingAbstraInRequirements(),
     DuplicatePackagesInRequirements(),
     MissingEnv(),
-    NewVersionOfAbstraAvailable(),
     ConflictingPath(),
     Psycopg2MustBeBinary(),
     ConflictingName(),
     DeprecatedFunctionUsage(),
 ]
+
+conditional_rules: List[LinterRule] = []
+
+if not os.getenv("ABSTRA_RUNNING_IN_BUNDLED_APP"):
+    conditional_rules = [NewVersionOfAbstraAvailable()]
+
+rules: List[LinterRule] = core_rules + conditional_rules
