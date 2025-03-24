@@ -1100,7 +1100,7 @@ class Project:
             stage
             for stage in self.workflow_stages
             if isinstance(stage, stage_with_file_classes)
-            and stage.file_path == file_path
+            and stage.file_path.resolve() == file_path.resolve()
         ]
 
     def iter_entrypoints(self) -> Generator[Path, None, None]:

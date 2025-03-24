@@ -4,6 +4,7 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
+from abstra_internals.server.routes import codebase as codebase_router
 from abstra_internals.server.routes import env_vars as envvars_router
 from abstra_internals.server.routes import executions as executions_router
 from abstra_internals.server.routes import forms as forms_router
@@ -38,6 +39,9 @@ def __get_api_bp(controller: MainController):
 
     hooks_bp = hooks_router.get_editor_bp(controller)
     bp.register_blueprint(hooks_bp, url_prefix="/hooks")
+
+    files_bp = codebase_router.get_editor_bp(controller.repositories)
+    bp.register_blueprint(files_bp, url_prefix="/codebase")
 
     jobs_bp = jobs_router.get_editor_bp(controller)
     bp.register_blueprint(jobs_bp, url_prefix="/jobs")
