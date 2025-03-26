@@ -7,6 +7,7 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import field
 from pathlib import Path
+from threading import Lock
 from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
@@ -1449,6 +1450,8 @@ def _update_file(
 
 
 class ProjectRepository:
+    lock = Lock()
+
     @classmethod
     def get_file_path(cls):
         return Settings.root_path / "abstra.json"
@@ -1484,8 +1487,9 @@ class ProjectRepository:
         with temp_file.open("w") as f:
             json.dump(project_data, f, indent=2)
 
-        shutil.move(str(temp_file), cls.get_file_path())
-        Path.rmdir(temp_file.parent)
+        with cls.lock:
+            shutil.move(str(temp_file), cls.get_file_path())
+            Path.rmdir(temp_file.parent)
 
     @classmethod
     def migrate_config_file(cls, verbose=True):
@@ -1505,9 +1509,11 @@ class ProjectRepository:
 
     @classmethod
     def load(cls) -> Project:
-        data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
+        file_path = cls.get_file_path()
 
-        return Project.from_dict(data)
+        with cls.lock:
+            data = json.loads(file_path.read_text(encoding="utf-8"))
+            return Project.from_dict(data)
 
     @classmethod
     def initialize_or_migrate(cls, verbose=True):
