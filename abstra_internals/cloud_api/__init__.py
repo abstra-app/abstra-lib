@@ -1,5 +1,4 @@
 import json
-import os
 from threading import Thread
 from time import sleep
 from typing import Any, Callable, Optional
@@ -59,7 +58,6 @@ def get_api_key_info(headers: dict) -> dict:
 def get_ai_messages(
     messages,
     stage,
-    thread_id,
     langgraph_thread_id,
     code,
     execution_error,
@@ -67,17 +65,14 @@ def get_ai_messages(
     env_vars_keys,
 ):
     url = f"{CLOUD_API_CLI_URL}/ai/messages"
-    new_smart_chat_flag = os.getenv("USE_NEW_SMART_CHAT", "false") == "true"
     current_abstra_version = pkg_utils.get_local_package_version().base_version
     body = {
         "messages": messages,
         "runtime": stage,
-        "threadId": thread_id,
         "langGraphThreadId": langgraph_thread_id,
         "code": code,
         "executionError": execution_error,
         "version": current_abstra_version,
-        "useNewSmartChat": new_smart_chat_flag,
         "envVars": env_vars_keys,
     }
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(

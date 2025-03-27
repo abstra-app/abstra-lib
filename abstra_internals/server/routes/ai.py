@@ -19,7 +19,6 @@ def get_editor_bp(main_controller: MainController):
         streamer = controller.send_ai_message(
             body["messages"],
             body["runtime"],
-            body["threadId"],
             body["langGraphThreadId"],
             body["code"],
             body["executionError"],

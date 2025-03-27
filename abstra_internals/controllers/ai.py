@@ -33,14 +33,13 @@ class AiController:
         self.controller = controller
 
     def send_ai_message(
-        self, messages, stage, thread_id, langgraph_thread_id, code, execution_error
+        self, messages, stage, langgraph_thread_id, code, execution_error
     ):
         headers = resolve_headers() or {}
         env_vars_keys = EnvVarsRepository.list_keys()
         yield from get_ai_messages(
             messages,
             stage,
-            thread_id,
             langgraph_thread_id,
             code,
             execution_error,
