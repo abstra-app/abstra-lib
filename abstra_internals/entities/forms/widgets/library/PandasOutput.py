@@ -8,6 +8,12 @@ if TYPE_CHECKING:
 
 
 class PandasOutput(OutputWidget):
+    """Pandas DataFrame output widget for displaying tabular data.
+
+    Attributes:
+        df (pd.DataFrame): The pandas DataFrame to display.
+    """
+
     type = "pandas-output"
 
     def __init__(
@@ -23,8 +29,21 @@ class PandasOutput(OutputWidget):
         page_size: int = 10,
         pagination_always_visible: bool = True,
     ):
+        """Initialize a PandasOutput widget.
+
+        Args:
+            df (pd.DataFrame): The pandas DataFrame to display.
+            label (Optional[str]): Text label displayed above the table.
+            key (Optional[str]): Identifier for the widget.
+            actions (Optional[List[dict]]): List of action configurations.
+            full_width (bool): Whether the table should take up the full width of its container.
+            display_index (bool): Whether to display row indices.
+            filterable (bool): Whether the table is filterable.
+            page_size (int): Number of rows to display per page.
+            pagination_always_visible (bool): Whether pagination controls are always visible.
+        """
         self.label = label
-        self.key = key
+        self._key = key
         self.df = df
         self.actions = actions
         self.full_width = full_width
@@ -48,7 +67,7 @@ class PandasOutput(OutputWidget):
         del serialized["schema"]["pandas_version"]
         return serialized
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "table": self.serialize_table(),

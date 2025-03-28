@@ -6,8 +6,13 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class AppointmentInput(InputWidget):
+    """Appointment scheduling input widget for selecting time slots.
+
+    Attributes:
+        value (Optional[AppointmentSlot]): The selected appointment time slot.
+    """
+
     type = "appointment-input"
-    slots: List[AppointmentSlot]
 
     def __init__(
         self,
@@ -21,6 +26,18 @@ class AppointmentInput(InputWidget):
         slots: Optional[List[AppointmentSlot]] = None,
         errors: Optional[Union[List[str], str]] = None,
     ) -> None:
+        """Initialize an AppointmentInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether a time slot must be selected before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            slots (Optional[List[AppointmentSlot]]): List of available time slots.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.required = required
@@ -50,13 +67,13 @@ class AppointmentInput(InputWidget):
         else:
             raise ValueError(f"Invalid value type {type(value)}")
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
             "label": self.label,
             "hint": self.hint,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "required": self.required,
             "fullWidth": self.full_width,
             "disabled": self.disabled,
@@ -64,10 +81,10 @@ class AppointmentInput(InputWidget):
             "errors": self.errors,
         }
 
-    def serialize_value(self) -> Optional[int]:
+    def _serialize_value(self) -> Optional[int]:
         return self.slots.index(self.value) if self.value is not None else None
 
-    def parse_value(self, value: Optional[int]) -> Optional[AppointmentSlot]:
+    def _parse_value(self, value: Optional[int]) -> Optional[AppointmentSlot]:
         if value is None:
             return None
         return self.slots[value]

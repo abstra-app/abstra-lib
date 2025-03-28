@@ -6,6 +6,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class PhoneInput(InputWidget):
+    """Phone number input widget with country code selection.
+
+    Attributes:
+        value (PhoneResponse): The phone number entered by the user.
+    """
+
     type = "phone-input"
     value: PhoneResponse
 
@@ -22,6 +28,19 @@ class PhoneInput(InputWidget):
         errors: Optional[str] = None,
         invalid_message: Optional[str] = None,
     ):
+        """Initialize a PhoneInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            placeholder (Optional[str]): Placeholder text displayed when the input is empty.
+            required (bool): Whether the input must be filled before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            errors (Optional[str]): Pre-defined validation error messages to display.
+            invalid_message (Optional[str]): Custom error message for invalid phone numbers.
+        """
         self.label = label
         self._key = key or label
         self.placeholder = placeholder
@@ -36,12 +55,12 @@ class PhoneInput(InputWidget):
     def make_empty(self):
         return PhoneResponse(raw="", masked="", country_code="", national_number="")
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
             "label": self.label,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "placeholder": self.placeholder,
             "required": self.required,
             "hint": self.hint,
@@ -62,17 +81,17 @@ class PhoneInput(InputWidget):
     def is_value_unset(self):
         return self.value.raw == ""
 
-    def set_value(self, value, set_errors=False):
+    def _set_value(self, value, set_errors=False):
         if isinstance(value, PhoneResponse):
             self.value = value
         elif isinstance(value, dict):
-            self.value = self.parse_value(value)
+            self.value = self._parse_value(value)
         elif value is None:
             self.value = self.make_empty()
         if set_errors:
-            self.set_errors()
+            self._set_errors()
 
-    def serialize_value(self):
+    def _serialize_value(self):
         if isinstance(self.value, dict):
             return {
                 "countryCode": re.sub(
@@ -89,7 +108,7 @@ class PhoneInput(InputWidget):
             }
         return {"countryCode": "", "nationalNumber": ""}
 
-    def parse_value(self, value) -> PhoneResponse:
+    def _parse_value(self, value) -> PhoneResponse:
         if value is None:
             return self.make_empty()
         masked = f"+{value.get('countryCode')} {value.get('nationalNumber')}"

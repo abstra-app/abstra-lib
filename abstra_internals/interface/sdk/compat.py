@@ -37,6 +37,12 @@ def _set_title(title: str):
 
 
 def use_legacy_threads(mode: Literal["scripts", "forms", "jobs", "hooks"]):
+    """
+    Sets up compatibility mode for legacy threading functionality.
+
+    Args:
+        mode (Literal["scripts", "forms", "jobs", "hooks"]): The execution mode for the legacy threads.
+    """
     callee = currentframe()
     if callee is None:
         return

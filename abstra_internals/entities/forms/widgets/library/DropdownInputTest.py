@@ -13,7 +13,7 @@ class TestHotReloadLocalModules(TestCase):
             label="Dropdown Label",
             options=[{"label": "Option 1", "value": "option_1"}],
         )
-        result = widget.render()
+        result = widget._render()
 
         # option values are generated automatically
         self.assertEqual(
@@ -43,7 +43,7 @@ class TestHotReloadLocalModules(TestCase):
             options=["Option 1", "Option 2"],
         )
 
-        result = widget.render()
+        result = widget._render()
 
         self.assertEqual(
             result,
@@ -75,13 +75,13 @@ class TestHotReloadLocalModules(TestCase):
             options=["Option 1", "Option 2"],
         )
 
-        initial_render = widget.render()
+        initial_render = widget._render()
 
         user_sent_value = [initial_render["options"][1]["value"]]
-        parsed_value = widget.parse_value(user_sent_value)
+        parsed_value = widget._parse_value(user_sent_value)
         widget.value = parsed_value
 
-        result = widget.render()
+        result = widget._render()
 
         self.assertEqual(
             result,
@@ -121,12 +121,12 @@ class TestHotReloadLocalModules(TestCase):
             min=2,
         )
 
-        initial_render = widget.render()
+        initial_render = widget._render()
         user_sent_value = [initial_render["options"][1]["value"]]
-        parsed_value = widget.parse_value(user_sent_value)
+        parsed_value = widget._parse_value(user_sent_value)
         widget.value = parsed_value
 
-        result = widget.render()
+        result = widget._render()
 
         self.assertEqual(
             result,
@@ -170,15 +170,15 @@ class TestHotReloadLocalModules(TestCase):
             max=1,
         )
 
-        initial_render = widget.render()
+        initial_render = widget._render()
         user_sent_value = [
             initial_render["options"][0]["value"],
             initial_render["options"][1]["value"],
         ]
-        parsed_value = widget.parse_value(user_sent_value)
+        parsed_value = widget._parse_value(user_sent_value)
         widget.value = parsed_value
 
-        result = widget.render()
+        result = widget._render()
 
         self.assertEqual(
             result,

@@ -4,6 +4,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class TextareaInput(InputWidget):
+    """Textarea input widget for collecting multi-line text.
+
+    Attributes:
+        value (str): The multi-line text value entered by the user.
+    """
+
     type = "textarea-input"
     value: str
 
@@ -19,6 +25,18 @@ class TextareaInput(InputWidget):
         disabled: bool = False,
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a TextareaInput widget.
+
+        Args:
+            label (str): Text label displayed above the textarea.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            placeholder (str): Placeholder text displayed when the textarea is empty.
+            required (bool): Whether the textarea must be filled before proceeding.
+            hint (Optional[str]): Help text displayed below the textarea.
+            full_width (bool): Whether the textarea should take up the full width of its container.
+            disabled (bool): Whether the textarea is non-interactive.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.placeholder = placeholder
@@ -29,7 +47,7 @@ class TextareaInput(InputWidget):
         self.value = ""
         self.errors = self._init_errors(errors)
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,

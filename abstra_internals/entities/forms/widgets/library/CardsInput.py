@@ -17,6 +17,12 @@ class CardOption(TypedDict):
 
 
 class CardsInput(InputWidget):
+    """Card selection input widget for choosing from visual card options.
+
+    Attributes:
+        value (Union[List[CardOption], CardOption, None]): The selected card option(s).
+    """
+
     type = "cards-input"
     value: Union[List[CardOption], CardOption, None]
     multiple: bool = False
@@ -40,6 +46,23 @@ class CardsInput(InputWidget):
         max: Optional[int] = None,
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a CardsInput widget.
+
+        Args:
+            label (str): Text label displayed above the cards.
+            options (List[CardOption]): List of card options to display.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            searchable (bool): Whether cards can be filtered by search.
+            required (bool): Whether a card selection is required before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            columns (Optional[int]): Number of columns to display cards in.
+            full_width (bool): Whether the cards should take up the full width of their container.
+            layout (Optional[str]): Layout style for the cards ('list' or 'grid').
+            disabled (bool): Whether the input is non-interactive.
+            min (Optional[int]): Minimum number of cards that must be selected when multiple=True.
+            max (Optional[int]): Maximum number of cards that can be selected when multiple=True.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.options = [
@@ -63,7 +86,7 @@ class CardsInput(InputWidget):
         self.errors = self._init_errors(errors)
         self.value = None
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
@@ -80,14 +103,14 @@ class CardsInput(InputWidget):
             "errors": self.errors,
             "min": self.min,
             "max": self.max,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
         }
 
     def _run_validators(self) -> List[str]:
         return self.multiple_handler.validate(self.value)
 
-    def serialize_value(self) -> List:
+    def _serialize_value(self) -> List:
         return self.multiple_handler.value_to_list(self.value)
 
-    def parse_value(self, value):
+    def _parse_value(self, value):
         return self.multiple_handler.value_to_list_or_value(value)

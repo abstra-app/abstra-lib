@@ -13,7 +13,7 @@ from abstra_internals.entities.forms.steps import (
 )
 from abstra_internals.entities.forms.template import Template
 from abstra_internals.entities.forms.widgets.library import TextOutput
-from abstra_internals.entities.forms.widgets.widget_base import BaseWidget
+from abstra_internals.entities.forms.widgets.widget_base import Widget
 
 from .form import Runnable, run
 
@@ -35,7 +35,7 @@ def generator_function(state: State) -> Generator[Template, None, None]:
     yield [TextOutput("Hello, world!")]
 
 
-basic_template: List[BaseWidget] = [TextOutput("Hello, world!")]
+basic_template: List[Widget] = [TextOutput("Hello, world!")]
 
 
 class MockFormSDKController(FormSDKController):

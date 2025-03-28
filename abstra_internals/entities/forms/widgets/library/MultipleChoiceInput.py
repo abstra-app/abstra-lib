@@ -9,6 +9,12 @@ from abstra_internals.entities.forms.widgets.widget_base import (
 
 
 class MultipleChoiceInput(InputWidget):
+    """Multiple choice input widget for selecting a single option from a set of radio buttons.
+
+    Attributes:
+        value (Optional[object]): The selected option value.
+    """
+
     type = "multiple-choice-input"
     value: Union[List[object], object, None]
 
@@ -28,6 +34,22 @@ class MultipleChoiceInput(InputWidget):
         errors: Optional[Union[List[str], str]] = None,
         value: Union[List[str], str, None] = None,
     ):
+        """Initialize a MultipleChoiceInput widget.
+
+        Args:
+            label (str): Text label displayed above the options.
+            options (List[AbstraOption]): List of options to choose from, as AbstraOption objects.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether an option must be selected before proceeding.
+            hint (Optional[str]): Help text displayed below the options.
+            full_width (bool): Whether the widget should take up the full width of its container.
+            disabled (bool): Whether the widget is non-interactive.
+            multiple (bool): Whether multiple options can be selected.
+            min (Optional[int]): Minimum number of options that can be selected.
+            max (Optional[int]): Maximum number of options that can be selected.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+            value (Optional[Union[List[str], str, None]]): Initial value of the widget.
+        """
         self.label = label
         self._key = key or label
         self.options = options
@@ -46,7 +68,7 @@ class MultipleChoiceInput(InputWidget):
         self.errors = self._init_errors(errors)
         self.value = value
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
@@ -54,7 +76,7 @@ class MultipleChoiceInput(InputWidget):
             "options": self.options_handler.serialized_options(),
             "hint": self.hint,
             "multiple": self.multiple,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "required": self.required,
             "fullWidth": self.full_width,
             "min": self.min,
@@ -66,10 +88,10 @@ class MultipleChoiceInput(InputWidget):
     def _run_validators(self) -> List[str]:
         return self.multiple_handler.validate(self.value)
 
-    def serialize_value(self) -> List:
+    def _serialize_value(self) -> List:
         list_values = self.multiple_handler.value_to_list(self.value)
         return self.options_handler.ids_from_values(list_values)
 
-    def parse_value(self, value: Union[List[str], None]):
+    def _parse_value(self, value: Union[List[str], None]):
         list_values = self.options_handler.values_from_ids(value)
         return self.multiple_handler.value_to_list_or_value(list_values)

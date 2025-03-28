@@ -6,6 +6,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class TimeInput(InputWidget):
+    """Time input widget with time picker.
+
+    Attributes:
+        value (Optional[time]): The time value selected by the user.
+    """
+
     type = "time-input"
     value: Optional[datetime.time]
 
@@ -21,6 +27,18 @@ class TimeInput(InputWidget):
         format: str = "24hs",
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a TimeInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether a time must be selected before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            format (str): The format of the time input.
+            errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.value = None
@@ -31,21 +49,21 @@ class TimeInput(InputWidget):
         self.format = format
         self.errors = self._init_errors(errors)
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
             "label": self.label,
             "format": self.format,
             "hint": self.hint,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "required": self.required,
             "fullWidth": self.full_width,
             "disabled": self.disabled,
             "errors": self.errors,
         }
 
-    def serialize_value(self) -> Optional[dict]:
+    def _serialize_value(self) -> Optional[dict]:
         if isinstance(self.value, str) and re.match("^\\d{2}:\\d{2}$", self.value):
             return {
                 "hour": int(self.value.split(":")[0]),
@@ -57,7 +75,7 @@ class TimeInput(InputWidget):
             return None
         return {"hour": 0, "minute": 0}
 
-    def parse_value(self, value) -> Optional[datetime.time]:
+    def _parse_value(self, value) -> Optional[datetime.time]:
         if value is None or value["hour"] is None or value["minute"] is None:
             return None
         return datetime.time(value["hour"], value["minute"])

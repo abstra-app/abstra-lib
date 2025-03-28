@@ -39,6 +39,21 @@ def prompt(
     format: Optional[Format] = None,
     temperature: float = 1.0,
 ):
+    """
+    Send a prompt to the AI and get a response.
+
+    Args:
+        prompt (Union[Prompt, List[Prompt]]): The prompt(s) to send to the AI model.
+        instructions (Union[str, List[str]]): Additional instructions for the AI. Defaults to [].
+        format (Optional[Format]): The expected format for the AI response. Defaults to None.
+        temperature (float): Controls randomness in the AI response, from 0.0 to 2.0. Defaults to 1.0.
+
+    Returns:
+        The AI response formatted according to the specified format if provided.
+
+    Raises:
+        ValueError: If temperature is not between 0.0 and 2.0.
+    """
     if temperature < 0.0 or temperature > 2.0:
         raise ValueError("Temperature must be between 0.0 and 2.0")
 

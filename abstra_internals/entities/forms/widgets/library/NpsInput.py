@@ -7,6 +7,12 @@ from abstra_internals.entities.forms.widgets.widget_base import (
 
 
 class NpsInput(InputWidget):
+    """Net Promoter Score input widget for collecting customer feedback scores.
+
+    Attributes:
+        value (int): The NPS score selected by the user.
+    """
+
     type = "nps-input"
     value: int
 
@@ -26,6 +32,22 @@ class NpsInput(InputWidget):
         errors: Optional[Union[List[str], str]] = None,
         value: int = 0,
     ):
+        """Initialize an NpsInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether a score must be selected before proceeding.
+            min (int): Minimum score value.
+            max (int): Maximum score value.
+            min_hint (str): Text displayed beneath the minimum score value.
+            max_hint (str): Text displayed beneath the maximum score value.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+            value (int): Initial value of the score.
+        """
         self.label = label
         self._key = key or label
         self.required = required
@@ -40,7 +62,7 @@ class NpsInput(InputWidget):
         self.errors = self._init_errors(errors)
         self.value = value
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,

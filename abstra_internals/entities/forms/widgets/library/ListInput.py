@@ -10,6 +10,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class ListInput(InputWidget):
+    """Repeatable list of input components that can be dynamically added or removed.
+
+    Attributes:
+        value (List[State]): The list of states for each item in the list.
+    """
+
     type = "list-input"
     value: List[State]
 
@@ -27,6 +33,20 @@ class ListInput(InputWidget):
         disabled: bool = False,
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a ListInput widget.
+
+        Args:
+            key (str): Identifier for the widget.
+            template (Union[Template, TemplateFunction]): Template or function that returns a template for each list item.
+            min (Optional[int]): Minimum number of items required.
+            max (Optional[int]): Maximum number of items allowed.
+            hint (Optional[str]): Help text displayed below the input.
+            add_button_text (str): Text displayed on the button to add a new item.
+            full_width (bool): Whether the input should take up the full width of its container.
+            required (bool): Whether at least one item is required.
+            disabled (bool): Whether the input is non-interactive.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self._key = key
         self._raw_template = template
         self.value = []
@@ -39,7 +59,7 @@ class ListInput(InputWidget):
         self.disabled = disabled
         self.errors = self._init_errors(errors)
 
-    def get_item_template(self, idx: int) -> Template:
+    def _get_item_template(self, idx: int) -> Template:
         item_state = self.value[idx] if idx < len(self.value) else {}
         if callable(self._raw_template):
             result = self._raw_template(State(item_state))
@@ -57,7 +77,7 @@ class ListInput(InputWidget):
 
     def _validate_all_items(self) -> List[str]:
         for idx in range(len(self.value)):
-            template = self.get_item_template(idx)
+            template = self._get_item_template(idx)
             renderer = TemplateRenderer(template)
             output = renderer.render(self.value[idx])
             if output["has_errors"]:
@@ -65,17 +85,17 @@ class ListInput(InputWidget):
         return []
 
     @property
-    def validators(self):
-        return super().validators + [
+    def _validators(self):
+        return super()._validators + [
             self._validate_list_min_max,
             self._validate_all_items,
         ]
 
-    def render(self):
+    def _render(self):
         rendered_items = []
         serialized_value = []
         for idx in range(len(self.value)):
-            item_template = self.get_item_template(idx)
+            item_template = self._get_item_template(idx)
             renderer = TemplateRenderer(item_template)
             output = renderer.render(self.value[idx])
             rendered_items.append(output["widgets"])
@@ -100,13 +120,13 @@ class ListInput(InputWidget):
             "value": serialized_value,
         }
 
-    def parse_value(self, value: List[Optional[Dict]]) -> List[State]:
+    def _parse_value(self, value: List[Optional[Dict]]) -> List[State]:
         parsed_values: List[State] = []
         if not value:
             return []
         for idx, item in enumerate(value):
             state = State()
-            template = self.get_item_template(idx)
+            template = self._get_item_template(idx)
             renderer = TemplateRenderer(template)
             raw_value = item or {}
             parsed = renderer.make_partial_state(raw_value)

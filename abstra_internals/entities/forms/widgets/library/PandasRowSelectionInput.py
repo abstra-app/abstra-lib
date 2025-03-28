@@ -11,6 +11,12 @@ if TYPE_CHECKING:
 
 
 class PandasRowSelectionInput(InputWidget):
+    """Pandas DataFrame row selection input widget for selecting rows from tabular data.
+
+    Attributes:
+        value (Union[List[Any], Any]): The selected row(s) from the DataFrame.
+    """
+
     type = "pandas-row-selection-input"
     value: Union[List[Any], Any]
 
@@ -34,6 +40,26 @@ class PandasRowSelectionInput(InputWidget):
         errors: Optional[Union[List[str], str]] = None,
         pagination_always_visible: bool = True,
     ):
+        """Initialize a PandasRowSelectionInput widget.
+
+        Args:
+            df (pd.DataFrame): The pandas DataFrame to display.
+            key (Optional[str]): Identifier for the widget.
+            required (bool): Whether row selection is required before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the table should take up the full width of its container.
+            display_index (bool): Whether to display row indices.
+            disabled (bool): Whether the input is non-interactive.
+            label (str): Text label displayed above the table.
+            filterable (bool): Whether the table is filterable.
+            multiple (bool): Whether multiple rows can be selected.
+            initial_value (Optional[Union[List, Any]]): Initial selected row(s).
+            min (Optional[int]): Minimum number of rows that must be selected when multiple=True.
+            max (Optional[int]): Maximum number of rows that can be selected when multiple=True.
+            page_size (int): Number of rows to display per page.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+            pagination_always_visible (bool): Whether pagination controls are always visible.
+        """
         self.df = df
         self._key = key or label
         self.required = required
@@ -75,13 +101,13 @@ class PandasRowSelectionInput(InputWidget):
     def _run_validators(self) -> List[str]:
         return self.multiple_handler.validate(self.value)
 
-    def serialize_value(self) -> List:
+    def _serialize_value(self) -> List:
         return self.multiple_handler.value_to_list(self.value)
 
-    def parse_value(self, value):
+    def _parse_value(self, value):
         return self.multiple_handler.value_to_list_or_value(value)
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
@@ -94,7 +120,7 @@ class PandasRowSelectionInput(InputWidget):
             "label": self.label,
             "multiple": self.multiple,
             "filterable": self.filterable,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "errors": self.errors,
             "min": self.min,
             "max": self.max,

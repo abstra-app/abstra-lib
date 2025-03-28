@@ -3,25 +3,44 @@ from dataclasses import dataclass
 from typing import Callable, Dict, Generator, List, Optional, Tuple, TypedDict, Union
 
 from abstra_internals.entities.forms.form_state import State
-from abstra_internals.entities.forms.widgets.widget_base import BaseWidget, InputWidget
+from abstra_internals.entities.forms.widgets.widget_base import InputWidget, Widget
 
 
 @dataclass
 class Button:
+    """
+    Base class for form navigation buttons.
+
+    Args:
+        label (str): The text displayed on the button.
+    """
+
     label: str
 
 
 class NextButton(Button):
+    """
+    Button used to navigate to the next step in a form.
+    Automatically labeled with internationalized "Next" text.
+    """
+
     def __init__(self):
+        """Initialize a NextButton with the default internationalized label."""
         super().__init__("i18n_next_action")
 
 
 class BackButton(Button):
+    """
+    Button used to navigate to the previous step in a form.
+    Automatically labeled with internationalized "Back" text.
+    """
+
     def __init__(self):
+        """Initialize a BackButton with the default internationalized label."""
         super().__init__("i18n_back_action")
 
 
-Template = List[BaseWidget]
+Template = List[Widget]
 TemplateWithButtons = Tuple[Template, Optional[List[Button]]]
 
 TemplateFunction = Callable[[State], Optional[Union[Template, TemplateWithButtons]]]
@@ -47,7 +66,7 @@ class TemplateRenderer:
         parsed = {}
         for idx, widget in enumerate(self.template):
             if isinstance(widget, InputWidget) and widget.key(idx) in raw_state:
-                parsed[widget.key(idx)] = widget.parse_value(
+                parsed[widget.key(idx)] = widget._parse_value(
                     raw_state.get(widget.key(idx))
                 )
         return State(parsed)
@@ -56,7 +75,7 @@ class TemplateRenderer:
         parsed = {}
         for idx, widget in enumerate(self.template):
             if isinstance(widget, InputWidget):
-                parsed[widget.key(idx)] = widget.parse_value(
+                parsed[widget.key(idx)] = widget._parse_value(
                     raw_state.get(widget.key(idx))
                 )
         return State(parsed)
@@ -70,11 +89,11 @@ class TemplateRenderer:
                 if value is not None:
                     widget.value = value
                 if widget.key(idx) in state:
-                    widget.set_errors()
-                if widget.has_errors() > 0:
+                    widget._set_errors()
+                if widget._has_errors() > 0:
                     has_errors = True
 
-            rendered = widget.render()
+            rendered = widget._render()
             rendered_widgets.append(rendered)
 
         return RenderOutput(widgets=rendered_widgets, has_errors=has_errors)

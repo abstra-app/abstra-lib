@@ -2,22 +2,22 @@ from abc import ABC, abstractmethod
 from typing import Callable, Generic, List, Optional, TypedDict, TypeVar, Union
 
 
-class BaseWidget(ABC):
+class Widget(ABC):
     type: str
 
     @abstractmethod
-    def render(self):
+    def _render(self):
         raise NotImplementedError("render method not implemented")
 
 
-class OutputWidget(BaseWidget):
+class OutputWidget(Widget):
     pass
 
 
 WidgetValue = TypeVar("WidgetValue")
 
 
-class InputWidget(BaseWidget, Generic[WidgetValue]):
+class InputWidget(Widget, Generic[WidgetValue]):
     required: bool
     value: WidgetValue
     _key: Optional[str]
@@ -25,14 +25,14 @@ class InputWidget(BaseWidget, Generic[WidgetValue]):
     def key(self, idx: int) -> str:
         return self._key or f"{self.type}_{idx}"
 
-    def set_errors(self):
+    def _set_errors(self):
         self.errors = [*self._run_validators()]
 
-    def has_errors(self):
+    def _has_errors(self):
         return len(self.errors) > 0
 
     @property
-    def validators(self) -> List[Callable[[], List[str]]]:
+    def _validators(self) -> List[Callable[[], List[str]]]:
         return [self._validate_required]
 
     def _init_errors(self, value) -> List[str]:
@@ -47,7 +47,7 @@ class InputWidget(BaseWidget, Generic[WidgetValue]):
 
     def _run_validators(self) -> List[str]:
         errors = []
-        for validator in self.validators:
+        for validator in self._validators:
             errors += validator()
         return errors
 
@@ -57,7 +57,7 @@ class InputWidget(BaseWidget, Generic[WidgetValue]):
 
         return []
 
-    def parse_value(self, value):
+    def _parse_value(self, value):
         return value
 
 

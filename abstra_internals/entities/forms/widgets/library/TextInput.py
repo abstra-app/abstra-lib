@@ -4,6 +4,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class TextInput(InputWidget):
+    """Text input widget for collecting single-line text.
+
+    Attributes:
+        value (str): The text value entered by the user.
+    """
+
     type = "text-input"
     value: str
 
@@ -22,6 +28,21 @@ class TextInput(InputWidget):
         max_length: Optional[int] = None,
         min_length: Optional[int] = None,
     ):
+        """Initialize a TextInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            placeholder (str): Placeholder text displayed when the input is empty.
+            required (bool): Whether the input must be filled before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+            mask (Optional[str]): String pattern for input masking.
+            max_length (Optional[int]): Maximum number of characters allowed.
+            min_length (Optional[int]): Minimum number of characters required.
+        """
         self.label = label
         self._key = key or label
         self.placeholder = placeholder
@@ -35,7 +56,7 @@ class TextInput(InputWidget):
         self.max_length = max_length
         self.min_length = min_length
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,

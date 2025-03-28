@@ -197,6 +197,7 @@ class FormEntityTest(unittest.TestCase):
 
         for i, widget in enumerate(rendered["widgets"]):
             for key, value in widget.items():
+                print(expected["widgets"][i])
                 if value != expected["widgets"][i][key]:
                     print(
                         f"WIDGET '{widget.get('key', '')}' (index {i}) | KEY '{key}'\nEXPECTED: {expected['widgets'][i][key]}\nGOT: {value}"

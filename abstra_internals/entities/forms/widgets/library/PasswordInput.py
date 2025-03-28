@@ -4,6 +4,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class PasswordInput(InputWidget):
+    """Password input widget for capturing sensitive text with masked display.
+
+    Attributes:
+        value (str): The password value entered by the user.
+    """
+
     type = "password-input"
     value: str
 
@@ -29,6 +35,28 @@ class PasswordInput(InputWidget):
         secret: bool = False,
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a PasswordInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            hint (Optional[str]): Help text displayed below the input.
+            required (bool): Whether the input must be filled before proceeding.
+            full_width (bool): Whether the input should take up the full width of its container.
+            lowercase_required (bool): Whether the input must contain at least one lowercase letter.
+            uppercase_required (bool): Whether the input must contain at least one uppercase letter.
+            special_required (bool): Whether the input must contain at least one special character.
+            digit_required (bool): Whether the input must contain at least one digit.
+            min_length (Optional[int]): Minimum number of characters required.
+            max_length (Optional[int]): Maximum number of characters allowed.
+            size (Optional[int]): Size of the input.
+            pattern (Optional[str]): Regular expression pattern for input validation.
+            autocomplete (Optional[str]): Autocomplete attribute for the input.
+            placeholder (Optional[str]): Placeholder text displayed when the input is empty.
+            disabled (bool): Whether the input is non-interactive.
+            secret (bool): Whether the input is a secret (e.g., for passwords).
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.value = ""
@@ -49,7 +77,7 @@ class PasswordInput(InputWidget):
         self.secret = secret
         self.errors = self._init_errors(errors)
 
-    def render(self):
+    def _render(self):
         return {
             "value": self.value,
             "type": self.type,
@@ -73,5 +101,5 @@ class PasswordInput(InputWidget):
             "errors": self.errors,
         }
 
-    def parse_value(self, value: str) -> str:
+    def _parse_value(self, value: str) -> str:
         return value

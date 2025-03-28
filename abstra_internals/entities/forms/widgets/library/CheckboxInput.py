@@ -4,6 +4,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class CheckboxInput(InputWidget):
+    """Checkbox input widget for capturing boolean values.
+
+    Attributes:
+        value (bool): The boolean value indicating whether the checkbox is checked.
+    """
+
     type = "checkbox-input"
     value: bool
 
@@ -18,6 +24,17 @@ class CheckboxInput(InputWidget):
         disabled: bool = False,
         errors: Optional[Union[list, str]] = None,
     ):
+        """Initialize a CheckboxInput widget.
+
+        Args:
+            label (str): Text label displayed next to the checkbox.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether the checkbox must be checked before proceeding.
+            hint (Optional[str]): Help text displayed below the checkbox.
+            full_width (bool): Whether the widget should take up the full width of its container.
+            disabled (bool): Whether the checkbox is non-interactive.
+            errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.required = required
@@ -27,7 +44,7 @@ class CheckboxInput(InputWidget):
         self.errors = self._init_errors(errors)
         self.value = False
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,

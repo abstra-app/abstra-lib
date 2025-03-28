@@ -5,6 +5,15 @@ from abstra_internals.entities.agents import ConnectionModel
 
 
 def get_connections(role: Literal["client", "agent"]) -> List[ConnectionModel]:
+    """
+    Get a list of available connections based on the specified role.
+
+    Args:
+        role (Literal["client", "agent"]): The role to get connections for, either "client" or "agent".
+
+    Returns:
+        List[ConnectionModel]: A list of connection models for the specified role.
+    """
     if role == "client":
         return (
             SDKContextStore.get_by_thread().repositories.role_clients.get_connections()

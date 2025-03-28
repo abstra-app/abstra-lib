@@ -7,6 +7,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class DateInput(InputWidget):
+    """Date input widget with calendar picker.
+
+    Attributes:
+        value (date): The date value selected by the user.
+    """
+
     type = "date-input"
     value: Optional[datetime.date]
 
@@ -20,7 +26,22 @@ class DateInput(InputWidget):
         full_width: bool = False,
         disabled: bool = False,
         errors: Optional[Union[List[str], str]] = None,
+        min_date: Optional[datetime.date] = None,
+        max_date: Optional[datetime.date] = None,
     ):
+        """Initialize a DateInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether a date must be selected before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
+            min_date (Optional[date]): Earliest selectable date.
+            max_date (Optional[date]): Latest selectable date.
+        """
         self.label = label
         self._key = key or label
         self.required = required
@@ -29,21 +50,23 @@ class DateInput(InputWidget):
         self.disabled = disabled
         self.value = None
         self.errors = self._init_errors(errors)
+        self.min_date = min_date
+        self.max_date = max_date
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
             "hint": self.hint,
             "label": self.label,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "required": self.required,
             "fullWidth": self.full_width,
             "disabled": self.disabled,
             "errors": self.errors,
         }
 
-    def serialize_value(self) -> str:
+    def _serialize_value(self) -> str:
         if isinstance(self.value, datetime.date):
             date = self.value.isoformat()
             if "T" in date:
@@ -61,7 +84,7 @@ class DateInput(InputWidget):
             return self.value
         return ""
 
-    def parse_value(self, value: str) -> Optional[datetime.date]:
+    def _parse_value(self, value: str) -> Optional[datetime.date]:
         if not value:
             return None
         try:

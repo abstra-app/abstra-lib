@@ -4,6 +4,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class CustomInput(InputWidget):
+    """Custom HTML input widget for creating custom interactive components.
+
+    Attributes:
+        value (Any): The value returned by the custom component.
+    """
+
     type = "custom-input"
     value: Any
 
@@ -20,6 +26,19 @@ class CustomInput(InputWidget):
         full_width: bool = False,
         change_event: Optional[Callable] = None,
     ):
+        """Initialize a CustomInput widget.
+
+        Args:
+            html_body (str): HTML content for the body of the custom component.
+            key (Optional[str]): Identifier for the widget, defaults to hash of html_body if not provided.
+            label (str): Text label displayed above the component.
+            html_head (str): HTML content for the head section.
+            height (int): Height of the component in pixels.
+            css (str): CSS styles for the component.
+            js (str): JavaScript code for the component.
+            full_width (bool): Whether the component should take up the full width of its container.
+            change_event (Optional[Callable]): Function to process value changes before storing.
+        """
         self.html_body = html_body
         self._key = key or str(hash(html_body))
         self.label = label
@@ -31,7 +50,7 @@ class CustomInput(InputWidget):
         self.full_width = full_width
         self.change_event = change_event
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
@@ -46,7 +65,7 @@ class CustomInput(InputWidget):
             "errors": self.errors,
         }
 
-    def parse_value(self, value) -> Any:
+    def _parse_value(self, value) -> Any:
         if self.change_event is not None:
             self.value = self.change_event(value)
         else:

@@ -7,18 +7,50 @@ from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
 
 
 def get_raw_request() -> Tuple[str, Dict[str, str], Dict[str, str]]:
+    """Get the raw HTTP request data.
+
+    Returns:
+        Tuple[str, Dict[str, str], Dict[str, str]]: A tuple containing:
+            - Raw request body as a string
+            - Request headers as a dictionary
+            - Request query parameters as a dictionary
+    """
     return SDKContextStore.get_by_thread().hook_sdk.get_raw_request()
 
 
 def get_email_request():
+    """Get the raw email request data.
+
+    Returns:
+        dict: Email request data containing sender, recipients, subject, and body information.
+    """
     return SDKContextStore.get_by_thread().hook_sdk.get_email_request()
 
 
 def get_request() -> Tuple[Union[str, List, Dict], Dict[str, str], Dict[str, str]]:
+    """Get the HTTP request data with parsed body.
+
+    Returns:
+        Tuple[Union[str, List, Dict], Dict[str, str], Dict[str, str]]: A tuple containing:
+            - Parsed request body (as string, list, or dict depending on content type)
+            - Request headers as a dictionary
+            - Request query parameters as a dictionary
+    """
     return SDKContextStore.get_by_thread().hook_sdk.get_request()
 
 
 def send_response(body="", status_code=200, headers={}) -> None:
+    """Send an HTTP response.
+
+    Args:
+        body (str or serializable): Response body content. Non-string values will
+            be serialized to JSON. Defaults to empty string.
+        status_code (int): HTTP status code. Defaults to 200.
+        headers (dict): HTTP response headers. Defaults to empty dict.
+
+    Raises:
+        BadSendResponse: If status_code is not an integer or headers is not a dictionary.
+    """
     if not isinstance(body, str):
         body = serialize(body)
 
@@ -32,6 +64,18 @@ def send_response(body="", status_code=200, headers={}) -> None:
 
 
 def send_json(data={}, status_code=200, headers={}):
+    """Send a JSON HTTP response.
+
+    Automatically sets the Content-Type header to application/json if not already set.
+
+    Args:
+        data (serializable): Data to be serialized to JSON. Defaults to empty dict.
+        status_code (int): HTTP status code. Defaults to 200.
+        headers (dict): HTTP response headers. Defaults to empty dict.
+
+    Raises:
+        BadSendResponse: If status_code is not an integer or headers is not a dictionary.
+    """
     if CaseInsensitiveDict(**headers).get("Content-Type") is None:
         headers["Content-Type"] = "application/json"
 

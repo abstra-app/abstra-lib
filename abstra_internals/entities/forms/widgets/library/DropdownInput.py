@@ -9,6 +9,12 @@ from abstra_internals.entities.forms.widgets.widget_base import (
 
 
 class DropdownInput(InputWidget):
+    """Dropdown select widget allowing selection from predefined options.
+
+    Attributes:
+        value (Union[List[object], object, None]): The selected value(s) from the dropdown options.
+    """
+
     type = "dropdown-input"
     multiple_handler: MultipleHandler
     options_handler: OptionsHandler
@@ -30,6 +36,22 @@ class DropdownInput(InputWidget):
         max: Optional[int] = None,
         errors: Optional[Union[List[object], object]] = None,
     ):
+        """Initialize a DropdownInput widget.
+
+        Args:
+            label (str): Text label displayed above the dropdown.
+            options (List[AbstraOption]): List of options to choose from, as AbstraOption objects.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether a selection is required before proceeding.
+            hint (Optional[str]): Help text displayed below the dropdown.
+            placeholder (str): Text shown when no option is selected.
+            full_width (bool): Whether the dropdown should take up the full width of its container.
+            disabled (bool): Whether the dropdown is non-interactive.
+            multiple (bool): Whether multiple options can be selected.
+            min (Optional[int]): Minimum number of selections required when multiple=True.
+            max (Optional[int]): Maximum number of selections allowed when multiple=True.
+            errors (Optional[Union[List[object], object]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.options = options
@@ -48,7 +70,7 @@ class DropdownInput(InputWidget):
         self.options_handler = OptionsHandler(self.options)
         self.errors = self._init_errors(errors)
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
@@ -57,7 +79,7 @@ class DropdownInput(InputWidget):
             "hint": self.hint,
             "multiple": self.multiple,
             "placeholder": self.placeholder,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "required": self.required,
             "fullWidth": self.full_width,
             "disabled": self.disabled,
@@ -69,10 +91,10 @@ class DropdownInput(InputWidget):
     def _run_validators(self) -> List[str]:
         return self.multiple_handler.validate(self.value)
 
-    def serialize_value(self) -> List:
+    def _serialize_value(self) -> List:
         list_values = self.multiple_handler.value_to_list(self.value)
         return self.options_handler.ids_from_values(list_values)
 
-    def parse_value(self, value: Union[List[str], None]):
+    def _parse_value(self, value: Union[List[str], None]):
         list_values = self.options_handler.values_from_ids(value)
         return self.multiple_handler.value_to_list_or_value(list_values)

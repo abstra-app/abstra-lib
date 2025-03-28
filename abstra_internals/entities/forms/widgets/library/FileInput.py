@@ -11,6 +11,12 @@ from abstra_internals.utils.file import extension_to_mime, upload_file
 
 
 class FileInput(InputWidget):
+    """File upload input widget for handling file uploads.
+
+    Attributes:
+        value (Union[FileResponse, List[FileResponse], None]): The uploaded file(s).
+    """
+
     type = "file-input"
     multiple: bool = False
     multiple_handler: MultipleHandler
@@ -32,6 +38,22 @@ class FileInput(InputWidget):
         accepted_formats: Optional[List[str]] = None,
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a FileInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether a file must be uploaded before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            max_file_size (Optional[int]): Maximum file size in bytes.
+            multiple (bool): Whether multiple files can be uploaded.
+            min (Optional[int]): Minimum number of files required when multiple=True.
+            max (Optional[int]): Maximum number of files allowed when multiple=True.
+            accepted_formats (Optional[List[str]]): List of accepted file extensions.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.required = required
@@ -49,13 +71,13 @@ class FileInput(InputWidget):
         self.value = None
         self.errors = self._init_errors(errors)
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
             "hint": self.hint,
             "label": self.label,
-            "value": self.serialize_value(),
+            "value": self._serialize_value(),
             "required": self.required,
             "multiple": self.multiple,
             "min": self.min,
@@ -85,11 +107,11 @@ class FileInput(InputWidget):
             return upload_file(value)
         return ""
 
-    def serialize_value(self) -> List[str]:
+    def _serialize_value(self) -> List[str]:
         values_list = self.multiple_handler.value_to_list(self.value)
         return [FileInput.__get_file_uri(item) for item in values_list]
 
-    def parse_value(
+    def _parse_value(
         self, value: Optional[List[str]]
     ) -> Union[FileResponse, List[FileResponse], None]:
         file_responses = [FileResponse(url) for url in value or []]

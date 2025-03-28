@@ -10,7 +10,7 @@ def get_user(refresh: bool = False) -> UserClaims:
     Get the current user
 
     Args:
-        refresh (bool, optional): Whether to force refresh the user. Defaults to False.
+        refresh (bool): Whether to force refresh the user. Defaults to False.
 
     Returns:
         Union[UserClaims, None]: User information
@@ -25,7 +25,7 @@ def execute_js(code: str, context: Optional[dict] = None):
 
     Args:
         code (str): JavaScript code to execute
-        context (dict, optional): Context to pass to the JavaScript code. Defaults to {}.
+        context (dict): Context to pass to the JavaScript code. Defaults to {}.
 
     Returns:
         Any: Result of the JavaScript code
@@ -40,7 +40,7 @@ def redirect(url: str, query_params: Optional[dict] = None) -> None:
 
     Args:
         url (str): URL to redirect to
-        query_params (Optional[dict], optional): Query parameters to append to the URL. Defaults to None.
+        query_params (Optional[dict]): Query parameters to append to the URL. Defaults to None.
 
     Returns:
         None

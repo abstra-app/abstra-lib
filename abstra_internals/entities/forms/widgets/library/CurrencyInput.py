@@ -4,6 +4,12 @@ from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
 
 class CurrencyInput(InputWidget):
+    """Currency input widget for entering monetary values.
+
+    Attributes:
+        value (Optional[float]): The currency value entered by the user.
+    """
+
     type = "currency-input"
     value: Optional[float]
 
@@ -22,6 +28,21 @@ class CurrencyInput(InputWidget):
         currency: str = "USD",
         errors: Optional[Union[List[str], str]] = None,
     ):
+        """Initialize a CurrencyInput widget.
+
+        Args:
+            label (str): Text label displayed above the input.
+            key (Optional[str]): Identifier for the widget, defaults to label if not provided.
+            required (bool): Whether the input must be filled before proceeding.
+            hint (Optional[str]): Help text displayed below the input.
+            placeholder (Optional[str]): Placeholder text displayed when the input is empty.
+            full_width (bool): Whether the input should take up the full width of its container.
+            disabled (bool): Whether the input is non-interactive.
+            min (Optional[float]): Minimum allowed value.
+            max (Optional[float]): Maximum allowed value.
+            currency (str): Currency code to use for formatting (e.g., "USD", "EUR").
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+        """
         self.label = label
         self._key = key or label
         self.required = required
@@ -45,10 +66,10 @@ class CurrencyInput(InputWidget):
         return []
 
     @property
-    def validators(self):
-        return super().validators + [self._validate_number_min_max]
+    def _validators(self):
+        return super()._validators + [self._validate_number_min_max]
 
-    def render(self):
+    def _render(self):
         return {
             "type": self.type,
             "key": self._key,
