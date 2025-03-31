@@ -1,9 +1,9 @@
+from pathlib import Path
+
 from colorama import Fore, Style
 
-from abstra_internals.utils.file import ABSTRA_TABLES_FILE
 
-
-def dump_message(num_tables: int):
+def dump_message(num_tables: int, path: Path):
     if num_tables == 0:
         print(
             Fore.RED
@@ -19,7 +19,7 @@ def dump_message(num_tables: int):
             + "\n\nSuccess: "
             + Style.RESET_ALL
             + Style.BRIGHT
-            + f"{num_tables} {tables} were dumped at {ABSTRA_TABLES_FILE}\n\n"
+            + f"{num_tables} {tables} were dumped at {path}\n\n"
             + Style.RESET_ALL
         )
 
@@ -49,37 +49,37 @@ def generic_error():
     )
 
 
-def file_not_found_error_message():
+def file_not_found_error_message(path: Path):
     print(
         Fore.RED
         + Style.BRIGHT
         + "\n\nError: "
         + Style.RESET_ALL
         + Style.BRIGHT
-        + f"The file {ABSTRA_TABLES_FILE} does not exist.\n\n"
+        + f"The file {path} does not exist.\n\n"
         + Style.RESET_ALL
     )
 
 
-def bad_json_error_message():
+def bad_json_error_message(path: Path):
     print(
         Fore.RED
         + Style.BRIGHT
         + "\n\nError: "
         + Style.RESET_ALL
         + Style.BRIGHT
-        + f"The content in file {ABSTRA_TABLES_FILE} is not in correct JSON format.\n\n"
+        + f"The content in file {path} is not in correct JSON format.\n\n"
         + Style.RESET_ALL
     )
 
 
-def zod_error_message():
+def zod_error_message(path: Path):
     print(
         Fore.RED
         + Style.BRIGHT
         + "\n\nError: "
         + Style.RESET_ALL
         + Style.BRIGHT
-        + f"The file {ABSTRA_TABLES_FILE} is not formatted correctly. \n\n"
+        + f"The file {path} is not formatted correctly. \n\n"
         + Style.RESET_ALL
     )

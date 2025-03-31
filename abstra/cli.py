@@ -10,6 +10,7 @@ from abstra_internals.interface.cli.start import start
 from abstra_internals.interface.cli.tables import dump, restore
 from abstra_internals.interface.cli.version import version
 from abstra_internals.settings import SettingsController
+from abstra_internals.utils.file import ABSTRA_TABLES_FILE
 
 
 class CLI(object):
@@ -39,9 +40,11 @@ class CLI(object):
         SettingsController.set_root_path(root_dir)
         dump()
 
-    def restore(self, root_dir: str = "."):
+    def restore(
+        self, root_dir: str = ".", dry_run: bool = False, file: str = ABSTRA_TABLES_FILE
+    ):
         SettingsController.set_root_path(root_dir)
-        restore()
+        restore(dry_run=dry_run, file=file)
 
     def add_agent(self, agent_id: str, agent_name: str, root_dir: Optional[str] = None):
         SettingsController.set_root_path(root_dir or select_dir())
