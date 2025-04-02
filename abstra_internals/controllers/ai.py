@@ -12,9 +12,15 @@ from abstra_internals.controllers.linters import fix_all_linters
 from abstra_internals.controllers.main import MainController
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.repositories.project.json_migrations import get_latest_version
-from abstra_internals.repositories.project.project import Project, ProjectRepository
+from abstra_internals.repositories.project.project import (
+    Project,
+    ProjectRepository,
+    StageWithFile,
+)
 from abstra_internals.services.env_vars import EnvVarsRepository
 from abstra_internals.settings import Settings
+from abstra_internals.utils.file import silent_traverse_code
+from abstra_internals.utils.paths import get_relative_path
 
 
 @dataclass
@@ -28,20 +34,55 @@ class PythonFile:
         return PythonFile(data["filename"], data["content"], data["stage"])
 
 
+def runtime_from_stage(stage: StageWithFile):
+    if stage.type_name == "form":
+        return "forms"
+    elif stage.type_name == "hook":
+        return "hooks"
+    elif stage.type_name == "script":
+        return "scripts"
+    elif stage.type_name == "job":
+        return "jobs"
+    else:
+        raise ValueError(f"Unknown stage type: {stage.type_name}")
+
+
+def enrich_code(stage: StageWithFile, code: str) -> str:
+    lines = []
+    for path in silent_traverse_code(stage.file_path):
+        lines.append(
+            "\n".join(
+                [
+                    str(get_relative_path(path, Settings.root_path)),
+                    "```python",
+                    code
+                    if stage.file_path.absolute() == path.absolute()
+                    else path.read_text(encoding="utf-8"),
+                    "````",
+                ]
+            )
+        )
+    return "\n\n".join(lines)
+
+
 class AiController:
     def __init__(self, controller: MainController):
         self.controller = controller
 
     def send_ai_message(
-        self, messages, stage, langgraph_thread_id, code, execution_error
+        self, messages, stage_id, langgraph_thread_id, code, execution_error
     ):
         headers = resolve_headers() or {}
         env_vars_keys = EnvVarsRepository.list_keys()
+        stage = self.controller.get_stage(stage_id)
+        assert isinstance(stage, StageWithFile), "Stage is not a StageWithFile"
+        enriched_code = enrich_code(stage, code)
+        runtime = runtime_from_stage(stage)
         yield from get_ai_messages(
             messages,
-            stage,
+            runtime,
             langgraph_thread_id,
-            code,
+            enriched_code,
             execution_error,
             headers,
             env_vars_keys,
