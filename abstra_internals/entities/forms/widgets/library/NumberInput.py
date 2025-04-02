@@ -29,6 +29,7 @@ class NumberInput(InputWidget):
         min: Optional[float] = None,
         max: Optional[float] = None,
         errors: Optional[Union[List[str], str]] = None,
+        initial_value: Optional[float] = None,
     ):
         """Initialize a NumberInput widget.
 
@@ -54,6 +55,7 @@ class NumberInput(InputWidget):
         self.disabled = disabled
         self.min = min
         self.max = max
+        self.value = initial_value
         self.errors = self._init_errors(errors)
         self.number_value_handler = NumberValueHandler(
             min=self.min, max=self.max, required=self.required
