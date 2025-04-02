@@ -909,7 +909,7 @@ class CommonFileNode:
         data = {}
         data["pathParts"] = self.path_parts
         data["size"] = self.size
-        data["lastModified"] = self.last_modified
+        data["lastModified"] = self.last_modified.isoformat()
         data["type"] = self.type
         if self.children is not None:
             data["children"] = self.children
