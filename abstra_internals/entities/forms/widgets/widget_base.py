@@ -122,7 +122,7 @@ class MultipleHandler:
         self.required = required
 
     def validate(self, value: Optional[Union[object, List[object]]]) -> List[str]:
-        if value is None:
+        if value is None and self.required:
             return ["i18n_error_required_field"]
 
         if not self.multiple or not isinstance(value, list):

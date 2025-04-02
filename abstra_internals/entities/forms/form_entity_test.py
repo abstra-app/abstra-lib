@@ -18,6 +18,8 @@ from abstra_internals.entities.forms.template import (
     TemplateGeneratorFunction,
 )
 from abstra_internals.entities.forms.widgets.library import (
+    DropdownInput,
+    FileInput,
     ListInput,
     PandasRowSelectionInput,
     TagInput,
@@ -95,6 +97,46 @@ rendered_pandas_row_selection_input = {
     "min": None,
     "max": None,
     "pageSize": 10,
+}
+
+rendered_dropdown_input = {
+    "type": "dropdown-input",
+    "key": "dropdown-key",
+    "label": "Dropdown",
+    "value": [],
+    "placeholder": "",
+    "required": True,
+    "hint": None,
+    "fullWidth": False,
+    "disabled": False,
+    "multiple": False,
+    "min": None,
+    "max": None,
+    "errors": [],
+    "options": [
+        {"label": "Option 1", "value": "0"},
+        {"label": "Option 2", "value": "1"},
+        {"label": "Option 3", "value": "2"},
+    ],
+}
+
+rendered_file_input = {
+    "type": "file-input",
+    "key": "file-key",
+    "label": "File",
+    "value": [],
+    "placeholder": "",
+    "required": True,
+    "hint": None,
+    "fullWidth": False,
+    "disabled": False,
+    "multiple": False,
+    "acceptedFormats": None,
+    "acceptedMimeTypes": "*",
+    "maxFileSize": None,
+    "min": None,
+    "max": None,
+    "errors": [],
 }
 
 
@@ -179,6 +221,30 @@ def pandas_row_selection_page(state: State) -> Template:
 
 
 pandas_row_selection_page_step = PageStep(pandas_row_selection_page)
+
+
+def required_false_page(state: State) -> Template:
+    return [
+        TextInput(
+            key="name",
+            label="Name",
+            required=False,
+        ),
+        DropdownInput(
+            key="dropdown-key",
+            label="Dropdown",
+            options=[
+                {"label": "Option 1", "value": "option1"},
+                {"label": "Option 2", "value": "option2"},
+                {"label": "Option 3", "value": "option3"},
+            ],
+            required=False,
+        ),
+        FileInput(key="file-key", label="File", required=False),
+    ]
+
+
+required_false_page_step = PageStep(required_false_page)
 
 
 def compute(state):
@@ -1231,3 +1297,60 @@ class FormEntityTest(unittest.TestCase):
             )
 
             state = form.run()
+
+    def test_required_false(self):
+        steps: List[Step] = [
+            required_false_page_step,
+            PageStep(lambda s: [TextOutput("test")]),
+        ]
+
+        form = FormEntity(steps, State(), force_hide_steps=False)
+        rendered = form.run()
+
+        # First render
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "required": False,
+                    },
+                    {
+                        **rendered_dropdown_input,
+                        "required": False,
+                    },
+                    {
+                        **rendered_file_input,
+                        "required": False,
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
+            },
+        )
