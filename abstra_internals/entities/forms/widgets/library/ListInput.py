@@ -47,7 +47,7 @@ class ListInput(InputWidget):
             disabled (bool): Whether the input is non-interactive.
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
-        self._key = key
+        self.key = key
         self._raw_template = template
         self.value = []
         self.min = min
@@ -57,7 +57,7 @@ class ListInput(InputWidget):
         self.full_width = full_width
         self.required = required
         self.disabled = disabled
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def _get_item_template(self, idx: int) -> Template:
         item_state = self.value[idx] if idx < len(self.value) else {}
@@ -107,7 +107,7 @@ class ListInput(InputWidget):
             serialized_value.append(item_value)
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "hint": self.hint,
             "errors": self.errors,
             "min": self.min,

@@ -65,9 +65,12 @@ class TemplateRenderer:
     def make_partial_state(self, raw_state: Dict) -> State:
         parsed = {}
         for idx, widget in enumerate(self.template):
-            if isinstance(widget, InputWidget) and widget.key(idx) in raw_state:
-                parsed[widget.key(idx)] = widget._parse_value(
-                    raw_state.get(widget.key(idx))
+            if (
+                isinstance(widget, InputWidget)
+                and widget._safe_get_key(idx) in raw_state
+            ):
+                parsed[widget._safe_get_key(idx)] = widget._parse_value(
+                    raw_state.get(widget._safe_get_key(idx))
                 )
         return State(parsed)
 
@@ -75,8 +78,8 @@ class TemplateRenderer:
         parsed = {}
         for idx, widget in enumerate(self.template):
             if isinstance(widget, InputWidget):
-                parsed[widget.key(idx)] = widget._parse_value(
-                    raw_state.get(widget.key(idx))
+                parsed[widget._safe_get_key(idx)] = widget._parse_value(
+                    raw_state.get(widget._safe_get_key(idx))
                 )
         return State(parsed)
 
@@ -85,12 +88,12 @@ class TemplateRenderer:
         has_errors = False
         for idx, widget in enumerate(self.template):
             if isinstance(widget, InputWidget):
-                value = state.get(widget.key(idx))
+                value = state.get(widget._safe_get_key(idx))
                 if value is not None:
                     widget.value = value
-                if widget.key(idx) in state:
-                    widget._set_errors()
-                if widget._has_errors() > 0:
+                if widget._safe_get_key(idx) in state:
+                    widget._apply_validation()
+                if len(widget.errors) > 0:
                     has_errors = True
 
             rendered = widget._render()

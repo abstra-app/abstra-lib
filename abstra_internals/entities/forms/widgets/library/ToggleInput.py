@@ -40,7 +40,7 @@ class ToggleInput(InputWidget):
             errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.on_text = on_text
         self.off_text = off_text
         self.value = False
@@ -48,7 +48,7 @@ class ToggleInput(InputWidget):
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def is_value_unset(self):
         return False
@@ -56,7 +56,7 @@ class ToggleInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "onText": self.on_text,
             "offText": self.off_text,

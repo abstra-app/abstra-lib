@@ -43,20 +43,20 @@ class DateInput(InputWidget):
             max_date (Optional[date]): Latest selectable date.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = None
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.min_date = min_date
         self.max_date = max_date
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "hint": self.hint,
             "label": self.label,
             "value": self._serialize_value(),

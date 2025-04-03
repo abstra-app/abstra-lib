@@ -40,7 +40,7 @@ class CustomInput(InputWidget):
             change_event (Optional[Callable]): Function to process value changes before storing.
         """
         self.html_body = html_body
-        self._key = key or str(hash(html_body))
+        self.key = key or str(hash(html_body))
         self.label = label
         self.html_head = html_head
         self.height = height
@@ -53,7 +53,7 @@ class CustomInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "htmlBody": self.html_body,

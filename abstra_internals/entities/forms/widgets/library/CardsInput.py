@@ -64,7 +64,7 @@ class CardsInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.options = [
             {**opt, "image": upload_widget_file(opt.get("image") or "")}
             for opt in options
@@ -83,13 +83,13 @@ class CardsInput(InputWidget):
         self.multiple_handler = MultipleHandler(
             self.multiple, self.min, self.max, self.required
         )
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.value = None
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "hint": self.hint,
             "options": self.options,

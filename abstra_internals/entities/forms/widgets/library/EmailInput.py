@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
@@ -43,21 +43,21 @@ class EmailInput(InputWidget):
             min_length (Optional[int]): Minimum number of characters required.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.placeholder = placeholder
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = ""
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.max_length = max_length
         self.min_length = min_length
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "placeholder": self.placeholder,
@@ -68,16 +68,14 @@ class EmailInput(InputWidget):
             "errors": self.errors,
         }
 
-    def _run_validators(self) -> List[str]:
-        errors = super()._run_validators()
-        if len(self.value) == 0:
-            return errors
-        is_valid_email = bool(
-            re.search(
-                '^(([^<>()[\\]\\\\.,;:\\s@"]+(\\.[^<>()[\\]\\\\.,;:\\s@"]+)*)|(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$',
-                self.value.strip().lower(),
-            )
-        )
-        if not is_valid_email:
-            errors.append("i18n_error_invalid_email")
-        return errors
+    def _validate_email_format(self) -> List[str]:
+        pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+
+        if re.match(pattern, self.value) is None:
+            return ["i18n_error_invalid_email"]
+
+        return []
+
+    @property
+    def _validators(self) -> List[Callable[[], List[str]]]:
+        return [self._basic_validate_required, self._validate_email_format]

@@ -49,7 +49,7 @@ class NpsInput(InputWidget):
             value (int): Initial value of the score.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.min = min
         self.max = max
@@ -59,13 +59,13 @@ class NpsInput(InputWidget):
         self.full_width = full_width
         self.disabled = disabled
         self.number_value_handler = NumberValueHandler(min=self.min, max=self.max)
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.value = value
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "min": self.min,
             "max": self.max,

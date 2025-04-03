@@ -40,19 +40,19 @@ class TimeInput(InputWidget):
             errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.value = None
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.format = format
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "format": self.format,
             "hint": self.hint,

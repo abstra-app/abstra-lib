@@ -1,5 +1,5 @@
 import re
-from typing import Optional
+from typing import Callable, List, Optional
 
 from abstra_internals.entities.forms.widgets.response_types import PhoneResponse
 from abstra_internals.entities.forms.widgets.widget_base import InputWidget
@@ -42,14 +42,14 @@ class PhoneInput(InputWidget):
             invalid_message (Optional[str]): Custom error message for invalid phone numbers.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.placeholder = placeholder
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = self.make_empty()
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.invalid_message = invalid_message
 
     def make_empty(self):
@@ -58,7 +58,7 @@ class PhoneInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self._serialize_value(),
             "placeholder": self.placeholder,
@@ -70,26 +70,17 @@ class PhoneInput(InputWidget):
             "invalidMessage": self.invalid_message,
         }
 
-    def _run_validators(self):
-        errors = []
+    @property
+    def _validators(self) -> List[Callable[[], List[str]]]:
+        return [self._validate_phone]
+
+    def _validate_phone(self):
         if self.required and (
             self.value.country_code == "" or self.value.national_number == ""
         ):
-            errors.append("i18n_error_required_field")
-        return errors
+            return ["i18n_error_required_field"]
 
-    def is_value_unset(self):
-        return self.value.raw == ""
-
-    def _set_value(self, value, set_errors=False):
-        if isinstance(value, PhoneResponse):
-            self.value = value
-        elif isinstance(value, dict):
-            self.value = self._parse_value(value)
-        elif value is None:
-            self.value = self.make_empty()
-        if set_errors:
-            self._set_errors()
+        return []
 
     def _serialize_value(self):
         if isinstance(self.value, dict):

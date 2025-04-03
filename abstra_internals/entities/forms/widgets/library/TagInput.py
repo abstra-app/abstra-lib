@@ -38,14 +38,14 @@ class TagInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.placeholder = placeholder
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = []
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def is_value_unset(self):
         return False
@@ -53,7 +53,7 @@ class TagInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "placeholder": self.placeholder,

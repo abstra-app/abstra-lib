@@ -44,14 +44,14 @@ class TextInput(InputWidget):
             min_length (Optional[int]): Minimum number of characters required.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.placeholder = placeholder
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = ""
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.mask = mask
         self.max_length = max_length
         self.min_length = min_length
@@ -59,7 +59,7 @@ class TextInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "placeholder": self.placeholder,
@@ -73,14 +73,16 @@ class TextInput(InputWidget):
             "errors": self.errors,
         }
 
-    def _run_validators(self):
-        validation_errors = super()._run_validators()
+    @property
+    def _validators(self):
+        return [
+            self._basic_validate_required,
+            self._validate_length,
+        ]
+
+    def _validate_length(self):
         if self.max_length and len(self.value) > self.max_length:
-            validation_errors.append(
-                f"Value is too long. Max length is {self.max_length}"
-            )
+            return [f"Value is too long. Max length is {self.max_length}"]
         if self.min_length and len(self.value) < self.min_length:
-            validation_errors.append(
-                f"Value is too short. Min length is {self.min_length}"
-            )
-        return validation_errors
+            return [f"Value is too short. Min length is {self.min_length}"]
+        return []

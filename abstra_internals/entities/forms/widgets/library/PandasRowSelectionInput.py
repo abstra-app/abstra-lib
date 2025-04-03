@@ -61,7 +61,7 @@ class PandasRowSelectionInput(InputWidget):
             pagination_always_visible (bool): Whether pagination controls are always visible.
         """
         self.df = df
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.hint = hint
         self.full_width = full_width
@@ -78,7 +78,7 @@ class PandasRowSelectionInput(InputWidget):
             self.multiple, self.min, self.max, self.required
         )
         self.page_size = page_size
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.value = None
         self.pagination_always_visible = pagination_always_visible
 
@@ -110,7 +110,7 @@ class PandasRowSelectionInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "hint": self.hint,
             "table": self.serialize_table(),
             "required": self.required,

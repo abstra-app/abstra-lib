@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from abstra_internals.entities.forms.widgets.widget_base import (
     AbstraOption,
@@ -46,7 +46,7 @@ class ChecklistInput(InputWidget):
             errors (Optional[List[str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.options = options
         self.value = []
         self.required = required
@@ -56,9 +56,9 @@ class ChecklistInput(InputWidget):
         self.min: int = min
         self.max = max or len(self.options)
         self.options_handler = OptionsHandler(self.options)
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
-    def _validate_required(self) -> List[str]:
+    def _checklist_validate_required(self) -> List[str]:
         if not self.required and len(self.value) == 0:
             return []
         errors = []
@@ -71,10 +71,14 @@ class ChecklistInput(InputWidget):
             errors.append("i18n_error_max_list")
         return errors
 
+    @property
+    def _validators(self) -> List[Callable[[], List[str]]]:
+        return [self._checklist_validate_required]
+
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "options": self.options_handler.serialized_options(),
             "label": self.label,
             "value": self._serialize_value(),

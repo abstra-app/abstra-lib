@@ -46,7 +46,7 @@ class NumberInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.placeholder = placeholder
         self.required = required
         self.hint = hint
@@ -55,7 +55,7 @@ class NumberInput(InputWidget):
         self.min = min
         self.max = max
         self.value = None
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.number_value_handler = NumberValueHandler(
             min=self.min, max=self.max, required=self.required
         )
@@ -63,7 +63,7 @@ class NumberInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "placeholder": self.placeholder,

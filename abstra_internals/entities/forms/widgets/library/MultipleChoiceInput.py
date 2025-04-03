@@ -51,7 +51,7 @@ class MultipleChoiceInput(InputWidget):
             value (Optional[Union[List[str], str, None]]): Initial value of the widget.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.options = options
         self.required = required
         self.hint = hint
@@ -65,13 +65,13 @@ class MultipleChoiceInput(InputWidget):
             self.multiple, self.min, self.max, self.required
         )
         self.options_handler = OptionsHandler(self.options)
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.value = value
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "options": self.options_handler.serialized_options(),
             "hint": self.hint,

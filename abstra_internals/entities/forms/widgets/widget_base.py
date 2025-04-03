@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, List, Optional, TypedDict, TypeVar, Union
+from typing import Callable, Generic, List, Optional, TypedDict, TypeVar, Union, final
 
 
 class Widget(ABC):
@@ -18,40 +18,51 @@ WidgetValue = TypeVar("WidgetValue")
 
 
 class InputWidget(Widget, Generic[WidgetValue]):
-    required: bool
     value: WidgetValue
-    _key: Optional[str]
+    required: bool
+    key: Optional[str]
+    _errors: List[str]
 
-    def key(self, idx: int) -> str:
-        return self._key or f"{self.type}_{idx}"
+    @final
+    @property
+    def errors(self) -> List[str]:
+        return self._errors
 
-    def _set_errors(self):
-        self.errors = [*self._run_validators()]
+    @final
+    @errors.setter
+    def errors(self, value: Union[List[str], str, None]) -> None:
+        if value is None:
+            self._errors = []
+            return
 
-    def _has_errors(self):
-        return len(self.errors) > 0
+        if isinstance(value, str):
+            self._errors = [value]
+            return
+
+        if isinstance(value, list):
+            if all(isinstance(e, str) for e in value):
+                self._errors = value
+                return
+            else:
+                raise TypeError("Provided errors list contains non-string elements")
+
+        raise TypeError("Errors must be a list of strings or a string")
+
+    @final
+    def _safe_get_key(self, idx: int) -> str:
+        return self.key or f"{self.type}_{idx}"
+
+    @final
+    def _apply_validation(self):
+        for validator in self._validators:
+            self._errors += validator()
 
     @property
     def _validators(self) -> List[Callable[[], List[str]]]:
-        return [self._validate_required]
+        return [self._basic_validate_required]
 
-    def _init_errors(self, value) -> List[str]:
-        if value is None:
-            return []
-        if isinstance(value, str):
-            return [value]
-        if isinstance(value, list):
-            return value
-
-        raise Exception("Errors must be a list of strings")
-
-    def _run_validators(self) -> List[str]:
-        errors = []
-        for validator in self._validators:
-            errors += validator()
-        return errors
-
-    def _validate_required(self) -> List[str]:
+    @final
+    def _basic_validate_required(self) -> List[str]:
         if self.required and (self.value is None or self.value == ""):
             return ["i18n_error_required_field"]
 

@@ -19,6 +19,7 @@ from abstra_internals.entities.forms.template import (
 )
 from abstra_internals.entities.forms.widgets.library import (
     DropdownInput,
+    EmailInput,
     FileInput,
     ListInput,
     PandasRowSelectionInput,
@@ -263,7 +264,6 @@ class FormEntityTest(unittest.TestCase):
 
         for i, widget in enumerate(rendered["widgets"]):
             for key, value in widget.items():
-                print(expected["widgets"][i])
                 if value != expected["widgets"][i][key]:
                     print(
                         f"WIDGET '{widget.get('key', '')}' (index {i}) | KEY '{key}'\nEXPECTED: {expected['widgets'][i][key]}\nGOT: {value}"
@@ -644,6 +644,219 @@ class FormEntityTest(unittest.TestCase):
                 "end_page": False,
                 "steps_info": {"current": 2, "total": 2, "disabled": False},
                 "buttons": [BackButton(), NextButton()],
+            },
+        )
+
+    def test_validation_required_false(self):
+        steps: List[Step] = [
+            required_false_page_step,
+            PageStep(lambda s: [TextOutput("test")]),
+        ]
+
+        form = FormEntity(steps, State(), force_hide_steps=False)
+        rendered = form.run()
+
+        # First render
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_input,
+                        "required": False,
+                    },
+                    {
+                        **rendered_dropdown_input,
+                        "required": False,
+                    },
+                    {
+                        **rendered_file_input,
+                        "required": False,
+                    },
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 2, "disabled": False},
+                "buttons": [NextButton()],
+            },
+        )
+
+        form.handle_navigation(
+            {
+                "type": "form:navigation",
+                "payload": {},
+                "action": "i18n_next_action",
+            }
+        )
+
+        rendered = form.run()
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        **rendered_text_output,
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 2, "total": 2, "disabled": False},
+                "buttons": [BackButton(), NextButton()],
+            },
+        )
+
+    def test_custom_validation(self):
+        def email_validation_page(state: State) -> Template:
+            email_input = EmailInput("Email", key="email")
+
+            if state.get("email") == "some@spam.com":
+                email_input.errors = ["We don't allow spam emails!"]
+
+            return [email_input]
+
+        steps: List[Step] = [
+            PageStep(email_validation_page),
+        ]
+
+        form = FormEntity(steps, State(), force_hide_steps=False)
+
+        # First render
+        rendered = form.run()
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        "type": "email-input",
+                        "key": "email",
+                        "label": "Email",
+                        "value": "",
+                        "placeholder": "",
+                        "required": True,
+                        "hint": None,
+                        "fullWidth": False,
+                        "mask": None,
+                        "maxLength": None,
+                        "minLength": None,
+                        "disabled": False,
+                        "errors": [],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # Fill input
+
+        form.handle_input(
+            {
+                "type": "form:input",
+                "payload": {"email": "some@spam.com"},
+            }
+        )
+
+        rendered = form.run()
+
+        # Validate error
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        "type": "email-input",
+                        "key": "email",
+                        "label": "Email",
+                        "value": "some@spam.com",
+                        "placeholder": "",
+                        "required": True,
+                        "hint": None,
+                        "fullWidth": False,
+                        "mask": None,
+                        "maxLength": None,
+                        "minLength": None,
+                        "disabled": False,
+                        "errors": ["We don't allow spam emails!"],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # Fill input with invalid email format
+        form.handle_input(
+            {
+                "type": "form:input",
+                "payload": {"email": "invalid-email"},
+            }
+        )
+
+        rendered = form.run()
+
+        # Validate error
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        "type": "email-input",
+                        "key": "email",
+                        "label": "Email",
+                        "value": "invalid-email",
+                        "placeholder": "",
+                        "required": True,
+                        "hint": None,
+                        "fullWidth": False,
+                        "mask": None,
+                        "maxLength": None,
+                        "minLength": None,
+                        "disabled": False,
+                        "errors": ["i18n_error_invalid_email"],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
+            },
+        )
+
+        # fill input with valid email format
+        form.handle_input(
+            {"type": "form:input", "payload": {"email": "joao@abstra.app"}}
+        )
+
+        rendered = form.run()
+
+        # Validate no error
+
+        self.compare_renders(
+            rendered,
+            {
+                "widgets": [
+                    {
+                        "type": "email-input",
+                        "key": "email",
+                        "label": "Email",
+                        "value": "joao@abstra.app",
+                        "placeholder": "",
+                        "required": True,
+                        "hint": None,
+                        "fullWidth": False,
+                        "mask": None,
+                        "maxLength": None,
+                        "minLength": None,
+                        "disabled": False,
+                        "errors": [],
+                    }
+                ],
+                "end_page": False,
+                "steps_info": {"current": 1, "total": 1, "disabled": True},
+                "buttons": [NextButton()],
             },
         )
 
@@ -1297,60 +1510,3 @@ class FormEntityTest(unittest.TestCase):
             )
 
             state = form.run()
-
-    def test_required_false(self):
-        steps: List[Step] = [
-            required_false_page_step,
-            PageStep(lambda s: [TextOutput("test")]),
-        ]
-
-        form = FormEntity(steps, State(), force_hide_steps=False)
-        rendered = form.run()
-
-        # First render
-        self.compare_renders(
-            rendered,
-            {
-                "widgets": [
-                    {
-                        **rendered_text_input,
-                        "required": False,
-                    },
-                    {
-                        **rendered_dropdown_input,
-                        "required": False,
-                    },
-                    {
-                        **rendered_file_input,
-                        "required": False,
-                    },
-                ],
-                "end_page": False,
-                "steps_info": {"current": 1, "total": 2, "disabled": False},
-                "buttons": [NextButton()],
-            },
-        )
-
-        form.handle_navigation(
-            {
-                "type": "form:navigation",
-                "payload": {},
-                "action": "i18n_next_action",
-            }
-        )
-
-        rendered = form.run()
-
-        self.compare_renders(
-            rendered,
-            {
-                "widgets": [
-                    {
-                        **rendered_text_output,
-                    }
-                ],
-                "end_page": False,
-                "steps_info": {"current": 2, "total": 2, "disabled": False},
-                "buttons": [BackButton(), NextButton()],
-            },
-        )

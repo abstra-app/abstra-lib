@@ -31,7 +31,7 @@ class PlotlyOutput(OutputWidget):
         """
         self.fig = fig
         self.label = label
-        self._key = key
+        self.key = key
         self.full_width = full_width
 
     def serialize_figure(self):

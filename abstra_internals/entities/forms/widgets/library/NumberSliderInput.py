@@ -45,13 +45,13 @@ class NumberSliderInput(InputWidget):
             step (float): Step increment for the slider.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = min
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.min = min
         self.max = max
         self.step = step
@@ -62,7 +62,7 @@ class NumberSliderInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "required": self.required,

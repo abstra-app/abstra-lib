@@ -39,13 +39,13 @@ class AppointmentInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.slots = AppointmentSlot.from_list(slots or [])
-        self.errors = self._init_errors(errors)
+        self.errors = errors
         self.value = None
 
     @property
@@ -70,7 +70,7 @@ class AppointmentInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "hint": self.hint,
             "value": self._serialize_value(),

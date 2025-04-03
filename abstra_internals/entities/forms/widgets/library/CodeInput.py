@@ -38,19 +38,19 @@ class CodeInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.language = language
         self.hint = hint
         self.full_width = full_width
         self.disabled = disabled
         self.value = ""
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "language": self.language,

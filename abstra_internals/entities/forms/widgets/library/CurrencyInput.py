@@ -44,7 +44,7 @@ class CurrencyInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.required = required
         self.hint = hint
         self.placeholder = placeholder
@@ -54,7 +54,7 @@ class CurrencyInput(InputWidget):
         self.min = min
         self.max = max
         self.currency = currency
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def _validate_number_min_max(self) -> List[str]:
         if type(self.value) is not int and type(self.value) is not float:
@@ -72,7 +72,7 @@ class CurrencyInput(InputWidget):
     def _render(self):
         return {
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "value": self.value,
             "placeholder": self.placeholder,

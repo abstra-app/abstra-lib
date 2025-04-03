@@ -43,7 +43,7 @@ class PandasOutput(OutputWidget):
             pagination_always_visible (bool): Whether pagination controls are always visible.
         """
         self.label = label
-        self._key = key
+        self.key = key
         self.df = df
         self.actions = actions
         self.full_width = full_width

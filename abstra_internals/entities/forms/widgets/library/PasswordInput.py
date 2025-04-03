@@ -58,7 +58,7 @@ class PasswordInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
-        self._key = key or label
+        self.key = key or label
         self.value = ""
         self.hint = hint
         self.required = required
@@ -75,13 +75,13 @@ class PasswordInput(InputWidget):
         self.placeholder = placeholder
         self.disabled = disabled
         self.secret = secret
-        self.errors = self._init_errors(errors)
+        self.errors = errors
 
     def _render(self):
         return {
             "value": self.value,
             "type": self.type,
-            "key": self._key,
+            "key": self.key,
             "label": self.label,
             "hint": self.hint,
             "required": self.required,
