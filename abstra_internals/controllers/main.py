@@ -266,10 +266,16 @@ class MainController:
         return project.is_initial(stage)
 
     def create_script(
-        self, title: str, file: str, workflow_position: Tuple[int, int] = (0, 0)
+        self,
+        title: str,
+        file: str,
+        workflow_position: Tuple[int, int] = (0, 0),
+        id: Optional[str] = None,
     ) -> ScriptStage:
         project = ProjectRepository.load()
-        script = ScriptStage.create(title, file, workflow_position=workflow_position)
+        script = ScriptStage.create(
+            title, file, workflow_position=workflow_position, id=id
+        )
         self.init_code_file(script.file, new_script_code)
         project.add_stage(script)
         ProjectRepository.save(project)
@@ -290,10 +296,14 @@ class MainController:
         ProjectRepository.save(project)
 
     def create_form(
-        self, title: str, file: str, workflow_position: Tuple[int, int] = (0, 0)
+        self,
+        title: str,
+        file: str,
+        workflow_position: Tuple[int, int] = (0, 0),
+        id: Optional[str] = None,
     ) -> FormStage:
         project = ProjectRepository.load()
-        form = FormStage.create(title, file, workflow_position=workflow_position)
+        form = FormStage.create(title, file, workflow_position=workflow_position, id=id)
         self.init_code_file(form.file, new_form_code)
         project.add_stage(form)
         ProjectRepository.save(project)
@@ -329,10 +339,14 @@ class MainController:
         ProjectRepository.save(project)
 
     def create_hook(
-        self, title: str, file: str, workflow_position: Tuple[int, int] = (0, 0)
+        self,
+        title: str,
+        file: str,
+        workflow_position: Tuple[int, int] = (0, 0),
+        id: Optional[str] = None,
     ) -> HookStage:
         project = ProjectRepository.load()
-        hook = HookStage.create(title, file, workflow_position=workflow_position)
+        hook = HookStage.create(title, file, workflow_position=workflow_position, id=id)
         self.init_code_file(hook.file, new_hook_code)
         project.add_stage(hook)
         ProjectRepository.save(project)
@@ -369,10 +383,14 @@ class MainController:
         return None
 
     def create_job(
-        self, title: str, file: str, workflow_position: Tuple[int, int] = (0, 0)
+        self,
+        title: str,
+        file: str,
+        workflow_position: Tuple[int, int] = (0, 0),
+        id: Optional[str] = None,
     ) -> JobStage:
         project = ProjectRepository.load()
-        job = JobStage.create(title, file, workflow_position=workflow_position)
+        job = JobStage.create(title, file, workflow_position=workflow_position, id=id)
         self.init_code_file(job.file, new_job_code)
         project.add_stage(job)
         ProjectRepository.save(project)

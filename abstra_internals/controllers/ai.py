@@ -74,18 +74,22 @@ class AiController:
     ):
         headers = resolve_headers() or {}
         env_vars_keys = EnvVarsRepository.list_keys()
-        stage = self.controller.get_stage(stage_id)
-        assert isinstance(stage, StageWithFile), "Stage is not a StageWithFile"
-        enriched_code = enrich_code(stage, code)
-        runtime = runtime_from_stage(stage)
+        current_abstra_json = ProjectRepository.load().as_dict
+        runtime = None
+        if stage_id:
+            stage = self.controller.get_stage(stage_id)
+            assert isinstance(stage, StageWithFile), "Stage is not a StageWithFile"
+            code = enrich_code(stage, code)
+            runtime = runtime_from_stage(stage)
         yield from get_ai_messages(
             messages,
             runtime,
             langgraph_thread_id,
-            enriched_code,
+            code,
             execution_error,
             headers,
             env_vars_keys,
+            current_abstra_json,
         )
 
     def create_thread(self):

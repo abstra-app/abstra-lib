@@ -19,6 +19,7 @@ from abstra_internals.server.routes import resources as resources_router
 from abstra_internals.server.routes import roles as roles_router
 from abstra_internals.server.routes import scripts as scripts_router
 from abstra_internals.server.routes import stdio as stdio_router
+from abstra_internals.server.routes import tables as tables_router
 from abstra_internals.server.routes import tasks as tasks_router
 from abstra_internals.server.routes import web_editor as web_editor_router
 from abstra_internals.server.routes import workflows as workflows_router
@@ -96,6 +97,9 @@ def __get_api_bp(controller: MainController):
 
     role_agents_bp = role_client_editor_bp(controller)
     bp.register_blueprint(role_agents_bp, url_prefix="/services/roles/client")
+
+    tables_bp = tables_router.get_editor_bp(controller)
+    bp.register_blueprint(tables_bp, url_prefix="/tables")
 
     guard = web_editor_router.get_editor_api_guard(controller)
     bp.before_request(guard)

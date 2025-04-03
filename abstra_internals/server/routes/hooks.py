@@ -40,7 +40,8 @@ def get_editor_bp(controller: MainController):
         if not title or not file:
             flask.abort(400)
         workflow_position = data.get("position", (0, 0))
-        hook = controller.create_hook(title, file, workflow_position)
+        id = data.get("id", None)
+        hook = controller.create_hook(title, file, workflow_position, id)
         return hook.editor_dto
 
     @bp.route("/<path:id>", methods=["PUT"])
