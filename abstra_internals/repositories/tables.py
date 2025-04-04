@@ -1,7 +1,7 @@
 import abc
 import typing
 from dataclasses import dataclass
-from typing import Any, Mapping, Optional
+from typing import Any, Optional
 
 import requests
 
@@ -104,7 +104,9 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
         params: dict = {},
         raise_for_status: bool = True,
     ):
-        headers: Mapping[str, str] = SIDECAR_HEADERS
+        headers = resolve_headers()
+        if headers is None:
+            raise Exception("You must be logged in to execute a table query")
         r = requests.request(
             method=method,
             url=f"{self.base_url}/tables{path}",
@@ -126,9 +128,6 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
         return requests.post(self.execute_url, headers=headers, json=body)
 
     def create_table(self, id: str, name: str) -> TableDTO:
-        headers = resolve_headers()
-        if headers is None:
-            raise Exception("You must be logged in to create a table")
         r = self._request(
             "POST",
             path="/table",
@@ -146,9 +145,6 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
             "name": name,
             "type": type,
         }
-        headers = resolve_headers()
-        if headers is None:
-            raise Exception("You must be logged in to create a column")
         r = self._request("POST", "/column", body=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)
