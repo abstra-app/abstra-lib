@@ -10,7 +10,7 @@ BATCH_SIZE = 10
 
 
 def get_tasks(
-    limit: Optional[int] = None, offset=0, where: Optional[dict] = None
+    limit: Optional[int] = None, offset: int = 0, where: Optional[dict] = None
 ) -> List[Task]:
     """Retrieve a list of pending tasks.
 
@@ -40,7 +40,7 @@ def get_tasks(
     return context.task_sdk.get_stage_pending_tasks(limit, offset, where)
 
 
-def send_task(type: str, payload: TaskPayload, show_warning=True) -> None:
+def send_task(type: str, payload: "TaskPayload", show_warning: bool = True) -> None:
     """Send a new task to the task queue.
 
     Args:
@@ -91,7 +91,7 @@ def iter_tasks(where: Optional[dict] = None) -> Iterator[Task]:
 
 
 def get_sent_tasks(
-    limit: Optional[int] = None, offset=0, where: Optional[dict] = None
+    limit: Optional[int] = None, offset: int = 0, where: Optional[dict] = None
 ) -> List[Task]:
     """Retrieve a list of tasks that have been sent.
 

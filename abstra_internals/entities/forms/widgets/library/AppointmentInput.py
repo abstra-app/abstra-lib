@@ -23,7 +23,7 @@ class AppointmentInput(InputWidget):
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        slots: Optional[List[AppointmentSlot]] = None,
+        slots: Optional[List["AppointmentSlot"]] = None,
         errors: Optional[Union[List[str], str]] = None,
     ) -> None:
         """Initialize an AppointmentInput widget.

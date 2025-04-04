@@ -84,7 +84,7 @@ def run(
 
 
 def run(
-    runnables: Union[List[Runnable], Widget],
+    runnables: Union[List["Runnable"], "Widget"],
     state: Optional[Dict] = None,
     hide_steps: bool = False,
 ) -> Union[State, None, object]:
@@ -95,7 +95,7 @@ def run(
     2. Running a single widget to get its value
 
     Args:
-        runnables (Union[List[Runnable], BaseWidget]): Either a list of form steps or a single widget.
+        runnables (Union[List[Runnable], Widget]): Either a list of form steps or a single widget.
         state (Optional[Dict]): Initial state values for the form.
         hide_steps (bool): Whether to hide steps navigation in the UI.
 

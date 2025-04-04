@@ -17,6 +17,14 @@ class Button:
 
     label: str
 
+    def __init__(self, label: str):
+        """Initialize a Button with the given label.
+
+        Args:
+            label (str): The text displayed on the button.
+        """
+        self.label = label
+
 
 class NextButton(Button):
     """

@@ -81,7 +81,7 @@ AbstraOption = Union[str, LabelValueOption]
 
 
 class OptionsHandler:
-    def __init__(self, options: List[AbstraOption]) -> None:
+    def __init__(self, options: List["AbstraOption"]) -> None:
         self.options = options
 
         self._mappedOptions = {

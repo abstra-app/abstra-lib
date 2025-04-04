@@ -18,8 +18,9 @@ class TextOutput(OutputWidget):
         """Initialize a TextOutput widget.
 
         Args:
-            value (str): The text to display.
-            key (Optional[str]): Identifier for the widget.
+            text (str): The text to display.
+            size (Literal["small", "medium", "large"]): The size of the text.
+            full_width (bool): Whether the widget should take up the full width of its container.
         """
         self.text = text
         self.size = size

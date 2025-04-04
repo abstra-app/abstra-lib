@@ -1,3 +1,11 @@
+class DeprecatedModule(Exception):
+    """
+    Exception raised when a module is deprecated.
+    """
+
+    pass
+
+
 class UnboundSDK(Exception):
     def __init__(self):
         self.message = "Files importing Abstra SDK must be run from the Abstra Editor."

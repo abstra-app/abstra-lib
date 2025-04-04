@@ -37,7 +37,7 @@ class ToggleInput(InputWidget):
             hint (Optional[str]): Help text displayed below the toggle.
             full_width (bool): Whether the widget should take up the full width of its container.
             disabled (bool): Whether the toggle is non-interactive.
-            errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
         self.key = key or label

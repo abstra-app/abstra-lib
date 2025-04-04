@@ -40,7 +40,6 @@ class NumberInput(InputWidget):
             hint (Optional[str]): Help text displayed below the input.
             full_width (bool): Whether the input should take up the full width of its container.
             disabled (bool): Whether the input is non-interactive.
-            initial_value (Optional[float]): Initial value for the input.
             min (Optional[float]): Minimum allowed value.
             max (Optional[float]): Maximum allowed value.
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.

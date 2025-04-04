@@ -37,7 +37,7 @@ class TimeInput(InputWidget):
             full_width (bool): Whether the input should take up the full width of its container.
             disabled (bool): Whether the input is non-interactive.
             format (str): The format of the time input.
-            errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
         self.key = key or label

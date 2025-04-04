@@ -4,7 +4,7 @@ from abstra_internals.entities.forms.steps import (
 )
 
 
-def end_page_step(func: TemplateFunction) -> EndPageStep:
+def end_page_step(func: "TemplateFunction") -> EndPageStep:
     """
     Decorator that converts a function into an EndPageStep.
 

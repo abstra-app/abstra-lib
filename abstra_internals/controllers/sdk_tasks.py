@@ -14,7 +14,14 @@ from abstra_internals.repositories.tasks import TaskDTO, TaskLockFailed, TaskPay
 
 
 class Task:
+    """
+    A task is a unit of work that can be sent to the execution engine.
+    """
+
     def __init__(self, task_controller: "TasksSDKController", dto: TaskDTO) -> None:
+        """
+        Initialize a Task object.
+        """
         self._dto = dto
         self._controller = task_controller
 
@@ -32,29 +39,50 @@ class Task:
 
     @property
     def id(self) -> str:
+        """
+        Get the ID of the task.
+        """
         return self._dto.id
 
     @property
     def type(self) -> str:
+        """
+        Get the type of the task.
+        """
         return self._dto.type
 
     @property
     def payload(self) -> TaskPayload:
+        """
+        Get the data of the task.
+        """
         return self._dto.payload
 
     def get_payload(self) -> TaskPayload:
+        """
+        Get the data of the task.
+        """
         return self._dto.payload
 
     def get_dto(self) -> TaskDTO:
+        """
+        Get the data of the task.
+        """
         return self._dto
 
     def lock(self) -> None:
+        """
+        Lock the task so it cannot be started by another execution.
+        """
         try:
             self._controller.lock_task(self._dto.id)
         except TaskLockFailed:
             raise TaskNotWaiting()
 
     def complete(self) -> None:
+        """
+        Mark the task as completed.
+        """
         try:
             self._controller.complete_task(self._dto.id)
         except TaskLockFailed:

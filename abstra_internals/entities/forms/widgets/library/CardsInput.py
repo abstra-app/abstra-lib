@@ -32,7 +32,7 @@ class CardsInput(InputWidget):
     def __init__(
         self,
         label: str,
-        options: List[CardOption],
+        options: List["CardOption"],
         *,
         key: Optional[str] = None,
         searchable: bool = False,

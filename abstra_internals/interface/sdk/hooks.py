@@ -39,14 +39,18 @@ def get_request() -> Tuple[Union[str, List, Dict], Dict[str, str], Dict[str, str
     return SDKContextStore.get_by_thread().hook_sdk.get_request()
 
 
-def send_response(body="", status_code=200, headers={}) -> None:
+def send_response(
+    body: Union[str, Dict, List] = "",
+    status_code: int = 200,
+    headers: Dict[str, str] = {},
+) -> None:
     """Send an HTTP response.
 
     Args:
-        body (str or serializable): Response body content. Non-string values will
+        body (Union[str, Dict, List]): Response body content. Non-string values will
             be serialized to JSON. Defaults to empty string.
         status_code (int): HTTP status code. Defaults to 200.
-        headers (dict): HTTP response headers. Defaults to empty dict.
+        headers (Dict[str, str]): HTTP response headers. Defaults to empty dict.
 
     Raises:
         BadSendResponse: If status_code is not an integer or headers is not a dictionary.
@@ -63,15 +67,17 @@ def send_response(body="", status_code=200, headers={}) -> None:
     SDKContextStore.get_by_thread().hook_sdk.set_response(status_code, body, headers)
 
 
-def send_json(data={}, status_code=200, headers={}):
+def send_json(
+    data: Union[Dict, List] = {}, status_code: int = 200, headers: Dict[str, str] = {}
+) -> None:
     """Send a JSON HTTP response.
 
     Automatically sets the Content-Type header to application/json if not already set.
 
     Args:
-        data (serializable): Data to be serialized to JSON. Defaults to empty dict.
+        data (Union[Dict, List]): Data to be serialized to JSON. Defaults to empty dict.
         status_code (int): HTTP status code. Defaults to 200.
-        headers (dict): HTTP response headers. Defaults to empty dict.
+        headers (Dict[str, str]): HTTP response headers. Defaults to empty dict.
 
     Raises:
         BadSendResponse: If status_code is not an integer or headers is not a dictionary.

@@ -23,7 +23,7 @@ class DropdownInput(InputWidget):
     def __init__(
         self,
         label: str,
-        options: List[AbstraOption],
+        options: List["AbstraOption"],
         *,
         key: Optional[str] = None,
         required: bool = True,

@@ -22,7 +22,7 @@ class ListInput(InputWidget):
     def __init__(
         self,
         key: str,
-        template: Union[Template, TemplateFunction],
+        template: Union["Template", "TemplateFunction"],
         *,
         min: Optional[int] = 0,
         max: Optional[int] = None,

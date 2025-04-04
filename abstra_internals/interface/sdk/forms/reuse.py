@@ -29,8 +29,8 @@ def reuse(func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
 
     Args:
         func (Callable): The function to reuse.
-        *args (Any): Variable length argument list to pass to the function.
-        **kwargs (Any): Arbitrary keyword arguments to pass to the function.
+        args (Any): Variable length argument list to pass to the function.
+        kwargs (Any): Arbitrary keyword arguments to pass to the function.
 
     Returns:
         Any: The result of the function call.

@@ -10,7 +10,7 @@ class DateInput(InputWidget):
     """Date input widget with calendar picker.
 
     Attributes:
-        value (date): The date value selected by the user.
+        value (Optional[datetime.date]): The date value selected by the user.
     """
 
     type = "date-input"
@@ -38,9 +38,9 @@ class DateInput(InputWidget):
             hint (Optional[str]): Help text displayed below the input.
             full_width (bool): Whether the input should take up the full width of its container.
             disabled (bool): Whether the input is non-interactive.
-            errors (Optional[Union[list, str]]): Pre-defined validation error messages to display.
-            min_date (Optional[date]): Earliest selectable date.
-            max_date (Optional[date]): Latest selectable date.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
+            min_date (Optional[datetime.date]): Earliest selectable date.
+            max_date (Optional[datetime.date]): Latest selectable date.
         """
         self.label = label
         self.key = key or label

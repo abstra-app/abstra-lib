@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import (
     AbstraOption,
@@ -12,16 +12,16 @@ class MultipleChoiceInput(InputWidget):
     """Multiple choice input widget for selecting a single option from a set of radio buttons.
 
     Attributes:
-        value (Optional[object]): The selected option value.
+        value (Optional[Union[List[Any], Any, None]]): The selected option value.
     """
 
     type = "multiple-choice-input"
-    value: Union[List[object], object, None]
+    value: Union[List[Any], Any, None]
 
     def __init__(
         self,
         label: str,
-        options: List[AbstraOption],
+        options: List["AbstraOption"],
         *,
         key: Optional[str] = None,
         required: bool = True,
@@ -32,7 +32,6 @@ class MultipleChoiceInput(InputWidget):
         min: Optional[int] = None,
         max: Optional[int] = None,
         errors: Optional[Union[List[str], str]] = None,
-        value: Union[List[str], str, None] = None,
     ):
         """Initialize a MultipleChoiceInput widget.
 
@@ -48,7 +47,6 @@ class MultipleChoiceInput(InputWidget):
             min (Optional[int]): Minimum number of options that can be selected.
             max (Optional[int]): Maximum number of options that can be selected.
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
-            value (Optional[Union[List[str], str, None]]): Initial value of the widget.
         """
         self.label = label
         self.key = key or label
@@ -65,8 +63,8 @@ class MultipleChoiceInput(InputWidget):
             self.multiple, self.min, self.max, self.required
         )
         self.options_handler = OptionsHandler(self.options)
+        self.value = [] if self.multiple else None
         self.errors = errors
-        self.value = value
 
     def _render(self):
         return {

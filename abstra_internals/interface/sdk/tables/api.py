@@ -220,7 +220,7 @@ def select(
     *,
     where: Optional[dict] = None,
     order_by: Optional[str] = None,
-    order_desc=False,
+    order_desc: bool = False,
     limit: Optional[int] = None,
     offset: Optional[int] = None,
 ):
@@ -253,7 +253,7 @@ def select_df(
     *,
     where: Optional[dict] = None,
     order_by: Optional[str] = None,
-    order_desc=False,
+    order_desc: bool = False,
     limit: Optional[int] = None,
     offset: Optional[int] = None,
 ):

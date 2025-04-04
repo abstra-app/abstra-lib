@@ -34,9 +34,9 @@ def normalize_format(format: Dict[str, object]) -> Dict[str, object]:
 
 
 def prompt(
-    prompt: Union[Prompt, List[Prompt]],
+    prompt: Union["Prompt", List["Prompt"]],
     instructions: Union[str, List[str]] = [],
-    format: Optional[Format] = None,
+    format: Optional["Format"] = None,
     temperature: float = 1.0,
 ):
     """
