@@ -47,22 +47,29 @@ def runtime_from_stage(stage: StageWithFile):
         raise ValueError(f"Unknown stage type: {stage.type_name}")
 
 
-def enrich_code(stage: StageWithFile, code: str) -> str:
-    lines = []
+def find_imported_code(stage: StageWithFile) -> Dict[str, str]:
+    seen_files = set()
+    conflict_counter = 0
+    files = {}
     for path in silent_traverse_code(stage.file_path):
-        lines.append(
-            "\n".join(
-                [
-                    str(get_relative_path(path, Settings.root_path)),
-                    "```python",
-                    code
-                    if stage.file_path.absolute() == path.absolute()
-                    else path.read_text(encoding="utf-8"),
-                    "````",
-                ]
-            )
+        if path in seen_files:
+            conflict_counter += 1
+            if conflict_counter > 10:  # Circular imports?
+                break
+            continue
+        seen_files.add(path)
+        if stage.file_path.absolute() == path.absolute():
+            continue
+        relative_path = str(get_relative_path(path, Settings.root_path))
+        files[relative_path] = "\n".join(
+            [
+                f"# {relative_path}",
+                "```python",
+                path.read_text(encoding="utf-8"),
+                "````",
+            ]
         )
-    return "\n\n".join(lines)
+    return files
 
 
 class AiController:
@@ -76,16 +83,19 @@ class AiController:
         env_vars_keys = EnvVarsRepository.list_keys()
         current_abstra_json = ProjectRepository.load().as_dict
         runtime = None
+        imported_code = {}
         if stage_id:
             stage = self.controller.get_stage(stage_id)
             assert isinstance(stage, StageWithFile), "Stage is not a StageWithFile"
-            code = enrich_code(stage, code)
+            imported_code = find_imported_code(stage)
+            code = "\n".join([f"# {stage.file_path}", "```python", code, "````"])
             runtime = runtime_from_stage(stage)
         yield from get_ai_messages(
             messages,
             runtime,
             langgraph_thread_id,
             code,
+            imported_code,
             execution_error,
             headers,
             env_vars_keys,
