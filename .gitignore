@@ -127,6 +127,7 @@ venv.bak/
 # Pyre type checker
 .pyre/
 .vscode/
+.ruff_cache/
 
 # version
 VERSION
