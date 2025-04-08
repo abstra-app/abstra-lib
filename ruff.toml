@@ -1,3 +1,4 @@
+
 exclude = [
     ".bzr",
     ".direnv",
@@ -28,3 +29,7 @@ exclude = [
     "abstra_internals/widgets/library",
     "abstra_internals/interface/sdk/forms/generated/",
 ]
+
+[lint]
+preview = true
+extend-select = ["PLW1514"]

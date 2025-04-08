@@ -4,4 +4,4 @@ use_legacy_threads("scripts")
 
 from pathlib import Path  # noqa: E402
 
-Path("script_b.log").write_text("script b ran successfully")
+Path("script_b.log").write_text("script b ran successfully", encoding="utf-8")

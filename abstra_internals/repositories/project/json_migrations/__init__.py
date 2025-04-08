@@ -46,7 +46,7 @@ def get_latest_version() -> str:
 def create_backup(data: dict, location: Path, filename: str):
     backup_path = os.path.join(location, CONFIG_FILE_BACKUPS, filename)
     Path(backup_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(backup_path, "w") as file:
+    with open(backup_path, "w", encoding="utf-8") as file:
         json.dump(data, file)
         return f"{CONFIG_FILE_BACKUPS}/{filename}"
 

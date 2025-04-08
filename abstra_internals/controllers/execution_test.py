@@ -35,7 +35,7 @@ class ExecutionControllerTest(BaseTest):
             id="mock_hook_id",
             workflow_position=(0, 1),
         )
-        Path(self.stage.file).write_text("print('Hello, World!')")
+        Path(self.stage.file).write_text("print('Hello, World!')", encoding="utf-8")
         self.project.add_stage(self.stage)
         ProjectRepository.save(self.project)
 

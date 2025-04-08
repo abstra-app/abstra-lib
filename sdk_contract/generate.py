@@ -382,7 +382,7 @@ def main():
     if not os.path.exists("./generated"):
         os.makedirs("./generated")
 
-    with open(OUTPUT_FILE, "w") as f:
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         # Use ensure_ascii=False to make sure all characters are properly represented
         json.dump(documentation, f, indent=2, ensure_ascii=False)
 

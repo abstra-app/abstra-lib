@@ -48,7 +48,7 @@ class EnvVarsRepository:
         env_file_path = EnvVarsRepository.get_env_var_path()
         if not env_file_path.exists():
             return True
-        with open(env_file_path) as f:
+        with open(env_file_path, encoding="utf-8") as f:
             try:
                 for it in parser.parse_stream(f):
                     if it.error:

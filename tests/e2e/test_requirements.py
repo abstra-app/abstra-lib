@@ -14,7 +14,9 @@ class TestRequirementsApi(BaseTest):
         self.assertEqual(requirements[0]["name"], "abstra")
 
     def test_existing_requirements(self):
-        Path("requirements.txt").write_text("foo==1.0.0\nbar\n\n# baz")
+        Path("requirements.txt").write_text(
+            "foo==1.0.0\nbar\n\n# baz", encoding="utf-8"
+        )
         requirements = self.client.get("/_editor/api/requirements").get_json()
         self.assertEqual(
             requirements,
@@ -41,7 +43,9 @@ class TestRequirementsApi(BaseTest):
         self.assertTrue(Path("requirements.txt").exists())
 
     def test_delete_requirement(self):
-        Path("requirements.txt").write_text("foo==1.0.0\nbar\n\n# baz")
+        Path("requirements.txt").write_text(
+            "foo==1.0.0\nbar\n\n# baz", encoding="utf-8"
+        )
         self.client.delete("/_editor/api/requirements/foo")
         requirements = self.client.get("/_editor/api/requirements").get_json()
         self.assertEqual(
@@ -58,7 +62,7 @@ class TestRequirementsApi(BaseTest):
 
         script = self.controller.create_script("New script", "script.py")
 
-        Path(script.file_path).write_text("import pandas as pd")
+        Path(script.file_path).write_text("import pandas as pd", encoding="utf-8")
 
         recommendation = self.client.get(
             "/_editor/api/requirements/recommendations"
@@ -66,9 +70,11 @@ class TestRequirementsApi(BaseTest):
         self.assertEqual(recommendation[0]["name"], "pandas")
 
     def test_get_requirements_recommendation_already_met(self):
-        Path("requirements.txt").write_text("Pillow")
+        Path("requirements.txt").write_text("Pillow", encoding="utf-8")
         script = self.controller.create_script("New script", "script.py")
-        Path(script.file_path).write_text("import pandas as pd\nfrom PIL import Image")
+        Path(script.file_path).write_text(
+            "import pandas as pd\nfrom PIL import Image", encoding="utf-8"
+        )
 
         recommendation = self.client.get(
             "/_editor/api/requirements/recommendations"

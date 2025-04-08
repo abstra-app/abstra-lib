@@ -18,7 +18,7 @@ def get_cached_latest_version(root_path: Path, package_name="abstra"):
 
     if cached_file.exists():
         try:
-            with open(cached_file, "r") as f:
+            with open(cached_file, "r", encoding="utf-8") as f:
                 cached_version = json.loads(f.readline())
 
             created_at = cached_version["created_at"]
@@ -58,7 +58,7 @@ def update_cached_latest_version(
     if not cached_file.parent.exists():
         cached_file.parent.mkdir(parents=True)
 
-    with open(cached_file, "w") as f:
+    with open(cached_file, "w", encoding="utf-8") as f:
         json.dump(
             {
                 "version": str(version),

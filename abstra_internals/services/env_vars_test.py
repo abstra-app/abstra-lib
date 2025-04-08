@@ -37,21 +37,21 @@ class TestEnvVarsRepository(TestCase):
         self.assertTrue(self.env_var_repo.check())
 
     def test_check_empty_file_is_valid(self):
-        open(".env", "w").close()
+        open(".env", "w", encoding="utf-8").close()
         self.assertTrue(self.env_var_repo.check())
 
     def test_check_multiple_lines_is_valid(self):
-        with open(".env", "w") as f:
+        with open(".env", "w", encoding="utf-8") as f:
             f.write("key=value\nkey2=value2")
         self.assertTrue(self.env_var_repo.check())
 
     def test_check_no_value_is_valid(self):
-        with open(".env", "w") as f:
+        with open(".env", "w", encoding="utf-8") as f:
             f.write("key=value\nkey2")
         self.assertTrue(self.env_var_repo.check())
 
     def test_check_invalid_returns_false(self):
-        with open(".env", "w") as f:
+        with open(".env", "w", encoding="utf-8") as f:
             f.write("===")
         self.assertFalse(self.env_var_repo.check())
 

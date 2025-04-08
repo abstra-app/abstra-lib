@@ -96,7 +96,7 @@ class FileInput(InputWidget):
     ) -> str:
         if isinstance(value, str):
             if Path(value).is_file():
-                return upload_file(open(value))
+                return upload_file(open(value, encoding="utf-8"))
             else:
                 return value
         if isinstance(value, FileResponse):
