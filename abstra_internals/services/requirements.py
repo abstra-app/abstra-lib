@@ -257,7 +257,7 @@ class Requirements:
                     yield "Installation finished successfully\n\n"
 
     def install(self):
-        if os.getenv("ABSTRA_RUNNING_IN_WINDOWS_APP"):
+        if os.getenv("ABSTRA_RUNNING_IN_BUNDLED_APP"):
             yield from self.__install_from_standalone()
         else:
             yield from self.__install_from_lib()
