@@ -2,6 +2,7 @@ import flask
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.server.routes import access_control as ac_router
+from abstra_internals.server.routes import agents as agents_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
 from abstra_internals.server.routes import codebase as codebase_router
@@ -100,6 +101,9 @@ def __get_api_bp(controller: MainController):
 
     tables_bp = tables_router.get_editor_bp(controller)
     bp.register_blueprint(tables_bp, url_prefix="/tables")
+
+    agents_bp = agents_router.get_editor_bp(controller)
+    bp.register_blueprint(agents_bp, url_prefix="/agents")
 
     guard = web_editor_router.get_editor_api_guard(controller)
     bp.before_request(guard)

@@ -60,6 +60,12 @@ class AgentsRepository(abc.ABC):
 
         return response.json()
 
+    def get_agent_connections(self):
+        url = f"{self.url}/connections"
+        response = requests.get(url, headers=self.get_headers())
+        response.raise_for_status()
+        return response.json()
+
     def get_headers(self) -> dict:
         raise NotImplementedError()
 
