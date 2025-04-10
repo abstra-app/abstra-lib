@@ -1,15 +1,16 @@
 import sys
-from typing import Callable, List, Literal, Union
+from typing import Callable, List, Literal, Optional, Union
 
 import flask_sock
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.sdk_context import (
-    ExecutionNotFound,
     SDKContextStore,
 )
+from abstra_internals.entities.execution import Execution
 from abstra_internals.env_masker import GLOBAL_MASKER
 from abstra_internals.environment import IS_PRODUCTION
+from abstra_internals.interface.sdk.user_exceptions import ExecutionNotFound
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.utils import serialize
 
@@ -56,39 +57,64 @@ class StdioController:
         self.sys_stderr_write = sys_stderr_write
 
     def patched_stderr_write(self, raw: Union[str, bytearray]) -> int:
-        return self._wrapper("stderr", self.sys_stderr_write, raw)
+        return self._handle_stdio("stderr", self.sys_stderr_write, raw)
 
     def patched_stdout_write(self, raw: Union[str, bytearray]) -> int:
-        return self._wrapper("stdout", self.sys_stdout_write, raw)
+        return self._handle_stdio("stdout", self.sys_stdout_write, raw)
 
-    def _wrapper(
+    def _handle_stdio(
         self,
-        type: Literal["stdout", "stderr"],
+        std_type: Literal["stdout", "stderr"],
         sys_write: Callable,
         raw: Union[str, bytearray],
     ):
         text = raw.decode("utf-8") if not isinstance(raw, str) else raw
 
-        if IS_PRODUCTION:
-            text = GLOBAL_MASKER.mask(text)
-
         try:
-            short_id = self._capture_stdio(type, text).split(sep="-")[0]
-            term_output = f"[RUN {short_id}] {text}" if text.strip() else text
-            sys_write(term_output)
-        except ExecutionNotFound:
-            sys_write(text)
+            execution = self.get_current_execution()
+
+            text = self.mask(text)
+            text = self.tag(text, execution)
+
+            self.send_stdio(execution, std_type, text)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
+            sys_write(text)
             sys.stdout.flush()
             return len(text)
 
-    def _capture_stdio(self, type: Literal["stderr", "stdout"], text: str) -> str:
-        execution = SDKContextStore.get_execution()
-        self.execution_logs_repository.insert_stdio(execution.id, type, text)
+    def get_current_execution(self) -> Optional[Execution]:
+        try:
+            return SDKContextStore.get_execution()
+        except ExecutionNotFound:
+            return None
+
+    def send_stdio(
+        self,
+        execution: Optional[Execution],
+        std_type: Literal["stderr", "stdout"],
+        text: str,
+    ):
+        if not execution:
+            return
+
+        self.execution_logs_repository.insert_stdio(execution.id, std_type, text)
         self.broadcast(
-            type=type, log=text, execution_id=execution.id, stage_id=execution.stage_id
+            type=std_type,
+            log=text,
+            execution_id=execution.id,
+            stage_id=execution.stage_id,
         )
 
-        return execution.id
+    def mask(self, raw: str) -> str:
+        if IS_PRODUCTION:
+            return GLOBAL_MASKER.mask(raw)
+        return raw
+
+    def tag(self, raw: str, execution: Optional[Execution]) -> str:
+        if not execution:
+            return raw
+
+        short_id = execution.id.split(sep="-")[0]
+        return f"[RUN {short_id}] {raw}" if raw.strip() else raw
