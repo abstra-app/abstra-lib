@@ -1,5 +1,3 @@
-import os
-
 from abstra_internals.controllers.main import MainController
 
 
@@ -13,4 +11,4 @@ class AgentsController:
         return self.controller.repositories.agents.get_agent_connections()
 
     def get_is_usage_mode(self):
-        return {"is_usage_mode": os.getenv("AGENT_USAGE_MODE", "false") == "true"}
+        return self.controller.repositories.agents.get_is_usage_mode()

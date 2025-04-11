@@ -66,6 +66,15 @@ class AgentsRepository(abc.ABC):
         response.raise_for_status()
         return response.json()
 
+    def get_is_usage_mode(self):
+        try:
+            url = f"{self.url}/is_usage_mode"
+            response = requests.get(url, headers=self.get_headers())
+            response.raise_for_status()
+            return {"is_usage_mode": response.json()}
+        except Exception:
+            return {"is_usage_mode": False}
+
     def get_headers(self) -> dict:
         raise NotImplementedError()
 
