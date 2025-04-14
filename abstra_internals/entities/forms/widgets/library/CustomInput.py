@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
@@ -25,6 +25,7 @@ class CustomInput(InputWidget):
         js: str = "",
         full_width: bool = False,
         change_event: Optional[Callable] = None,
+        errors: Optional[Union[List[str], str]] = None,
     ):
         """Initialize a CustomInput widget.
 
@@ -38,6 +39,7 @@ class CustomInput(InputWidget):
             js (str): JavaScript code for the component.
             full_width (bool): Whether the component should take up the full width of its container.
             change_event (Optional[Callable]): Function to process value changes before storing.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.html_body = html_body
         self.key = key or str(hash(html_body))
@@ -49,6 +51,7 @@ class CustomInput(InputWidget):
         self.value = None
         self.full_width = full_width
         self.change_event = change_event
+        self.errors = errors
 
     def _render(self):
         return {

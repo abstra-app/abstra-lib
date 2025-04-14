@@ -256,7 +256,7 @@ class Parser:
             if base.__name__ not in filtered_base_names
         ]
 
-        for base in cls.__bases__:
+        for base in sorted(cls.__bases__, key=lambda x: x.__name__):
             current.extend(self._all_ancestors(base))
 
         return list(set(filter(lambda x: x not in filtered_base_names, current)))

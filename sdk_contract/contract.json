@@ -484,8 +484,8 @@
       "description": "Camera input widget for capturing images or videos directly from a camera.",
       "parent_classes": [
         "Widget",
-        "InputWidget",
-        "FileInput"
+        "FileInput",
+        "InputWidget"
       ],
       "init": {
         "parameters": [
@@ -1200,6 +1200,13 @@
             "description": "Function to process value changes before storing.",
             "default": "None",
             "required": false
+          },
+          {
+            "name": "errors",
+            "type": "Optional[Union[List[str], str]]",
+            "description": "Pre-defined validation error messages to display.",
+            "default": "None",
+            "required": false
           }
         ]
       }
@@ -1657,8 +1664,8 @@
       "description": "Image upload input widget for handling image file uploads.",
       "parent_classes": [
         "Widget",
-        "InputWidget",
-        "FileInput"
+        "FileInput",
+        "InputWidget"
       ],
       "init": {
         "parameters": [
@@ -3346,8 +3353,8 @@
       "description": "Video upload input widget for handling video file uploads.",
       "parent_classes": [
         "Widget",
-        "InputWidget",
-        "FileInput"
+        "FileInput",
+        "InputWidget"
       ],
       "init": {
         "parameters": [
