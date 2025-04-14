@@ -18,12 +18,15 @@ class Task:
     A task is a unit of work that can be sent to the execution engine.
     """
 
-    def __init__(self, task_controller: "TasksSDKController", dto: TaskDTO) -> None:
+    def __init__(
+        self, task_controller: "TasksSDKController", dto: TaskDTO, mock: bool = False
+    ) -> None:
         """
         Initialize a Task object.
         """
         self._dto = dto
         self._controller = task_controller
+        self._mock = mock
 
     def __str__(self) -> str:
         return str(self._dto)
@@ -84,7 +87,7 @@ class Task:
         Mark the task as completed.
         """
         try:
-            self._controller.complete_task(self._dto.id)
+            self._controller.complete_task(self._dto.id, mock=self._mock)
         except TaskLockFailed:
             raise TaskNotWaiting()
 
@@ -121,10 +124,13 @@ class TasksSDKController:
         self, limit: Union[int, None], offset: int, where: Dict
     ) -> List[Task]:
         if self.execution.context.mock_execution.test_pending_tasks:
-            return [
-                Task(self, task)
+            all_tasks = [
+                Task(self, task, mock=True)
                 for task in self.execution.context.mock_execution.test_pending_tasks
             ]
+            limit = limit or len(all_tasks)
+            offset = offset or 0
+            return all_tasks[offset : limit + offset]
 
         stage = self.project.get_stage(self.execution.stage_id)
         if not stage:
@@ -152,7 +158,17 @@ class TasksSDKController:
             task_id, self.execution.id, self.execution.stage_id
         )
 
-    def complete_task(self, task_id: str) -> None:
+    def complete_task(self, task_id: str, mock: bool = False) -> None:
+        if mock:
+            if (
+                current_mocked_pending_tasks
+                := self.execution.context.mock_execution.test_pending_tasks
+            ):
+                self.execution.context.mock_execution.test_pending_tasks = [
+                    task for task in current_mocked_pending_tasks if task.id != task_id
+                ]
+            return
+
         self.repositories.tasks.complete_task(
             task_id, self.execution.id, self.execution.stage_id
         )
@@ -169,7 +185,9 @@ class TasksSDKController:
             raise user_exceptions.IncompatibleScriptSDK()
 
         if self.execution.context.mock_execution.test_trigger_task:
-            return Task(self, self.execution.context.mock_execution.test_trigger_task)
+            return Task(
+                self, self.execution.context.mock_execution.test_trigger_task, mock=True
+            )
 
         dto = self.repositories.tasks.get_by_id(self.execution.context.task_id)
         return Task(self, dto)
