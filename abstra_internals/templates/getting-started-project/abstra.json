@@ -1,21 +1,14 @@
 {
   "workspace": {
-    "id": null,
     "name": "Untitled Workspace",
+    "language": "en",
     "theme": "#ffffff",
     "logo_url": "https://seeklogo.com/images/D/Dunder_Mifflin-logo-4AD9504DD3-seeklogo.com.png",
     "favicon_url": null,
     "brand_name": "Application Workflow (Abstra Start Sample Project)",
     "main_color": "#003085",
-    "font_color": null,
     "font_family": "Roboto",
-    "language": "en"
-  },
-  "kanban": {
-    "access_control": {
-      "is_public": false,
-      "required_roles": []
-    }
+    "font_color": null
   },
   "home": {
     "access_control": {
@@ -49,9 +42,9 @@
         {
           "target_id": "9f715346-fd5d-48b3-afad-215bb2ae9c00",
           "target_type": "scripts",
-          "type": "forms:finished",
+          "type": "task",
           "id": "v3s2dmo",
-          "condition_value": null
+          "task_type": "collect_data"
         }
       ],
       "notification_trigger": {
@@ -77,7 +70,7 @@
       "transitions": []
     }
   ],
-  "iterators": [],
-  "conditions": [],
-  "version": "11.0"
+  "agents": [],
+  "clients": [],
+  "version": "13.0"
 }

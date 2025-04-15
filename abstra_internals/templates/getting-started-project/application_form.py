@@ -69,7 +69,7 @@ rating = af.read_rating(f"Rate this joke's funniness: {generated_joke}", char="ğ
 
 # ğŸ’¡ Use the send_task function to send data to be used in the next stages:
 send_task(
-    "data_collector",
+    "collect_data",
     {
         "best_movie": best_movie,
         "interview_opt_in": interview_opt_in,

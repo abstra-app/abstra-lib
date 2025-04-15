@@ -1,5 +1,5 @@
 from abstra.messages import send_email
-from abstra.tasks import get_trigger_task, send_task
+from abstra.tasks import get_trigger_task
 
 ### Abstra Workflows is the easiest way to store and manage data across different parts of your workflow
 
@@ -44,11 +44,5 @@ else:
         title="Nope, Sorry!",
         message=f"Your application to work at Dunder Mifflin has been rejected. Here's why:\n {reasons_text} \n\n Sincerely Not Sorry, \n\n Michael Scott - World's Best Boss.",
     )
-
-# Store the application response for future use:
-if not reasons:
-    send_task("approved", {})
-else:
-    send_task("rejected", {"reasons": reasons})
 
 task.complete()
