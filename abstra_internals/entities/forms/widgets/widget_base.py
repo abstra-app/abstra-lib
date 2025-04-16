@@ -21,12 +21,12 @@ class InputWidget(Widget, Generic[WidgetValue]):
     value: WidgetValue
     required: bool
     key: Optional[str]
-    _errors: List[str]
+    _errors: Optional[List[str]]
 
     @final
     @property
     def errors(self) -> List[str]:
-        return self._errors
+        return self._errors or []
 
     @final
     @errors.setter
@@ -55,7 +55,7 @@ class InputWidget(Widget, Generic[WidgetValue]):
     @final
     def _apply_validation(self):
         for validator in self._validators:
-            self._errors += validator()
+            self.errors += validator()
 
     @property
     def _validators(self) -> List[Callable[[], List[str]]]:
