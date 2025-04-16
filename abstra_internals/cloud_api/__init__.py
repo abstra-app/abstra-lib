@@ -93,6 +93,13 @@ def generate_project(prompt: str, abstra_json_version: str, headers: dict):
     return r.json()
 
 
+def get_history(headers: dict, limit: int, offset: int):
+    url = f"{CLOUD_API_CLI_URL}/ai/history"
+    r = requests.get(url, headers=headers, params={"limit": limit, "offset": offset})
+    r.raise_for_status()
+    return r.json()
+
+
 def create_thread(headers: dict):
     url = f"{CLOUD_API_CLI_URL}/ai/thread"
     r = requests.post(url, headers=headers)

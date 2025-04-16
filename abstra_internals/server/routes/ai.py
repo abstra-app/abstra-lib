@@ -29,6 +29,18 @@ def get_editor_bp(main_controller: MainController):
 
         return flask.Response(streamer, mimetype="text/event-stream")
 
+    @bp.get("/history")
+    @editor_usage
+    def _get_history():
+        limit = flask.request.args.get("limit")
+        limit = int(limit) if limit else 10
+        offset = flask.request.args.get("offset")
+        offset = int(offset) if offset else 0
+        threads = controller.get_history(limit, offset)
+        if threads is None:
+            flask.abort(403)
+        return threads
+
     @bp.post("/thread")
     @editor_usage
     def _create_thread():

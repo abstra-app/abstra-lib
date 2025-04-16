@@ -7,6 +7,7 @@ from abstra_internals.cloud_api import (
     create_thread,
     generate_project,
     get_ai_messages,
+    get_history,
 )
 from abstra_internals.controllers.linters import fix_all_linters
 from abstra_internals.controllers.main import MainController
@@ -101,6 +102,12 @@ class AiController:
             env_vars_keys,
             current_abstra_json,
         )
+
+    def get_history(self, limit: int, offset: int):
+        headers = resolve_headers()
+        if headers is None:
+            return None
+        return get_history(headers, limit, offset)
 
     def create_thread(self):
         headers = resolve_headers()
