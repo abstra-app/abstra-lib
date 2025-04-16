@@ -1153,6 +1153,13 @@
             "required": false
           },
           {
+            "name": "required",
+            "type": "bool",
+            "description": "Whether the input must be filled before proceeding.",
+            "default": "True",
+            "required": false
+          },
+          {
             "name": "label",
             "type": "str",
             "description": "Text label displayed above the component.",

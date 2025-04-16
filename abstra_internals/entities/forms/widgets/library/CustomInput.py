@@ -18,6 +18,7 @@ class CustomInput(InputWidget):
         html_body: str,
         *,
         key: Optional[str] = None,
+        required: bool = True,
         label: str = "",
         html_head: str = "",
         height: int = 200,
@@ -32,6 +33,7 @@ class CustomInput(InputWidget):
         Args:
             html_body (str): HTML content for the body of the custom component.
             key (Optional[str]): Identifier for the widget, defaults to hash of html_body if not provided.
+            required (bool): Whether the component must be filled before proceeding.
             label (str): Text label displayed above the component.
             html_head (str): HTML content for the head section.
             height (int): Height of the component in pixels.
@@ -43,6 +45,7 @@ class CustomInput(InputWidget):
         """
         self.html_body = html_body
         self.key = key or str(hash(html_body))
+        self.required = required
         self.label = label
         self.html_head = html_head
         self.height = height
@@ -59,6 +62,7 @@ class CustomInput(InputWidget):
             "key": self.key,
             "label": self.label,
             "value": self.value,
+            "required": self.required,
             "htmlBody": self.html_body,
             "height": self.height,
             "htmlHead": self.html_head,
