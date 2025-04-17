@@ -535,3 +535,9 @@ class MainController:
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
 
             self.tasks_repository.set_locked_tasks_to_pending(execution.id)
+
+    def get_public_url(self):
+        if Settings.has_public_url():
+            return {"public_url": Settings.public_url}
+
+        return {"public_url": None}

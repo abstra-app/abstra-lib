@@ -30,4 +30,8 @@ def get_editor_bp(controller: MainController):
     def _get_project_info():
         return controller.get_project_info()
 
+    @bp.get("/public-url")
+    def _get_public_url():
+        return controller.get_public_url()
+
     return bp
