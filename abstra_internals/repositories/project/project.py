@@ -13,7 +13,22 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 from pydantic.dataclasses import dataclass
 
 from abstra_internals.constants import ABSTRA_LOGO_URL, get_project_url
-from abstra_internals.contracts_generated import CommonUser
+from abstra_internals.contracts_generated import (
+    CommonAbstraJsonV13,
+    CommonAbstraJsonV13AgentsItem,
+    CommonAbstraJsonV13ClientsItem,
+    CommonAbstraJsonV13DefinitionsFormStage,
+    CommonAbstraJsonV13DefinitionsFormStageAccessControl,
+    CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger,
+    CommonAbstraJsonV13DefinitionsHookStage,
+    CommonAbstraJsonV13DefinitionsJobStage,
+    CommonAbstraJsonV13DefinitionsScriptStage,
+    CommonAbstraJsonV13DefinitionsTransition,
+    CommonAbstraJsonV13Home,
+    CommonAbstraJsonV13HomeAccessControl,
+    CommonAbstraJsonV13Workspace,
+    CommonUser,
+)
 from abstra_internals.entities.agents import AgentEntrypoint
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
@@ -118,6 +133,13 @@ class NotificationTrigger:
     def to_dto(self) -> Optional[Dict[str, Any]]:
         return {"variable_name": self.variable_name, "enabled": self.enabled}
 
+    def to_abstra_json_dto(
+        self,
+    ) -> CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger:
+        return CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger(
+            variable_name=self.variable_name, enabled=self.enabled
+        )
+
 
 @dataclass
 class WorkflowTransition:
@@ -170,6 +192,15 @@ class WorkflowTransition:
             return "scripts:finished"
         else:
             raise Exception(f"Invalid source type {source_type}")
+
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsTransition:
+        return CommonAbstraJsonV13DefinitionsTransition(
+            id=self.id,
+            target_id=self.target_id,
+            target_type=self.target_type,
+            type=self.type,
+            task_type=self.task_type,
+        )
 
 
 @dataclass
@@ -270,6 +301,18 @@ class HookStage(StageWithFile):
             }
         )
 
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsHookStage:
+        return CommonAbstraJsonV13DefinitionsHookStage(
+            id=self.id,
+            file=self.file,
+            path=self.path,
+            title=self.title,
+            enabled=self.enabled,
+            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
+            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
+            is_initial=self.is_initial,
+        )
+
 
 @dataclass
 class ScriptStage(StageWithFile):
@@ -359,6 +402,16 @@ class ScriptStage(StageWithFile):
             }
         )
 
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsScriptStage:
+        return CommonAbstraJsonV13DefinitionsScriptStage(
+            id=self.id,
+            file=self.file,
+            title=self.title,
+            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
+            is_initial=self.is_initial,
+            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
+        )
+
 
 @dataclass
 class AccessSettings:
@@ -391,6 +444,13 @@ class AccessSettings:
     def update(self, changes: Dict[str, Any]):
         for attr, value in changes.items():
             setattr(self, attr, value)
+
+    def to_abstra_json_dto(
+        self,
+    ) -> CommonAbstraJsonV13DefinitionsFormStageAccessControl:
+        return CommonAbstraJsonV13DefinitionsFormStageAccessControl(
+            is_public=self.is_public, required_roles=self.required_roles
+        )
 
 
 @dataclass
@@ -476,6 +536,16 @@ class JobStage(StageWithFile):
                 "workflow_position": new_position,
                 "transitions": [],
             }
+        )
+
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsJobStage:
+        return CommonAbstraJsonV13DefinitionsJobStage(
+            id=self.id,
+            file=self.file,
+            title=self.title,
+            schedule=self.schedule,
+            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
+            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
         )
 
 
@@ -663,6 +733,28 @@ class FormStage(StageWithFile):
             "required_roles": self.access_control.required_roles,
         }
 
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsFormStage:
+        return CommonAbstraJsonV13DefinitionsFormStage(
+            id=self.id,
+            file=self.file,
+            path=self.path,
+            title=self.title,
+            end_message=self.end_message,
+            auto_start=self.auto_start or False,
+            start_message=self.start_message,
+            error_message=self.error_message,
+            welcome_title=self.welcome_title,
+            allow_restart=self.allow_restart or False,
+            timeout_message=self.timeout_message,
+            start_button_text=self.start_button_text,
+            restart_button_text=self.restart_button_text,
+            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
+            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
+            is_initial=self.is_initial,
+            notification_trigger=self.notification_trigger.to_abstra_json_dto(),
+            access_control=self.access_control.to_abstra_json_dto(),
+        )
+
 
 @dataclass
 class AgentStage(Stage):
@@ -740,6 +832,16 @@ class AgentStage(Stage):
             }
         )
 
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13AgentsItem:
+        return CommonAbstraJsonV13AgentsItem(
+            id=self.id,
+            title=self.title,
+            project_id=self.project_id,
+            client_stage_id=self.client_stage_id,
+            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
+            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
+        )
+
 
 @dataclass
 class ClientStage(Stage):
@@ -805,6 +907,14 @@ class ClientStage(Stage):
             client_stage_id=self.id,
             input_schemas=None,
             output_schemas=None,
+        )
+
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13ClientsItem:
+        return CommonAbstraJsonV13ClientsItem(
+            id=self.id,
+            title=self.title,
+            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
+            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
         )
 
 
@@ -951,6 +1061,19 @@ class StyleSettings:
             language="en",
         )
 
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13Workspace:
+        return CommonAbstraJsonV13Workspace(
+            name=self.name,
+            language=self.language,
+            theme=self.theme,
+            logo_url=self.logo_url,
+            favicon_url=self.favicon_url,
+            brand_name=self.brand_name,
+            main_color=self.main_color,
+            font_family=self.font_family,
+            font_color=self.font_color,
+        )
+
 
 @dataclass
 class StyleSettingsWithSidebar(StyleSettings):
@@ -1046,6 +1169,14 @@ class Home:
         if id == "access_control":
             setattr(self, id, AccessSettings.from_dict(changes))
 
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV13Home:
+        return CommonAbstraJsonV13Home(
+            access_control=CommonAbstraJsonV13HomeAccessControl(
+                is_public=self.access_control.is_public,
+                required_roles=self.access_control.required_roles,
+            )
+        )
+
 
 @dataclass
 class Project:
@@ -1083,6 +1214,19 @@ class Project:
             "agents": [agent.as_dict for agent in self.agents],
             "clients": [client.as_dict for client in self.clients],
         }
+
+    def to_abstra_json_dto(self):
+        return CommonAbstraJsonV13(
+            version="13.0",
+            workspace=self.workspace.to_abstra_json_dto(),
+            home=self.home.to_abstra_json_dto(),
+            jobs=[job.to_abstra_json_dto() for job in self.jobs],
+            hooks=[hook.to_abstra_json_dto() for hook in self.hooks],
+            forms=[form.to_abstra_json_dto() for form in self.forms],
+            scripts=[script.to_abstra_json_dto() for script in self.scripts],
+            agents=[agent.to_abstra_json_dto() for agent in self.agents],
+            clients=[client.to_abstra_json_dto() for client in self.clients],
+        )
 
     @property
     def workflow_stages(self) -> List[Stage]:
@@ -1480,12 +1624,10 @@ class ProjectRepository:
     def save(cls, project: Project):
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
-        project_data = project.as_dict
-
-        project_data["version"] = json_migrations.get_latest_version()
+        project_dto = project.to_abstra_json_dto()
 
         with temp_file.open("w") as f:
-            json.dump(project_data, f, indent=2)
+            json.dump(project_dto.to_dict(), f, indent=2)
 
         with cls.lock:
             shutil.move(str(temp_file), cls.get_file_path())
@@ -1496,6 +1638,7 @@ class ProjectRepository:
         if not cls.exists():
             return
         data = json.loads(cls.get_file_path().read_text(encoding="utf-8"))
+        assert isinstance(data, dict)
         initial_version = data.get("version")
 
         migrated_data = json_migrations.migrate(
@@ -1513,6 +1656,8 @@ class ProjectRepository:
 
         with cls.lock:
             data = json.loads(file_path.read_text(encoding="utf-8"))
+            if data["version"] == "v13.0":
+                CommonAbstraJsonV13.from_dict(data)
             return Project.from_dict(data)
 
     @classmethod
