@@ -223,11 +223,12 @@ def connect_tunnel(on_public_url_update: Optional[Callable[[], None]]):
                     if on_public_url_update:
                         on_public_url_update()
 
-                    print(
-                        f"Hooks can also be fired from {Fore.GREEN} {public_url}/_hooks/:hook-path{Fore.RESET}"
-                    )
-            except simple_websocket.ConnectionClosed as e:
-                print(f"Connection closed: {e}")
+                    if not hasattr(loop, "_printed"):
+                        setattr(loop, "_printed", True)
+                        print(
+                            f"You can test your hooks locally by sending requests to: {Fore.GREEN}{public_url}/_hooks/:hook-path{Fore.RESET}"
+                        )
+            except simple_websocket.ConnectionClosed:
                 ws = None
             except simple_websocket.ConnectionError as e:
                 print(f"Connection error: {e}")
