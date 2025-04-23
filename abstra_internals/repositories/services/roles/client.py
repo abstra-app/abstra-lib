@@ -30,6 +30,9 @@ class RoleClientRepository(RoleCommonRepository):
         if not Settings.has_public_url():
             return
 
+        if self._cached_connections is None:
+            self._cached_connections = []
+
         project = ProjectRepository.load()
         connections = self.get_connections()
 
@@ -61,7 +64,7 @@ class RoleClientRepository(RoleCommonRepository):
                 )
 
     def get_connections(self) -> List[ConnectionModel]:
-        if self._cached_connections is None or len(self._cached_connections) == 0:
+        if self._cached_connections is None:
             self.sync_connections()
         return self._cached_connections or []
 
