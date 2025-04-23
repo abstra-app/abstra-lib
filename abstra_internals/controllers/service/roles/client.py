@@ -32,40 +32,7 @@ class RoleClientController(RoleCommonController):
         )
 
     def sync_connection_pool(self):
-        if not Settings.has_public_url():
-            return
-
-        project = ProjectRepository.load()
-        connections = self.repos.role_clients.get_connections()
-
-        for connection in connections:
-            for agent in project.agents:
-                if agent.id == connection.client_stage_id:
-                    break
-            else:
-                self.repos.role_clients.delete_connection(connection)
-
-        for agent in project.agents:
-            if not agent.client_stage_id or not agent.project_id:
-                continue
-
-            for connection in connections:
-                if (
-                    connection.agent_stage_id == agent.client_stage_id
-                    and connection.agent_project_id == agent.project_id
-                    and connection.client_stage_id == agent.id
-                ):
-                    self.repos.role_clients.update_or_create_connection(
-                        connection=connection
-                    )
-                    break
-
-            else:
-                self.repos.role_clients.connect_to_agent(
-                    agent_stage_id=agent.client_stage_id,
-                    agent_project_id=agent.project_id,
-                    client_stage_id=agent.id,
-                )
+        self.repos.role_clients.sync_connections()
 
     def safe_sync_connection_pool(self):
         try:

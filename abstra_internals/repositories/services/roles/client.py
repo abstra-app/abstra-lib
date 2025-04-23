@@ -12,6 +12,7 @@ from abstra_internals.entities.agents import (
     SignProofResponse,
 )
 from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
+from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 from abstra_internals.settings import Settings
 
@@ -25,7 +26,43 @@ class RoleClientRepository(RoleCommonRepository):
     _cached_connections: Optional[List[ConnectionModel]] = None
     base_url: str
 
+    def sync_connections(self):
+        if not Settings.has_public_url():
+            return
+
+        project = ProjectRepository.load()
+        connections = self.get_connections()
+
+        for connection in connections:
+            for agent in project.agents:
+                if agent.id == connection.client_stage_id:
+                    break
+            else:
+                self.delete_connection(connection)
+
+        for agent in project.agents:
+            if not agent.client_stage_id or not agent.project_id:
+                continue
+
+            for connection in connections:
+                if (
+                    connection.agent_stage_id == agent.client_stage_id
+                    and connection.agent_project_id == agent.project_id
+                    and connection.client_stage_id == agent.id
+                ):
+                    self.update_or_create_connection(connection=connection)
+                    break
+
+            else:
+                self.connect_to_agent(
+                    agent_stage_id=agent.client_stage_id,
+                    agent_project_id=agent.project_id,
+                    client_stage_id=agent.id,
+                )
+
     def get_connections(self) -> List[ConnectionModel]:
+        if self._cached_connections is None or len(self._cached_connections) == 0:
+            self.sync_connections()
         return self._cached_connections or []
 
     @property
