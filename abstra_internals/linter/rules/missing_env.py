@@ -26,6 +26,13 @@ class EnvInCodeNotInEnvFile(LinterIssue):
 class MissingEnv(LinterRule):
     label: str = "Missing env vars"
     type: str = "info"
+    internal_envs: Set[str] = {
+        "ABSTRA_RUNNING_IN_BUNDLED_APP",
+        "ABSTRA_BUNDLED_APP_PACKAGES_FOLDER",
+        "ABSTRA_BUNDLED_APP_ROOT_FOLDER",
+        "ABSTRA_ENVIRONMENT",
+        "ABSTRA_SELENIUM_URL",
+    }
 
     def find_issues(self) -> List[LinterIssue]:
         env_vars_in_code_dict = EnvVarsRepository.get_env_vars_in_code()
@@ -33,7 +40,7 @@ class MissingEnv(LinterRule):
         env_vars_in_env_file: Set[str] = set(
             [ev.name for ev in EnvVarsRepository.list()]
         )
-        missing_env_vars = env_vars_in_code - env_vars_in_env_file
+        missing_env_vars = env_vars_in_code - env_vars_in_env_file - self.internal_envs
 
         issues = []
 
