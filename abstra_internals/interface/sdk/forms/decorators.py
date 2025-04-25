@@ -6,7 +6,8 @@ from abstra_internals.entities.forms.steps import (
 
 def end_page_step(func: "TemplateFunction") -> EndPageStep:
     """
-    Decorator that converts a function into an EndPageStep.
+    Add this decorator to a function to mark it as the end page of a form.
+    It will remove buttons and end execution.
 
     Args:
         func (TemplateFunction): The function to be decorated.

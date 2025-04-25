@@ -6,6 +6,10 @@ class Widget(ABC):
     type: str
 
     @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
     def _render(self):
         raise NotImplementedError("render method not implemented")
 

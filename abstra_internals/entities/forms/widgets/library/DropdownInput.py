@@ -50,7 +50,7 @@ class DropdownInput(InputWidget):
             multiple (bool): Whether multiple options can be selected.
             min (Optional[int]): Minimum number of selections required when multiple=True.
             max (Optional[int]): Maximum number of selections allowed when multiple=True.
-            errors (Optional[Union[List[object], object]]): Pre-defined validation error messages to display.
+            errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
         self.key = key or label

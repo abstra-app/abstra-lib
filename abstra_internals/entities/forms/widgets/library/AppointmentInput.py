@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from abstra_internals.entities.forms.widgets.response_types import AppointmentSlot
 from abstra_internals.entities.forms.widgets.widget_base import InputWidget
@@ -17,25 +17,25 @@ class AppointmentInput(InputWidget):
     def __init__(
         self,
         label: str,
+        slots: List["Dict"],
         *,
         key: Optional[str] = None,
         required: bool = True,
         hint: Optional[str] = None,
         full_width: bool = False,
         disabled: bool = False,
-        slots: Optional[List["AppointmentSlot"]] = None,
         errors: Optional[Union[List[str], str]] = None,
     ) -> None:
         """Initialize an AppointmentInput widget.
 
         Args:
             label (str): Text label displayed above the input.
+            slots (List[Dict]): List of available time slots. Eg. [{"begin": "2023-10-01T10:00:00", "end": "2023-10-01T11:00:00"}]
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
             required (bool): Whether a time slot must be selected before proceeding.
             hint (Optional[str]): Help text displayed below the input.
             full_width (bool): Whether the input should take up the full width of its container.
             disabled (bool): Whether the input is non-interactive.
-            slots (Optional[List[AppointmentSlot]]): List of available time slots.
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
         self.label = label
@@ -58,7 +58,7 @@ class AppointmentInput(InputWidget):
     ) -> None:
         if value is None:
             self._value = None
-        if isinstance(value, AppointmentSlot):
+        elif isinstance(value, AppointmentSlot):
             self._value = value
         elif isinstance(value, dict):
             self._value = AppointmentSlot.from_dict(value)

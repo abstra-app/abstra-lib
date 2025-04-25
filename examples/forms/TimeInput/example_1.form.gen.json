@@ -1,0 +1,27 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "time-input",
+            "key": "my-time_input",
+            "label": "Time Input",
+            "format": "24hs",
+            "hint": null,
+            "value": null,
+            "required": true,
+            "fullWidth": false,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

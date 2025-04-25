@@ -1,6 +1,15 @@
 import copy
 from dataclasses import dataclass
-from typing import Callable, Dict, Generator, List, Optional, Tuple, TypedDict, Union
+from typing import (
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Tuple,
+    TypedDict,
+    Union,
+)
 
 from abstra_internals.entities.forms.form_state import State
 from abstra_internals.entities.forms.widgets.widget_base import InputWidget, Widget

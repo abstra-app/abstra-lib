@@ -1,0 +1,30 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "text-input",
+            "key": "my-text_input",
+            "label": "Text Input",
+            "value": "",
+            "placeholder": "",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "mask": null,
+            "maxLength": null,
+            "minLength": null,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

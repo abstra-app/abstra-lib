@@ -1,4 +1,10 @@
-from typing import List, Optional, TypedDict, Union
+import sys
+from typing import List, Optional, Union
+
+if sys.version_info < (3, 11):
+    from typing_extensions import NotRequired, TypedDict
+else:
+    from typing import NotRequired, TypedDict
 
 from abstra_internals.entities.forms.widgets.file_upload import upload_widget_file
 from abstra_internals.entities.forms.widgets.widget_base import (
@@ -8,12 +14,12 @@ from abstra_internals.entities.forms.widgets.widget_base import (
 
 
 class CardOption(TypedDict):
-    title: Optional[str]
-    subtitle: Optional[str]
-    image: Optional[str]
-    description: Optional[str]
-    topLeftExtra: Optional[str]
-    topRightExtra: Optional[str]
+    title: NotRequired[Optional[str]]
+    subtitle: NotRequired[Optional[str]]
+    image: NotRequired[Optional[str]]
+    description: NotRequired[Optional[str]]
+    topLeftExtra: NotRequired[Optional[str]]
+    topRightExtra: NotRequired[Optional[str]]
 
 
 class CardsInput(InputWidget):
@@ -35,8 +41,9 @@ class CardsInput(InputWidget):
         options: List["CardOption"],
         *,
         key: Optional[str] = None,
-        searchable: bool = False,
         required: bool = True,
+        searchable: bool = False,
+        multiple: bool = False,
         hint: Optional[str] = None,
         columns: Optional[int] = 2,
         full_width: bool = False,
@@ -52,8 +59,9 @@ class CardsInput(InputWidget):
             label (str): Text label displayed above the cards.
             options (List[CardOption]): List of card options to display.
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
-            searchable (bool): Whether cards can be filtered by search.
             required (bool): Whether a card selection is required before proceeding.
+            multiple (bool): Whether multiple cards can be selected.
+            searchable (bool): Whether cards can be filtered by search.
             hint (Optional[str]): Help text displayed below the input.
             columns (Optional[int]): Number of columns to display cards in.
             full_width (bool): Whether the cards should take up the full width of their container.
@@ -76,7 +84,7 @@ class CardsInput(InputWidget):
         self.full_width = full_width
         self.layout = layout
         self.disabled = disabled
-        self.multiple = False
+        self.multiple = multiple
         self.empty_value = []
         self.min = min
         self.max = max

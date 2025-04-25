@@ -1,0 +1,27 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "textarea-input",
+            "key": "my-textarea_input",
+            "label": "Textarea Input",
+            "value": "",
+            "placeholder": "",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

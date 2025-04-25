@@ -1,0 +1,20 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "progress-output",
+            "current": 1,
+            "total": 10,
+            "text": "",
+            "fullWidth": false
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 0,
+        "disabled": false
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": []
+}

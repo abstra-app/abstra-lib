@@ -1,0 +1,63 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "pandas-output",
+            "table": {
+                "schema": {
+                    "fields": [
+                        {
+                            "name": "index",
+                            "type": "integer"
+                        },
+                        {
+                            "name": "Country",
+                            "type": "string"
+                        },
+                        {
+                            "name": "Population",
+                            "type": "string"
+                        }
+                    ],
+                    "primaryKey": [
+                        "index"
+                    ]
+                },
+                "data": [
+                    {
+                        "index": 0,
+                        "Country": "USA",
+                        "Population": "32,700,000"
+                    },
+                    {
+                        "index": 1,
+                        "Country": "China",
+                        "Population": "1,300,000,000"
+                    },
+                    {
+                        "index": 2,
+                        "Country": "Japan",
+                        "Population": "126,000,000"
+                    }
+                ]
+            },
+            "fullWidth": false,
+            "displayIndex": true,
+            "label": null,
+            "actions": null,
+            "filterable": true,
+            "pageSize": 10,
+            "paginationAlwaysVisible": true
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

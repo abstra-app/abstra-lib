@@ -1,0 +1,101 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "list-input",
+            "key": "my-list",
+            "hint": null,
+            "errors": [],
+            "min": 2,
+            "max": null,
+            "addButtonText": "+",
+            "fullWidth": false,
+            "required": true,
+            "disabled": false,
+            "schemas": [
+                [
+                    {
+                        "type": "text-input",
+                        "key": "item_name",
+                        "label": "Item Name",
+                        "value": "",
+                        "placeholder": "",
+                        "required": true,
+                        "hint": null,
+                        "fullWidth": false,
+                        "mask": null,
+                        "maxLength": null,
+                        "minLength": null,
+                        "disabled": false,
+                        "errors": []
+                    },
+                    {
+                        "type": "number-input",
+                        "key": "item_quantity",
+                        "label": "Item Quantity",
+                        "value": null,
+                        "placeholder": null,
+                        "required": true,
+                        "hint": null,
+                        "fullWidth": false,
+                        "min": null,
+                        "max": null,
+                        "disabled": false,
+                        "errors": []
+                    }
+                ],
+                [
+                    {
+                        "type": "text-input",
+                        "key": "item_name",
+                        "label": "Item Name",
+                        "value": "",
+                        "placeholder": "",
+                        "required": true,
+                        "hint": null,
+                        "fullWidth": false,
+                        "mask": null,
+                        "maxLength": null,
+                        "minLength": null,
+                        "disabled": false,
+                        "errors": []
+                    },
+                    {
+                        "type": "number-input",
+                        "key": "item_quantity",
+                        "label": "Item Quantity",
+                        "value": null,
+                        "placeholder": null,
+                        "required": true,
+                        "hint": null,
+                        "fullWidth": false,
+                        "min": null,
+                        "max": null,
+                        "disabled": false,
+                        "errors": []
+                    }
+                ]
+            ],
+            "value": [
+                {
+                    "item_name": "",
+                    "item_quantity": null
+                },
+                {
+                    "item_name": "",
+                    "item_quantity": null
+                }
+            ]
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

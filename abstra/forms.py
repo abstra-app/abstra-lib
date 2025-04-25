@@ -2,6 +2,7 @@
 # Can't use __all__ yet because of the wildcard imports and code generation
 
 # Utils
+from abstra_internals.entities.forms.widgets.widget_base import Widget
 from abstra_internals.interface.sdk.forms.other import (
     execute_js,
     get_query_params,
@@ -65,6 +66,7 @@ from abstra_internals.entities.forms.widgets.library import (
     VideoInput,
 )
 from abstra_internals.interface.sdk.forms.form import Form, run
+from abstra_internals.entities.forms.widgets.widget_base import Widget
 from abstra_internals.interface.sdk.forms.decorators import end_page_step
 
 # Legacy
@@ -131,6 +133,7 @@ __all__ = [
     "NextButton",
     "BackButton",
     # Widgets
+    "Widget",
     "ListItemSchema",
     "AppointmentInput",
     "CameraInput",

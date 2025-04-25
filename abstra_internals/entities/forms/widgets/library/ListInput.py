@@ -49,7 +49,7 @@ class ListInput(InputWidget):
         """
         self.key = key
         self._raw_template = template
-        self.value = []
+        self.value = [State() for _ in range(min)] if min else []
         self.min = min
         self.max = max
         self.hint = hint

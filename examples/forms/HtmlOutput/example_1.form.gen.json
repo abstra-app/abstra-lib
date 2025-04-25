@@ -1,0 +1,20 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "html-output",
+            "html": "\n<div>\n    <h1>HTML Output</h1>\n    <p>This is a simple HTML output example.</p>\n    <ul>\n        <li>Item 1</li>\n        <li>Item 2</li>\n        <li>Item 3</li>\n    </ul>\n</div>\n",
+            "fullWidth": false
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

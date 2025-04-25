@@ -30,6 +30,10 @@ class is_null(Comparator):
     Checks if a column value is NULL.
     """
 
+    def __init__(self):
+        """Initialize the NULL comparator."""
+        pass
+
     def exp(self, column_name: str, idx: int) -> Tuple[str, list]:
         """Generate SQL expression for NULL comparison.
 
@@ -364,6 +368,10 @@ class is_not_null(Comparator):
 
     Checks if a column value is not NULL.
     """
+
+    def __init__(self):
+        """Initialize the NOT NULL comparator."""
+        pass
 
     def exp(self, column_name: str, idx: int) -> Tuple[str, list]:
         """Generate SQL expression for NOT NULL comparison.

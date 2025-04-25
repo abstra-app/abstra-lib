@@ -1,0 +1,29 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "number-slider-input",
+            "key": "my-number_slider_input",
+            "label": "Number Slider Input",
+            "value": 0,
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "cnpj-input",
+            "key": "my-cnpj_input",
+            "label": "Cnpj Input",
+            "value": "",
+            "placeholder": "00.000.000/0001-00",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "disabled": false,
+            "invalidMessage": "i18n_error_invalid_cnpj",
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}

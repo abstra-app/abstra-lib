@@ -3,7 +3,7 @@ from abstra_internals.widgets.response_types import (
     FileResponse,
     PhoneResponse,
 )
-from abstra_internals.widgets.types import AbstraOption
+from abstra_internals.widgets.widget_base import AbstraOption
 
 __all__ = [
     "AbstraOption",

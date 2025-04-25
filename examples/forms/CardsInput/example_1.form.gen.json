@@ -1,0 +1,52 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "cards-input",
+            "key": "Choose your favorite dessert",
+            "label": "Choose your favorite dessert",
+            "hint": null,
+            "options": [
+                {
+                    "title": "Crepe",
+                    "subtitle": "French",
+                    "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",
+                    "description": "A cr\u00eape or crepe is a type of very thin pancake."
+                },
+                {
+                    "title": "Pancake",
+                    "subtitle": "American",
+                    "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",
+                    "description": "A pancake is a flat cake, often thin and round."
+                },
+                {
+                    "title": "Waffle",
+                    "subtitle": "Belgian",
+                    "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",
+                    "description": "A waffle is a patterned dish made from leavened batter or dough."
+                }
+            ],
+            "multiple": false,
+            "searchable": false,
+            "required": true,
+            "columns": 2,
+            "fullWidth": false,
+            "layout": "list",
+            "disabled": false,
+            "errors": [],
+            "min": null,
+            "max": null,
+            "value": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        "i18n_next_action"
+    ]
+}
