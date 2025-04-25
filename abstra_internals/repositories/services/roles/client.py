@@ -27,7 +27,7 @@ class RoleClientRepository(RoleCommonRepository):
     base_url: str
 
     def sync_connections(self):
-        if not Settings.has_public_url():
+        if not Settings.has_public_url() or not self.get_headers():
             return
 
         if self._cached_connections is None:

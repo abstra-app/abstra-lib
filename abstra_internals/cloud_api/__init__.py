@@ -162,14 +162,13 @@ def connect_tunnel(on_public_url_update: Optional[Callable[[], None]]):
     )
 
     def loop():
-        while True:
-            headers = resolve_headers()
-            if headers is not None:
-                break
-            sleep(1)
         ws = None
         while True:
             if ws is None:
+                headers = resolve_headers()
+                if headers is None:
+                    sleep(5)
+                    continue
                 try:
                     ws = simple_websocket.Client(url, headers=headers)
                 except Exception:
