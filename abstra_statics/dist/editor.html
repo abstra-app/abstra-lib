@@ -1,64 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" href="/favicon-editor.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Primary Meta Tags -->
-  <title>Abstra Editor</title>
-  <meta name="title" content="Abstra Editor" />
-  <script>
-    // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/h97k86ks'
-    (function () {
-      var w = window;
-      var ic = w.Intercom;
-      if (typeof ic === 'function') {
-        ic('reattach_activator');
-        ic('update', w.intercomSettings);
-      } else {
-        var d = document;
-        var i = function () {
-          i.c(arguments);
-        };
-        i.q = [];
-        i.c = function (args) {
-          i.q.push(args);
-        };
-        w.Intercom = i;
-        var l = function () {
-          var s = d.createElement('script');
-          s.type = 'text/javascript';
-          s.async = true;
-          s.src = 'https://widget.intercom.io/widget/h97k86ks';
-          var x = d.getElementsByTagName('script')[0];
-          x.parentNode.insertBefore(s, x);
-        };
-        if (document.readyState === 'complete') {
-          l();
-        } else if (w.attachEvent) {
-          w.attachEvent('onload', l);
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon-editor.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Primary Meta Tags -->
+    <title>Abstra Editor</title>
+    <meta name="title" content="Abstra Editor" />
+    <script>
+      // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/h97k86ks'
+      (function () {
+        var w = window;
+        var ic = w.Intercom;
+        if (typeof ic === 'function') {
+          ic('reattach_activator');
+          ic('update', w.intercomSettings);
         } else {
-          w.addEventListener('load', l, false);
+          var d = document;
+          var i = function () {
+            i.c(arguments);
+          };
+          i.q = [];
+          i.c = function (args) {
+            i.q.push(args);
+          };
+          w.Intercom = i;
+          var l = function () {
+            var s = d.createElement('script');
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = 'https://widget.intercom.io/widget/h97k86ks';
+            var x = d.getElementsByTagName('script')[0];
+            x.parentNode.insertBefore(s, x);
+          };
+          if (document.readyState === 'complete') {
+            l();
+          } else if (w.attachEvent) {
+            w.attachEvent('onload', l);
+          } else {
+            w.addEventListener('load', l, false);
+          }
         }
-      }
-    })();
-  </script>
-  <script type="module" crossorigin src="/assets/editor.c6a18c67.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/index.866f1cee.js">
-  <link rel="modulepreload" crossorigin href="/assets/userStore.3e5bf0f3.js">
-  <link rel="modulepreload" crossorigin href="/assets/url.8807a85e.js">
-  <link rel="modulepreload" crossorigin href="/assets/colorHelpers.ca0796d4.js">
-  <link rel="modulepreload" crossorigin href="/assets/workspaceStore.68d6e4c7.js">
-  <link rel="modulepreload" crossorigin href="/assets/asyncComputed.2c8718b1.js">
-  <link rel="modulepreload" crossorigin href="/assets/linters.9028c9d1.js">
-  <link rel="stylesheet" href="/assets/index.e9da1d43.css">
-  <link rel="stylesheet" href="/assets/index.442b4e87.css">
-</head>
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/editor.ff05c540.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/index.a2e3d1d4.js">
+    <link rel="modulepreload" crossorigin href="/assets/userStore.7adbbcf9.js">
+    <link rel="modulepreload" crossorigin href="/assets/url.fa8177ef.js">
+    <link rel="modulepreload" crossorigin href="/assets/colorHelpers.8c004a9f.js">
+    <link rel="modulepreload" crossorigin href="/assets/workspaceStore.456e5ee4.js">
+    <link rel="modulepreload" crossorigin href="/assets/asyncComputed.fa6bd868.js">
+    <link rel="modulepreload" crossorigin href="/assets/linters.9ddcb22d.js">
+    <link rel="stylesheet" href="/assets/index.ce34a27b.css">
+    <link rel="stylesheet" href="/assets/index.442b4e87.css">
+  </head>
 
-<body>
-  <div id="app"></div>
-  
-</body>
-
+  <body>
+    <div id="app"></div>
+    
+  </body>
 </html>
