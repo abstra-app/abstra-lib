@@ -31,3 +31,4 @@ psutil
 pypdfium2==4.30.0
 watchdog==4.0.2
 mail-parser==4.1.2
+python-dateutil==2.9.0

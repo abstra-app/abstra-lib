@@ -46,7 +46,6 @@ class CodebaseController:
             raise ValueError(f"Invalid path: {path}")
 
         project = ProjectRepository().load()
-
         return [
             AbstraLibApiEditorFilesListResponseItem(
                 file=CommonFileNode(
