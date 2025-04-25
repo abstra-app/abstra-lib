@@ -7,9 +7,11 @@ from abstra_internals.interface.contract.forms_contract import (
     ValidationResult,
 )
 from abstra_internals.interface.sdk.forms.deprecated.page_response import PageResponse
+from abstra_internals.interface.sdk.forms.deprecated.widgets.prop_check import (
+    validate_widget_props,
+)
+from abstra_internals.interface.sdk.forms.deprecated.widgets.widget_base import Input
 from abstra_internals.interface.sdk.forms.generated.widget_schema import WidgetSchema
-from abstra_internals.widgets.prop_check import validate_widget_props
-from abstra_internals.widgets.widget_base import Input
 
 
 class Page(WidgetSchema):

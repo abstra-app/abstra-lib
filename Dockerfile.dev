@@ -16,8 +16,8 @@ RUN apt-get install -y htop vim git curl
 RUN apt-get install --no-install-suggests --no-install-recommends -y poppler-utils ffmpeg libsm6 libxext6
 
 # Install extra dependencies for the project
-COPY ./requirements-tests.txt /requirements-tests.txt
-RUN pip install --no-cache-dir --compile -r /requirements-tests.txt
+COPY ./requirements-dev.txt /requirements-dev.txt
+RUN pip install --no-cache-dir --compile -r /requirements-dev.txt
 
 RUN mkdir /abstra-lib
 

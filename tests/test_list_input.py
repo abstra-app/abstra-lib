@@ -5,7 +5,7 @@ from abstra_internals.controllers.execution_client_form import FormClient
 from abstra_internals.controllers.sdk_context import SDKContext
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import FormContext, Request
-from abstra_internals.widgets.library import ListInput
+from abstra_internals.interface.sdk.forms.deprecated.widgets.library import ListInput
 from tests.fixtures import BaseTest
 
 default_text_input = {

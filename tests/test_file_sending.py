@@ -1,9 +1,11 @@
 import io
 
+from abstra_internals.interface.sdk.forms.deprecated.widgets.file_utils import (
+    upload_widget_file,
+)
 from abstra_internals.server.apps import get_local_app
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.utils.file import get_random_filepath
-from abstra_internals.widgets.file_utils import upload_widget_file
 from tests.fixtures import BaseTest, clear_dir
 
 

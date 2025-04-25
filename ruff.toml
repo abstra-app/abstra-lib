@@ -26,8 +26,6 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    "abstra_internals/widgets/library",
-    "abstra_internals/interface/sdk/forms/generated/",
 ]
 
 [lint]

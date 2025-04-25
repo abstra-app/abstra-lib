@@ -7,9 +7,11 @@ import pypdfium2 as pdfium
 from PIL.Image import Image
 
 import abstra_internals.utils.b64 as b64
+from abstra_internals.interface.sdk.forms.deprecated.widgets.response_abc import (
+    AbstractFileResponse,
+)
 from abstra_internals.repositories.ai import AiApiHttpClient
 from abstra_internals.utils.string import to_snake_case
-from abstra_internals.widgets.response_abc import AbstractFileResponse
 
 Prompt = Union[str, io.IOBase, pathlib.Path, AbstractFileResponse]
 Format = Dict[str, object]

@@ -5,8 +5,11 @@ from uuid import UUID
 
 from abstra_internals.interface.sdk.forms.deprecated.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.deprecated.steps_response import StepsResponse
+from abstra_internals.interface.sdk.forms.deprecated.widgets.response_types import (
+    FileResponse,
+    PhoneResponse,
+)
 from abstra_internals.utils import serialize
-from abstra_internals.widgets.response_types import FileResponse, PhoneResponse
 
 
 def to_json_serializable(data):

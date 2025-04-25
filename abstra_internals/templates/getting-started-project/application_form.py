@@ -3,7 +3,9 @@ from typing import List, Union
 import abstra.ai as ai
 import abstra.forms as af
 from abstra.tasks import send_task
-from abstra_internals.widgets.response_types import FileResponse
+from abstra_internals.interface.sdk.forms.deprecated.widgets.response_types import (
+    FileResponse,
+)
 
 ### 📌 Abstra Forms is the easiest way to create dynamic forms that allow users to interact with your Python script.
 

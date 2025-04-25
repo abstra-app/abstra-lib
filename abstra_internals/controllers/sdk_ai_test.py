@@ -6,7 +6,9 @@ from unittest.mock import MagicMock, patch
 from PIL import Image
 
 from abstra_internals.controllers.sdk_ai import AiSDKController
-from abstra_internals.widgets.response_types import FileResponse
+from abstra_internals.interface.sdk.forms.deprecated.widgets.response_types import (
+    FileResponse,
+)
 
 
 class TestAiSDKController(unittest.TestCase):

@@ -106,6 +106,9 @@ class Logger:
         print(f"👀{self.YELLOW}Skipped: {len(self.skips)}{self.RESET}")
         print(f"🔥{self.RED}Errors: {len(self.errors)}{self.RESET}")
 
+    def has_errors(self) -> bool:
+        return len(self.errors) > 0
+
 
 class SDKContractParser:
     def __init__(self, main_module_name: str):
@@ -399,13 +402,37 @@ class SDKContractParser:
         }
 
     def _normalize_type_annotation(self, annotation: str) -> str:
-        annotation = re.sub(r"<class '([^']+)'>", "\\1", annotation)
+        # Remove <class '...'> wrapper
+        annotation = re.sub(r"<class '([^']+)'>", r"\1", annotation)
+        # Remove typing prefix (run twice for potential nested cases)
         annotation = annotation.replace("typing.", "")
-        annotation = re.sub(r"ForwardRef\('([^']+)'\)", "\\1", annotation)
-        annotation = annotation.replace("'", '"')
+        # Handle ForwardRef
+        annotation = re.sub(r"ForwardRef\('([^']+)'\)", r"\1", annotation)
+        # Handle the simplest case: Union[NoneType] -> NoneType
+        annotation = re.sub(r"\bUnion\[\s*NoneType\s*\]", "NoneType", annotation)
+        # Handle Union[T, NoneType] -> Optional[T]
         annotation = re.sub(
-            r"Union\[(.*), NoneType\]", "Optional[Union[\\1]]", annotation
+            r"\bUnion\[\s*([^,\]]+)\s*,\s*NoneType\s*\]", r"Optional[\1]", annotation
         )
+        # Handle Union[NoneType, T] -> Optional[T]
+        annotation = re.sub(
+            r"\bUnion\[\s*NoneType\s*,\s*([^,\]]+)\s*\]", r"Optional[\1]", annotation
+        )
+        # Handle Union[A, B, ..., NoneType] -> Optional[Union[A, B, ...]]
+        annotation = re.sub(
+            r"\bUnion\[(.*?),\s*NoneType\s*\]", r"Optional[Union[\1]]", annotation
+        )
+        # Handle Union[NoneType, A, B, ...] -> Optional[Union[A, B, ...]]
+        annotation = re.sub(
+            r"\bUnion\[\s*NoneType\s*,\s*(.*?)\]", r"Optional[Union[\1]]", annotation
+        )
+        # Cleanup - If Step D/E resulted in Optional[Union[T]] where T has no comma, simplify it.
+        annotation = re.sub(
+            r"\bOptional\[\s*Union\[\s*([^,\]]+)\s*\]\s*\]", r"Optional[\1]", annotation
+        )
+        # Quote replacement
+        annotation = annotation.replace("'", '"')
+
         return annotation
 
     def _validate_params(
@@ -538,6 +565,12 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         # Use ensure_ascii=False to make sure all characters are properly represented
         json.dump(documentation, f, indent=2, ensure_ascii=False)
+
+    if parser.logger.has_errors():
+        print(
+            f"{Logger.RED}There were errors during the generation process. Please check the logs.{Logger.RESET}"
+        )
+        exit(1)
 
 
 if __name__ == "__main__":

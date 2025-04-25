@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Callable, Optional
 
-from abstra_internals.widgets.widget_base import Input
+from abstra_internals.interface.sdk.forms.deprecated.widgets.widget_base import Input
 
 if TYPE_CHECKING:
     from abstra_internals.interface.sdk.forms.deprecated.page import Page

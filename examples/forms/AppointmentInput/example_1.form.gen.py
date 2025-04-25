@@ -14,9 +14,8 @@ def generate_slots():
     Each slot is 45 minutes long, starting from 10:00 to 18:00 with a 15-minute interval.
     """
     slots = []
-    current_date = datetime(
-        2025, 1, 1
-    )  # Replace with datetime.now() for real-time usage
+    # Replace with datetime.now() for real-time usage
+    current_date = datetime(2025, 1, 1)
     max_date = current_date + timedelta(days=14)
     while current_date < max_date:
         if current_date.weekday() < 5:

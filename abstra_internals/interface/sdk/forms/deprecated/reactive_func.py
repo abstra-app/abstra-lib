@@ -1,5 +1,5 @@
 from abstra_internals.interface.sdk.forms.deprecated.page import Page
-from abstra_internals.widgets.widget_base import Input
+from abstra_internals.interface.sdk.forms.deprecated.widgets.widget_base import Input
 
 
 def reactive(func):

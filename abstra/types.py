@@ -1,9 +1,11 @@
-from abstra_internals.widgets.response_types import (
+from abstra_internals.interface.sdk.forms.deprecated.widgets.response_types import (
     AppointmentSlot,
     FileResponse,
     PhoneResponse,
 )
-from abstra_internals.widgets.widget_base import AbstraOption
+from abstra_internals.interface.sdk.forms.deprecated.widgets.widget_base import (
+    AbstraOption,
+)
 
 __all__ = [
     "AbstraOption",

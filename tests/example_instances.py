@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objs as go
 
-from abstra_internals.widgets.library import (
+from abstra_internals.interface.sdk.forms.deprecated.widgets.library import (
     AppointmentInput,
     CameraInput,
     CardsInput,
