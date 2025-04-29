@@ -331,6 +331,7 @@ def insert(table: str, values: Any):
     if isinstance(values, list):
         query, params = _make_insert_multiple_query(table, values)
         return _run(query, params)
+
     query, params = _make_insert_query(table, _make_row_dict(values))
     return _run(query, params)[0]
 

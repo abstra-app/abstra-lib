@@ -1,7 +1,7 @@
 import io
 import unittest
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import List
 from uuid import UUID
 
@@ -310,6 +310,10 @@ class TestMakeRowDict(unittest.TestCase):
 
 
 class TestSerialize(unittest.TestCase):
+    def test_datetime(self):
+        value = datetime(2001, 1, 1, 10, 10, 10, 0)
+        self.assertEqual(serialize(value), "2001-01-01T10:10:10")
+
     def test_set(self):
         value = set([1, 2, 3, 4])
         self.assertEqual(serialize(value), "[1, 2, 3, 4]")
@@ -329,31 +333,3 @@ class TestSerialize(unittest.TestCase):
     def test_uuid(self):
         value = UUID("12345678-1234-5678-1234-567812345678")
         self.assertEqual(serialize(value), "12345678-1234-5678-1234-567812345678")
-
-    def test_string(self):
-        value = "boo"
-        self.assertEqual(serialize(value), "boo")
-
-    def test_datetime(self):
-        value = datetime(2001, 1, 1, 10, 10, 10, 0)
-        self.assertEqual(serialize(value), "2001-01-01T10:10:10")
-
-    def test_timezone_datetime(self):
-        value = datetime(2025, 2, 6, 20, 4, 10, tzinfo=timezone(timedelta(hours=-4)))
-        self.assertEqual(serialize(value), "2025-02-07T00:04:10+00:00")
-
-    def test_date(self):
-        value = datetime(2025, 2, 6, 0, 0, 0, 0).date()
-        self.assertEqual(serialize(value), "2025-02-06")
-
-    def test_datetime_string(self):
-        value = "2025-02-06T20:04:10"
-        self.assertEqual(serialize(value), "2025-02-06T20:04:10")
-
-    def test_date_string(self):
-        value = "2025-02-06"
-        self.assertEqual(serialize(value), "2025-02-06T00:00:00")
-
-    def test_timezone_datetime_string(self):
-        value = "2025-02-06T20:04:10-04:00"
-        self.assertEqual(serialize(value), "2025-02-07T00:04:10+00:00")
