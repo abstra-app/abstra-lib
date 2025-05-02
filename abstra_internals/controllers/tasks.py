@@ -128,6 +128,11 @@ class TasksController:
         target_stage = self.get_stage(stage_id)
         tasks = self.repos.tasks.get_stage_tasks(stage_id)
 
+        tasks.sort(
+            key=lambda task: datetime.fromisoformat(task.created.at),
+            reverse=True,
+        )
+
         if not target_stage["title"]:
             raise Exception(f"Stage {stage_id} not found")
 
@@ -153,6 +158,11 @@ class TasksController:
             for task in all_tasks
             if task.created.by_execution_id is not None
         ]
+
+        tasks_with_executions.sort(
+            key=lambda task: datetime.fromisoformat(task[0].created.at),
+            reverse=True,
+        )
 
         return [
             ListTasksItem(
