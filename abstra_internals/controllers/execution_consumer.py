@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from abstra_internals.controllers.execution_process import ExecutionProcess
 from abstra_internals.controllers.main import MainController
-from abstra_internals.environment import QUEUE_CONCURRENCY
+from abstra_internals.environment import RABBITMQ_QUEUE_CONCURRENCY
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import Consumer, QueueMessage
 from abstra_internals.settings import Settings
@@ -54,7 +54,6 @@ def PreExecController(
 
         p.start()
         p.join(timeout=PROCESS_TIMEOUT)
-        consumer.done_callback(msg)
 
         if p.is_alive():
             p.terminate()
@@ -72,13 +71,15 @@ def PreExecController(
         controller.child_exit(
             app_id=arbiter_uuid, worker_id=worker_uuid, err_msg=f"[ABORTED] {e.args}"
         )
-        consumer.stop()
+    finally:
+        consumer.done_callback(msg)
 
 
 class Arbiter:
     def __init__(self, controller: MainController):
         self.controller = controller
         self.uuid = str(uuid4())
+        self.thread_pool = ThreadPoolExecutor(max_workers=RABBITMQ_QUEUE_CONCURRENCY)
 
     @property
     def head_id(self) -> str:
@@ -92,18 +93,24 @@ class Arbiter:
         AbstraLogger.debug(f"[{self.head_id}] ARBITER EXIT")
         self.controller.self_exit(app_id=self.uuid, err_msg="[ABORTED] Worker exited")
 
+    def submit(self, func, *args, **kwargs):
+        return self.thread_pool.submit(func, *args, **kwargs)
+
 
 def ExecutionConsumer(consumer: Consumer, controller: MainController):
-    with Arbiter(controller) as arbiter:
-        with ThreadPoolExecutor(max_workers=QUEUE_CONCURRENCY) as executor:
-            try:
-                for msg in consumer.iter():
-                    executor.submit(
+    try:
+        with Arbiter(controller) as arbiter:
+            for msg in consumer.iter():
+                try:
+                    arbiter.submit(
                         PreExecController,
                         arbiter_uuid=arbiter.uuid,
                         controller=controller,
                         consumer=consumer,
                         msg=msg,
                     )
-            except Exception as e:
-                AbstraLogger.capture_exception(e)
+                except Exception as e:
+                    consumer.done_callback(msg)
+                    AbstraLogger.capture_exception(e)
+    except Exception as e:
+        AbstraLogger.capture_exception(e)
