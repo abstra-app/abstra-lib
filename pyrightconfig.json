@@ -5,7 +5,8 @@
     "abstra_statics"
   ],
   "exclude": [
-    "tests/"
+    "tests/",
+    "abstra_internals/templates/new_form.py"
   ],
   "reportGeneralTypeIssues": "error",
   "reportMissingImports": true,

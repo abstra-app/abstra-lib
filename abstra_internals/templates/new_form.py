@@ -1,13 +1,25 @@
-import abstra.forms as af
+from abstra.forms import MarkdownOutput, TextInput, TextOutput, run
 from abstra.tasks import send_task
 
-# With Abstra Forms, it's easy to build user interfaces
-name = af.read("👋 Hello there! What is your name?")
+# A page is a list of widgets
+personal_details = [
+    TextInput("👋 Hello there! What is your name?", key="name"),
+]
+
+
+# A function returning a list of widgets is a reactive page
+def greeting_page(state):
+    name = state["name"]
+    return [
+        TextOutput(f"🎉 Welcome, {name}!"),
+        MarkdownOutput(
+            "Check out our [docs](https://abstra.io/docs/concepts/forms/) 📚"
+        ),
+    ]
+
+
+# Run the form with the defined pages
+state = run([personal_details, greeting_page])
 
 # You can send tasks to the next stages of your workflow
-send_task("greeting", {"name": name})
-
-# Different kinds of input and output widgets are available
-af.display(f"🎉 Welcome, {name}!")
-
-af.display_markdown("Check out our [docs](https://abstra.io/docs/concepts/forms/) 📚")
+send_task("greeting", {"name": state["name"]})
