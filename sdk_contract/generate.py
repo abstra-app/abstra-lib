@@ -184,7 +184,7 @@ class SDKContractParser:
         if not examples_dir_path.exists():
             return examples
 
-        for example_file in examples_dir_path.glob("*.gen.py"):
+        for example_file in sorted(list(examples_dir_path.glob("*.gen.py"))):
             with open(example_file, "r", encoding="utf-8") as f:
                 raw = f.read()
 
