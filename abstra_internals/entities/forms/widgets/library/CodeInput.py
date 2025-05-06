@@ -31,7 +31,7 @@ class CodeInput(InputWidget):
             label (str): Text label displayed above the input.
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
             required (bool): Whether the input must be filled before proceeding.
-            language (Optional[str]): Programming language for syntax highlighting.
+            language (Optional[str]): Programming language for syntax highlighting. Eg. 'python', 'javascript', 'html'.
             hint (Optional[str]): Help text displayed below the input.
             full_width (bool): Whether the input should take up the full width of its container.
             disabled (bool): Whether the input is non-interactive.

@@ -49,7 +49,7 @@ class is_null(Comparator):
 
 
 class is_eq(Comparator):
-    """Comparator for SQL equality operator (=).
+    """Comparator for SQL equality operator (`=`).
 
     Checks if a column value equals a specified value.
     """
@@ -77,7 +77,7 @@ class is_eq(Comparator):
 
 
 class is_neq(Comparator):
-    """Comparator for SQL inequality operator (<>).
+    """Comparator for SQL inequality operator (`<>`).
 
     Checks if a column value is not equal to a specified value.
     """

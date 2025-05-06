@@ -71,7 +71,8 @@ def get_trigger_task() -> Task:
 def iter_tasks(where: Optional[dict] = None) -> Iterator[Task]:
     """Iterate through all pending tasks, handling pagination automatically.
 
-    This function yields tasks in batches determined by BATCH_SIZE constant.
+    This function yields tasks preloads in batches of 10. It continues to fetch
+    and yield tasks until there are no more tasks to retrieve.
 
     Args:
         where (Optional[dict]): Dictionary of filters to apply. Defaults to None.

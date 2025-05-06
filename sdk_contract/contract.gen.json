@@ -1508,7 +1508,7 @@
           {
             "name": "language",
             "type": "Optional[str]",
-            "description": "Programming language for syntax highlighting.",
+            "description": "Programming language for syntax highlighting. Eg. 'python', 'javascript', 'html'.",
             "default": "None",
             "required": false
           },
@@ -6842,7 +6842,7 @@
     },
     "is_eq": {
       "object_type": "class",
-      "description": "Comparator for SQL equality operator (=). Checks if a column value equals a specified value.",
+      "description": "Comparator for SQL equality operator (`=`). Checks if a column value equals a specified value.",
       "init": {
         "params": [
           {
@@ -6861,7 +6861,7 @@
     },
     "is_neq": {
       "object_type": "class",
-      "description": "Comparator for SQL inequality operator (<>). Checks if a column value is not equal to a specified value.",
+      "description": "Comparator for SQL inequality operator (`<>`). Checks if a column value is not equal to a specified value.",
       "init": {
         "params": [
           {
@@ -7216,7 +7216,7 @@
     },
     "iter_tasks": {
       "object_type": "function",
-      "description": "Iterate through all pending tasks, handling pagination automatically. This function yields tasks in batches determined by BATCH_SIZE constant.",
+      "description": "Iterate through all pending tasks, handling pagination automatically. This function yields tasks preloads in batches of 10. It continues to fetch and yield tasks until there are no more tasks to retrieve.",
       "params": [
         {
           "name": "where",
