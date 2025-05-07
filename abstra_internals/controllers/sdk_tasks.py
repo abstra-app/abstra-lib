@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from abstra_internals.controllers.common.task_executors import TaskExecutor
 from abstra_internals.entities.execution import Execution
@@ -77,6 +77,12 @@ class Task:
         Get the data of the task.
         """
         return self._dto
+
+    def get(self, key: str, default: Optional[object] = None) -> object:
+        """
+        Get the value of a key in the task payload.
+        """
+        return self._dto.payload.get(key, default)
 
     def lock(self) -> None:
         """
