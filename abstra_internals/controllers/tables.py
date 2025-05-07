@@ -76,3 +76,6 @@ class TablesController:
 
     def create_column(self, table_id: str, name: str, type: str):
         return self.repos.tables.create_column(table_id, name, type)
+
+    def insert_row(self, table_id: str, row: dict):
+        return self.repos.tables.insert_row(table_id, row)

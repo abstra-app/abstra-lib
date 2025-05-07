@@ -31,4 +31,16 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
         created_column = controller.create_column(table_id, name, type)
         return created_column.to_dict()
 
+    @bp.post("/row")
+    def _insert_row():
+        if flask.request.json is None:
+            flask.abort(400)
+        table_id = flask.request.json.get("tableId")
+        row = flask.request.json.get("row")
+        if not table_id or not row:
+            flask.abort(400)
+        controller.insert_row(table_id, row)
+
+        return {"status": "ok"}
+
     return bp

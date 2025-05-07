@@ -76,7 +76,7 @@ class TablesApiHttpClient(abc.ABC):
     def create_column(self, table_id: str, name: str, type: str) -> ColumnDTO:
         raise NotImplementedError()
 
-    def insert_row(self, table_id: str, values: typing.List) -> requests.Response:
+    def insert_row(self, table_id: str, values: dict):
         raise NotImplementedError()
 
 
@@ -96,7 +96,7 @@ class ProductionTablesApiHttpClient(TablesApiHttpClient):
     def create_column(self, table_id: str, name: str, type: str) -> ColumnDTO:
         raise NotImplementedError()
 
-    def insert_row(self, table_id: str, values: typing.List) -> requests.Response:
+    def insert_row(self, table_id: str, values: dict):
         raise NotImplementedError()
 
 
@@ -157,5 +157,9 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)
 
-    def insert_row(self, table_id: str, values: typing.List) -> requests.Response:
-        raise NotImplementedError()
+    def insert_row(self, table_id: str, values: dict):
+        body = {
+            "tableId": table_id,
+            "row": values,
+        }
+        self._request("POST", "/row", body=body)
