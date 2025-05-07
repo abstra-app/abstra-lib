@@ -44,7 +44,7 @@ class PandasOutput(OutputWidget):
         """
         self.label = label
         self.key = key
-        self.df = df
+        self.df = df.reset_index(drop=True) if df is not None else None
         self.actions = actions
         self.full_width = full_width
         self.display_index = display_index

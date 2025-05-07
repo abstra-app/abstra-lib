@@ -23,6 +23,10 @@ class PandasRowSelectionInput(Input):
 
     def set_props(self, props):
         self.df = props.get("df", "")
+        try:
+            self.df = self.df.reset_index(drop=True)
+        except Exception:
+            pass
         self.required = props.get("required", True)
         self.hint = props.get("hint", None)
         self.full_width = props.get("full_width", True)

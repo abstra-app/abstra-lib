@@ -60,7 +60,7 @@ class PandasRowSelectionInput(InputWidget):
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
             pagination_always_visible (bool): Whether pagination controls are always visible.
         """
-        self.df = df
+        self.df = df.reset_index(drop=True) if df is not None else None
         self.key = key or label
         self.required = required
         self.hint = hint
