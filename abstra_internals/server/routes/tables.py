@@ -43,4 +43,25 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
 
         return {"status": "ok"}
 
+    @bp.patch("/table/<table_id>")
+    def _update_table(table_id):
+        if flask.request.json is None:
+            flask.abort(400)
+        name = flask.request.json.get("name")
+        if not name:
+            flask.abort(400)
+        updated_table = controller.update_table(table_id, name)
+        return updated_table.to_dict()
+
+    @bp.patch("/column/<column_id>")
+    def _update_column(column_id):
+        if flask.request.json is None:
+            flask.abort(400)
+        table_id = flask.request.json.get("tableId")
+        changes = flask.request.json.get("changes")
+        if not table_id:
+            flask.abort(400)
+        updated_column = controller.update_column(column_id, table_id, changes)
+        return updated_column.to_dict()
+
     return bp

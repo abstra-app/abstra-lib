@@ -79,6 +79,12 @@ class TablesApiHttpClient(abc.ABC):
     def insert_row(self, table_id: str, values: dict):
         raise NotImplementedError()
 
+    def update_table(self, table_id: str, name: str) -> TableDTO:
+        raise NotImplementedError()
+
+    def update_column(self, column_id: str, table_id: str, changes: dict) -> ColumnDTO:
+        raise NotImplementedError()
+
 
 class ProductionTablesApiHttpClient(TablesApiHttpClient):
     def execute(self, query: str, params: typing.List) -> requests.Response:
@@ -97,6 +103,12 @@ class ProductionTablesApiHttpClient(TablesApiHttpClient):
         raise NotImplementedError()
 
     def insert_row(self, table_id: str, values: dict):
+        raise NotImplementedError()
+
+    def update_table(self, table_id: str, name: str) -> TableDTO:
+        raise NotImplementedError()
+
+    def update_column(self, column_id: str, table_id: str, changes: dict) -> ColumnDTO:
         raise NotImplementedError()
 
 
@@ -163,3 +175,20 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
             "row": values,
         }
         self._request("POST", "/row", body=body)
+
+    def update_table(self, table_id: str, name: str) -> TableDTO:
+        body = {
+            "name": name,
+        }
+        r = self._request("PATCH", f"/table/{table_id}", body=body)
+        table = r.json()["response"]
+        return TableDTO.from_dict(table)
+
+    def update_column(self, column_id: str, table_id: str, changes: dict) -> ColumnDTO:
+        body = {
+            "tableId": table_id,
+            "changes": changes,
+        }
+        r = self._request("PATCH", f"column/{column_id}", body=body)
+        column = r.json()["response"]
+        return ColumnDTO.from_dict(column)

@@ -79,3 +79,9 @@ class TablesController:
 
     def insert_row(self, table_id: str, row: dict):
         return self.repos.tables.insert_row(table_id, row)
+
+    def update_table(self, table_id: str, name: str):
+        return self.repos.tables.update_table(table_id, name)
+
+    def update_column(self, column_id: str, table_id: str, changes: dict):
+        return self.repos.tables.update_column(column_id, table_id, changes)
