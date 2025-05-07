@@ -5,7 +5,7 @@ from typing import List, Literal, Union
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 Kind = Literal["passwordless", "task-waiting", "message"]
 
@@ -81,7 +81,10 @@ class ProductionEmailRepository(EmailRepository):
 
     def send(self, param: EmailParams):
         requests.post(
-            self.base_url, json=param.to_dict(), headers=SIDECAR_HEADERS
+            self.base_url,
+            json=param.to_dict(),
+            headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         ).raise_for_status()
 
 
@@ -96,7 +99,10 @@ class LocalEmailRepository(EmailRepository):
         if headers is None:
             raise Exception("You must be logged in to send an email")
         requests.post(
-            self.base_url, json=param.to_dict(), headers=headers
+            self.base_url,
+            json=param.to_dict(),
+            headers=headers,
+            timeout=REQUEST_TIMEOUT,
         ).raise_for_status()
 
 

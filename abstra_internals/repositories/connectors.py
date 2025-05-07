@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 @dataclass
@@ -30,7 +30,9 @@ class ConnectorsRepository(abc.ABC):
 
     def get_access_token(self, connection_name: str) -> AccessTokenDTO:
         response = requests.get(
-            self.get_access_token_url(connection_name), headers=self.get_headers()
+            self.get_access_token_url(connection_name),
+            headers=self.get_headers(),
+            timeout=REQUEST_TIMEOUT,
         )
         response.raise_for_status()
         return AccessTokenDTO(**response.json())

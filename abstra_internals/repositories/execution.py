@@ -6,7 +6,12 @@ import requests
 from pydantic.dataclasses import dataclass
 
 from abstra_internals.entities.execution import Execution, ExecutionStatus
-from abstra_internals.environment import SERVER_UUID, SIDECAR_HEADERS, WORKER_UUID
+from abstra_internals.environment import (
+    REQUEST_TIMEOUT,
+    SERVER_UUID,
+    SIDECAR_HEADERS,
+    WORKER_UUID,
+)
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.utils.dot_abstra import EXECUTIONS_FOLDER
 from abstra_internals.utils.file_manager import FileManager
@@ -194,6 +199,7 @@ class ProductionExecutionRepository(ExecutionRepository):
             f"{self.url}/executions",
             json=request_dto,
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -208,6 +214,7 @@ class ProductionExecutionRepository(ExecutionRepository):
             f"{self.url}/executions/{execution.id}",
             json=request_dto,
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -217,6 +224,7 @@ class ProductionExecutionRepository(ExecutionRepository):
             f"{self.url}/executions/{execution_id}",
             json=dict(status="failed"),
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -232,6 +240,7 @@ class ProductionExecutionRepository(ExecutionRepository):
                 workerId=worker_id,
             ),
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -248,6 +257,7 @@ class ProductionExecutionRepository(ExecutionRepository):
                 status=status,
             ),
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()

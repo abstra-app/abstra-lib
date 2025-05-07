@@ -7,7 +7,12 @@ import flask
 import requests
 
 from abstra_internals.credentials import get_credentials
-from abstra_internals.environment import CLOUD_API_CLI_URL, SIDECAR_HEADERS, SIDECAR_URL
+from abstra_internals.environment import (
+    CLOUD_API_CLI_URL,
+    REQUEST_TIMEOUT,
+    SIDECAR_HEADERS,
+    SIDECAR_URL,
+)
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.threaded import threaded
 from abstra_internals.utils import get_local_python_version, get_local_user_id
@@ -30,7 +35,7 @@ def send_editor_usage(payload: Dict):
 
     headers = {"apiKey": get_credentials()}
     api_url = f"{CLOUD_API_CLI_URL}/editor/usage"
-    requests.post(api_url, json=data, headers=headers)
+    requests.post(api_url, json=data, headers=headers, timeout=REQUEST_TIMEOUT)
 
 
 def editor_usage(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -60,7 +65,12 @@ def send_player_usage(*, event: str, payload: Dict, auth: Optional[str] = None):
         if claims := UserClaims.from_jwt(auth.split(" ")[1]):
             body["email"] = claims.email
 
-    requests.post(f"{SIDECAR_URL}/usage/event", headers=SIDECAR_HEADERS, json=body)
+    requests.post(
+        f"{SIDECAR_URL}/usage/event",
+        headers=SIDECAR_HEADERS,
+        json=body,
+        timeout=REQUEST_TIMEOUT,
+    )
 
 
 def player_usage(func: Callable[..., Any]) -> Callable[..., Any]:

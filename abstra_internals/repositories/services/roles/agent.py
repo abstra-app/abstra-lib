@@ -3,7 +3,7 @@ from typing import TypedDict, Union
 import requests
 
 from abstra_internals.entities.agents import ConnectionModel
-from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
+from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 
@@ -18,7 +18,7 @@ class RoleAgentRepository(RoleCommonRepository):
         headers = self.get_headers()
         assert headers is not None, "You should be logged in to get connections"
         url = f"{self.base_url}/connections"
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
         if not response.ok:
             raise Exception(response.text)
         self._cached_connections = [
@@ -72,7 +72,9 @@ class RoleAgentRepository(RoleCommonRepository):
                 ae.to_camel() for ae in project.get_agent_entrypoints()
             ],
         }
-        response = requests.post(url, headers=headers, json=body)
+        response = requests.post(
+            url, headers=headers, json=body, timeout=REQUEST_TIMEOUT
+        )
         if not response.ok:
             raise Exception(response.text)
         self.fetch_connections()  # Refresh the cache
@@ -91,7 +93,9 @@ class RoleAgentRepository(RoleCommonRepository):
             "token": connection_token,
             "clientTaskUrl": client_tasks_url,
         }
-        response = requests.patch(url, headers=headers, json=body)
+        response = requests.patch(
+            url, headers=headers, json=body, timeout=REQUEST_TIMEOUT
+        )
 
         if not response.ok:
             error_message = (
@@ -115,7 +119,9 @@ class RoleAgentRepository(RoleCommonRepository):
         body = {
             "tokens": [connection_token],
         }
-        response = requests.delete(url, headers=headers, json=body)
+        response = requests.delete(
+            url, headers=headers, json=body, timeout=REQUEST_TIMEOUT
+        )
         response.raise_for_status()
         self.fetch_connections()
 

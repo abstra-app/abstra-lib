@@ -5,7 +5,7 @@ import requests
 from abstra_internals.email_templates import task_waiting_template
 from abstra_internals.entities.execution import Execution, PreExecution
 from abstra_internals.entities.execution_context import ScriptContext
-from abstra_internals.environment import IS_PRODUCTION
+from abstra_internals.environment import IS_PRODUCTION, REQUEST_TIMEOUT
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
     AgentStage,
@@ -97,6 +97,7 @@ class TaskExecutor:
                         ),
                     },
                     headers={"authorization": conn.token},
+                    timeout=REQUEST_TIMEOUT,
                 ).raise_for_status()
 
             elif isinstance(stage, ClientStage):
@@ -109,6 +110,7 @@ class TaskExecutor:
                     conn.client_task_url,
                     json=task.model_dump(),
                     headers={"Authorization": conn.token},
+                    timeout=REQUEST_TIMEOUT,
                 ).raise_for_status()
 
     def _send_waiting_thread_notification(self, task: TaskDTO):

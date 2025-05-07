@@ -11,7 +11,7 @@ from abstra_internals.entities.agents import (
     ConnectionModel,
     SignProofResponse,
 )
-from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
+from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 from abstra_internals.settings import Settings
@@ -92,6 +92,7 @@ class RoleClientRepository(RoleCommonRepository):
                 clientProjectId=client_project_id,
                 agentProjectId=agent_project_id,
             ),
+            timeout=REQUEST_TIMEOUT,
         )
         if not response.ok:
             raise Exception(response.text)
@@ -134,6 +135,7 @@ class RoleClientRepository(RoleCommonRepository):
                 agent_stage_id=agent_stage_id,
                 client_stage_id=client_stage_id,
             ),
+            timeout=REQUEST_TIMEOUT,
         )
 
         response.raise_for_status()
@@ -155,6 +157,7 @@ class RoleClientRepository(RoleCommonRepository):
             json=dict(
                 client_tasks_url=client_tasks_url,
             ),
+            timeout=REQUEST_TIMEOUT,
         )
 
         if not response.ok:
@@ -198,6 +201,7 @@ class RoleClientRepository(RoleCommonRepository):
             headers={
                 "Authorization": connection.token,
             },
+            timeout=REQUEST_TIMEOUT,
         )
         response.raise_for_status()
         self._cached_connections = [
@@ -213,7 +217,9 @@ class RoleClientRepository(RoleCommonRepository):
             headers = self.get_headers()
             assert headers is not None, "You should be logged in to get agents"
             url = f"{self.base_url}/agents"
-            response = requests.get(url, headers=headers, params={"ids": ids})
+            response = requests.get(
+                url, headers=headers, params={"ids": ids}, timeout=REQUEST_TIMEOUT
+            )
             if not response.ok:
                 raise Exception(response.text)
             agents = [AgentModel.model_validate(agent) for agent in response.json()]
@@ -226,7 +232,7 @@ class RoleClientRepository(RoleCommonRepository):
     def get_entrypoints(self, project_id: str) -> List[AgentEntrypoint]:
         agent = self.get_agent(project_id)
         url = agent.tasks_url + "/agent/entrypoints"
-        res = requests.get(url)
+        res = requests.get(url, timeout=REQUEST_TIMEOUT)
         res.raise_for_status()
         return [AgentEntrypoint.model_validate(e) for e in res.json()]
 

@@ -5,7 +5,7 @@ import requests
 
 from abstra_internals.contracts_generated import CommonUser, CommonUserRoles
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 class UsersRepository(ABC):
@@ -76,6 +76,7 @@ class ProductionUsersRepository(UsersRepository):
             headers=SIDECAR_HEADERS,
             json=body,
             params=params,
+            timeout=REQUEST_TIMEOUT,
         )
 
         if raise_for_status:

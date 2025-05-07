@@ -5,7 +5,7 @@ import requests
 
 from abstra_internals.contracts_generated import CommonTablesSnapshot
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import CLOUD_API_CLI_URL
+from abstra_internals.environment import CLOUD_API_CLI_URL, REQUEST_TIMEOUT
 from abstra_internals.interface.cli.tables.format import tables_snapshot_from_csv
 from abstra_internals.interface.cli.tables_messages import (
     bad_json_error_message,
@@ -24,7 +24,7 @@ def dump():
     headers = resolve_headers()
     url = f"{CLOUD_API_CLI_URL}/tables/dump"
     try:
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
         res.raise_for_status()
         res_json = res.json()
         json_str = json.dumps(res_json, indent=2)
@@ -73,7 +73,12 @@ def restore(dry_run: bool = False, file=ABSTRA_TABLES_FILE):
                     print(f"    Foreign Key: {column.foreign_key}")
         else:
             print(parsed_data.to_dict())
-            res = requests.post(url, json=parsed_data.to_dict(), headers=headers)
+            res = requests.post(
+                url,
+                json=parsed_data.to_dict(),
+                headers=headers,
+                timeout=REQUEST_TIMEOUT,
+            )
             if res.status_code == 400:
                 print(res.text)
                 zod_error_message(file_path)

@@ -4,7 +4,7 @@ from typing import TypedDict, Union
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 class TokenValidationResult(TypedDict):
@@ -29,6 +29,7 @@ class AgentsRepository(abc.ABC):
             json={
                 "token": token,
             },
+            timeout=REQUEST_TIMEOUT,
         )
         if not response.ok:
             return {
@@ -55,6 +56,7 @@ class AgentsRepository(abc.ABC):
             json={
                 "token": token,
             },
+            timeout=REQUEST_TIMEOUT,
         )
         response.raise_for_status()
 
@@ -62,14 +64,18 @@ class AgentsRepository(abc.ABC):
 
     def get_agent_connections(self):
         url = f"{self.url}/connections"
-        response = requests.get(url, headers=self.get_headers())
+        response = requests.get(
+            url, headers=self.get_headers(), timeout=REQUEST_TIMEOUT
+        )
         response.raise_for_status()
         return response.json()
 
     def get_is_usage_mode(self):
         try:
             url = f"{self.url}/is_usage_mode"
-            response = requests.get(url, headers=self.get_headers())
+            response = requests.get(
+                url, headers=self.get_headers(), timeout=REQUEST_TIMEOUT
+            )
             response.raise_for_status()
             return {"is_usage_mode": response.json()}
         except Exception:

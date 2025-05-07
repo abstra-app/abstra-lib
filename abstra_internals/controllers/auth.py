@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 import requests
 
 from abstra_internals.email_templates import authn_template
-from abstra_internals.environment import OIDC_AUTHORITY
+from abstra_internals.environment import OIDC_AUTHORITY, REQUEST_TIMEOUT
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.jwt_signer import JWTRepository
@@ -24,7 +24,10 @@ def get_oidc_userinfo_email(access_token: str) -> typing.Optional[str]:
     if not OIDC_AUTHORITY():
         raise ValueError("[OIDC] OIDC_AUTHORITY is not set")
 
-    r = requests.get(f"{OIDC_AUTHORITY()}/.well-known/openid-configuration")
+    r = requests.get(
+        f"{OIDC_AUTHORITY()}/.well-known/openid-configuration",
+        timeout=REQUEST_TIMEOUT,
+    )
     if not r.ok:
         raise ValueError("[OIDC] Failed to fetch OIDC configuration")
 
@@ -33,7 +36,9 @@ def get_oidc_userinfo_email(access_token: str) -> typing.Optional[str]:
         raise ValueError("[OIDC] userinfo_endpoint not found in OIDC configuration")
 
     r = requests.get(
-        userinfo_endpoint, headers={"Authorization": f"Bearer {access_token}"}
+        userinfo_endpoint,
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=REQUEST_TIMEOUT,
     )
     if not r.ok:
         return None

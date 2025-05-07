@@ -19,6 +19,7 @@ from abstra_internals.environment import (
     HOST,
     IS_PRODUCTION,
     PROJECT_ID,
+    REQUEST_TIMEOUT,
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
@@ -27,7 +28,7 @@ from abstra_internals.utils import packages as pkg_utils
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:
     url = f"{CLOUD_API_CLI_URL}/builds"
-    r = requests.post(url=url, headers=headers)
+    r = requests.post(url=url, headers=headers, timeout=REQUEST_TIMEOUT)
     if not r.ok:
         raise Exception(f"Failed to create build: {r.text}")
 
@@ -37,13 +38,15 @@ def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:
 
 def update_build(build_id: str, headers: dict, error: Optional[str] = None):
     url = f"{CLOUD_API_CLI_URL}/builds/{build_id}"
-    requests.patch(url=url, headers=headers, json=dict(error=error)).raise_for_status()
+    requests.patch(
+        url=url, headers=headers, json=dict(error=error), timeout=REQUEST_TIMEOUT
+    ).raise_for_status()
 
 
 def get_api_key_info(headers: dict) -> dict:
     url = f"{CLOUD_API_CLI_URL}/api-keys/info"
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
     except Exception as e:
         AbstraLogger.capture_exception(e)
         return {"logged": False, "reason": "CONNECTION_ERROR"}
@@ -88,28 +91,35 @@ def get_ai_messages(
 def generate_project(prompt: str, abstra_json_version: str, headers: dict):
     url = f"{CLOUD_API_CLI_URL}/ai/generate"
     body = {"prompt": prompt, "version": abstra_json_version}
-    r = requests.post(url, headers=headers, json=body)
+    r = requests.post(url, headers=headers, json=body, timeout=REQUEST_TIMEOUT)
     r.raise_for_status()
     return r.json()
 
 
 def get_history(headers: dict, limit: int, offset: int):
     url = f"{CLOUD_API_CLI_URL}/ai/history"
-    r = requests.get(url, headers=headers, params={"limit": limit, "offset": offset})
+    r = requests.get(
+        url,
+        headers=headers,
+        params={"limit": limit, "offset": offset},
+        timeout=REQUEST_TIMEOUT,
+    )
     r.raise_for_status()
     return r.json()
 
 
 def create_thread(headers: dict):
     url = f"{CLOUD_API_CLI_URL}/ai/thread"
-    r = requests.post(url, headers=headers)
+    r = requests.post(url, headers=headers, timeout=REQUEST_TIMEOUT)
     r.raise_for_status()
     return r.json()
 
 
 def cancel_all(headers: dict, thread_id: str):
     url = f"{CLOUD_API_CLI_URL}/ai/cancel-all"
-    r = requests.post(url, headers=headers, json={"threadId": thread_id})
+    r = requests.post(
+        url, headers=headers, json={"threadId": thread_id}, timeout=REQUEST_TIMEOUT
+    )
     r.raise_for_status()
 
 
@@ -118,7 +128,7 @@ def get_project_info(headers: dict, project_id: Optional[str] = None):
         url = f"{CLOUD_API_CLI_URL}/project/{project_id}"
     else:
         url = f"{CLOUD_API_CLI_URL}/project"
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
     r.raise_for_status()
     return r.json()
 
@@ -200,6 +210,7 @@ def connect_tunnel(on_public_url_update: Optional[Callable[[], None]]):
                         response = requests.request(
                             request.method,
                             f"http://{HOST}:{Settings.server_port}{request.path}",
+                            timeout=REQUEST_TIMEOUT,
                             **kwargs,
                         )
                         response_json = TunnelResponse(

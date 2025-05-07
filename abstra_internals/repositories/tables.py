@@ -6,7 +6,7 @@ from typing import Any, Optional
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 @dataclass
@@ -83,7 +83,12 @@ class TablesApiHttpClient(abc.ABC):
 class ProductionTablesApiHttpClient(TablesApiHttpClient):
     def execute(self, query: str, params: typing.List) -> requests.Response:
         body = {"query": query, "params": params}
-        return requests.post(self.execute_url, headers=SIDECAR_HEADERS, json=body)
+        return requests.post(
+            self.execute_url,
+            headers=SIDECAR_HEADERS,
+            json=body,
+            timeout=REQUEST_TIMEOUT,
+        )
 
     def create_table(self, id: str, name: str) -> TableDTO:
         raise NotImplementedError()
@@ -113,6 +118,7 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
             headers=headers,
             json=body,
             params=params,
+            timeout=REQUEST_TIMEOUT,
         )
 
         if raise_for_status:
@@ -125,7 +131,9 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
         headers = resolve_headers()
         if headers is None:
             raise Exception("You must be logged in to execute a table query")
-        return requests.post(self.execute_url, headers=headers, json=body)
+        return requests.post(
+            self.execute_url, headers=headers, json=body, timeout=REQUEST_TIMEOUT
+        )
 
     def create_table(self, id: str, name: str) -> TableDTO:
         r = self._request(

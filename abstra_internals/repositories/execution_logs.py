@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 import requests
 
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.serializer import SerializationHelper
 from abstra_internals.threaded import threaded
@@ -167,6 +167,7 @@ class ProductionExecutionLogsRepository(ExecutionLogsRepository):
             f"{self.url}/executions/{log_entry.execution_id}/logs",
             json=dto,
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -180,6 +181,7 @@ class ProductionExecutionLogsRepository(ExecutionLogsRepository):
             f"{self.url}/executions/{execution_id}/logs",
             params={"event": event} if event else None,
             headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         response.raise_for_status()

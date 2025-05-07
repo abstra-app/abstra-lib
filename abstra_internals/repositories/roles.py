@@ -5,6 +5,7 @@ import requests
 
 from abstra_internals.contracts_generated import CommonRole
 from abstra_internals.credentials import resolve_headers
+from abstra_internals.environment import REQUEST_TIMEOUT
 
 
 class RolesRepository(ABC):
@@ -25,7 +26,9 @@ class LocalRolesRepository(RolesRepository):
         if not self.headers:
             return []
 
-        response = requests.get(f"{self.url}/roles", headers=self.headers)
+        response = requests.get(
+            f"{self.url}/roles", headers=self.headers, timeout=REQUEST_TIMEOUT
+        )
         return [CommonRole.from_dict(role) for role in response.json()]
 
 

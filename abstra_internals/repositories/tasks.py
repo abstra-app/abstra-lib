@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import requests
 
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.utils.datetime import to_utc_iso_string
 from abstra_internals.utils.dot_abstra import TASKS_FOLDER
@@ -278,6 +278,7 @@ class ProductionTasksRepository(TasksRepository):
             headers=headers,
             json=body,
             params=params,
+            timeout=REQUEST_TIMEOUT,
         )
 
         if raise_for_status:

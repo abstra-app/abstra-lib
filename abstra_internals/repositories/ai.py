@@ -5,7 +5,7 @@ from typing import Any, List
 import requests
 
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 class AiApiHttpClient(ABC):
@@ -25,7 +25,10 @@ class ProductionAiApiHttpClient(AiApiHttpClient):
             "temperature": temperature,
         }
         response = requests.post(
-            f"{self.url}/prompt", headers=SIDECAR_HEADERS, json=body
+            f"{self.url}/prompt",
+            headers=SIDECAR_HEADERS,
+            json=body,
+            timeout=REQUEST_TIMEOUT,
         )
         try:
             response = response.json()
@@ -44,7 +47,9 @@ class LocalAiApiHttpClient(AiApiHttpClient):
         headers = resolve_headers()
         if headers is None:
             raise Exception("You must be logged in to use AI")
-        response = requests.post(f"{self.url}/prompt", headers=headers, json=body)
+        response = requests.post(
+            f"{self.url}/prompt", headers=headers, json=body, timeout=REQUEST_TIMEOUT
+        )
         try:
             response = response.json()
             return response

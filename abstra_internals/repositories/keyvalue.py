@@ -2,7 +2,7 @@ import abc
 
 import requests
 
-from abstra_internals.environment import SIDECAR_HEADERS
+from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 class KVRepository(abc.ABC):
@@ -23,7 +23,9 @@ class ProductionKVRepository(KVRepository):
         self.base_url = sidecar_url + "/kv"
 
     def get(self, key: str):
-        r = requests.get(f"{self.base_url}/{key}", headers=SIDECAR_HEADERS)
+        r = requests.get(
+            f"{self.base_url}/{key}", headers=SIDECAR_HEADERS, timeout=REQUEST_TIMEOUT
+        )
         if not r.ok:
             return None
 
@@ -31,12 +33,15 @@ class ProductionKVRepository(KVRepository):
 
     def delete(self, key: str):
         requests.delete(
-            f"{self.base_url}/{key}", headers=SIDECAR_HEADERS
+            f"{self.base_url}/{key}", headers=SIDECAR_HEADERS, timeout=REQUEST_TIMEOUT
         ).raise_for_status()
 
     def set(self, key: str, value: str):
         requests.put(
-            f"{self.base_url}/{key}", json=dict(value=value), headers=SIDECAR_HEADERS
+            f"{self.base_url}/{key}",
+            json=dict(value=value),
+            headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         ).raise_for_status()
 
 

@@ -6,7 +6,7 @@ from typing import Optional
 import jwt
 import requests
 
-from abstra_internals.environment import PROJECT_ID, SIDECAR_HEADERS
+from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
 from abstra_internals.jwt_auth import decode_jwt
 from abstra_internals.utils import generate_n_digit_code
 
@@ -30,7 +30,10 @@ class ProductionJWTRepository(JWTRepository):
 
     def sign(self, email: str):
         r = requests.post(
-            self.base_url, json=dict(email=email), headers=SIDECAR_HEADERS
+            self.base_url,
+            json=dict(email=email),
+            headers=SIDECAR_HEADERS,
+            timeout=REQUEST_TIMEOUT,
         )
 
         if not r.ok:
