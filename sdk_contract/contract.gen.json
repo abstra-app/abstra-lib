@@ -6920,7 +6920,7 @@
     },
     "is_gt": {
       "object_type": "class",
-      "description": "Comparator for SQL greater than operator (>). Checks if a column value is greater than a specified value.",
+      "description": "Comparator for SQL greater than operator (`>`). Checks if a column value is greater than a specified value.",
       "init": {
         "params": [
           {
@@ -6965,7 +6965,7 @@
     },
     "is_gte": {
       "object_type": "class",
-      "description": "Comparator for SQL greater than or equal operator (>=). Checks if a column value is greater than or equal to a specified value.",
+      "description": "Comparator for SQL greater than or equal operator (`>=`). Checks if a column value is greater than or equal to a specified value.",
       "init": {
         "params": [
           {
@@ -7003,7 +7003,7 @@
     },
     "is_lt": {
       "object_type": "class",
-      "description": "Comparator for SQL less than operator (<). Checks if a column value is less than a specified value.",
+      "description": "Comparator for SQL less than operator (`<`). Checks if a column value is less than a specified value.",
       "init": {
         "params": [
           {
@@ -7041,7 +7041,7 @@
     },
     "is_lte": {
       "object_type": "class",
-      "description": "Comparator for SQL less than or equal operator (<=). Checks if a column value is less than or equal to a specified value.",
+      "description": "Comparator for SQL less than or equal operator (`<=`). Checks if a column value is less than or equal to a specified value.",
       "init": {
         "params": [
           {

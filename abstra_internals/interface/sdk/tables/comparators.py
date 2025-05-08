@@ -105,7 +105,7 @@ class is_neq(Comparator):
 
 
 class is_gt(Comparator):
-    """Comparator for SQL greater than operator (>).
+    """Comparator for SQL greater than operator (`>`).
 
     Checks if a column value is greater than a specified value.
     """
@@ -133,7 +133,7 @@ class is_gt(Comparator):
 
 
 class is_gte(Comparator):
-    """Comparator for SQL greater than or equal operator (>=).
+    """Comparator for SQL greater than or equal operator (`>=`).
 
     Checks if a column value is greater than or equal to a specified value.
     """
@@ -161,7 +161,7 @@ class is_gte(Comparator):
 
 
 class is_lt(Comparator):
-    """Comparator for SQL less than operator (<).
+    """Comparator for SQL less than operator (`<`).
 
     Checks if a column value is less than a specified value.
     """
@@ -189,7 +189,7 @@ class is_lt(Comparator):
 
 
 class is_lte(Comparator):
-    """Comparator for SQL less than or equal operator (<=).
+    """Comparator for SQL less than or equal operator (`<=`).
 
     Checks if a column value is less than or equal to a specified value.
     """
