@@ -29,6 +29,7 @@ DISABLE_STDIO_PATCH = os.getenv("ABSTRA_DISABLE_STDIO_PATCH", "false") == "true"
 
 CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
+WAITING_ROOM_URL = os.getenv("ABSTRA_WAITING_ROOM_URL") or ""
 
 PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
 FILES_FOLDER = os.getenv("ABSTRA_FILES_FOLDER")

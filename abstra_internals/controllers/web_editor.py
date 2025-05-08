@@ -2,6 +2,8 @@ from typing import Optional
 
 import flask
 
+from abstra_internals.contracts_generated import AbstraLibApiEditorWebEditorResponse
+from abstra_internals.environment import WAITING_ROOM_URL
 from abstra_internals.repositories.jwt_signer import EditorJWTRepository
 
 
@@ -11,6 +13,9 @@ class WebEditorController:
         editor_jwt: EditorJWTRepository,
     ) -> None:
         self.jwt = editor_jwt
+
+    def inspect(self) -> AbstraLibApiEditorWebEditorResponse:
+        return AbstraLibApiEditorWebEditorResponse(waiting_room_url=WAITING_ROOM_URL)
 
     def welcome(self, token: Optional[str]):
         if not token:

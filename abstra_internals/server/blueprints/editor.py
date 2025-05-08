@@ -105,6 +105,9 @@ def __get_api_bp(controller: MainController):
     agents_bp = agents_router.get_editor_bp(controller)
     bp.register_blueprint(agents_bp, url_prefix="/agents")
 
+    web_editor_bp = web_editor_router.get_web_editor_bp(controller)
+    bp.register_blueprint(web_editor_bp, url_prefix="/web-editor")
+
     guard = web_editor_router.get_editor_api_guard(controller)
     bp.before_request(guard)
 
@@ -116,9 +119,6 @@ def get_editor_bp(controller: MainController):
 
     api_bp = __get_api_bp(controller)
     bp.register_blueprint(api_bp, url_prefix="/api")
-
-    web_editor_bp = web_editor_router.get_web_editor_bp(controller)
-    bp.register_blueprint(web_editor_bp, url_prefix="/web-editor")
 
     @bp.get("/")
     @editor_usage

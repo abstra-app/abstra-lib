@@ -16,6 +16,10 @@ def get_web_editor_bp(main_controller: MainController):
 
         return editorAuthController.welcome(data["token"])
 
+    @bp.get("/")
+    def _inspect():
+        return editorAuthController.inspect().to_dict()
+
     return bp
 
 
