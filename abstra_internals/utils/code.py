@@ -1,7 +1,10 @@
 import ast
 import inspect
 import textwrap
+from pathlib import Path
 from typing import Callable, List, Optional
+
+from abstra_internals.utils.ast_cache import ASTCache
 
 
 class UsageVisitor(ast.NodeVisitor):
@@ -74,18 +77,18 @@ class SubscriptVisitor(UsageVisitor):
 
 
 def function_called_args(
-    code: str, package_path: List[str], function_name: str
+    path: Path, package_path: List[str], function_name: str
 ) -> Optional[List[List[ast.expr]]]:
-    tree = ast.parse(code)
+    tree = ASTCache.get(path)
     visitor = FunctionCallVisitor(package_path, function_name)
     visitor.visit(tree)
     return visitor.args if visitor.args else None
 
 
 def subscript_called_args(
-    code: str, package_path: List[str], object_name: str
+    path: Path, package_path: List[str], object_name: str
 ) -> Optional[List[List[ast.expr]]]:
-    tree = ast.parse(code)
+    tree = ASTCache.get(path)
     visitor = SubscriptVisitor(package_path, object_name)
     visitor.visit(tree)
     return visitor.args if visitor.args else None

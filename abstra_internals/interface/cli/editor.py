@@ -8,7 +8,8 @@ from abstra_internals.controllers.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST
-from abstra_internals.fs_watcher import run_watcher
+from abstra_internals.file_handlers import FileHandler
+from abstra_internals.file_watcher import FileChangeWatcher
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import EditorConsumer
@@ -40,11 +41,11 @@ def start_consumer(controller: MainController):
     return consumer, th
 
 
-def start_file_watcher():
+def start_file_watcher(watcher: FileChangeWatcher):
     threading.Thread(
         daemon=True,
         name="file_watcher",
-        target=run_watcher,
+        target=watcher.run,
     ).start()
 
 
@@ -66,7 +67,13 @@ def editor(headless: bool):
     controller.reset_repositories()
     StdioPatcher.apply(controller)
 
-    start_file_watcher()
+    watcher = FileChangeWatcher()
+    file_handler = FileHandler(controller)
+    watcher.add_handler(file_handler.env_var_handler)
+    watcher.add_handler(file_handler.python_files_handler)
+    watcher.add_handler(file_handler.all_files_handler)
+
+    start_file_watcher(watcher)
     start_resources_watcher()
     start_consumer(controller)
 

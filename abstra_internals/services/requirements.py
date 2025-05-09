@@ -16,6 +16,7 @@ from pkg_resources import get_distribution, working_set
 
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
+from abstra_internals.utils.ast_cache import ASTCache
 from abstra_internals.utils.format import pip_name
 
 install_lock = threading.Lock()
@@ -98,7 +99,7 @@ class Requirement:
         else:
             yield from self.__uninstall_from_lib()
 
-        working_set.by_key.pop(self.name, None)  # dirty hack
+        working_set.by_key.pop(self.name, None)  # type: ignore # dirty hack
 
     def __uninstall_from_standalone(self):
         cmd = [
@@ -269,61 +270,81 @@ class RequirementsRepository:
     def get_file_path(cls):
         return Settings.root_path / "requirements.txt"
 
-    # TODO: refactor this method -> TA ORIVEL
     @classmethod
     def get_recommendation(cls) -> List[RequirementRecommendation]:
         imported_modules: Set[RequirementRecommendation] = set()
-
-        project = ProjectRepository.load()
-        package_dist = packages_distributions()
         visited_set = set()
 
+        project = ProjectRepository.load()
+        already_added = {pip_name(lib.name) for lib in cls.load().libraries}
+        package_dist_cache = packages_distributions()
+
         for python_file in project.project_files:
-            try:
-                if not python_file.exists():
-                    continue
-                code = python_file.read_text(encoding="utf-8")
-                parsed = ast.parse(code)
-                for node in parsed.body:
-                    pkg_names = []
-
-                    if isinstance(node, ast.Import):
-                        for alias in node.names:
-                            pkg_names.append(alias.name.split(".")[0])
-
-                    if isinstance(node, ast.ImportFrom):
-                        if node.module is None:
-                            continue
-
-                        pkg_names.append(node.module.split(".")[0])
-
-                    for pkg_name in pkg_names:
-                        for lib in find_installed_libs(
-                            pkg_name, visited_set, package_dist
-                        ):
-                            imported_modules.add(
-                                RequirementRecommendation(
-                                    requirement=Requirement(
-                                        name=lib["name"],
-                                        version=lib["version"],
-                                    ),
-                                    reason_file=python_file,
-                                    reason_line=node.lineno,
-                                    reason_code=python_file.read_text(
-                                        encoding="utf-8"
-                                    ).splitlines()[node.lineno - 1],
-                                )
-                            )
-
-            except SyntaxError:
+            if not python_file.exists():
                 continue
 
-        already_added = set([pip_name(lib.name) for lib in cls.load().libraries])
+            try:
+                parsed = ASTCache.get(python_file)
+                if parsed is None:
+                    continue
+
+                file_lines = python_file.read_text(encoding="utf-8").splitlines()
+
+                for node in ast.walk(parsed):
+                    if isinstance(node, (ast.Import, ast.ImportFrom)):
+                        pkg_names = []
+
+                        if isinstance(node, ast.Import):
+                            pkg_names.extend(
+                                alias.name.split(".")[0] for alias in node.names
+                            )
+                        elif (
+                            isinstance(node, ast.ImportFrom) and node.module is not None
+                        ):
+                            pkg_names.append(node.module.split(".")[0])
+
+                        for pkg_name in pkg_names:
+                            if pkg_name in visited_set:
+                                continue
+
+                            visited_set.add(pkg_name)
+                            kind = check_package(pkg_name)
+
+                            if kind != "installed":
+                                continue
+
+                            lib_names = package_dist_cache.get(pkg_name, [])
+                            for lib_name in lib_names:
+                                if pip_name(lib_name) in already_added:
+                                    continue
+
+                                version = get_distribution(lib_name).version
+                                if version is None:
+                                    continue
+
+                                imported_modules.add(
+                                    RequirementRecommendation(
+                                        requirement=Requirement(
+                                            name=lib_name,
+                                            version=version,
+                                        ),
+                                        reason_file=python_file,
+                                        reason_line=node.lineno,
+                                        reason_code=file_lines[node.lineno - 1],
+                                    )
+                                )
+
+            except (SyntaxError, UnicodeDecodeError):
+                continue
+
+        modules_in_requirements = set(
+            [pip_name(lib.name) for lib in cls.load().libraries]
+        )
 
         return [
             module
             for module in imported_modules
-            if pip_name(module.requirement.name) not in already_added
+            if pip_name(module.requirement.name) not in modules_in_requirements
         ]
 
     @classmethod
