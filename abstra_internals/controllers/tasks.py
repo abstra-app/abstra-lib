@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import List, Optional, Tuple
 
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.tasks import TaskDTO
+from abstra_internals.utils.datetime import from_utc_iso_string
 
 
 @dataclass
@@ -95,14 +95,14 @@ class TasksController:
                 continue
             if req and (
                 req.filter.start_date
-                and datetime.fromisoformat(task.created.at)
-                < datetime.fromisoformat(req.filter.start_date)
+                and from_utc_iso_string(task.created.at)
+                < from_utc_iso_string(req.filter.start_date)
             ):
                 continue
             if req and (
                 req.filter.end_date
-                and datetime.fromisoformat(task.created.at)
-                > datetime.fromisoformat(req.filter.end_date)
+                and from_utc_iso_string(task.created.at)
+                > from_utc_iso_string(req.filter.end_date)
             ):
                 continue
 
@@ -129,7 +129,7 @@ class TasksController:
         tasks = self.repos.tasks.get_stage_tasks(stage_id)
 
         tasks.sort(
-            key=lambda task: datetime.fromisoformat(task.created.at),
+            key=lambda task: from_utc_iso_string(task.created.at),
             reverse=True,
         )
 
@@ -160,7 +160,7 @@ class TasksController:
         ]
 
         tasks_with_executions.sort(
-            key=lambda task: datetime.fromisoformat(task[0].created.at),
+            key=lambda task: from_utc_iso_string(task[0].created.at),
             reverse=True,
         )
 
