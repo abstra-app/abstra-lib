@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from multiprocessing import Manager, Process
 from typing import List
 
-from abstra_internals.repositories.linter.models import LinterCheck, LinterRule
+from abstra_internals.repositories.linter.models import LinterCheck
 from abstra_internals.repositories.linter.rules import rules
+from abstra_internals.settings import Settings
 
 
 class LinterRepository(ABC):
@@ -28,9 +29,14 @@ class LinterRepository(ABC):
         pass
 
 
+def check_rule(rule, checks_list, root_path):
+    Settings.set_root_path(root_path)
+    check = rule.check()
+    checks_list.append(check)
+
+
 class LocalLinterRepository(LinterRepository):
     def __init__(self):
-        self.rules: List[LinterRule] = rules
         self.checks: List[LinterCheck] = []
 
     def get_checks(self) -> List[LinterCheck]:
@@ -41,12 +47,10 @@ class LocalLinterRepository(LinterRepository):
         new_checks = manager.list()
         processes = []
 
-        def check_rule(rule, checks_list):
-            check = rule.check()
-            checks_list.append(check)
-
-        for rule in self.rules:
-            process = Process(target=check_rule, args=(rule, new_checks))
+        for rule in rules:
+            process = Process(
+                target=check_rule, args=(rule, new_checks, Settings.root_path)
+            )
             process.start()
             processes.append(process)
 
