@@ -9,11 +9,10 @@ import typing as t
 import uuid
 import warnings
 from pathlib import Path
-from typing import Generator, Optional, Set, Union
+from typing import Generator, Optional, Union
 
 from werkzeug.datastructures import FileStorage
 
-from abstra_internals.utils.ast_cache import ASTCache
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 FILE_TYPES = {
@@ -443,17 +442,15 @@ def silent_traverse_code(
 ) -> Generator[Path, None, None]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        yield from traverse_code(path, raise_on_syntax_errors, set())
+        yield from traverse_code(path, raise_on_syntax_errors)
 
 
 def traverse_code(
-    path: Path, raise_on_syntax_errors=False, yielded_files: Optional[Set[Path]] = None
+    path: Path, raise_on_syntax_errors=False
 ) -> Generator[Path, None, None]:
-    if yielded_files is None:
-        yielded_files = set()
-
     try:
-        parsed = ASTCache.get(path)
+        code = path.read_text(encoding="utf-8")
+        parsed = ast.parse(code)
 
         for node in parsed.body:
             if isinstance(node, ast.Import):
@@ -461,9 +458,7 @@ def traverse_code(
                     file_path = _get_file_path_from_absolute_module(alias.name)
 
                     if file_path is not None:
-                        yield from traverse_code(
-                            file_path, raise_on_syntax_errors, yielded_files
-                        )
+                        yield from traverse_code(file_path)
 
             if isinstance(node, ast.ImportFrom):
                 for alias in node.names:
@@ -472,17 +467,13 @@ def traverse_code(
                     )
 
                     if file_path is not None:
-                        yield from traverse_code(
-                            file_path, raise_on_syntax_errors, yielded_files
-                        )
+                        yield from traverse_code(file_path)
 
     except Exception as e:
         if raise_on_syntax_errors and isinstance(e, SyntaxError):
             raise e
 
-    if path not in yielded_files:
-        yield path
-        yielded_files.add(path)
+    yield path
 
 
 def get_tmp_upload_dir():

@@ -48,11 +48,6 @@ from abstra_internals.repositories.keyvalue import (
     LocalKVRepository,
     ProductionKVRepository,
 )
-from abstra_internals.repositories.linter.repository import (
-    LinterRepository,
-    LocalLinterRepository,
-    ProductionLinterRepository,
-)
 from abstra_internals.repositories.multiprocessing import (
     ForkserverContextRepository,
     MPContextReposity,
@@ -115,14 +110,10 @@ class Repositories:
     role_agents: RoleAgentRepository
     role_clients: RoleClientRepository
     agents: AgentsRepository
-    linter: LinterRepository
 
 
 def get_editor_repositories():
     mp_context = SpawnContextReposity()
-
-    linter = LocalLinterRepository()
-    linter.update_checks()
 
     return Repositories(
         execution=LocalExecutionRepository(mp_context.get_context()),
@@ -142,7 +133,6 @@ def get_editor_repositories():
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
         agents=LocalAgentsRepository(CLOUD_API_CLI_URL),
-        linter=linter,
     )
 
 
@@ -168,5 +158,4 @@ def get_prodution_app_repositories():
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=ForkserverContextRepository(),
         agents=ProductionAgentsRepository(SIDECAR_URL),
-        linter=ProductionLinterRepository(),
     )

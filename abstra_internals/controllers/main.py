@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import flask
 
 from abstra_internals.cloud_api import get_api_key_info, get_project_info
+from abstra_internals.controllers.linters import check_linters
 from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
@@ -127,11 +128,14 @@ class MainController:
         self.execution_repository = repositories.execution
         self.web_editor_repository = repositories.editor_jwt
         self.execution_logs_repository = repositories.execution_logs
-        self.linter_repository = repositories.linter
 
     def deploy(self):
-        self.linter_repository.update_checks()
-        issues = self.linter_repository.get_blocking_checks()
+        rules = check_linters()
+
+        issues = []
+        for rule in rules:
+            if rule.type in ["error", "security", "bug"]:
+                issues += rule.issues
 
         if len(issues) > 0:
             raise Exception(

@@ -1,7 +1,6 @@
 import unittest
 from pathlib import Path
 
-from abstra_internals.utils.ast_cache import ASTCache
 from abstra_internals.utils.file import traverse_code
 from tests.fixtures import clear_dir, init_dir
 
@@ -12,7 +11,6 @@ class TestTraverseCode(unittest.TestCase):
 
     def tearDown(self):
         clear_dir(self.root)
-        ASTCache.clear()
 
     def test_no_import(self):
         entrypoint = Path("entrypoint.py")
@@ -182,10 +180,7 @@ class TestTraverseCode(unittest.TestCase):
         entrypoint = Path("entrypoint.py")
         entrypoint.write_text("from module import Class")
 
-        self.assertSetEqual(
-            set(traverse_code(entrypoint, yielded_files=set())),
-            set([entrypoint, module]),
-        )
+        self.assertSetEqual(set(traverse_code(entrypoint)), set([entrypoint, module]))
 
     def test_from_import_with_multiple_methods(self):
         module = Path("module.py")

@@ -9,6 +9,7 @@ from abstra_internals.cloud_api import (
     get_ai_messages,
     get_history,
 )
+from abstra_internals.controllers.linters import fix_all_linters
 from abstra_internals.controllers.main import MainController
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.repositories.project.json_migrations import get_latest_version
@@ -136,7 +137,7 @@ class AiController:
             )
 
             ProjectRepository.initialize_or_migrate(verbose=False)
-            self.controller.linter_repository.fix_all_linters()
+            fix_all_linters()
         except Exception as e:
             if tries >= 3:
                 raise e
