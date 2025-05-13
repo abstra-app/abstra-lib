@@ -2,8 +2,6 @@ import os
 import unittest
 from pathlib import Path
 
-IGNORED_FOLDER = "templates/getting-started-project"
-
 
 class TestInitFiles(unittest.TestCase):
     def setUp(self) -> None:
@@ -22,8 +20,6 @@ class TestInitFiles(unittest.TestCase):
 
     def verify_each_folder(self, folders):
         for folder in folders:
-            if folder.endswith(IGNORED_FOLDER):
-                continue
             with self.subTest(folder=folder):
                 init_file = os.path.join(folder, "__init__.py")
 

@@ -6,7 +6,6 @@ from abstra_internals.interface.cli.agents import add_agent
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.interface.cli.dir import select_dir
 from abstra_internals.interface.cli.editor import editor
-from abstra_internals.interface.cli.start import start
 from abstra_internals.interface.cli.tables import dump, restore
 from abstra_internals.interface.cli.version import version
 from abstra_internals.settings import SettingsController
@@ -49,10 +48,6 @@ class CLI(object):
     def add_agent(self, agent_id: str, agent_name: str, root_dir: Optional[str] = None):
         SettingsController.set_root_path(root_dir or select_dir())
         add_agent(agent_project_id=agent_id, agent_title=agent_name)
-
-    def start(self, root_dir: Optional[str] = None, token: Optional[str] = None):
-        SettingsController.set_root_path(root_dir or select_dir())
-        start(token)
 
 
 def _SeparateFlagArgs(args):

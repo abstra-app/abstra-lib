@@ -37,7 +37,6 @@ from abstra_internals.settings import Settings
 from abstra_internals.templates import (
     abstra_favicon,
     abstra_logo,
-    generate_getting_started_project,
 )
 from abstra_internals.utils import check_is_url, nested_get
 from abstra_internals.utils.file import generate_conflictless_path, silent_traverse_code
@@ -1666,7 +1665,3 @@ class ProjectRepository:
             cls.initialize()
         else:
             cls.migrate_config_file(verbose=verbose)
-
-    @classmethod
-    def generate_getting_started_project(cls):
-        generate_getting_started_project(Settings.root_path)
