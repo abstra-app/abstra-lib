@@ -2,7 +2,6 @@ from typing import Optional
 
 import fire
 
-from abstra_internals.interface.cli.agents import add_agent
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.interface.cli.dir import select_dir
 from abstra_internals.interface.cli.editor import editor
@@ -44,10 +43,6 @@ class CLI(object):
     ):
         SettingsController.set_root_path(root_dir)
         restore(dry_run=dry_run, file=file)
-
-    def add_agent(self, agent_id: str, agent_name: str, root_dir: Optional[str] = None):
-        SettingsController.set_root_path(root_dir or select_dir())
-        add_agent(agent_project_id=agent_id, agent_title=agent_name)
 
 
 def _SeparateFlagArgs(args):
