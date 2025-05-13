@@ -75,5 +75,11 @@ class NumberInput(InputWidget):
             "errors": self.errors,
         }
 
+    @property
+    def _validators(self):
+        return [
+            self._run_validators,
+        ]
+
     def _run_validators(self) -> List[str]:
         return self.number_value_handler.validate(self.value)

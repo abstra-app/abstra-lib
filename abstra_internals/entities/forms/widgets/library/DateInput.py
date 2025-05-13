@@ -3,7 +3,9 @@ import re
 import time
 from typing import List, Optional, Union
 
-from abstra_internals.entities.forms.widgets.widget_base import InputWidget
+from abstra_internals.entities.forms.widgets.widget_base import (
+    InputWidget,
+)
 
 
 class DateInput(InputWidget):
@@ -64,6 +66,8 @@ class DateInput(InputWidget):
             "fullWidth": self.full_width,
             "disabled": self.disabled,
             "errors": self.errors,
+            "minDate": self.min_date.isoformat() if self.min_date else None,
+            "maxDate": self.max_date.isoformat() if self.max_date else None,
         }
 
     def _serialize_value(self) -> str:
@@ -95,3 +99,28 @@ class DateInput(InputWidget):
             return datetime.date(year, month, day)
         except Exception:
             raise ValueError("Invalid date string format. Expected YYYY-MM-DD.")
+
+    @property
+    def _validators(self):
+        return [
+            self._basic_validate_required,
+            self._validate_date_limits,
+        ]
+
+    def _validate_date_limits(self):
+        errors = []
+        if (
+            self.min_date is not None
+            and self.value is not None
+            and self.value < self.min_date
+        ):
+            errors.append("i18n_error_min_date")
+
+        if (
+            self.max_date is not None
+            and self.value is not None
+            and self.value > self.max_date
+        ):
+            errors.append("i18n_error_max_date")
+
+        return errors

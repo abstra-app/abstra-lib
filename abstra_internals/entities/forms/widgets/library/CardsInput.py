@@ -114,6 +114,10 @@ class CardsInput(InputWidget):
             "value": self._serialize_value(),
         }
 
+    @property
+    def _validators(self):
+        return [self._run_validators]
+
     def _run_validators(self) -> List[str]:
         return self.multiple_handler.validate(self.value)
 
