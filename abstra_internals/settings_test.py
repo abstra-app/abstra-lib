@@ -5,7 +5,20 @@ from unittest import TestCase
 from abstra_internals.settings import SettingsController
 
 
+def reset_settings_controller():
+    SettingsController._instance = None
+    SettingsController._root_path = None
+    SettingsController._server_port = None
+    SettingsController._public_url = None
+
+
 class SettingsTest(TestCase):
+    def setUp(self) -> None:
+        reset_settings_controller()
+
+    def tearDown(self) -> None:
+        reset_settings_controller()
+
     def test_settings_controller_set_valid_root_path(self):
         controller = SettingsController()
         tmpdir = gettempdir()

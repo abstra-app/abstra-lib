@@ -150,7 +150,7 @@ class TestWorkflowC(BaseWorkflowTest):
         run_response = self.client.post("/_editor/api/jobs/job_a/run")
         self.assertEqual(run_response.status_code, 200)
 
-        for _ in range(10):
+        for _ in range(20):
             # Check completed task in script stage
             response = self.client.post(
                 "/_editor/api/tasks/list",
