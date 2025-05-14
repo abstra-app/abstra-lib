@@ -1,7 +1,7 @@
 import flask
 import flask_sock
 
-from abstra_internals.controllers.execution_stdio import StdioController
+from abstra_internals.controllers.execution.execution_stdio import StdioController
 from abstra_internals.logger import AbstraLogger
 
 

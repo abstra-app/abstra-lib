@@ -1,7 +1,7 @@
 from multiprocessing.forkserver import set_forkserver_preload
 
-from abstra_internals.controllers import execution_process
-from abstra_internals.controllers.execution_consumer import ExecutionConsumer
+from abstra_internals.controllers.execution import execution_process
+from abstra_internals.controllers.execution.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DEFAULT_PORT, RABBITMQ_CONNECTION_URI
 from abstra_internals.logger import AbstraLogger

@@ -1,6 +1,6 @@
 from typing import List, Literal
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.entities.agents import ConnectionModel
 
 

@@ -1,6 +1,6 @@
 from abstra.forms import ListItemSchema, Page
-from abstra_internals.controllers.execution_client_form import FormClient
-from abstra_internals.controllers.sdk_context import (
+from abstra_internals.controllers.execution.execution_client_form import FormClient
+from abstra_internals.controllers.sdk.sdk_context import (
     SDKContext,
 )
 from abstra_internals.entities.execution import Execution

@@ -2033,7 +2033,9 @@
                 "required": true,
                 "fullWidth": false,
                 "disabled": false,
-                "errors": []
+                "errors": [],
+                "minDate": null,
+                "maxDate": null
               }
             ],
             "stepsInfo": {
@@ -4570,57 +4572,6 @@
                             "type": "contour"
                           }
                         ],
-                        "heatmapgl": [
-                          {
-                            "colorbar": {
-                              "outlinewidth": 0,
-                              "ticks": ""
-                            },
-                            "colorscale": [
-                              [
-                                0.0,
-                                "#0d0887"
-                              ],
-                              [
-                                0.1111111111111111,
-                                "#46039f"
-                              ],
-                              [
-                                0.2222222222222222,
-                                "#7201a8"
-                              ],
-                              [
-                                0.3333333333333333,
-                                "#9c179e"
-                              ],
-                              [
-                                0.4444444444444444,
-                                "#bd3786"
-                              ],
-                              [
-                                0.5555555555555556,
-                                "#d8576b"
-                              ],
-                              [
-                                0.6666666666666666,
-                                "#ed7953"
-                              ],
-                              [
-                                0.7777777777777778,
-                                "#fb9f3a"
-                              ],
-                              [
-                                0.8888888888888888,
-                                "#fdca26"
-                              ],
-                              [
-                                1.0,
-                                "#f0f921"
-                              ]
-                            ],
-                            "type": "heatmapgl"
-                          }
-                        ],
                         "heatmap": [
                           {
                             "colorbar": {
@@ -4871,6 +4822,17 @@
                               }
                             },
                             "type": "scattermapbox"
+                          }
+                        ],
+                        "scattermap": [
+                          {
+                            "marker": {
+                              "colorbar": {
+                                "outlinewidth": 0,
+                                "ticks": ""
+                              }
+                            },
+                            "type": "scattermap"
                           }
                         ],
                         "scatterpolargl": [
@@ -7184,7 +7146,7 @@
           "required": false
         }
       ],
-      "return_type": "List[abstra_internals.controllers.sdk_tasks.Task]",
+      "return_type": "List[abstra_internals.controllers.sdk.sdk_tasks.Task]",
       "examples": []
     },
     "send_task": {
@@ -7251,7 +7213,7 @@
       "object_type": "function",
       "description": "Retrieve the task that triggered the current execution. Returns: Task: The task object that triggered this execution.",
       "params": [],
-      "return_type": "abstra_internals.controllers.sdk_tasks.Task",
+      "return_type": "abstra_internals.controllers.sdk.sdk_tasks.Task",
       "examples": []
     },
     "iter_tasks": {
@@ -7266,7 +7228,7 @@
           "required": false
         }
       ],
-      "return_type": "Iterator[abstra_internals.controllers.sdk_tasks.Task]",
+      "return_type": "Iterator[abstra_internals.controllers.sdk.sdk_tasks.Task]",
       "examples": []
     },
     "get_sent_tasks": {
@@ -7295,7 +7257,7 @@
           "required": false
         }
       ],
-      "return_type": "List[abstra_internals.controllers.sdk_tasks.Task]",
+      "return_type": "List[abstra_internals.controllers.sdk.sdk_tasks.Task]",
       "examples": []
     }
   },

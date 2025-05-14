@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tempfile
 from pathlib import Path
 from typing import (
     Union,
@@ -9,8 +10,8 @@ from typing import (
 import flask_sock
 import libcst as cst
 
-from abstra_internals.controllers.execution import ExecutionController
-from abstra_internals.controllers.execution_client_form import FormClient
+from abstra_internals.controllers.execution.execution import ExecutionController
+from abstra_internals.controllers.execution.execution_client_form import FormClient
 from abstra_internals.entities.execution_context import FormContext, Request
 from abstra_internals.repositories.factory import Repositories, get_editor_repositories
 from abstra_internals.repositories.project.project import FormStage, ProjectRepository
@@ -199,7 +200,7 @@ def create_formatted_code(path: Path) -> Path:
 
 
 def render_examples():
-    root_path = Path(__file__).parent / "tmp-project"
+    root_path = Path(tempfile.gettempdir()) / "abstra_examples"
     root_path.mkdir(exist_ok=True)
 
     Settings.set_root_path(root_path.as_posix())

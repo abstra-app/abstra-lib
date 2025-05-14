@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from werkzeug.serving import make_server
 
 from abstra_internals.cloud_api import connect_tunnel
-from abstra_internals.controllers.execution_consumer import ExecutionConsumer
+from abstra_internals.controllers.execution.execution_consumer import ExecutionConsumer
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST

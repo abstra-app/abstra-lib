@@ -1,4 +1,4 @@
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.interface.sdk.user_exceptions import MissingDependencyError
 from abstra_internals.utils.datetime import from_utc_iso_string
 

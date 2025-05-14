@@ -4,9 +4,12 @@ import flask
 import flask_sock
 
 from abstra_internals.constants import get_public_dir
-from abstra_internals.controllers.execution import ExecutionController
-from abstra_internals.controllers.execution_client_form import FormClient
-from abstra_internals.controllers.execution_client_hook import HookClient, Response
+from abstra_internals.controllers.execution.execution import ExecutionController
+from abstra_internals.controllers.execution.execution_client_form import FormClient
+from abstra_internals.controllers.execution.execution_client_hook import (
+    HookClient,
+    Response,
+)
 from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution_context import (
     FormContext,

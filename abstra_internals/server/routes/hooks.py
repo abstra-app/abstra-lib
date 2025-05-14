@@ -1,7 +1,7 @@
 import flask
 
-from abstra_internals.controllers.execution import ExecutionController
-from abstra_internals.controllers.execution_client_hook import HookClient
+from abstra_internals.controllers.execution.execution import ExecutionController
+from abstra_internals.controllers.execution.execution_client_hook import HookClient
 from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution_context import (
     HookContext,

@@ -1,7 +1,7 @@
 from typing import Iterator, List, Optional
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
-from abstra_internals.controllers.sdk_tasks import Task
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_tasks import Task
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.tasks import TaskPayload
 from abstra_internals.utils.json import to_json_serializable

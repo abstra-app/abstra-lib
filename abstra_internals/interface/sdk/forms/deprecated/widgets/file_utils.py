@@ -39,7 +39,7 @@ def upload_widget_file(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> st
 
 def download_to_path(url: str) -> pathlib.Path:
     # TODO: circular import - god help me
-    from abstra_internals.controllers.sdk_context import (
+    from abstra_internals.controllers.sdk.sdk_context import (
         SDKContextStore,
     )
 

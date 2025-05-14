@@ -10,7 +10,9 @@
             "required": true,
             "fullWidth": false,
             "disabled": false,
-            "errors": []
+            "errors": [],
+            "minDate": null,
+            "maxDate": null
         }
     ],
     "stepsInfo": {

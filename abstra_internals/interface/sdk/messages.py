@@ -1,7 +1,7 @@
 import io
 from typing import List, Union
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.email_templates import message_template
 
 

@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, TypeVar, Union
 
-from abstra_internals.controllers.sdk_ai import Format, Prompt
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_ai import Format, Prompt
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 
 T = TypeVar("T")
 

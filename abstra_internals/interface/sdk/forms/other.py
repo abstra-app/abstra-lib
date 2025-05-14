@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.proxy import ReadOnlyProxyDict
 

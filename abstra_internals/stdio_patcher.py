@@ -1,6 +1,6 @@
 import sys
 
-from abstra_internals.controllers.execution_stdio import StdioController
+from abstra_internals.controllers.execution.execution_stdio import StdioController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DISABLE_STDIO_PATCH
 

@@ -2,8 +2,8 @@ import unittest
 from typing import Generator, List, Optional
 from unittest.mock import patch
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
-from abstra_internals.controllers.sdk_forms import FormSDKController
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_forms import FormSDKController
 from abstra_internals.entities.forms.form_state import State
 from abstra_internals.entities.forms.steps import (
     ComputationStep,

@@ -1,7 +1,7 @@
 from dataclasses import is_dataclass
 from typing import Any, Dict, List, Optional
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.interface.sdk.tables import comparators as cmp
 from abstra_internals.interface.sdk.tables.utils import (
     WithAsDict,

@@ -1,4 +1,4 @@
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.repositories.connectors import AccessTokenDTO
 
 from .google_credentials import create_abstra_google_credentials

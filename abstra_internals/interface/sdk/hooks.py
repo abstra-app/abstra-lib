@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Union
 
-from abstra_internals.controllers.sdk_context import SDKContextStore
+from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.interface.sdk.user_exceptions import BadSendResponse
 from abstra_internals.utils import serialize
 from abstra_internals.utils.insensitive_dict import CaseInsensitiveDict
