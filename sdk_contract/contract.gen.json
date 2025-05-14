@@ -2447,6 +2447,11 @@
               "i18n_next_action"
             ]
           }
+        },
+        {
+          "name": "Using the output of a FileInput",
+          "description": "This example runs a form with two pages. The first page requests a file and a filename from the user. The second page saves the file in the persistent directory with the given filename and sends a task with the file path.",
+          "code": "import os\n\nfrom abstra.common import get_persistent_dir\nfrom abstra.forms import FileInput, TextInput, run\nfrom abstra.tasks import send_task\n\n# Create a page to input a file and choose its filename\nexample_page = [\n    TextInput(label=\"Choose a filename\", key=\"filename\"),\n    FileInput(label=\"File input\", key=\"my-file\"),\n]\n\n\n# Save the inputted file in the persistent dir and send its path\ndef save_inputed_file(state):\n    # Get information from the previous page\n    inputted_file = state.get(\"my-file\")\n    custom_filename = state.get(\"filename\")\n\n    # Compute the inputted file's extension\n    file_name = inputted_file.name\n    _, file_extension = os.path.splitext(file_name)\n\n    # Save in persistent dir\n    pdir_path = get_persistent_dir()\n    file_path = f\"{pdir_path}/{custom_filename}{file_extension}\"\n    with open(file_path, \"wb\") as f:\n        file_object = inputted_file.file\n        f.write(file_object.read())\n\n    # Send task with the persistent file path\n    send_task(\"file\", {\"file_path\": file_path})\n\n\n# Run the form\nresult = run([example_page, save_inputed_file])"
         }
       ]
     },

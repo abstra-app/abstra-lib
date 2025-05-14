@@ -210,7 +210,9 @@ def render_examples():
 
     repos = get_editor_repositories()
 
-    files = list(Path(__file__).parent.rglob("*.form.py"))
+    files_with_output = list(Path(__file__).parent.rglob("*.form.py"))
+    files_without_output = list(Path(__file__).parent.rglob("*.raw.py"))
+    files = files_with_output + files_without_output
 
     print(f"Found {len(files)} form files")
 
@@ -221,8 +223,9 @@ def render_examples():
         ProjectRepository.save(proj)
         output = HeadlessRenderer().render(form, repos)
 
-        with open(path.with_suffix(".gen.json"), "w", encoding="utf-8") as f:
-            json.dump(output, f, indent=4)
+        if path.name.endswith(".form.py"):
+            with open(path.with_suffix(".gen.json"), "w", encoding="utf-8") as f:
+                json.dump(output, f, indent=4)
 
     shutil.rmtree(root_path.as_posix(), ignore_errors=True)
 
