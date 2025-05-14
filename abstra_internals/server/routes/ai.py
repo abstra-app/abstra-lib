@@ -94,6 +94,6 @@ def get_editor_bp(main_controller: MainController):
 
     @bp.get("/actions-version")
     def _get_actions_version():
-        return {"version": "v0"}
+        return {"version": "v1"}
 
     return bp

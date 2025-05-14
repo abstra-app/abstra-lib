@@ -80,7 +80,7 @@ def get_ai_messages(
         "executionError": execution_error,
         "version": current_abstra_version,
         "envVars": env_vars_keys,
-        "actionsVersion": "v0",
+        "actionsVersion": "v1",
         "abstraJson": current_abstra_json,
     }
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
