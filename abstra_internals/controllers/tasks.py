@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple
 
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.tasks import TaskDTO
 from abstra_internals.utils.datetime import from_utc_iso_string
 
@@ -61,7 +60,7 @@ class TasksController:
         self.repos = repositories
 
     def get_stage(self, stage_id: str):
-        project = ProjectRepository().load()
+        project = self.repos.project.load()
         stage = project.get_stage(stage_id)
 
         if not stage:

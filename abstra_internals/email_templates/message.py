@@ -6,7 +6,7 @@ from typing import List, Union
 
 from abstra_internals.email_templates.i18n import get_translation
 from abstra_internals.repositories.email import EmailParams
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 
 DEFAULT_FILENAME = "attachment.bin"
 DEFAULT_APPLICATION_TYPE = "application/octet-stream"
@@ -59,7 +59,7 @@ def generate_email(
     attachments: List[Union[str, io.IOBase]],
     is_html: bool,
 ) -> EmailParams:
-    project = ProjectRepository.load()
+    project = LocalProjectRepository().load()
     translations = get_translation(project.workspace.language or "en")
 
     subject = translations.message_from(project.workspace.project_name)

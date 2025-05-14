@@ -15,7 +15,6 @@ from abstra_internals.credentials import resolve_headers
 from abstra_internals.repositories.project.json_migrations import get_latest_version
 from abstra_internals.repositories.project.project import (
     Project,
-    ProjectRepository,
     StageWithFile,
 )
 from abstra_internals.services.env_vars import EnvVarsRepository
@@ -82,7 +81,7 @@ class AiController:
     ):
         headers = resolve_headers() or {}
         env_vars_keys = EnvVarsRepository.list_keys()
-        current_abstra_json = ProjectRepository.load().as_dict
+        current_abstra_json = self.controller.repositories.project.load().as_dict
         runtime = None
         imported_code = {}
         if stage_id:
@@ -136,7 +135,7 @@ class AiController:
                 generated_abstra_json, encoding="utf-8"
             )
 
-            ProjectRepository.initialize_or_migrate(verbose=False)
+            self.controller.repositories.project.initialize_or_migrate(verbose=False)
             fix_all_linters()
         except Exception as e:
             if tries >= 3:

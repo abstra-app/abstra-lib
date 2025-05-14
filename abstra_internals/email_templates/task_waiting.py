@@ -4,7 +4,10 @@ from abstra_internals.constants import get_project_url
 from abstra_internals.email_templates.html_wrapper import style_wrap
 from abstra_internals.email_templates.i18n import get_translation
 from abstra_internals.repositories.email import EmailParams
-from abstra_internals.repositories.project.project import FormStage, ProjectRepository
+from abstra_internals.repositories.project.project import (
+    FormStage,
+    LocalProjectRepository,
+)
 
 template = """
 <p style="font-style: normal; font-weight: 700; font-size: 30px; line-height: 36px; color:#181818; margin-top:30px;">
@@ -18,7 +21,7 @@ template = """
 
 
 def generate_email(recipient_emails: List[str], form: FormStage) -> EmailParams:
-    project = ProjectRepository.load()
+    project = LocalProjectRepository().load()
     translations = get_translation(project.workspace.language or "en")
     stage_link = f"{get_project_url()}/{form.path}"
 

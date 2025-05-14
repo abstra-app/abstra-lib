@@ -49,7 +49,11 @@ from abstra_internals.utils.file import get_tmp_upload_dir, path2module, upload_
 
 
 def get_player_bp(controller: MainController):
-    guard = Guard(controller.users_repository, enabled=IS_PRODUCTION)
+    guard = Guard(
+        controller.users_repository,
+        project_repository=controller.repositories.project,
+        enabled=IS_PRODUCTION,
+    )
     cache = Cache(enabled=IS_PRODUCTION)
 
     bp = flask.Blueprint("player", __name__)

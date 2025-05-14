@@ -3,7 +3,6 @@ from abstra_internals.repositories.project.project import (
     FormStage,
     JobStage,
     NotificationTrigger,
-    ProjectRepository,
     ScriptStage,
     WorkflowTransition,
 )
@@ -85,7 +84,7 @@ class WorkflowTest(BaseTest):
 
         self.assertEqual(updated_workflow, initial_state)
 
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
 
         self.assertEqual(len(project.forms[0].workflow_transitions), 1)
 
@@ -457,7 +456,7 @@ class WorkflowTest(BaseTest):
         self.assertEqual(workflow["transitions"][0]["type"], "bar")
 
     def test_single_form(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form = FormStage(
             id="form",
             path="form",
@@ -470,13 +469,13 @@ class WorkflowTest(BaseTest):
             ),
         )
         project.forms.append(form)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form"])
 
     def test_more_then_one_stage(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form = FormStage(
             id="form",
             path="form",
@@ -504,13 +503,13 @@ class WorkflowTest(BaseTest):
         )
         project.forms.append(form)
         project.scripts.append(script)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(2)
         self.assertEqual(path, ["form", "script"])
 
     def test_more_stages_then_limit(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form = FormStage(
             id="form",
             path="form",
@@ -538,13 +537,13 @@ class WorkflowTest(BaseTest):
         )
         project.forms.append(form)
         project.scripts.append(script)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(1)
         self.assertEqual(path, ["form"])
 
     def test_more_then_one_path(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form0 = FormStage(
             id="form0",
             path="form0",
@@ -604,13 +603,13 @@ class WorkflowTest(BaseTest):
         project.scripts.append(script1)
         project.scripts.append(script2)
         project.scripts.append(script3)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form0", "script2", "script3"])
 
     def test_more_than_one_initial_stage(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form0 = FormStage(
             id="form0",
             path="form0",
@@ -694,13 +693,13 @@ class WorkflowTest(BaseTest):
         project.scripts.append(script2)
         project.forms.append(form1)
         project.forms.append(form2)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form1", "form2", "script2"])
 
     def test_disjointed_graphs(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form0 = FormStage(
             id="form0",
             path="form0",
@@ -797,13 +796,13 @@ class WorkflowTest(BaseTest):
         project.forms.append(form1)
         project.forms.append(form2)
         project.forms.append(form3)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form1", "form2", "form3"])
 
     def test_simple_loop(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         job0 = JobStage(
             id="job0",
             title="Job0",
@@ -855,13 +854,13 @@ class WorkflowTest(BaseTest):
         project.jobs.append(job0)
         project.forms.append(form0)
         project.scripts.append(script1)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["job0", "form0", "script1"])
 
     def test_dont_enter_in_loops(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         job0 = JobStage(
             id="job0",
             title="Job0",
@@ -913,13 +912,13 @@ class WorkflowTest(BaseTest):
         project.jobs.append(job0)
         project.forms.append(form0)
         project.scripts.append(script1)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(10)
         self.assertEqual(path, ["job0", "form0", "script1"])
 
     def test_clips_the_largest_path(self):
-        project = ProjectRepository.load()
+        project = self.repositories.project.load()
         form0 = FormStage(
             id="form0",
             path="form0",
@@ -1039,7 +1038,7 @@ class WorkflowTest(BaseTest):
         project.scripts.append(script2)
         project.forms.append(form3)
         project.scripts.append(script3)
-        ProjectRepository.save(project)
+        self.repositories.project.save(project)
 
         path = self.wf_controller.get_path(3)
         self.assertEqual(path, ["form0", "form1", "form2"])

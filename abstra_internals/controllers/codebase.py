@@ -18,7 +18,6 @@ from abstra_internals.contracts_generated import (
     CommonFileNode,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import ProjectRepository
 
 
 def rm_tree(pth: Path):
@@ -45,7 +44,7 @@ class CodebaseController:
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
 
-        project = ProjectRepository().load()
+        project = self.repos.project.load()
 
         return [
             AbstraLibApiEditorFilesListResponseItem(
@@ -54,11 +53,11 @@ class CodebaseController:
                     size=child_path.stat().st_size,
                     last_modified=datetime.fromtimestamp(path.stat().st_mtime),
                     type="directory" if child_path.is_dir() else "file",
-                    children=[
-                        list(c.relative_to(path).parts) for c in child_path.iterdir()
-                    ]
-                    if child_path.is_dir()
-                    else [],
+                    children=(
+                        [list(c.relative_to(path).parts) for c in child_path.iterdir()]
+                        if child_path.is_dir()
+                        else []
+                    ),
                 ),
                 stages=[
                     AbstraLibApiEditorFilesListResponseItemStagesItem(

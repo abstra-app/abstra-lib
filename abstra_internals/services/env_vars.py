@@ -6,7 +6,7 @@ from typing import Dict, List, Set, Tuple
 from dotenv import dotenv_values, load_dotenv, parser, set_key, unset_key
 
 from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.code import function_called_args, subscript_called_args
 
@@ -61,7 +61,7 @@ class EnvVarsRepository:
     @classmethod
     def get_env_vars_in_code(cls) -> Dict[str, Set[Tuple[Path, ast.expr]]]:
         used_env_vars: Dict[str, Set[Tuple[Path, ast.expr]]] = {}
-        project = ProjectRepository.load()
+        project = LocalProjectRepository().load()
 
         for python_file in project.project_files:
             try:

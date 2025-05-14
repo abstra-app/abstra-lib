@@ -18,10 +18,11 @@ DEBOUNCE_DELAY = 0.5
 
 
 class FileChangeEventHandler(FileSystemEventHandler):
-    def __init__(self):
+    def __init__(self, project_repository: ProjectRepository):
         super().__init__()
         self._debounce_timer: Optional[threading.Timer] = None
         self.dot_env_path = Settings.root_path / ".env"
+        self.project_repository = project_repository
 
     def on_modified(self, event: FileSystemEvent):
         filepath = Path(event.src_path)
@@ -32,12 +33,13 @@ class FileChangeEventHandler(FileSystemEventHandler):
         if filepath.resolve() == self.dot_env_path.resolve():
             AbstraLogger.info("Reloading .env and all modules")
             load_dotenv(self.dot_env_path, override=True)
-            for dep in ProjectRepository.load().get_local_dependencies():
+            for dep in self.project_repository.load().get_local_dependencies():
                 self.reload_module(dep)
             return
 
         resolved_deps = [
-            dep.resolve() for dep in ProjectRepository.load().get_local_dependencies()
+            dep.resolve()
+            for dep in self.project_repository.load().get_local_dependencies()
         ]
 
         if filepath.resolve() in resolved_deps:
@@ -67,17 +69,15 @@ class FileChangeEventHandler(FileSystemEventHandler):
     def should_ignore_event(self, event: FileSystemEvent) -> bool:
         return not isinstance(event, (FileModifiedEvent))
 
+    def run(self):
+        observer = Observer()
+        observer.schedule(self, path=str(Settings.root_path), recursive=True)
+        observer.start()
 
-def run_watcher():
-    event_handler = FileChangeEventHandler()
+        try:
+            while True:
+                time.sleep(1)
 
-    observer = Observer()
-    observer.schedule(event_handler, path=str(Settings.root_path), recursive=True)
-    observer.start()
-
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()

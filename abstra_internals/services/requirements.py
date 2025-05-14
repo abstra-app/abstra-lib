@@ -14,7 +14,7 @@ from importlib_metadata import packages_distributions
 from pip._internal.cli.main import main as pip_main
 from pkg_resources import get_distribution, working_set
 
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.settings import Settings
 from abstra_internals.utils.format import pip_name
 
@@ -274,7 +274,7 @@ class RequirementsRepository:
     def get_recommendation(cls) -> List[RequirementRecommendation]:
         imported_modules: Set[RequirementRecommendation] = set()
 
-        project = ProjectRepository.load()
+        project = LocalProjectRepository().load()
         package_dist = packages_distributions()
         visited_set = set()
 

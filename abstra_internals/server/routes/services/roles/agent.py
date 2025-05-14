@@ -3,7 +3,6 @@ import flask
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.agent import RoleAgentController
 from abstra_internals.entities.agents import ConnectionModel
-from abstra_internals.repositories.project.project import ProjectRepository
 
 
 def get_player_bp(main_controller: MainController) -> flask.Blueprint:
@@ -30,7 +29,7 @@ def get_player_bp(main_controller: MainController) -> flask.Blueprint:
 
     @bp.get("/entrypoints")
     def _get_agent_entrypoints():
-        project = ProjectRepository.load()
+        project = main_controller.repositories.project.load()
         return [ae.model_dump() for ae in project.get_agent_entrypoints()]
 
     @bp.post("/connection")
@@ -46,6 +45,7 @@ def get_player_bp(main_controller: MainController) -> flask.Blueprint:
             client_tasks_url=flask.request.json["client_tasks_url"],
             client_stage_id=flask.request.json["client_stage_id"],
             agent_stage_id=flask.request.json["agent_stage_id"],
+            project=main_controller.repositories.project.load(),
         )
         return connection.model_dump()
 

@@ -6,7 +6,7 @@ from abstra_internals.constants import (
     get_project_url,
 )
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 
 DEPRECATED_FUNCTIONS = {
     "run": {"from": "abstra.tables", "new_function": "run_sql"},
@@ -42,7 +42,7 @@ class DeprecatedFunctionUsage(LinterRule):
     type: str = "warning"
 
     def find_issues(self) -> List[LinterIssue]:
-        project = ProjectRepository.load()
+        project = LocalProjectRepository().load()
         issues = []
 
         for entrypoint, stage in project.iter_entrypointed_stages():

@@ -5,7 +5,7 @@ from abstra_internals.repositories.project.project import (
     FormStage,
     HookStage,
     JobStage,
-    ProjectRepository,
+    LocalProjectRepository,
     ScriptStage,
     StageWithFile,
 )
@@ -58,7 +58,7 @@ class MissingEntrypoint(LinterRule):
     type = "bug"
 
     def find_issues(self) -> List[LinterIssue]:
-        project = ProjectRepository.load()
+        project = LocalProjectRepository().load()
         issues = []
         for form in project.forms:
             if not form.file_path.exists():

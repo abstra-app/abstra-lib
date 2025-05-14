@@ -3,7 +3,7 @@ from pathlib import Path
 from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.execution.execution_client_hook import HookClient
 from abstra_internals.entities.execution_context import HookContext, Request, Response
-from abstra_internals.repositories.project.project import HookStage, ProjectRepository
+from abstra_internals.repositories.project.project import HookStage
 from tests.fixtures import BaseTest
 
 
@@ -28,7 +28,7 @@ class ExecutionControllerTest(BaseTest):
             response=Response(headers={}, status=200, body=""),
         )
 
-        self.project = ProjectRepository.load()
+        self.project = self.repositories.project.load()
         self.stage = HookStage.create(
             title="mock_stage",
             file="mock_file.py",
@@ -37,7 +37,7 @@ class ExecutionControllerTest(BaseTest):
         )
         Path(self.stage.file).write_text("print('Hello, World!')", encoding="utf-8")
         self.project.add_stage(self.stage)
-        ProjectRepository.save(self.project)
+        self.repositories.project.save(self.project)
 
         self.hook_client = HookClient(self.context)
 

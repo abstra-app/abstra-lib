@@ -50,35 +50,42 @@ Selector = Union[StageIdSelector, PathArgSelector, IdArgSelector, QueryArgSelect
 
 class Guard:
     repository: UsersRepository
+    project_repository: ProjectRepository
     auth_decoder: Callable[[str], Optional[UserClaims]]
 
     def __init__(
         self,
         repository: UsersRepository,
+        project_repository: ProjectRepository,
         enabled: bool,
         auth_decoder: Callable[[str], Optional[UserClaims]] = default_auth_decoder,
     ) -> None:
         self.repository = repository
+        self.project_repository = project_repository
         self.auth_decoder = auth_decoder
         self.enable = enabled
 
     def __get_access_settings(self, selector: Selector, **kwargs):
         if isinstance(selector, IdArgSelector):
             stage_id = str(kwargs.get(selector.value))
-            return ProjectRepository.load().get_access_control_by_stage_id(stage_id)
+            return self.project_repository.load().get_access_control_by_stage_id(
+                stage_id
+            )
 
         elif isinstance(selector, StageIdSelector):
-            return ProjectRepository.load().get_access_control_by_stage_id(
+            return self.project_repository.load().get_access_control_by_stage_id(
                 selector.value
             )
 
         elif isinstance(selector, QueryArgSelector):
             stage_id = str(flask.request.args.get(selector.value))
-            return ProjectRepository.load().get_access_control_by_stage_id(stage_id)
+            return self.project_repository.load().get_access_control_by_stage_id(
+                stage_id
+            )
 
         ##path arg is default
         path = str(kwargs.get(selector.value))
-        return ProjectRepository.load().get_access_control_by_stage_path(path)
+        return self.project_repository.load().get_access_control_by_stage_path(path)
 
     def __allow(
         self, access_setting: AccessSettings, authHeader: Optional[str]
@@ -106,8 +113,8 @@ class Guard:
         return NavigationGuard("FORBIDEN")
 
     def should_allow(self, path: str, auth: Optional[str]) -> NavigationGuard:
-        access_settings = ProjectRepository.load().get_access_control_by_stage_path(
-            path
+        access_settings = (
+            self.project_repository.load().get_access_control_by_stage_path(path)
         )
         ##404 allow this to be handled by the frontend
         if access_settings is None:
@@ -116,7 +123,7 @@ class Guard:
         return self.__allow(access_settings, auth)
 
     def filtered_workspace(self, auth: Optional[str]) -> StyleSettingsWithSidebar:
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         user: Optional[CommonUser] = None
 
         visible_sidebar = Sidebar(items=[])

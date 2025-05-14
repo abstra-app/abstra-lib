@@ -5,7 +5,6 @@ from typing import List, Optional
 from abstra_internals.controllers.common.task_executors import TaskExecutor
 from abstra_internals.controllers.service.roles.common import RoleCommonController
 from abstra_internals.entities.execution import Execution
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.settings import Settings
 
 
@@ -23,7 +22,7 @@ class RoleClientController(RoleCommonController):
         execution: Optional[Execution] = None,
     ):
         executor = TaskExecutor(self.repos)
-        project = ProjectRepository.load()
+        project = self.repos.project.load()
         executor.send_task(
             type=task_type,
             current_stage=project.get_stage_raises(target_stage_id),

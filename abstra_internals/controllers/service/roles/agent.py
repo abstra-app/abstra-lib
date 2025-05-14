@@ -6,7 +6,6 @@ from abstra_internals.entities.execution import Execution
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project.project import (
     Project,
-    ProjectRepository,
     Stage,
 )
 from abstra_internals.repositories.tasks import TaskPayload
@@ -52,7 +51,7 @@ class RoleAgentController(RoleCommonController):
         execution: Optional[Execution] = None,
     ):
         executor = TaskExecutor(self.repos)
-        project = ProjectRepository.load()
+        project = self.repos.project.load()
         executor.send_task(
             type=task_type,
             current_stage=project.get_stage_raises(target_stage_id),

@@ -1,7 +1,9 @@
 from abstra_internals.email_templates.html_wrapper import style_wrap
 from abstra_internals.email_templates.i18n import get_translation
 from abstra_internals.repositories.email import EmailParams
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import (
+    LocalProjectRepository,
+)
 
 template = """
 <p
@@ -27,7 +29,7 @@ template = """
 
 
 def generate_email(email: str, code: str) -> EmailParams:
-    project = ProjectRepository.load()
+    project = LocalProjectRepository().load()
     translations = get_translation(project.workspace.language or "en")
 
     content = template.format(

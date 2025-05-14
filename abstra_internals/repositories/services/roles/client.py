@@ -12,7 +12,7 @@ from abstra_internals.entities.agents import (
     SignProofResponse,
 )
 from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 from abstra_internals.settings import Settings
 
@@ -33,7 +33,9 @@ class RoleClientRepository(RoleCommonRepository):
         if self._cached_connections is None:
             self._cached_connections = []
 
-        project = ProjectRepository.load()
+        # TODO(lucasrrt): this should be injected, but once agents will be removed from the project
+        # in a near future, I won't bother with this
+        project = LocalProjectRepository().load()
         connections = self.get_connections()
 
         for connection in connections:

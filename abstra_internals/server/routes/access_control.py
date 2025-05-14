@@ -29,7 +29,11 @@ def get_editor_bp(controller: MainController):
 
 
 def get_player_bp(main_controller: MainController):
-    guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
+    guard = Guard(
+        main_controller.users_repository,
+        project_repository=main_controller.repositories.project,
+        enabled=IS_PRODUCTION,
+    )
 
     bp = flask.Blueprint("player_access_control", __name__)
 

@@ -1,13 +1,17 @@
 from unittest import TestCase
 
 from abstra_internals.linter.rules.missing_env import MissingEnv
-from abstra_internals.repositories.project.project import ProjectRepository, ScriptStage
+from abstra_internals.repositories.project.project import (
+    LocalProjectRepository,
+    ScriptStage,
+)
 from tests.fixtures import clear_dir, init_dir
 
 
 class TestMissingEnv(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        self.project_repository = LocalProjectRepository()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -21,7 +25,7 @@ class TestMissingEnv(TestCase):
         rule = MissingEnv()
         env_path = self.root / ".env"
         env_path.write_text("FOO=bar")
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         code_path = self.root / "test.py"
         code_path.write_text("from os import getenv\ngetenv('FOO')")
         script = ScriptStage(
@@ -33,13 +37,13 @@ class TestMissingEnv(TestCase):
             workflow_transitions=[],
         )
         project.add_stage(script)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
         issues = rule.find_issues()
         self.assertEqual(len(issues), 0)
 
     def test_find_issues_when_code_uses_a_non_defined_env(self):
         rule = MissingEnv()
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         code_path = self.root / "test.py"
         code_path.write_text("from os import getenv\ngetenv('FOO')")
         script = ScriptStage(
@@ -51,7 +55,7 @@ class TestMissingEnv(TestCase):
             workflow_transitions=[],
         )
         project.add_stage(script)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
         issues = rule.find_issues()
         self.assertEqual(len(issues), 1)
 

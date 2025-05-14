@@ -9,7 +9,6 @@ from abstra_internals.interface.sdk.user_exceptions import (
     TaskWriteAttempt,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.project.project import ProjectRepository
 from abstra_internals.repositories.tasks import TaskDTO, TaskLockFailed, TaskPayload
 
 
@@ -118,7 +117,7 @@ class TasksSDKController:
     def __init__(self, repositories: Repositories, execution: Execution) -> None:
         self.execution = execution
         self.repositories = repositories
-        self.project = ProjectRepository().load()
+        self.project = self.repositories.project.load()
         self.executor = TaskExecutor(repositories)
 
     def send_task(self, type: str, payload: TaskPayload, show_warning: bool) -> None:

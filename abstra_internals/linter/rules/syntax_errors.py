@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.utils.file import silent_traverse_code
 
 
@@ -31,7 +31,7 @@ class SyntaxErrors(LinterRule):
     error = None
 
     def find_issues(self) -> List[LinterIssue]:
-        project = ProjectRepository.load()
+        project = LocalProjectRepository().load()
         for entrypoint in project.iter_entrypoints():
             try:
                 for _ in silent_traverse_code(entrypoint, raise_on_syntax_errors=True):

@@ -14,7 +14,10 @@ from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.execution.execution_client_form import FormClient
 from abstra_internals.entities.execution_context import FormContext, Request
 from abstra_internals.repositories.factory import Repositories, get_editor_repositories
-from abstra_internals.repositories.project.project import FormStage, ProjectRepository
+from abstra_internals.repositories.project.project import (
+    FormStage,
+    LocalProjectRepository,
+)
 from abstra_internals.settings import Settings
 
 
@@ -205,8 +208,9 @@ def render_examples():
 
     Settings.set_root_path(root_path.as_posix())
 
-    ProjectRepository.initialize()
-    proj = ProjectRepository.load()
+    project_repository = LocalProjectRepository()
+    project_repository.initialize()
+    proj = project_repository.load()
 
     repos = get_editor_repositories()
 
@@ -220,7 +224,7 @@ def render_examples():
         untyped_file_path = create_formatted_code(path)
         form = FormStage.create(title="Form", file=untyped_file_path.as_posix())
         proj.add_stage(form)
-        ProjectRepository.save(proj)
+        project_repository.save(proj)
         output = HeadlessRenderer().render(form, repos)
 
         if path.name.endswith(".form.py"):

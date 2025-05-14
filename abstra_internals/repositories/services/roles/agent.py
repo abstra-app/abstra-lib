@@ -4,7 +4,7 @@ import requests
 
 from abstra_internals.entities.agents import ConnectionModel
 from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import Project
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 
 
@@ -53,6 +53,7 @@ class RoleAgentRepository(RoleCommonRepository):
         client_stage_id: str,
         agent_stage_id: str,
         client_tasks_url: str,
+        project: Project,
     ) -> ConnectionModel:
         """
         Second step of the protocol. As the server, it asks the cloud to build the connection.
@@ -61,7 +62,6 @@ class RoleAgentRepository(RoleCommonRepository):
         headers = self.get_headers()
         assert headers is not None, "You should be logged in to connect an agent"
         url = f"{self.base_url}/connections"
-        project = ProjectRepository.load()
         body = {
             "clientStageId": client_stage_id,
             "agentProjectId": agent_project_id,

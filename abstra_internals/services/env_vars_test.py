@@ -1,7 +1,10 @@
 from unittest import TestCase
 
 from abstra_internals.contracts_generated import AbstraLibApiEditorEnvVarsModel
-from abstra_internals.repositories.project.project import ProjectRepository, ScriptStage
+from abstra_internals.repositories.project.project import (
+    LocalProjectRepository,
+    ScriptStage,
+)
 from abstra_internals.services.env_vars import EnvVarsRepository
 from tests.fixtures import clear_dir, init_dir
 
@@ -10,6 +13,7 @@ class TestEnvVarsRepository(TestCase):
     def setUp(self):
         self.dir = init_dir()
         self.env_var_repo = EnvVarsRepository()
+        self.project_repository = LocalProjectRepository()
 
     def tearDown(self):
         clear_dir(self.dir)
@@ -56,7 +60,7 @@ class TestEnvVarsRepository(TestCase):
         self.assertFalse(self.env_var_repo.check())
 
     def test_env_vars_in_code(self):
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         code_path = self.dir / "code.py"
         code_content = "\n".join(["import os", "os.getenv('FOO')", "os.environ['BAR']"])
         code_path.write_text(code_content)
@@ -69,12 +73,12 @@ class TestEnvVarsRepository(TestCase):
             workflow_transitions=[],
         )
         project.add_stage(script)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
         env_vars_in_code = self.env_var_repo.get_env_vars_in_code()
         self.assertEqual(env_vars_in_code.keys(), {"FOO", "BAR"})
 
     def test_env_vars_in_code_only_consider_first_arg(self):
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         code_path = self.dir / "code.py"
         code_content = "\n".join(["import os", "os.getenv('FOO', 'default')"])
         code_path.write_text(code_content)
@@ -87,6 +91,6 @@ class TestEnvVarsRepository(TestCase):
             workflow_transitions=[],
         )
         project.add_stage(script)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
         env_vars_in_code = self.env_var_repo.get_env_vars_in_code()
         self.assertEqual(env_vars_in_code.keys(), {"FOO"})

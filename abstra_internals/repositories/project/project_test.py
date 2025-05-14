@@ -4,22 +4,22 @@ from abstra_internals.repositories.project.project import (
     FormStage,
     NotificationTrigger,
     Project,
-    ProjectRepository,
     ScriptStage,
     WorkflowTransition,
 )
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, get_editor_repositories, init_dir
 
 
 class ProjectTests(TestCase):
     def setUp(self):
         self.root = init_dir()
+        self.project_repository = get_editor_repositories().project
 
     def tearDown(self) -> None:
         clear_dir(self.root)
 
     def test_delete_file_if_remove_file_true(self):
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         file = self.root / "script.py"
         file.write_text("print('hello, world')")
 
@@ -32,12 +32,12 @@ class ProjectTests(TestCase):
             workflow_transitions=[],
         )
         project.scripts.append(script)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
         project.delete_stage("test", remove_file=True)
         self.assertFalse(file.exists())
 
     def test_dont_delete_file_if_remove_file_false(self):
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         file = self.root / "script.py"
         file.write_text("print('hello, world')")
 
@@ -50,7 +50,7 @@ class ProjectTests(TestCase):
             workflow_transitions=[],
         )
         project.scripts.append(script)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
         project.delete_stage("test", remove_file=False)
         self.assertTrue(file.exists())
 
@@ -108,15 +108,15 @@ class ProjectTests(TestCase):
             )
         )
 
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
 
         project.add_stage(form1)
         project.add_stage(form2)
         project.add_stage(script)
 
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
-        read_project = ProjectRepository.load()
+        read_project = self.project_repository.load()
 
         read_form1 = read_project.get_stage(form1.id)
         if read_form1 is None or not isinstance(read_form1, FormStage):
@@ -190,15 +190,15 @@ class ProjectTests(TestCase):
             )
         )
 
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
 
         project.add_stage(form1)
         project.add_stage(form2)
         project.add_stage(script)
 
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
-        p = ProjectRepository.load()
+        p = self.project_repository.load()
 
         self.assertEqual(p.get_next_stages_ids(form1.id), [form2.id, script.id])
         self.assertEqual(p.get_next_stages_ids(form2.id), [])

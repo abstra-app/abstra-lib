@@ -40,7 +40,11 @@ def get_editor_bp(main_controller: MainController):
 
 def get_player_bp(main_controller: MainController):
     controller = WorkflowController(main_controller.repositories)
-    guard = Guard(main_controller.users_repository, enabled=IS_PRODUCTION)
+    guard = Guard(
+        main_controller.users_repository,
+        project_repository=main_controller.repositories.project,
+        enabled=IS_PRODUCTION,
+    )
 
     bp = flask.Blueprint("player_workflow", __name__)
 

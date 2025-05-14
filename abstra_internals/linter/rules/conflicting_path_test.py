@@ -1,13 +1,17 @@
 import unittest
 
 from abstra_internals.linter.rules.conflicting_path import ConflictingPath
-from abstra_internals.repositories.project.project import FormStage, ProjectRepository
+from abstra_internals.repositories.project.project import (
+    FormStage,
+    LocalProjectRepository,
+)
 from tests.fixtures import clear_dir, init_dir
 
 
 class ConflictingPathTest(unittest.TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        self.project_repository = LocalProjectRepository()
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -17,7 +21,7 @@ class ConflictingPathTest(unittest.TestCase):
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_conflicting_path_without_conflict(self):
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         form = FormStage.create(
             id="test",
             title="test",
@@ -25,13 +29,13 @@ class ConflictingPathTest(unittest.TestCase):
         )
         form.path = "not_conflicting_path"
         project.add_stage(form)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
         rule = ConflictingPath()
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_conflicting_path_with_conflict(self):
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
         form = FormStage.create(
             id="login",
             title="login",
@@ -39,7 +43,7 @@ class ConflictingPathTest(unittest.TestCase):
         )
         form.path = "login"
         project.add_stage(form)
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
         rule = ConflictingPath()
         issues = rule.find_issues()

@@ -11,7 +11,6 @@ from abstra_internals.repositories.project.project import (
     AgentStage,
     ClientStage,
     FormStage,
-    ProjectRepository,
     ScriptStage,
     Stage,
 )
@@ -20,8 +19,8 @@ from abstra_internals.repositories.tasks import TaskDTO, TaskPayload
 
 class TaskExecutor:
     def __init__(self, repos: Repositories) -> None:
-        self.project = ProjectRepository.load()
         self.repos = repos
+        self.project = self.repos.project.load()
 
     def send_task(
         self,
@@ -31,7 +30,7 @@ class TaskExecutor:
         execution: Optional[Execution] = None,
         show_warning: bool = True,
     ) -> None:
-        project = ProjectRepository.load()
+        project = self.repos.project.load()
         next_stages = [
             project.get_stage_raises(t.target_id)
             for t in current_stage.workflow_transitions

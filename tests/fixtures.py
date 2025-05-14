@@ -10,7 +10,9 @@ from unittest import TestCase
 from abstra_internals.controllers.main import MainController
 from abstra_internals.interface.cli.editor import start_consumer
 from abstra_internals.repositories.factory import get_editor_repositories
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import (
+    LocalProjectRepository,
+)
 from abstra_internals.server.apps import get_cloud_app, get_local_app
 from abstra_internals.settings import SettingsController
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
@@ -33,7 +35,7 @@ def init_dir(path: typing.Optional[Path] = None):
     SettingsController.set_root_path(path.as_posix())
     SettingsController.set_public_url("foo")
     SettingsController.set_server_port(3000)
-    ProjectRepository.initialize()
+    LocalProjectRepository().initialize()
 
     return path
 

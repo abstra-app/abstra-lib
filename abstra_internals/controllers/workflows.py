@@ -11,7 +11,6 @@ from abstra_internals.repositories.project.project import (
     JobStage,
     NotificationTrigger,
     Project,
-    ProjectRepository,
     ScriptStage,
     Stage,
     WorkflowTransition,
@@ -32,7 +31,7 @@ class WorkflowController:
 
     # workflow visual editor
     def get_workflow(self):
-        project = ProjectRepository.load()
+        project = self.repos.project.load()
         return self._make_workflow_dto(project)
 
     def build_adjacency_list(
@@ -148,7 +147,7 @@ class WorkflowController:
         )
 
     def update_workflow(self, workflow_state_dto: Dict):
-        project = ProjectRepository.load()
+        project = self.repos.project.load()
 
         for stage_dto in workflow_state_dto["stages"]:
             stage = project.get_stage(stage_dto["id"])
@@ -281,7 +280,7 @@ class WorkflowController:
                         )
                     )
 
-        ProjectRepository.save(project)
+        self.repos.project.save(project)
 
         RoleClientController(self.repos).safe_sync_connection_pool()
 

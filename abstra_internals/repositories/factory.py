@@ -58,6 +58,11 @@ from abstra_internals.repositories.producer import (
     ProducerRepository,
     ProductionProducerRepository,
 )
+from abstra_internals.repositories.project.project import (
+    LocalProjectRepository,
+    ProductionProjectRepository,
+    ProjectRepository,
+)
 from abstra_internals.repositories.roles import (
     LocalRolesRepository,
     ProductionRolesRepository,
@@ -90,6 +95,7 @@ from abstra_internals.repositories.users import (
 
 @dataclass
 class Repositories:
+    project: ProjectRepository
     execution_logs: ExecutionLogsRepository
     connectors: ConnectorsRepository
     execution: ExecutionRepository
@@ -116,6 +122,7 @@ def get_editor_repositories():
     mp_context = SpawnContextReposity()
 
     return Repositories(
+        project=LocalProjectRepository(),
         execution=LocalExecutionRepository(mp_context.get_context()),
         producer=LocalProducerRepository(mp_context.get_context()),
         connectors=LocalConnectorsRepository(CLOUD_API_CLI_URL),
@@ -141,6 +148,7 @@ def get_prodution_app_repositories():
         raise Exception("Production urls are not set")
 
     return Repositories(
+        project=ProductionProjectRepository(),
         producer=ProductionProducerRepository(RABBITMQ_CONNECTION_URI),
         execution_logs=ProductionExecutionLogsRepository(SIDECAR_URL),
         connectors=ProductionConnectorsRepository(SIDECAR_URL),

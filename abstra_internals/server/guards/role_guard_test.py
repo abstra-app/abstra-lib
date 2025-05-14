@@ -8,7 +8,6 @@ from abstra_internals.repositories.project.project import (
     AccessSettings,
     FormStage,
     NotificationTrigger,
-    ProjectRepository,
     WorkflowTransition,
 )
 from abstra_internals.repositories.users import TestUsersRepository
@@ -18,12 +17,13 @@ from abstra_internals.server.guards.role_guard import (
     PathArgSelector,
     StageIdSelector,
 )
-from tests.fixtures import clear_dir, init_dir
+from tests.fixtures import clear_dir, get_editor_repositories, init_dir
 
 
 class TestRequirementsApi(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
+        self.project_repository = get_editor_repositories().project
 
     def tearDown(self) -> None:
         clear_dir(self.root)
@@ -55,7 +55,7 @@ class TestRequirementsApi(TestCase):
             }
         )
 
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
 
         public_form = FormStage(
             id="public_form_id",
@@ -113,9 +113,14 @@ class TestRequirementsApi(TestCase):
         project.forms.append(protected_form)
         project.forms.append(private_form)
 
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
-        guard = Guard(repo, enabled=True, auth_decoder=test_auth_decoder)
+        guard = Guard(
+            repo,
+            project_repository=self.project_repository,
+            enabled=True,
+            auth_decoder=test_auth_decoder,
+        )
 
         app = Flask(__name__)
         bp = Blueprint("dummy", __name__)
@@ -241,7 +246,7 @@ class TestRequirementsApi(TestCase):
             }
         )
 
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
 
         public_form = FormStage(
             id="public_form_id",
@@ -309,9 +314,14 @@ class TestRequirementsApi(TestCase):
         project.forms.append(protected_form)
         project.forms.append(private_form)
 
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
-        guard = Guard(repo, enabled=True, auth_decoder=test_auth_decoder)
+        guard = Guard(
+            repo,
+            enabled=True,
+            project_repository=self.project_repository,
+            auth_decoder=test_auth_decoder,
+        )
 
         ## Logged in users
         test_matrix = [

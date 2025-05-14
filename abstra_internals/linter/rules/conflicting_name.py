@@ -2,7 +2,7 @@ from pathlib import Path
 from pkgutil import iter_modules
 
 from abstra_internals.linter.linter import LinterFix, LinterIssue, LinterRule
-from abstra_internals.repositories.project.project import ProjectRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.settings import Settings
 
 
@@ -12,18 +12,19 @@ class AddPreffix(LinterFix):
 
     def __init__(self, file: Path):
         self.file = file
+        self.project_repository = LocalProjectRepository()
 
     def fix(self):
         new_file = self.file.parent / f"{self.preffix}{self.file.name}"
 
         self.file.rename(new_file)
 
-        project = ProjectRepository.load()
+        project = self.project_repository.load()
 
         for stage in project.get_stages_by_file_path(self.file):
             project.update_stage(stage, dict(file=str(new_file.name)))
 
-        ProjectRepository.save(project)
+        self.project_repository.save(project)
 
 
 class ConflictingNameIssue(LinterIssue):
