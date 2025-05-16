@@ -17,7 +17,7 @@ class WebEditorController:
     def inspect(self) -> AbstraLibApiEditorWebEditorResponse:
         return AbstraLibApiEditorWebEditorResponse(waiting_room_url=WAITING_ROOM_URL)
 
-    def welcome(self, token: Optional[str]):
+    def set_cookie(self, token: Optional[str]):
         if not token:
             return flask.make_response({"ok": False, "error": "No token provided"}, 401)
 
@@ -36,6 +36,7 @@ class WebEditorController:
         return response
 
     def guard(self):
+        # Local development uses a fake JWT repository
         token = flask.request.cookies.get("editor_auth")
         if not self.jwt.verify(token):
             return flask.make_response({"ok": False, "error": "Invalid token"}, 403)

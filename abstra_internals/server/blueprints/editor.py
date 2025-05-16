@@ -120,6 +120,9 @@ def get_editor_bp(controller: MainController):
     api_bp = __get_api_bp(controller)
     bp.register_blueprint(api_bp, url_prefix="/api")
 
+    editor_auth_bp = web_editor_router.get_web_editor_auth_bp(controller)
+    bp.register_blueprint(editor_auth_bp, url_prefix="/auth")
+
     @bp.get("/")
     @editor_usage
     def _spa_index():
