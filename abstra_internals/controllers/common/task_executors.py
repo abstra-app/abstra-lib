@@ -3,7 +3,7 @@ from typing import Optional
 import requests
 
 from abstra_internals.email_templates import task_waiting_template
-from abstra_internals.entities.execution import Execution, PreExecution
+from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import ScriptContext
 from abstra_internals.environment import IS_PRODUCTION, REQUEST_TIMEOUT
 from abstra_internals.repositories.factory import Repositories
@@ -55,11 +55,9 @@ class TaskExecutor:
             if execution:
                 execution.context.sent_tasks.append(task.id)
             if isinstance(stage, ScriptStage):
-                self.repos.producer.submit(
-                    PreExecution(
-                        context=ScriptContext(task_id=task.id),
-                        stage_id=stage.id,
-                    )
+                self.repos.producer.enqueue(
+                    context=ScriptContext(task_id=task.id),
+                    stage_id=stage.id,
                 )
             elif (
                 isinstance(stage, AgentStage)

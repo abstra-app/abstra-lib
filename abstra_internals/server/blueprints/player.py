@@ -136,11 +136,10 @@ def get_player_bp(controller: MainController):
 
             ExecutionController(
                 repositories=controller.repositories,
-            ).run(
                 stage=form,
                 client=client,
                 context=context,
-            )
+            ).run()
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
@@ -223,11 +222,10 @@ def get_player_bp(controller: MainController):
 
         ExecutionController(
             repositories=controller.repositories,
-        ).run(
             stage=hook,
             client=client,
             context=context,
-        )
+        ).run()
 
         if not context.response or not client.context.response:
             flask.abort(500)
@@ -261,12 +259,7 @@ def get_player_bp(controller: MainController):
         if not job:
             flask.abort(404)
 
-        ExecutionController(
-            repositories=controller.repositories,
-        ).submit(
-            stage=job,
-            context=JobContext(),
-        )
+        controller.repositories.producer.enqueue(job.id, context=JobContext())
 
         return {"status": "running"}
 

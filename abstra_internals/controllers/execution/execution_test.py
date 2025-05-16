@@ -44,11 +44,10 @@ class ExecutionControllerTest(BaseTest):
     def test_run_initial_returns_dto(self):
         ExecutionController(
             repositories=self.repositories,
-        ).run(
             stage=self.stage,
             context=self.context,
             client=self.hook_client,
-        )
+        ).run()
 
         if not self.context.response:
             self.fail("Response was not set")

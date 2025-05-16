@@ -1,7 +1,4 @@
-from multiprocessing.forkserver import set_forkserver_preload
-
-from abstra_internals.controllers.execution import execution_process
-from abstra_internals.controllers.execution.execution_consumer import ExecutionConsumer
+from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DEFAULT_PORT, RABBITMQ_CONNECTION_URI
 from abstra_internals.logger import AbstraLogger
@@ -20,11 +17,10 @@ def run():
     if not RABBITMQ_CONNECTION_URI:
         raise Exception("RABBITMQ_CONNECTION_URI not found")
 
-    set_forkserver_preload([execution_process.__name__])
     controller = MainController(repositories=get_prodution_app_repositories())
     with RabbitConsumer(RABBITMQ_CONNECTION_URI) as consumer:
         SignalHandlers.register_sigterm_callback(consumer.stop)
-        ExecutionConsumer(consumer, controller)
+        ConsumerController(controller, consumer).start_loop()
 
 
 if __name__ == "__main__":

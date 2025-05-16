@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from abstra.forms import url_params
 from abstra.tasks import get_tasks, get_trigger_task, send_task
-from abstra_internals.controllers.execution.execution_target import ClientAbandoned
+from abstra_internals.controllers.execution.execution import ClientAbandoned
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.utils.json import to_json_serializable
 

@@ -1,7 +1,7 @@
 import inspect
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 import flask
 import requests
@@ -89,7 +89,7 @@ def player_usage(func: Callable[..., Any]) -> Callable[..., Any]:
 
 
 # Executions
-def _send_execution_usage(file: Path, status: str, exception: Optional[Exception]):
+def send_execution_usage(file: Path, status: str, exception: Optional[Exception]):
     if SIDECAR_URL or is_test_env() or is_dev_env():
         return
 
@@ -100,16 +100,3 @@ def _send_execution_usage(file: Path, status: str, exception: Optional[Exception
         )
     except Exception:
         pass
-
-
-Result = Tuple[Literal["finished", "abandoned", "failed"], Optional[Exception]]
-
-
-def execution_usage(func: Callable[[Path], Result]) -> Callable[[Path], Result]:
-    @wraps(func)
-    def wrapper(file: Path) -> Result:
-        status, exception = func(file)
-        _send_execution_usage(file, status, exception)
-        return status, exception
-
-    return wrapper

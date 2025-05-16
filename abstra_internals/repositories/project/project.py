@@ -1293,13 +1293,6 @@ class Project:
         else:
             raise Exception(f"Cannot add stage of type {type(stage)}")
 
-    def get_stage(self, id: str) -> Optional[Stage]:
-        for stage in self.workflow_stages:
-            if stage.id == id:
-                return stage
-
-        return None
-
     def get_workspace(self):
         sidebar = [stage.to_sidebar_item.as_dict for stage in self.secured_stages]
         return StyleSettingsWithSidebar.from_dict(
@@ -1360,18 +1353,12 @@ class Project:
             raise StageNotFoundError(f"Stage with id '{id}' not found")
         return stage
 
-    def get_action(self, id: str) -> Optional[Stage]:
+    def get_stage(self, id: str) -> Optional[Stage]:
         for stage in self.workflow_stages:
             if stage.id == id:
                 return stage
 
         return None
-
-    def get_action_raises(self, id: str) -> Stage:
-        stage = self.get_action(id)
-        if not stage:
-            raise StageNotFoundError(f"Stage with id '{id}' not found")
-        return stage
 
     def get_form(self, id: str) -> Optional[FormStage]:
         for form in self.forms:
@@ -1457,7 +1444,7 @@ class Project:
 
     def update_stage(self, stage: Stage, changes: Dict[str, Any]) -> Stage:
         # This guarantees that the updated stage will be the one from the project
-        project_stage = self.get_action(stage.id)
+        project_stage = self.get_stage(stage.id)
 
         if project_stage is None:
             raise StageNotFoundError(f"Stage with id '{stage.id}' not found")
@@ -1480,7 +1467,7 @@ class Project:
         return project_stage
 
     def delete_stage(self, id: str, remove_file: bool = False):
-        stage = self.get_action(id)
+        stage = self.get_stage(id)
 
         if remove_file and isinstance(stage, StageWithFile):
             if not stage:

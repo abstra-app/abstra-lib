@@ -68,8 +68,3 @@ class Execution(Serializable, Generic[T]):
     @field_serializer("updated_at")
     def serialize_updated_at(self, value):
         return to_utc_iso_string(value) if value is not None else None
-
-
-class PreExecution(Serializable):
-    stage_id: str
-    context: Optional[ClientContext] = None

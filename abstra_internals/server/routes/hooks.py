@@ -86,11 +86,10 @@ def get_editor_bp(controller: MainController):
 
         ExecutionController(
             repositories=controller.repositories,
-        ).run(
             stage=hook,
             client=client,
             context=context,
-        )
+        ).run()
 
         if context.response is None or client.context.response is None:
             flask.abort(500)

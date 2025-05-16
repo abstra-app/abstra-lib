@@ -8,15 +8,14 @@ import pika
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from pika.exceptions import AMQPError, ChannelError
 
-from abstra_internals.entities.execution import PreExecution
 from abstra_internals.environment import (
+    EXECUTION_QUEUE_CONCURRENCY,
     RABBITMQ_EXECUTION_QUEUE,
-    RABBITMQ_QUEUE_CONCURRENCY,
     RABBITMQ_QUEUE_RECONNECT_ATTEMPTS,
     RABBITMQ_QUEUE_RECONNECT_BACKOFF_TIME,
 )
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.producer import QueueMessage
+from abstra_internals.repositories.producer import PreExecution, QueueMessage
 from abstra_internals.utils import deserialize
 
 
@@ -51,7 +50,7 @@ class RabbitConsumer(Consumer):
         self.conn_uri = conn_uri
 
         self.stop_evt = Event()
-        self.concurrency = RABBITMQ_QUEUE_CONCURRENCY
+        self.concurrency = EXECUTION_QUEUE_CONCURRENCY
         self.queue = RABBITMQ_EXECUTION_QUEUE
         self._connect()
 
@@ -134,7 +133,6 @@ class RabbitConsumer(Consumer):
         return self
 
 
-# TODO: move out of repositories
 class EditorConsumer(Consumer):
     def __init__(self, queue: Queue) -> None:
         self.stop_evt = Event()

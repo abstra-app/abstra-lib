@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from werkzeug.serving import make_server
 
 from abstra_internals.cloud_api import connect_tunnel
-from abstra_internals.controllers.execution.execution_consumer import ExecutionConsumer
+from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST
@@ -31,8 +31,7 @@ def start_consumer(controller: MainController):
     th = threading.Thread(
         daemon=True,
         name="execution_consumer",
-        target=ExecutionConsumer,
-        kwargs=dict(controller=controller, consumer=consumer),
+        target=ConsumerController(controller, consumer).start_loop,
     )
 
     th.start()

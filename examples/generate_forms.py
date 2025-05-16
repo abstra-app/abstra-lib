@@ -178,11 +178,10 @@ class HeadlessRenderer:
 
         ExecutionController(
             repositories=repositories,
-        ).run(
             stage=form,
             client=client,
             context=context,
-        )
+        ).run()
 
         return ws.get_render()
 

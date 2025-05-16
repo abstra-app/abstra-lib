@@ -37,11 +37,10 @@ def get_editor_bp(controller: MainController):
 
             ExecutionController(
                 repositories=controller.repositories,
-            ).run(
                 stage=form,
                 client=client,
                 context=context,
-            )
+            ).run()
 
         except Exception as e:
             AbstraLogger.capture_exception(e)

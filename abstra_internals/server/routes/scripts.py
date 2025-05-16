@@ -77,10 +77,9 @@ def get_editor_bp(controller: MainController):
 
         ExecutionController(
             repositories=controller.repositories,
-        ).run(
             stage=script,
             context=ScriptContext(task_id=task_id),
-        )
+        ).run()
 
         return {"ok": True}
 

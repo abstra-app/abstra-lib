@@ -163,7 +163,7 @@ def _make_update_query(table: str, set: dict, where: dict):
     set_values_list = []
     for column_name, value in set.items():
         column_id = quoted_identifier(column_name)
-        set_column_names.append(f"{column_id}=${len(set_values_list)+1}")
+        set_column_names.append(f"{column_id}=${len(set_values_list) + 1}")
         set_values_list.append(serialize(value))
     set_exp = ", ".join(set_column_names)
 

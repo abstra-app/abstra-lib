@@ -155,10 +155,6 @@ class MainController:
         project = self.repositories.project.load()
         return project.get_stage(id)
 
-    def get_action(self, id: str) -> Optional[Stage]:
-        project = self.repositories.project.load()
-        return project.get_action(id)
-
     def get_async_stage_ids(self):
         project = self.repositories.project.load()
         job_ids = [stage.id for stage in project.jobs]
@@ -259,7 +255,7 @@ class MainController:
 
     def is_initial(self, id: str):
         project = self.repositories.project.load()
-        stage = project.get_action(id)
+        stage = project.get_stage(id)
         if not stage:
             raise Exception(f"Stage {id} not found")
         return project.is_initial(stage)
@@ -397,7 +393,7 @@ class MainController:
 
     def update_stage(self, id: str, changes: Dict[str, Any]) -> Stage:
         project = self.repositories.project.load()
-        stage = project.get_action(id)
+        stage = project.get_stage(id)
 
         if not stage:
             raise Exception(f"Stage with id {id} not found")
@@ -487,8 +483,7 @@ class MainController:
         )
 
     # Worker lifecycle
-
-    def child_exit(self, *, app_id: str, worker_id: str, err_msg: str):
+    def worker_exit(self, *, app_id: str, worker_id: str, err_msg: str):
         killed_executions = self.execution_repository.find_by_worker(
             worker_id=worker_id,
             status="running",
@@ -512,7 +507,7 @@ class MainController:
 
             self.tasks_repository.set_locked_tasks_to_pending(execution.id)
 
-    def self_exit(self, *, app_id: str, err_msg: str):
+    def app_exit(self, *, app_id: str, err_msg: str):
         exited_execs = self.execution_repository.find_by_app(
             status="running",
             app_id=app_id,

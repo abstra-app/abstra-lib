@@ -241,7 +241,7 @@ class is_in(Comparator):
             Tuple[str, list]: A tuple containing the SQL expression string and a list
                 containing the values to check against.
         """
-        placeholders = ", ".join([f"${idx+i}" for i in range(len(self.value))])
+        placeholders = ", ".join([f"${idx + i}" for i in range(len(self.value))])
         return f"{quoted_identifier(column_name)} IN ({placeholders})", self.value
 
 
@@ -270,7 +270,7 @@ class is_not_in(Comparator):
             Tuple[str, list]: A tuple containing the SQL expression string and a list
                 containing the values to check against.
         """
-        placeholders = ", ".join([f"${idx+i}" for i in range(len(self.value))])
+        placeholders = ", ".join([f"${idx + i}" for i in range(len(self.value))])
         return f"{quoted_identifier(column_name)} NOT IN ({placeholders})", self.value
 
 
@@ -357,7 +357,7 @@ class is_between(Comparator):
             Tuple[str, list]: A tuple containing the SQL expression string and a list
                 containing the lower and upper bound values.
         """
-        return f"{quoted_identifier(column_name)} BETWEEN ${idx} AND ${idx+1}", [
+        return f"{quoted_identifier(column_name)} BETWEEN ${idx} AND ${idx + 1}", [
             self.value1,
             self.value2,
         ]
