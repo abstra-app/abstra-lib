@@ -6,8 +6,9 @@ from unittest.mock import MagicMock, patch
 from PIL import Image
 
 from abstra_internals.controllers.sdk.sdk_ai import AiSDKController
+from abstra_internals.entities.forms.widgets.response_types import FileResponse
 from abstra_internals.interface.sdk.forms.deprecated.widgets.response_types import (
-    FileResponse,
+    FileResponse as DeprecatedFileResponse,
 )
 
 
@@ -88,6 +89,79 @@ class TestAiSDKController(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIn("type", result[0]["content"][0])
 
+    def test_make_message_from_txt_path(self):
+        # Create a dummy txt
+        file_path = Path("test.txt")
+        file_path.write_text(content := "dummy content")
+
+        result = self.controller._make_messages(file_path)
+
+        self.assertEqual(result, [{"role": "user", "content": content}])
+
+    def test_make_messages_with_txt_file_response(self):
+        # Create a dummy txt
+        file_path = Path("test.txt")
+        file_path.write_text(content := "dummy content")
+
+        class MockFileResponse(FileResponse):
+            def __init__(self, url):
+                self._url = url
+
+            @property
+            def name(self):
+                return self.path.name
+
+            @property
+            def content(self):
+                return self.path.read_bytes()
+
+            @property
+            def file(self):
+                return self.path.open("rb")
+
+            @property
+            def path(self):
+                return file_path
+
+        # Mock FileResponse
+        file_response = MockFileResponse(url=file_path.as_posix())
+
+        result = self.controller._make_messages(file_response)
+
+        self.assertEqual(result, [{"role": "user", "content": content}])
+
+    def test_make_messages_with_txt_deprecated_file_response(self):
+        # Create a dummy txt
+        file_path = Path("test.txt")
+        file_path.write_text(content := "dummy content")
+
+        class MockFileResponse(DeprecatedFileResponse):
+            def __init__(self, url):
+                self._url = url
+
+            @property
+            def name(self):
+                return self.path.name
+
+            @property
+            def content(self):
+                return self.path.read_bytes()
+
+            @property
+            def file(self):
+                return self.path.open("rb")
+
+            @property
+            def path(self):
+                return file_path
+
+        # Mock FileResponse
+        file_response = MockFileResponse(url=file_path.as_posix())
+
+        result = self.controller._make_messages(file_response)
+
+        self.assertEqual(result, [{"role": "user", "content": content}])
+
     def test_prompt_with_image_file(self):
         # Mock AI client response
         self.mock_ai_client.prompt.return_value = {"content": "Mocked AI response"}
@@ -116,6 +190,46 @@ class TestAiSDKController(unittest.TestCase):
         file_path.write_text("dummy content")
 
         class MockFileResponse(FileResponse):
+            def __init__(self, url):
+                self._url = url
+
+            @property
+            def name(self):
+                return self.path.name
+
+            @property
+            def content(self):
+                return self.path.read_bytes()
+
+            @property
+            def file(self):
+                return self.path.open("rb")
+
+            @property
+            def path(self):
+                return file_path
+
+        # Mock FileResponse
+        file_response = MockFileResponse(url=file_path.as_posix())
+
+        result = self.controller.prompt(
+            prompts=[file_response],
+            instructions=["Test instruction."],
+            format=None,
+            temperature=0.7,
+        )
+
+        self.assertEqual(result, "Mocked AI response")
+
+    def test_prompt_with_deprecated_file_response(self):
+        # Mock AI client response
+        self.mock_ai_client.prompt.return_value = {"content": "Mocked AI response"}
+
+        # save dummy file
+        file_path = Path("test.pdf")
+        file_path.write_text("dummy content")
+
+        class MockFileResponse(DeprecatedFileResponse):
             def __init__(self, url):
                 self._url = url
 

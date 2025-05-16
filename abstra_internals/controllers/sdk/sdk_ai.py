@@ -7,13 +7,18 @@ import pypdfium2 as pdfium
 from PIL.Image import Image
 
 import abstra_internals.utils.b64 as b64
-from abstra_internals.interface.sdk.forms.deprecated.widgets.response_abc import (
+from abstra_internals.entities.forms.widgets.response_types import (
     AbstractFileResponse,
+)
+from abstra_internals.interface.sdk.forms.deprecated.widgets.response_abc import (
+    AbstractFileResponse as DeprecatedAbstractFileResponse,
 )
 from abstra_internals.repositories.ai import AiApiHttpClient
 from abstra_internals.utils.string import to_snake_case
 
-Prompt = Union[str, io.IOBase, pathlib.Path, AbstractFileResponse]
+Prompt = Union[
+    str, io.IOBase, pathlib.Path, AbstractFileResponse, DeprecatedAbstractFileResponse
+]
 Format = Dict[str, object]
 
 
@@ -75,6 +80,10 @@ class AiSDKController:
 
     def _make_messages(self, prompt: Prompt) -> List:
         if isinstance(prompt, pathlib.Path):
+            if prompt.suffix[1:] == "txt":
+                with open(prompt, "r", encoding="utf-8") as f:
+                    return [self._make_text_message(f.read())]
+
             with prompt.open("rb") as f:
                 if images := self._try_extract_images(f):
                     return [
@@ -85,8 +94,12 @@ class AiSDKController:
                 encoded_str = b64.encode_base_64(f)
                 return [self._make_image_url_message(encoded_str)]
 
-        if isinstance(prompt, AbstractFileResponse):
+        if isinstance(prompt, (AbstractFileResponse, DeprecatedAbstractFileResponse)):
             file = prompt.file
+
+            if prompt.path.suffix[1:] == "txt":
+                return [self._make_text_message(prompt.content.decode("utf-8"))]
+
             if images := self._try_extract_images(file):
                 return [
                     self._make_image_url_message(b64.encode_base_64(image))
