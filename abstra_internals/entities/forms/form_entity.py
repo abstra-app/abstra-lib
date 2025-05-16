@@ -35,6 +35,11 @@ class RenderedForm(TypedDict):
     yielding: bool
 
 
+class ButtonAction(TypedDict):
+    key: str
+    label: str
+
+
 class FormEntity:
     steps: List[Step]
     current_step_idx: int

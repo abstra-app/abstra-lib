@@ -4,7 +4,7 @@ import flask_sock
 
 from abstra_internals.controllers.execution.execution_client import ExecutionClient
 from abstra_internals.entities.execution_context import FormContext
-from abstra_internals.entities.forms.form_entity import RenderedForm
+from abstra_internals.entities.forms.form_entity import ButtonAction, RenderedForm
 from abstra_internals.interface.contract import forms_contract
 from abstra_internals.utils import deserialize, serialize
 
@@ -71,7 +71,14 @@ class FormClient(ExecutionClient):
     ## SDK
 
     def request_render(self, rendered: RenderedForm, seq: int) -> None:
-        actions = list(map(lambda button: button.label, rendered["buttons"]))
+        actions = list(
+            map(
+                lambda button: ButtonAction(
+                    key=button.safe_get_key(), label=button.label
+                ),
+                rendered["buttons"],
+            )
+        )
         self._user_code_send(
             forms_contract.FormRenderMessage(
                 widgets=rendered["widgets"],

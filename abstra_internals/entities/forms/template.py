@@ -22,17 +22,30 @@ class Button:
 
     Args:
         label (str): The text displayed on the button.
+        key (Optional[str]): An optional key for the button.
+            If not provided, the label will be used as the key.
     """
 
     label: str
+    key: Optional[str]
 
-    def __init__(self, label: str):
+    def __init__(
+        self,
+        label: str,
+        key: Optional[str] = None,
+    ):
         """Initialize a Button with the given label.
 
         Args:
             label (str): The text displayed on the button.
+            key (Optional[str]): An optional key for the button.
+                If not provided, the label will be used as the key.
         """
         self.label = label
+        self.key = key
+
+    def safe_get_key(self) -> str:
+        return self.key if self.key else self.label
 
 
 class NextButton(Button):

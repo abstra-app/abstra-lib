@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Literal, Optional, TypedDict, Union
 
 from abstra_internals.debug import make_exception_debug_data, make_frame_debug_data
-from abstra_internals.entities.forms.form_entity import StepsInfo
+from abstra_internals.entities.forms.form_entity import ButtonAction, StepsInfo
 
 
 class Message:
@@ -103,7 +103,7 @@ class FormRenderMessage(Message):
         end_page: bool,
         seq: int,
         production_mode: bool,
-        actions: Optional[List[str]] = None,
+        actions: Optional[List[ButtonAction]] = None,
     ):
         super().__init__(
             {

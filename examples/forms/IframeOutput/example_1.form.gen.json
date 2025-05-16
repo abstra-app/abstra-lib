@@ -17,6 +17,9 @@
     "endPage": false,
     "seq": 0,
     "actions": [
-        "i18n_next_action"
+        {
+            "key": "i18n_next_action",
+            "label": "i18n_next_action"
+        }
     ]
 }

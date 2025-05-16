@@ -351,6 +351,13 @@
             "description": "The text displayed on the button.",
             "default": "None",
             "required": true
+          },
+          {
+            "name": "key",
+            "type": "Optional[str]",
+            "description": "An optional key for the button. If not provided, the label will be used as the key.",
+            "default": "None",
+            "required": false
           }
         ]
       },
@@ -776,7 +783,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -912,7 +922,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1081,7 +1094,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         },
@@ -1138,7 +1154,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1232,7 +1251,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1363,7 +1385,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1473,7 +1498,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1575,7 +1603,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1685,7 +1716,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1811,7 +1845,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -1936,7 +1973,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2046,7 +2086,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2193,7 +2236,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2309,7 +2355,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2444,7 +2493,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         },
@@ -2510,7 +2562,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2563,7 +2618,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2632,7 +2690,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2768,7 +2829,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2837,7 +2901,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2890,7 +2957,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         },
@@ -2915,7 +2985,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -2984,7 +3057,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3174,7 +3250,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3227,7 +3306,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3366,7 +3448,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3499,7 +3584,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3617,7 +3705,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3735,7 +3826,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -3880,7 +3974,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -4082,7 +4179,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -4264,7 +4364,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -4377,7 +4480,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -4575,6 +4681,57 @@
                               ]
                             ],
                             "type": "contour"
+                          }
+                        ],
+                        "heatmapgl": [
+                          {
+                            "colorbar": {
+                              "outlinewidth": 0,
+                              "ticks": ""
+                            },
+                            "colorscale": [
+                              [
+                                0.0,
+                                "#0d0887"
+                              ],
+                              [
+                                0.1111111111111111,
+                                "#46039f"
+                              ],
+                              [
+                                0.2222222222222222,
+                                "#7201a8"
+                              ],
+                              [
+                                0.3333333333333333,
+                                "#9c179e"
+                              ],
+                              [
+                                0.4444444444444444,
+                                "#bd3786"
+                              ],
+                              [
+                                0.5555555555555556,
+                                "#d8576b"
+                              ],
+                              [
+                                0.6666666666666666,
+                                "#ed7953"
+                              ],
+                              [
+                                0.7777777777777778,
+                                "#fb9f3a"
+                              ],
+                              [
+                                0.8888888888888888,
+                                "#fdca26"
+                              ],
+                              [
+                                1.0,
+                                "#f0f921"
+                              ]
+                            ],
+                            "type": "heatmapgl"
                           }
                         ],
                         "heatmap": [
@@ -4827,17 +4984,6 @@
                               }
                             },
                             "type": "scattermapbox"
-                          }
-                        ],
-                        "scattermap": [
-                          {
-                            "marker": {
-                              "colorbar": {
-                                "outlinewidth": 0,
-                                "ticks": ""
-                              }
-                            },
-                            "type": "scattermap"
                           }
                         ],
                         "scatterpolargl": [
@@ -5242,7 +5388,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -5412,7 +5561,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -5514,7 +5666,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -5616,7 +5771,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -5742,7 +5900,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -5803,7 +5964,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -5905,7 +6069,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -6007,7 +6174,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -6117,7 +6287,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
@@ -6253,7 +6426,10 @@
             "endPage": false,
             "seq": 0,
             "actions": [
-              "i18n_next_action"
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
             ]
           }
         }
