@@ -1247,6 +1247,12 @@ class Project:
             and stage.file_path.resolve() == file_path.resolve()
         ]
 
+    def iter_py_files(self) -> Generator[Path, None, None]:
+        root = Settings.root_path
+        for path in root.rglob("*.py"):
+            if path.is_file():
+                yield path
+
     def iter_entrypoints(self) -> Generator[Path, None, None]:
         for stage in self.workflow_stages:
             if isinstance(stage, StageWithFile):

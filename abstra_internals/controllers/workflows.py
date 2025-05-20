@@ -163,6 +163,7 @@ class WorkflowController:
                     or isinstance(stage, HookStage)
                     or isinstance(stage, JobStage)
                 ):
+                    stage.update({"file": f"{stage_dto['props']['filename']}"})
                     stage.file = f"{stage_dto['props']['filename']}"
                 if isinstance(stage, FormStage) or isinstance(stage, HookStage):
                     stage.path = stage_dto["props"]["path"]
