@@ -48,16 +48,24 @@ class FileChangeEventHandler(FileSystemEventHandler):
             return
 
     def reload_module(self, file: Path):
-        module_name = file.stem
-        module = sys.modules.get(module_name)
-
         try:
+            relative_path = file.resolve().relative_to(Settings.root_path.resolve())
+            if relative_path.suffix != ".py":
+                return
+
+            module_name = ".".join(relative_path.with_suffix("").parts)
+
+            AbstraLogger.debug(f"Reloading module: {module_name}")
+
+            module = sys.modules.get(module_name)
+
             if module is None:
                 importlib.import_module(module_name)
             else:
                 if module.__spec__ is not None and module.__spec__.cached is not None:
                     Path(module.__spec__.cached).unlink(missing_ok=True)
                 importlib.reload(module)
+
         except Exception as e:
             AbstraLogger.error(
                 f"Could not reload module from {file} with the following error: {e}"

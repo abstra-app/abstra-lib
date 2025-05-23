@@ -46,3 +46,85 @@ class ReloadProjectLocalModulesTest(TestCase):
         handler.reload_module(mod_file)
         main_module = import_as_new("main.py")
         self.assertEqual(main_module.x, 2)
+
+    def test_reload_nested_module(self):
+        project = self.project_repository.load()
+
+        nested_dir = self.root / "foo"
+        nested_dir.mkdir()
+        mod_file = nested_dir / "bar.py"
+        mod_file.write_text("y = 10")
+
+        main_file = self.root / "main.py"
+        main_file.write_text("from foo.bar import y")
+
+        script = ScriptStage(
+            file="main.py",
+            id="test_nested",
+            is_initial=True,
+            title="test_nested",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.scripts.append(script)
+        self.project_repository.save(project)
+
+        main_module = import_as_new("main.py")
+        self.assertEqual(main_module.y, 10)
+
+        mod_file.write_text("y = 42")
+
+        handler = FileChangeEventHandler(self.project_repository)
+        handler.reload_module(mod_file)
+
+        main_module = import_as_new("main.py")
+        self.assertEqual(main_module.y, 42)
+
+    def test_reload_nested_module_symlinked_root(self):
+        project = self.project_repository.load()
+
+        nested_dir = self.root / "pkg"
+        nested_dir.mkdir()
+        mod_file = nested_dir / "mod.py"
+        mod_file.write_text("z = 100")
+
+        main_file = self.root / "main.py"
+        main_file.write_text("from pkg.mod import z")
+
+        script = ScriptStage(
+            file="main.py",
+            id="test_symlinked",
+            is_initial=True,
+            title="test_symlinked",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+        project.scripts.append(script)
+        self.project_repository.save(project)
+
+        symlink_root = self.root.parent / "symlinked_root"
+        if symlink_root.exists():
+            symlink_root.unlink()
+        symlink_root.symlink_to(self.root)
+
+        mod_file_symlinked = symlink_root / "pkg" / "mod.py"
+        mod_file_symlinked.write_text("z = 123")
+
+        handler = FileChangeEventHandler(self.project_repository)
+        handler.reload_module(mod_file_symlinked)
+
+        main_module = import_as_new("main.py")
+        self.assertEqual(main_module.z, 123)
+
+    def test_ignore_ignored_paths(self):
+        ignored_files = [
+            self.root / ".abstra" / "resources.dat",
+            self.root / "__pycache__" / "something.pyc",
+            self.root / "abstra.json",
+        ]
+        for file in ignored_files:
+            file.parent.mkdir(exist_ok=True)
+            file.write_text("junk")
+
+            handler = FileChangeEventHandler(self.project_repository)
+            self.assertTrue(handler.should_ignore_path(file))
