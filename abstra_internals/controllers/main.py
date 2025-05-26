@@ -364,8 +364,10 @@ class MainController:
         project.delete_stage(id, remove_file)
         self.repositories.project.save(project)
 
-    def get_jobs(self) -> List[JobStage]:
-        project = self.repositories.project.load()
+    def get_jobs(self, include_disabled_jobs: bool = False) -> List[JobStage]:
+        project = self.repositories.project.load(
+            include_disabled_stages=include_disabled_jobs
+        )
         return project.jobs
 
     def get_job(self, id: str) -> Optional[JobStage]:

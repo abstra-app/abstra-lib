@@ -245,7 +245,9 @@ def get_player_bp(controller: MainController):
         if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
             flask.abort(401)
 
-        jobs = controller.get_jobs()
+        # The scheduler needs all the jobs, including disabled ones, to schedule them.
+        # The scheduler will always send the request to the lib to run the jobs, and the lib will check if the job is enabled or not.
+        jobs = controller.get_jobs(include_disabled_jobs=True)
 
         # used by sidecar - DO NOT CHANGE CONTRACT
         return [{"id": job.id, "schedule": job.schedule} for job in jobs]
