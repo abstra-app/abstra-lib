@@ -44,7 +44,7 @@ class CodebaseController:
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
 
-        project = self.repos.project.load()
+        project = self.repos.project.load(include_disabled_stages=True)
 
         return [
             AbstraLibApiEditorFilesListResponseItem(

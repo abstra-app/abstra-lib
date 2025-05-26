@@ -28,7 +28,7 @@ class ExecutionControllerTest(BaseTest):
             response=Response(headers={}, status=200, body=""),
         )
 
-        self.project = self.repositories.project.load()
+        self.project = self.repositories.project.load(include_disabled_stages=False)
         self.stage = HookStage.create(
             title="mock_stage",
             file="mock_file.py",

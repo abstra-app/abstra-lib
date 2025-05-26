@@ -117,7 +117,7 @@ class TasksSDKController:
     def __init__(self, repositories: Repositories, execution: Execution) -> None:
         self.execution = execution
         self.repositories = repositories
-        self.project = self.repositories.project.load()
+        self.project = self.repositories.project.load(include_disabled_stages=False)
         self.executor = TaskExecutor(repositories)
 
     def send_task(self, type: str, payload: TaskPayload, show_warning: bool) -> None:

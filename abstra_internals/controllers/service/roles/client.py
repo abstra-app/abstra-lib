@@ -22,7 +22,7 @@ class RoleClientController(RoleCommonController):
         execution: Optional[Execution] = None,
     ):
         executor = TaskExecutor(self.repos)
-        project = self.repos.project.load()
+        project = self.repos.project.load(include_disabled_stages=False)
         executor.send_task(
             type=task_type,
             current_stage=project.get_stage_raises(target_stage_id),

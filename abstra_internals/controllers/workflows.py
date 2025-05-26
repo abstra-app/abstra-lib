@@ -31,7 +31,7 @@ class WorkflowController:
 
     # workflow visual editor
     def get_workflow(self):
-        project = self.repos.project.load()
+        project = self.repos.project.load(include_disabled_stages=True)
         return self._make_workflow_dto(project)
 
     def build_adjacency_list(
@@ -147,7 +147,7 @@ class WorkflowController:
         )
 
     def update_workflow(self, workflow_state_dto: Dict):
-        project = self.repos.project.load()
+        project = self.repos.project.load(include_disabled_stages=True)
 
         for stage_dto in workflow_state_dto["stages"]:
             stage = project.get_stage(stage_dto["id"])

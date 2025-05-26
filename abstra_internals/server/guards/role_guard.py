@@ -68,24 +68,26 @@ class Guard:
     def __get_access_settings(self, selector: Selector, **kwargs):
         if isinstance(selector, IdArgSelector):
             stage_id = str(kwargs.get(selector.value))
-            return self.project_repository.load().get_access_control_by_stage_id(
-                stage_id
-            )
+            return self.project_repository.load(
+                include_disabled_stages=False
+            ).get_access_control_by_stage_id(stage_id)
 
         elif isinstance(selector, StageIdSelector):
-            return self.project_repository.load().get_access_control_by_stage_id(
-                selector.value
-            )
+            return self.project_repository.load(
+                include_disabled_stages=False
+            ).get_access_control_by_stage_id(selector.value)
 
         elif isinstance(selector, QueryArgSelector):
             stage_id = str(flask.request.args.get(selector.value))
-            return self.project_repository.load().get_access_control_by_stage_id(
-                stage_id
-            )
+            return self.project_repository.load(
+                include_disabled_stages=False
+            ).get_access_control_by_stage_id(stage_id)
 
         ##path arg is default
         path = str(kwargs.get(selector.value))
-        return self.project_repository.load().get_access_control_by_stage_path(path)
+        return self.project_repository.load(
+            include_disabled_stages=False
+        ).get_access_control_by_stage_path(path)
 
     def __allow(
         self, access_setting: AccessSettings, authHeader: Optional[str]
@@ -113,9 +115,9 @@ class Guard:
         return NavigationGuard("FORBIDEN")
 
     def should_allow(self, path: str, auth: Optional[str]) -> NavigationGuard:
-        access_settings = (
-            self.project_repository.load().get_access_control_by_stage_path(path)
-        )
+        access_settings = self.project_repository.load(
+            include_disabled_stages=False
+        ).get_access_control_by_stage_path(path)
         ##404 allow this to be handled by the frontend
         if access_settings is None:
             return NavigationGuard("NOT_FOUND")
@@ -123,7 +125,7 @@ class Guard:
         return self.__allow(access_settings, auth)
 
     def filtered_workspace(self, auth: Optional[str]) -> StyleSettingsWithSidebar:
-        project = self.project_repository.load()
+        project = self.project_repository.load(include_disabled_stages=False)
         user: Optional[CommonUser] = None
 
         visible_sidebar = Sidebar(items=[])

@@ -33,6 +33,9 @@ from abstra_internals.entities.agents import AgentEntrypoint
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
+from abstra_internals.repositories.project.disabled_stages_loader import (
+    DisabledStagesLoader,
+)
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
     abstra_favicon,
@@ -1636,7 +1639,7 @@ class ProjectRepository:
         if migrated_data["version"] != initial_version:
             self.save(Project.from_dict(migrated_data))
 
-    def load(self) -> Project:
+    def load(self, include_disabled_stages: bool = False) -> Project:
         file_path = self.get_file_path()
 
         with self.lock:
@@ -1657,4 +1660,45 @@ class LocalProjectRepository(ProjectRepository):
 
 
 class ProductionProjectRepository(ProjectRepository):
-    pass
+    def __init__(self, disabled_stages_loader: DisabledStagesLoader):
+        self.disabled_stages_loader = disabled_stages_loader
+
+    def load(self, include_disabled_stages: bool = False):
+        file_path = self.get_file_path()
+
+        with self.lock:
+            data = json.loads(file_path.read_text(encoding="utf-8"))
+            if data["version"] == "v13.0":
+                CommonAbstraJsonV13.from_dict(data)
+
+            if include_disabled_stages:
+                filtered_data = data
+            else:
+                filtered_data = filter_stages_from_data(
+                    data, self.disabled_stages_loader.get_disabled_stages_ids()
+                )
+            return Project.from_dict(filtered_data)
+
+
+def filter_stages_from_data(
+    data: dict, disabled_stages_ids: Optional[List[str]] = None
+):
+    if disabled_stages_ids is None or len(disabled_stages_ids) == 0:
+        return data
+
+    stage_keys = ["forms", "hooks", "scripts", "jobs", "agents", "clients"]
+
+    copy_data = data.copy()
+
+    for key in stage_keys:
+        copy_data[key] = [
+            stage for stage in copy_data[key] if stage["id"] not in disabled_stages_ids
+        ]
+        for stage in copy_data[key]:
+            stage["transitions"] = [
+                transition
+                for transition in stage.get("transitions", [])
+                if transition["target_id"] not in disabled_stages_ids
+            ]
+
+    return copy_data

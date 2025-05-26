@@ -20,7 +20,7 @@ from abstra_internals.repositories.tasks import TaskDTO, TaskPayload
 class TaskExecutor:
     def __init__(self, repos: Repositories) -> None:
         self.repos = repos
-        self.project = self.repos.project.load()
+        self.project = self.repos.project.load(include_disabled_stages=False)
 
     def send_task(
         self,
@@ -30,7 +30,7 @@ class TaskExecutor:
         execution: Optional[Execution] = None,
         show_warning: bool = True,
     ) -> None:
-        project = self.repos.project.load()
+        project = self.repos.project.load(include_disabled_stages=False)
         next_stages = [
             project.get_stage_raises(t.target_id)
             for t in current_stage.workflow_transitions

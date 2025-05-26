@@ -33,13 +33,17 @@ class FileChangeEventHandler(FileSystemEventHandler):
         if filepath.resolve() == self.dot_env_path.resolve():
             AbstraLogger.info("Reloading .env and all modules")
             load_dotenv(self.dot_env_path, override=True)
-            for dep in self.project_repository.load().get_local_dependencies():
+            for dep in self.project_repository.load(
+                include_disabled_stages=True
+            ).get_local_dependencies():
                 self.reload_module(dep)
             return
 
         resolved_deps = [
             dep.resolve()
-            for dep in self.project_repository.load().get_local_dependencies()
+            for dep in self.project_repository.load(
+                include_disabled_stages=True
+            ).get_local_dependencies()
         ]
 
         if filepath.resolve() in resolved_deps:

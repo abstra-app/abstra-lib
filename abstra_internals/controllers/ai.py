@@ -81,7 +81,9 @@ class AiController:
     ):
         headers = resolve_headers() or {}
         env_vars_keys = EnvVarsRepository.list_keys()
-        current_abstra_json = self.controller.repositories.project.load().as_dict
+        current_abstra_json = self.controller.repositories.project.load(
+            include_disabled_stages=True
+        ).as_dict
         runtime = None
         imported_code = {}
         if stage_id:

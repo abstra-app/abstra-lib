@@ -58,6 +58,9 @@ from abstra_internals.repositories.producer import (
     ProducerRepository,
     ProductionProducerRepository,
 )
+from abstra_internals.repositories.project.disabled_stages_loader import (
+    ProductionDisabledStagesLoader,
+)
 from abstra_internals.repositories.project.project import (
     LocalProjectRepository,
     ProductionProjectRepository,
@@ -147,8 +150,10 @@ def get_prodution_app_repositories():
     if SIDECAR_URL is None or RABBITMQ_CONNECTION_URI is None:
         raise Exception("Production urls are not set")
 
+    disabled_stages_loader = ProductionDisabledStagesLoader(SIDECAR_URL)
+
     return Repositories(
-        project=ProductionProjectRepository(),
+        project=ProductionProjectRepository(disabled_stages_loader),
         producer=ProductionProducerRepository(RABBITMQ_CONNECTION_URI),
         execution_logs=ProductionExecutionLogsRepository(SIDECAR_URL),
         connectors=ProductionConnectorsRepository(SIDECAR_URL),

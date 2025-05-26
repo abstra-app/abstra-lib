@@ -60,7 +60,7 @@ class TasksController:
         self.repos = repositories
 
     def get_stage(self, stage_id: str):
-        project = self.repos.project.load()
+        project = self.repos.project.load(include_disabled_stages=True)
         stage = project.get_stage(stage_id)
 
         if not stage:
