@@ -22,6 +22,7 @@ def get_editor_bp(main_controller: MainController):
             body["langGraphThreadId"],
             body["code"],
             body["executionError"],
+            body["allowedActionsSchema"],
         )
 
         if streamer is None:

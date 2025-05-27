@@ -77,7 +77,13 @@ class AiController:
         self.controller = controller
 
     def send_ai_message(
-        self, messages, stage_id, langgraph_thread_id, code, execution_error
+        self,
+        messages,
+        stage_id,
+        langgraph_thread_id,
+        code,
+        execution_error,
+        allowed_actions_schema,
     ):
         headers = resolve_headers() or {}
         env_vars_keys = EnvVarsRepository.list_keys()
@@ -102,6 +108,7 @@ class AiController:
             headers,
             env_vars_keys,
             current_abstra_json,
+            allowed_actions_schema,
         )
 
     def get_history(self, limit: int, offset: int):
