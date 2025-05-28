@@ -1,5 +1,7 @@
+from pathlib import Path
 from typing import Dict, List, Optional, TypeVar, Union
 
+from abstra_internals.contracts_generated import CloudApiCliModelsNfseResponse
 from abstra_internals.controllers.sdk.sdk_ai import Format, Prompt
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 
@@ -64,3 +66,31 @@ def prompt(
     return SDKContextStore.get_by_thread().ai_sdk.prompt(
         prompt_list, instructions_list, normalized_format, temperature
     )
+
+
+def parse_document(document_path: Path, model: str) -> dict:
+    """
+    Parse a document using the specified AI model.
+    Args:
+        document_path (Path): The path to the document to be parsed.
+        model (str): The AI model to use for parsing.
+    Returns:
+        dict: The parsed document data.
+    Raises:
+        ValueError: If the document path is invalid or the model is not supported.
+    """
+    return SDKContextStore.get_by_thread().ai_sdk.parse_document(document_path, model)
+
+
+def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
+    """
+    Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.
+    Args:
+        document_path (Path): The path to the NFSe document to be parsed.
+    Returns:
+        CloudApiCliModelsNfseResponse: The parsed NFSe response.
+    Raises:
+        ValueError: If the document path is invalid or the parsing fails.
+    """
+    data = parse_document(document_path, "nfse")
+    return CloudApiCliModelsNfseResponse.from_dict(data)

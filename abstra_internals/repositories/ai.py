@@ -16,6 +16,10 @@ class AiApiHttpClient(ABC):
     def prompt(self, messages: List[Any], tools: List[Any], temperature: float):
         raise NotImplementedError()
 
+    @abstractmethod
+    def parse_document(self, model: str, file_content: bytes, mime_type: str):
+        raise NotImplementedError()
+
 
 class ProductionAiApiHttpClient(AiApiHttpClient):
     def prompt(self, messages: List[Any], tools: List[Any], temperature: float):
@@ -36,6 +40,17 @@ class ProductionAiApiHttpClient(AiApiHttpClient):
         except json.JSONDecodeError:
             raise Exception(f"Error parsing JSON: {response.text}")
 
+    def parse_document(self, model: str, file_content: bytes, mime_type: str):
+        response = requests.post(
+            f"{self.url}/parse-document/{model}",
+            headers={**SIDECAR_HEADERS, "Content-Type": mime_type},
+            timeout=REQUEST_TIMEOUT,
+            data=file_content,
+        )
+        response.raise_for_status()
+
+        return response.json()
+
 
 class LocalAiApiHttpClient(AiApiHttpClient):
     def prompt(self, messages: List[Any], tools: List[Any], temperature: float):
@@ -55,3 +70,17 @@ class LocalAiApiHttpClient(AiApiHttpClient):
             return response
         except json.JSONDecodeError:
             raise Exception(f"Error parsing JSON: {response.text}")
+
+    def parse_document(self, model: str, file_content: bytes, mime_type: str):
+        headers = resolve_headers()
+        if headers is None:
+            raise Exception("You must be logged in to use AI")
+        response = requests.post(
+            f"{self.url}/parse-document/{model}",
+            headers={**headers, "Content-Type": mime_type},
+            timeout=REQUEST_TIMEOUT,
+            data=file_content,
+        )
+        response.raise_for_status()
+
+        return response.json()

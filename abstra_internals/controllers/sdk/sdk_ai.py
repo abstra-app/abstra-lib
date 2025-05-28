@@ -7,9 +7,7 @@ import pypdfium2 as pdfium
 from PIL.Image import Image
 
 import abstra_internals.utils.b64 as b64
-from abstra_internals.entities.forms.widgets.response_types import (
-    AbstractFileResponse,
-)
+from abstra_internals.entities.forms.widgets.response_types import AbstractFileResponse
 from abstra_internals.interface.sdk.forms.deprecated.widgets.response_abc import (
     AbstractFileResponse as DeprecatedAbstractFileResponse,
 )
@@ -190,3 +188,22 @@ class AiSDKController:
                 raise Exception(f"Error parsing JSON: {parameters_dict}")
 
         return response["content"]
+
+    def parse_document(self, document_path: pathlib.Path, model: str) -> dict:
+        if document_path.suffix.lower() == ".pdf":
+            mime_type = "application/pdf"
+        elif document_path.suffix.lower() in [".jpeg", ".jpg"]:
+            mime_type = "image/jpeg"
+        elif document_path.suffix.lower() == ".png":
+            mime_type = "image/png"
+        else:
+            raise ValueError(
+                f"Unsupported file type: {document_path.suffix}. Supported types are: .pdf, .jpeg, .jpg, .png"
+            )
+
+        file_bytes = document_path.read_bytes()
+        return self.ai_client.parse_document(
+            model=model,
+            file_content=file_bytes,
+            mime_type=mime_type,
+        )

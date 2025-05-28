@@ -52,6 +52,43 @@
       ],
       "return_type": "Unknown",
       "examples": []
+    },
+    "parse_document": {
+      "object_type": "function",
+      "description": "Parse a document using the specified AI model.",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Path",
+          "description": "The path to the document to be parsed.",
+          "default": "None",
+          "required": true
+        },
+        {
+          "name": "model",
+          "type": "str",
+          "description": "The AI model to use for parsing. dict: The parsed document data. ValueError: If the document path is invalid or the model is not supported.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "dict",
+      "examples": []
+    },
+    "parse_nfse": {
+      "object_type": "function",
+      "description": "Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Path",
+          "description": "The path to the NFSe document to be parsed. CloudApiCliModelsNfseResponse: The parsed NFSe response. ValueError: If the document path is invalid or the parsing fails.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsNfseResponse",
+      "examples": []
     }
   },
   "abstra.cli": {
