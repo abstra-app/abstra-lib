@@ -1,3 +1,4 @@
+import sys
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from abstra_internals.entities.forms.form_entity import (
@@ -61,7 +62,7 @@ class FormSDKController:
                 continue
 
             if rendered["end_page"]:
-                break
+                sys.exit(0)
 
             response = self.client.next_user_message()
 
