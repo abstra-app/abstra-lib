@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 from abstra_internals.cloud_api import (
+    abort_thread,
     cancel_all,
     create_thread,
     generate_project,
@@ -126,6 +127,10 @@ class AiController:
     def cancel_all(self, thread_id: str):
         if headers := resolve_headers():
             cancel_all(headers, thread_id)
+
+    def abort_thread(self, thread_id: str):
+        if headers := resolve_headers():
+            return abort_thread(headers, thread_id)
 
     def generate_project(self, prompt: str, tries: int = 0):
         headers = resolve_headers() or {}

@@ -125,6 +125,17 @@ def cancel_all(headers: dict, thread_id: str):
     r.raise_for_status()
 
 
+def abort_thread(headers: dict, thread_id: str):
+    url = f"{CLOUD_API_CLI_URL}/ai/abort"
+    r = requests.post(
+        url,
+        headers=headers,
+        json={"langGraphThreadId": thread_id},
+        timeout=REQUEST_TIMEOUT,
+    )
+    r.raise_for_status()
+
+
 def get_project_info(headers: dict, project_id: Optional[str] = None):
     if project_id:
         url = f"{CLOUD_API_CLI_URL}/project/{project_id}"

@@ -30,6 +30,18 @@ def get_editor_bp(main_controller: MainController):
 
         return flask.Response(streamer, mimetype="text/event-stream")
 
+    @bp.post("/abort")
+    @editor_usage
+    def _abort():
+        body = flask.request.json
+        if not body:
+            flask.abort(400)
+        thread_id = body.get("langGraphThreadId")
+        if not thread_id:
+            flask.abort(400)
+        controller.abort_thread(thread_id)
+        return {"success": True}
+
     @bp.get("/history")
     @editor_usage
     def _get_history():
