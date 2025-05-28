@@ -150,7 +150,7 @@ def get_prodution_app_repositories():
     if SIDECAR_URL is None or RABBITMQ_CONNECTION_URI is None:
         raise Exception("Production urls are not set")
 
-    disabled_stages_loader = ProductionDisabledStagesLoader(SIDECAR_URL)
+    disabled_stages_loader = ProductionDisabledStagesLoader()
 
     return Repositories(
         project=ProductionProjectRepository(disabled_stages_loader),
