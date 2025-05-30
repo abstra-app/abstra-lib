@@ -65,12 +65,8 @@ class EnvVarsRepository:
 
         for python_file in project.project_files:
             try:
-                function_calls = function_called_args(
-                    python_file.read_text(encoding="utf-8"), ["os"], "getenv"
-                )
-                subscript_calls = subscript_called_args(
-                    python_file.read_text(encoding="utf-8"), ["os"], "environ"
-                )
+                function_calls = function_called_args(python_file, ["os"], "getenv")
+                subscript_calls = subscript_called_args(python_file, ["os"], "environ")
 
                 if function_calls is not None:
                     for function_call in function_calls:

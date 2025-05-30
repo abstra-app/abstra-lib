@@ -1,9 +1,14 @@
+from functools import lru_cache
+
 import jedi
 from pydantic import BaseModel
 
+JEDI_ENV = jedi.InterpreterEnvironment()
 
+
+@lru_cache(maxsize=128)
 def _script(code: str):
-    return jedi.Script(code, environment=jedi.InterpreterEnvironment())
+    return jedi.Script(code=code, environment=JEDI_ENV)
 
 
 def jedi_get_autocomplete(code, line, column):

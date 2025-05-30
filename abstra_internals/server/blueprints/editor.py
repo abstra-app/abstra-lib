@@ -69,7 +69,7 @@ def __get_api_bp(controller: MainController):
     login_bp = login_router.get_editor_bp(controller)
     bp.register_blueprint(login_bp, url_prefix="/login")
 
-    linters_bp = linters_router.get_editor_bp()
+    linters_bp = linters_router.get_editor_bp(controller)
     bp.register_blueprint(linters_bp, url_prefix="/linters")
 
     ai_bp = ai_router.get_editor_bp(controller)

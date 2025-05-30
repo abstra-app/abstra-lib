@@ -9,10 +9,11 @@ import typing as t
 import uuid
 import warnings
 from pathlib import Path
-from typing import Generator, Optional, Union
+from typing import Generator, Optional, Set, Union
 
 from werkzeug.datastructures import FileStorage
 
+from abstra_internals.utils.ast_cache import ASTCache
 from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 FILE_TYPES = {
@@ -442,23 +443,31 @@ def silent_traverse_code(
 ) -> Generator[Path, None, None]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        yield from traverse_code(path, raise_on_syntax_errors)
+        yield from traverse_code(path, raise_on_syntax_errors, set())
 
 
 def traverse_code(
-    path: Path, raise_on_syntax_errors=False
+    path: Path, raise_on_syntax_errors=False, yielded_files: Optional[Set[Path]] = None
 ) -> Generator[Path, None, None]:
+    if yielded_files is None:
+        yielded_files = set()
+
     try:
-        code = path.read_text(encoding="utf-8")
-        parsed = ast.parse(code)
+        parsed = ASTCache.get(path)
 
         for node in parsed.body:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     file_path = _get_file_path_from_absolute_module(alias.name)
 
-                    if file_path is not None:
-                        yield from traverse_code(file_path)
+                    if (
+                        file_path is not None
+                        and file_path not in yielded_files
+                        and file_path.absolute() != path.absolute()
+                    ):
+                        yield from traverse_code(
+                            file_path, raise_on_syntax_errors, yielded_files
+                        )
 
             if isinstance(node, ast.ImportFrom):
                 for alias in node.names:
@@ -466,14 +475,22 @@ def traverse_code(
                         node.level, node.module, alias.name, path.parent
                     )
 
-                    if file_path is not None:
-                        yield from traverse_code(file_path)
+                    if (
+                        file_path is not None
+                        and file_path not in yielded_files
+                        and file_path.absolute() != path.absolute()
+                    ):
+                        yield from traverse_code(
+                            file_path, raise_on_syntax_errors, yielded_files
+                        )
 
     except Exception as e:
         if raise_on_syntax_errors and isinstance(e, SyntaxError):
             raise e
 
-    yield path
+    if path not in yielded_files:
+        yield path
+        yielded_files.add(path)
 
 
 def get_tmp_upload_dir():

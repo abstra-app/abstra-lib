@@ -1247,7 +1247,7 @@ class Project:
             stage
             for stage in self.workflow_stages
             if isinstance(stage, stage_with_file_classes)
-            and stage.file_path.resolve() == file_path.resolve()
+            and stage.file_path.absolute() == file_path.absolute()
         ]
 
     def iter_py_files(self) -> Generator[Path, None, None]:

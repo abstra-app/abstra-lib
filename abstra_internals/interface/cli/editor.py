@@ -1,4 +1,5 @@
 import threading
+import time
 
 from dotenv import load_dotenv
 from werkzeug.serving import make_server
@@ -8,7 +9,8 @@ from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST
-from abstra_internals.fs_watcher import FileChangeEventHandler
+from abstra_internals.file_handlers import FileHandler
+from abstra_internals.file_watcher import FileChangeWatcher
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import EditorConsumer
@@ -39,7 +41,7 @@ def start_consumer(controller: MainController):
     return consumer, th
 
 
-def start_file_watcher(watcher: FileChangeEventHandler):
+def start_file_watcher(watcher: FileChangeWatcher):
     threading.Thread(
         daemon=True,
         name="file_watcher",
@@ -55,6 +57,18 @@ def start_resources_watcher():
     ).start()
 
 
+def start_linter(controller: MainController):
+    def defered_check():
+        time.sleep(2)
+        controller.repositories.linter.update_checks()
+
+    threading.Thread(
+        daemon=True,
+        name="linter",
+        target=defered_check,
+    ).start()
+
+
 def editor(headless: bool):
     load_dotenv(Settings.root_path / ".env")
     serve_message()
@@ -65,11 +79,16 @@ def editor(headless: bool):
     controller.reset_repositories()
     StdioPatcher.apply(controller)
 
-    watcher = FileChangeEventHandler(controller.repositories.project)
-    start_file_watcher(watcher)
+    watcher = FileChangeWatcher()
+    file_handler = FileHandler(controller)
+    watcher.add_handler(file_handler.env_var_handler)
+    watcher.add_handler(file_handler.python_files_handler)
+    watcher.add_handler(file_handler.all_files_handler)
 
+    start_file_watcher(watcher)
     start_resources_watcher()
     start_consumer(controller)
+    start_linter(controller)
 
     role_client_controller = RoleClientController(controller.repositories)
     role_client_controller.loop_sync_connection_pool()
