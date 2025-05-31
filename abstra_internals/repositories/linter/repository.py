@@ -73,7 +73,9 @@ class LocalLinterRepository(LinterRepository):
 
     def get_blocking_checks(self) -> List[LinterCheck]:
         return [
-            check for check in self.checks if check.type in ["error", "security", "bug"]
+            check
+            for check in self.checks
+            if check.type in ["error", "security", "bug"] and check.issues
         ]
 
 
