@@ -99,6 +99,6 @@ class BaseWorkflowTest(BaseTest):
         (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
-        self.consumer.stop()
+        self.consumer.stop_iter()
         self.thread.join()
         super().tearDown()

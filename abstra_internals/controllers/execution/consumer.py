@@ -1,20 +1,14 @@
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
 from uuid import uuid4
 
-from abstra_internals.controllers.execution.execution import ExecutionController
+from abstra_internals.controllers.execution.worker_process import process_main
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution import ClientContext
 from abstra_internals.environment import (
     EXECUTION_QUEUE_CONCURRENCY,
-    set_SERVER_UUID,
-    set_WORKER_UUID,
 )
-from abstra_internals.logger import AbstraLogger, Environment
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import Consumer, QueueMessage
-from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
-from abstra_internals.stdio_patcher import StdioPatcher
 
 
 class StageNotFound(Exception):
@@ -35,40 +29,35 @@ class ConsumerController:
         self.main_controller = main_controller
         self.consumer = consumer
         self.app_id = str(uuid4())
-
-    def tagged_msg(self, msg: str) -> str:
-        short_id = self.app_id.split("-")[0]
-        return f"[ConsumerController ({short_id})] {msg}"
+        self.concurrency = EXECUTION_QUEUE_CONCURRENCY
 
     def start_loop(self):
         AbstraLogger.debug(
-            self.tagged_msg(f"Starting loop with {EXECUTION_QUEUE_CONCURRENCY} threads")
+            f"[ConsumerController] Starting loop with {self.concurrency} threads"
         )
 
-        thread_pool = ThreadPoolExecutor(max_workers=EXECUTION_QUEUE_CONCURRENCY)
+        thread_pool = ThreadPoolExecutor(max_workers=self.concurrency)
 
-        for msg in self.consumer.iter():
-            try:
+        try:
+            for msg in self.consumer.iter():
+                AbstraLogger.debug(
+                    f"[ConsumerController] Submitting message [{msg.delivery_tag}] for processing"
+                )
                 thread_pool.submit(
                     self.run_subprocess,
                     msg=msg,
                 )
-            except Exception as e:
-                AbstraLogger.error(self.tagged_msg(f"iteration error: {e}"))
-                AbstraLogger.capture_exception(e)
+        finally:
+            AbstraLogger.warning(
+                "[ConsumerController] Consumer main loop exited, waiting for threads to finish"
+            )
+            thread_pool.shutdown(wait=True)
+            AbstraLogger.warning("[ConsumerController] All threads finished")
 
-        AbstraLogger.debug(
-            self.tagged_msg("Consumer main loop exited, waiting for threads to finish")
-        )
-        thread_pool.shutdown(wait=True)
-        AbstraLogger.debug(self.tagged_msg("All threads finished"))
-
-        self.main_controller.app_exit(
-            app_id=self.app_id,
-            err_msg=self.tagged_msg("Consumer main loop exited"),
-        )
-
-        raise Exception("Consumer main loop exited")
+            self.main_controller.fail_app_executions(
+                app_id=self.app_id,
+                err_msg="[ABSTRA]: Consumer main loop exited",
+            )
 
     def run_subprocess(self, msg: QueueMessage):
         worker_id = str(uuid4())
@@ -77,11 +66,16 @@ class ConsumerController:
         try:
             mp_context = self.main_controller.repositories.mp_context.get_context()
             stage = self.main_controller.get_stage(msg.preexecution.stage_id)
+
             if stage is None:
-                raise StageNotFound(msg.preexecution.stage_id)
+                AbstraLogger.warning(
+                    f"[ConsumerController] Stage not found: {msg.preexecution.stage_id}. Message [{msg.delivery_tag}] will be acknowledged."
+                )
+                self.consumer.threadsafe_ack(msg)
+                return
 
             p = mp_context.Process(
-                target=subprocess,
+                target=process_main,
                 kwargs=dict(
                     stage=stage,
                     controller=self.main_controller,
@@ -112,45 +106,31 @@ class ConsumerController:
 
                 raise NonCleanExit(err_msg)
 
-            self.consumer.done_callback(msg)
+            self.consumer.threadsafe_ack(msg)
 
         except Exception as e:
-            AbstraLogger.error(self.tagged_msg(f"Worker {worker_id} error: {e}"))
-            AbstraLogger.capture_exception(e)
-            self.main_controller.worker_exit(
-                app_id=self.app_id,
-                worker_id=worker_id,
-                err_msg=self.tagged_msg(f"Worker {worker_id} error: {e}"),
+            AbstraLogger.error(
+                f"[ConsumerController] Error processing message [{msg.delivery_tag}]: {e}"
             )
 
+            AbstraLogger.capture_message(
+                f"[ConsumerController] Error processing message [{msg.delivery_tag}]: {e}"
+            )
 
-def subprocess(
-    *,
-    root_path: str,
-    server_port: int,
-    worker_id: str,
-    app_id: str,
-    stage: StageWithFile,
-    controller: MainController,
-    environment: Optional[Environment],
-    request: Optional[ClientContext] = None,
-):
-    AbstraLogger.debug("[ConsumerController Subprocess] Starting...")
+            AbstraLogger.capture_exception(e)
 
-    Settings.set_root_path(root_path)
-    Settings.set_server_port(server_port, force=True)
-    AbstraLogger.init(environment)
+            self.main_controller.fail_worker_executions(
+                app_id=self.app_id,
+                worker_id=worker_id,
+                err_msg=f"[ABSTRA]: {e}",
+            )
 
-    set_SERVER_UUID(app_id)
-    set_WORKER_UUID(worker_id)
+            self.consumer.threadsafe_nack(msg)
 
-    StdioPatcher.apply(controller)
+            AbstraLogger.warning(
+                f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"
+            )
 
-    ExecutionController(
-        repositories=controller.repositories,
-        stage=stage,
-        client=None,
-        context=request,
-    ).run()
-
-    AbstraLogger.debug("[ConsumerController Subprocess] Finished")
+            AbstraLogger.capture_message(
+                f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"
+            )

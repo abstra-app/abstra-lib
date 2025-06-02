@@ -480,17 +480,21 @@ class MainController:
             sent_tasks=sent_tasks,
         )
 
+    def get_public_url(self):
+        if Settings.has_public_url():
+            return {"public_url": Settings.public_url}
+
+        return {"public_url": None}
+
     # Worker lifecycle
-    def worker_exit(self, *, app_id: str, worker_id: str, err_msg: str):
+    def fail_worker_executions(self, *, app_id: str, worker_id: str, err_msg: str):
         killed_executions = self.execution_repository.find_by_worker(
             worker_id=worker_id,
             status="running",
             app_id=app_id,
         )
 
-        # update executions
         for execution in killed_executions:
-            # Add log entry
             err_log = LogEntry(
                 execution_id=execution.id,
                 created_at=datetime.datetime.now(),
@@ -500,20 +504,16 @@ class MainController:
             )
             self.execution_logs_repository.save(err_log)
 
-            # Update execution status
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
-
             self.tasks_repository.set_locked_tasks_to_pending(execution.id)
 
-    def app_exit(self, *, app_id: str, err_msg: str):
+    def fail_app_executions(self, *, app_id: str, err_msg: str):
         exited_execs = self.execution_repository.find_by_app(
             status="running",
             app_id=app_id,
         )
 
-        # update executions
         for execution in exited_execs:
-            # Add log entry
             err_log = LogEntry(
                 execution_id=execution.id,
                 created_at=datetime.datetime.now(),
@@ -523,13 +523,5 @@ class MainController:
             )
             self.execution_logs_repository.save(err_log)
 
-            # Update execution status
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
-
             self.tasks_repository.set_locked_tasks_to_pending(execution.id)
-
-    def get_public_url(self):
-        if Settings.has_public_url():
-            return {"public_url": Settings.public_url}
-
-        return {"public_url": None}

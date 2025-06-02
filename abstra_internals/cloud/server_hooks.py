@@ -53,7 +53,7 @@ class GunicornOptionsBuilder:
             if status == signal.Signals.SIGKILL:
                 err_msg += ": Server reached its memory limit or was replaced with a new version"
 
-            self.main_controller.worker_exit(
+            self.main_controller.fail_worker_executions(
                 app_id=app_id, worker_id=worker_id, err_msg=err_msg
             )
 
@@ -64,7 +64,7 @@ class GunicornOptionsBuilder:
     def on_exit(self, server: Arbiter):
         try:
             app_id = get_internal_id(server, ensure=False)
-            self.main_controller.app_exit(
+            self.main_controller.fail_app_executions(
                 app_id=app_id, err_msg="[ABORTED] Server exited"
             )
 
