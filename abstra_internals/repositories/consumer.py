@@ -79,7 +79,7 @@ class RabbitConsumer(Consumer):
             AbstraLogger.debug(
                 f"[RabbitConsumer] Not acknowledging message [{msg.delivery_tag}]"
             )
-            self.channel.basic_nack(delivery_tag=msg.delivery_tag, requeue=True)
+            self.channel.basic_nack(delivery_tag=msg.delivery_tag, requeue=False)
 
         self.connection.add_callback_threadsafe(callback)
 
@@ -102,8 +102,16 @@ class RabbitConsumer(Consumer):
             )
 
     def stop_iter(self):
-        AbstraLogger.warning("[RabbitConsumer] Stopping consumer")
+        AbstraLogger.warning("[RabbitConsumer] Setting stop event for consumer")
         self.stop_evt.set()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop_iter()
+
+        AbstraLogger.debug("[RabbitConsumer] Exiting consumer context manager")
+        self.connection.process_data_events(time_limit=60)
+        AbstraLogger.warning("[RabbitConsumer] Data events processed")
+
         if self.connection.is_open:
             AbstraLogger.warning("[RabbitConsumer] Cancelling channel")
             self.channel.cancel()
@@ -112,11 +120,6 @@ class RabbitConsumer(Consumer):
             AbstraLogger.warning("[RabbitConsumer] Closing connection")
             self.connection.close()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        AbstraLogger.debug("[RabbitConsumer] Exiting consumer context manager")
-        self.connection.process_data_events(time_limit=60)
-        AbstraLogger.warning("[RabbitConsumer] Data events processed")
-        self.stop_iter()
         return False
 
     def __enter__(self) -> "RabbitConsumer":
