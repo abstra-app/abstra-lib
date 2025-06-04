@@ -135,8 +135,10 @@ class FormEntity:
             template, _ = result
 
             renderer = TemplateRenderer(template)
-
-            self.state.update_values(renderer.make_state(dto["payload"]))
+            parsed = renderer.parse_state(
+                raw_state=dto["payload"], include_missing=True
+            )
+            self.state.update(parsed)
 
             output = renderer.render(self.state)
 
@@ -163,4 +165,5 @@ class FormEntity:
         template, _ = result
         renderer = TemplateRenderer(template)
 
-        self.state.update_values(renderer.make_partial_state(dto["payload"]))
+        parsed = renderer.parse_state(raw_state=dto["payload"], include_missing=False)
+        self.state.update(parsed)

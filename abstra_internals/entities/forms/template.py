@@ -92,37 +92,36 @@ class TemplateRenderer:
         # Avoids using mutable objects as widgets currently have a internal state
         return copy.deepcopy(self._raw_template)
 
-    def make_partial_state(self, raw_state: Dict) -> State:
+    def parse_state(self, *, raw_state: Dict, include_missing: bool) -> State:
         parsed = {}
         for idx, widget in enumerate(self.template):
-            if (
-                isinstance(widget, InputWidget)
-                and widget._safe_get_key(idx) in raw_state
-            ):
-                parsed[widget._safe_get_key(idx)] = widget._parse_value(
-                    raw_state.get(widget._safe_get_key(idx))
-                )
-        return State(parsed)
+            if not isinstance(widget, InputWidget):
+                continue
 
-    def make_state(self, raw_state: Dict) -> State:
-        parsed = {}
-        for idx, widget in enumerate(self.template):
-            if isinstance(widget, InputWidget):
-                parsed[widget._safe_get_key(idx)] = widget._parse_value(
-                    raw_state.get(widget._safe_get_key(idx))
-                )
+            key = widget._ensure_key(idx)
+
+            if not include_missing and key not in raw_state:
+                continue
+
+            parsed[key] = widget._parse_value(raw_state.get(key))
+
         return State(parsed)
 
     def render(self, state: State) -> RenderOutput:
         rendered_widgets = []
         has_errors = False
+
         for idx, widget in enumerate(self.template):
             if isinstance(widget, InputWidget):
-                value = state.get(widget._safe_get_key(idx))
+                key = widget._ensure_key(idx)
+                value = state.get(key)
+
                 if value is not None:
                     widget.value = value
-                if widget._safe_get_key(idx) in state:
+
+                if key in state:
                     widget._apply_validation()
+
                 if len(widget.errors) > 0:
                     has_errors = True
 

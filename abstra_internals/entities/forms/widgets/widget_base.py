@@ -53,7 +53,7 @@ class InputWidget(Widget, Generic[WidgetValue]):
         raise TypeError("Errors must be a list of strings or a string")
 
     @final
-    def _safe_get_key(self, idx: int) -> str:
+    def _ensure_key(self, idx: int) -> str:
         return self.key or f"{self.type}_{idx}"
 
     @final

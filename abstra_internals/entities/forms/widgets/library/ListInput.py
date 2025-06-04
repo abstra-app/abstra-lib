@@ -129,7 +129,7 @@ class ListInput(InputWidget):
             template = self._get_item_template(idx)
             renderer = TemplateRenderer(template)
             raw_value = item or {}
-            parsed = renderer.make_partial_state(raw_value)
-            state.update_values(parsed)
+            parsed = renderer.parse_state(raw_state=raw_value, include_missing=False)
+            state.update(parsed)
             parsed_values.append(state)
         return parsed_values

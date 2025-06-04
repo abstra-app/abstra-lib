@@ -109,7 +109,7 @@ def run(
     if isinstance(runnables, Widget):
         state = Form([[runnables]], initial_state=state, hide_steps=hide_steps).run()
         if isinstance(runnables, InputWidget):
-            return state[runnables._safe_get_key]
+            return state[runnables._ensure_key]
         return None
 
     return Form(runnables, initial_state=state, hide_steps=hide_steps).run()
