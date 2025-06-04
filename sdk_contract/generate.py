@@ -69,6 +69,7 @@ class FunctionDoc(ObjectDoc):
 class ClassDoc(ObjectDoc):
     parent_classes: List[str]
     init: Dict[str, List[Parameter]]
+    properties: List[Parameter]
 
 
 class Logger:
@@ -303,6 +304,9 @@ class SDKContractParser:
                 init={
                     "params": parsed_constructor["params"],
                 },
+                properties=cls_docstr[
+                    "params"
+                ],  # TODO: validate this against the class attributes and typehints
                 parent_classes=self._list_class_superclasses(cls),
                 examples=self._process_examples(cls, module),
             )

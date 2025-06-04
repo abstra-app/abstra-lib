@@ -398,6 +398,18 @@
           }
         ]
       },
+      "properties": {
+        "label": {
+          "name": "label",
+          "type": "str",
+          "description": "The text displayed on the button."
+        },
+        "key": {
+          "name": "key",
+          "type": "Optional[str]",
+          "description": "An optional key for the button. If not provided, the label will be used as the key."
+        }
+      },
       "parent_classes": [],
       "examples": []
     },
@@ -407,6 +419,7 @@
       "init": {
         "params": []
       },
+      "properties": {},
       "parent_classes": [
         "Button"
       ],
@@ -418,6 +431,7 @@
       "init": {
         "params": []
       },
+      "properties": {},
       "parent_classes": [
         "Button"
       ],
@@ -429,6 +443,7 @@
       "init": {
         "params": []
       },
+      "properties": {},
       "parent_classes": [],
       "examples": []
     },
@@ -438,6 +453,7 @@
       "init": {
         "params": []
       },
+      "properties": {},
       "parent_classes": [
         "WidgetSchema"
       ],
@@ -505,6 +521,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Optional[AppointmentSlot]",
+          "description": "The selected appointment time slot."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -920,6 +943,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[FileResponse, List[FileResponse], None]",
+          "description": "The captured image or video file(s)."
+        }
+      },
       "parent_classes": [
         "FileInput",
         "InputWidget",
@@ -1072,6 +1102,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[List[CardOption], CardOption, None]",
+          "description": "The selected card option(s)."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -1256,6 +1293,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "bool",
+          "description": "The boolean value indicating whether the checkbox is checked."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -1373,6 +1417,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "List[object]",
+          "description": "The list of selected values."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -1501,6 +1552,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The CNPJ number entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -1606,6 +1664,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The code text entered by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -1718,6 +1783,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The CPF number entered by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -1845,6 +1917,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Optional[float]",
+          "description": "The currency value entered by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -1975,6 +2054,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Any",
+          "description": "The value returned by the custom component."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -2088,6 +2174,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Optional[datetime.date]",
+          "description": "The date value selected by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -2222,6 +2315,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[List[object], object, None]",
+          "description": "The selected value(s) from the dropdown options."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -2359,6 +2459,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The email address entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -2492,6 +2599,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[FileResponse, List[FileResponse], None]",
+          "description": "The uploaded file(s)."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -2572,6 +2686,13 @@
           }
         ]
       },
+      "properties": {
+        "file": {
+          "name": "file",
+          "type": "str",
+          "description": "The URL of the file to make available for download."
+        }
+      },
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -2628,6 +2749,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "html": {
+          "name": "html",
+          "type": "str",
+          "description": "The HTML content to display."
+        }
       },
       "parent_classes": [
         "OutputWidget",
@@ -2698,6 +2826,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "url": {
+          "name": "url",
+          "type": "str",
+          "description": "The URL or data URI of the iframe content."
+        }
       },
       "parent_classes": [
         "OutputWidget",
@@ -2827,6 +2962,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[FileResponse, List[FileResponse], None]",
+          "description": "The uploaded image file(s)."
+        }
+      },
       "parent_classes": [
         "FileInput",
         "InputWidget",
@@ -2910,6 +3052,13 @@
           }
         ]
       },
+      "properties": {
+        "image": {
+          "name": "image",
+          "type": "str",
+          "description": "The URL of the image to display."
+        }
+      },
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -2967,6 +3116,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "text": {
+          "name": "text",
+          "type": "str",
+          "description": "The LaTeX content to display."
+        }
       },
       "parent_classes": [
         "OutputWidget",
@@ -3065,6 +3221,18 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "link_url": {
+          "name": "link_url",
+          "type": "str",
+          "description": "The URL that the link points to."
+        },
+        "link_text": {
+          "name": "link_text",
+          "type": "str",
+          "description": "The visible text of the link."
+        }
       },
       "parent_classes": [
         "OutputWidget",
@@ -3179,6 +3347,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "List[State]",
+          "description": "The list of states for each item in the list."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -3317,6 +3492,13 @@
           }
         ]
       },
+      "properties": {
+        "text": {
+          "name": "text",
+          "type": "str",
+          "description": "The markdown content to display."
+        }
+      },
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -3435,6 +3617,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Optional[Union[List[Any], Any, None]]",
+          "description": "The selected option value."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -3585,6 +3774,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "int",
+          "description": "The NPS score selected by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -3707,6 +3903,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[float, None]",
+          "description": "The numeric value entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -3828,6 +4031,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "float",
+          "description": "The numeric value selected by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -3941,6 +4151,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "df": {
+          "name": "df",
+          "type": "pd.DataFrame",
+          "description": "The pandas DataFrame to display."
+        }
       },
       "parent_classes": [
         "OutputWidget",
@@ -4138,6 +4355,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[List[Any], Any]",
+          "description": "The selected row(s) from the DataFrame."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -4358,6 +4582,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The password value entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -4480,6 +4711,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "PhoneResponse",
+          "description": "The phone number entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -4560,6 +4798,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "fig": {
+          "name": "fig",
+          "type": "Any",
+          "description": "The Plotly figure to display."
+        }
       },
       "parent_classes": [
         "OutputWidget",
@@ -5469,6 +5714,18 @@
           }
         ]
       },
+      "properties": {
+        "current": {
+          "name": "current",
+          "type": "float",
+          "description": "The current progress value."
+        },
+        "total": {
+          "name": "total",
+          "type": "float",
+          "description": "The total value representing 100% progress."
+        }
+      },
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -5563,6 +5820,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "int",
+          "description": "The rating value selected by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -5670,6 +5934,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The formatted text value entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -5774,6 +6045,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "List[Any]",
+          "description": "The list of tag values entered by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -5901,6 +6179,13 @@
           }
         ]
       },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The text value entered by the user."
+        }
+      },
       "parent_classes": [
         "InputWidget",
         "Widget"
@@ -5974,6 +6259,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -6072,6 +6358,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "str",
+          "description": "The multi-line text value entered by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -6177,6 +6470,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Optional[time]",
+          "description": "The time value selected by the user."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -6289,6 +6589,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "bool",
+          "description": "The boolean value indicating whether the toggle is on or off."
+        }
       },
       "parent_classes": [
         "InputWidget",
@@ -6423,6 +6730,13 @@
             "required": false
           }
         ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Union[FileResponse, List[FileResponse], None]",
+          "description": "The uploaded video file(s)."
+        }
       },
       "parent_classes": [
         "FileInput",
@@ -6786,6 +7100,23 @@
           }
         ]
       },
+      "properties": {
+        "query": {
+          "name": "query",
+          "type": "str",
+          "description": "The SQL query that caused the error."
+        },
+        "params": {
+          "name": "params",
+          "type": "Optional[List]",
+          "description": "The parameters used in the query."
+        },
+        "errors": {
+          "name": "errors",
+          "type": "List",
+          "description": "List of error messages from the database."
+        }
+      },
       "parent_classes": [
         "BaseException",
         "Exception"
@@ -7074,6 +7405,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7093,6 +7425,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7112,6 +7445,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7138,6 +7472,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7157,6 +7492,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7176,6 +7512,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7195,6 +7532,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7214,6 +7552,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7233,6 +7572,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7252,6 +7592,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7271,6 +7612,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7282,6 +7624,7 @@
       "init": {
         "params": []
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7293,6 +7636,7 @@
       "init": {
         "params": []
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7312,6 +7656,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7331,6 +7676,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [
         "Comparator"
       ],
@@ -7424,6 +7770,7 @@
           }
         ]
       },
+      "properties": {},
       "parent_classes": [],
       "examples": []
     },
