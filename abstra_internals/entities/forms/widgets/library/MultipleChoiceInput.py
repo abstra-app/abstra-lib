@@ -1,8 +1,8 @@
 from typing import Any, List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import (
-    AbstraOption,
     InputWidget,
+    LabelValueDict,
     MultipleHandler,
     OptionsHandler,
 )
@@ -12,7 +12,7 @@ class MultipleChoiceInput(InputWidget):
     """Multiple choice input widget for selecting a single option from a set of radio buttons.
 
     Attributes:
-        value (Optional[Union[List[Any], Any, None]]): The selected option value.
+        value (Optional[Union[List[Any], Any, None]]): The selected option value. If `multiple` is True, this can be a list of values; otherwise, it is a single value or None.
     """
 
     type = "multiple-choice-input"
@@ -21,7 +21,7 @@ class MultipleChoiceInput(InputWidget):
     def __init__(
         self,
         label: str,
-        options: List["AbstraOption"],
+        options: Union[List["LabelValueDict"], List[str]],
         *,
         key: Optional[str] = None,
         required: bool = True,
@@ -37,7 +37,7 @@ class MultipleChoiceInput(InputWidget):
 
         Args:
             label (str): Text label displayed above the options.
-            options (List[AbstraOption]): List of options to choose from, as AbstraOption objects.
+            options (Union[List[LabelValueDict], List[str]]): List of options to choose from, either as {"label": str, "value": str} dictionaries or simple strings.
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
             required (bool): Whether an option must be selected before proceeding.
             hint (Optional[str]): Help text displayed below the options.

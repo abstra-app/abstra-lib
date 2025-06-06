@@ -10,7 +10,7 @@ class NumberInput(InputWidget):
     """Number input widget for capturing numeric values.
 
     Attributes:
-        value (Union[float, None]): The numeric value entered by the user.
+        value (Union[float, None]): The numeric value entered by the user. Can be None if `required` is False.
     """
 
     type = "number-input"

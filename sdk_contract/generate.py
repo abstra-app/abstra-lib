@@ -69,7 +69,7 @@ class FunctionDoc(ObjectDoc):
 class ClassDoc(ObjectDoc):
     parent_classes: List[str]
     init: Dict[str, List[Parameter]]
-    properties: List[Parameter]
+    properties: Dict[str, BaseParameter]
 
 
 class Logger:
@@ -469,7 +469,7 @@ class SDKContractParser:
 
             if docstr_param["type"] not in annotation:
                 errors.append(
-                    f"'{sig_param_name}' type mismatch: {annotation} != {docstr_param['type']}."
+                    f"'{sig_param_name}' type mismatch: {annotation} != {docstr_param['type']}. Have you remembered to use quotes (\"CustomType\")?"
                 )
                 continue
 

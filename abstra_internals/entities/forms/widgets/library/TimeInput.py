@@ -9,7 +9,7 @@ class TimeInput(InputWidget):
     """Time input widget with time picker.
 
     Attributes:
-        value (Optional[time]): The time value selected by the user.
+        value (Optional[datetime.time]): The time value selected by the user.
     """
 
     type = "time-input"

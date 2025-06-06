@@ -1,8 +1,8 @@
 from typing import List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import (
-    AbstraOption,
     InputWidget,
+    LabelValueDict,
     MultipleHandler,
     OptionsHandler,
 )
@@ -12,7 +12,7 @@ class DropdownInput(InputWidget):
     """Dropdown select widget allowing selection from predefined options.
 
     Attributes:
-        value (Union[List[object], object, None]): The selected value(s) from the dropdown options.
+        value (Union[List[object], object, None]): The selected value(s) from the dropdown options. If `multiple` is True, this can be a list of values; otherwise, it is a single value or None.
     """
 
     type = "dropdown-input"
@@ -23,7 +23,7 @@ class DropdownInput(InputWidget):
     def __init__(
         self,
         label: str,
-        options: List["AbstraOption"],
+        options: Union[List["LabelValueDict"], List[str]],
         *,
         key: Optional[str] = None,
         required: bool = True,
@@ -40,7 +40,7 @@ class DropdownInput(InputWidget):
 
         Args:
             label (str): Text label displayed above the dropdown.
-            options (List[AbstraOption]): List of options to choose from, as AbstraOption objects.
+            options (Union[List[LabelValueDict], List[str]]): List of options to choose from, either as {"label": str, "value": str} dictionaries or simple strings.
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
             required (bool): Whether a selection is required before proceeding.
             hint (Optional[str]): Help text displayed below the dropdown.

@@ -526,7 +526,7 @@
         "value": {
           "name": "value",
           "type": "Optional[AppointmentSlot]",
-          "description": "The selected appointment time slot."
+          "description": "The selected appointment time slot. AppointmentSlot contains begin and end attributes. Eg.: `{\"begin\": \"2023-10-01T10:00:00\", \"end\": \"2023-10-01T11:00:00\"}`"
         }
       },
       "parent_classes": [
@@ -947,7 +947,7 @@
         "value": {
           "name": "value",
           "type": "Union[FileResponse, List[FileResponse], None]",
-          "description": "The captured image or video file(s)."
+          "description": "The captured image or video file(s). FileResponse is a dictionary-like object: `{'name': str, 'path': pathlib.Path}`. If `multiple` is True, will be a list, otherwise a single FileResponse object."
         }
       },
       "parent_classes": [
@@ -1013,7 +1013,7 @@
           {
             "name": "options",
             "type": "List[CardOption]",
-            "description": "List of card options to display.",
+            "description": "List of card options to display. CardOption is a Dict with the following structure: `TypedDict({\"title\": str, \"subtitle\": str, \"image\": str, \"description\": str, \"topLeftExtra\": str, \"topRightExtra\": str})`",
             "default": "None",
             "required": true
           },
@@ -1107,7 +1107,7 @@
         "value": {
           "name": "value",
           "type": "Union[List[CardOption], CardOption, None]",
-          "description": "The selected card option(s)."
+          "description": "The selected card option(s). CardOption is a Dict with the following structure: `{\"title\": str, \"subtitle\": str, \"image\": str, \"description\": str, \"topLeftExtra\": str, \"topRightExtra\": str}`"
         }
       },
       "parent_classes": [
@@ -1355,8 +1355,8 @@
           },
           {
             "name": "options",
-            "type": "List[AbstraOption]",
-            "description": "List of options to choose from, as AbstraOption objects.",
+            "type": "Union[List[LabelValueDict], List[str]]",
+            "description": "List of options to choose from, either as {\"label\": str, \"value\": str} dictionaries or simple strings.",
             "default": "None",
             "required": true
           },
@@ -2239,8 +2239,8 @@
           },
           {
             "name": "options",
-            "type": "List[AbstraOption]",
-            "description": "List of options to choose from, as AbstraOption objects.",
+            "type": "Union[List[LabelValueDict], List[str]]",
+            "description": "List of options to choose from, either as {\"label\": str, \"value\": str} dictionaries or simple strings.",
             "default": "None",
             "required": true
           },
@@ -2320,7 +2320,7 @@
         "value": {
           "name": "value",
           "type": "Union[List[object], object, None]",
-          "description": "The selected value(s) from the dropdown options."
+          "description": "The selected value(s) from the dropdown options. If `multiple` is True, this can be a list of values; otherwise, it is a single value or None."
         }
       },
       "parent_classes": [
@@ -2603,7 +2603,7 @@
         "value": {
           "name": "value",
           "type": "Union[FileResponse, List[FileResponse], None]",
-          "description": "The uploaded file(s)."
+          "description": "The uploaded file(s). FileResponse is a dictionary-like object: `{'name': str, 'path': pathlib.Path}`. If `multiple` is True, will be a list, otherwise a single FileResponse object."
         }
       },
       "parent_classes": [
@@ -2966,7 +2966,7 @@
         "value": {
           "name": "value",
           "type": "Union[FileResponse, List[FileResponse], None]",
-          "description": "The uploaded image file(s)."
+          "description": "The uploaded image file(s). FileResponse is a dictionary-like object: `{'name': str, 'path': pathlib.Path}`. If `multiple` is True, will be a list, otherwise a single FileResponse object."
         }
       },
       "parent_classes": [
@@ -3352,7 +3352,7 @@
         "value": {
           "name": "value",
           "type": "List[State]",
-          "description": "The list of states for each item in the list."
+          "description": "The list of states for each item in the list. State is a dictionary-like object that holds the values for each input in the list indexed by their keys."
         }
       },
       "parent_classes": [
@@ -3548,8 +3548,8 @@
           },
           {
             "name": "options",
-            "type": "List[AbstraOption]",
-            "description": "List of options to choose from, as AbstraOption objects.",
+            "type": "Union[List[LabelValueDict], List[str]]",
+            "description": "List of options to choose from, either as {\"label\": str, \"value\": str} dictionaries or simple strings.",
             "default": "None",
             "required": true
           },
@@ -3622,7 +3622,7 @@
         "value": {
           "name": "value",
           "type": "Optional[Union[List[Any], Any, None]]",
-          "description": "The selected option value."
+          "description": "The selected option value. If `multiple` is True, this can be a list of values; otherwise, it is a single value or None."
         }
       },
       "parent_classes": [
@@ -3907,7 +3907,7 @@
         "value": {
           "name": "value",
           "type": "Union[float, None]",
-          "description": "The numeric value entered by the user."
+          "description": "The numeric value entered by the user. Can be None if `required` is False."
         }
       },
       "parent_classes": [
@@ -4313,13 +4313,6 @@
             "required": false
           },
           {
-            "name": "initial_value",
-            "type": "Optional[Union[List, Any]]",
-            "description": "Initial selected row(s).",
-            "default": "None",
-            "required": false
-          },
-          {
             "name": "min",
             "type": "Optional[int]",
             "description": "Minimum number of rows that must be selected when multiple=True.",
@@ -4359,8 +4352,8 @@
       "properties": {
         "value": {
           "name": "value",
-          "type": "Union[List[Any], Any]",
-          "description": "The selected row(s) from the DataFrame."
+          "type": "Union[List[Dict], Dict, None]",
+          "description": "The selected row(s) from the DataFrame. If `multiple` is True, this can be a list of rows as dicts; otherwise, it is a single dict or None."
         }
       },
       "parent_classes": [
@@ -4715,7 +4708,7 @@
         "value": {
           "name": "value",
           "type": "PhoneResponse",
-          "description": "The phone number entered by the user."
+          "description": "The phone number entered by the user. PhoneResponse is a dataclass containing: raw(str) the complete digit-only phone number; masked(str): the formatted complete phone number; country_code(str) and national_number(str)."
         }
       },
       "parent_classes": [
@@ -4799,13 +4792,7 @@
           }
         ]
       },
-      "properties": {
-        "fig": {
-          "name": "fig",
-          "type": "Any",
-          "description": "The Plotly figure to display."
-        }
-      },
+      "properties": {},
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -5714,18 +5701,7 @@
           }
         ]
       },
-      "properties": {
-        "current": {
-          "name": "current",
-          "type": "float",
-          "description": "The current progress value."
-        },
-        "total": {
-          "name": "total",
-          "type": "float",
-          "description": "The total value representing 100% progress."
-        }
-      },
+      "properties": {},
       "parent_classes": [
         "OutputWidget",
         "Widget"
@@ -6049,7 +6025,7 @@
       "properties": {
         "value": {
           "name": "value",
-          "type": "List[Any]",
+          "type": "List[str]",
           "description": "The list of tag values entered by the user."
         }
       },
@@ -6474,7 +6450,7 @@
       "properties": {
         "value": {
           "name": "value",
-          "type": "Optional[time]",
+          "type": "Optional[datetime.time]",
           "description": "The time value selected by the user."
         }
       },
@@ -6735,7 +6711,7 @@
         "value": {
           "name": "value",
           "type": "Union[FileResponse, List[FileResponse], None]",
-          "description": "The uploaded video file(s)."
+          "description": "FileResponse is a dictionary-like object: `{'name': str, 'path': pathlib.Path}`. If `multiple` is True, will be a list, otherwise a single FileResponse object."
         }
       },
       "parent_classes": [
@@ -7764,7 +7740,7 @@
           {
             "name": "mock",
             "type": "bool",
-            "description": "Whether the task is a mock task. Defaults to False.",
+            "description": "Whether the task is a mock task.",
             "default": "False",
             "required": false
           }

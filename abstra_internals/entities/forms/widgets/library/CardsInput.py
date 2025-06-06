@@ -26,7 +26,7 @@ class CardsInput(InputWidget):
     """Card selection input widget for choosing from visual card options.
 
     Attributes:
-        value (Union[List[CardOption], CardOption, None]): The selected card option(s).
+        value (Union[List[CardOption], CardOption, None]): The selected card option(s). CardOption is a Dict with the following structure: `{"title": str, "subtitle": str, "image": str, "description": str, "topLeftExtra": str, "topRightExtra": str}`
     """
 
     type = "cards-input"
@@ -57,7 +57,7 @@ class CardsInput(InputWidget):
 
         Args:
             label (str): Text label displayed above the cards.
-            options (List[CardOption]): List of card options to display.
+            options (List[CardOption]): List of card options to display. CardOption is a Dict with the following structure: `TypedDict({"title": str, "subtitle": str, "image": str, "description": str, "topLeftExtra": str, "topRightExtra": str})`
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
             required (bool): Whether a card selection is required before proceeding.
             multiple (bool): Whether multiple cards can be selected.

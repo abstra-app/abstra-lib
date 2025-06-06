@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import (
     InputWidget,
@@ -14,11 +14,11 @@ class PandasRowSelectionInput(InputWidget):
     """Pandas DataFrame row selection input widget for selecting rows from tabular data.
 
     Attributes:
-        value (Union[List[Any], Any]): The selected row(s) from the DataFrame.
+        value (Union[List[Dict], Dict, None]): The selected row(s) from the DataFrame. If `multiple` is True, this can be a list of rows as dicts; otherwise, it is a single dict or None.
     """
 
     type = "pandas-row-selection-input"
-    value: Union[List[Any], Any]
+    value: Union[List[Dict], Dict, None]
 
     def __init__(
         self,
@@ -33,7 +33,6 @@ class PandasRowSelectionInput(InputWidget):
         label: str = "",
         filterable: bool = False,
         multiple: bool = False,
-        initial_value: Optional[Union[List, Any]] = None,
         min: Optional[int] = None,
         max: Optional[int] = None,
         page_size: int = 10,
@@ -53,7 +52,6 @@ class PandasRowSelectionInput(InputWidget):
             label (str): Text label displayed above the table.
             filterable (bool): Whether the table is filterable.
             multiple (bool): Whether multiple rows can be selected.
-            initial_value (Optional[Union[List, Any]]): Initial selected row(s).
             min (Optional[int]): Minimum number of rows that must be selected when multiple=True.
             max (Optional[int]): Maximum number of rows that can be selected when multiple=True.
             page_size (int): Number of rows to display per page.
@@ -70,8 +68,7 @@ class PandasRowSelectionInput(InputWidget):
         self.label = label
         self.filterable = filterable
         self.multiple = multiple
-        self.empty_value = [] if self.multiple else None
-        self.value = initial_value or self.empty_value
+        self.value = [] if self.multiple else None
         self.min = min
         self.max = max
         self.multiple_handler = MultipleHandler(
@@ -79,7 +76,6 @@ class PandasRowSelectionInput(InputWidget):
         )
         self.page_size = page_size
         self.errors = errors
-        self.value = None
         self.pagination_always_visible = pagination_always_visible
 
     def serialize_table(self):

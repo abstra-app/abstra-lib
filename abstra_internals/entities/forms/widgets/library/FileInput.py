@@ -14,7 +14,7 @@ class FileInput(InputWidget):
     """File upload input widget for handling file uploads.
 
     Attributes:
-        value (Union[FileResponse, List[FileResponse], None]): The uploaded file(s).
+        value (Union[FileResponse, List[FileResponse], None]): The uploaded file(s). FileResponse is a dictionary-like object: `{'name': str, 'path': pathlib.Path}`. If `multiple` is True, will be a list, otherwise a single FileResponse object.
     """
 
     type = "file-input"

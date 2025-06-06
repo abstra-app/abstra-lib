@@ -9,7 +9,7 @@ class AppointmentInput(InputWidget):
     """Appointment scheduling input widget for selecting time slots.
 
     Attributes:
-        value (Optional[AppointmentSlot]): The selected appointment time slot.
+        value (Optional[AppointmentSlot]): The selected appointment time slot. AppointmentSlot contains begin and end attributes. Eg.: `{"begin": "2023-10-01T10:00:00", "end": "2023-10-01T11:00:00"}`
     """
 
     type = "appointment-input"

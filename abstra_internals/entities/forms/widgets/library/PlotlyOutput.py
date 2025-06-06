@@ -5,11 +5,7 @@ from abstra_internals.entities.forms.widgets.widget_base import OutputWidget
 
 
 class PlotlyOutput(OutputWidget):
-    """Plotly figure output widget for displaying interactive charts.
-
-    Attributes:
-        fig (Any): The Plotly figure to display.
-    """
+    """Plotly figure output widget for displaying interactive charts."""
 
     type = "plotly-output"
 

@@ -1,8 +1,8 @@
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import (
-    AbstraOption,
     InputWidget,
+    LabelValueDict,
     OptionsHandler,
 )
 
@@ -20,7 +20,7 @@ class ChecklistInput(InputWidget):
     def __init__(
         self,
         label: str,
-        options: List["AbstraOption"],
+        options: Union[List["LabelValueDict"], List[str]],
         *,
         key: Optional[str] = None,
         required: bool = True,
@@ -35,7 +35,7 @@ class ChecklistInput(InputWidget):
 
         Args:
             label (str): Text label displayed above the checklist.
-            options (List[AbstraOption]): List of options to choose from, as AbstraOption objects.
+            options (Union[List[LabelValueDict], List[str]]): List of options to choose from, either as {"label": str, "value": str} dictionaries or simple strings.
             key (Optional[str]): Identifier for the widget, defaults to label if not provided.
             required (bool): Whether at least one option must be selected before proceeding.
             hint (Optional[str]): Help text displayed below the checklist.

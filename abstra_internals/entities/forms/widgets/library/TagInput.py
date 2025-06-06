@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 from abstra_internals.entities.forms.widgets.widget_base import InputWidget
 
@@ -7,11 +7,11 @@ class TagInput(InputWidget):
     """Tag input widget for entering multiple tag values.
 
     Attributes:
-        value (List[Any]): The list of tag values entered by the user.
+        value (List[str]): The list of tag values entered by the user.
     """
 
     type = "tag-input"
-    value: List[Any]
+    value: List[str]
 
     def __init__(
         self,

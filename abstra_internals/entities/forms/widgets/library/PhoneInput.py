@@ -9,7 +9,7 @@ class PhoneInput(InputWidget):
     """Phone number input widget with country code selection.
 
     Attributes:
-        value (PhoneResponse): The phone number entered by the user.
+        value (PhoneResponse): The phone number entered by the user. PhoneResponse is a dataclass containing: raw(str) the complete digit-only phone number; masked(str): the formatted complete phone number; country_code(str) and national_number(str).
     """
 
     type = "phone-input"

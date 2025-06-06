@@ -13,7 +13,7 @@ class ListInput(InputWidget):
     """Repeatable list of input components that can be dynamically added or removed.
 
     Attributes:
-        value (List[State]): The list of states for each item in the list.
+        value (List[State]): The list of states for each item in the list. State is a dictionary-like object that holds the values for each input in the list indexed by their keys.
     """
 
     type = "list-input"

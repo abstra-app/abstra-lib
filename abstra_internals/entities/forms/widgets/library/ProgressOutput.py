@@ -2,12 +2,7 @@ from abstra_internals.entities.forms.widgets.widget_base import OutputWidget
 
 
 class ProgressOutput(OutputWidget):
-    """Progress bar output widget for displaying completion status.
-
-    Attributes:
-        current (float): The current progress value.
-        total (float): The total value representing 100% progress.
-    """
+    """Progress bar output widget for displaying completion status."""
 
     type = "progress-output"
 

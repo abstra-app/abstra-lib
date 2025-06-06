@@ -1,5 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, List, Optional, TypedDict, TypeVar, Union, final
+from typing import (
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+    final,
+)
 
 
 class Widget(ABC):
@@ -76,19 +86,16 @@ class InputWidget(Widget, Generic[WidgetValue]):
         return value
 
 
-class LabelValueOption(TypedDict):
+class LabelValueDict(TypedDict):
     label: str
     value: object
 
 
-AbstraOption = Union[str, LabelValueOption]
-
-
 class OptionsHandler:
-    def __init__(self, options: List["AbstraOption"]) -> None:
+    def __init__(self, options: Union[List[LabelValueDict], List[str]]) -> None:
         self.options = options
 
-        self._mappedOptions = {
+        self._mappedOptions: Dict[str, LabelValueDict] = {
             str(index): {
                 "label": option if isinstance(option, str) else option["label"],
                 "value": option if isinstance(option, str) else option["value"],
@@ -117,7 +124,7 @@ class OptionsHandler:
                 return mapKey
         return None
 
-    def serialized_options(self) -> List[LabelValueOption]:
+    def serialized_options(self) -> List[LabelValueDict]:
         return [
             {"label": v["label"], "value": k} for k, v in self._mappedOptions.items()
         ]

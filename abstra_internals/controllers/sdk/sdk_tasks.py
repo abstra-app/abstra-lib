@@ -26,7 +26,7 @@ class Task:
         Args:
             task_controller (TasksSDKController): The controller for managing tasks.
             dto (TaskDTO): The data transfer object representing the task.
-            mock (bool): Whether the task is a mock task. Defaults to False.
+            mock (bool): Whether the task is a mock task.
         """
         self._dto = dto
         self._controller = task_controller
