@@ -85,3 +85,6 @@ class TablesController:
 
     def update_column(self, column_id: str, table_id: str, changes: dict):
         return self.repos.tables.update_column(column_id, table_id, changes)
+
+    def run_sql(self, sql: str, params: List[str] = []):
+        return self.repos.tables.execute(sql, params)

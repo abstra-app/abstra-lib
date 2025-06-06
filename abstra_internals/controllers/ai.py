@@ -12,6 +12,7 @@ from abstra_internals.cloud_api import (
 )
 from abstra_internals.controllers.main import MainController
 from abstra_internals.credentials import resolve_headers
+from abstra_internals.repositories.execution import ExecutionFilter
 from abstra_internals.repositories.project.json_migrations import get_latest_version
 from abstra_internals.repositories.project.project import (
     Project,
@@ -98,6 +99,11 @@ class AiController:
             imported_code = find_imported_code(stage)
             code = "\n".join([f"# {stage.file_path}", "```python", code, "````"])
             runtime = runtime_from_stage(stage)
+        tasks = self.controller.repositories.tasks.get_all_tasks()
+        tasks_dicts = [task.dump() for task in tasks]
+        execution_filter = ExecutionFilter.from_dict({})
+        executions = self.controller.repositories.execution.list(execution_filter)
+        executions_dict = executions.to_dict()["executions"]
         yield from get_ai_messages(
             messages,
             runtime,
@@ -109,6 +115,8 @@ class AiController:
             env_vars_keys,
             current_abstra_json,
             allowed_actions_schema,
+            tasks_dicts,
+            executions_dict,
         )
 
     def get_history(self, limit: int, offset: int):

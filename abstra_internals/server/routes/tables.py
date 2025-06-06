@@ -64,4 +64,15 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
         updated_column = controller.update_column(column_id, table_id, changes)
         return updated_column.to_dict()
 
+    @bp.post("/run_sql")
+    def _run_sql():
+        if flask.request.json is None:
+            flask.abort(400)
+        sql = flask.request.json.get("sql")
+        params = flask.request.json.get("params", [])
+        if not sql:
+            flask.abort(400)
+        result = controller.run_sql(sql, params)
+        return result.json()
+
     return bp

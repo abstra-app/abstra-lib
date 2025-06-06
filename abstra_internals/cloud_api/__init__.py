@@ -69,6 +69,8 @@ def get_ai_messages(
     env_vars_keys,
     current_abstra_json,
     allowed_actions_schema,
+    tasks,
+    executions,
 ):
     url = f"{CLOUD_API_CLI_URL}/ai/messages"
     current_abstra_version = pkg_utils.get_local_package_version().base_version
@@ -84,6 +86,8 @@ def get_ai_messages(
         "actionsVersion": "v1",
         "abstraJson": current_abstra_json,
         "allowedActionsSchema": allowed_actions_schema,
+        "tasks": tasks,
+        "executions": executions,
     }
     return requests.post(url, headers=headers, json=body, stream=True).iter_content(
         chunk_size=None
