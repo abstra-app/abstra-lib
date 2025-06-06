@@ -1,6 +1,8 @@
 from ast import Attribute, NodeVisitor, keyword, parse
 from pathlib import Path
 
+from abstra_internals.utils.file import iterate_files
+
 
 # For each node, checks if it's a .write_text(...) call and if it has an encoding='utf-8' kwarg
 # raises an error if it doesn't
@@ -85,9 +87,13 @@ class ReadTextVisitor(NodeVisitor):
 class TestEncoding:
     def test_write_file(self):
         # Find every .py file in __file__'s directory recursively
+        parent_path = Path(__file__).parent.parent
+        abstra_path = parent_path / "abstra"
+        abstra_internals_path = parent_path / "abstra_internals"
+
         for file in [
-            *Path(__file__).parent.parent.joinpath("abstra").rglob("*.py"),
-            *Path(__file__).parent.parent.joinpath("abstra_internals").rglob("*.py"),
+            *iterate_files(abstra_path, ".py"),
+            *iterate_files(abstra_internals_path, ".py"),
         ]:
             # ignore _test and test_ files
             if file.name.endswith("_test.py") or file.name.startswith("test_"):

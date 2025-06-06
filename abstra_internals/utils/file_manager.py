@@ -5,6 +5,7 @@ from typing import Generic, List, Optional, Type, TypeVar
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.settings import Settings
+from abstra_internals.utils.file import iterate_files
 from abstra_internals.utils.serializable import Serializable
 
 T = TypeVar("T", bound=Serializable)
@@ -31,7 +32,7 @@ class FileManager(Generic[T]):
         with self.lock:
             data = [
                 self._load(file_path.stem)
-                for file_path in self.directory_path.glob("*.json")
+                for file_path in iterate_files(self.directory_path, ".json")
             ]
 
             return [d for d in data if d is not None]
@@ -48,7 +49,7 @@ class FileManager(Generic[T]):
 
     def clear(self) -> None:
         with self.lock:
-            for file_path in self.directory_path.glob("*.json"):
+            for file_path in iterate_files(self.directory_path, ".json"):
                 file_path.unlink()
 
     def _get_file_path(self, id: str) -> Path:

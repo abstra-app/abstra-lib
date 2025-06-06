@@ -9,7 +9,7 @@ import typing as t
 import uuid
 import warnings
 from pathlib import Path
-from typing import Generator, Optional, Set, Union
+from typing import Generator, List, Optional, Set, Union
 
 from werkzeug.datastructures import FileStorage
 
@@ -290,6 +290,41 @@ GIT_FOLDER = ".git"
 ABSTRA_IGNORE = ".abstraignore"
 ABSTRA_TABLES_FILE = "abstra-tables.json"
 
+EXCLUDED_DIRS = {"__pycache__", "venv", ".venv"}
+
+VIRTUAL_ENV = os.getenv("VIRTUAL_ENV") or os.getenv("CONDA_PREFIX")
+if VIRTUAL_ENV:
+    VIRTUAL_ENV = Path(VIRTUAL_ENV).resolve()
+
+
+def walk_directory(directory: Path):
+    matches: List[Path] = []
+    if not directory.exists():
+        return matches
+
+    # venv and .venv here are redundant to keep this function working
+    # in our development environment where abstra-lib venv may be different
+    # from project venv
+    if directory.name in EXCLUDED_DIRS:
+        return matches
+
+    directory = directory.resolve()
+    if VIRTUAL_ENV and directory == VIRTUAL_ENV:
+        return matches
+
+    matches = [directory]
+    for child in directory.iterdir():
+        if child.is_dir():
+            matches += walk_directory(child)
+        elif child.is_file():
+            matches.append(child)
+
+    return matches
+
+
+def iterate_files(path: Path, extension: str):
+    return [f for f in walk_directory(path) if f.name.endswith(extension)]
+
 
 def is_relative_path(path: str) -> bool:
     return not path.startswith("<") and not path.startswith("/")
@@ -337,7 +372,7 @@ def files_from_directory(directory: Path):
     ignored = [*get_ignore_files(directory), *get_ignore_files(Path.cwd())]
     paths = filter(
         lambda p: p.is_file() and not should_ignore(ignored, p.relative_to(directory)),
-        Path(directory).rglob("*"),
+        walk_directory(directory),
     )
     return list(paths)
 

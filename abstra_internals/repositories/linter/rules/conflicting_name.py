@@ -9,6 +9,7 @@ from abstra_internals.repositories.linter.models import (
 )
 from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.settings import Settings
+from abstra_internals.utils.file import iterate_files
 
 
 class AddPreffix(LinterFix):
@@ -53,7 +54,8 @@ class ConflictingName(LinterRule):
 
     def find_issues(self) -> List[LinterIssue]:
         root = Settings.root_path
-        project_py_files = set(root.glob("*.py"))
+        project_py_files = set(iterate_files(root, ".py"))
+
         _reserved_names = set(root / (n + ".py") for n in reserved_names())
 
         return [
