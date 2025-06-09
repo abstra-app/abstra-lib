@@ -54,7 +54,6 @@ from abstra_internals.repositories.linter.repository import (
     ProductionLinterRepository,
 )
 from abstra_internals.repositories.multiprocessing import (
-    ForkserverContextRepository,
     MPContextReposity,
     SpawnContextReposity,
 )
@@ -178,7 +177,7 @@ def get_prodution_app_repositories():
         role_agents=ProductionRoleAgentRepository(SIDECAR_URL),
         role_clients=ProductionRoleClientRepository(SIDECAR_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
-        mp_context=ForkserverContextRepository(),
+        mp_context=SpawnContextReposity(),
         agents=ProductionAgentsRepository(SIDECAR_URL),
         linter=ProductionLinterRepository(),
     )
