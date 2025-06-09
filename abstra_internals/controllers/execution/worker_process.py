@@ -26,11 +26,11 @@ def process_main(
     request: Optional[ClientContext] = None,
 ):
     try:
+        AbstraLogger.init(environment)
         AbstraLogger.debug("[ConsumerController Subprocess] Starting...")
 
         Settings.set_root_path(root_path)
         Settings.set_server_port(server_port, force=True)
-        AbstraLogger.init(environment)
 
         set_SERVER_UUID(app_id)
         set_WORKER_UUID(worker_id)

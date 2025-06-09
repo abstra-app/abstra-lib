@@ -5,6 +5,7 @@ from abstra_internals.controllers.execution.worker_process import process_main
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import (
     EXECUTION_QUEUE_CONCURRENCY,
+    PROCESS_TIMEOUT_SECONDS,
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import Consumer, QueueMessage
@@ -17,11 +18,6 @@ class StageNotFound(Exception):
 
 class NonCleanExit(Exception):
     pass
-
-
-# Should be smaller than the RabbitMQ consumer timeout
-# to prevent its termination
-PROCESS_TIMEOUT_SECONDS = 60 * 60 * 3
 
 
 class ConsumerController:
