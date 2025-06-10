@@ -92,13 +92,13 @@ class ConsumerController:
             if p.is_alive():
                 p.terminate()
                 raise NonCleanExit(
-                    f"Worker took too long to complete ({PROCESS_TIMEOUT_SECONDS} seconds)"
+                    f"Run took too long to complete ({PROCESS_TIMEOUT_SECONDS} secs) and was terminated. Please make sure all your requests calls have a timeout set."
                 )
 
             if p.exitcode != 0:
-                err_msg = f"Worker exited with status ({p.exitcode})"
+                err_msg = f"Run failed with status '{p.exitcode}'"
                 if p.exitcode == -9:
-                    err_msg += ": Server reached its memory limit"
+                    err_msg += ": memory limit reached."
 
                 raise NonCleanExit(err_msg)
 
