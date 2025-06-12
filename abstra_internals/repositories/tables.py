@@ -1,12 +1,10 @@
 import abc
 import typing
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Optional
 
-import requests
-
-from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.cloud_api.http_client import AbstraHTTPResponse, HTTPClient
+from abstra_internals.environment import REQUEST_TIMEOUT
 
 
 @dataclass
@@ -59,15 +57,15 @@ class TableDTO:
         return dict((k, v) for k, v in self.__dict__.items() if v is not None)
 
 
-class TablesApiHttpClient(abc.ABC):
-    base_url: str
+class TablesRepository(abc.ABC):
     execute_url: str
+    client: "HTTPClient"
 
-    def __init__(self, base_url: str) -> None:
-        self.execute_url = f"{base_url}/tables/execute"
-        self.base_url = base_url
+    def __init__(self, client: "HTTPClient") -> None:
+        self.execute_url = "/tables/execute"
+        self.client = client
 
-    def execute(self, query: str, params: typing.List) -> requests.Response:
+    def execute(self, query: str, params: typing.List) -> AbstraHTTPResponse:
         raise NotImplementedError()
 
     def create_table(self, id: str, name: str) -> TableDTO:
@@ -86,14 +84,12 @@ class TablesApiHttpClient(abc.ABC):
         raise NotImplementedError()
 
 
-class ProductionTablesApiHttpClient(TablesApiHttpClient):
-    def execute(self, query: str, params: typing.List) -> requests.Response:
+class ProductionTablesRepository(TablesRepository):
+    def execute(self, query: str, params: typing.List) -> AbstraHTTPResponse:
         body = {"query": query, "params": params}
-        return requests.post(
+        return self.client.post(
             self.execute_url,
-            headers=SIDECAR_HEADERS,
             json=body,
-            timeout=REQUEST_TIMEOUT,
         )
 
     def create_table(self, id: str, name: str) -> TableDTO:
@@ -112,46 +108,16 @@ class ProductionTablesApiHttpClient(TablesApiHttpClient):
         raise NotImplementedError()
 
 
-class LocalTablesApiHttpClient(TablesApiHttpClient):
-    def _request(
-        self,
-        method: str,
-        path: str,
-        body: Any = None,
-        params: dict = {},
-        raise_for_status: bool = True,
-    ):
-        headers = resolve_headers()
-        if headers is None:
-            raise Exception("You must be logged in to execute a table query")
-        r = requests.request(
-            method=method,
-            url=f"{self.base_url}/tables{path}",
-            headers=headers,
-            json=body,
-            params=params,
-            timeout=REQUEST_TIMEOUT,
-        )
-
-        if raise_for_status:
-            r.raise_for_status()
-
-        return r
-
-    def execute(self, query: str, params: typing.List) -> requests.Response:
+class LocalTablesRepository(TablesRepository):
+    def execute(self, query: str, params: typing.List) -> AbstraHTTPResponse:
         body = {"query": query, "params": params}
-        headers = resolve_headers()
-        if headers is None:
-            raise Exception("You must be logged in to execute a table query")
-        return requests.post(
-            self.execute_url, headers=headers, json=body, timeout=REQUEST_TIMEOUT
-        )
+
+        return self.client.post(self.execute_url, json=body, timeout=REQUEST_TIMEOUT)
 
     def create_table(self, id: str, name: str) -> TableDTO:
-        r = self._request(
-            "POST",
-            path="/table",
-            body={
+        r = self.client.post(
+            "/table",
+            json={
                 "id": id,
                 "name": name,
             },
@@ -165,7 +131,7 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
             "name": name,
             "type": type,
         }
-        r = self._request("POST", "/column", body=body)
+        r = self.client.post("/column", json=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)
 
@@ -174,13 +140,13 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
             "tableId": table_id,
             "row": values,
         }
-        self._request("POST", "/row", body=body)
+        self.client.post("/row", json=body)
 
     def update_table(self, table_id: str, name: str) -> TableDTO:
         body = {
             "name": name,
         }
-        r = self._request("PATCH", f"/table/{table_id}", body=body)
+        r = self.client.patch(f"/table/{table_id}", json=body)
         table = r.json()["response"]
         return TableDTO.from_dict(table)
 
@@ -189,6 +155,6 @@ class LocalTablesApiHttpClient(TablesApiHttpClient):
             "tableId": table_id,
             "changes": changes,
         }
-        r = self._request("PATCH", f"column/{column_id}", body=body)
+        r = self.client.patch(f"column/{column_id}", json=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)

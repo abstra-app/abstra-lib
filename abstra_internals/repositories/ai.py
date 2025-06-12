@@ -2,15 +2,13 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any, List
 
-import requests
-
+from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
-class AiApiHttpClient(ABC):
-    def __init__(self, base_url: str) -> None:
-        self.url = f"{base_url}/ai"
+class AIRepository(ABC):
+    def __init__(self, client: "HTTPClient") -> None:
+        self.client = client
 
     @abstractmethod
     def prompt(self, messages: List[Any], tools: List[Any], temperature: float):
@@ -21,18 +19,16 @@ class AiApiHttpClient(ABC):
         raise NotImplementedError()
 
 
-class ProductionAiApiHttpClient(AiApiHttpClient):
+class ProductionAIRepository(AIRepository):
     def prompt(self, messages: List[Any], tools: List[Any], temperature: float):
         body = {
             "messages": messages,
             "tools": tools,
             "temperature": temperature,
         }
-        response = requests.post(
-            f"{self.url}/prompt",
-            headers=SIDECAR_HEADERS,
+        response = self.client.post(
+            endpoint="/prompt",
             json=body,
-            timeout=REQUEST_TIMEOUT,
         )
         try:
             response = response.json()
@@ -41,10 +37,9 @@ class ProductionAiApiHttpClient(AiApiHttpClient):
             raise Exception(f"Error parsing JSON: {response.text}")
 
     def parse_document(self, model: str, file_content: bytes, mime_type: str):
-        response = requests.post(
-            f"{self.url}/parse-document/{model}",
-            headers={**SIDECAR_HEADERS, "Content-Type": mime_type},
-            timeout=REQUEST_TIMEOUT,
+        response = self.client.post(
+            endpoint=f"/parse-document/{model}",
+            headers={"Content-Type": mime_type},
             data=file_content,
         )
         response.raise_for_status()
@@ -52,19 +47,16 @@ class ProductionAiApiHttpClient(AiApiHttpClient):
         return response.json()
 
 
-class LocalAiApiHttpClient(AiApiHttpClient):
+class LocalAIRepository(AIRepository):
     def prompt(self, messages: List[Any], tools: List[Any], temperature: float):
         body = {
             "messages": messages,
             "tools": tools,
             "temperature": temperature,
         }
-        headers = resolve_headers()
-        if headers is None:
-            raise Exception("You must be logged in to use AI")
-        response = requests.post(
-            f"{self.url}/prompt", headers=headers, json=body, timeout=REQUEST_TIMEOUT
-        )
+
+        response = self.client.post("/prompt", json=body)
+
         try:
             response = response.json()
             return response
@@ -75,10 +67,9 @@ class LocalAiApiHttpClient(AiApiHttpClient):
         headers = resolve_headers()
         if headers is None:
             raise Exception("You must be logged in to use AI")
-        response = requests.post(
-            f"{self.url}/parse-document/{model}",
+        response = self.client.post(
+            f"/parse-document/{model}",
             headers={**headers, "Content-Type": mime_type},
-            timeout=REQUEST_TIMEOUT,
             data=file_content,
         )
         response.raise_for_status()

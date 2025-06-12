@@ -5,12 +5,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, TypedDict
 
-import requests
-
-from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.serializer import SerializationHelper
-from abstra_internals.threaded import threaded
 from abstra_internals.utils import serialize
 from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
 from abstra_internals.utils.dot_abstra import LOCAL_LOGS_FOLDER
@@ -147,14 +144,10 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
 
 
 class ProductionExecutionLogsRepository(ExecutionLogsRepository):
-    def __init__(
-        self,
-        url: str,
-    ):
-        self.url = url
+    def __init__(self, client: "HTTPClient"):
         self.sequence = 0
+        self.client = client
 
-    @threaded
     def save(self, log_entry: LogEntry) -> None:
         validated_payload = SerializationHelper.enforce_max_size(log_entry.payload)
 
@@ -163,25 +156,19 @@ class ProductionExecutionLogsRepository(ExecutionLogsRepository):
             "payload": validated_payload,
         }
 
-        res = requests.post(
-            f"{self.url}/executions/{log_entry.execution_id}/logs",
+        self.client.async_post(
+            endpoint=f"/executions/{log_entry.execution_id}/logs",
             json=dto,
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
-
-        res.raise_for_status()
 
     def get(
         self,
         execution_id: str,
         event: Optional[LogEvent] = None,
     ) -> List[LogEntry]:
-        response = requests.get(
-            f"{self.url}/executions/{execution_id}/logs",
+        response = self.client.get(
+            f"/executions/{execution_id}/logs",
             params={"event": event} if event else None,
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         response.raise_for_status()

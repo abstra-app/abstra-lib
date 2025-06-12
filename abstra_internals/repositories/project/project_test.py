@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from abstra_internals.repositories.factory import build_editor_repositories
 from abstra_internals.repositories.project.project import (
     FormStage,
     NotificationTrigger,
@@ -7,13 +8,13 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
     WorkflowTransition,
 )
-from tests.fixtures import clear_dir, get_editor_repositories, init_dir
+from tests.fixtures import clear_dir, init_dir
 
 
 class ProjectTests(TestCase):
     def setUp(self):
         self.root = init_dir()
-        self.project_repository = get_editor_repositories().project
+        self.project_repository = build_editor_repositories().project
 
     def tearDown(self) -> None:
         clear_dir(self.root)

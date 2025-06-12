@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
-import requests
-
+from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.contracts_generated import CommonUser, CommonUserRoles
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
 
 
 class UsersRepository(ABC):
@@ -59,37 +57,21 @@ class LocalUsersRepository(UsersRepository):
 
 
 class ProductionUsersRepository(UsersRepository):
-    def __init__(self, url: str) -> None:
-        self.url = url
-
-    def _request(
-        self,
-        method: str,
-        path: str,
-        body: Any = None,
-        params: dict = {},
-        raise_for_status: bool = True,
-    ):
-        r = requests.request(
-            method=method,
-            url=f"{self.url}/users{path}",
-            headers=SIDECAR_HEADERS,
-            json=body,
-            params=params,
-            timeout=REQUEST_TIMEOUT,
-        )
-
-        if raise_for_status:
-            r.raise_for_status()
-
-        return r
+    def __init__(self, client: "HTTPClient") -> None:
+        self.client = client
 
     def get_user(self, email: str) -> Optional[CommonUser]:
-        r = self._request("GET", "/", params={"email": email}, raise_for_status=False)
+        r = self.client.get(
+            endpoint="/users",
+            params={"email": email},
+        )
         if not r.ok:
             return None
         return CommonUser.from_dict(r.json())
 
     def insert_user(self, email: str) -> bool:
-        r = self._request("POST", "/", body={"email": email}, raise_for_status=False)
+        r = self.client.post(
+            endpoint="/users",
+            json={"email": email},
+        )
         return r.ok

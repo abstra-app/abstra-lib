@@ -1,8 +1,6 @@
 import abc
 
-import requests
-
-from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.cloud_api.http_client import HTTPClient
 
 
 class KVRepository(abc.ABC):
@@ -17,14 +15,12 @@ class KVRepository(abc.ABC):
 
 
 class ProductionKVRepository(KVRepository):
-    base_url: str
-
-    def __init__(self, sidecar_url: str):
-        self.base_url = sidecar_url + "/kv"
+    def __init__(self, client: "HTTPClient"):
+        self.client = client
 
     def get(self, key: str):
-        r = requests.get(
-            f"{self.base_url}/{key}", headers=SIDECAR_HEADERS, timeout=REQUEST_TIMEOUT
+        r = self.client.get(
+            f"/kv/{key}",
         )
         if not r.ok:
             return None
@@ -32,16 +28,14 @@ class ProductionKVRepository(KVRepository):
         return r.json()["value"]
 
     def delete(self, key: str):
-        requests.delete(
-            f"{self.base_url}/{key}", headers=SIDECAR_HEADERS, timeout=REQUEST_TIMEOUT
+        self.client.delete(
+            f"/kv/{key}",
         ).raise_for_status()
 
     def set(self, key: str, value: str):
-        requests.put(
-            f"{self.base_url}/{key}",
+        self.client.put(
+            f"/kv/{key}",
             json=dict(value=value),
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         ).raise_for_status()
 
 

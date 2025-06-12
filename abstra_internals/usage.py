@@ -9,9 +9,9 @@ import requests
 from abstra_internals.credentials import get_credentials
 from abstra_internals.environment import (
     CLOUD_API_CLI_URL,
+    CLOUD_API_PROD_HEADERS,
+    CLOUD_API_PROD_URL,
     REQUEST_TIMEOUT,
-    SIDECAR_HEADERS,
-    SIDECAR_URL,
 )
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.threaded import threaded
@@ -57,7 +57,7 @@ def editor_manual_usage(*, event: str, payload: Dict):
 # PLAYER
 @threaded
 def send_player_usage(*, event: str, payload: Dict, auth: Optional[str] = None):
-    if SIDECAR_URL is None:
+    if CLOUD_API_PROD_URL is None:
         return
 
     body = dict(event=event, payload=payload)
@@ -66,8 +66,8 @@ def send_player_usage(*, event: str, payload: Dict, auth: Optional[str] = None):
             body["email"] = claims.email
 
     requests.post(
-        f"{SIDECAR_URL}/usage/event",
-        headers=SIDECAR_HEADERS,
+        f"{CLOUD_API_PROD_URL}/usage/event",
+        headers=CLOUD_API_PROD_HEADERS,
         json=body,
         timeout=REQUEST_TIMEOUT,
     )
@@ -90,7 +90,7 @@ def player_usage(func: Callable[..., Any]) -> Callable[..., Any]:
 
 # Executions
 def send_execution_usage(file: Path, status: str, exception: Optional[Exception]):
-    if SIDECAR_URL or is_test_env() or is_dev_env():
+    if CLOUD_API_PROD_URL or is_test_env() or is_dev_env():
         return
 
     try:

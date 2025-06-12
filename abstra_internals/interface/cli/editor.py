@@ -14,7 +14,7 @@ from abstra_internals.file_watcher import FileChangeWatcher
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import EditorConsumer
-from abstra_internals.repositories.factory import get_editor_repositories
+from abstra_internals.repositories.factory import build_editor_repositories
 from abstra_internals.repositories.producer import LocalProducerRepository
 from abstra_internals.resources_watcher import resources_polling_loop
 from abstra_internals.server.apps import get_local_app
@@ -75,7 +75,7 @@ def editor(headless: bool):
     check_latest_version()
     AbstraLogger.init("local")
 
-    controller = MainController(repositories=get_editor_repositories())
+    controller = MainController(repositories=build_editor_repositories())
     controller.reset_repositories()
     StdioPatcher.apply(controller)
 

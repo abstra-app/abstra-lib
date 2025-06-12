@@ -8,6 +8,7 @@ from uuid import UUID
 import requests
 
 from abstra.tables import insert
+from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.controllers.execution.execution_client_form import FormClient
 from abstra_internals.controllers.sdk.sdk_context import SDKContext
 from abstra_internals.entities.execution import Execution
@@ -23,14 +24,19 @@ from abstra_internals.interface.sdk.tables.api import (
     _make_update_query,
     serialize,
 )
-from abstra_internals.repositories.tables import TablesApiHttpClient
+from abstra_internals.repositories.tables import TablesRepository
 from tests.fixtures import BaseTest
 
 
-class MockTablesApi(TablesApiHttpClient):
+class MockHTTPClient(HTTPClient):
     def __init__(self):
-        super().__init__("FAKE_URL")
+        self.response = requests.Response()
 
+    def request(self, method: str, endpoint: str, **kwargs) -> requests.Response:
+        return self.response
+
+
+class MockTablesApi(TablesRepository):
     def execute(self, query: str, params: List) -> requests.Response:
         resp = requests.Response()
         resp.status_code = 200
@@ -44,7 +50,7 @@ class MockTablesApi(TablesApiHttpClient):
 class TestTables(BaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.repositories.tables = MockTablesApi()
+        self.repositories.tables = MockTablesApi(client=MockHTTPClient())
         context = FormContext(
             request=Request(body="", query_params={}, headers={}, method="GET"),
         )

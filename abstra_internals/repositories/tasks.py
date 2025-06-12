@@ -1,12 +1,10 @@
 import datetime
 import json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Literal, Mapping, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 from uuid import uuid4
 
-import requests
-
-from abstra_internals.environment import REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.utils.datetime import to_utc_iso_string
 from abstra_internals.utils.dot_abstra import TASKS_FOLDER
@@ -260,31 +258,8 @@ class LocalTasksRepository(TasksRepository):
 
 
 class ProductionTasksRepository(TasksRepository):
-    def __init__(self, url: str) -> None:
-        self.url = url
-
-    def _request(
-        self,
-        method: str,
-        path: str,
-        body: Any = None,
-        params: dict = {},
-        raise_for_status: bool = True,
-    ):
-        headers: Mapping[str, str] = SIDECAR_HEADERS
-        r = requests.request(
-            method=method,
-            url=f"{self.url}/tasks{path}",
-            headers=headers,
-            json=body,
-            params=params,
-            timeout=REQUEST_TIMEOUT,
-        )
-
-        if raise_for_status:
-            r.raise_for_status()
-
-        return r
+    def __init__(self, client: "HTTPClient") -> None:
+        self.client = client
 
     def send_task(
         self,
@@ -294,10 +269,9 @@ class ProductionTasksRepository(TasksRepository):
         source_stage_id: Optional[str],
         execution_id: Optional[str],
     ) -> TaskDTO:
-        r = self._request(
-            "POST",
-            path="/",
-            body={
+        r = self.client.post(
+            endpoint="/tasks",
+            json={
                 "type": type,
                 "payload": payload,
                 "targetStageId": target_stage_id,
@@ -314,10 +288,9 @@ class ProductionTasksRepository(TasksRepository):
     def lock_task(
         self, task_id: str, execution_id: Optional[str], stage_id: Optional[str]
     ) -> None:
-        r = self._request(
-            "PATCH",
-            path=f"/{task_id}",
-            body={
+        r = self.client.patch(
+            endpoint=f"/tasks/{task_id}",
+            json={
                 "status": "locked",
                 "locked": {
                     "at": to_utc_iso_string(
@@ -337,10 +310,9 @@ class ProductionTasksRepository(TasksRepository):
     def complete_task(
         self, task_id: str, execution_id: Optional[str], stage_id: Optional[str]
     ) -> None:
-        r = self._request(
-            "PATCH",
-            path=f"/{task_id}",
-            body={
+        r = self.client.patch(
+            endpoint=f"/tasks/{task_id}",
+            json={
                 "status": "completed",
                 "completed": {
                     "at": to_utc_iso_string(
@@ -358,7 +330,10 @@ class ProductionTasksRepository(TasksRepository):
         r.raise_for_status()
 
     def set_task_to_pending(self, task_id: str) -> None:
-        r = self._request("PATCH", path=f"/{task_id}", body={"status": "pending"})
+        r = self.client.patch(
+            endpoint=f"/tasks/{task_id}",
+            json={"status": "pending"},
+        )
 
         if r.status_code == 409:
             raise TaskLockFailed(f"Task {task_id} is not completed")
@@ -368,9 +343,8 @@ class ProductionTasksRepository(TasksRepository):
     def get_pending_tasks(
         self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
     ) -> List[TaskDTO]:
-        r = self._request(
-            "GET",
-            path="/",
+        r = self.client.get(
+            endpoint="/tasks",
             params={
                 "stageId": stage_id,
                 "status": ["pending"],
@@ -386,9 +360,8 @@ class ProductionTasksRepository(TasksRepository):
     def get_sent_tasks(
         self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
     ) -> List[TaskDTO]:
-        r = self._request(
-            "GET",
-            path="/",
+        r = self.client.get(
+            endpoint="/tasks",
             params={
                 "stageId": None,
                 "status": [],
@@ -402,12 +375,17 @@ class ProductionTasksRepository(TasksRepository):
         return [TaskDTO(**task) for task in tasks]
 
     def get_stage_tasks(self, stage_id: str) -> List[TaskDTO]:
-        r = self._request("GET", path="/", params={"stageId": stage_id})
+        r = self.client.get(
+            endpoint="/tasks",
+            params={"stageId": stage_id},
+        )
         tasks = r.json()["tasks"]
         return [TaskDTO(**task) for task in tasks]
 
     def get_by_id(self, task_id: str) -> TaskDTO:
-        r = self._request("GET", path=f"/{task_id}")
+        r = self.client.get(
+            endpoint=f"/tasks/{task_id}",
+        )
         task = r.json()
         return TaskDTO(**task)
 
@@ -418,7 +396,11 @@ class ProductionTasksRepository(TasksRepository):
         raise NotImplementedError()
 
     def set_locked_tasks_to_pending(self, execution_id: str) -> None:
-        r = self._request("PATCH", path="/", body={"executionId": execution_id})
+        r = self.client.patch(
+            endpoint="/tasks",
+            json={"executionId": execution_id},
+        )
+
         r.raise_for_status()
 
     def clear(self):

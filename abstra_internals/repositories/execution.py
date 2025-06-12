@@ -2,14 +2,12 @@ import datetime
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-import requests
 from pydantic.dataclasses import dataclass
 
+from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.entities.execution import Execution, ExecutionStatus
 from abstra_internals.environment import (
-    REQUEST_TIMEOUT,
     SERVER_UUID,
-    SIDECAR_HEADERS,
     WORKER_UUID,
 )
 from abstra_internals.repositories.multiprocessing import MPContext
@@ -175,8 +173,8 @@ class LocalExecutionRepository(ExecutionRepository):
 
 
 class ProductionExecutionRepository(ExecutionRepository):
-    def __init__(self, url: str):
-        self.url = url
+    def __init__(self, client: "HTTPClient"):
+        self.client = client
 
     def _adapt_legacy_execution_dtos(self, dtos: List[dict]) -> List[dict]:
         for dto in dtos:
@@ -195,11 +193,9 @@ class ProductionExecutionRepository(ExecutionRepository):
             appId=SERVER_UUID(),
         )
 
-        res = requests.post(
-            f"{self.url}/executions",
+        res = self.client.post(
+            endpoint="/executions",
             json=request_dto,
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -210,21 +206,17 @@ class ProductionExecutionRepository(ExecutionRepository):
             context=execution.context.dump() or {},
         )
 
-        res = requests.patch(
-            f"{self.url}/executions/{execution.id}",
+        res = self.client.patch(
+            f"/executions/{execution.id}",
             json=request_dto,
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
 
     def set_failure_by_id(self, execution_id: str) -> None:
-        res = requests.patch(
-            f"{self.url}/executions/{execution_id}",
+        res = self.client.patch(
+            f"/executions/{execution_id}",
             json=dict(status="failed"),
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -232,15 +224,13 @@ class ProductionExecutionRepository(ExecutionRepository):
     def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
     ) -> List[Execution]:
-        res = requests.get(
-            f"{self.url}/executions",
+        res = self.client.get(
+            "/executions",
             params=dict(
                 appId=app_id,
                 status=status,
                 workerId=worker_id,
             ),
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()
@@ -250,14 +240,12 @@ class ProductionExecutionRepository(ExecutionRepository):
         return [Execution(**dto) for dto in dtos]
 
     def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
-        res = requests.get(
-            f"{self.url}/executions",
+        res = self.client.get(
+            "/executions",
             params=dict(
                 appId=app_id,
                 status=status,
             ),
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         res.raise_for_status()

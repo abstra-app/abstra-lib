@@ -5,10 +5,15 @@ from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution import ClientContext
 from abstra_internals.environment import (
+    IS_PRODUCTION,
     set_SERVER_UUID,
     set_WORKER_UUID,
 )
-from abstra_internals.logger import AbstraLogger, Environment
+from abstra_internals.logger import AbstraLogger
+from abstra_internals.repositories.factory import (
+    build_editor_repositories,
+    build_prod_repositories,
+)
 from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
@@ -21,16 +26,20 @@ def process_main(
     worker_id: str,
     app_id: str,
     stage: StageWithFile,
-    controller: MainController,
-    environment: Optional[Environment],
     request: Optional[ClientContext] = None,
 ):
-    try:
-        AbstraLogger.init(environment)
-        AbstraLogger.debug("[ConsumerController Subprocess] Starting...")
+    Settings.set_root_path(root_path)
+    Settings.set_server_port(server_port, force=True)
 
-        Settings.set_root_path(root_path)
-        Settings.set_server_port(server_port, force=True)
+    try:
+        if IS_PRODUCTION:
+            AbstraLogger.init("cloud")
+            repositories = build_prod_repositories()
+            controller = MainController(repositories)
+        else:
+            AbstraLogger.init("local")
+            repositories = build_editor_repositories()
+            controller = MainController(repositories)
 
         set_SERVER_UUID(app_id)
         set_WORKER_UUID(worker_id)

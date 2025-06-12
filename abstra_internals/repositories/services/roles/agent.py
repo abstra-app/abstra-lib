@@ -3,7 +3,11 @@ from typing import TypedDict, Union
 import requests
 
 from abstra_internals.entities.agents import ConnectionModel
-from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.environment import (
+    CLOUD_API_PROD_HEADERS,
+    PROJECT_ID,
+    REQUEST_TIMEOUT,
+)
 from abstra_internals.repositories.project.project import Project
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 
@@ -128,7 +132,7 @@ class RoleAgentRepository(RoleCommonRepository):
 
 class ProductionRoleAgentRepository(RoleAgentRepository):
     def get_headers(self):
-        return SIDECAR_HEADERS
+        return CLOUD_API_PROD_HEADERS
 
     def get_current_project_id(self):
         return PROJECT_ID

@@ -11,7 +11,7 @@ from abstra_internals.entities.forms.widgets.response_types import AbstractFileR
 from abstra_internals.interface.sdk.forms.deprecated.widgets.response_abc import (
     AbstractFileResponse as DeprecatedAbstractFileResponse,
 )
-from abstra_internals.repositories.ai import AiApiHttpClient
+from abstra_internals.repositories.ai import AIRepository
 from abstra_internals.utils.string import to_snake_case
 
 Prompt = Union[
@@ -21,7 +21,7 @@ Format = Dict[str, object]
 
 
 class AiSDKController:
-    def __init__(self, ai_client: AiApiHttpClient):
+    def __init__(self, ai_client: AIRepository):
         self.ai_client = ai_client
 
     def _build_function_tool_call(self, format: Dict[str, object]) -> Dict[str, object]:

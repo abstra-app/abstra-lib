@@ -1,30 +1,27 @@
 from dataclasses import dataclass
 
+from abstra_internals.cloud_api.http_client import HTTPClient
+from abstra_internals.credentials import resolve_headers_raise
 from abstra_internals.environment import (
     CLOUD_API_CLI_URL,
+    CLOUD_API_PROD_HEADERS,
+    CLOUD_API_PROD_URL,
     EDITOR_MODE,
     RABBITMQ_CONNECTION_URI,
-    SIDECAR_URL,
 )
 from abstra_internals.repositories.agents import (
     AgentsRepository,
-    LocalAgentsRepository,
-    ProductionAgentsRepository,
 )
 from abstra_internals.repositories.ai import (
-    AiApiHttpClient,
-    LocalAiApiHttpClient,
-    ProductionAiApiHttpClient,
+    AIRepository,
+    LocalAIRepository,
+    ProductionAIRepository,
 )
 from abstra_internals.repositories.connectors import (
     ConnectorsRepository,
-    LocalConnectorsRepository,
-    ProductionConnectorsRepository,
 )
 from abstra_internals.repositories.email import (
     EmailRepository,
-    LocalEmailRepository,
-    ProductionEmailRepository,
 )
 from abstra_internals.repositories.execution import (
     ExecutionRepository,
@@ -84,9 +81,9 @@ from abstra_internals.repositories.services import (
 from abstra_internals.repositories.services.roles.agent import RoleAgentRepository
 from abstra_internals.repositories.services.roles.client import RoleClientRepository
 from abstra_internals.repositories.tables import (
-    LocalTablesApiHttpClient,
-    ProductionTablesApiHttpClient,
-    TablesApiHttpClient,
+    LocalTablesRepository,
+    ProductionTablesRepository,
+    TablesRepository,
 )
 from abstra_internals.repositories.tasks import (
     LocalTasksRepository,
@@ -108,16 +105,16 @@ class Repositories:
     execution: ExecutionRepository
     mp_context: MPContextReposity
     producer: ProducerRepository
-    tables: TablesApiHttpClient
+    tables: TablesRepository
     email: EmailRepository
     users: UsersRepository
     roles: RolesRepository
-    ai: AiApiHttpClient
+    ai: AIRepository
     jwt: JWTRepository
     kv: KVRepository
     roles: RolesRepository
     tasks: TasksRepository
-    tables: TablesApiHttpClient
+    tables: TablesRepository
     users: UsersRepository
     editor_jwt: EditorJWTRepository
     role_agents: RoleAgentRepository
@@ -126,8 +123,12 @@ class Repositories:
     linter: LinterRepository
 
 
-def get_editor_repositories():
+def build_editor_repositories():
     mp_context = SpawnContextReposity()
+
+    http_client = HTTPClient(
+        base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise
+    )
 
     linter = LocalLinterRepository()
 
@@ -135,49 +136,53 @@ def get_editor_repositories():
         project=LocalProjectRepository(),
         execution=LocalExecutionRepository(mp_context.get_context()),
         producer=LocalProducerRepository(mp_context.get_context()),
-        connectors=LocalConnectorsRepository(CLOUD_API_CLI_URL),
+        connectors=ConnectorsRepository(client=http_client),
         tasks=LocalTasksRepository(mp_context.get_context()),
-        tables=LocalTablesApiHttpClient(CLOUD_API_CLI_URL),
-        email=LocalEmailRepository(CLOUD_API_CLI_URL),
-        roles=LocalRolesRepository(CLOUD_API_CLI_URL),
-        ai=LocalAiApiHttpClient(CLOUD_API_CLI_URL),
+        tables=LocalTablesRepository(client=http_client),
+        email=EmailRepository(client=http_client),
+        roles=LocalRolesRepository(client=http_client),
+        ai=LocalAIRepository(client=http_client),
         execution_logs=LocalExecutionLogsRepository(),
         users=LocalUsersRepository(),
         jwt=LocalJWTRepository(),
         kv=LocalKVRepository(),
-        role_agents=LocalRoleAgentRepository(CLOUD_API_CLI_URL),
-        role_clients=LocalRoleClientRepository(CLOUD_API_CLI_URL),
+        role_agents=LocalRoleAgentRepository(base_url=CLOUD_API_CLI_URL),
+        role_clients=LocalRoleClientRepository(base_url=CLOUD_API_CLI_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
-        agents=LocalAgentsRepository(CLOUD_API_CLI_URL),
+        agents=AgentsRepository(client=http_client),
         linter=linter,
     )
 
 
-def get_prodution_app_repositories():
-    if SIDECAR_URL is None or RABBITMQ_CONNECTION_URI is None:
+def build_prod_repositories():
+    if CLOUD_API_PROD_URL is None or RABBITMQ_CONNECTION_URI is None:
         raise Exception("Production urls are not set")
 
     disabled_stages_loader = ProductionDisabledStagesLoader()
 
+    http_client = HTTPClient(
+        base_url=CLOUD_API_PROD_URL, base_headers=CLOUD_API_PROD_HEADERS
+    )
+
     return Repositories(
         project=ProductionProjectRepository(disabled_stages_loader),
         producer=ProductionProducerRepository(RABBITMQ_CONNECTION_URI),
-        execution_logs=ProductionExecutionLogsRepository(SIDECAR_URL),
-        connectors=ProductionConnectorsRepository(SIDECAR_URL),
-        execution=ProductionExecutionRepository(SIDECAR_URL),
-        tables=ProductionTablesApiHttpClient(SIDECAR_URL),
-        email=ProductionEmailRepository(SIDECAR_URL),
-        roles=ProductionRolesRepository(SIDECAR_URL),
-        users=ProductionUsersRepository(SIDECAR_URL),
-        tasks=ProductionTasksRepository(SIDECAR_URL),
-        ai=ProductionAiApiHttpClient(SIDECAR_URL),
-        jwt=ProductionJWTRepository(SIDECAR_URL),
-        kv=ProductionKVRepository(SIDECAR_URL),
-        role_agents=ProductionRoleAgentRepository(SIDECAR_URL),
-        role_clients=ProductionRoleClientRepository(SIDECAR_URL),
+        execution_logs=ProductionExecutionLogsRepository(client=http_client),
+        connectors=ConnectorsRepository(client=http_client),
+        execution=ProductionExecutionRepository(client=http_client),
+        tables=ProductionTablesRepository(client=http_client),
+        email=EmailRepository(client=http_client),
+        roles=ProductionRolesRepository(),
+        users=ProductionUsersRepository(client=http_client),
+        tasks=ProductionTasksRepository(client=http_client),
+        ai=ProductionAIRepository(client=http_client),
+        jwt=ProductionJWTRepository(client=http_client),
+        kv=ProductionKVRepository(client=http_client),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=SpawnContextReposity(),
-        agents=ProductionAgentsRepository(SIDECAR_URL),
+        agents=AgentsRepository(client=http_client),
         linter=ProductionLinterRepository(),
+        role_agents=ProductionRoleAgentRepository(CLOUD_API_PROD_URL),
+        role_clients=ProductionRoleClientRepository(CLOUD_API_PROD_URL),
     )

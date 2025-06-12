@@ -19,12 +19,12 @@ from abstra_internals.entities.execution_context import (
 )
 from abstra_internals.environment import (
     BUILD_ID,
+    CLOUD_API_PROD_SHARED_TOKEN,
     EDITOR_MODE,
     IS_PRODUCTION,
     OIDC_AUTHORITY,
     OIDC_CLIENT_ID,
     SHOW_WATERMARK,
-    SIDECAR_SHARED_TOKEN,
 )
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.logger import AbstraLogger
@@ -242,19 +242,19 @@ def get_player_bp(controller: MainController):
 
     @bp.get("/_jobs")
     def list_jobs():
-        if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
+        if flask.request.headers.get("Shared-Token") != CLOUD_API_PROD_SHARED_TOKEN:
             flask.abort(401)
 
         # The scheduler needs all the jobs, including disabled ones, to schedule them.
         # The scheduler will always send the request to the lib to run the jobs, and the lib will check if the job is enabled or not.
         jobs = controller.get_jobs(include_disabled_jobs=True)
 
-        # used by sidecar - DO NOT CHANGE CONTRACT
+        # used by Scheduler Container - DO NOT CHANGE CONTRACT
         return [{"id": job.id, "schedule": job.schedule} for job in jobs]
 
     @bp.post("/_jobs/<path:id>")
     def job_runner(id):
-        if flask.request.headers.get("Shared-Token") != SIDECAR_SHARED_TOKEN:
+        if flask.request.headers.get("Shared-Token") != CLOUD_API_PROD_SHARED_TOKEN:
             flask.abort(401)
 
         job = controller.get_job(id)

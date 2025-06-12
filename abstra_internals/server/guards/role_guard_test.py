@@ -17,13 +17,13 @@ from abstra_internals.server.guards.role_guard import (
     PathArgSelector,
     StageIdSelector,
 )
-from tests.fixtures import clear_dir, get_editor_repositories, init_dir
+from tests.fixtures import build_editor_repositories, clear_dir, init_dir
 
 
 class TestRequirementsApi(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        self.project_repository = get_editor_repositories().project
+        self.project_repository = build_editor_repositories().project
 
     def tearDown(self) -> None:
         clear_dir(self.root)

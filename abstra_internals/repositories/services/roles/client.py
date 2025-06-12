@@ -11,7 +11,11 @@ from abstra_internals.entities.agents import (
     ConnectionModel,
     SignProofResponse,
 )
-from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.environment import (
+    CLOUD_API_PROD_HEADERS,
+    PROJECT_ID,
+    REQUEST_TIMEOUT,
+)
 from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.repositories.services.roles.common import RoleCommonRepository
 from abstra_internals.settings import Settings
@@ -241,7 +245,7 @@ class RoleClientRepository(RoleCommonRepository):
 
 class ProductionRoleClientRepository(RoleClientRepository):
     def get_headers(self):
-        return SIDECAR_HEADERS
+        return CLOUD_API_PROD_HEADERS
 
     def get_current_project_id(self):
         return PROJECT_ID

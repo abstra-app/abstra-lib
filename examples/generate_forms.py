@@ -13,7 +13,10 @@ import libcst as cst
 from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.execution.execution_client_form import FormClient
 from abstra_internals.entities.execution_context import FormContext, Request
-from abstra_internals.repositories.factory import Repositories, get_editor_repositories
+from abstra_internals.repositories.factory import (
+    Repositories,
+    build_editor_repositories,
+)
 from abstra_internals.repositories.project.project import (
     FormStage,
     LocalProjectRepository,
@@ -211,7 +214,7 @@ def render_examples():
     project_repository.initialize()
     proj = project_repository.load()
 
-    repos = get_editor_repositories()
+    repos = build_editor_repositories()
 
     files_with_output = list(Path(__file__).parent.rglob("*.form.py"))
     files_without_output = list(Path(__file__).parent.rglob("*.raw.py"))

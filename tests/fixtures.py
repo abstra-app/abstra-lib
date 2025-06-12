@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.interface.cli.editor import start_consumer
-from abstra_internals.repositories.factory import get_editor_repositories
+from abstra_internals.repositories.factory import build_editor_repositories
 from abstra_internals.repositories.project.project import (
     LocalProjectRepository,
 )
@@ -76,7 +76,7 @@ def sort_response_by_payload(response: dict):
 class BaseTest(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
-        self.repositories = get_editor_repositories()
+        self.repositories = build_editor_repositories()
         self.controller = MainController(self.repositories)
 
     def tearDown(self) -> None:

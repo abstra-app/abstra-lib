@@ -4,9 +4,9 @@ from functools import lru_cache
 from typing import Optional
 
 import jwt
-import requests
 
-from abstra_internals.environment import PROJECT_ID, REQUEST_TIMEOUT, SIDECAR_HEADERS
+from abstra_internals.cloud_api.http_client import HTTPClient
+from abstra_internals.environment import PROJECT_ID
 from abstra_internals.jwt_auth import decode_jwt
 from abstra_internals.utils import generate_n_digit_code
 
@@ -25,15 +25,13 @@ class JWTRepository(abc.ABC):
 class ProductionJWTRepository(JWTRepository):
     base_url: str
 
-    def __init__(self, sidecar_url: str):
-        self.base_url = sidecar_url + "/jwt/sign"
+    def __init__(self, client: "HTTPClient"):
+        self.client = client
 
     def sign(self, email: str):
-        r = requests.post(
-            self.base_url,
+        r = self.client.post(
+            endpoint="/jwt/sign",
             json=dict(email=email),
-            headers=SIDECAR_HEADERS,
-            timeout=REQUEST_TIMEOUT,
         )
 
         if not r.ok:

@@ -44,3 +44,10 @@ def resolve_headers():
         return None
 
     return {"Api-Authorization": f"Bearer {credentials}"}
+
+
+def resolve_headers_raise():
+    headers = resolve_headers()
+    if headers is None:
+        raise Exception("You must be logged in to execute this operation")
+    return headers

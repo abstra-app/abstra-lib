@@ -31,14 +31,14 @@ class DevSDK:
         pass
 
 
-Environment = Literal["cloud", "local"]
+LoggerEnvironment = Literal["cloud", "local"]
 
 
 class AbstraLogger:
-    environment: Environment = "local"
+    environment: LoggerEnvironment = "local"
 
     @classmethod
-    def init(cls, environment: Optional[Environment]):
+    def init(cls, environment: Optional[LoggerEnvironment]):
         cls.environment = environment or "local"
         logging.basicConfig(level=LOGLEVEL(), format=LOGFORMAT())
 

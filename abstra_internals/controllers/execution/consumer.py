@@ -74,13 +74,11 @@ class ConsumerController:
                 target=process_main,
                 kwargs=dict(
                     stage=stage,
-                    controller=self.main_controller,
                     worker_id=worker_id,
                     app_id=self.app_id,
                     root_path=Settings.root_path,
                     server_port=Settings.server_port,
                     request=msg.preexecution.context,
-                    environment=AbstraLogger.environment,
                 ),
                 name=f"Worker-{head_id}",
             )
