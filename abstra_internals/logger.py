@@ -49,8 +49,8 @@ class AbstraLogger:
         try:
             cls.get_sdk().init(
                 dsn="https://9bbccd1a46ddb8a563483c6afc61ca35@o1317386.ingest.us.sentry.io/4507024713383936",
-                traces_sample_rate=1.0,
-                profiles_sample_rate=1.0,
+                traces_sample_rate=0.01,
+                profiles_sample_rate=0.01,
                 environment=cls.environment,
                 enable_tracing=True,
                 release=pkg_resources.get_distribution("abstra").version,
