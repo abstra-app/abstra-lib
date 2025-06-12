@@ -19,7 +19,6 @@ from typing import (
 )
 
 from abstra_internals.interface.sdk.user_exceptions import DeprecatedModule
-from abstra_internals.utils.file import iterate_files
 
 ABSTRA_LIB_ROOT = pathlib.Path(__file__).parent.parent
 
@@ -186,7 +185,7 @@ class SDKContractParser:
         if not examples_dir_path.exists():
             return examples
 
-        for example_file in sorted(iterate_files(examples_dir_path, ".gen.py")):
+        for example_file in sorted(list(examples_dir_path.glob("*.gen.py"))):
             with open(example_file, "r", encoding="utf-8") as f:
                 raw = f.read()
 

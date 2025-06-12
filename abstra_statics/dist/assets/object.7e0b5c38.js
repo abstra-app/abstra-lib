@@ -1,0 +1,5 @@
+import"./index.4dd2cd5b.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},n=new Error().stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="6fcaf885-553d-4a5b-8ff9-e7ac0e33ea00",e._sentryDebugIdIdentifier="sentry-dbid-6fcaf885-553d-4a5b-8ff9-e7ac0e33ea00")}catch{}})();const r=e=>{if(e==null)return"";const n=String(e);return n.includes(";")||n.includes(`
+`)||n.includes('"')?`"${n.replace(/"/g,'""')}"`:n},s=e=>{let n=e.columns.map(r).join(";")+`
+`;e.rows.forEach(o=>{n+=o.map(r).join(";")+`
+`});const t=document.createElement("a");t.href="data:text/csv;charset=utf-8,"+encodeURIComponent(n),t.target="_blank",t.download=`${e.fileName}.csv`,t.click()};function c(e){const n={};for(const t in e)if(e.hasOwnProperty(t)){if(typeof e[t]=="object"&&e[t]!==null){n[t]=JSON.stringify(e[t]);continue}n[t]=String(e[t])}return n}export{s as d,c as o};
+//# sourceMappingURL=object.7e0b5c38.js.map

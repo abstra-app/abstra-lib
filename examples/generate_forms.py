@@ -19,7 +19,6 @@ from abstra_internals.repositories.project.project import (
     LocalProjectRepository,
 )
 from abstra_internals.settings import Settings
-from abstra_internals.utils.file import iterate_files
 
 
 class TypeHintRemoverCST(cst.CSTTransformer):
@@ -214,11 +213,8 @@ def render_examples():
 
     repos = get_editor_repositories()
 
-    parent_path = Path(__file__).parent
-
-    files_with_output = iterate_files(parent_path, ".form.py")
-    files_without_output = iterate_files(parent_path, ".raw.py")
-
+    files_with_output = list(Path(__file__).parent.rglob("*.form.py"))
+    files_without_output = list(Path(__file__).parent.rglob("*.raw.py"))
     files = files_with_output + files_without_output
 
     print(f"Found {len(files)} form files")

@@ -18,14 +18,13 @@ from abstra_internals.contracts_generated import (
     CommonFileNode,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.utils.file import EXCLUDED_DIRS, walk_directory
 
 
 def rm_tree(pth: Path):
     pth = Path(pth)
     if not pth.exists():
         return
-    for child in walk_directory(pth):
+    for child in pth.glob("*"):
         if child.is_file():
             child.unlink()
         else:
@@ -36,26 +35,6 @@ def rm_tree(pth: Path):
 class CodebaseController:
     def __init__(self, repos: Repositories):
         self.repos = repos
-
-    def file_node(self, child_path: Path, base_path: Path) -> CommonFileNode:
-        is_dir = child_path.is_dir()
-        stats = child_path.stat()
-
-        grand_children = []
-        if is_dir:
-            grand_children = [
-                list(c.relative_to(base_path).parts)
-                for c in child_path.iterdir()
-                if c.name not in EXCLUDED_DIRS
-            ]
-
-        return CommonFileNode(
-            path_parts=list(child_path.relative_to(base_path).parts),
-            size=stats.st_size,
-            last_modified=datetime.fromtimestamp(stats.st_mtime),
-            type="directory" if is_dir else "file",
-            children=grand_children,
-        )
 
     def list_files(self, path) -> AbstraLibApiEditorFilesListResponse:
         if path is None:
@@ -69,7 +48,17 @@ class CodebaseController:
 
         return [
             AbstraLibApiEditorFilesListResponseItem(
-                file=self.file_node(child_path, path),
+                file=CommonFileNode(
+                    path_parts=list(child_path.relative_to(path).parts),
+                    size=child_path.stat().st_size,
+                    last_modified=datetime.fromtimestamp(path.stat().st_mtime),
+                    type="directory" if child_path.is_dir() else "file",
+                    children=(
+                        [list(c.relative_to(path).parts) for c in child_path.iterdir()]
+                        if child_path.is_dir()
+                        else []
+                    ),
+                ),
                 stages=[
                     AbstraLibApiEditorFilesListResponseItemStagesItem(
                         id=stage.id,
@@ -78,7 +67,7 @@ class CodebaseController:
                     for stage in project.get_stages_by_file_path(child_path)
                 ],
             )
-            for child_path in walk_directory(path)
+            for child_path in path.glob("**/*")
         ]
 
     def create_file(self, path, content: Optional[bytes] = None) -> CommonFileNode:
@@ -140,8 +129,6 @@ class CodebaseController:
     def mkdir(self, path) -> AbstraLibApiEditorFilesMkdirResponse:
         if isinstance(path, str):
             path = Path(path)
-        elif isinstance(path, list):
-            path = Path(*path)
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
 
