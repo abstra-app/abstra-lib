@@ -32,6 +32,7 @@ class HTTPClient:
         )
         self.timeout = REQUEST_TIMEOUT  # Default timeout for requests
         self.pool = ThreadPoolExecutor(max_workers=5)
+        self._local = threading.local()
 
     @property
     def base_headers(self) -> Dict[str, str]:
@@ -45,15 +46,15 @@ class HTTPClient:
 
     @property
     def session(self) -> requests.Session:
-        if not hasattr(threading.local(), "http_session"):
-            threading.local().http_session = requests.Session()
-            threading.local().http_session.mount(
+        if not hasattr(self._local, "session"):
+            self._local.session = requests.Session()
+            self._local.session.mount(
                 "http://", requests.adapters.HTTPAdapter(max_retries=3)
             )
-            threading.local().http_session.mount(
+            self._local.session.mount(
                 "https://", requests.adapters.HTTPAdapter(max_retries=3)
             )
-        return threading.local().http_session
+        return self._local.session
 
     def request(self, method: str, endpoint: str, **kwargs) -> requests.Response:
         """
