@@ -3,7 +3,7 @@ import re
 
 
 class EnvMasker:
-    patter: re.Pattern
+    pattern: re.Pattern
 
     def __init__(self, min_value_size=3):
         env_values = set(

@@ -21,13 +21,3 @@ def to_snake_case(name: str):
     # remove trailing _
     name = re.sub(r"_$", "", name)
     return name.lower()
-
-
-def to_pascal_case(name: str):
-    # snake
-    name = to_snake_case(name)
-    # replace _[letter] with [uppercase letter]
-    name = re.sub(r"_(.)", lambda match: match.group(1).upper(), name)
-    # capitalize first letter
-    name = re.sub(r"^.", lambda match: match.group(0).upper(), name)
-    return name

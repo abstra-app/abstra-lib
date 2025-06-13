@@ -15,9 +15,22 @@ from abstra_internals.environment import (
 )
 from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.threaded import threaded
-from abstra_internals.utils import get_local_python_version, get_local_user_id
+from abstra_internals.utils import get_local_python_version
 from abstra_internals.utils.env import is_dev_env, is_test_env
 from abstra_internals.utils.packages import get_local_package_version
+
+
+def get_local_user_id():
+    import hashlib
+    import uuid
+
+    id = str(uuid.getnode())
+
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(id.encode("utf-8"))
+    hashed_string = sha256_hash.hexdigest()
+
+    return hashed_string
 
 
 # EDITOR

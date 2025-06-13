@@ -8,8 +8,6 @@ from abstra_internals.logger import AbstraLogger
 from abstra_internals.utils.email import is_valid_email
 
 USER_AUTH_HEADER_KEY = "Authorization"
-API_AUTH_HEADER_KEY = "Api-Authorization"
-AUTHOR_AUTH_HEADER_KEY = "Author-Authorization"
 
 
 def decode_jwt(jwt_str: str, aud=PROJECT_ID):

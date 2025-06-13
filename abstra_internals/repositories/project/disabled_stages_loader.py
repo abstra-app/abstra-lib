@@ -2,9 +2,6 @@ import pathlib
 
 from abstra_internals.environment import DISABLED_STAGES_FOLDER
 
-GET_DISABLED_STAGES_TIMEOUT = 5
-GET_DISABLED_STAGES_CACHE_EXPIRATION = 60 * 5
-
 
 class DisabledStagesLoader:
     def _get_disabled_stages_folder(self):
@@ -26,9 +23,3 @@ class ProductionDisabledStagesLoader(DisabledStagesLoader):
             raise Exception("DISABLED_STAGES_FOLDER is not set")
 
         return pathlib.Path(DISABLED_STAGES_FOLDER)
-
-
-class LocalDisabledStagesLoader(DisabledStagesLoader):
-    def _get_disabled_stages_folder(self):
-        # This should not be used in Editor
-        raise NotImplementedError

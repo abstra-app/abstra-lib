@@ -1,11 +1,9 @@
-import base64
 import random
 import re
 import socket
 import sys
 import typing as t
 from contextlib import closing
-from uuid import uuid4
 
 import jsonpath_ng as jp
 import simplejson
@@ -29,51 +27,6 @@ def is_serializable(st):
         return True
     except Exception:
         return False
-
-
-def btos(b64):
-    return base64.b64decode(b64).decode()
-
-
-def get_staticmethod(cls, name):
-    # hack because python sucks
-    method_key = f"_{cls.__name__}{name}"
-    return getattr(cls, method_key, None)
-
-
-def parse_value(cls, value):
-    convert = get_staticmethod(cls, "__parse_value")
-    return convert(value) if convert else value
-
-
-def serialize_value(cls, value):
-    revert = get_staticmethod(cls, "__serialize_value")
-    return revert(value) if revert else value
-
-
-def random_id(length=10):
-    import random
-    import string
-
-    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
-
-
-def hash_string(value):
-    import hashlib
-
-    sha256_hash = hashlib.sha256()
-    sha256_hash.update(value.encode("utf-8"))
-    hashed_string = sha256_hash.hexdigest()
-
-    return hashed_string
-
-
-def get_local_user_id():
-    import uuid
-
-    id = str(uuid.getnode())
-
-    return hash_string(id)
 
 
 def check_is_url(url: str) -> bool:
@@ -105,15 +58,6 @@ def nested_get(data: t.Dict, path: str):
         return next(m.value for m in expr.find(data))
     except Exception:
         return None
-
-
-def get_internal_id(obj: object, ensure=True) -> str:
-    key = "abstra_uuid"
-
-    if not getattr(obj, key, None) and ensure:
-        setattr(obj, key, uuid4().__str__())
-
-    return getattr(obj, key)
 
 
 def get_local_python_version():

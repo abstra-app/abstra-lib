@@ -45,7 +45,7 @@ class Migration012(Migration):
 
         file_path.write_text(file_content, encoding="utf-8")
 
-    def get_all_stages(self, typed=False):
+    def get_all_stages(self):
         forms = self.data.get("forms", [])
         scripts = self.data.get("scripts", [])
         jobs = self.data.get("jobs", [])

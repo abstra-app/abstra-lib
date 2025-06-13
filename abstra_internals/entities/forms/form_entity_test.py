@@ -252,9 +252,6 @@ def compute(state):
     pass
 
 
-compute_step = ComputationStep(compute)
-
-
 class FormEntityTest(unittest.TestCase):
     def compare_renders(self, rendered, expected):
         self.assertEqual(rendered["end_page"], expected["end_page"])

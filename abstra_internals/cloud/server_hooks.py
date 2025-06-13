@@ -1,5 +1,6 @@
 import inspect
 import signal
+from uuid import uuid4
 
 from gunicorn.arbiter import Arbiter
 from gunicorn.workers.base import Worker
@@ -15,23 +16,30 @@ from abstra_internals.environment import (
     set_WORKER_UUID,
 )
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.utils import get_internal_id
 
 
 class GunicornOptionsBuilder:
     def __init__(self, main_controller: MainController) -> None:
         self.main_controller = main_controller
 
+    def get_internal_id(self, obj: object, ensure=True) -> str:
+        key = "abstra_uuid"
+
+        if not getattr(obj, key, None) and ensure:
+            setattr(obj, key, uuid4().__str__())
+
+        return getattr(obj, key)
+
     #### HOOKS
 
     # Called just before the master process is initialized.
     def on_starting(self, server: Arbiter):
-        server_uuid = get_internal_id(server)
+        server_uuid = self.get_internal_id(server)
         set_SERVER_UUID(server_uuid)
 
     # Called just before a worker is forked.
     def pre_fork(self, server: Arbiter, worker: Worker):
-        worker_uuid = get_internal_id(worker)
+        worker_uuid = self.get_internal_id(worker)
         set_WORKER_UUID(worker_uuid)
 
     # Called just after a worker has been exited, in the master process.
@@ -46,8 +54,8 @@ class GunicornOptionsBuilder:
                     if isinstance(back_status, int):
                         status = back_status
 
-            worker_id = get_internal_id(worker, ensure=False)
-            app_id = get_internal_id(server, ensure=False)
+            worker_id = self.get_internal_id(worker, ensure=False)
+            app_id = self.get_internal_id(server, ensure=False)
 
             err_msg = f"[ABORTED] Worker exited with status ({status})"
             if status == signal.Signals.SIGKILL:
@@ -63,7 +71,7 @@ class GunicornOptionsBuilder:
     # Called just before exiting Gunicorn.
     def on_exit(self, server: Arbiter):
         try:
-            app_id = get_internal_id(server, ensure=False)
+            app_id = self.get_internal_id(server, ensure=False)
             self.main_controller.fail_app_executions(
                 app_id=app_id, err_msg="[ABORTED] Server exited"
             )

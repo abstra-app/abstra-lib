@@ -13,11 +13,6 @@ class MPContextReposity(abc.ABC):
         raise NotImplementedError()
 
 
-class ForkserverContextRepository(MPContextReposity):
-    def get_context(self) -> "ForkServerContext":
-        return get_context("forkserver")
-
-
 class SpawnContextReposity(MPContextReposity):
     def get_context(self) -> "SpawnContext":
         return get_context("spawn")

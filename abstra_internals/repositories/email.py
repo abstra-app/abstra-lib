@@ -73,8 +73,3 @@ class EmailRepository:
             endpoint="/email",
             json=param.to_dict(),
         ).raise_for_status()
-
-
-class TestEmailRepository(EmailRepository):
-    def send(self, param: EmailParams):
-        pass

@@ -104,19 +104,6 @@ class RoleClientRepository(RoleCommonRepository):
             raise Exception(response.text)
         return SignProofResponse.model_validate_json(response.text)
 
-    def get_or_create_connection_to_agent(
-        self, agent_project_id: str, client_stage_id: str, agent_stage_id: str
-    ):
-        for connection in self.get_connections():
-            if connection.agent_project_id != agent_project_id:
-                continue
-            if connection.client_stage_id != client_stage_id:
-                continue
-            if connection.agent_stage_id != agent_stage_id:
-                continue
-            return connection
-        return self.connect_to_agent(agent_project_id, client_stage_id, agent_stage_id)
-
     def connect_to_agent(
         self, agent_project_id: str, client_stage_id: str, agent_stage_id: str
     ) -> ConnectionModel:

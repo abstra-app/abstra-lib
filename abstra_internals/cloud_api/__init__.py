@@ -17,8 +17,6 @@ from abstra_internals.environment import (
     CLOUD_API_CLI_URL,
     CLOUD_API_ENDPOINT,
     HOST,
-    IS_PRODUCTION,
-    PROJECT_ID,
     REQUEST_TIMEOUT,
 )
 from abstra_internals.logger import AbstraLogger
@@ -148,17 +146,6 @@ def get_project_info(headers: dict, project_id: Optional[str] = None):
     r = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
     r.raise_for_status()
     return r.json()
-
-
-def get_project_id():
-    if IS_PRODUCTION:
-        return PROJECT_ID
-
-    else:
-        headers = resolve_headers()
-        if headers is None:
-            return None
-        return get_project_info(headers)["id"]
 
 
 class TunnelRequest(BaseModel):

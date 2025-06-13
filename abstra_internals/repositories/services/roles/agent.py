@@ -33,13 +33,6 @@ class RoleAgentRepository(RoleCommonRepository):
     def get_connections(self):
         return self.fetch_connections()
 
-    def get_connection_by_stage_id(self, stage_id: str):
-        connections = self.get_connections()
-        for connection in connections:
-            if connection.client_stage_id == stage_id:
-                return connection
-        raise Exception(f"Connection not found for stage {stage_id}")
-
     def get_connection_by_token(self, token: str):
         connections = self.get_connections()
         for connection in connections:

@@ -68,17 +68,8 @@ class Stage(ABC):
     def editor_dto(self) -> dict:
         pass
 
-    @property
-    @abstractmethod
-    def admin_dto(self) -> dict:
-        pass
-
     @abstractmethod
     def update(self, changes: Dict[str, Any]):
-        pass
-
-    @abstractmethod
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)) -> "Stage":
         pass
 
     def __post_init__(self):
@@ -252,16 +243,6 @@ class HookStage(StageWithFile):
         )
 
     @property
-    def admin_dto(self):
-        return {
-            "title": self.title,
-            "id": self.id,
-            "path": self.path,
-            "type": "hook",
-            "is_initial": self.is_initial,
-        }
-
-    @property
     def as_dict(self):
         return {
             "id": self.id,
@@ -292,16 +273,6 @@ class HookStage(StageWithFile):
                 setattr(self, attr, normalize_path(value))
             else:
                 raise Exception(f"Cannot update {attr} of hook")
-
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
-        return self.from_dict(
-            {
-                **self.as_dict,
-                "id": new_id,
-                "workflow_position": new_position,
-                "transitions": [],
-            }
-        )
 
     def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsHookStage:
         return CommonAbstraJsonV13DefinitionsHookStage(
@@ -358,15 +329,6 @@ class ScriptStage(StageWithFile):
         )
 
     @property
-    def admin_dto(self):
-        return {
-            "title": self.title,
-            "id": self.id,
-            "type": "script",
-            "is_initial": self.is_initial,
-        }
-
-    @property
     def as_dict(self):
         return {
             "id": self.id,
@@ -393,16 +355,6 @@ class ScriptStage(StageWithFile):
                 _update_file(self, value)
             else:
                 raise Exception(f"Cannot update {attr} of script")
-
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
-        return self.from_dict(
-            {
-                **self.as_dict,
-                "id": new_id,
-                "workflow_position": new_position,
-                "transitions": [],
-            }
-        )
 
     def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsScriptStage:
         return CommonAbstraJsonV13DefinitionsScriptStage(
@@ -499,10 +451,6 @@ class JobStage(StageWithFile):
         )
 
     @property
-    def admin_dto(self):
-        return {"title": self.title, "id": self.id, "type": "job", "is_initial": True}
-
-    @property
     def as_dict(self):
         return {
             "id": self.id,
@@ -529,16 +477,6 @@ class JobStage(StageWithFile):
                 _update_file(self, value)
             else:
                 raise Exception(f"Cannot update {attr} of job")
-
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
-        return self.from_dict(
-            {
-                **self.as_dict,
-                "id": new_id,
-                "workflow_position": new_position,
-                "transitions": [],
-            }
-        )
 
     def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsJobStage:
         return CommonAbstraJsonV13DefinitionsJobStage(
@@ -628,15 +566,6 @@ class FormStage(StageWithFile):
         )
 
     @property
-    def admin_dto(self):
-        return {
-            "title": self.title,
-            "id": self.id,
-            "path": self.path,
-            "type": "form",
-        }
-
-    @property
     def to_sidebar_item(self) -> "SidebarItem":
         return SidebarItem(
             id=self.id,
@@ -715,16 +644,6 @@ class FormStage(StageWithFile):
                 )
             else:
                 raise Exception(f"Cannot update {attr} of form")
-
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
-        return self.from_dict(
-            {
-                **self.as_dict,
-                "id": new_id,
-                "workflow_position": new_position,
-                "transitions": [],
-            }
-        )
 
     def to_access_dto(self):
         return {
@@ -816,24 +735,6 @@ class AgentStage(Stage):
     def editor_dto(self):
         return self.as_dict
 
-    @property
-    def admin_dto(self):
-        return {
-            "title": self.title,
-            "id": self.id,
-            "type": "agent",
-        }
-
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
-        return self.from_dict(
-            {
-                **self.as_dict,
-                "id": new_id,
-                "workflow_position": new_position,
-                "transitions": [],
-            }
-        )
-
     def to_abstra_json_dto(self) -> CommonAbstraJsonV13AgentsItem:
         return CommonAbstraJsonV13AgentsItem(
             id=self.id,
@@ -884,24 +785,6 @@ class ClientStage(Stage):
     @property
     def editor_dto(self):
         return self.as_dict
-
-    @property
-    def admin_dto(self):
-        return {
-            "title": self.title,
-            "id": self.id,
-            "type": "client",
-        }
-
-    def duplicate(self, new_id: str, new_position: Tuple[int, int] = (0, 0)):
-        return self.from_dict(
-            {
-                **self.as_dict,
-                "id": new_id,
-                "workflow_position": new_position,
-                "transitions": [],
-            }
-        )
 
     def get_agent_entrypoint(self):
         return AgentEntrypoint(
@@ -1107,10 +990,6 @@ class StageNotFoundError(KeyError):
     pass
 
 
-class TransitionNotFoundError(KeyError):
-    pass
-
-
 @dataclass
 class Home:
     access_control: AccessSettings
@@ -1307,9 +1186,6 @@ class Project:
         return StyleSettingsWithSidebar.from_dict(
             {**self.workspace.as_dict, "sidebar": sidebar}
         )
-
-    def default_sidebar(self) -> Sidebar:
-        return Sidebar(items=[stage.to_sidebar_item for stage in self.secured_stages])
 
     def get_access_control_by_stage_id(self, id: str) -> Optional[AccessSettings]:
         for stage in [self.home, *self.forms, *self.jobs]:

@@ -80,30 +80,10 @@ class ExecutionLogsRepository(ABC):
     ) -> List[LogEntry]:
         raise NotImplementedError()
 
-    def get_logs_dto(self, execution_id: str) -> List[LogsDTO]:
-        logs = self.get(execution_id)
-        output: List[LogsDTO] = []
-        for entry in logs:
-            text = entry.payload.get("text")
-            if not text:
-                continue
-
-            if entry.event == "stdout":
-                output.append({"type": "stdout", "text": text})
-            elif entry.event == "stderr":
-                output.append({"type": "stderr", "text": text})
-            elif entry.event == "unhandled-exception":
-                output.append({"type": "stderr", "text": text})
-
-        return output
-
 
 class LocalExecutionLogsRepository(ExecutionLogsRepository):
-    _logs: Dict[str, List[LogEntry]]
-
     def __init__(self):
         self.sequence = 0
-        self._logs = {}
 
     def save(self, log_entry: LogEntry) -> None:
         execution_id = log_entry.execution_id
