@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp
-from typing import Dict, List, Literal, Mapping, Optional, Set
+from typing import Dict, List, Literal, Optional, Set
 
 from importlib_metadata import packages_distributions
 from pip._internal.cli.main import main as pip_main
@@ -369,27 +369,3 @@ class RequirementsRepository:
         requirements = cls.load()
         requirements.ensure(lib_name, get_distribution(lib_name).version)
         cls.save(requirements)
-
-
-def find_installed_libs(
-    pkg_name: str, visited_set: set, package_dist: Mapping[str, List[str]]
-) -> List[dict]:
-    if pkg_name in visited_set:
-        return []
-
-    visited_set.add(pkg_name)
-    kind = check_package(pkg_name)
-    if kind != "installed":
-        return []
-
-    lib_name = package_dist.get(pkg_name)
-    if lib_name is None:
-        return []  # this should not happen
-
-    return [
-        dict(
-            name=lib,
-            version=get_distribution(lib).version,
-        )
-        for lib in lib_name
-    ]
