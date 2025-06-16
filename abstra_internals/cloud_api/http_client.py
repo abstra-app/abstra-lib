@@ -7,6 +7,7 @@ import requests.adapters
 import urllib3
 
 from abstra_internals.environment import REQUEST_TIMEOUT
+from abstra_internals.logger import AbstraLogger
 
 AbstraHTTPResponse = requests.Response
 
@@ -34,12 +35,17 @@ class HTTPClient:
         self.pool = ThreadPoolExecutor(max_workers=5)
         self._local = threading.local()
 
+    def __del__(self):
+        self.cleanup()
+
+    def cleanup(self):
+        if hasattr(self, "pool"):
+            self.pool.shutdown(wait=False)
+        if hasattr(self._local, "session"):
+            self._local.session.close()
+
     @property
     def base_headers(self) -> Dict[str, str]:
-        """
-        Returns the base headers for the HTTP client.
-        This can be overridden in subclasses to provide custom headers.
-        """
         if callable(self._base_headers_resolver):
             return self._base_headers_resolver()
         return self._base_headers or {}
@@ -48,12 +54,9 @@ class HTTPClient:
     def session(self) -> requests.Session:
         if not hasattr(self._local, "session"):
             self._local.session = requests.Session()
-            self._local.session.mount(
-                "http://", requests.adapters.HTTPAdapter(max_retries=3)
-            )
-            self._local.session.mount(
-                "https://", requests.adapters.HTTPAdapter(max_retries=3)
-            )
+            adapter = requests.adapters.HTTPAdapter(max_retries=self.retry_strategy)
+            self._local.session.mount("http://", adapter)
+            self._local.session.mount("https://", adapter)
         return self._local.session
 
     def request(self, method: str, endpoint: str, **kwargs) -> requests.Response:
@@ -71,21 +74,24 @@ class HTTPClient:
         kwargs.setdefault("timeout", self.timeout)
         kwargs["headers"] = {**self.base_headers, **kwargs.get("headers", {})}
 
-        return self.session.request(method, endpoint, **kwargs)
+        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        return self.session.request(method, url, **kwargs)
 
     def async_post(self, endpoint: str, **kwargs) -> None:
         """
         Sends a request in the background using a thread pool.
 
         Args:
-            method (str): HTTP method (e.g., 'GET', 'POST').
             endpoint (str): The URL endpoint to append to the base URL.
             **kwargs: Additional arguments passed to the requests method.
         """
 
         def post(**i_kwargs):
-            res = self.post(endpoint, **i_kwargs)
-            res.raise_for_status()
+            try:
+                res = self.post(endpoint, **i_kwargs)
+                res.raise_for_status()
+            except Exception as e:
+                AbstraLogger.error(f"Error in async_post: {str(e)}")
 
         self.pool.submit(post, **kwargs)
 
