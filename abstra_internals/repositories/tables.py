@@ -58,11 +58,9 @@ class TableDTO:
 
 
 class TablesRepository(abc.ABC):
-    execute_url: str
     client: "HTTPClient"
 
     def __init__(self, client: "HTTPClient") -> None:
-        self.execute_url = "/tables/execute"
         self.client = client
 
     def execute(self, query: str, params: typing.List) -> AbstraHTTPResponse:
@@ -88,7 +86,7 @@ class ProductionTablesRepository(TablesRepository):
     def execute(self, query: str, params: typing.List) -> AbstraHTTPResponse:
         body = {"query": query, "params": params}
         return self.client.post(
-            self.execute_url,
+            "/tables/execute",
             json=body,
         )
 
@@ -112,7 +110,7 @@ class LocalTablesRepository(TablesRepository):
     def execute(self, query: str, params: typing.List) -> AbstraHTTPResponse:
         body = {"query": query, "params": params}
 
-        return self.client.post(self.execute_url, json=body, timeout=REQUEST_TIMEOUT)
+        return self.client.post("/tables/execute", json=body, timeout=REQUEST_TIMEOUT)
 
     def create_table(self, id: str, name: str) -> TableDTO:
         r = self.client.post(
@@ -131,7 +129,7 @@ class LocalTablesRepository(TablesRepository):
             "name": name,
             "type": type,
         }
-        r = self.client.post("/column", json=body)
+        r = self.client.post("tables/column", json=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)
 
@@ -140,13 +138,13 @@ class LocalTablesRepository(TablesRepository):
             "tableId": table_id,
             "row": values,
         }
-        self.client.post("/row", json=body)
+        self.client.post("tables/row", json=body)
 
     def update_table(self, table_id: str, name: str) -> TableDTO:
         body = {
             "name": name,
         }
-        r = self.client.patch(f"/table/{table_id}", json=body)
+        r = self.client.patch(f"tables/table/{table_id}", json=body)
         table = r.json()["response"]
         return TableDTO.from_dict(table)
 
@@ -155,6 +153,6 @@ class LocalTablesRepository(TablesRepository):
             "tableId": table_id,
             "changes": changes,
         }
-        r = self.client.patch(f"column/{column_id}", json=body)
+        r = self.client.patch(f"tables/column/{column_id}", json=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)

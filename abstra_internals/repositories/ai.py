@@ -55,20 +55,19 @@ class LocalAIRepository(AIRepository):
             "temperature": temperature,
         }
 
-        response = self.client.post("/prompt", json=body)
+        response = self.client.post("/ai/prompt", json=body)
 
-        try:
-            response = response.json()
-            return response
-        except json.JSONDecodeError:
-            raise Exception(f"Error parsing JSON: {response.text}")
+        response.raise_for_status()
+
+        response = response.json()
+        return response
 
     def parse_document(self, model: str, file_content: bytes, mime_type: str):
         headers = resolve_headers()
         if headers is None:
             raise Exception("You must be logged in to use AI")
         response = self.client.post(
-            f"/parse-document/{model}",
+            f"/ai/parse-document/{model}",
             headers={**headers, "Content-Type": mime_type},
             data=file_content,
         )

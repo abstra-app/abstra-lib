@@ -19,7 +19,7 @@ class ConnectorsRepository(abc.ABC):
 
     def get_access_token(self, connection_name: str) -> AccessTokenDTO:
         response = self.client.get(
-            endpoint=f"/connection/{connection_name}/access-token",
+            endpoint=f"connectors/connection/{connection_name}/access-token",
         )
         response.raise_for_status()
         return AccessTokenDTO(**response.json())

@@ -75,6 +75,7 @@ class HTTPClient:
         kwargs["headers"] = {**self.base_headers, **kwargs.get("headers", {})}
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+
         return self.session.request(method, url, **kwargs)
 
     def async_post(self, endpoint: str, **kwargs) -> None:
