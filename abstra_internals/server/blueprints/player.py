@@ -37,10 +37,6 @@ from abstra_internals.server.guards.role_guard import (
 from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import auth as auth_router
 from abstra_internals.server.routes import workflows as workflows_router
-from abstra_internals.server.routes.services.roles import (
-    role_agent_player_bp,
-    role_client_player_bp,
-)
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.settings import Settings
 from abstra_internals.usage import player_usage
@@ -92,12 +88,6 @@ def get_player_bp(controller: MainController):
                 "workspace": guard.filtered_workspace(auth).as_dict,
             }
         }
-
-    role_agents_bp = role_agent_player_bp(controller)
-    bp.register_blueprint(role_agents_bp, url_prefix="/_tasks/agent")
-
-    role_clients_bp = role_client_player_bp(controller)
-    bp.register_blueprint(role_clients_bp, url_prefix="/_tasks/client")
 
     @bp.get("/_version")
     def _get_version():

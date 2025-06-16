@@ -1,15 +1,10 @@
 from typing import Optional
 
-import requests
-
 from abstra_internals.email_templates import task_waiting_template
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import ScriptContext
-from abstra_internals.environment import IS_PRODUCTION, REQUEST_TIMEOUT
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
-    AgentStage,
-    ClientStage,
     FormStage,
     ScriptStage,
     Stage,
@@ -59,56 +54,6 @@ class TaskExecutor:
                     context=ScriptContext(task_id=task.id),
                     stage_id=stage.id,
                 )
-            elif (
-                isinstance(stage, AgentStage)
-                and stage.project_id is not None
-                and stage.client_stage_id is not None
-            ):
-                agent = self.repos.role_clients.get_agent(stage.project_id)
-
-                conn = next(
-                    (
-                        c
-                        for c in self.repos.role_clients.get_connections()
-                        if c.agent_project_id == agent.project_id
-                        and c.client_stage_id == stage.id
-                    ),
-                    None,
-                )
-
-                assert conn is not None, "Connection for agent not found"
-
-                requests.post(
-                    agent.tasks_url + "/agent",
-                    json={
-                        "task_data": {
-                            "type": type,
-                            "payload": {
-                                **payload,
-                                "connection_token": conn.token,
-                            },
-                        },
-                        "target_stage_id": (stage.client_stage_id),
-                        "execution_id": (
-                            execution.id if IS_PRODUCTION and execution else None
-                        ),
-                    },
-                    headers={"authorization": conn.token},
-                    timeout=REQUEST_TIMEOUT,
-                ).raise_for_status()
-
-            elif isinstance(stage, ClientStage):
-                assert isinstance(payload["connection_token"], str)
-                conn = self.repos.role_agents.get_connection_by_token(
-                    payload["connection_token"]
-                )
-
-                requests.post(
-                    conn.client_task_url,
-                    json=task.model_dump(),
-                    headers={"Authorization": conn.token},
-                    timeout=REQUEST_TIMEOUT,
-                ).raise_for_status()
 
     def _send_waiting_thread_notification(self, task: TaskDTO):
         stage = self.project.get_stage(task.target_stage_id)

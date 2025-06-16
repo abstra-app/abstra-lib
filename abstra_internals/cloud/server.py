@@ -1,7 +1,6 @@
 from abstra_internals.cloud.server_application import CustomApplication
 from abstra_internals.cloud.server_hooks import GunicornOptionsBuilder
 from abstra_internals.controllers.main import MainController
-from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import DEFAULT_PORT
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.factory import build_prod_repositories
@@ -17,10 +16,6 @@ def run():
 
     controller = MainController(repositories=build_prod_repositories())
     StdioPatcher.apply(controller)
-
-    role_client_controller = RoleClientController(controller.repositories)
-    role_client_controller.safe_sync_connection_pool()
-    role_client_controller.loop_sync_connection_pool()
 
     options = GunicornOptionsBuilder(controller).build()
     app = get_cloud_app(controller)

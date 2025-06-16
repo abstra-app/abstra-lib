@@ -2,7 +2,6 @@ import flask
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.server.routes import access_control as ac_router
-from abstra_internals.server.routes import agents as agents_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
 from abstra_internals.server.routes import codebase as codebase_router
@@ -25,7 +24,6 @@ from abstra_internals.server.routes import tasks as tasks_router
 from abstra_internals.server.routes import web_editor as web_editor_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.routes import workspace as workspace_router
-from abstra_internals.server.routes.services.roles import role_client_editor_bp
 from abstra_internals.server.utils import send_from_dist
 from abstra_internals.usage import editor_usage
 
@@ -96,14 +94,8 @@ def __get_api_bp(controller: MainController):
     tasks_bp = tasks_router.get_editor_bp(controller)
     bp.register_blueprint(tasks_bp, url_prefix="/tasks")
 
-    role_agents_bp = role_client_editor_bp(controller)
-    bp.register_blueprint(role_agents_bp, url_prefix="/services/roles/client")
-
     tables_bp = tables_router.get_editor_bp(controller)
     bp.register_blueprint(tables_bp, url_prefix="/tables")
-
-    agents_bp = agents_router.get_editor_bp(controller)
-    bp.register_blueprint(agents_bp, url_prefix="/agents")
 
     web_editor_bp = web_editor_router.get_web_editor_bp(controller)
     bp.register_blueprint(web_editor_bp, url_prefix="/web-editor")

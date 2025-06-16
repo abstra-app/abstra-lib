@@ -14,22 +14,19 @@ from pydantic.dataclasses import dataclass
 
 from abstra_internals.constants import ABSTRA_LOGO_URL, get_project_url
 from abstra_internals.contracts_generated import (
-    CommonAbstraJsonV13,
-    CommonAbstraJsonV13AgentsItem,
-    CommonAbstraJsonV13ClientsItem,
-    CommonAbstraJsonV13DefinitionsFormStage,
-    CommonAbstraJsonV13DefinitionsFormStageAccessControl,
-    CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger,
-    CommonAbstraJsonV13DefinitionsHookStage,
-    CommonAbstraJsonV13DefinitionsJobStage,
-    CommonAbstraJsonV13DefinitionsScriptStage,
-    CommonAbstraJsonV13DefinitionsTransition,
-    CommonAbstraJsonV13Home,
-    CommonAbstraJsonV13HomeAccessControl,
-    CommonAbstraJsonV13Workspace,
+    CommonAbstraJsonV14,
+    CommonAbstraJsonV14DefinitionsFormStage,
+    CommonAbstraJsonV14DefinitionsFormStageAccessControl,
+    CommonAbstraJsonV14DefinitionsFormStageNotificationTrigger,
+    CommonAbstraJsonV14DefinitionsHookStage,
+    CommonAbstraJsonV14DefinitionsJobStage,
+    CommonAbstraJsonV14DefinitionsScriptStage,
+    CommonAbstraJsonV14DefinitionsTransition,
+    CommonAbstraJsonV14Home,
+    CommonAbstraJsonV14HomeAccessControl,
+    CommonAbstraJsonV14Workspace,
     CommonUser,
 )
-from abstra_internals.entities.agents import AgentEntrypoint
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.project import json_migrations
@@ -48,7 +45,7 @@ from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
 
 ServedStage = Union["FormStage", "HookStage"]
-StageType = Literal["form", "hook", "job", "script", "agent", "client"]
+StageType = Literal["form", "hook", "job", "script"]
 
 
 class Stage(ABC):
@@ -128,8 +125,8 @@ class NotificationTrigger:
 
     def to_abstra_json_dto(
         self,
-    ) -> CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger:
-        return CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger(
+    ) -> CommonAbstraJsonV14DefinitionsFormStageNotificationTrigger:
+        return CommonAbstraJsonV14DefinitionsFormStageNotificationTrigger(
             variable_name=self.variable_name, enabled=self.enabled
         )
 
@@ -186,8 +183,8 @@ class WorkflowTransition:
         else:
             raise Exception(f"Invalid source type {source_type}")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsTransition:
-        return CommonAbstraJsonV13DefinitionsTransition(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14DefinitionsTransition:
+        return CommonAbstraJsonV14DefinitionsTransition(
             id=self.id,
             target_id=self.target_id,
             target_type=self.target_type,
@@ -274,8 +271,8 @@ class HookStage(StageWithFile):
             else:
                 raise Exception(f"Cannot update {attr} of hook")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsHookStage:
-        return CommonAbstraJsonV13DefinitionsHookStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14DefinitionsHookStage:
+        return CommonAbstraJsonV14DefinitionsHookStage(
             id=self.id,
             file=self.file,
             path=self.path,
@@ -356,8 +353,8 @@ class ScriptStage(StageWithFile):
             else:
                 raise Exception(f"Cannot update {attr} of script")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsScriptStage:
-        return CommonAbstraJsonV13DefinitionsScriptStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14DefinitionsScriptStage:
+        return CommonAbstraJsonV14DefinitionsScriptStage(
             id=self.id,
             file=self.file,
             title=self.title,
@@ -401,8 +398,8 @@ class AccessSettings:
 
     def to_abstra_json_dto(
         self,
-    ) -> CommonAbstraJsonV13DefinitionsFormStageAccessControl:
-        return CommonAbstraJsonV13DefinitionsFormStageAccessControl(
+    ) -> CommonAbstraJsonV14DefinitionsFormStageAccessControl:
+        return CommonAbstraJsonV14DefinitionsFormStageAccessControl(
             is_public=self.is_public, required_roles=self.required_roles
         )
 
@@ -478,8 +475,8 @@ class JobStage(StageWithFile):
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsJobStage:
-        return CommonAbstraJsonV13DefinitionsJobStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14DefinitionsJobStage:
+        return CommonAbstraJsonV14DefinitionsJobStage(
             id=self.id,
             file=self.file,
             title=self.title,
@@ -654,8 +651,8 @@ class FormStage(StageWithFile):
             "required_roles": self.access_control.required_roles,
         }
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13DefinitionsFormStage:
-        return CommonAbstraJsonV13DefinitionsFormStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14DefinitionsFormStage:
+        return CommonAbstraJsonV14DefinitionsFormStage(
             id=self.id,
             file=self.file,
             path=self.path,
@@ -674,132 +671,6 @@ class FormStage(StageWithFile):
             is_initial=self.is_initial,
             notification_trigger=self.notification_trigger.to_abstra_json_dto(),
             access_control=self.access_control.to_abstra_json_dto(),
-        )
-
-
-@dataclass
-class AgentStage(Stage):
-    id: str
-    title: str
-    project_id: Optional[str]
-    workflow_transitions: List[WorkflowTransition]
-    workflow_position: Tuple[float, float]
-    client_stage_id: Optional[str]
-    type_name = "agent"
-
-    @staticmethod
-    def from_dict(data: Dict):
-        x, y = data["workflow_position"]
-        return AgentStage(
-            id=data["id"],
-            title=data["title"],
-            project_id=data["project_id"],
-            client_stage_id=data["client_stage_id"],
-            workflow_position=(x, y),
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
-        )
-
-    @property
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "project_id": self.project_id,
-            "workflow_position": self.workflow_position,
-            "transitions": [t.as_dict for t in self.workflow_transitions],
-            "client_stage_id": self.client_stage_id,
-        }
-
-    def update(self, changes: Dict[str, Any]):
-        for attr, value in changes.items():
-            if attr in ["title", "project_id"]:
-                setattr(self, attr, value)
-            else:
-                raise Exception(f"Cannot update {attr} of agent")
-
-    @staticmethod
-    def create(title: str, project_id: str, id: Union[str, None] = None):
-        _id = id or str(uuid.uuid4())
-        return AgentStage(
-            id=_id,
-            title=title,
-            project_id=project_id,
-            client_stage_id="",
-            workflow_transitions=[],
-            workflow_position=(0, 0),
-        )
-
-    @property
-    def editor_dto(self):
-        return self.as_dict
-
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13AgentsItem:
-        return CommonAbstraJsonV13AgentsItem(
-            id=self.id,
-            title=self.title,
-            project_id=self.project_id,
-            client_stage_id=self.client_stage_id,
-            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
-            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
-        )
-
-
-@dataclass
-class ClientStage(Stage):
-    id: str
-    title: str
-    workflow_transitions: List[WorkflowTransition]
-    workflow_position: Tuple[float, float]
-    type_name = "client"
-
-    @staticmethod
-    def from_dict(data: Dict):
-        x, y = data["workflow_position"]
-        return ClientStage(
-            id=data["id"],
-            title=data["title"],
-            workflow_position=(x, y),
-            workflow_transitions=[
-                WorkflowTransition.from_dict(t) for t in data["transitions"]
-            ],
-        )
-
-    @property
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "workflow_position": self.workflow_position,
-            "transitions": [t.as_dict for t in self.workflow_transitions],
-        }
-
-    def update(self, changes: Dict[str, Any]):
-        for attr, value in changes.items():
-            if attr in ["id", "title"]:
-                setattr(self, attr, value)
-            else:
-                raise Exception(f"Cannot update {attr} of script")
-
-    @property
-    def editor_dto(self):
-        return self.as_dict
-
-    def get_agent_entrypoint(self):
-        return AgentEntrypoint(
-            title=self.title,
-            client_stage_id=self.id,
-            input_schemas=None,
-            output_schemas=None,
-        )
-
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13ClientsItem:
-        return CommonAbstraJsonV13ClientsItem(
-            id=self.id,
-            title=self.title,
-            workflow_position=[self.workflow_position[0], self.workflow_position[1]],
-            transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
         )
 
 
@@ -946,8 +817,8 @@ class StyleSettings:
             language="en",
         )
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13Workspace:
-        return CommonAbstraJsonV13Workspace(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14Workspace:
+        return CommonAbstraJsonV14Workspace(
             name=self.name,
             language=self.language,
             theme=self.theme,
@@ -1050,9 +921,9 @@ class Home:
         if id == "access_control":
             setattr(self, id, AccessSettings.from_dict(changes))
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV13Home:
-        return CommonAbstraJsonV13Home(
-            access_control=CommonAbstraJsonV13HomeAccessControl(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV14Home:
+        return CommonAbstraJsonV14Home(
+            access_control=CommonAbstraJsonV14HomeAccessControl(
                 is_public=self.access_control.is_public,
                 required_roles=self.access_control.required_roles,
             )
@@ -1067,8 +938,6 @@ class Project:
     forms: List[FormStage]
     hooks: List[HookStage]
     jobs: List[JobStage]
-    agents: List[AgentStage]
-    clients: List[ClientStage]
 
     _graph: Graph
 
@@ -1092,21 +961,17 @@ class Project:
             "hooks": [hook.as_dict for hook in self.hooks],
             "forms": [form.as_dict for form in self.forms],
             "scripts": [script.as_dict for script in self.scripts],
-            "agents": [agent.as_dict for agent in self.agents],
-            "clients": [client.as_dict for client in self.clients],
         }
 
     def to_abstra_json_dto(self):
-        return CommonAbstraJsonV13(
-            version="13.0",
+        return CommonAbstraJsonV14(
+            version="14.0",
             workspace=self.workspace.to_abstra_json_dto(),
             home=self.home.to_abstra_json_dto(),
             jobs=[job.to_abstra_json_dto() for job in self.jobs],
             hooks=[hook.to_abstra_json_dto() for hook in self.hooks],
             forms=[form.to_abstra_json_dto() for form in self.forms],
             scripts=[script.to_abstra_json_dto() for script in self.scripts],
-            agents=[agent.to_abstra_json_dto() for agent in self.agents],
-            clients=[client.to_abstra_json_dto() for client in self.clients],
         )
 
     @property
@@ -1116,8 +981,6 @@ class Project:
             *self.jobs,
             *self.hooks,
             *self.scripts,
-            *self.agents,
-            *self.clients,
         ]
 
     def get_stages_by_file_path(self, file_path: Path) -> List[StageWithFile]:
@@ -1174,10 +1037,6 @@ class Project:
             self.jobs.append(stage)
         elif isinstance(stage, ScriptStage):
             self.scripts.append(stage)
-        elif isinstance(stage, AgentStage):
-            self.agents.append(stage)
-        elif isinstance(stage, ClientStage):
-            self.clients.append(stage)
         else:
             raise Exception(f"Cannot add stage of type {type(stage)}")
 
@@ -1305,9 +1164,6 @@ class Project:
                 t for t in stage.workflow_transitions if t.target_id != target_id
             ]
 
-    def get_agent_entrypoints(self) -> List[AgentEntrypoint]:
-        return [client.get_agent_entrypoint() for client in self.clients]
-
     def update_path(self, stage: ServedStage, new_path: str):
         old_path = stage.path
 
@@ -1366,8 +1222,6 @@ class Project:
         self.hooks = [h for h in self.hooks if h.id != id]
         self.jobs = [j for j in self.jobs if j.id != id]
         self.scripts = [s for s in self.scripts if s.id != id]
-        self.agents = [a for a in self.agents if a.id != id]
-        self.clients = [c for c in self.clients if c.id != id]
 
     @staticmethod
     def __from_dict(data: dict):
@@ -1375,7 +1229,7 @@ class Project:
         nodes = []
         edges = []
 
-        stage_keys = ["forms", "hooks", "scripts", "jobs", "agents", "clients"]
+        stage_keys = ["forms", "hooks", "scripts", "jobs"]
 
         for key in stage_keys:
             for stage in data[key]:
@@ -1397,8 +1251,6 @@ class Project:
         forms = [FormStage.from_dict(form) for form in data["forms"]]
         hooks = [HookStage.from_dict(hook) for hook in data["hooks"]]
         jobs = [JobStage.from_dict(job) for job in data["jobs"]]
-        agents = [AgentStage.from_dict(agent) for agent in data["agents"]]
-        clients = [ClientStage.from_dict(client) for client in data["clients"]]
 
         workspace = StyleSettings.from_dict(data["workspace"])
         home = Home.from_dict(data.get("home", {}))
@@ -1409,8 +1261,6 @@ class Project:
             forms=forms,
             hooks=hooks,
             jobs=jobs,
-            agents=agents,
-            clients=clients,
             home=home,
             _graph=Graph.from_primitives(nodes=nodes, edges=edges),
         )
@@ -1440,8 +1290,6 @@ class Project:
             forms=[],
             hooks=[],
             jobs=[],
-            agents=[],
-            clients=[],
             home=Home.create(),
             _graph=Graph.from_primitives([], []),
         )
@@ -1521,7 +1369,7 @@ class ProjectRepository:
         with self.lock:
             data = json.loads(file_path.read_text(encoding="utf-8"))
             if data["version"] == "v13.0":
-                CommonAbstraJsonV13.from_dict(data)
+                CommonAbstraJsonV14.from_dict(data)
             return Project.from_dict(data)
 
     def initialize_or_migrate(self, verbose=True):
@@ -1545,7 +1393,7 @@ class ProductionProjectRepository(ProjectRepository):
         with self.lock:
             data = json.loads(file_path.read_text(encoding="utf-8"))
             if data["version"] == "v13.0":
-                CommonAbstraJsonV13.from_dict(data)
+                CommonAbstraJsonV14.from_dict(data)
 
             if include_disabled_stages:
                 filtered_data = data
@@ -1562,7 +1410,7 @@ def filter_stages_from_data(
     if disabled_stages_ids is None or len(disabled_stages_ids) == 0:
         return data
 
-    stage_keys = ["forms", "hooks", "scripts", "jobs", "agents", "clients"]
+    stage_keys = ["forms", "hooks", "scripts", "jobs"]
 
     copy_data = data.copy()
 

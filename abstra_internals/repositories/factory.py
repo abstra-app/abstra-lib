@@ -9,9 +9,6 @@ from abstra_internals.environment import (
     EDITOR_MODE,
     RABBITMQ_CONNECTION_URI,
 )
-from abstra_internals.repositories.agents import (
-    AgentsRepository,
-)
 from abstra_internals.repositories.ai import (
     AIRepository,
     LocalAIRepository,
@@ -72,14 +69,6 @@ from abstra_internals.repositories.roles import (
     ProductionRolesRepository,
     RolesRepository,
 )
-from abstra_internals.repositories.services import (
-    LocalRoleAgentRepository,
-    LocalRoleClientRepository,
-    ProductionRoleAgentRepository,
-    ProductionRoleClientRepository,
-)
-from abstra_internals.repositories.services.roles.agent import RoleAgentRepository
-from abstra_internals.repositories.services.roles.client import RoleClientRepository
 from abstra_internals.repositories.tables import (
     LocalTablesRepository,
     ProductionTablesRepository,
@@ -117,9 +106,6 @@ class Repositories:
     tables: TablesRepository
     users: UsersRepository
     editor_jwt: EditorJWTRepository
-    role_agents: RoleAgentRepository
-    role_clients: RoleClientRepository
-    agents: AgentsRepository
     linter: LinterRepository
 
 
@@ -146,11 +132,8 @@ def build_editor_repositories():
         users=LocalUsersRepository(),
         jwt=LocalJWTRepository(),
         kv=LocalKVRepository(),
-        role_agents=LocalRoleAgentRepository(base_url=CLOUD_API_CLI_URL),
-        role_clients=LocalRoleClientRepository(base_url=CLOUD_API_CLI_URL),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
-        agents=AgentsRepository(client=http_client),
         linter=linter,
     )
 
@@ -181,8 +164,5 @@ def build_prod_repositories():
         kv=ProductionKVRepository(client=http_client),
         editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=SpawnContextReposity(),
-        agents=AgentsRepository(client=http_client),
         linter=ProductionLinterRepository(),
-        role_agents=ProductionRoleAgentRepository(CLOUD_API_PROD_URL),
-        role_clients=ProductionRoleClientRepository(CLOUD_API_PROD_URL),
     )

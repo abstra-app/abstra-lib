@@ -1,21 +1,4 @@
 {
-  "abstra.agents": {
-    "get_connections": {
-      "object_type": "function",
-      "description": "Get a list of available connections based on the specified role.",
-      "params": [
-        {
-          "name": "role",
-          "type": "Literal[\"client\", \"agent\"]",
-          "description": "The role to get connections for, either \"client\" or \"agent\". List[ConnectionModel]: A list of connection models for the specified role.",
-          "default": "None",
-          "required": true
-        }
-      ],
-      "return_type": "List[abstra_internals.entities.agents.ConnectionModel]",
-      "examples": []
-    }
-  },
   "abstra.ai": {
     "prompt": {
       "object_type": "function",

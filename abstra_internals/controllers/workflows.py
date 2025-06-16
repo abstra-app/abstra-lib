@@ -1,11 +1,8 @@
 from typing import Dict, List, Optional, TypedDict
 
 from abstra_internals.controllers.main import UnknownNodeTypeError
-from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
-    AgentStage,
-    ClientStage,
     FormStage,
     HookStage,
     JobStage,
@@ -85,11 +82,6 @@ class WorkflowController:
         if isinstance(stage, (FormStage, HookStage)):
             path = stage.path
             props["path"] = path
-        project_id = None
-        if isinstance(stage, AgentStage):
-            project_id = stage.project_id
-            props["projectId"] = project_id
-            props["clientStageId"] = stage.client_stage_id
         return StageDTO(
             id=stage.id,
             type=stage.type_name + "s",
@@ -116,10 +108,6 @@ class WorkflowController:
 
             if isinstance(stage, FormStage) or isinstance(stage, HookStage):
                 stage_dto["props"]["path"] = stage.path
-
-            if isinstance(stage, AgentStage):
-                stage_dto["props"]["projectId"] = stage.project_id
-                stage_dto["props"]["clientStageId"] = stage.client_stage_id
 
             stages.append(stage_dto)
 
@@ -167,11 +155,6 @@ class WorkflowController:
                     stage.file = f"{stage_dto['props']['filename']}"
                 if isinstance(stage, FormStage) or isinstance(stage, HookStage):
                     stage.path = stage_dto["props"]["path"]
-                if isinstance(stage, AgentStage):
-                    stage.project_id = stage_dto["props"].get("projectId", "")
-                    stage.client_stage_id = stage_dto["props"].get(
-                        "clientStageId", None
-                    )
             elif stage_dto["type"] == "forms":
                 stage = FormStage(
                     id=stage_dto["id"],
@@ -231,30 +214,6 @@ class WorkflowController:
                     workflow_transitions=[],
                 )
                 project.jobs.append(stage)
-            elif stage_dto["type"] == "agents":
-                stage = AgentStage(
-                    id=stage_dto["id"],
-                    title=stage_dto["title"],
-                    project_id=stage_dto["props"].get("projectId", ""),
-                    workflow_position=(
-                        stage_dto["position"]["x"],
-                        stage_dto["position"]["y"],
-                    ),
-                    workflow_transitions=[],
-                    client_stage_id=stage_dto["props"].get("clientStageId", None),
-                )
-                project.agents.append(stage)
-            elif stage_dto["type"] == "clients":
-                stage = ClientStage(
-                    id=stage_dto["id"],
-                    title=stage_dto["title"],
-                    workflow_position=(
-                        stage_dto["position"]["x"],
-                        stage_dto["position"]["y"],
-                    ),
-                    workflow_transitions=[],
-                )
-                project.clients.append(stage)
             else:
                 raise UnknownNodeTypeError(stage_dto["type"])
 
@@ -282,7 +241,5 @@ class WorkflowController:
                     )
 
         self.repos.project.save(project)
-
-        RoleClientController(self.repos).safe_sync_connection_pool()
 
         return self._make_workflow_dto(project)

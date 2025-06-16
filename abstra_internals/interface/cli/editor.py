@@ -7,7 +7,6 @@ from werkzeug.serving import make_server
 from abstra_internals.cloud_api import connect_tunnel
 from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
-from abstra_internals.controllers.service.roles.client import RoleClientController
 from abstra_internals.environment import HOST
 from abstra_internals.file_handlers import FileHandler
 from abstra_internals.file_watcher import FileChangeWatcher
@@ -90,17 +89,12 @@ def editor(headless: bool):
     start_consumer(controller)
     start_linter(controller)
 
-    role_client_controller = RoleClientController(controller.repositories)
-    role_client_controller.loop_sync_connection_pool()
-
     app = get_local_app(controller)
     server = make_server(host=HOST, port=Settings.server_port, threaded=True, app=app)
 
     if not headless:
         browser_open_editor()
 
-    connect_tunnel(
-        on_public_url_update=role_client_controller.safe_sync_connection_pool
-    )
+    connect_tunnel()
 
     server.serve_forever()

@@ -1,7 +1,7 @@
 import json
 from threading import Thread
 from time import sleep
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 import requests
 import simple_websocket
@@ -170,7 +170,7 @@ class SessionPathMessage(BaseModel):
     sessionPath: str
 
 
-def connect_tunnel(on_public_url_update: Optional[Callable[[], None]]):
+def connect_tunnel():
     url = f"{CLOUD_API_ENDPOINT}/tunnel/connect".replace("https://", "wss://").replace(
         "http://", "ws://"
     )
@@ -233,9 +233,6 @@ def connect_tunnel(on_public_url_update: Optional[Callable[[], None]]):
                         f"{CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}"
                     )
                     Settings.set_public_url(public_url)
-
-                    if on_public_url_update:
-                        on_public_url_update()
 
                     if not hasattr(loop, "_printed"):
                         setattr(loop, "_printed", True)
