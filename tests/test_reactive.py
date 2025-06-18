@@ -598,8 +598,6 @@ class TestReactive(BaseTest):
                 initial_value=orgs[0],
             )
 
-            print([org.get("projects")[0].get("name")] if org is not None else None)
-
             p.read_dropdown(
                 "Proj",
                 (

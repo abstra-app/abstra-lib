@@ -5,14 +5,14 @@ from typing import List, Optional
 from pydantic.dataclasses import dataclass
 
 from abstra_internals.cloud_api.http_client import HTTPClient
+from abstra_internals.consts.filepaths import EXECUTIONS_DIR_PATH
 from abstra_internals.entities.execution import Execution, ExecutionStatus
 from abstra_internals.environment import (
     SERVER_UUID,
     WORKER_UUID,
 )
 from abstra_internals.repositories.multiprocessing import MPContext
-from abstra_internals.utils.dot_abstra import EXECUTIONS_FOLDER
-from abstra_internals.utils.file_manager import FileManager
+from abstra_internals.services.fs_storage import FileSystemStorage
 
 
 @dataclass
@@ -102,15 +102,15 @@ class ExecutionRepository(ABC):
 
 class LocalExecutionRepository(ExecutionRepository):
     def __init__(self, mp_context: MPContext):
-        self.manager = FileManager(
-            mp_context, directory=EXECUTIONS_FOLDER, model=Execution
+        self.fs_storage = FileSystemStorage(
+            mp_context, directory=EXECUTIONS_DIR_PATH, model=Execution
         )
 
     def create(self, execution: Execution) -> None:
-        self.manager.save(execution.id, execution)
+        self.fs_storage.save(execution.id, execution)
 
     def update(self, execution: Execution) -> None:
-        self.manager.save(execution.id, execution)
+        self.fs_storage.save(execution.id, execution)
 
     def set_failure_by_id(self, execution_id: str) -> None:
         raise NotImplementedError()
@@ -124,17 +124,17 @@ class LocalExecutionRepository(ExecutionRepository):
         return []
 
     def clear(self):
-        self.manager.clear()
+        self.fs_storage.clear()
 
     def get(self, execution_id: str) -> Execution:
-        execution = self.manager.load(execution_id)
+        execution = self.fs_storage.load(execution_id)
         if execution is None:
             raise Exception(f"Execution with id {execution_id} not found")
 
         return execution
 
     def list(self, filter: ExecutionFilter) -> ExecutionResponse:
-        executions = self.manager.load_all()
+        executions = self.fs_storage.load_all()
         filtered_executions = [
             execution
             for execution in executions

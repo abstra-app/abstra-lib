@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import flask
 
 from abstra_internals.cloud_api import get_api_key_info, get_project_info
+from abstra_internals.consts.filepaths import TEST_DATA_FILEPATH
 from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
@@ -37,6 +38,7 @@ from abstra_internals.repositories.project.project import (
 from abstra_internals.repositories.roles import RolesRepository
 from abstra_internals.repositories.tasks import ExecutionTasksResponse, TasksRepository
 from abstra_internals.repositories.users import UsersRepository
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
@@ -47,8 +49,7 @@ from abstra_internals.templates import (
     new_job_code,
     new_script_code,
 )
-from abstra_internals.utils.dot_abstra import TEST_DATA_FILE
-from abstra_internals.utils.file import files_from_directory, module2path, path2module
+from abstra_internals.utils.file import module2path, path2module
 from abstra_internals.utils.validate import validate_json
 
 
@@ -225,10 +226,9 @@ class MainController:
                     path=str(file.relative_to(Settings.root_path)),
                     type="file" if file.is_file() else "dir",
                 )
-                for file in files_from_directory(parent_path)
-                if file.is_dir()
-                or not allowed_suffixes
-                or file.suffix in allowed_suffixes
+                for file in FileSystemService.list_files(
+                    parent_path, allowed_suffixes=allowed_suffixes, use_ignore=True
+                )
             ]
 
         elif mode == "module":
@@ -315,11 +315,11 @@ class MainController:
     def write_test_data(self, data: str) -> None:
         if not validate_json(data):
             raise Exception("Invalid JSON")
-        test_file = Settings.root_path / TEST_DATA_FILE
+        test_file = Settings.root_path / TEST_DATA_FILEPATH
         test_file.write_text(data, encoding="utf-8")
 
     def read_test_data(self) -> str:
-        test_file = Settings.root_path / TEST_DATA_FILE
+        test_file = Settings.root_path / TEST_DATA_FILEPATH
         if not test_file.is_file():
             return "{}"
         return test_file.read_text(encoding="utf-8")

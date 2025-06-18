@@ -3,6 +3,7 @@ from pathlib import Path
 
 import requests
 
+from abstra_internals.consts.filepaths import ABSTRA_TABLES_FILEPATH
 from abstra_internals.contracts_generated import CommonTablesSnapshot
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.environment import CLOUD_API_CLI_URL, REQUEST_TIMEOUT
@@ -17,7 +18,6 @@ from abstra_internals.interface.cli.tables_messages import (
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
-from abstra_internals.utils.file import ABSTRA_TABLES_FILE
 
 
 def dump():
@@ -28,7 +28,7 @@ def dump():
         res.raise_for_status()
         res_json = res.json()
         json_str = json.dumps(res_json, indent=2)
-        file_path = Settings.root_path.joinpath(ABSTRA_TABLES_FILE)
+        file_path = Settings.root_path.joinpath(ABSTRA_TABLES_FILEPATH)
         file_path.write_text(json_str, encoding="utf-8")
         num_tables = len(res_json["tables"])
         dump_message(num_tables, file_path)
@@ -37,7 +37,7 @@ def dump():
         generic_error()
 
 
-def restore(dry_run: bool = False, file=ABSTRA_TABLES_FILE):
+def restore(dry_run: bool = False, file=ABSTRA_TABLES_FILEPATH):
     headers = resolve_headers()
     url = f"{CLOUD_API_CLI_URL}/tables/restore"
     # /path/to/file

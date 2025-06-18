@@ -2,13 +2,13 @@ from typing import Optional
 
 import fire
 
+from abstra_internals.consts.filepaths import ABSTRA_TABLES_FILEPATH
 from abstra_internals.interface.cli.deploy import deploy
 from abstra_internals.interface.cli.dir import select_dir
 from abstra_internals.interface.cli.editor import editor
 from abstra_internals.interface.cli.tables import dump, restore
 from abstra_internals.interface.cli.version import version
 from abstra_internals.settings import SettingsController
-from abstra_internals.utils.file import ABSTRA_TABLES_FILE
 
 
 class CLI(object):
@@ -39,7 +39,10 @@ class CLI(object):
         dump()
 
     def restore(
-        self, root_dir: str = ".", dry_run: bool = False, file: str = ABSTRA_TABLES_FILE
+        self,
+        root_dir: str = ".",
+        dry_run: bool = False,
+        file: str = ABSTRA_TABLES_FILEPATH,
     ):
         SettingsController.set_root_path(root_dir)
         restore(dry_run=dry_run, file=file)

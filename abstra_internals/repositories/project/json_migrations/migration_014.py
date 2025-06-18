@@ -1,8 +1,8 @@
 import shutil
 
+from abstra_internals.consts.filepaths import DOT_ABSTRA_DIR
 from abstra_internals.interface.cli.deploy import _generate_zip_file
 from abstra_internals.settings import Settings
-from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 from .base_migration import Migration
 
@@ -47,7 +47,7 @@ class Migration014(Migration):
     def backup_project_on_dot_abstra(self):
         try:
             root = Settings.root_path
-            dot_abstra_folder = root / DOT_ABSTRA_FOLDER_NAME
+            dot_abstra_folder = root / DOT_ABSTRA_DIR
             zip_path = str(_generate_zip_file())
             backup_zip_path = dot_abstra_folder / "backup.zip"
             shutil.move(zip_path, backup_zip_path)

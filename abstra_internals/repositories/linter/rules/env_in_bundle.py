@@ -5,8 +5,8 @@ from abstra_internals.repositories.linter.models import (
     LinterIssue,
     LinterRule,
 )
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
-from abstra_internals.utils.file import files_from_directory
 
 
 class AddEnvToAbstraIgnore(LinterFix):
@@ -31,9 +31,14 @@ class EnvInBundle(LinterRule):
     def find_issues(self) -> List[LinterIssue]:
         env_file = Settings.root_path / ".env"
 
-        bundle_files = files_from_directory(Settings.root_path)
-
-        if env_file in bundle_files:
-            return [EnvInBundleFound()]
-        else:
+        if not env_file.exists():
             return []
+
+        ignored_patterns = FileSystemService.load_ignore_patterns(Settings.root_path)
+
+        if FileSystemService.is_ignored(
+            ignored_patterns, env_file.relative_to(Settings.root_path)
+        ):
+            return []
+
+        return [EnvInBundleFound()]

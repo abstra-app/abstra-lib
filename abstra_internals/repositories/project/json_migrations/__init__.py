@@ -4,8 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Type
 
+from abstra_internals.consts.filepaths import CONFIG_BACKUP_DIR_PATH
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.utils.dot_abstra import CONFIG_FILE_BACKUPS
 
 from .base_migration import Migration
 from .migration_001 import Migration001
@@ -46,11 +46,11 @@ def get_latest_version() -> str:
 
 
 def create_backup(data: dict, location: Path, filename: str):
-    backup_path = os.path.join(location, CONFIG_FILE_BACKUPS, filename)
+    backup_path = os.path.join(location, CONFIG_BACKUP_DIR_PATH, filename)
     Path(backup_path).parent.mkdir(parents=True, exist_ok=True)
     with open(backup_path, "w", encoding="utf-8") as file:
         json.dump(data, file)
-        return f"{CONFIG_FILE_BACKUPS}/{filename}"
+        return f"{CONFIG_BACKUP_DIR_PATH}/{filename}"
 
 
 def migrate(data: dict, path: Path, verbose=True):

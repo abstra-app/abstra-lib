@@ -14,13 +14,13 @@ class TestCRUDFiles(BaseTest):
             json={"name": "test-workspace-updated", "brand_name": "test-brand-name"},
         )
         workspace = self.client.get("/_editor/api/workspace").get_json()
-        print(workspace)
         self.assertEqual(workspace["name"], "test-workspace-updated")
         self.assertEqual(workspace["brand_name"], "test-brand-name")
 
     def test_list_files(self):
         res = self.client.get("/_editor/api/workspace/files")
         self.assertEqual(res.status_code, 200)
+
         self.assertCountEqual(
             res.json or [],
             [

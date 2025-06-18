@@ -33,13 +33,17 @@ from abstra_internals.repositories.project import json_migrations
 from abstra_internals.repositories.project.disabled_stages_loader import (
     DisabledStagesLoader,
 )
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
     abstra_favicon,
     abstra_logo,
 )
 from abstra_internals.utils import check_is_url, nested_get
-from abstra_internals.utils.file import generate_conflictless_path, silent_traverse_code
+from abstra_internals.utils.file import (
+    generate_conflictless_path,
+    silent_traverse_code,
+)
 from abstra_internals.utils.format import normalize_path
 from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
@@ -989,14 +993,13 @@ class Project:
             stage
             for stage in self.workflow_stages
             if isinstance(stage, stage_with_file_classes)
-            and stage.file_path.absolute() == file_path.absolute()
+            and stage.file_path.absolute().resolve() == file_path.absolute().resolve()
         ]
 
     def iter_py_files(self) -> Generator[Path, None, None]:
         root = Settings.root_path
-        for path in root.rglob("*.py"):
-            if path.is_file():
-                yield path
+        for path in FileSystemService.list_files(root, allowed_suffixes=[".py"]):
+            yield path
 
     def iter_entrypoints(self) -> Generator[Path, None, None]:
         for stage in self.workflow_stages:

@@ -1,18 +1,19 @@
 import os
 from threading import Lock
 
+from abstra_internals.consts.filepaths import CREDENTIALS_FILEPATH
 from abstra_internals.settings import Settings
-from abstra_internals.utils.dot_abstra import CREDENTIALS_FILE
 
 credentials_lock = Lock()
 
 
 def get_credentials():
-    if os.getenv("ABSTRA_API_TOKEN"):
-        return os.getenv("ABSTRA_API_TOKEN")
+    token = os.getenv("ABSTRA_API_TOKEN")
+    if token:
+        return token
 
     with credentials_lock:
-        credentials_path = Settings.root_path.joinpath(CREDENTIALS_FILE)
+        credentials_path = Settings.root_path.joinpath(CREDENTIALS_FILEPATH)
 
         if not credentials_path.exists():
             return None
@@ -23,7 +24,7 @@ def get_credentials():
 
 def delete_credentials():
     with credentials_lock:
-        credentials_path = Settings.root_path.joinpath(CREDENTIALS_FILE)
+        credentials_path = Settings.root_path.joinpath(CREDENTIALS_FILEPATH)
 
         if credentials_path.exists():
             credentials_path.unlink()
@@ -31,7 +32,7 @@ def delete_credentials():
 
 def set_credentials(token: str):
     with credentials_lock:
-        credentials_path = Settings.root_path.joinpath(CREDENTIALS_FILE)
+        credentials_path = Settings.root_path.joinpath(CREDENTIALS_FILEPATH)
         credentials_path.parent.mkdir(exist_ok=True)
 
         credentials_path.write_text(token, encoding="utf-8")

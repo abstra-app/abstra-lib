@@ -6,7 +6,6 @@ from pathlib import Path
 class TestInitFiles(unittest.TestCase):
     def setUp(self) -> None:
         self.lib_root = Path(__file__).parent.parent
-        print(f"Library root: {self.lib_root}")
 
     def collect_all_folders(self, root):
         folders = []

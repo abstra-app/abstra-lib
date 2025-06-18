@@ -8,6 +8,7 @@ from abstra_internals.repositories.linter.models import (
     LinterRule,
 )
 from abstra_internals.repositories.project.project import LocalProjectRepository
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 
 
@@ -53,8 +54,9 @@ class ConflictingName(LinterRule):
 
     def find_issues(self) -> List[LinterIssue]:
         root = Settings.root_path
-        project_py_files = set(root.glob("*.py"))
-        _reserved_names = set(root / (n + ".py") for n in reserved_names())
+        project_py_files = FileSystemService.list_files(root, allowed_suffixes=[".py"])
+
+        _reserved_names = set((root / (name + ".py")) for name in reserved_names())
 
         return [
             ConflictingNameIssue(file)

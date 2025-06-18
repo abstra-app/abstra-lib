@@ -2,7 +2,7 @@ import mimetypes
 from datetime import datetime
 from os.path import sep
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import flask
 
@@ -18,23 +18,32 @@ from abstra_internals.contracts_generated import (
     CommonFileNode,
 )
 from abstra_internals.repositories.factory import Repositories
-
-
-def rm_tree(pth: Path):
-    pth = Path(pth)
-    if not pth.exists():
-        return
-    for child in pth.glob("*"):
-        if child.is_file():
-            child.unlink()
-        else:
-            rm_tree(child)
-    pth.rmdir()
+from abstra_internals.services.fs import SKIPPED_DIRNAMES, FileSystemService
 
 
 class CodebaseController:
     def __init__(self, repos: Repositories):
         self.repos = repos
+
+    def file_node(self, child_path: Path, base_path: Path) -> CommonFileNode:
+        is_dir = child_path.is_dir()
+        stats = child_path.stat()
+
+        grand_children = []
+        if is_dir:
+            grand_children = [
+                list(c.relative_to(base_path).parts)
+                for c in child_path.iterdir()
+                if c.name not in SKIPPED_DIRNAMES
+            ]
+
+        return CommonFileNode(
+            path_parts=list(child_path.relative_to(base_path).parts),
+            size=stats.st_size,
+            last_modified=datetime.fromtimestamp(stats.st_mtime),
+            type="directory" if is_dir else "file",
+            children=grand_children,
+        )
 
     def list_files(self, path) -> AbstraLibApiEditorFilesListResponse:
         if path is None:
@@ -48,17 +57,7 @@ class CodebaseController:
 
         return [
             AbstraLibApiEditorFilesListResponseItem(
-                file=CommonFileNode(
-                    path_parts=list(child_path.relative_to(path).parts),
-                    size=child_path.stat().st_size,
-                    last_modified=datetime.fromtimestamp(path.stat().st_mtime),
-                    type="directory" if child_path.is_dir() else "file",
-                    children=(
-                        [list(c.relative_to(path).parts) for c in child_path.iterdir()]
-                        if child_path.is_dir()
-                        else []
-                    ),
-                ),
+                file=self.file_node(child_path, path),
                 stages=[
                     AbstraLibApiEditorFilesListResponseItemStagesItem(
                         id=stage.id,
@@ -67,7 +66,7 @@ class CodebaseController:
                     for stage in project.get_stages_by_file_path(child_path)
                 ],
             )
-            for child_path in path.glob("**/*")
+            for child_path in FileSystemService.list_files(path, use_ignore=False)
         ]
 
     def create_file(self, path, content: Optional[bytes] = None) -> CommonFileNode:
@@ -92,7 +91,7 @@ class CodebaseController:
     ) -> AbstraLibApiEditorFilesDeleteResponse:
         path = Path(*path_parts)
         if path.is_dir():
-            rm_tree(path)
+            FileSystemService.rm_tree(path)
         else:
             path.unlink()
         return AbstraLibApiEditorFilesDeleteResponse(ok=True)
@@ -126,9 +125,13 @@ class CodebaseController:
         mtype, _ = mimetypes.guess_type(path)
         return flask.send_file(path, mimetype=mtype)
 
-    def mkdir(self, path) -> AbstraLibApiEditorFilesMkdirResponse:
+    def mkdir(
+        self, path: Union[str, Path, List[str]]
+    ) -> AbstraLibApiEditorFilesMkdirResponse:
         if isinstance(path, str):
             path = Path(path)
+        elif isinstance(path, list):
+            path = Path(*path)
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
 

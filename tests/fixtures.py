@@ -7,6 +7,7 @@ import typing
 from pathlib import Path
 from unittest import TestCase
 
+from abstra_internals.consts.filepaths import DOT_ABSTRA_DIR
 from abstra_internals.controllers.main import MainController
 from abstra_internals.interface.cli.editor import start_consumer
 from abstra_internals.repositories.factory import build_editor_repositories
@@ -15,7 +16,6 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.server.apps import get_cloud_app, get_local_app
 from abstra_internals.settings import SettingsController
-from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 
 def rm_tree(pth: Path):
@@ -96,7 +96,7 @@ class BaseWorkflowTest(BaseTest):
         self.maxDiff = None
         self.client = self.get_editor_flask_client()
         self.consumer, self.thread = start_consumer(self.controller)
-        (self.root / DOT_ABSTRA_FOLDER_NAME).mkdir(exist_ok=True)
+        (self.root / DOT_ABSTRA_DIR).mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
         self.consumer.stop_iter()

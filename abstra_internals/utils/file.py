@@ -2,7 +2,6 @@ import ast
 import io
 import os
 import pathlib
-import re
 import shutil
 import tempfile
 import typing as t
@@ -14,7 +13,6 @@ from typing import Generator, Optional, Set, Union
 from werkzeug.datastructures import FileStorage
 
 from abstra_internals.utils.ast_cache import ASTCache
-from abstra_internals.utils.dot_abstra import DOT_ABSTRA_FOLDER_NAME
 
 FILE_TYPES = {
     "txt": {
@@ -286,60 +284,8 @@ FILE_TYPES = {
 }
 
 
-GIT_FOLDER = ".git"
-ABSTRA_IGNORE = ".abstraignore"
-ABSTRA_TABLES_FILE = "abstra-tables.json"
-
-
 def is_relative_path(path: str) -> bool:
     return not path.startswith("<") and not path.startswith("/")
-
-
-def make_ignore_regex(path: str) -> re.Pattern:
-    posix_path = path.replace("\\", "/")
-
-    ignore_regex = r"^" + re.escape(posix_path).replace(r"\*", ".*").replace(r"\?", ".")
-
-    if not posix_path.endswith("/"):
-        ignore_regex += r"(/|$)"
-
-    return re.compile(ignore_regex)
-
-
-def get_ignore_files(dir: Path):
-    GITIGNORE = dir.joinpath(".gitignore")
-    IGNOREFILE = dir.joinpath(ABSTRA_IGNORE)
-    git_path = dir.joinpath(GIT_FOLDER)
-    abstra_path = dir.joinpath(DOT_ABSTRA_FOLDER_NAME)
-    ignored = [IGNOREFILE.name, GITIGNORE.name, abstra_path.name, git_path.name]
-
-    if IGNOREFILE.exists():
-        with open(IGNOREFILE, "r", encoding="utf-8"):
-            ignored.extend(IGNOREFILE.read_text(encoding="utf-8").split("\n"))
-    elif GITIGNORE.exists():
-        ignored.extend(GITIGNORE.read_text(encoding="utf-8").split("\n"))
-    return [
-        make_ignore_regex(p)
-        for p in ignored
-        if p and not p.startswith("#") and not p.startswith("!")
-    ]
-
-
-def should_ignore(ignored_paths, _path: Path):
-    path = _path.as_posix()
-    for ignored_path in ignored_paths:
-        if ignored_path.search(path):
-            return True
-    return False
-
-
-def files_from_directory(directory: Path):
-    ignored = [*get_ignore_files(directory), *get_ignore_files(Path.cwd())]
-    paths = filter(
-        lambda p: p.is_file() and not should_ignore(ignored, p.relative_to(directory)),
-        Path(directory).rglob("*"),
-    )
-    return list(paths)
 
 
 def path2module(path: Path) -> str:

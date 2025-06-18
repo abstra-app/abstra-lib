@@ -41,7 +41,7 @@ class HTTPClient:
     def cleanup(self):
         if hasattr(self, "pool"):
             self.pool.shutdown(wait=False)
-        if hasattr(self._local, "session"):
+        if hasattr(self, "_local") and hasattr(self._local, "session"):
             self._local.session.close()
 
     @property

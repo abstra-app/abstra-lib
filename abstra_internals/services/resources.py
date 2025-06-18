@@ -4,8 +4,8 @@ from typing import List
 
 import psutil
 
+from abstra_internals.consts.filepaths import RESOURCES_FILEPATH
 from abstra_internals.settings import Settings
-from abstra_internals.utils.dot_abstra import RESOURCES_FILE
 
 
 def get_usage_recursive(pid: int):
@@ -27,7 +27,7 @@ class ResourcesRepository:
 
     @staticmethod
     def get_file():
-        file = Settings.root_path / RESOURCES_FILE
+        file = Settings.root_path / RESOURCES_FILEPATH
         file.touch(exist_ok=True)
         return file
 

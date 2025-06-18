@@ -6,11 +6,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 from abstra_internals.cloud_api.http_client import HTTPClient
+from abstra_internals.consts.filepaths import LOCAL_LOGS_DIR_PATH
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.serializer import SerializationHelper
 from abstra_internals.utils import serialize
 from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
-from abstra_internals.utils.dot_abstra import LOCAL_LOGS_FOLDER
 
 
 @dataclass
@@ -91,7 +91,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
         if not execution_id:
             return
 
-        log_file = Path(LOCAL_LOGS_FOLDER) / f"{execution_id}.log"
+        log_file = Path(LOCAL_LOGS_DIR_PATH) / f"{execution_id}.log"
 
         if not log_file.parent.exists():
             log_file.parent.mkdir(parents=True)
@@ -104,7 +104,7 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
         execution_id: str,
         event: Optional[LogEvent] = None,
     ) -> List[LogEntry]:
-        log_file = Path(LOCAL_LOGS_FOLDER) / f"{execution_id}.log"
+        log_file = Path(LOCAL_LOGS_DIR_PATH) / f"{execution_id}.log"
 
         if not log_file.exists():
             return []

@@ -5,16 +5,15 @@ from pathlib import Path
 import requests
 from packaging.version import Version
 
+from abstra_internals.consts.filepaths import CACHED_VERSIONS_DIR_PATH
 from abstra_internals.logger import AbstraLogger
-
-from .dot_abstra import CACHED_VERSIONS_DIR
 
 EXPIRE_PERIOD = 60 * 60 * 4  # 4 hours
 TIMEOUT = 5
 
 
 def get_cached_latest_version(root_path: Path, package_name="abstra"):
-    cached_file = root_path / CACHED_VERSIONS_DIR / f"{package_name}.json"
+    cached_file = root_path / CACHED_VERSIONS_DIR_PATH / f"{package_name}.json"
 
     if cached_file.exists():
         try:
@@ -53,7 +52,7 @@ def get_cached_latest_version(root_path: Path, package_name="abstra"):
 def update_cached_latest_version(
     root_path: Path, version: Version, package_name="abstra"
 ):
-    cached_file = root_path / CACHED_VERSIONS_DIR / f"{package_name}.json"
+    cached_file = root_path / CACHED_VERSIONS_DIR_PATH / f"{package_name}.json"
 
     if not cached_file.parent.exists():
         cached_file.parent.mkdir(parents=True)

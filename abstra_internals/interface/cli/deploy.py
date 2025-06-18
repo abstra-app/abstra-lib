@@ -8,8 +8,8 @@ import requests
 from abstra_internals.cloud_api import create_build, update_build
 from abstra_internals.credentials import resolve_headers
 from abstra_internals.logger import AbstraLogger
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
-from abstra_internals.utils.file import files_from_directory
 
 
 def _generate_zip_file() -> pathlib.Path:
@@ -17,7 +17,7 @@ def _generate_zip_file() -> pathlib.Path:
     zip_path = pathlib.Path(tempfile.gettempdir(), f"{uuid.uuid4()}.zip")
 
     with zipfile.ZipFile(zip_path, "w") as zip_file:
-        for file in files_from_directory(root_path):
+        for file in FileSystemService.list_files(root_path, use_ignore=True):
             zip_file.write(file, file.relative_to(root_path))
 
     return zip_path

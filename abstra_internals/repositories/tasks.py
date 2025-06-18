@@ -5,10 +5,10 @@ from typing import Dict, List, Literal, Optional, Union
 from uuid import uuid4
 
 from abstra_internals.cloud_api.http_client import HTTPClient
+from abstra_internals.consts.filepaths import TASKS_DIR_PATH
 from abstra_internals.repositories.multiprocessing import MPContext
+from abstra_internals.services.fs_storage import FileSystemStorage
 from abstra_internals.utils.datetime import to_utc_iso_string
-from abstra_internals.utils.dot_abstra import TASKS_FOLDER
-from abstra_internals.utils.file_manager import FileManager
 from abstra_internals.utils.serializable import Serializable
 
 TaskStatus = Literal["pending", "locked", "completed"]
@@ -108,13 +108,15 @@ class TasksRepository(ABC):
 
 class LocalTasksRepository(TasksRepository):
     def __init__(self, mp_context: MPContext):
-        self.manager = FileManager(mp_context, directory=TASKS_FOLDER, model=TaskDTO)
+        self.fs_storage = FileSystemStorage(
+            mp_context, directory=TASKS_DIR_PATH, model=TaskDTO
+        )
 
     def clear(self):
-        self.manager.clear()
+        self.fs_storage.clear()
 
     def get(self, id: str) -> TaskDTO:
-        task = self.manager.load(id)
+        task = self.fs_storage.load(id)
         if task is None:
             raise Exception(f"Task with id {id} not found")
 
@@ -143,7 +145,7 @@ class LocalTasksRepository(TasksRepository):
             locked=None,
             completed=None,
         )
-        self.manager.save(id, task)
+        self.fs_storage.save(id, task)
         return task
 
     def lock_task(
@@ -161,7 +163,7 @@ class LocalTasksRepository(TasksRepository):
             by_stage_id=stage_id,
         )
 
-        self.manager.save(task_id, task)
+        self.fs_storage.save(task_id, task)
 
     def complete_task(
         self, task_id: str, execution_id: Optional[str], stage_id: Optional[str]
@@ -178,7 +180,7 @@ class LocalTasksRepository(TasksRepository):
             by_stage_id=stage_id,
         )
 
-        self.manager.save(task_id, task)
+        self.fs_storage.save(task_id, task)
 
     def set_task_to_pending(self, task_id: str) -> None:
         task = self.get(task_id)
@@ -188,7 +190,7 @@ class LocalTasksRepository(TasksRepository):
 
         task.status = "pending"
 
-        self.manager.save(task_id, task)
+        self.fs_storage.save(task_id, task)
 
     def _where_matches(self, task: TaskDTO, where: Dict) -> bool:
         payload = task.payload
@@ -200,7 +202,7 @@ class LocalTasksRepository(TasksRepository):
     def get_pending_tasks(
         self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
     ) -> List[TaskDTO]:
-        all_tasks = self.manager.load_all()
+        all_tasks = self.fs_storage.load_all()
         pending_tasks = [
             task
             for task in all_tasks
@@ -217,7 +219,7 @@ class LocalTasksRepository(TasksRepository):
     def get_sent_tasks(
         self, stage_id: str, limit: Union[int, None], offset: int, where: Dict
     ) -> List[TaskDTO]:
-        all_tasks = self.manager.load_all()
+        all_tasks = self.fs_storage.load_all()
         sent_tasks = [
             task
             for task in all_tasks
@@ -230,23 +232,23 @@ class LocalTasksRepository(TasksRepository):
         return sent_tasks[offset : offset + limit]
 
     def get_stage_tasks(self, stage_id: str) -> List[TaskDTO]:
-        all_tasks = self.manager.load_all()
+        all_tasks = self.fs_storage.load_all()
         return [task for task in all_tasks if task.target_stage_id == stage_id]
 
     def get_by_id(self, task_id: str) -> TaskDTO:
         return self.get(task_id)
 
     def get_all_tasks(self) -> List[TaskDTO]:
-        return self.manager.load_all()
+        return self.fs_storage.load_all()
 
     def get_execution_sent_tasks(self, execution_id: str) -> List[TaskDTO]:
-        all_tasks = self.manager.load_all()
+        all_tasks = self.fs_storage.load_all()
         return [
             task for task in all_tasks if task.created.by_execution_id == execution_id
         ]
 
     def set_locked_tasks_to_pending(self, execution_id: str) -> None:
-        all_tasks = self.manager.load_all()
+        all_tasks = self.fs_storage.load_all()
         for task in all_tasks:
             if (
                 task.locked
@@ -254,7 +256,7 @@ class LocalTasksRepository(TasksRepository):
                 and task.status == "locked"
             ):
                 task.status = "pending"
-                self.manager.save(task.id, task)
+                self.fs_storage.save(task.id, task)
 
 
 class ProductionTasksRepository(TasksRepository):
