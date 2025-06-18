@@ -247,11 +247,14 @@ def get_player_bp(controller: MainController):
         if flask.request.headers.get("Shared-Token") != CLOUD_API_PROD_SHARED_TOKEN:
             flask.abort(401)
 
-        job = controller.get_job(id)
-        if not job:
+        status = controller.get_job_status(id)
+        if status == "not_found":
             flask.abort(404)
 
-        controller.repositories.producer.enqueue(job.id, context=JobContext())
+        if status == "disabled":
+            flask.abort(201)
+
+        controller.repositories.producer.enqueue(id, context=JobContext())
 
         return {"status": "running"}
 

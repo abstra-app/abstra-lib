@@ -2,7 +2,7 @@ import datetime
 import pkgutil
 import webbrowser
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import flask
 
@@ -375,6 +375,21 @@ class MainController:
             return stage
 
         return None
+
+    def get_job_status(self, id: str) -> Literal["enabled", "disabled", "not_found"]:
+        project = self.repositories.project.load(include_disabled_stages=True)
+        stage = project.get_stage(id)
+
+        if not isinstance(stage, JobStage):
+            return "not_found"
+
+        project = self.repositories.project.load()
+        stage = project.get_stage(id)
+
+        if isinstance(stage, JobStage):
+            return "enabled"
+
+        return "disabled"
 
     def create_job(
         self,
