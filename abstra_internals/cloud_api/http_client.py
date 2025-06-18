@@ -6,7 +6,7 @@ import requests
 import requests.adapters
 import urllib3
 
-from abstra_internals.environment import REQUEST_TIMEOUT
+from abstra_internals.environment import MAX_HTTP_CLIENT_THREADS, REQUEST_TIMEOUT
 from abstra_internals.logger import AbstraLogger
 
 AbstraHTTPResponse = requests.Response
@@ -32,7 +32,7 @@ class HTTPClient:
             backoff_factor=2,
         )
         self.timeout = REQUEST_TIMEOUT  # Default timeout for requests
-        self.pool = ThreadPoolExecutor(max_workers=5)
+        self.pool = ThreadPoolExecutor(max_workers=MAX_HTTP_CLIENT_THREADS)
         self._local = threading.local()
 
     def __del__(self):
