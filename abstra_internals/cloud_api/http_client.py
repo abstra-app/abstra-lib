@@ -30,8 +30,9 @@ class HTTPClient:
         self.retry_strategy = urllib3.Retry(
             total=5,
             backoff_factor=2,
+            allowed_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         )
-        self.timeout = REQUEST_TIMEOUT  # Default timeout for requests
+        self.timeout = REQUEST_TIMEOUT
         self.pool = ThreadPoolExecutor(max_workers=MAX_HTTP_CLIENT_THREADS)
         self._local = threading.local()
 

@@ -16,6 +16,7 @@ from abstra_internals.credentials import (
 )
 from abstra_internals.entities.execution_context import ScriptContext
 from abstra_internals.interface.cli.deploy import deploy
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import ExecutionFilter, ExecutionRepository
 from abstra_internals.repositories.execution_logs import (
@@ -487,7 +488,7 @@ class MainController:
         return {"public_url": None}
 
     # Worker lifecycle
-    def fail_worker_executions(self, *, app_id: str, worker_id: str, err_msg: str):
+    def fail_worker_executions(self, *, app_id: str, worker_id: str, reason: str):
         killed_executions = self.execution_repository.find_by_worker(
             worker_id=worker_id,
             status="running",
@@ -498,7 +499,7 @@ class MainController:
             err_log = LogEntry(
                 execution_id=execution.id,
                 created_at=datetime.datetime.now(),
-                payload={"text": err_msg},
+                payload={"text": "[ABSTRA] Execution aborted. " + reason},
                 sequence=999999,
                 event="stderr",
             )
@@ -507,7 +508,11 @@ class MainController:
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
             self.tasks_repository.set_locked_tasks_to_pending(execution.id)
 
-    def fail_app_executions(self, *, app_id: str, err_msg: str):
+        AbstraLogger.capture_message(
+            f"[ABSTRA] Failed {len(killed_executions)} running executions for app `{app_id}` with worker {worker_id} with reason: {reason}"
+        )
+
+    def fail_app_executions(self, *, app_id: str, reason: str):
         exited_execs = self.execution_repository.find_by_app(
             status="running",
             app_id=app_id,
@@ -517,7 +522,7 @@ class MainController:
             err_log = LogEntry(
                 execution_id=execution.id,
                 created_at=datetime.datetime.now(),
-                payload={"text": err_msg},
+                payload={"text": "[ABSTRA] Execution aborted. " + reason},
                 sequence=999999,
                 event="stderr",
             )
@@ -525,3 +530,7 @@ class MainController:
 
             self.execution_repository.set_failure_by_id(execution_id=execution.id)
             self.tasks_repository.set_locked_tasks_to_pending(execution.id)
+
+        AbstraLogger.capture_message(
+            f"[ABSTRA] Failed {len(exited_execs)} running executions for app `{app_id}` with reason: {reason}"
+        )

@@ -50,9 +50,10 @@ class ConsumerController:
             thread_pool.shutdown(wait=True)
             AbstraLogger.warning("[ConsumerController] All threads finished")
 
+            # If the loop exits and there are running executions, gracefull shutdown has failed
             self.main_controller.fail_app_executions(
                 app_id=self.app_id,
-                err_msg="[ABSTRA]: Consumer main loop exited",
+                reason="Failed to set status",
             )
 
     def run_subprocess(self, msg: QueueMessage):
@@ -107,24 +108,16 @@ class ConsumerController:
                 f"[ConsumerController] Error processing message [{msg.delivery_tag}]: {e}"
             )
 
-            AbstraLogger.capture_message(
-                f"[ConsumerController] Error processing message [{msg.delivery_tag}]: {e}"
-            )
-
             AbstraLogger.capture_exception(e)
 
             self.main_controller.fail_worker_executions(
                 app_id=self.app_id,
                 worker_id=worker_id,
-                err_msg=f"[ABSTRA]: {e}",
+                reason=f"{e}",
             )
 
             self.consumer.threadsafe_nack(msg)
 
             AbstraLogger.warning(
-                f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"
-            )
-
-            AbstraLogger.capture_message(
                 f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"
             )

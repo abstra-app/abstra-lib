@@ -57,12 +57,12 @@ class GunicornOptionsBuilder:
             worker_id = self.get_internal_id(worker, ensure=False)
             app_id = self.get_internal_id(server, ensure=False)
 
-            err_msg = f"[ABORTED] Worker exited with status ({status})"
+            err_msg = f"Process exited with status '{status}'"
             if status == signal.Signals.SIGKILL:
-                err_msg += ": Server reached its memory limit or was replaced with a new version"
+                err_msg += ": memory limit reached"
 
             self.main_controller.fail_worker_executions(
-                app_id=app_id, worker_id=worker_id, err_msg=err_msg
+                app_id=app_id, worker_id=worker_id, reason=err_msg
             )
 
         except Exception as e:
@@ -73,7 +73,7 @@ class GunicornOptionsBuilder:
         try:
             app_id = self.get_internal_id(server, ensure=False)
             self.main_controller.fail_app_executions(
-                app_id=app_id, err_msg="[ABORTED] Server exited"
+                app_id=app_id, reason="Process exited unexpectedly."
             )
 
         except Exception as e:
