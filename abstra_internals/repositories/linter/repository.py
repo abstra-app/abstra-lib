@@ -45,7 +45,11 @@ class LocalLinterRepository(LinterRepository):
         threads = []
 
         for rule in rules:
-            thread = threading.Thread(target=check_rule, args=(rule, new_checks))
+            thread = threading.Thread(
+                target=check_rule,
+                args=(rule, new_checks),
+                name=f"LinterCheck[{rule.name}]",
+            )
             thread.start()
             threads.append(thread)
 

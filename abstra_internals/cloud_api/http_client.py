@@ -33,7 +33,10 @@ class HTTPClient:
             allowed_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         )
         self.timeout = REQUEST_TIMEOUT
-        self.pool = ThreadPoolExecutor(max_workers=MAX_HTTP_CLIENT_THREADS)
+        self.pool = ThreadPoolExecutor(
+            max_workers=MAX_HTTP_CLIENT_THREADS,
+            thread_name_prefix="HTTPClient",
+        )
         self._local = threading.local()
 
     def __del__(self):

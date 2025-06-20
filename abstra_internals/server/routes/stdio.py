@@ -12,6 +12,7 @@ def get_editor_bp(_):
     @sock.route("/listen")
     def _websocket(ws: flask_sock.Server):
         try:
+            ws.thread.name = "StdioWebSocket"
             StdioController.register(ws)
             ws.event.wait()
         except Exception as e:

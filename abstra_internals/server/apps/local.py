@@ -23,6 +23,6 @@ def get_local_app(controller: MainController) -> flask.Flask:
     @app.before_request
     def rename_thread():
         curr = threading.current_thread()
-        curr.name = flask.request.path
+        curr.name = f"FlaskThread[{flask.request.path}]"
 
     return app

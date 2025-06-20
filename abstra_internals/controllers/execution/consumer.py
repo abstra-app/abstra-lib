@@ -32,7 +32,10 @@ class ConsumerController:
             f"[ConsumerController] Starting loop with {self.concurrency} threads"
         )
 
-        thread_pool = ThreadPoolExecutor(max_workers=self.concurrency)
+        thread_pool = ThreadPoolExecutor(
+            max_workers=self.concurrency,
+            thread_name_prefix="ExecutionConsumer",
+        )
 
         try:
             for msg in self.consumer.iter():
@@ -73,6 +76,7 @@ class ConsumerController:
 
             p = mp_context.Process(
                 target=process_main,
+                name=f"Worker-{head_id}",
                 kwargs=dict(
                     stage=stage,
                     worker_id=worker_id,
@@ -81,7 +85,6 @@ class ConsumerController:
                     server_port=Settings.server_port,
                     request=msg.preexecution.context,
                 ),
-                name=f"Worker-{head_id}",
             )
 
             p.start()

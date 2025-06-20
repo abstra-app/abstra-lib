@@ -19,7 +19,7 @@ from abstra_internals.resources_watcher import resources_polling_loop
 from abstra_internals.server.apps import get_local_app
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
-from abstra_internals.utils.browser import browser_open_editor
+from abstra_internals.utils.browser import background_open_editor
 from abstra_internals.version import check_latest_version
 
 
@@ -31,7 +31,7 @@ def start_consumer(controller: MainController):
 
     th = threading.Thread(
         daemon=True,
-        name="execution_consumer",
+        name="ExecutionConsumer",
         target=ConsumerController(controller, consumer).start_loop,
     )
 
@@ -43,7 +43,7 @@ def start_consumer(controller: MainController):
 def start_file_watcher(watcher: FileChangeWatcher):
     threading.Thread(
         daemon=True,
-        name="file_watcher",
+        name="FileWatcher",
         target=watcher.run,
     ).start()
 
@@ -51,7 +51,7 @@ def start_file_watcher(watcher: FileChangeWatcher):
 def start_resources_watcher():
     threading.Thread(
         daemon=True,
-        name="resources_watcher",
+        name="ResourcesWatcher",
         target=resources_polling_loop,
     ).start()
 
@@ -63,7 +63,7 @@ def start_linter(controller: MainController):
 
     threading.Thread(
         daemon=True,
-        name="linter",
+        name="Linter",
         target=defered_check,
     ).start()
 
@@ -93,7 +93,7 @@ def editor(headless: bool):
     server = make_server(host=HOST, port=Settings.server_port, threaded=True, app=app)
 
     if not headless:
-        browser_open_editor()
+        background_open_editor()
 
     connect_tunnel()
 

@@ -36,7 +36,11 @@ class FileChangeWatcher(FileSystemEventHandler):
 
         threads = []
         for handler in self.handlers:
-            thread = threading.Thread(target=handler, args=(filepath,))
+            thread = threading.Thread(
+                target=handler,
+                args=(filepath,),
+                name=f"FileWatcher[{handler.__name__}]",
+            )
             thread.start()
             threads.append(thread)
 
@@ -52,6 +56,7 @@ class FileChangeWatcher(FileSystemEventHandler):
     def run(self):
         observer = Observer()
         observer.schedule(self, path=str(Settings.root_path), recursive=True)
+        observer.name = "FileWatcherObserver"
         observer.start()
 
         try:

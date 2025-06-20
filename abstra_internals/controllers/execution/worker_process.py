@@ -1,3 +1,4 @@
+import threading
 import traceback
 from typing import Optional
 
@@ -28,6 +29,8 @@ def process_main(
     stage: StageWithFile,
     request: Optional[ClientContext] = None,
 ):
+    thread = threading.current_thread()
+    thread.name = f"WorkerProcess[{worker_id}]"
     Settings.set_root_path(root_path)
     Settings.set_server_port(server_port, force=True)
 
