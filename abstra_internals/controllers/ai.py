@@ -84,6 +84,7 @@ class AiController:
         langgraph_thread_id,
         code,
         execution_error,
+        execution_logs,
         allowed_actions_schema,
     ):
         headers = resolve_headers() or {}
@@ -111,6 +112,7 @@ class AiController:
             code,
             imported_code,
             execution_error,
+            execution_logs,
             headers,
             env_vars_keys,
             current_abstra_json,
