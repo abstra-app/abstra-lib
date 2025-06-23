@@ -2,6 +2,8 @@ import datetime
 import pkgutil
 import webbrowser
 from pathlib import Path
+from shutil import move
+from tempfile import mkdtemp
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import flask
@@ -415,9 +417,10 @@ class MainController:
         if isinstance(stage, StageWithFile) and (
             code_content := changes.pop("code_content", None)
         ):
-            Settings.root_path.joinpath(stage.file_path).write_text(
-                code_content, encoding="utf-8"
-            )
+            temp_file = Path(mkdtemp()) / stage.file_path
+            with temp_file.open("w", encoding="utf-8") as f:
+                f.write(code_content)
+            move(str(temp_file), Settings.root_path.joinpath(stage.file_path))
 
         if test_data := changes.pop("test_data", None):
             self.write_test_data(test_data)
