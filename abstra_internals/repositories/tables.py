@@ -129,7 +129,7 @@ class LocalTablesRepository(TablesRepository):
             "name": name,
             "type": type,
         }
-        r = self.client.post("tables/column", json=body)
+        r = self.client.post("/tables/column", json=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)
 
@@ -138,13 +138,13 @@ class LocalTablesRepository(TablesRepository):
             "tableId": table_id,
             "row": values,
         }
-        self.client.post("tables/row", json=body)
+        self.client.post("/tables/row", json=body)
 
     def update_table(self, table_id: str, name: str) -> TableDTO:
         body = {
             "name": name,
         }
-        r = self.client.patch(f"tables/table/{table_id}", json=body)
+        r = self.client.patch(f"/tables/table/{table_id}", json=body)
         table = r.json()["response"]
         return TableDTO.from_dict(table)
 
@@ -153,6 +153,6 @@ class LocalTablesRepository(TablesRepository):
             "tableId": table_id,
             "changes": changes,
         }
-        r = self.client.patch(f"tables/column/{column_id}", json=body)
+        r = self.client.patch(f"/tables/column/{column_id}", json=body)
         column = r.json()["response"]
         return ColumnDTO.from_dict(column)
