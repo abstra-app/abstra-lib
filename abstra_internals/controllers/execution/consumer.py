@@ -9,6 +9,7 @@ from abstra_internals.environment import (
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import Consumer, QueueMessage
+from abstra_internals.repositories.producer import LocalProducerRepository
 from abstra_internals.settings import Settings
 
 
@@ -74,6 +75,12 @@ class ConsumerController:
                 self.consumer.threadsafe_ack(msg)
                 return
 
+            local_queue = None
+            if isinstance(
+                self.main_controller.repositories.producer, LocalProducerRepository
+            ):
+                local_queue = self.main_controller.repositories.producer.queue
+
             p = mp_context.Process(
                 target=process_main,
                 name=f"Worker-{head_id}",
@@ -84,6 +91,7 @@ class ConsumerController:
                     root_path=Settings.root_path,
                     server_port=Settings.server_port,
                     request=msg.preexecution.context,
+                    local_queue=local_queue,
                 ),
             )
 

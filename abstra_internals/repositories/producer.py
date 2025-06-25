@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from multiprocessing import Queue
 from typing import Optional
 
 import pika
@@ -9,7 +10,6 @@ from abstra_internals.environment import (
     RABBITMQ_DEFAUT_EXCHANGE,
     RABBITMQ_EXECUTION_QUEUE,
 )
-from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.utils.serializable import Serializable
 
 
@@ -31,8 +31,8 @@ class ProducerRepository(ABC):
 
 
 class LocalProducerRepository(ProducerRepository):
-    def __init__(self, mp_context: MPContext):
-        self.queue = mp_context.Queue()
+    def __init__(self, local_queue: Queue):
+        self.queue = local_queue
 
     def enqueue(self, stage_id: str, context: Optional[ClientContext] = None) -> None:
         preexecution = PreExecution(stage_id=stage_id, context=context)

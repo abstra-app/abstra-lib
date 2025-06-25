@@ -1,5 +1,6 @@
 import threading
 import traceback
+from multiprocessing import Queue
 from typing import Optional
 
 from abstra_internals.controllers.execution.execution import ExecutionController
@@ -28,6 +29,7 @@ def process_main(
     app_id: str,
     stage: StageWithFile,
     request: Optional[ClientContext] = None,
+    local_queue: Optional[Queue] = None,
 ):
     thread = threading.current_thread()
     thread.name = f"WorkerProcess[{worker_id}]"
@@ -41,7 +43,7 @@ def process_main(
             controller = MainController(repositories)
         else:
             AbstraLogger.init("local")
-            repositories = build_editor_repositories()
+            repositories = build_editor_repositories(local_queue)
             controller = MainController(repositories)
 
         set_SERVER_UUID(app_id)

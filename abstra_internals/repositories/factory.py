@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from multiprocessing import Queue
+from typing import Optional
 
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.credentials import resolve_headers_raise
@@ -109,7 +111,7 @@ class Repositories:
     linter: LinterRepository
 
 
-def build_editor_repositories():
+def build_editor_repositories(local_queue: Optional[Queue] = None):
     mp_context = SpawnContextReposity()
 
     http_client = HTTPClient(
@@ -117,11 +119,12 @@ def build_editor_repositories():
     )
 
     linter = LocalLinterRepository()
+    local_queue = local_queue or mp_context.get_context().Queue()
 
     return Repositories(
         project=LocalProjectRepository(),
         execution=LocalExecutionRepository(mp_context.get_context()),
-        producer=LocalProducerRepository(mp_context.get_context()),
+        producer=LocalProducerRepository(local_queue=local_queue),
         connectors=ConnectorsRepository(client=http_client),
         tasks=LocalTasksRepository(mp_context.get_context()),
         tables=LocalTablesRepository(client=http_client),
