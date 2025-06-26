@@ -13,6 +13,7 @@ from abstra_internals.server.routes import jobs as jobs_router
 from abstra_internals.server.routes import linters as linters_router
 from abstra_internals.server.routes import login as login_router
 from abstra_internals.server.routes import logs as logs_router
+from abstra_internals.server.routes import mcp as mcp_router
 from abstra_internals.server.routes import pysa as pysa_router
 from abstra_internals.server.routes import requirements as requirements_router
 from abstra_internals.server.routes import resources as resources_router
@@ -30,6 +31,9 @@ from abstra_internals.usage import editor_usage
 
 def __get_api_bp(controller: MainController):
     bp = flask.Blueprint("editor_api", __name__)
+
+    mcp_bp = mcp_router.get_editor_bp(controller.repositories)
+    bp.register_blueprint(mcp_bp, url_prefix="/mcp")
 
     workspace_bp = workspace_router.get_editor_bp(controller)
     bp.register_blueprint(workspace_bp, url_prefix="/workspace")
