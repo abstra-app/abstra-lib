@@ -38,6 +38,10 @@ class WebEditorController:
     def guard(self):
         # Local development uses a fake JWT repository
         token = flask.request.cookies.get("editor_auth")
+
+        if flask.request.path == "/_healthcheck":
+            return flask.make_response("ok", 200)
+
         if not self.jwt.verify(token):
             return flask.make_response({"ok": False, "error": "Invalid token"}, 403)
         return None
