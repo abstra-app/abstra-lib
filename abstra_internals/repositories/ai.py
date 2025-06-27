@@ -27,9 +27,10 @@ class ProductionAIRepository(AIRepository):
             "temperature": temperature,
         }
         response = self.client.post(
-            endpoint="/prompt",
+            endpoint="/ai/prompt",
             json=body,
         )
+
         try:
             response = response.json()
             return response
@@ -38,7 +39,7 @@ class ProductionAIRepository(AIRepository):
 
     def parse_document(self, model: str, file_content: bytes, mime_type: str):
         response = self.client.post(
-            endpoint=f"/parse-document/{model}",
+            endpoint=f"/ai/parse-document/{model}",
             headers={"Content-Type": mime_type},
             data=file_content,
         )
