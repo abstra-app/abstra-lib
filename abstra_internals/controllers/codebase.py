@@ -99,11 +99,28 @@ class CodebaseController:
     def rename_file(self, path, new_name) -> AbstraLibApiEditorFilesRenameResponse:
         if isinstance(path, str):
             path = Path(path)
+        elif isinstance(path, List):
+            path = Path(*path)
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
 
-        new_path = path.parent / new_name
+        if isinstance(new_name, str):
+            new_path = path.parent / new_name
+        elif isinstance(new_name, List):
+            new_path = path.parent / Path(*new_name)
+        else:
+            raise ValueError(f"Invalid new name: {new_name}")
+
+        # Check if the renamed file is a workflow stage
+        project = self.repos.project.load(include_disabled_stages=True)
+        stages = project.get_stages_by_file_path(path)
+
+        if stages:
+            stages[0].update({"file": str(new_path)})
+
         path.rename(new_path)
+        self.repos.project.save(project)
+
         return AbstraLibApiEditorFilesRenameResponse(ok=True)
 
     def edit_file(self, path, content: bytes) -> AbstraLibApiEditorFilesEditResponse:

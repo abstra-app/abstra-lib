@@ -1,0 +1,2 @@
+import{B as n,R as t}from"./Badge.26909d0d.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="eb628e0b-3d99-49f6-88cc-5d7c50ac4b09",e._sentryDebugIdIdentifier="sentry-dbid-eb628e0b-3d99-49f6-88cc-5d7c50ac4b09")}catch{}})();n.install=function(e){return e.component(n.name,n),e.component(t.name,t),e};
+//# sourceMappingURL=index.4d904bbc.js.map
