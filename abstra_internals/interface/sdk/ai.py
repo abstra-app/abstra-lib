@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Dict, List, Optional, TypeVar, Union
 
-from abstra_internals.contracts_generated import CloudApiCliModelsNfseResponse
+from abstra_internals.contracts_generated import (
+    CloudApiCliModelsBoletoResponse,
+    CloudApiCliModelsNfseResponse,
+)
 from abstra_internals.controllers.sdk.sdk_ai import Format, Prompt
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 
@@ -94,3 +97,17 @@ def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
     """
     data = parse_document(document_path, "nfse")
     return CloudApiCliModelsNfseResponse.from_dict(data)
+
+
+def parse_boleto(document_path: Path) -> CloudApiCliModelsBoletoResponse:
+    """
+    Parse a Boleto document.
+    Args:
+        document_path (Path): The path to the Boleto document to be parsed.
+    Returns:
+        dict: The parsed Boleto data.
+    Raises:
+        ValueError: If the document path is invalid or the parsing fails.
+    """
+    data = parse_document(document_path, "boleto")
+    return CloudApiCliModelsBoletoResponse.from_dict(data)

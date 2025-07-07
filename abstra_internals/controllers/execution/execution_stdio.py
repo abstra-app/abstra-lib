@@ -42,7 +42,7 @@ class StdioController:
             try:
                 listener.send(msg)
             except Exception:
-                pass
+                StdioController.unregister(listener)
 
     def __init__(
         self,

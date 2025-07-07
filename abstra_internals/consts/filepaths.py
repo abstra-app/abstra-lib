@@ -8,7 +8,6 @@ CACHED_VERSIONS_DIR_PATH = f"{DOT_ABSTRA_DIR}/cached_versions"
 CONFIG_BACKUP_DIR_PATH = f"{DOT_ABSTRA_DIR}/config_file_backups"
 
 CREDENTIALS_FILEPATH = f"{DOT_ABSTRA_DIR}/credentials"
-RESOURCES_FILEPATH = f"{DOT_ABSTRA_DIR}/resources.dat"
 TEST_DATA_FILEPATH = f"{DOT_ABSTRA_DIR}/test_data.json"
 
 GIT_DIR_PATH = ".git"

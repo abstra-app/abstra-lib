@@ -1,15 +1,30 @@
 import os
 
 import flask
+import flask_sock
 
 from abstra_internals.contracts_generated import AbstraLibApiEditorFilesRenameRequest
 from abstra_internals.controllers.codebase import CodebaseController
+from abstra_internals.controllers.codebase_events import CodebaseEventController
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.factory import Repositories
 
 
 def get_editor_bp(repos: Repositories):
     bp = flask.Blueprint("editor_files", __name__)
     controller = CodebaseController(repos)
+    sock = flask_sock.Sock(bp)
+
+    @sock.route("/events")
+    def _websocket(ws: flask_sock.Server):
+        try:
+            ws.thread.name = "CodebaseEventsWebSocket"
+            CodebaseEventController.register(ws)
+            ws.event.wait()
+        except Exception as e:
+            AbstraLogger.capture_exception(e)
+        finally:
+            CodebaseEventController.unregister(ws)
 
     @bp.get("/files")
     def _list_files():

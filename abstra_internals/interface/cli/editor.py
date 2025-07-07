@@ -1,22 +1,20 @@
 import threading
-import time
 
 from dotenv import load_dotenv
 from werkzeug.serving import make_server
 
 from abstra_internals.cloud_api import connect_tunnel
+from abstra_internals.controllers.codebase_events import CodebaseEventController
 from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import HOST
-from abstra_internals.file_handlers import FileHandler
-from abstra_internals.file_watcher import FileChangeWatcher
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import EditorConsumer
 from abstra_internals.repositories.factory import build_editor_repositories
 from abstra_internals.repositories.producer import LocalProducerRepository
-from abstra_internals.resources_watcher import resources_polling_loop
 from abstra_internals.server.apps import get_local_app
+from abstra_internals.services.file_watcher import FileWatcher
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
 from abstra_internals.utils.browser import background_open_editor
@@ -40,56 +38,31 @@ def start_consumer(controller: MainController):
     return consumer, th
 
 
-def start_file_watcher(watcher: FileChangeWatcher):
-    threading.Thread(
-        daemon=True,
-        name="FileWatcher",
-        target=watcher.run,
-    ).start()
-
-
-def start_resources_watcher():
-    threading.Thread(
-        daemon=True,
-        name="ResourcesWatcher",
-        target=resources_polling_loop,
-    ).start()
-
-
-def start_linter(controller: MainController):
-    def defered_check():
-        time.sleep(2)
-        controller.repositories.linter.update_checks()
-
-    threading.Thread(
-        daemon=True,
-        name="Linter",
-        target=defered_check,
-    ).start()
-
-
 def editor(headless: bool):
     load_dotenv(Settings.root_path / ".env")
     serve_message()
     check_latest_version()
     AbstraLogger.init("local")
 
-    controller = MainController(repositories=build_editor_repositories())
-    controller.reset_repositories()
-    StdioPatcher.apply(controller)
+    repositories = build_editor_repositories()
+    main_controller = MainController(repositories)
+    main_controller.reset_repositories()
+    StdioPatcher.apply(main_controller)
 
-    watcher = FileChangeWatcher()
-    file_handler = FileHandler(controller)
-    watcher.add_handler(file_handler.env_var_handler)
-    watcher.add_handler(file_handler.python_files_handler)
-    watcher.add_handler(file_handler.all_files_handler)
+    codebase_event_controller = CodebaseEventController(repositories)
+    watcher = FileWatcher(
+        [
+            codebase_event_controller.reload_env,
+            codebase_event_controller.reload_modules,
+            codebase_event_controller.lint_files,
+            codebase_event_controller.broadcast_changes,
+        ]
+    )
+    watcher.start()
 
-    start_file_watcher(watcher)
-    start_resources_watcher()
-    start_consumer(controller)
-    start_linter(controller)
+    start_consumer(main_controller)
 
-    app = get_local_app(controller)
+    app = get_local_app(main_controller)
     server = make_server(host=HOST, port=Settings.server_port, threaded=True, app=app)
 
     if not headless:

@@ -16,7 +16,6 @@ from abstra_internals.server.routes import logs as logs_router
 from abstra_internals.server.routes import mcp as mcp_router
 from abstra_internals.server.routes import pysa as pysa_router
 from abstra_internals.server.routes import requirements as requirements_router
-from abstra_internals.server.routes import resources as resources_router
 from abstra_internals.server.routes import roles as roles_router
 from abstra_internals.server.routes import scripts as scripts_router
 from abstra_internals.server.routes import stdio as stdio_router
@@ -64,9 +63,6 @@ def __get_api_bp(controller: MainController):
 
     requirements_bp = requirements_router.get_editor_bp(controller)
     bp.register_blueprint(requirements_bp, url_prefix="/requirements")
-
-    resources_bp = resources_router.get_editor_bp(controller)
-    bp.register_blueprint(resources_bp, url_prefix="/resources")
 
     login_bp = login_router.get_editor_bp(controller)
     bp.register_blueprint(login_bp, url_prefix="/login")

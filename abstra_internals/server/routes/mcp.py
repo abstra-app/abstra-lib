@@ -29,9 +29,9 @@ def get_editor_bp(repositories: Repositories):
         project = repositories.project.load()
         for stage in project.workflow_stages:
             if stage.id == stage_id:
-                assert isinstance(
-                    stage, StageWithFile
-                ), "Stage must have an associated file."
+                assert isinstance(stage, StageWithFile), (
+                    "Stage must have an associated file."
+                )
                 return stage.file_path.read_text(encoding="utf-8")
         raise ValueError(f"Stage with ID {stage_id} not found.")
 

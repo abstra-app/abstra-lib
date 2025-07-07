@@ -1,11 +1,16 @@
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from abstra_internals.entities.forms.widgets.widget_base import OutputWidget
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 
 class PlotlyOutput(OutputWidget):
     """Plotly figure output widget for displaying interactive charts."""
+
+    fig: Optional["go.Figure"] = None
 
     type = "plotly-output"
 
@@ -40,7 +45,13 @@ class PlotlyOutput(OutputWidget):
             if not isinstance(fig_json, str):
                 raise Exception("fig.to_json() did not return a string")
             return json.loads(fig_json)
-        return json.loads(self.fig.to_json())
+        else:
+            fig_json = self.fig.to_json()
+            if not isinstance(fig_json, str):
+                raise Exception(
+                    f"fig.to_json() did not return a string: {type(fig_json)}"
+                )
+            return json.loads(fig_json)
 
     def _render(self):
         return {
