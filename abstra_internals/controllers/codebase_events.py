@@ -1,4 +1,5 @@
 import json
+import threading
 from pathlib import Path
 from typing import List
 
@@ -17,16 +18,20 @@ from abstra_internals.services.file_watcher import FSEventType
 class CodebaseEventController:
     listeners: List[flask_sock.Server] = []
 
+    _lock = threading.Lock()
+
     @classmethod
     def register(cls, listener: flask_sock.Server):
-        cls.listeners.append(listener)
+        with cls._lock:
+            cls.listeners.append(listener)
 
     @classmethod
     def unregister(cls, listener: flask_sock.Server):
-        try:
-            cls.listeners.remove(listener)
-        except ValueError:
-            pass
+        with cls._lock:
+            try:
+                cls.listeners.remove(listener)
+            except ValueError:
+                pass
 
     @classmethod
     def broadcast_changes(cls, filepath: Path, event: FSEventType):

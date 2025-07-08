@@ -15,12 +15,22 @@ def get_editor_bp(repos: Repositories):
     controller = CodebaseController(repos)
     sock = flask_sock.Sock(bp)
 
+    def _wait_inactivity(ws: flask_sock.Server):
+        keep_alive_interval = 30
+        while True:
+            try:
+                msg = ws.receive(timeout=keep_alive_interval + 10)
+                if msg is None:
+                    break
+            except Exception:
+                break
+
     @sock.route("/events")
     def _websocket(ws: flask_sock.Server):
         try:
             ws.thread.name = "CodebaseEventsWebSocket"
             CodebaseEventController.register(ws)
-            ws.event.wait()
+            _wait_inactivity(ws)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:

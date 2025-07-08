@@ -17,7 +17,6 @@ from abstra_internals.settings import Settings
 
 IGNORED_PATHS = [
     ".abstra/",
-    "abstra.json",
     ".venv",
     "__pycache__",
 ]

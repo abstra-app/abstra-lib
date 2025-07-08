@@ -72,6 +72,21 @@
       ],
       "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsNfseResponse",
       "examples": []
+    },
+    "parse_boleto": {
+      "object_type": "function",
+      "description": "Parse a Boleto document.",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Path",
+          "description": "The path to the Boleto document to be parsed. dict: The parsed Boleto data. ValueError: If the document path is invalid or the parsing fails.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsBoletoResponse",
+      "examples": []
     }
   },
   "abstra.cli": {
@@ -82,7 +97,7 @@
       "object_type": "function",
       "description": "Get the path to the persistent directory Returns: pathlib.Path: Path to the persistent directory",
       "params": [],
-      "return_type": "pathlib.Path",
+      "return_type": "pathlib._local.Path",
       "examples": []
     },
     "get_project_url": {
@@ -96,24 +111,10 @@
       "object_type": "function",
       "description": "Get the path to the public directory Returns: pathlib.Path: Path to the public directory",
       "params": [],
-      "return_type": "pathlib.Path",
+      "return_type": "pathlib._local.Path",
       "examples": []
     },
-    "create_public_link": {
-      "object_type": "function",
-      "description": "Create a public link for a file by copying it to the public directory",
-      "params": [
-        {
-          "name": "path",
-          "type": "Union[str, pathlib.Path]",
-          "description": "Path to the file str: Public link to the file",
-          "default": "None",
-          "required": true
-        }
-      ],
-      "return_type": "str",
-      "examples": []
-    },
+    "create_public_link": null,
     "get_execution_id": {
       "object_type": "function",
       "description": "Get the execution ID of the current execution.",
@@ -233,33 +234,19 @@
   },
   "abstra.ensurepath": {},
   "abstra.files": {
-    "create_public_link": {
-      "object_type": "function",
-      "description": "Create a public link for a file by copying it to the public directory",
-      "params": [
-        {
-          "name": "path",
-          "type": "Union[str, pathlib.Path]",
-          "description": "Path to the file str: Public link to the file",
-          "default": "None",
-          "required": true
-        }
-      ],
-      "return_type": "str",
-      "examples": []
-    },
+    "create_public_link": null,
     "get_persistent_dir": {
       "object_type": "function",
       "description": "Get the path to the persistent directory Returns: pathlib.Path: Path to the persistent directory",
       "params": [],
-      "return_type": "pathlib.Path",
+      "return_type": "pathlib._local.Path",
       "examples": []
     },
     "get_public_dir": {
       "object_type": "function",
       "description": "Get the path to the public directory Returns: pathlib.Path: Path to the public directory",
       "params": [],
-      "return_type": "pathlib.Path",
+      "return_type": "pathlib._local.Path",
       "examples": []
     }
   },
