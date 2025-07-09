@@ -114,7 +114,21 @@
       "return_type": "pathlib._local.Path",
       "examples": []
     },
-    "create_public_link": null,
+    "create_public_link": {
+      "object_type": "function",
+      "description": "Create a public link for a file by copying it to the public directory",
+      "params": [
+        {
+          "name": "path",
+          "type": "Union[str, pathlib._local.Path]",
+          "description": "Path to the file str: Public link to the file",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "str",
+      "examples": []
+    },
     "get_execution_id": {
       "object_type": "function",
       "description": "Get the execution ID of the current execution.",
@@ -234,7 +248,21 @@
   },
   "abstra.ensurepath": {},
   "abstra.files": {
-    "create_public_link": null,
+    "create_public_link": {
+      "object_type": "function",
+      "description": "Create a public link for a file by copying it to the public directory",
+      "params": [
+        {
+          "name": "path",
+          "type": "Union[str, pathlib._local.Path]",
+          "description": "Path to the file str: Public link to the file",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "str",
+      "examples": []
+    },
     "get_persistent_dir": {
       "object_type": "function",
       "description": "Get the path to the persistent directory Returns: pathlib.Path: Path to the persistent directory",
