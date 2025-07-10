@@ -1,7 +1,7 @@
 import threading
 import time
 from pathlib import Path
-from typing import Callable, List, Literal, Optional
+from typing import Callable, List, Literal
 
 from watchdog.events import (
     FileCreatedEvent,
@@ -27,7 +27,7 @@ Handler = Callable[[Path, FSEventType], None]
 class FileWatcher(FileSystemEventHandler):
     def __init__(self, handlers: List[Handler]):
         super().__init__()
-        self._debounce_timer: Optional[threading.Timer] = None
+        self._debounce_timers: dict[str, threading.Timer] = {}
         self.handlers: List[Handler] = handlers
 
     def start(self):
@@ -38,6 +38,7 @@ class FileWatcher(FileSystemEventHandler):
 
     def dispatch(self, event: FileSystemEvent):
         filepath = Path(event.src_path)
+        filepath_str = str(filepath)
 
         if self.should_ignore_path(filepath):
             return
@@ -53,8 +54,8 @@ class FileWatcher(FileSystemEventHandler):
         else:
             return
 
-        if self._debounce_timer is not None:
-            self._debounce_timer.cancel()
+        if filepath_str in self._debounce_timers:
+            self._debounce_timers[filepath_str].cancel()
 
         def execute_handlers():
             time.sleep(0.01)
@@ -66,12 +67,11 @@ class FileWatcher(FileSystemEventHandler):
 
             for thread in threads:
                 thread.join()
-            self._debounce_timer = None
 
-        self._debounce_timer = threading.Timer(
+        self._debounce_timers[filepath_str] = threading.Timer(
             interval=0.5, function=execute_handlers
         )  # 500ms debounce
-        self._debounce_timer.start()
+        self._debounce_timers[filepath_str].start()
 
     def should_ignore_path(self, path: Path) -> bool:
         return any(ignored_file in str(path) for ignored_file in IGNORED_PATHS)
