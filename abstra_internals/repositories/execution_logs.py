@@ -16,6 +16,7 @@ from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_stri
 @dataclass
 class LogEntry:
     execution_id: str
+    stage_id: str
     created_at: datetime
     event: Literal["stderr", "stdout"]
     payload: Dict[Literal["text"], str]
@@ -24,6 +25,7 @@ class LogEntry:
     def to_dto(self) -> Dict[str, Any]:
         return {
             "executionId": self.execution_id,
+            "stageId": self.stage_id,
             "createdAt": to_utc_iso_string(self.created_at),
             "event": self.event,
             "payload": self.payload,
@@ -35,6 +37,7 @@ class LogEntry:
         if dto.get("event") == "stdout" or dto.get("event") == "stderr":
             return LogEntry(
                 execution_id=dto["executionId"],
+                stage_id=dto["stageId"],
                 created_at=from_utc_iso_string(dto["createdAt"]),
                 event=dto["event"],
                 payload=dto["payload"],
@@ -56,11 +59,16 @@ class ExecutionLogsRepository(ABC):
         return self.sequence
 
     def insert_stdio(
-        self, execution_id: str, event: Literal["stdout", "stderr"], text: str
+        self,
+        execution_id: str,
+        stage_id: str,
+        event: Literal["stdout", "stderr"],
+        text: str,
     ):
         self.save(
             LogEntry(
                 execution_id=execution_id,
+                stage_id=stage_id,
                 created_at=datetime.now(),
                 event=event,
                 payload={"text": text},

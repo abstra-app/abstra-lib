@@ -34,3 +34,9 @@ def ensure_gitignore(dir: pathlib.Path):
     path = dir / ".gitignore"
     if not path.exists():
         path.write_text(gitignore, encoding="utf-8")
+
+
+def ensure_dotenv(dir: pathlib.Path):
+    path = dir / ".env"
+    if not path.exists():
+        path.write_text("", encoding="utf-8")

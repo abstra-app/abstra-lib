@@ -104,12 +104,8 @@ class StdioController:
         if not execution:
             return
 
-        self.execution_logs_repository.insert_stdio(execution.id, std_type, text)
-        self.broadcast(
-            type=std_type,
-            log=text,
-            execution_id=execution.id,
-            stage_id=execution.stage_id,
+        self.execution_logs_repository.insert_stdio(
+            execution.id, execution.stage_id, std_type, text
         )
 
     def mask(self, raw: str) -> str:

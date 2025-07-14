@@ -23,6 +23,7 @@ class TestLocalExecutionLogsRepository(unittest.TestCase):
     def test_create_stdio(self):
         log_entry = LogEntry(
             execution_id="foo",
+            stage_id="bar",
             created_at=datetime.now(),
             event="stdout",
             payload={"text": "hello"},

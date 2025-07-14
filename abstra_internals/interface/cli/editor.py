@@ -10,6 +10,7 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import HOST
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
+from abstra_internals.logs_watcher import LogsWatcher, on_logs_update
 from abstra_internals.repositories.consumer import EditorConsumer
 from abstra_internals.repositories.factory import build_editor_repositories
 from abstra_internals.repositories.producer import LocalProducerRepository
@@ -59,6 +60,9 @@ def editor(headless: bool):
         ]
     )
     watcher.start()
+
+    logs_watcher = LogsWatcher([on_logs_update])
+    logs_watcher.start()
 
     start_consumer(main_controller)
 

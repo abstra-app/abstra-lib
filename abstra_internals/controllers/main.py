@@ -46,6 +46,7 @@ from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
     ensure_abstraignore,
+    ensure_dotenv,
     ensure_gitignore,
     new_form_code,
     new_hook_code,
@@ -117,6 +118,7 @@ class MainController:
         RequirementsRepository.ensure("abstra")
         ensure_abstraignore(Settings.root_path)
         ensure_gitignore(Settings.root_path)
+        ensure_dotenv(Settings.root_path)
 
         self.repositories = repositories
 
@@ -516,6 +518,7 @@ class MainController:
         for execution in killed_executions:
             err_log = LogEntry(
                 execution_id=execution.id,
+                stage_id=execution.stage_id,
                 created_at=datetime.datetime.now(),
                 payload={"text": "[ABSTRA] Execution aborted. " + reason},
                 sequence=999999,
@@ -539,6 +542,7 @@ class MainController:
         for execution in exited_execs:
             err_log = LogEntry(
                 execution_id=execution.id,
+                stage_id=execution.stage_id,
                 created_at=datetime.datetime.now(),
                 payload={"text": "[ABSTRA] Execution aborted. " + reason},
                 sequence=999999,

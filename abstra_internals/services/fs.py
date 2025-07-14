@@ -9,7 +9,7 @@ from abstra_internals.consts.filepaths import (
     GIT_DIR_PATH,
 )
 
-SKIPPED_DIRNAMES = {"__pycache__", "venv", ".venv"}
+SKIPPED_DIRNAMES = {"__pycache__", "venv", ".venv", ".vscode", ".cursor", ".ruff_cache"}
 
 
 class FileSystemService:
@@ -26,6 +26,7 @@ class FileSystemService:
     def list_files(
         dir: Path,
         *,
+        include_dirs: bool = False,
         use_ignore: bool = True,
         allowed_suffixes: Optional[List[str]] = None,
     ) -> List[Path]:
@@ -39,7 +40,7 @@ class FileSystemService:
         """
         return FileSystemService.list_paths(
             dir,
-            include_dirs=False,
+            include_dirs=include_dirs,
             use_ignore=use_ignore,
             allowed_suffixes=allowed_suffixes,
         )
@@ -68,8 +69,8 @@ class FileSystemService:
             raise ValueError(f"Provided path {dirpath} is not a directory.")
 
         ignored_patterns = [
-            *FileSystemService.load_ignore_patterns(dirpath),
-            *FileSystemService.load_ignore_patterns(Path.cwd()),
+            *FileSystemService.load_ignore_patterns(dirpath, ignore_dotenv=False),
+            *FileSystemService.load_ignore_patterns(Path.cwd(), ignore_dotenv=False),
         ]
 
         if use_ignore and FileSystemService.is_ignored(ignored_patterns, dirpath):
@@ -89,13 +90,16 @@ class FileSystemService:
             if (
                 child.is_file()
                 and FileSystemService._suffix_allowed(child, allowed_suffixes)
-                and not FileSystemService.is_ignored(
-                    ignored_patterns, child.relative_to(dirpath)
+                and (
+                    not use_ignore
+                    or not FileSystemService.is_ignored(
+                        ignored_patterns, child.relative_to(dirpath)
+                    )
                 )
             ):
                 matches.append(child)
             elif child.is_dir():
-                if FileSystemService.is_ignored(
+                if use_ignore and FileSystemService.is_ignored(
                     ignored_patterns, child.relative_to(dirpath)
                 ):
                     continue
@@ -107,7 +111,7 @@ class FileSystemService:
                         allowed_suffixes=allowed_suffixes,
                     )
                 )
-        return matches
+        return sorted(matches, key=lambda p: p.as_posix())
 
     @staticmethod
     def rm_tree(path: Path):
@@ -137,7 +141,7 @@ class FileSystemService:
         return False
 
     @staticmethod
-    def load_ignore_patterns(root_dir: Path) -> List[re.Pattern]:
+    def load_ignore_patterns(root_dir: Path, ignore_dotenv=True) -> List[re.Pattern]:
         git_ignore_path = root_dir.joinpath(".gitignore")
         abstra_ignore_path = root_dir.joinpath(ABSTRA_IGNORE_FILEPATH)
         git_path = root_dir.joinpath(GIT_DIR_PATH)
@@ -164,7 +168,10 @@ class FileSystemService:
         return [
             FileSystemService._make_ignore_regex(p)
             for p in ignored
-            if p and not p.startswith("#") and not p.startswith("!")
+            if p
+            and not p.startswith("#")
+            and not p.startswith("!")
+            and (not p == ".env" or ignore_dotenv)
         ]
 
     @staticmethod

@@ -989,6 +989,7 @@ class Project:
 
     def get_stages_by_file_path(self, file_path: Path) -> List[StageWithFile]:
         stage_with_file_classes = (FormStage, HookStage, JobStage, ScriptStage)
+
         return [
             stage
             for stage in self.workflow_stages

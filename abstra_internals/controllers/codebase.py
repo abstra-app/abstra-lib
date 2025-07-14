@@ -66,7 +66,9 @@ class CodebaseController:
                     for stage in project.get_stages_by_file_path(child_path)
                 ],
             )
-            for child_path in FileSystemService.list_files(path, use_ignore=False)
+            for child_path in FileSystemService.list_files(
+                path, include_dirs=True, use_ignore=False
+            )
         ]
 
     def create_file(self, path, content: Optional[bytes] = None) -> CommonFileNode:

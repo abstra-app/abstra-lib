@@ -28,6 +28,7 @@ class TestCRUDFiles(BaseTest):
                 dict(path="abstra.json", name="abstra.json", type="file"),
                 dict(name="favicon.ico", path="favicon.ico", type="file"),
                 dict(name="logo.png", path="logo.png", type="file"),
+                dict(name=".env", path=".env", type="file"),
             ],
         )
 
