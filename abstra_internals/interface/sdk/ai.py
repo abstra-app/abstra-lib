@@ -111,3 +111,4 @@ def parse_boleto(document_path: Path) -> CloudApiCliModelsBoletoResponse:
     """
     data = parse_document(document_path, "boleto")
     return CloudApiCliModelsBoletoResponse.from_dict(data)
+    return CloudApiCliModelsBoletoResponse.from_dict(data)
