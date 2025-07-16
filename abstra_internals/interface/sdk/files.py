@@ -16,7 +16,7 @@ def create_public_link(path: Union[str, Path]) -> str:
     Create a public link for a file by copying it to the public directory
 
     Args:
-        path (Union[str, pathlib._local.Path]): Path to the file
+        path (Union[str, pathlib.Path]): Path to the file
 
     Returns:
         str: Public link to the file

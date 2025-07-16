@@ -154,18 +154,20 @@ def experimental_prompt_browser(
     driver: Optional["WebDriver"] = None,
     verbose: bool = False,
 ) -> dict:
-    from selenium import webdriver
-
     """
     Main browse function using ReAct framework for AI-powered web browsing.
-    
+
     Args:
-        query: The query/task to accomplish through web browsing
-        return_params: JSON schema dict or Pydantic BaseModel defining the expected return format
-    
+        query (str): The query/task to accomplish through web browsing
+        response_format (Optional[Union[dict, pydantic.main.BaseModel]]): JSON schema dict or Pydantic BaseModel defining the expected return format
+        driver (Optional[WebDriver]): Optional WebDriver instance to use. If not provided, a new one will be created
+        verbose (bool): Enable verbose logging for debugging purposes
+
     Returns:
         Dict containing the results of the browsing task
     """
+    from selenium import webdriver
+
     ABSTRA_ENVIRONMENT = os.getenv("ABSTRA_ENVIRONMENT")
     ABSTRA_SELENIUM_URL = os.getenv("ABSTRA_SELENIUM_URL")
 

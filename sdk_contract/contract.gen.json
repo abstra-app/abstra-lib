@@ -87,6 +87,42 @@
       ],
       "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsBoletoResponse",
       "examples": []
+    },
+    "experimental_prompt_browser": {
+      "object_type": "function",
+      "description": "Main browse function using ReAct framework for AI-powered web browsing.",
+      "params": [
+        {
+          "name": "query",
+          "type": "str",
+          "description": "The query/task to accomplish through web browsing",
+          "default": "None",
+          "required": true
+        },
+        {
+          "name": "response_format",
+          "type": "Optional[Union[dict, pydantic.main.BaseModel]]",
+          "description": "JSON schema dict or Pydantic BaseModel defining the expected return format",
+          "default": "None",
+          "required": false
+        },
+        {
+          "name": "driver",
+          "type": "Optional[WebDriver]",
+          "description": "Optional WebDriver instance to use. If not provided, a new one will be created",
+          "default": "None",
+          "required": false
+        },
+        {
+          "name": "verbose",
+          "type": "bool",
+          "description": "Enable verbose logging for debugging purposes Dict containing the results of the browsing task",
+          "default": "False",
+          "required": false
+        }
+      ],
+      "return_type": "dict",
+      "examples": []
     }
   },
   "abstra.cli": {
@@ -97,7 +133,7 @@
       "object_type": "function",
       "description": "Get the path to the persistent directory Returns: pathlib.Path: Path to the persistent directory",
       "params": [],
-      "return_type": "pathlib._local.Path",
+      "return_type": "pathlib.Path",
       "examples": []
     },
     "get_project_url": {
@@ -111,7 +147,7 @@
       "object_type": "function",
       "description": "Get the path to the public directory Returns: pathlib.Path: Path to the public directory",
       "params": [],
-      "return_type": "pathlib._local.Path",
+      "return_type": "pathlib.Path",
       "examples": []
     },
     "create_public_link": {
@@ -120,7 +156,7 @@
       "params": [
         {
           "name": "path",
-          "type": "Union[str, pathlib._local.Path]",
+          "type": "Union[str, pathlib.Path]",
           "description": "Path to the file str: Public link to the file",
           "default": "None",
           "required": true
@@ -254,7 +290,7 @@
       "params": [
         {
           "name": "path",
-          "type": "Union[str, pathlib._local.Path]",
+          "type": "Union[str, pathlib.Path]",
           "description": "Path to the file str: Public link to the file",
           "default": "None",
           "required": true
@@ -267,14 +303,14 @@
       "object_type": "function",
       "description": "Get the path to the persistent directory Returns: pathlib.Path: Path to the persistent directory",
       "params": [],
-      "return_type": "pathlib._local.Path",
+      "return_type": "pathlib.Path",
       "examples": []
     },
     "get_public_dir": {
       "object_type": "function",
       "description": "Get the path to the public directory Returns: pathlib.Path: Path to the public directory",
       "params": [],
-      "return_type": "pathlib._local.Path",
+      "return_type": "pathlib.Path",
       "examples": []
     }
   },
