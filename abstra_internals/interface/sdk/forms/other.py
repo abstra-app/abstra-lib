@@ -1,8 +1,8 @@
 from typing import Dict, Optional
 
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
-from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.proxy import ReadOnlyProxyDict
+from abstra_internals.services.jwt import UserClaims
 
 
 def get_user(refresh: bool = False) -> UserClaims:

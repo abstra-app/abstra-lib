@@ -10,7 +10,7 @@ def get_player_bp(main_controller: MainController):
     bp = flask.Blueprint("auth", __name__)
     controller = AuthController(
         kv_repository=main_controller.kv_repository,
-        jwt_repository=main_controller.jwt_repository,
+        passwordless_repository=main_controller.passwordless_repository,
         users_repository=main_controller.users_repository,
         email_repository=main_controller.email_repository,
     )

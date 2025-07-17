@@ -1,6 +1,7 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
+from abstra_internals.environment import PROJECT_ID
 from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
@@ -25,10 +26,11 @@ from abstra_internals.server.routes import web_editor as web_editor_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.routes import workspace as workspace_router
 from abstra_internals.server.utils import send_from_dist
+from abstra_internals.services.jwt import decode_jwt
 from abstra_internals.usage import editor_usage
 
 
-def __get_api_bp(controller: MainController):
+def _get_api_bp(controller: MainController):
     bp = flask.Blueprint("editor_api", __name__)
 
     mcp_bp = mcp_router.get_editor_bp(controller.repositories)
@@ -100,20 +102,14 @@ def __get_api_bp(controller: MainController):
     web_editor_bp = web_editor_router.get_web_editor_bp(controller)
     bp.register_blueprint(web_editor_bp, url_prefix="/web-editor")
 
-    guard = web_editor_router.get_editor_api_guard(controller)
-    bp.before_request(guard)
-
     return bp
 
 
 def get_editor_bp(controller: MainController):
     bp = flask.Blueprint("editor", __name__)
 
-    api_bp = __get_api_bp(controller)
+    api_bp = _get_api_bp(controller)
     bp.register_blueprint(api_bp, url_prefix="/api")
-
-    editor_auth_bp = web_editor_router.get_web_editor_auth_bp(controller)
-    bp.register_blueprint(editor_auth_bp, url_prefix="/auth")
 
     @bp.get("/")
     @editor_usage
@@ -123,5 +119,38 @@ def get_editor_bp(controller: MainController):
     @bp.get("/<path:filename>")
     def _spa(filename: str):
         return send_from_dist(filename, "editor.html")
+
+    return bp
+
+
+def get_editor_auth_bp():
+    bp = flask.Blueprint("editor_auth", __name__)
+
+    @bp.post("/set-cookie")
+    def _set_cookie():
+        data = flask.request.json
+
+        if not data:
+            flask.abort(400)
+
+        token = data.get("token")
+
+        if not token:
+            return flask.make_response({"ok": False, "error": "No token provided"}, 401)
+
+        if not decode_jwt(token, aud=f"web-editor-{PROJECT_ID}"):
+            return flask.make_response({"ok": False, "error": "Invalid token"}, 401)
+
+        response = flask.make_response({"ok": True})
+
+        response.set_cookie(
+            "editor_auth",
+            token,
+            max_age=60 * 60 * 24 * 7,  # Expires in 7 day (in seconds)
+            httponly=True,  # Makes it inaccessible to JavaScript
+            secure=True,  # Ensures it's sent over HTTPS
+            samesite="Lax",  # Protects against CSRF
+        )
+        return response
 
     return bp

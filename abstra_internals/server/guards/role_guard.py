@@ -9,7 +9,6 @@ from abstra_internals.contracts_generated import (
     AbstraLibApiPlayerUserNavigationGuard as NavigationGuard,
 )
 from abstra_internals.contracts_generated import CommonUser
-from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.repositories.project.project import (
     AccessSettings,
     ProjectRepository,
@@ -17,6 +16,7 @@ from abstra_internals.repositories.project.project import (
     StyleSettingsWithSidebar,
 )
 from abstra_internals.repositories.users import UsersRepository
+from abstra_internals.services.jwt import USER_AUTH_HEADER_KEY, UserClaims
 
 SOCKET_AUTH_HEADER_PREFIX = "base64url.bearer.authorization."
 

@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from flask import Blueprint, Flask
 
-from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.repositories.project.project import (
     AccessSettings,
     FormStage,
@@ -17,6 +16,7 @@ from abstra_internals.server.guards.role_guard import (
     PathArgSelector,
     StageIdSelector,
 )
+from abstra_internals.services.jwt import USER_AUTH_HEADER_KEY, UserClaims
 from tests.fixtures import build_editor_repositories, clear_dir, init_dir
 
 

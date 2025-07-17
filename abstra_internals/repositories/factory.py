@@ -8,7 +8,6 @@ from abstra_internals.environment import (
     CLOUD_API_CLI_URL,
     CLOUD_API_PROD_HEADERS,
     CLOUD_API_PROD_URL,
-    EDITOR_MODE,
     RABBITMQ_CONNECTION_URI,
 )
 from abstra_internals.repositories.ai import (
@@ -32,13 +31,6 @@ from abstra_internals.repositories.execution_logs import (
     LocalExecutionLogsRepository,
     ProductionExecutionLogsRepository,
 )
-from abstra_internals.repositories.jwt_signer import (
-    EditorJWTRepository,
-    JWTRepository,
-    LocalJWTRepository,
-    ProductionJWTRepository,
-    get_editor_jwt_repository,
-)
 from abstra_internals.repositories.keyvalue import (
     KVRepository,
     LocalKVRepository,
@@ -52,6 +44,11 @@ from abstra_internals.repositories.linter.repository import (
 from abstra_internals.repositories.multiprocessing import (
     MPContextReposity,
     SpawnContextReposity,
+)
+from abstra_internals.repositories.passwordless import (
+    LocalPasswordlessRepository,
+    PasswordlessRepository,
+    ProductionPasswordlessRepository,
 )
 from abstra_internals.repositories.producer import (
     LocalProducerRepository,
@@ -101,13 +98,12 @@ class Repositories:
     users: UsersRepository
     roles: RolesRepository
     ai: AIRepository
-    jwt: JWTRepository
+    passwordless: PasswordlessRepository
     kv: KVRepository
     roles: RolesRepository
     tasks: TasksRepository
     tables: TablesRepository
     users: UsersRepository
-    editor_jwt: EditorJWTRepository
     linter: LinterRepository
 
 
@@ -133,9 +129,8 @@ def build_editor_repositories(local_queue: Optional[Queue] = None):
         ai=LocalAIRepository(client=http_client),
         execution_logs=LocalExecutionLogsRepository(),
         users=LocalUsersRepository(),
-        jwt=LocalJWTRepository(),
+        passwordless=LocalPasswordlessRepository(),
         kv=LocalKVRepository(),
-        editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=mp_context,
         linter=linter,
     )
@@ -163,9 +158,8 @@ def build_prod_repositories():
         users=ProductionUsersRepository(client=http_client),
         tasks=ProductionTasksRepository(client=http_client),
         ai=ProductionAIRepository(client=http_client),
-        jwt=ProductionJWTRepository(client=http_client),
+        passwordless=ProductionPasswordlessRepository(client=http_client),
         kv=ProductionKVRepository(client=http_client),
-        editor_jwt=get_editor_jwt_repository(EDITOR_MODE),
         mp_context=SpawnContextReposity(),
         linter=ProductionLinterRepository(),
     )

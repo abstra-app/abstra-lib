@@ -2,8 +2,8 @@ import flask
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import IS_PRODUCTION
-from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.server.guards.role_guard import Guard
+from abstra_internals.services.jwt import USER_AUTH_HEADER_KEY
 from abstra_internals.usage import editor_usage
 
 

@@ -7,8 +7,8 @@ from abstra_internals.email_templates import authn_template
 from abstra_internals.environment import OIDC_AUTHORITY, REQUEST_TIMEOUT
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
-from abstra_internals.repositories.jwt_signer import JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
+from abstra_internals.repositories.passwordless import PasswordlessRepository
 from abstra_internals.repositories.users import UsersRepository
 
 
@@ -48,7 +48,7 @@ def get_oidc_userinfo_email(access_token: str) -> typing.Optional[str]:
 
 class AuthController:
     kv_repository: KVRepository
-    jwt_repository: JWTRepository
+    passwordless_repository: PasswordlessRepository
     users_repository: UsersRepository
     email_repository: EmailRepository
 
@@ -56,23 +56,23 @@ class AuthController:
         self,
         *,
         kv_repository: KVRepository,
-        jwt_repository: JWTRepository,
+        passwordless_repository: PasswordlessRepository,
         email_repository: EmailRepository,
         users_repository: UsersRepository,
     ):
         self.kv_repository = kv_repository
-        self.jwt_repository = jwt_repository
+        self.passwordless_repository = passwordless_repository
         self.email_repository = email_repository
         self.users_repository = users_repository
 
     def _sign_and_signup(self, email: str) -> str:
         self.users_repository.insert_user(email)
-        return self.jwt_repository.sign(email)
+        return self.passwordless_repository.sign(email)
 
     def authenticate(self, email: str) -> bool:
         try:
             key = authn_kv_key(email)
-            code = self.jwt_repository.gen_code()
+            code = self.passwordless_repository.gen_code()
             self.kv_repository.set(key, code)
 
             counter_key = authn_kv_counter(email)
@@ -90,7 +90,7 @@ class AuthController:
         try:
             key = authn_kv_key(email)
             counter_key = authn_kv_counter(email)
-            user_code = self.jwt_repository.sanitize_code(user_code)
+            user_code = self.passwordless_repository.sanitize_code(user_code)
 
             code = self.kv_repository.get(key)
             if code != user_code:

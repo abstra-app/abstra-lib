@@ -13,7 +13,7 @@ from abstra_internals.environment import (
     CLOUD_API_PROD_URL,
     REQUEST_TIMEOUT,
 )
-from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY, UserClaims
+from abstra_internals.services.jwt import USER_AUTH_HEADER_KEY, UserClaims
 from abstra_internals.threaded import threaded
 from abstra_internals.utils import get_local_python_version
 from abstra_internals.utils.env import is_dev_env, is_test_env

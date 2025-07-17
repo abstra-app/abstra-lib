@@ -11,8 +11,8 @@ from abstra_internals.interface.contract.forms_contract import (
     ValidationResult,
 )
 from abstra_internals.interface.sdk import user_exceptions
-from abstra_internals.jwt_auth import UserClaims
 from abstra_internals.repositories.users import UsersRepository
+from abstra_internals.services.jwt import UserClaims
 
 if TYPE_CHECKING:
     from abstra_internals.controllers.execution.execution_client_form import FormClient

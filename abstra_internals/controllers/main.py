@@ -26,8 +26,8 @@ from abstra_internals.repositories.execution_logs import (
     LogEntry,
 )
 from abstra_internals.repositories.factory import Repositories
-from abstra_internals.repositories.jwt_signer import EditorJWTRepository, JWTRepository
 from abstra_internals.repositories.keyvalue import KVRepository
+from abstra_internals.repositories.passwordless import PasswordlessRepository
 from abstra_internals.repositories.producer import ProducerRepository
 from abstra_internals.repositories.project.project import (
     FormStage,
@@ -102,14 +102,13 @@ class DoubleTransitionError(Exception):
 
 class MainController:
     kv_repository: KVRepository
-    jwt_repository: JWTRepository
+    passwordless_repository: PasswordlessRepository
     email_repository: EmailRepository
     tasks_repository: TasksRepository
     users_repository: UsersRepository
     roles_repository: RolesRepository
     producer_repository: ProducerRepository
     execution_repository: ExecutionRepository
-    web_editor_repository: EditorJWTRepository
     execution_logs_repository: ExecutionLogsRepository
 
     def __init__(self, repositories: Repositories):
@@ -123,14 +122,13 @@ class MainController:
         self.repositories = repositories
 
         self.kv_repository = repositories.kv
-        self.jwt_repository = repositories.jwt
+        self.passwordless_repository = repositories.passwordless
         self.email_repository = repositories.email
         self.users_repository = repositories.users
         self.roles_repository = repositories.roles
         self.tasks_repository = repositories.tasks
         self.producer_repository = repositories.producer
         self.execution_repository = repositories.execution
-        self.web_editor_repository = repositories.editor_jwt
         self.execution_logs_repository = repositories.execution_logs
         self.linter_repository = repositories.linter
 

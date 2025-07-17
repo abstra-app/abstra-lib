@@ -26,7 +26,6 @@ from abstra_internals.environment import (
     OIDC_CLIENT_ID,
     SHOW_WATERMARK,
 )
-from abstra_internals.jwt_auth import USER_AUTH_HEADER_KEY
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.cache.control import Cache
 from abstra_internals.server.guards.role_guard import (
@@ -38,6 +37,7 @@ from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import auth as auth_router
 from abstra_internals.server.routes import workflows as workflows_router
 from abstra_internals.server.utils import send_from_dist
+from abstra_internals.services.jwt import USER_AUTH_HEADER_KEY
 from abstra_internals.settings import Settings
 from abstra_internals.usage import player_usage
 from abstra_internals.utils import check_is_url

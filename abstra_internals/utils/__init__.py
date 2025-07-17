@@ -1,4 +1,3 @@
-import random
 import re
 import socket
 import sys
@@ -7,10 +6,6 @@ from contextlib import closing
 
 import jsonpath_ng as jp
 import simplejson
-
-
-def generate_n_digit_code(n: int) -> str:
-    return str(random.randint(10 ** (n - 1), 10**n - 1))
 
 
 def serialize(obj, **kwargs):
