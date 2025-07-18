@@ -969,7 +969,7 @@ class Project:
 
     def to_abstra_json_dto(self):
         return CommonAbstraJsonV15(
-            version="14.0",
+            version="15.0",
             workspace=self.workspace.to_abstra_json_dto(),
             home=self.home.to_abstra_json_dto(),
             jobs=[job.to_abstra_json_dto() for job in self.jobs],
