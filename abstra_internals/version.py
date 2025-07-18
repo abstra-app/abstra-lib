@@ -1,6 +1,6 @@
 from enum import Enum
+from importlib.metadata import PackageNotFoundError
 
-import pkg_resources
 import requests
 
 from abstra_internals.environment import IS_PRODUCTION
@@ -41,7 +41,7 @@ class PackageVersionManager:
 
             return VersionStatus.UP_TO_DATE
 
-        except pkg_resources.DistributionNotFound:
+        except PackageNotFoundError:
             print(f"{self.package_name} is not installed.\n")
             return VersionStatus.UNKNOWN
 

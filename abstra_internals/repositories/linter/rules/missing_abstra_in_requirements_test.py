@@ -1,4 +1,5 @@
-import pkg_resources
+from importlib.metadata import distribution
+from unittest.mock import patch
 
 from abstra_internals.repositories.linter.rules.missing_abstra_in_requirements import (
     AbstraVersionInRequirementsIsBehindInstalled,
@@ -7,21 +8,30 @@ from abstra_internals.repositories.linter.rules.missing_abstra_in_requirements i
 from tests.fixtures import BaseTest
 
 
-def mock_get_distribution(name):
+class MockDistribution:
+    def __init__(self, name, version):
+        self.name = name
+        self.version = version
+
+
+def mock_distribution(name):
     if name == "abstra":
-        return pkg_resources.Distribution(project_name="abstra", version="1.0.0")
+        return MockDistribution("abstra", "1.0.0")
     else:
-        return pkg_resources.get_distribution(name)
+        return distribution(name)
 
 
 class MissingAbstraInRequirementsTest(BaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.old_get_distribution = pkg_resources.get_distribution
-        pkg_resources.get_distribution = mock_get_distribution
+        self.patcher = patch(
+            "abstra_internals.utils.packages.distribution",
+            side_effect=mock_distribution,
+        )
+        self.patcher.start()
 
     def tearDown(self) -> None:
-        pkg_resources.get_distribution = self.old_get_distribution
+        self.patcher.stop()
         super().tearDown()
 
     def test_missing_abstra_in_requirements_valid_with_requirements(self):

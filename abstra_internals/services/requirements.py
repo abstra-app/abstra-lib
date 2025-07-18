@@ -5,6 +5,7 @@ import subprocess
 import sys
 import threading
 from dataclasses import dataclass
+from importlib.metadata import PackageNotFoundError, distribution
 from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp
@@ -12,7 +13,6 @@ from typing import Dict, List, Literal, Optional, Set
 
 from importlib_metadata import packages_distributions
 from pip._internal.cli.main import main as pip_main
-from pkg_resources import get_distribution, working_set
 
 from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.settings import Settings
@@ -86,8 +86,8 @@ class Requirement:
 
     def installed_version(self):
         try:
-            return get_distribution(self.name).version
-        except Exception:
+            return distribution(self.name).version
+        except PackageNotFoundError:
             return None
 
     def uninstall(self):
@@ -98,8 +98,6 @@ class Requirement:
             yield from self.__uninstall_from_standalone()
         else:
             yield from self.__uninstall_from_lib()
-
-        working_set.by_key.pop(self.name, None)  # type: ignore # dirty hack
 
     def __uninstall_from_standalone(self):
         cmd = [
@@ -318,21 +316,24 @@ class RequirementsRepository:
                                 if pip_name(lib_name) in already_added:
                                     continue
 
-                                version = get_distribution(lib_name).version
-                                if version is None:
-                                    continue
+                                try:
+                                    version = distribution(lib_name).version
+                                    if version is None:
+                                        continue
 
-                                imported_modules.add(
-                                    RequirementRecommendation(
-                                        requirement=Requirement(
-                                            name=lib_name,
-                                            version=version,
-                                        ),
-                                        reason_file=python_file,
-                                        reason_line=node.lineno,
-                                        reason_code=file_lines[node.lineno - 1],
+                                    imported_modules.add(
+                                        RequirementRecommendation(
+                                            requirement=Requirement(
+                                                name=lib_name,
+                                                version=version,
+                                            ),
+                                            reason_file=python_file,
+                                            reason_line=node.lineno,
+                                            reason_code=file_lines[node.lineno - 1],
+                                        )
                                     )
-                                )
+                                except PackageNotFoundError:
+                                    continue
 
             except (SyntaxError, UnicodeDecodeError):
                 continue
@@ -367,5 +368,9 @@ class RequirementsRepository:
     @classmethod
     def ensure(cls, lib_name: str):
         requirements = cls.load()
-        requirements.ensure(lib_name, get_distribution(lib_name).version)
+        try:
+            requirements.ensure(lib_name, distribution(lib_name).version)
+        except PackageNotFoundError:
+            # Package not found, skip
+            pass
         cls.save(requirements)

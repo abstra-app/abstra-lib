@@ -1,5 +1,5 @@
-import pkg_resources
-from pkg_resources import get_distribution as gd
+from importlib.metadata import distribution
+from unittest.mock import patch
 
 from abstra_internals.repositories.linter.rules.psycopg2 import (
     Psycopg2FoundWithoutBinary,
@@ -8,21 +8,30 @@ from abstra_internals.repositories.linter.rules.psycopg2 import (
 from tests.fixtures import BaseTest
 
 
-def mock_get_distribution(name):
+class MockDistribution:
+    def __init__(self, name, version):
+        self.name = name
+        self.version = version
+
+
+def mock_distribution(name):
     if name == "abstra":
-        return pkg_resources.Distribution(project_name="abstra", version="1.0.0")
+        return MockDistribution("abstra", "1.0.0")
     else:
-        return gd(name)
+        return distribution(name)
 
 
-class MissingAbstraInRequirementsTest(BaseTest):
+class Psycopg2Test(BaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.old_get_distribution = pkg_resources.get_distribution
-        pkg_resources.get_distribution = mock_get_distribution
+        self.patcher = patch(
+            "abstra_internals.utils.packages.distribution",
+            side_effect=mock_distribution,
+        )
+        self.patcher.start()
 
     def tearDown(self) -> None:
-        pkg_resources.get_distribution = self.old_get_distribution
+        self.patcher.stop()
         super().tearDown()
 
     def test_psycopg2_valid(self):

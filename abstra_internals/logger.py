@@ -1,7 +1,7 @@
+import importlib.metadata
 import logging
 from typing import Literal, Optional
 
-import pkg_resources
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -53,7 +53,7 @@ class AbstraLogger:
                 profiles_sample_rate=0.01,
                 environment=cls.environment,
                 enable_tracing=True,
-                release=pkg_resources.get_distribution("abstra").version,
+                release=importlib.metadata.distribution("abstra").version,
                 shutdown_timeout=0,
                 disabled_integrations=[
                     LoggingIntegration(),
