@@ -33,6 +33,10 @@ def get_local_app(controller: MainController) -> flask.Flask:
     app.url_map.strict_slashes = False
     flask_cors.CORS(app)
 
+    @app.route("/_healthcheck")
+    def _healthcheck():
+        return "ok"
+
     editor = get_editor_bp(controller)
     editor.before_app_request(lambda: _guard(controller))
     app.register_blueprint(editor, url_prefix="/_editor")
@@ -44,10 +48,6 @@ def get_local_app(controller: MainController) -> flask.Flask:
     # Must be public
     editor_auth = get_editor_auth_bp()
     app.register_blueprint(editor_auth, url_prefix="/_editor/auth")
-
-    @app.route("/_healthcheck")
-    def _healthcheck():
-        return "ok"
 
     @app.before_request
     def rename_thread():
