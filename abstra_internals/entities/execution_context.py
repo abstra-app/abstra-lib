@@ -74,7 +74,7 @@ ClientContext = Union[HookContext, FormContext, ScriptContext, JobContext]
 
 def extract_flask_request(request: flask.Request) -> Request:
     return Request(
-        headers=filter_non_string_values(request.headers),
+        headers=filter_non_string_values(dict(request.headers)),
         body=request.get_data(as_text=True),
         query_params={**request.args},
         method=request.method,
