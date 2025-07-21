@@ -38,11 +38,11 @@ def get_local_app(controller: MainController) -> flask.Flask:
         return "ok"
 
     editor = get_editor_bp(controller)
-    editor.before_app_request(lambda: _guard(controller))
+    editor.before_request(lambda: _guard(controller))
     app.register_blueprint(editor, url_prefix="/_editor")
 
     player = get_player_bp(controller)
-    player.before_app_request(lambda: _guard(controller))
+    player.before_request(lambda: _guard(controller))
     app.register_blueprint(player)
 
     # Must be public
