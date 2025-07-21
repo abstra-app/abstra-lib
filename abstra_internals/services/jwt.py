@@ -1,5 +1,6 @@
 import typing
 from dataclasses import dataclass
+from functools import lru_cache
 
 import jwt
 
@@ -10,6 +11,7 @@ from abstra_internals.utils.email import is_valid_email
 USER_AUTH_HEADER_KEY = "Authorization"
 
 
+@lru_cache(maxsize=10)
 def decode_jwt(jwt_str: str, aud=PROJECT_ID):
     try:
         if PUBLIC_KEY:

@@ -2,6 +2,7 @@ import flask
 
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import PROJECT_ID
+from abstra_internals.logger import AbstraLogger
 from abstra_internals.server.routes import access_control as ac_router
 from abstra_internals.server.routes import ai as ai_router
 from abstra_internals.server.routes import assets as assets_router
@@ -126,22 +127,26 @@ def get_editor_bp(controller: MainController):
 def get_editor_auth_bp():
     bp = flask.Blueprint("editor_auth", __name__)
 
-    @bp.post("/set-cookie")
+    @bp.get("/set-cookie")
     def _set_cookie():
-        data = flask.request.json
-
-        if not data:
-            flask.abort(400)
-
-        token = data.get("token")
+        token = flask.request.args.get("token")
 
         if not token:
+            AbstraLogger.capture_message(
+                "Editor auth token not provided in request",
+            )
             return flask.make_response({"ok": False, "error": "No token provided"}, 401)
 
         if not decode_jwt(token, aud=f"web-editor-{PROJECT_ID}"):
+            AbstraLogger.capture_message(
+                "Editor auth token is invalid",
+            )
             return flask.make_response({"ok": False, "error": "Invalid token"}, 401)
 
         response = flask.make_response({"ok": True})
+
+        response.headers["Location"] = "/_editor/"
+        response.status_code = 302
 
         response.set_cookie(
             "editor_auth",
