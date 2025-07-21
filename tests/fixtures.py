@@ -22,12 +22,31 @@ def rm_tree(pth: Path):
     pth = Path(pth)
     if not pth.exists():
         return
-    for child in pth.glob("*"):
-        if child.is_file():
-            child.unlink()
-        else:
-            rm_tree(child)
-    pth.rmdir()
+
+    # Use shutil.rmtree with error handling for Windows compatibility
+    import stat
+
+    def handle_remove_readonly(func, path, exc):
+        # Handle read-only files on Windows
+        if os.path.exists(path):
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+
+    try:
+        shutil.rmtree(pth, onerror=handle_remove_readonly)
+    except OSError:
+        # Fallback to manual deletion if shutil.rmtree fails
+        try:
+            for root, dirs, files in os.walk(pth, topdown=False):
+                for name in files:
+                    file_path = os.path.join(root, name)
+                    os.chmod(file_path, stat.S_IWRITE)
+                    os.unlink(file_path)
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            os.rmdir(pth)
+        except OSError:
+            pass  # Ignore if cleanup fails
 
 
 def init_dir(path: typing.Optional[Path] = None):

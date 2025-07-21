@@ -1,23 +1,26 @@
 import tempfile
+from pathlib import Path
 from unittest import TestCase
 
 from abstra_internals.repositories.project.json_migrations.migration_015 import (
     Migration015,
 )
 from abstra_internals.settings import Settings, SettingsController
+from tests.fixtures import rm_tree
 
 
 class TestMigration015(TestCase):
     def setUp(self):
         # Create a temp directory to simulate project root
-        self.temp_dir = tempfile.TemporaryDirectory()
-        SettingsController.set_root_path(self.temp_dir.name)
+        self.temp_dir = Path(tempfile.mkdtemp())
+        SettingsController.set_root_path(self.temp_dir.as_posix())
         # Create a dummy script file
         (Settings.root_path / "shared.py").write_text("x = 1\n", encoding="utf-8")
         (Settings.root_path / "unique.py").write_text("y = 2\n", encoding="utf-8")
 
     def tearDown(self):
-        self.temp_dir.cleanup()
+        # Clean up temp directory with Windows-compatible cleanup
+        rm_tree(self.temp_dir)
 
     def test_multiple_stages_share_file(self):
         data = {
