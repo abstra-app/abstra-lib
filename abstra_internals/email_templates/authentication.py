@@ -28,7 +28,7 @@ template = """
 """
 
 
-def generate_email(email: str, code: str) -> EmailParams:
+def generate_email(email: str, code: str, is_resend: bool = False) -> EmailParams:
     project = LocalProjectRepository().load()
     translations = get_translation(project.workspace.language or "en")
 
@@ -48,4 +48,5 @@ def generate_email(email: str, code: str) -> EmailParams:
         body=html,
         is_html=True,
         attachments=[],
+        is_resend=is_resend,
     )

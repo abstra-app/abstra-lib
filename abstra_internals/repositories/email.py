@@ -28,6 +28,7 @@ class EmailParams:
     body: str
     attachments: List[EmailAttachment]
     is_html: bool
+    is_resend: bool
 
     def to_dict(self):
         return {
@@ -37,6 +38,7 @@ class EmailParams:
             "body": self.body,
             "attachments": [attachment.to_dict() for attachment in self.attachments],
             "isHtml": self.is_html,
+            "isResend": self.is_resend,
         }
 
     def __init__(
@@ -47,12 +49,14 @@ class EmailParams:
         body: str,
         attachments: List[Union[EmailAttachment, dict]],
         is_html: bool,
+        is_resend: bool = False,
     ):
         self.kind = kind
         self.to = to
         self.subject = subject
         self.body = body
         self.is_html = is_html
+        self.is_resend = is_resend
 
         self.attachments = []
         for attachment in attachments:

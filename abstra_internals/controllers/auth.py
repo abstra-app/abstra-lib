@@ -69,7 +69,7 @@ class AuthController:
         self.users_repository.insert_user(email)
         return self.passwordless_repository.sign(email)
 
-    def authenticate(self, email: str) -> bool:
+    def authenticate(self, email: str, is_resend: bool = False) -> bool:
         try:
             key = authn_kv_key(email)
             code = self.passwordless_repository.gen_code()
@@ -78,7 +78,7 @@ class AuthController:
             counter_key = authn_kv_counter(email)
             self.kv_repository.set(counter_key, ".")
 
-            authentication_email = authn_template.generate_email(email, code)
+            authentication_email = authn_template.generate_email(email, code, is_resend)
             self.email_repository.send(authentication_email)
 
             return True

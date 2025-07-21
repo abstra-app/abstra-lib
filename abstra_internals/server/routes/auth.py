@@ -25,7 +25,8 @@ def get_player_bp(main_controller: MainController):
         if not email or not is_valid_email(email):
             return flask.abort(400)
 
-        ok = controller.authenticate(email)
+        is_resend = data.get("isResend", False)
+        ok = controller.authenticate(email, is_resend)
         if not ok:
             return flask.abort(400)
 
