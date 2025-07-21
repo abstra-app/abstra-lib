@@ -750,7 +750,8 @@ class StyleSettings:
     def as_dict(self):
         default_value = StyleSettings.defaultValue()
         return {
-            k: v or default_value.__dict__.get(k, v) for k, v in self.__dict__.items()
+            k: v if v is not None else default_value.__dict__.get(k, v)
+            for k, v in self.__dict__.items()
         }
 
     @property
