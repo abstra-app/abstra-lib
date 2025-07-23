@@ -1,4 +1,4 @@
-from abstra_internals.interface.sdk.connectors import (
+from .connectors import (
     get_access_token,
     get_bigquery_credentials,
     get_gdrive_credentials,

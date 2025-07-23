@@ -1,0 +1,201 @@
+# coding: utf-8
+
+"""
+OpenAPI Supply Midia
+
+Plataforma de gateways do Portal TotalBank.   Os serviços expostos permitem ao usuário estabelecer integração de sua automação com os serviços de cobrança, pagamento, PIX e conta-corrente. É possível consultar, emitir relatórios e registrar movimentações para os respectivos serviços.   # Obtenção de credenciais   Para obter credenciais para consumo da API de token de acesso, é necessário:   - Criação de uma conta de acesso, habilitada para utilizar o serviço 'Gateway Supply', no portal <a href=\"https://portal.totalbank.com.br/\" target=\"_blank\">TotalBank</a>. Esta conta de acesso é criada a partir de uma solicitação ao nosso <a href=\"mailto:suporte@supplymidia.com.br\">suporte</a>.  - Criação de um usuário com perfil de 'Gestor de API' no portal <a href=\"https://portal.totalbank.com.br/\" target=\"_blank\">TotalBank</a>.   - Este usuário 'Gestor de API' deverá criar um usuário para ser utilizado na API de token de acesso, no menu: Administração - Configuração de API - Usuários gateway.   - Neste mesmo menu, na aba Documentação gateway, é possível visualizar o endereço de nosso endpoint e a documentação da API de autorização, para receber o token de acesso necessário para consumir nossas APIs.   - A partir desta etapa, você estará apto a obter tokens de acesso para consumir nossos serviços.   # Webhooks   ## Pré-requisitos para uso do webhook    Habilitar o serviço 'Gateway Supply'.   ## Cadastro e gestão de webhook   Para as contas de acesso que têm o serviço 'Gateway Supply', o usuário administrador com a permissão 'Gestor WS' terá acesso ao menu Administração->Configuração de API.   Nele, além de ser possível gerenciar os usuários gateway, há a opção 'Webhooks', na qual o usuário administrador tem a gestao dos webhooks cadastrados para sua conta de acesso.   Clicando no botão 'Adicionar configuração de web-service, o usuário administrador conseguirá cadastrar a URL do webhook e um e-mail para contato.   Este e-mail para contato é acionado quando há falha no envio da notificação.   A configuração cadastrada nesta tela engloba a conta de acesso.   ## Configuração do webhook para um convênio   Para sobrescrever a configuração do webhook para a conta de acesso e utilizar uma configuração única para o convênio, no menu Administração->Convênios, é possível criar uma configuração própria para o convênio, basta selecionar a opção 'Sobrescreve configuração de webhook?'.   ## Testes sandbox   No menu Administração->Configuração de web-service, clicando em 'Testes', é possível iniciar os testes em ambiente sandbox. Com ele será possível chamar a URL do seu Webhook com um payload exemplo de Pix, Cobrança ou Pagamento, e assim preparar o Webhook para receber os dados do banco.   Fique a vontade para testar e garantir que está tudo funcionando.   Nos testes são disponibilizados exemplos de payloads para preparar seu sistema para recebimento.   ## Notificações   Por enquanto, o portal TotalBank está adaptado para as notificações dos tipos Pix, Cobrança e Pagamento.   <a href=\"#post-/rest/documentacao-webhook/cobranca\">Webhook de cobrança</a>   <a href=\"#post-/rest/documentacao-webhook/pagamento\">Webhook de pagamentos</a>   <a href=\"#post-/rest/documentacao-webhook/pix\">Webhook de PIX</a>   # Rate Limit: Limite de requisições por minuto   Para assegurar uma experiência de alta qualidade e a estabilidade dos nossos serviços, introduzimos um limite de requisições por minuto (rate limit) nas nossas APIs. Esta nova medida visa proporcionar um acesso justo e eficiente aos nossos recursos tecnológicos, garantindo desempenho consistente e confiável para todos os usuários e parceiros.   Ao superar o limite estipulado na conta de acesso, as requisições adicionais serão bloqueadas temporariamente, gerando um erro de código HTTP 429 - Too Many Requests que indica muitas requisições em um determinado período, isto é, por minuto. Isso é parte do nosso esforço para prevenir sobrecargas no sistema, mantendo-o rápido e acessível a todos.   Para mais informações sobre como se adaptar ao rate limit e para solicitações de aumento, por favor, entre em contato através do nosso <a href=\"mailto:suporte@supplymidia.com.br\">suporte</a>.   # Códigos de resposta HTTP   Entenda os principais códigos de retorno de nossas APIs.   Sucesso   200 OK - Requisição com Sucesso     Erro na Requisição   400 Bad Request - Erro na requisição   401 Unauthorized - Cabeçalho de autenticação inválido   403 Forbidden - Token incorreto ou segurança violada   404 Not Found - O recurso solicitado não existe   405 Not Allowed - Método do recurso não suportado   406 Not Accepted - Tipo de mídia não permitido   415 Unsupported Media Type - Payload não suportado   429 Too Many Requests - Muitas solicitações    Erro no Servidor   500 Internal Server Error - Erro no gateway   503 Service Unavailable - Serviço não disponível   504 Gateway timeout - Servidor não respondeu    Caso tenha dúvidas, envie um e-mail para nossa equipe de <a href=\"mailto:desenvolvimento@supplymidia.com.br\">desenvolvimento</a>
+
+The version of the OpenAPI document: 1.0
+Generated by OpenAPI Generator (https://openapi-generator.tech)
+
+Do not edit the class manually.
+"""  # noqa: E501
+
+from __future__ import annotations
+
+import json
+import pprint
+import re  # noqa: F401
+from datetime import datetime
+from typing import Any, ClassVar, Dict, List, Optional, Set, Union
+
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing_extensions import Self
+
+
+class CallbackPIXVO(BaseModel):
+    """
+    CallbackPIXVO
+    """  # noqa: E501
+
+    beneficiario: Optional[StrictStr] = Field(
+        default=None, description="Descrição do beneficiário"
+    )
+    codigo_convenio: Optional[StrictStr] = Field(
+        default=None, description="Código do convênio", alias="codigoConvenio"
+    )
+    momento_notificacao: Optional[datetime] = Field(
+        default=None, description="Momento de notificação", alias="momentoNotificacao"
+    )
+    txid: Optional[StrictStr] = Field(default=None, description="Id da transação")
+    autenticacao: Optional[StrictStr] = Field(
+        default=None, description="Autenticação e2eId da transação"
+    )
+    situacao: Optional[StrictStr] = Field(default=None, description="Situação do PIX")
+    valor: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="Valor nominal"
+    )
+    valor_pago: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="Valor pago", alias="valorPago"
+    )
+    pagador: Optional[StrictStr] = Field(default=None, description="Pagador original")
+    pagador_inscricao: Optional[StrictStr] = Field(
+        default=None,
+        description="Inscrição CPF/CNPJ do pagador original",
+        alias="pagadorInscricao",
+    )
+    pagador_efetivo: Optional[StrictStr] = Field(
+        default=None, description="Pagador efetivo", alias="pagadorEfetivo"
+    )
+    pagador_efetivo_inscricao: Optional[StrictStr] = Field(
+        default=None,
+        description="Inscrição CPF/CNPJ do pagador efetivo",
+        alias="pagadorEfetivoInscricao",
+    )
+    info_pagador_efetivo: Optional[StrictStr] = Field(
+        default=None,
+        description="Informação do pagador efetivo",
+        alias="infoPagadorEfetivo",
+    )
+    solicitacao_pagador: Optional[StrictStr] = Field(
+        default=None, description="Solicitação ao pagador", alias="solicitacaoPagador"
+    )
+    data_liquidacao: Optional[datetime] = Field(
+        default=None, description="Data de liquidação", alias="dataLiquidacao"
+    )
+    meio_informacao_liquidacao: Optional[StrictStr] = Field(
+        default=None,
+        description="Meio de liquidação (meio por qual a informação de liquidação foi obtida).",
+        alias="meioInformacaoLiquidacao",
+    )
+    id_devolucao: Optional[StrictStr] = Field(
+        default=None,
+        description="Id que representa unicamente uma devolução",
+        alias="idDevolucao",
+    )
+    rtr_id_devolucao: Optional[StrictStr] = Field(
+        default=None,
+        description=" ReturnIdentification que transita na PACS004",
+        alias="rtrIdDevolucao",
+    )
+    valor_devolvido: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="Valor devolvido", alias="valorDevolvido"
+    )
+    motivo_devolucao: Optional[StrictStr] = Field(
+        default=None,
+        description="Campo que pode ser utilizado pelo PSP recebedor para detalhar os motivos da devolução",
+        alias="motivoDevolucao",
+    )
+    data_devolucao: Optional[datetime] = Field(
+        default=None,
+        description="Horário no qual a devolução foi liquidada no PSP",
+        alias="dataDevolucao",
+    )
+    __properties: ClassVar[List[str]] = [
+        "beneficiario",
+        "codigoConvenio",
+        "momentoNotificacao",
+        "txid",
+        "autenticacao",
+        "situacao",
+        "valor",
+        "valorPago",
+        "pagador",
+        "pagadorInscricao",
+        "pagadorEfetivo",
+        "pagadorEfetivoInscricao",
+        "infoPagadorEfetivo",
+        "solicitacaoPagador",
+        "dataLiquidacao",
+        "meioInformacaoLiquidacao",
+        "idDevolucao",
+        "rtrIdDevolucao",
+        "valorDevolvido",
+        "motivoDevolucao",
+        "dataDevolucao",
+    ]
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        validate_assignment=True,
+        protected_namespaces=(),
+    )
+
+    def to_str(self) -> str:
+        """Returns the string representation of the model using alias"""
+        return pprint.pformat(self.model_dump(by_alias=True))
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of the model using alias"""
+        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
+        return json.dumps(self.to_dict())
+
+    @classmethod
+    def from_json(cls, json_str: str) -> Optional[Self]:
+        """Create an instance of CallbackPIXVO from a JSON string"""
+        return cls.from_dict(json.loads(json_str))
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return the dictionary representation of the model using alias.
+
+        This has the following differences from calling pydantic's
+        `self.model_dump(by_alias=True)`:
+
+        * `None` is only added to the output dict for nullable fields that
+          were set at model initialization. Other fields with value `None`
+          are ignored.
+        """
+        excluded_fields: Set[str] = set([])
+
+        _dict = self.model_dump(
+            by_alias=True,
+            exclude=excluded_fields,
+            exclude_none=True,
+        )
+        return _dict
+
+    @classmethod
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+        """Create an instance of CallbackPIXVO from a dict"""
+        if obj is None:
+            return None
+
+        if not isinstance(obj, dict):
+            return cls.model_validate(obj)
+
+        _obj = cls.model_validate(
+            {
+                "beneficiario": obj.get("beneficiario"),
+                "codigoConvenio": obj.get("codigoConvenio"),
+                "momentoNotificacao": obj.get("momentoNotificacao"),
+                "txid": obj.get("txid"),
+                "autenticacao": obj.get("autenticacao"),
+                "situacao": obj.get("situacao"),
+                "valor": obj.get("valor"),
+                "valorPago": obj.get("valorPago"),
+                "pagador": obj.get("pagador"),
+                "pagadorInscricao": obj.get("pagadorInscricao"),
+                "pagadorEfetivo": obj.get("pagadorEfetivo"),
+                "pagadorEfetivoInscricao": obj.get("pagadorEfetivoInscricao"),
+                "infoPagadorEfetivo": obj.get("infoPagadorEfetivo"),
+                "solicitacaoPagador": obj.get("solicitacaoPagador"),
+                "dataLiquidacao": obj.get("dataLiquidacao"),
+                "meioInformacaoLiquidacao": obj.get("meioInformacaoLiquidacao"),
+                "idDevolucao": obj.get("idDevolucao"),
+                "rtrIdDevolucao": obj.get("rtrIdDevolucao"),
+                "valorDevolvido": obj.get("valorDevolvido"),
+                "motivoDevolucao": obj.get("motivoDevolucao"),
+                "dataDevolucao": obj.get("dataDevolucao"),
+            }
+        )
+        return _obj

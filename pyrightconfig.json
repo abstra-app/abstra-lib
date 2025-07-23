@@ -6,7 +6,8 @@
   ],
   "exclude": [
     "tests/",
-    "abstra_internals/templates/new_form.py"
+    "abstra_internals/templates/new_form.py",
+    "abstra_internals/services/banking/sdk/totalbank_generated_sdk"
   ],
   "reportGeneralTypeIssues": "error",
   "reportMissingImports": true,
