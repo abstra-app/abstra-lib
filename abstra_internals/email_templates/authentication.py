@@ -19,7 +19,7 @@ template = """
 </p>
 <div>
     <img style="height: 21px; display:inline; vertical-align:middle;"
-        src="https://abstra.assets.cloud/bi_hourglass-split+(1).png" />
+        src="https://assets.abstra.cloud/bi_hourglass-split+(1).png" />
     <p
         style="font-style: normal; font-weight: 700; font-size: 16px; line-height:21px; color:#707070; margin:0; display:inline; vertical-align:middle;">
         {this_code_expires}
