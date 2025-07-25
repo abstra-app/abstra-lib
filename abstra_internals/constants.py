@@ -54,6 +54,4 @@ def get_project_url() -> str:
     return PROJECT_URL or f"http://localhost:{Settings.server_port}"
 
 
-ABSTRA_LOGO_URL = (
-    "https://abstra-cloud-assets.s3.us-east-1.amazonaws.com/logo-small-256px.png"
-)
+ABSTRA_LOGO_URL = "https://assets.abstra.cloud/logo-small-256px.png"
