@@ -252,7 +252,7 @@ def get_player_bp(controller: MainController):
             flask.abort(404)
 
         if status == "disabled":
-            flask.abort(201)
+            return {"status": "disabled"}
 
         controller.repositories.producer.enqueue(id, context=JobContext())
 
