@@ -1,13 +1,14 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from abstra_internals.consts.filepaths import (
     ABSTRA_IGNORE_FILEPATH,
     DOT_ABSTRA_DIR,
     GIT_DIR_PATH,
 )
+from abstra_internals.settings import Settings
 
 SKIPPED_DIRNAMES = {"__pycache__", "venv", ".venv", ".vscode", ".cursor", ".ruff_cache"}
 
@@ -112,6 +113,67 @@ class FileSystemService:
                     )
                 )
         return sorted(matches, key=lambda p: p.as_posix())
+
+    @staticmethod
+    def search_in_files(
+        root_dir: Path, query: str, glob: str, use_ignore: bool
+    ) -> List[Tuple[str, int, str]]:
+        """
+        Search for a query string in files matching a glob pattern.
+
+        This method searches through files in the project directory that match
+        the specified glob pattern and returns lines containing the query string.
+
+        Args:
+            query (str): The string to search for in the files.
+            glob (str): Glob pattern to filter files (e.g., "*.py", "*.txt").
+
+        Returns:
+            List[Tuple[str, int, str]]: List of tuples containing:
+                - File path relative to project root
+                - Line number where the query was found
+                - Line content
+
+        Example:
+            ```python
+            controller = MainController(repositories)
+
+            # Search for 'def ' in all Python files
+            results = controller.search_in_files("def ", "*.py")
+            for file_path, line_number, line_content in results:
+                print(f"Found in {file_path} at line {line_number}: {line_content}")
+            ```
+
+        Note:
+            - Uses glob patterns to filter files
+            - Returns empty list if no matches found
+            - Case-sensitive search
+        """
+        results: List[Tuple[str, int, str]] = []
+        ignored_patterns = FileSystemService.load_ignore_patterns(
+            root_dir, ignore_dotenv=False
+        )
+        for file_path in root_dir.glob(glob):
+            if file_path.is_file() and not FileSystemService.is_ignored(
+                ignored_patterns, file_path.relative_to(root_dir)
+            ):
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        for line_number, line in enumerate(f, start=1):
+                            if query in line:
+                                results.append(
+                                    (
+                                        file_path.relative_to(
+                                            Settings.root_path
+                                        ).as_posix(),
+                                        line_number,
+                                        line.strip(),
+                                    )
+                                )
+                except (IOError, UnicodeDecodeError):
+                    continue
+
+        return results
 
     @staticmethod
     def rm_tree(path: Path):

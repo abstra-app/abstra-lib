@@ -279,7 +279,7 @@ class TestRequirementsApi(TestCase):
                 id="1",
                 target_type="target_type",
                 target_id="public_pependent_form",
-                type="form:finished",
+                type="task",
             )
         )
 

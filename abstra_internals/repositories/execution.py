@@ -1,8 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import List, Optional
-
-from pydantic.dataclasses import dataclass
 
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.consts.filepaths import EXECUTIONS_DIR_PATH
@@ -34,8 +33,8 @@ class ExecutionFilter:
             stage_id=data.get("stageId"),
             status=data.get("status"),
             project_id=data.get("projectId"),
-            offset=data.get("offset", 0),
-            limit=data.get("limit", 10),
+            offset=int(data.get("offset", 0)),
+            limit=int(data.get("limit", 10)),
             start_date=data.get("startDate"),
             end_date=data.get("endDate"),
             search=data.get("search"),

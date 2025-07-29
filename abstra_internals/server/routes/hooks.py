@@ -1,13 +1,7 @@
 import flask
 
-from abstra_internals.controllers.execution.execution import ExecutionController
-from abstra_internals.controllers.execution.execution_client_hook import HookClient
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution_context import (
-    HookContext,
-    Response,
-    extract_flask_request,
-)
+from abstra_internals.entities.execution_context import extract_flask_request
 from abstra_internals.repositories.project.project import HookStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -69,35 +63,6 @@ def get_editor_bp(controller: MainController):
     @bp.route("/<path:id>/run", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     @editor_usage
     def _run_hook(id: str):
-        hook = controller.get_hook(id)
-        if not hook:
-            flask.abort(404)
-
-        context = HookContext(
-            request=extract_flask_request(flask.request),
-            response=Response(
-                body="",
-                headers={},
-                status=200,
-            ),
-        )
-
-        client = HookClient(context=context)
-
-        ExecutionController(
-            repositories=controller.repositories,
-            stage=hook,
-            client=client,
-            context=context,
-        ).run()
-
-        if context.response is None or client.context.response is None:
-            flask.abort(500)
-
-        return {
-            "body": client.context.response.body,
-            "status": context.response.status,
-            "headers": context.response.headers,
-        }
+        return controller.debug_run_hook(id, extract_flask_request(flask.request))
 
     return bp

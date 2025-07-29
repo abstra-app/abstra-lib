@@ -34,7 +34,7 @@ from abstra_internals.usage import editor_usage
 def _get_api_bp(controller: MainController):
     bp = flask.Blueprint("editor_api", __name__)
 
-    mcp_bp = mcp_router.get_editor_bp(controller.repositories)
+    mcp_bp = mcp_router.get_editor_bp(controller)
     bp.register_blueprint(mcp_bp, url_prefix="/mcp")
 
     workspace_bp = workspace_router.get_editor_bp(controller)

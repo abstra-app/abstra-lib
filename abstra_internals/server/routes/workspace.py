@@ -80,14 +80,14 @@ def get_editor_bp(controller: MainController):
         if not file_path:
             flask.abort(400)
 
-        return {"exists": controller.check_file(file_path)}
+        return {"exists": controller.check_file_exists(file_path)}
 
     @bp.post("/check-files")
     def _check_files():
         if not flask.request.json:
             flask.abort(400)
         file_paths = flask.request.json.get("paths", [])
-        return controller.check_files(file_paths)
+        return controller.check_multiple_files_exists(file_paths)
 
     @bp.get("/read-test-data")
     @editor_usage

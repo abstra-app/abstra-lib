@@ -22,7 +22,7 @@ class WorkflowTest(BaseTest):
         self.assertEqual(path, [])
 
     def test_get_empty(self):
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(workflow, {"stages": [], "transitions": []})
 
     def test_get_with_stages(self):
@@ -42,7 +42,7 @@ class WorkflowTest(BaseTest):
             "transitions": [],
         }
         self.wf_controller.update_workflow(initial_state)
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(workflow, initial_state)
 
     def test_get_with_transitions(self):
@@ -88,7 +88,7 @@ class WorkflowTest(BaseTest):
 
         self.assertEqual(len(project.forms[0].workflow_transitions), 1)
 
-        gotten_workflow = self.wf_controller.get_workflow()
+        gotten_workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(gotten_workflow, initial_state)
 
         initial_state = {
@@ -147,7 +147,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 1)
 
     def test_update_remove_stages(self):
@@ -168,7 +168,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 1)
         self.wf_controller.update_workflow(
             {
@@ -176,7 +176,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 0)
 
     def test_update_change_stage_position(self):
@@ -197,7 +197,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["position"], {"x": 0, "y": 0})
         self.wf_controller.update_workflow(
@@ -217,7 +217,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["position"], {"x": 1, "y": 1})
 
@@ -239,7 +239,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["title"], "Foo")
         self.wf_controller.update_workflow(
@@ -259,7 +259,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["stages"]), 1)
         self.assertEqual(workflow["stages"][0]["title"], "Bar")
 
@@ -291,7 +291,7 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["transitions"]), 0)
         self.wf_controller.update_workflow(
             {
@@ -328,7 +328,7 @@ class WorkflowTest(BaseTest):
                 ],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["transitions"]), 1)
 
     def test_update_remove_transitions(self):
@@ -367,7 +367,7 @@ class WorkflowTest(BaseTest):
                 ],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["transitions"]), 1)
         self.wf_controller.update_workflow(
             {
@@ -375,85 +375,8 @@ class WorkflowTest(BaseTest):
                 "transitions": [],
             }
         )
-        workflow = self.wf_controller.get_workflow()
+        workflow = self.wf_controller.get_workflow_settings()
         self.assertEqual(len(workflow["transitions"]), 0)
-
-    def test_update_change_transition_type(self):
-        self.wf_controller.update_workflow(
-            {
-                "stages": [
-                    {
-                        "type": "forms",
-                        "id": "foo",
-                        "title": "Foo",
-                        "position": {"x": 0, "y": 0},
-                        "props": {
-                            "path": "foo",
-                            "filename": "foo.py",
-                        },
-                    },
-                    {
-                        "type": "hooks",
-                        "id": "bar",
-                        "title": "Bar",
-                        "position": {"x": 0, "y": 0},
-                        "props": {
-                            "filename": "bar.py",
-                            "path": "bar",
-                        },
-                    },
-                ],
-                "transitions": [
-                    {
-                        "id": "foo",
-                        "sourceStageId": "foo",
-                        "targetStageId": "bar",
-                        "type": "foo",
-                        "taskType": None,
-                    }
-                ],
-            }
-        )
-        workflow = self.wf_controller.get_workflow()
-        self.assertEqual(len(workflow["transitions"]), 1)
-        self.assertEqual(workflow["transitions"][0]["type"], "foo")
-        self.wf_controller.update_workflow(
-            {
-                "stages": [
-                    {
-                        "type": "forms",
-                        "id": "foo",
-                        "title": "Foo",
-                        "position": {"x": 0, "y": 0},
-                        "props": {
-                            "path": "foo",
-                            "filename": "foo.py",
-                        },
-                    },
-                    {
-                        "type": "hooks",
-                        "id": "bar",
-                        "title": "Bar",
-                        "position": {"x": 0, "y": 0},
-                        "props": {
-                            "filename": "bar.py",
-                            "path": "bar",
-                        },
-                    },
-                ],
-                "transitions": [
-                    {
-                        "id": "foo",
-                        "sourceStageId": "foo",
-                        "targetStageId": "bar",
-                        "type": "bar",
-                    }
-                ],
-            }
-        )
-        workflow = self.wf_controller.get_workflow()
-        self.assertEqual(len(workflow["transitions"]), 1)
-        self.assertEqual(workflow["transitions"][0]["type"], "bar")
 
     def test_single_form(self):
         project = self.repositories.project.load()
@@ -487,7 +410,7 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script",
-                    type="finished",
+                    type="task",
                 )
             ],
             notification_trigger=NotificationTrigger(
@@ -521,7 +444,7 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script",
-                    type="finished",
+                    type="task",
                 )
             ],
             notification_trigger=NotificationTrigger(
@@ -555,13 +478,13 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script1",
-                    type="finished",
+                    type="task",
                 ),
                 WorkflowTransition(
                     id="2",
                     target_type="script",
                     target_id="script2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -586,7 +509,7 @@ class WorkflowTest(BaseTest):
                     id="3",
                     target_type="script",
                     target_id="script3",
-                    type="finished",
+                    type="task",
                 )
             ],
         )
@@ -621,13 +544,13 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script1",
-                    type="finished",
+                    type="task",
                 ),
                 WorkflowTransition(
                     id="2",
                     target_type="script",
                     target_id="script2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -661,7 +584,7 @@ class WorkflowTest(BaseTest):
                     id="3",
                     target_type="form",
                     target_id="form2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -680,7 +603,7 @@ class WorkflowTest(BaseTest):
                     id="4",
                     target_type="script",
                     target_id="script2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -711,13 +634,13 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script1",
-                    type="finished",
+                    type="task",
                 ),
                 WorkflowTransition(
                     id="2",
                     target_type="script",
                     target_id="script2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -751,7 +674,7 @@ class WorkflowTest(BaseTest):
                     id="3",
                     target_type="form",
                     target_id="form2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -770,7 +693,7 @@ class WorkflowTest(BaseTest):
                     id="4",
                     target_type="form",
                     target_id="form3",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -814,7 +737,7 @@ class WorkflowTest(BaseTest):
                     id="0",
                     target_type="form",
                     target_id="form0",
-                    type="finished",
+                    type="task",
                 ),
             ],
         )
@@ -829,7 +752,7 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script1",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -846,7 +769,7 @@ class WorkflowTest(BaseTest):
                     id="2",
                     target_type="form",
                     target_id="form0",
-                    type="finished",
+                    type="task",
                 ),
             ],
         )
@@ -872,7 +795,7 @@ class WorkflowTest(BaseTest):
                     id="0",
                     target_type="form",
                     target_id="form0",
-                    type="finished",
+                    type="task",
                 ),
             ],
         )
@@ -887,7 +810,7 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="script",
                     target_id="script1",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -904,7 +827,7 @@ class WorkflowTest(BaseTest):
                     id="2",
                     target_type="form",
                     target_id="form0",
-                    type="finished",
+                    type="task",
                 ),
             ],
         )
@@ -930,7 +853,7 @@ class WorkflowTest(BaseTest):
                     id="1",
                     target_type="form",
                     target_id="form1",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -949,13 +872,13 @@ class WorkflowTest(BaseTest):
                     id="2",
                     target_type="form",
                     target_id="form2",
-                    type="finished",
+                    type="task",
                 ),
                 WorkflowTransition(
                     id="3",
                     target_type="script",
                     target_id="script1",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -982,13 +905,13 @@ class WorkflowTest(BaseTest):
                     id="4",
                     target_type="form",
                     target_id="form3",
-                    type="finished",
+                    type="task",
                 ),
                 WorkflowTransition(
                     id="5",
                     target_type="script",
                     target_id="script2",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(
@@ -1015,7 +938,7 @@ class WorkflowTest(BaseTest):
                     id="7",
                     target_type="script",
                     target_id="script3",
-                    type="finished",
+                    type="task",
                 ),
             ],
             notification_trigger=NotificationTrigger(

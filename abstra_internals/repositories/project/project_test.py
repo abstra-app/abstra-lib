@@ -96,7 +96,7 @@ class ProjectTests(TestCase):
                 id="1",
                 target_id=form2.id,
                 target_type=form2.type_name,
-                type=WorkflowTransition.default_type(form1.type_name),
+                type="task",
             )
         )
 
@@ -105,7 +105,7 @@ class ProjectTests(TestCase):
                 id="2",
                 target_id=script.id,
                 target_type=script.type_name,
-                type=WorkflowTransition.default_type(form1.type_name),
+                type="task",
             )
         )
 
@@ -178,7 +178,7 @@ class ProjectTests(TestCase):
                 id="1",
                 target_id=form2.id,
                 target_type=form2.type_name,
-                type=WorkflowTransition.default_type(form1.type_name),
+                type="task",
             )
         )
 
@@ -187,7 +187,7 @@ class ProjectTests(TestCase):
                 id="2",
                 target_id=script.id,
                 target_type=script.type_name,
-                type=WorkflowTransition.default_type(form1.type_name),
+                type="task",
             )
         )
 

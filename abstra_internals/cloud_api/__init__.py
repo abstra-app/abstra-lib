@@ -1,4 +1,5 @@
 import json
+import uuid
 from threading import Thread
 from time import sleep
 from typing import Any, Optional
@@ -21,7 +22,6 @@ from abstra_internals.environment import (
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.settings import Settings
-from abstra_internals.utils import packages as pkg_utils
 
 
 def create_build(headers: dict) -> CloudApiCliBuildCreateResponse:
@@ -54,90 +54,6 @@ def get_api_key_info(headers: dict) -> dict:
         return {"logged": True, "info": response_data.to_dict()}
     else:
         return {"logged": False, "reason": "INVALID_API_TOKEN"}
-
-
-def get_ai_messages(
-    messages,
-    stage,
-    langgraph_thread_id,
-    code,
-    imported_code,
-    execution_error,
-    execution_logs,
-    headers: dict,
-    env_vars_keys,
-    current_abstra_json,
-    allowed_actions_schema,
-    tasks,
-    executions,
-):
-    url = f"{CLOUD_API_CLI_URL}/ai/messages"
-    current_abstra_version = pkg_utils.get_local_package_version().base_version
-    body = {
-        "messages": messages,
-        "runtime": stage,
-        "langGraphThreadId": langgraph_thread_id,
-        "code": code,
-        "importedCode": imported_code,
-        "executionError": execution_error,
-        "executionLogs": execution_logs,
-        "version": current_abstra_version,
-        "envVars": env_vars_keys,
-        "actionsVersion": "v1",
-        "abstraJson": current_abstra_json,
-        "allowedActionsSchema": allowed_actions_schema,
-        "tasks": tasks,
-        "executions": executions,
-    }
-    return requests.post(url, headers=headers, json=body, stream=True).iter_content(
-        chunk_size=None
-    )
-
-
-def generate_project(prompt: str, abstra_json_version: str, headers: dict):
-    url = f"{CLOUD_API_CLI_URL}/ai/generate"
-    body = {"prompt": prompt, "version": abstra_json_version}
-    r = requests.post(url, headers=headers, json=body, timeout=REQUEST_TIMEOUT)
-    r.raise_for_status()
-    return r.json()
-
-
-def get_history(headers: dict, limit: int, offset: int):
-    url = f"{CLOUD_API_CLI_URL}/ai/history"
-    r = requests.get(
-        url,
-        headers=headers,
-        params={"limit": limit, "offset": offset},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()
-
-
-def create_thread(headers: dict):
-    url = f"{CLOUD_API_CLI_URL}/ai/thread"
-    r = requests.post(url, headers=headers, timeout=REQUEST_TIMEOUT)
-    r.raise_for_status()
-    return r.json()
-
-
-def cancel_all(headers: dict, thread_id: str):
-    url = f"{CLOUD_API_CLI_URL}/ai/cancel-all"
-    r = requests.post(
-        url, headers=headers, json={"threadId": thread_id}, timeout=REQUEST_TIMEOUT
-    )
-    r.raise_for_status()
-
-
-def abort_thread(headers: dict, thread_id: str):
-    url = f"{CLOUD_API_CLI_URL}/ai/abort"
-    r = requests.post(
-        url,
-        headers=headers,
-        json={"langGraphThreadId": thread_id},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
 
 
 def get_project_info(headers: dict, project_id: Optional[str] = None):
@@ -198,6 +114,7 @@ def connect_tunnel():
                 message = ws.receive()
                 assert isinstance(message, str)
                 message_dict = json.loads(message)
+
                 if "method" in message_dict:
                     request = TunnelRequest.model_validate_json(message)
                     kwargs: Any = dict(
@@ -205,9 +122,11 @@ def connect_tunnel():
                         params=request.query,
                         **dict(data=request.body if request.body else {}),
                     )
-                    if not request.path.startswith(
-                        "/_hooks/"
-                    ) and not request.path.startswith("/_tasks"):
+                    if (
+                        not request.path.startswith("/_hooks/")
+                        and not request.path.startswith("/_tasks")
+                        and not request.path.startswith("/_editor/api/mcp")
+                    ):
                         response = TunnelResponse(
                             status=403,
                             headers={},
@@ -230,11 +149,13 @@ def connect_tunnel():
                             sessionPath=request.sessionPath,
                             requestId=request.requestId,
                         ).model_dump_json()
+
                         ws.send(response_json)
 
                 else:
                     global session
                     session = SessionPathMessage.model_validate_json(message)
+                    set_session_path(session.sessionPath)
                     public_url = (
                         f"{CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}"
                     )
@@ -259,3 +180,29 @@ def connect_tunnel():
                 ws = None
 
     Thread(target=loop, daemon=True, name="TunnelLoop").start()
+
+
+def get_session_path() -> str:
+    path = Settings.root_path / ".abstra" / "session_path"
+    assert path.exists(), f"Session path file does not exist: {path}"
+    return path.read_text(encoding="utf-8").strip()
+
+
+def set_session_path(session_path: str):
+    path = Settings.root_path / ".abstra" / "session_path"
+    path.write_text(session_path, encoding="utf-8")
+    refresh_tunnel_secret_key()
+
+
+def refresh_tunnel_secret_key():
+    secret_key = uuid.uuid4().hex
+    path = Settings.root_path / ".abstra" / "secret_key"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(secret_key, encoding="utf-8")
+
+
+def get_tunnel_secret_key() -> str:
+    path = Settings.root_path / ".abstra" / "secret_key"
+    if not path.exists():
+        refresh_tunnel_secret_key()
+    return path.read_text(encoding="utf-8").strip()

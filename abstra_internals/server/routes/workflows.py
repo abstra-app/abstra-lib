@@ -16,7 +16,7 @@ def get_editor_bp(main_controller: MainController):
     @bp.get("/")
     def _load_workflow():
         try:
-            return controller.get_workflow()
+            return controller.get_workflow_settings()
         except Exception as e:
             AbstraLogger.capture_exception(e)
             return str(e), 500
@@ -53,7 +53,7 @@ def get_player_bp(main_controller: MainController):
     @guard.by(StageIdSelector("kanban"))
     def _load_workflow():
         try:
-            return controller.get_workflow()
+            return controller.get_workflow_settings()
         except Exception as e:
             AbstraLogger.capture_exception(e)
             return str(e), 500

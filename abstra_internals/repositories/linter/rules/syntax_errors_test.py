@@ -10,19 +10,19 @@ class SyntaxErrorsTest(BaseTest):
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_valid_empty_file(self):
-        script = self.controller.create_script("New script", "script.py")
+        script = self.controller.create_tasklet("New script", "script.py")
         script.file_path.touch()
         rule = SyntaxErrors()
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_valid_with_content(self):
-        script = self.controller.create_script("New script", "script.py")
+        script = self.controller.create_tasklet("New script", "script.py")
         script.file_path.write_text("print('hello world')")
         rule = SyntaxErrors()
         self.assertEqual(len(rule.find_issues()), 0)
 
     def test_syntax_errors_invalid_with_syntax_error(self):
-        script = self.controller.create_script("New script", "script.py")
+        script = self.controller.create_tasklet("New script", "script.py")
         script.file_path.write_text("print('hello world'")
         rule = SyntaxErrors()
         self.assertEqual(len(rule.find_issues()), 1)

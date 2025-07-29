@@ -5,12 +5,10 @@ import sys
 import tempfile
 import uuid
 from abc import ABC, abstractmethod
-from dataclasses import field
+from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
-
-from pydantic.dataclasses import dataclass
 
 from abstra_internals.constants import ABSTRA_LOGO_URL, get_project_url
 from abstra_internals.contracts_generated import (
@@ -35,15 +33,9 @@ from abstra_internals.repositories.project.disabled_stages_loader import (
 )
 from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
-from abstra_internals.templates import (
-    abstra_favicon,
-    abstra_logo,
-)
+from abstra_internals.templates import abstra_favicon, abstra_logo
 from abstra_internals.utils import check_is_url, nested_get
-from abstra_internals.utils.file import (
-    generate_conflictless_path,
-    silent_traverse_code,
-)
+from abstra_internals.utils.file import generate_conflictless_path, silent_traverse_code
 from abstra_internals.utils.format import normalize_path
 from abstra_internals.utils.graph import Edge, Graph, Node
 from abstra_internals.utils.string import to_kebab_case
@@ -140,7 +132,7 @@ class WorkflowTransition:
     id: str
     target_id: str
     target_type: str
-    type: str
+    type: Literal["task"]
     task_type: Optional[str] = None
 
     def __post_init__(self):

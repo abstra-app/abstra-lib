@@ -104,6 +104,30 @@ def run(
             - For a list of runnables: the final State object
             - For a single InputWidget: the widget's value
             - For other single widgets: None
+
+    Examples:
+
+        # Running a single-step form:
+        ```python
+        from abstra_internals.interface.sdk.forms import run
+        from abstra_internals.interface.sdk.forms.widgets import InputWidget
+        from abstra_internals.interface.sdk.forms.widgets import TextInput
+        run([[
+            TextInput(label="Enter your name"),
+            TextInput(label="Enter your email")
+        ]])
+        ```
+
+        # Running a multi-step form:
+        ```python
+        from abstra_internals.interface.sdk.forms import run
+        from abstra_internals.interface.sdk.forms.widgets import InputWidget
+        from abstra_internals.interface.sdk.forms.widgets import TextInput
+        run([
+            [TextInput(label="Enter your name")],
+            [TextInput(label="Enter your email")]
+        ])
+
     """
     # Single widget run
     if isinstance(runnables, Widget):

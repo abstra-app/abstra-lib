@@ -1,5 +1,6 @@
 import flask
 
+from abstra_internals.contracts_generated import AbstraLibApiAiStreamRequest
 from abstra_internals.controllers.ai import AiController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.usage import editor_manual_usage, editor_usage
@@ -9,22 +10,16 @@ def get_editor_bp(main_controller: MainController):
     bp = flask.Blueprint("editor_ai", __name__)
     controller = AiController(main_controller)
 
-    @bp.post("/message")
+    @bp.post("/stream")
     @editor_usage
     def _get_next_message():
         body = flask.request.json
         if not body:
             flask.abort(400)
 
-        streamer = controller.send_ai_message(
-            body["messages"],
-            body["stageId"],
-            body["langGraphThreadId"],
-            body["code"],
-            body["executionError"],
-            body["executionLogs"],
-            body["allowedActionsSchema"],
-        )
+        body = AbstraLibApiAiStreamRequest.from_dict(body)
+
+        streamer = controller.send_ai_message(body)
 
         if streamer is None:
             flask.abort(403)
@@ -61,32 +56,15 @@ def get_editor_bp(main_controller: MainController):
         thread = controller.create_thread()
         if not thread:
             flask.abort(403)
-        return thread
+        return thread.to_dict()
 
-    @bp.post("/cancel-all")
+    @bp.delete("/thread/<thread_id>")
     @editor_usage
-    def _cancel_all():
-        body = flask.request.json
-        if not body:
-            flask.abort(400)
-        thread_id = body.get("threadId")
-        if not thread_id:
-            flask.abort(400)
-        controller.cancel_all(thread_id)
-        return {"success": True}
-
-    @bp.post("/generate")
-    @editor_usage
-    def _generate():
-        body = flask.request.json
-        if not body:
-            flask.abort(400)
-
-        prompt = body.get("prompt")
-        if not prompt:
-            flask.abort(400)
-
-        controller.generate_project(prompt)
+    def _delete_thread(thread_id: str):
+        """
+        Delete a conversation thread.
+        """
+        controller.delete_thread(thread_id)
         return {"success": True}
 
     @bp.post("/vote")
@@ -106,8 +84,14 @@ def get_editor_bp(main_controller: MainController):
 
         return {"success": True}
 
-    @bp.get("/actions-version")
-    def _get_actions_version():
-        return {"version": "v1"}
+    @bp.post("/start-conversation")
+    def _start_conversation():
+        """
+        Start a new conversation with the AI.
+        """
+        conversation = controller.start_conversation()
+        if not conversation:
+            flask.abort(403)
+        return conversation
 
     return bp

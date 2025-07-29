@@ -1,8 +1,8 @@
 from unittest import TestCase
 
 from abstra_internals.controllers.pysa import (
+    analyze_python_syntax,
     jedi_get_autocomplete,
-    jedi_get_syntax_errors,
     jedi_help,
 )
 
@@ -49,7 +49,7 @@ class PysaTests(TestCase):
         self.assertEqual(help[0]["name"], "print")
 
     def test_jedi_get_syntax_errors(self):
-        errors = jedi_get_syntax_errors(CODE + "\nif:")
+        errors = analyze_python_syntax(CODE + "\nif:")
         self.assertEqual(
             errors,
             [

@@ -14,7 +14,7 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
         if flask.request.json is None:
             flask.abort(400)
         req = DataRequest.from_dict(flask.request.json)
-        tasks, total = controller.list_tasks(req)
+        tasks, total = controller.list_all_tasks(req)
         return {
             "tasks": [task.dump() for task in tasks],
             "totalCount": total,
@@ -23,7 +23,7 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
     @bp.get("/<stage_id>")
     @editor_usage
     def _get_tasks(stage_id: str):
-        tasks = controller.get_stage_tasks(stage_id)
+        tasks = controller.list_tasks_sent_to_stage(stage_id)
         return {
             "tasks": [task.dump() for task in tasks],
             "totalCount": len(tasks),
@@ -31,7 +31,7 @@ def get_editor_bp(main_controller: MainController) -> flask.Blueprint:
 
     @bp.get("/<stage_id>/sent")
     def _get_sent_tasks(stage_id: str):
-        tasks = controller.get_sent_tasks(stage_id)
+        tasks = controller.list_tasks_sent_by_stage(stage_id)
         return {
             "tasks": [task.dump() for task in tasks],
             "totalCount": len(tasks),

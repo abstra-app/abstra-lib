@@ -72,6 +72,8 @@ class ExecutionController:
                 except Exception as e_final:
                     AbstraLogger.capture_exception(e_final)
 
+        return {"execution": execution.model_dump()}
+
     def _execute_without_exit(self, filepath: Path):
         try:
             import_as_new(filepath.as_posix())

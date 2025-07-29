@@ -17,7 +17,7 @@ def get_editor_bp(controller: MainController):
     @bp.get("/stages")
     @editor_usage
     def _get_stages():
-        stages = controller.get_stages()
+        stages = controller.list_all_stages()
         return [stage.as_dict for stage in stages]
 
     @bp.get("/<execution_id>/tasks")

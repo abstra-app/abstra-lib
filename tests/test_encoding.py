@@ -23,23 +23,34 @@ class WriteTextVisitor(NodeVisitor):
         )
 
         if isinstance(node.func, Attribute) and node.func.attr == "write_text":
-            # arg check
-            if len(node.args) > 1:
-                encoding_arg = node.args[1]
-                if encoding_arg.s == "utf-8":  # type: ignore
-                    return
-                else:
-                    raise AssertionError(error_msg)
+            # Only check encoding if provided
+            encoding_found = False
             # kwarg check
             for kw in node.keywords:
                 if isinstance(kw, keyword) and kw.arg == "encoding":
-                    if kw.value.s == "utf-8":  # type: ignore
+                    encoding_found = True
+                    kw_encoding_value = getattr(
+                        kw.value, "value", getattr(kw.value, "s", None)
+                    )
+                    if kw_encoding_value == "utf-8":
                         return
                     else:
                         raise AssertionError(error_msg)
-
-            raise AssertionError(error_msg)
-
+            # arg check (positional)
+            if not encoding_found and len(node.args) > 1:
+                encoding_arg = node.args[1]
+                encoding_value = getattr(
+                    encoding_arg, "value", getattr(encoding_arg, "s", None)
+                )
+                encoding_found = True
+                if encoding_value == "utf-8":
+                    return
+                else:
+                    raise AssertionError(error_msg)
+            # If encoding is provided but not utf-8, error. If not provided, pass.
+            if encoding_found:
+                raise AssertionError(error_msg)
+            return
         self.generic_visit(node)
 
 
@@ -62,23 +73,33 @@ class ReadTextVisitor(NodeVisitor):
         )
 
         if isinstance(node.func, Attribute) and node.func.attr == "read_text":
-            # arg check
-            if len(node.args) > 0:
-                encoding_arg = node.args[0]
-                if encoding_arg.s == "utf-8":  # type: ignore
-                    return
-                else:
-                    raise AssertionError(error_msg)
+            encoding_found = False
             # kwarg check
             for kw in node.keywords:
                 if isinstance(kw, keyword) and kw.arg == "encoding":
-                    if kw.value.s == "utf-8":  # type: ignore
+                    encoding_found = True
+                    kw_encoding_value = getattr(
+                        kw.value, "value", getattr(kw.value, "s", None)
+                    )
+                    if kw_encoding_value == "utf-8":
                         return
                     else:
                         raise AssertionError(error_msg)
-
-            raise AssertionError(error_msg)
-
+            # arg check (positional)
+            if not encoding_found and len(node.args) > 0:
+                encoding_arg = node.args[0]
+                encoding_value = getattr(
+                    encoding_arg, "value", getattr(encoding_arg, "s", None)
+                )
+                encoding_found = True
+                if encoding_value == "utf-8":
+                    return
+                else:
+                    raise AssertionError(error_msg)
+            # If encoding is provided but not utf-8, error. If not provided, pass.
+            if encoding_found:
+                raise AssertionError(error_msg)
+            return
         self.generic_visit(node)
 
 

@@ -44,7 +44,81 @@ def jedi_help(code, line, column):
         return []
 
 
-def jedi_get_syntax_errors(code):
+def analyze_python_syntax(code):
+    """
+    Analyze Python code for syntax errors using the Jedi static analysis engine.
+
+    This function parses the provided Python code and returns a list of syntax errors
+    found during parsing. It uses Jedi's syntax error detection capabilities to
+    identify issues like missing parentheses, invalid indentation, undefined variables,
+    and other Python syntax violations.
+
+    Args:
+        code (str): The Python source code to analyze for syntax errors.
+            Can be a complete script, code snippet, or partial code.
+
+    Returns:
+        List[Dict]: List of syntax error objects, each containing:
+            - line (int): Line number where the error occurs (1-based)
+            - column (int): Column number where the error starts (0-based)
+            - until_line (int): Line number where the error ends
+            - until_column (int): Column number where the error ends
+            - message (str): Human-readable error description
+            - severity (str): Always "error" for syntax errors
+
+    Example:
+        ```python
+        # Valid Python code - no errors
+        valid_code = '''
+        def hello_world():
+            print("Hello, world!")
+            return "success"
+        '''
+        errors = jedi_get_syntax_errors(valid_code)
+        print(f"Errors found: {len(errors)}")  # Output: 0
+
+        # Code with syntax errors
+        invalid_code = '''
+        def broken_function(
+            print("Missing closing parenthesis")
+            if True
+                print("Missing colon")
+            return unclosed_string"
+        '''
+        errors = jedi_get_syntax_errors(invalid_code)
+        for error in errors:
+            print(f"Line {error['line']}: {error['message']}")
+            print(f"  Position: column {error['column']} to {error['until_column']}")
+
+        # Code with indentation errors
+        indentation_error = '''
+        def my_function():
+        print("Wrong indentation")
+            return True
+        '''
+        errors = jedi_get_syntax_errors(indentation_error)
+        if errors:
+            print(f"Indentation error: {errors[0]['message']}")
+
+        # Incomplete code snippets
+        incomplete_code = "for i in range(10):"
+        errors = jedi_get_syntax_errors(incomplete_code)
+        # May return errors for incomplete syntax
+        ```
+
+    Note:
+        - Uses cached Jedi Script objects for performance optimization
+        - Returns empty list if code analysis fails due to Jedi exceptions
+        - Line numbers are 1-based (first line is 1), columns are 0-based
+        - Useful for real-time code validation in editors and IDEs
+        - Can handle partial or incomplete code snippets
+        - Severity is always "error" as this function only detects syntax errors
+        - The function is safe and won't raise exceptions, returning [] on errors
+
+    Copywritings:
+        Analyze Python code for syntax errors
+        Analyzing Python code for syntax errors...
+    """
     try:
         script = _script(code)
         errors = script.get_syntax_errors()

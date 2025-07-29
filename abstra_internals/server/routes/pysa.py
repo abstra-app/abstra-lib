@@ -2,8 +2,8 @@ import flask
 
 from abstra_internals.controllers.pysa import (
     Context,
+    analyze_python_syntax,
     jedi_get_autocomplete,
-    jedi_get_syntax_errors,
     jedi_help,
 )
 
@@ -33,6 +33,6 @@ def get_editor_bp():
             return flask.abort(400)
 
         ctx = Context(**flask.request.json)
-        return jedi_get_syntax_errors(ctx.code)
+        return analyze_python_syntax(ctx.code)
 
     return bp

@@ -1,8 +1,6 @@
 import flask
 
-from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution_context import JobContext
 from abstra_internals.repositories.project.project import JobStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -64,17 +62,7 @@ def get_editor_bp(controller: MainController):
     @bp.post("/<path:id>/run")
     @editor_usage
     def _run_job(id: str):
-        job = controller.get_job(id)
-        if not job:
-            flask.abort(404)
-
-        print(f"Running job {job.id} ({job.title})")
-
-        ExecutionController(
-            repositories=controller.repositories,
-            stage=job,
-            context=JobContext(),
-        ).run()
+        controller.debug_run_job(id)
 
         return {"ok": True}
 

@@ -60,7 +60,7 @@ class TestRequirementsApi(BaseTest):
         ).get_json()
         self.assertEqual(recommendation, [])
 
-        script = self.controller.create_script("New script", "script.py")
+        script = self.controller.create_tasklet("New script", "script.py")
 
         Path(script.file_path).write_text("import pandas as pd", encoding="utf-8")
 
@@ -71,7 +71,7 @@ class TestRequirementsApi(BaseTest):
 
     def test_get_requirements_recommendation_already_met(self):
         Path("requirements.txt").write_text("Pillow", encoding="utf-8")
-        script = self.controller.create_script("New script", "script.py")
+        script = self.controller.create_tasklet("New script", "script.py")
         Path(script.file_path).write_text(
             "import pandas as pd\nfrom PIL import Image", encoding="utf-8"
         )

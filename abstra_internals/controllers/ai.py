@@ -1,24 +1,15 @@
-import json
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from abstra_internals.cloud_api import (
-    abort_thread,
-    cancel_all,
-    create_thread,
-    generate_project,
-    get_ai_messages,
-    get_history,
+from abstra_internals.cloud_api import get_session_path, get_tunnel_secret_key
+from abstra_internals.contracts_generated import (
+    AbstraLibApiAiStreamRequest,
+    CloudApiCliAiV2StreamRequest,
 )
 from abstra_internals.controllers.main import MainController
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.repositories.execution import ExecutionFilter
-from abstra_internals.repositories.project.json_migrations import get_latest_version
-from abstra_internals.repositories.project.project import (
-    Project,
-    StageWithFile,
-)
-from abstra_internals.services.env_vars import EnvVarsRepository
+from abstra_internals.interface.cli.version import version
+from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
 from abstra_internals.utils.file import silent_traverse_code
 from abstra_internals.utils.paths import get_relative_path
@@ -76,94 +67,45 @@ def find_imported_code(stage: StageWithFile) -> Dict[str, str]:
 class AiController:
     def __init__(self, controller: MainController):
         self.controller = controller
+        self.repos = controller.repositories
 
     def send_ai_message(
         self,
-        messages,
-        stage_id,
-        langgraph_thread_id,
-        code,
-        execution_error,
-        execution_logs,
-        allowed_actions_schema,
+        body: AbstraLibApiAiStreamRequest,
     ):
-        headers = resolve_headers() or {}
-        env_vars_keys = EnvVarsRepository.list_keys()
-        current_abstra_json = self.controller.repositories.project.load(
-            include_disabled_stages=True
-        ).as_dict
-        runtime = None
-        imported_code = {}
-        if stage_id:
-            stage = self.controller.get_stage(stage_id)
-            assert isinstance(stage, StageWithFile), "Stage is not a StageWithFile"
-            imported_code = find_imported_code(stage)
-            code = "\n".join([f"# {stage.file_path}", "```python", code, "````"])
-            runtime = runtime_from_stage(stage)
-        tasks = self.controller.repositories.tasks.get_all_tasks()
-        tasks_dicts = [task.dump() for task in tasks]
-        execution_filter = ExecutionFilter.from_dict({})
-        executions = self.controller.repositories.execution.list(execution_filter)
-        executions_dict = executions.to_dict()["executions"]
-        yield from get_ai_messages(
-            messages,
-            runtime,
-            langgraph_thread_id,
-            code,
-            imported_code,
-            execution_error,
-            execution_logs,
-            headers,
-            env_vars_keys,
-            current_abstra_json,
-            allowed_actions_schema,
-            tasks_dicts,
-            executions_dict,
+        yield from self.repos.ai.get_ai_messages(
+            CloudApiCliAiV2StreamRequest(
+                conversation_id=body.conversation_id,
+                content=body.content,
+                context={
+                    **body.context,
+                    "libVersion": version(),
+                },
+                secret_key=get_tunnel_secret_key(),
+                tunnel_session_path=get_session_path(),
+                human_approval=body.human_approval,
+            )
         )
 
     def get_history(self, limit: int, offset: int):
         headers = resolve_headers()
         if headers is None:
             return None
-        return get_history(headers, limit, offset)
+        return self.repos.ai.get_history(headers, limit, offset)
 
     def create_thread(self):
         headers = resolve_headers()
         if headers is None:
             return None
-        return create_thread(headers)
+        return self.repos.ai.create_thread(headers)
 
-    def cancel_all(self, thread_id: str):
+    def delete_thread(self, thread_id: str):
         if headers := resolve_headers():
-            cancel_all(headers, thread_id)
+            return self.repos.ai.delete_thread(headers, thread_id)
 
     def abort_thread(self, thread_id: str):
         if headers := resolve_headers():
-            return abort_thread(headers, thread_id)
-
-    def generate_project(self, prompt: str, tries: int = 0):
-        headers = resolve_headers() or {}
-        abstra_json_version = get_latest_version()
-        try:
-            res = generate_project(prompt, abstra_json_version, headers)
-            is_abstra_json_valid = Project.validate(res["abstra_json"])
-            if not is_abstra_json_valid:
-                raise Exception("Generated abstra.json is not valid")
-
-            generated_abstra_json = json.dumps(res["abstra_json"], indent=4)
-            python_files = [PythonFile.from_dict(file) for file in res["python_files"]]
-
-            self.init_stages(python_files)
-            Settings.root_path.joinpath("abstra.json").write_text(
-                generated_abstra_json, encoding="utf-8"
-            )
-
-            self.controller.repositories.project.initialize_or_migrate(verbose=False)
-            self.controller.linter_repository.fix_all_linters()
-        except Exception as e:
-            if tries >= 3:
-                raise e
-            return self.generate_project(prompt, tries + 1)
+            return self.repos.ai.abort_thread(headers, thread_id)
 
     def init_stages(self, python_files: List[PythonFile]):
         for file in python_files:
@@ -172,7 +114,7 @@ class AiController:
             elif file.stage == "hook":
                 script = self.controller.create_hook(file.filename[:-3], file.filename)
             elif file.stage == "script":
-                script = self.controller.create_script(
+                script = self.controller.create_tasklet(
                     file.filename[:-3], file.filename
                 )
             elif file.stage == "job":
@@ -180,3 +122,13 @@ class AiController:
             else:
                 raise Exception(f"Invalid stage {file.stage}")
             script.file_path.write_text(file.content, encoding="utf-8")
+            script.file_path.write_text(file.content, encoding="utf-8")
+            script.file_path.write_text(file.content, encoding="utf-8")
+            script.file_path.write_text(file.content, encoding="utf-8")
+            script.file_path.write_text(file.content, encoding="utf-8")
+            script.file_path.write_text(file.content, encoding="utf-8")
+
+    def start_conversation(self):
+        return self.repos.ai.start_conversation(
+            secret_key=get_tunnel_secret_key(), tunnel_session_path=get_session_path()
+        )

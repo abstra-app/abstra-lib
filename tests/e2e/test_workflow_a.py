@@ -98,7 +98,7 @@ class TestWorkflowA(BaseWorkflowTest):
                         "props": {"taskType": None},
                         "sourceStageId": "job_a",
                         "targetStageId": "script_b",
-                        "type": "jobs:finished",
+                        "type": "task",
                     },
                 ],
             },
