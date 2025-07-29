@@ -59,7 +59,9 @@ def send_task(type: str, payload: "TaskPayload", show_warning: bool = True) -> N
 
 
 def get_trigger_task() -> Task:
-    """Retrieve the task that triggered the current execution.
+    """Retrieve the task that triggered the current execution of a task.
+
+    This should be called only in tasklet stages, never in forms, jobs or hooks.
 
     Returns:
         Task: The task object that triggered this execution.
