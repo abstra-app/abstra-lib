@@ -9,6 +9,7 @@ from abstra_internals.templates import (
     new_script_code,
 )
 from abstra_internals.usage import editor_usage
+from abstra_internals.utils.packages import get_local_package_version
 
 
 def get_editor_bp(controller: MainController):
@@ -31,6 +32,14 @@ def get_editor_bp(controller: MainController):
     @editor_usage
     def _get_workspace_root_path():
         return str(Settings.root_path.absolute())
+
+    @bp.get("/version")
+    def _get_abstra_version():
+        try:
+            version = get_local_package_version("abstra")
+            return {"version": str(version)}
+        except Exception as e:
+            return {"error": f"Could not get version: {str(e)}"}, 500
 
     @bp.post("/open-file")
     @editor_usage
