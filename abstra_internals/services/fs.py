@@ -180,10 +180,10 @@ class FileSystemService:
         path = Path(path)
         if not path.exists():
             return
-        for child in FileSystemService.list_paths(path):
-            if child.is_file():
+        for child in path.iterdir():
+            if child.is_symlink() or child.is_file():
                 child.unlink()
-            else:
+            elif child.is_dir():
                 FileSystemService.rm_tree(child)
         path.rmdir()
 
