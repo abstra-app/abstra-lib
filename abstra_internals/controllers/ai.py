@@ -8,10 +8,10 @@ from abstra_internals.contracts_generated import (
 )
 from abstra_internals.controllers.main import MainController
 from abstra_internals.credentials import resolve_headers
-from abstra_internals.interface.cli.version import version
 from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
 from abstra_internals.utils.file import silent_traverse_code
+from abstra_internals.utils.packages import get_local_package_version
 from abstra_internals.utils.paths import get_relative_path
 
 
@@ -79,7 +79,7 @@ class AiController:
                 content=body.content,
                 context={
                     **body.context,
-                    "libVersion": version(),
+                    "libVersion": str(get_local_package_version()),
                 },
                 secret_key=get_tunnel_secret_key(),
                 tunnel_session_path=get_session_path(),
