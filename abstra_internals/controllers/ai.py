@@ -80,6 +80,9 @@ class AiController:
                 context={
                     **body.context,
                     "libVersion": str(get_local_package_version()),
+                    "knownIssues": [
+                        i.to_dict() for i in self.repos.linter.find_issues_in_codebase()
+                    ],
                 },
                 secret_key=get_tunnel_secret_key(),
                 tunnel_session_path=get_session_path(),

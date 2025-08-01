@@ -58,7 +58,6 @@ def get_editor_bp(main_controller: MainController):
             workflow_controller.add_transition,
             requires_approval(workflow_controller.fix_positions_with_autolayout),
             pysa_controller.analyze_python_syntax,
-            main_controller.linter_repository.find_issues_in_codebase,
             requires_approval(main_controller.linter_repository.fix_issue_in_codebase),
         ]
     )
