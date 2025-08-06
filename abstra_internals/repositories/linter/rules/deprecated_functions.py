@@ -1,16 +1,13 @@
 import ast
-import webbrowser
 from typing import Dict, List
 
-from abstra_internals.constants import (
-    get_project_url,
-)
 from abstra_internals.repositories.linter.models import (
-    LinterFix,
     LinterIssue,
     LinterRule,
 )
-from abstra_internals.repositories.project.project import LocalProjectRepository
+from abstra_internals.repositories.project.project import (
+    LocalProjectRepository,
+)
 from abstra_internals.utils.ast_cache import ASTCache
 
 DEPRECATED_FUNCTIONS = {
@@ -18,28 +15,17 @@ DEPRECATED_FUNCTIONS = {
 }
 
 
-class ReplaceDeprecatedFunction(LinterFix):
-    def __init__(self, stage_type: str, stage_id: str):
-        self.label = "Go to the file"
-        self.stage_type = stage_type
-        self.stage_id = stage_id
-
-    def fix(self):
-        project_url = get_project_url()
-        webbrowser.open(f"{project_url}/_editor/{self.stage_type}/{self.stage_id}")
-
-
 class DeprecatedFunctionFound(LinterIssue):
     def __init__(
         self,
         function_name: str,
         new_function_name: str,
-        stage_type: str,
-        stage_id: str,
+        stage_title: str,
+        stage_file: str,
         module: str,
     ):
-        self.label = f"The function '{function_name}' from '{module}' is deprecated. Please use '{new_function_name}' instead."
-        self.fixes = [ReplaceDeprecatedFunction(stage_type, stage_id)]
+        self.label = f"The stage '{stage_title}' ({stage_file}) uses a deprecated function '{function_name}' from '{module}'. Please use '{new_function_name}' instead."
+        self.fixes = []
 
 
 class DeprecatedFunctionUsage(LinterRule):
@@ -72,8 +58,8 @@ class DeprecatedFunctionUsage(LinterRule):
                                     DeprecatedFunctionFound(
                                         function_name,
                                         new_function_name,
-                                        stage_type=stage.type_name,
-                                        stage_id=stage.id,
+                                        stage_title=stage.title,
+                                        stage_file=stage.file,
                                         module=module,
                                     )
                                 )
