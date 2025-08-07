@@ -178,6 +178,11 @@ def connect_tunnel():
                 print("Network error: Connection refused. Retrying in 5 seconds...")
                 await asyncio.sleep(5)
                 continue
+            except Exception as e:
+                AbstraLogger.capture_exception(e)
+                print(f"Unexpected error: {e}. Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+                continue
 
     def run_async_loop():
         asyncio.run(loop())
