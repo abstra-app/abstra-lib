@@ -1,11 +1,12 @@
+import asyncio
 import json
+import socket
 import uuid
 from threading import Thread
-from time import sleep
 from typing import Any, Optional
 
 import requests
-import simple_websocket
+import websockets
 from colorama import Fore
 from pydantic import BaseModel
 
@@ -93,93 +94,95 @@ def connect_tunnel():
         "http://", "ws://"
     )
 
-    def loop():
-        ws = None
+    async def loop():
+        await asyncio.sleep(1)
         while True:
-            if ws is None:
-                headers = resolve_headers()
-                if headers is None:
-                    sleep(5)
-                    continue
-                try:
-                    ws = simple_websocket.Client(
-                        url,
-                        headers=headers,
-                    )
-                    ws.thread.name = "TunnelWebSocket"
-                except Exception:
-                    sleep(1)
-                    continue
+            headers = resolve_headers()
+            if headers is None:
+                continue
             try:
-                message = ws.receive()
-                assert isinstance(message, str)
-                message_dict = json.loads(message)
+                async with websockets.connect(
+                    uri=url, additional_headers=headers
+                ) as ws:
+                    while True:
+                        try:
+                            message = await ws.recv()
+                            assert isinstance(message, str)
+                            message_dict = json.loads(message)
 
-                if "method" in message_dict:
-                    request = TunnelRequest.model_validate_json(message)
-                    kwargs: Any = dict(
-                        headers=request.headers,
-                        params=request.query,
-                        **dict(data=request.body if request.body else {}),
-                    )
-                    if (
-                        not request.path.startswith("/_hooks/")
-                        and not request.path.startswith("/_tasks")
-                        and not request.path.startswith("/_editor/api/mcp")
-                    ):
-                        response = TunnelResponse(
-                            status=403,
-                            headers={},
-                            text=f"Forbidden path: {request.path}",
-                            sessionPath=request.sessionPath,
-                            requestId=request.requestId,
-                        )
-                        ws.send(response.model_dump_json())
-                    else:
-                        response = requests.request(
-                            request.method,
-                            f"http://{HOST}:{Settings.server_port}{request.path}",
-                            timeout=REQUEST_TIMEOUT,
-                            **kwargs,
-                        )
-                        response_json = TunnelResponse(
-                            status=response.status_code,
-                            headers=dict(response.headers),
-                            text=response.text,
-                            sessionPath=request.sessionPath,
-                            requestId=request.requestId,
-                        ).model_dump_json()
+                            if "method" in message_dict:
+                                request = TunnelRequest.model_validate_json(message)
+                                kwargs: Any = dict(
+                                    headers=request.headers,
+                                    params=request.query,
+                                    **dict(data=request.body if request.body else {}),
+                                )
+                                if (
+                                    not request.path.startswith("/_hooks/")
+                                    and not request.path.startswith("/_healthcheck")
+                                    and not request.path.startswith("/_tasks")
+                                    and not request.path.startswith("/_editor/api/mcp")
+                                ):
+                                    response = TunnelResponse(
+                                        status=403,
+                                        headers={},
+                                        text=f"Forbidden path: {request.path}",
+                                        sessionPath=request.sessionPath,
+                                        requestId=request.requestId,
+                                    )
+                                    await ws.send(response.model_dump_json())
+                                else:
+                                    response = requests.request(
+                                        request.method,
+                                        f"http://{HOST}:{Settings.server_port}{request.path}",
+                                        timeout=REQUEST_TIMEOUT,
+                                        **kwargs,
+                                    )
+                                    response_json = TunnelResponse(
+                                        status=response.status_code,
+                                        headers=dict(response.headers),
+                                        text=response.text,
+                                        sessionPath=request.sessionPath,
+                                        requestId=request.requestId,
+                                    ).model_dump_json()
 
-                        ws.send(response_json)
+                                    await ws.send(response_json)
 
-                else:
-                    global session
-                    session = SessionPathMessage.model_validate_json(message)
-                    set_session_path(session.sessionPath)
-                    public_url = (
-                        f"{CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}"
-                    )
-                    Settings.set_public_url(public_url)
+                            else:
+                                global session
+                                session = SessionPathMessage.model_validate_json(
+                                    message
+                                )
+                                set_session_path(session.sessionPath)
+                                public_url = f"{CLOUD_API_ENDPOINT}/tunnel/forward/{session.sessionPath}"
+                                Settings.set_public_url(public_url)
 
-                    if not hasattr(loop, "_printed"):
-                        setattr(loop, "_printed", True)
-                        print(
-                            f"You can test your hooks locally by sending requests to: {Fore.GREEN}{public_url}/_hooks/:hook-path{Fore.RESET}"
-                        )
-            except simple_websocket.ConnectionClosed:
-                ws = None
-            except simple_websocket.ConnectionError as e:
-                print(f"Connection error: {e}")
-                ws = None
-            except KeyboardInterrupt:
-                ws.close()
-                break
-            except Exception as e:
-                print(f"Error: {e}")
-                ws.close()
-                ws = None
+                                if not hasattr(loop, "_printed"):
+                                    setattr(loop, "_printed", True)
+                                    print(
+                                        f"You can test your hooks locally by sending requests to: {Fore.GREEN}{public_url}/_hooks/:hook-path{Fore.RESET}"
+                                    )
+                        except websockets.exceptions.ConnectionClosedOK:
+                            print("WebSocket connection closed OK")
+                            await asyncio.sleep(5)
+                            break
+                        except websockets.exceptions.ConnectionClosedError as e:
+                            print(f"WebSocket connection closed with error: {e}")
+                            await asyncio.sleep(5)
+                            break
+            except socket.gaierror:
+                print("Network error: Unable to resolve host. Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+                continue
+            except ConnectionRefusedError:
+                print("Network error: Connection refused. Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+                continue
 
-    Thread(target=loop, daemon=True, name="TunnelLoop").start()
+    def run_async_loop():
+        asyncio.run(loop())
+
+    Thread(target=run_async_loop, daemon=True, name="TunnelLoop").start()
 
 
 def get_session_path() -> str:
