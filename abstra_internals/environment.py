@@ -8,6 +8,8 @@ NOISY_LOGLEVEL = lambda: os.getenv("ABSTRA_NOISY_LOGLEVEL", DEFAULT_LOGLEVEL)  #
 PROCESS_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s][%(process)d]%(message)s"
 DEFAULT_LOGFORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
 LOGFORMAT = lambda: os.getenv("ABSTRA_LOGFORMAT", DEFAULT_LOGFORMAT)  # noqa: E731
+CLOUD_SAMPLE_RATE = float(os.getenv("ABSTRA_CLOUD_SAMPLE_RATE", 0.2))
+LOCAL_SAMPLE_RATE = float(os.getenv("ABSTRA_LOCAL_SAMPLE_RATE", 0.0))
 
 # SERVER
 HOST = os.getenv("ABSTRA_HOST", "localhost")

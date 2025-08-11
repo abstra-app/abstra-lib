@@ -5,7 +5,13 @@ from typing import Literal, Optional
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from abstra_internals.environment import LOGFORMAT, LOGLEVEL, NOISY_LOGLEVEL
+from abstra_internals.environment import (
+    CLOUD_SAMPLE_RATE,
+    LOCAL_SAMPLE_RATE,
+    LOGFORMAT,
+    LOGLEVEL,
+    NOISY_LOGLEVEL,
+)
 from abstra_internals.utils.env import is_dev_env, is_test_env
 
 internal_logger = lambda: logging.getLogger("abstra_internal")  # noqa: E731
@@ -53,6 +59,9 @@ class AbstraLogger:
                 profiles_sample_rate=0.01,
                 environment=cls.environment,
                 enable_tracing=True,
+                sample_rate=CLOUD_SAMPLE_RATE
+                if AbstraLogger.environment == "cloud"
+                else LOCAL_SAMPLE_RATE,
                 release=importlib.metadata.distribution("abstra").version,
                 shutdown_timeout=0,
                 disabled_integrations=[
