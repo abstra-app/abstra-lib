@@ -1,5 +1,10 @@
+import os
+import ssl
+import subprocess
+import sys
 import threading
 
+import certifi
 from dotenv import load_dotenv
 from werkzeug.serving import make_server
 
@@ -39,7 +44,44 @@ def start_consumer(controller: MainController):
     return consumer, th
 
 
+def ensure_certificates():
+    try:
+        cafile = certifi.where()
+        if not os.path.isfile(cafile):
+            raise FileNotFoundError(f"Certifi CA file not found at {cafile}")
+        ssl.create_default_context(cafile=cafile)
+    except Exception:
+        print(
+            "SSL certificate validation failed. Attempting to restore certificates..."
+        )
+        try:
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "--force-reinstall",
+                    "certifi",
+                ],
+                check=True,
+            )
+            import certifi as certifi_reinstalled
+
+            cafile_re = certifi_reinstalled.where()
+            if os.path.isfile(cafile_re):
+                print(f"Certificates restored at: {cafile_re}")
+            else:
+                print(
+                    f"Certifi CA file still missing at: {cafile_re}. Please check your Python environment."
+                )
+        except Exception as update_e:
+            print(f"Failed to restore certificates: {update_e}")
+
+
 def editor(headless: bool):
+    ensure_certificates()
+
     load_dotenv(Settings.root_path / ".env")
     serve_message()
     check_latest_version()
