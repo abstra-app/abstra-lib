@@ -17,7 +17,9 @@ def _generate_zip_file() -> pathlib.Path:
     zip_path = pathlib.Path(tempfile.gettempdir(), f"{uuid.uuid4()}.zip")
 
     with zipfile.ZipFile(zip_path, "w") as zip_file:
-        for file in FileSystemService.list_files(root_path, use_ignore=True):
+        for file in FileSystemService.list_files(
+            root_path, use_ignore=True, ignore_dotenv=True
+        ):
             zip_file.write(file, file.relative_to(root_path))
 
     return zip_path

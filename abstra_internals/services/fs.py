@@ -30,6 +30,7 @@ class FileSystemService:
         include_dirs: bool = False,
         use_ignore: bool = True,
         allowed_suffixes: Optional[List[str]] = None,
+        ignore_dotenv: bool = False,
     ) -> List[Path]:
         """
         List all files in the given directory, optionally filtering by suffixes
@@ -44,6 +45,7 @@ class FileSystemService:
             include_dirs=include_dirs,
             use_ignore=use_ignore,
             allowed_suffixes=allowed_suffixes,
+            ignore_dotenv=ignore_dotenv,
         )
 
     @staticmethod
@@ -53,6 +55,7 @@ class FileSystemService:
         include_dirs: bool = True,
         use_ignore: bool = True,
         allowed_suffixes: Optional[List[str]] = None,
+        ignore_dotenv: bool = False,
     ) -> List[Path]:
         """ "
         List all files and directories in the given directory, optionally filtering by suffixes
@@ -70,8 +73,12 @@ class FileSystemService:
             raise ValueError(f"Provided path {dirpath} is not a directory.")
 
         ignored_patterns = [
-            *FileSystemService.load_ignore_patterns(dirpath, ignore_dotenv=False),
-            *FileSystemService.load_ignore_patterns(Path.cwd(), ignore_dotenv=False),
+            *FileSystemService.load_ignore_patterns(
+                dirpath, ignore_dotenv=ignore_dotenv
+            ),
+            *FileSystemService.load_ignore_patterns(
+                Path.cwd(), ignore_dotenv=ignore_dotenv
+            ),
         ]
 
         if use_ignore and FileSystemService.is_ignored(ignored_patterns, dirpath):
