@@ -36,28 +36,6 @@
       "return_type": "Unknown",
       "examples": []
     },
-    "parse_document": {
-      "object_type": "function",
-      "description": "Parse a document using the specified AI model.",
-      "params": [
-        {
-          "name": "document_path",
-          "type": "Path",
-          "description": "The path to the document to be parsed.",
-          "default": "None",
-          "required": true
-        },
-        {
-          "name": "model",
-          "type": "str",
-          "description": "The AI model to use for parsing. dict: The parsed document data. ValueError: If the document path is invalid or the model is not supported.",
-          "default": "None",
-          "required": true
-        }
-      ],
-      "return_type": "dict",
-      "examples": []
-    },
     "parse_nfse": {
       "object_type": "function",
       "description": "Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.",
@@ -125,9 +103,7 @@
       "examples": []
     }
   },
-  "abstra.cli": {
-    "CLI": null
-  },
+  "abstra.cli": {},
   "abstra.common": {
     "get_persistent_dir": {
       "object_type": "function",
@@ -356,7 +332,7 @@
           "required": false
         }
       ],
-      "return_type": "abstra_internals.jwt_auth.UserClaims",
+      "return_type": "abstra_internals.services.jwt.UserClaims",
       "examples": []
     },
     "redirect": {
@@ -381,7 +357,6 @@
       "return_type": "None",
       "examples": []
     },
-    "url_params": null,
     "reuse": {
       "object_type": "function",
       "description": "Reuse the result of a function call with the given arguments.",
@@ -6817,7 +6792,7 @@
         {
           "name": "hide_steps",
           "type": "bool",
-          "description": "Whether to hide steps navigation in the UI. Union[State, None, object]: - For a list of runnables: the final State object - For a single InputWidget: the widget's value - For other single widgets: None",
+          "description": "Whether to hide steps navigation in the UI. Union[State, None, object]: - For a list of runnables: the final State object - For a single InputWidget: the widget's value - For other single widgets: None # Running a single-step form: ```python from abstra_internals.interface.sdk.forms import run from abstra_internals.interface.sdk.forms.widgets import InputWidget from abstra_internals.interface.sdk.forms.widgets import TextInput run([[ TextInput(label=\"Enter your name\"), TextInput(label=\"Enter your email\") ]]) ``` # Running a multi-step form: ```python from abstra_internals.interface.sdk.forms import run from abstra_internals.interface.sdk.forms.widgets import InputWidget from abstra_internals.interface.sdk.forms.widgets import TextInput run([ [TextInput(label=\"Enter your name\")], [TextInput(label=\"Enter your email\")] ])",
           "default": "False",
           "required": false
         }
@@ -6839,52 +6814,7 @@
       ],
       "return_type": "abstra_internals.entities.forms.steps.EndPageStep",
       "examples": []
-    },
-    "read_appointment": null,
-    "read_camera": null,
-    "read_cards": null,
-    "read_checkbox": null,
-    "read_checklist": null,
-    "read_cnpj": null,
-    "read_code": null,
-    "read_cpf": null,
-    "read_currency": null,
-    "read_custom": null,
-    "read_date": null,
-    "read_dropdown": null,
-    "read_email": null,
-    "read_file": null,
-    "read_image": null,
-    "read_list": null,
-    "read_multiple_choice": null,
-    "read_nps": null,
-    "read_number": null,
-    "read_number_slider": null,
-    "read_pandas_row_selection": null,
-    "read_password": null,
-    "read_phone": null,
-    "read_rating": null,
-    "read_richtext": null,
-    "read_tag": null,
-    "read": null,
-    "read_textarea": null,
-    "read_time": null,
-    "read_toggle": null,
-    "read_video": null,
-    "display_file": null,
-    "display_html": null,
-    "display_iframe": null,
-    "display_image": null,
-    "display_latex": null,
-    "display_link": null,
-    "display_markdown": null,
-    "display_pandas": null,
-    "display_plotly": null,
-    "display_progress": null,
-    "display": null,
-    "Page": null,
-    "reactive": null,
-    "run_steps": null
+    }
   },
   "abstra.hooks": {
     "get_raw_request": {
@@ -6967,9 +6897,7 @@
       "examples": []
     }
   },
-  "abstra.logging": {
-    "logger": null
-  },
+  "abstra.logging": {},
   "abstra.messages": {
     "send_email": {
       "object_type": "function",
@@ -7786,7 +7714,7 @@
     },
     "get_trigger_task": {
       "object_type": "function",
-      "description": "Retrieve the task that triggered the current execution. Returns: Task: The task object that triggered this execution.",
+      "description": "Retrieve the task that triggered the current execution of a task. This should be called only in tasklet stages, never in forms, jobs or hooks. Returns: Task: The task object that triggered this execution.",
       "params": [],
       "return_type": "abstra_internals.controllers.sdk.sdk_tasks.Task",
       "examples": []
@@ -7836,10 +7764,5 @@
       "examples": []
     }
   },
-  "abstra.types": {
-    "AbstraOption": null,
-    "FileResponse": null,
-    "PhoneResponse": null,
-    "AppointmentSlot": null
-  }
+  "abstra.types": {}
 }

@@ -71,20 +71,6 @@ def prompt(
     )
 
 
-def parse_document(document_path: Path, model: str) -> dict:
-    """
-    Parse a document using the specified AI model.
-    Args:
-        document_path (Path): The path to the document to be parsed.
-        model (str): The AI model to use for parsing.
-    Returns:
-        dict: The parsed document data.
-    Raises:
-        ValueError: If the document path is invalid or the model is not supported.
-    """
-    return SDKContextStore.get_by_thread().ai_sdk.parse_document(document_path, model)
-
-
 def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
     """
     Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.
@@ -95,7 +81,7 @@ def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
     Raises:
         ValueError: If the document path is invalid or the parsing fails.
     """
-    data = parse_document(document_path, "nfse")
+    data = SDKContextStore.get_by_thread().ai_sdk.parse_document(document_path, "nfse")
     return CloudApiCliModelsNfseResponse.from_dict(data)
 
 
@@ -109,6 +95,7 @@ def parse_boleto(document_path: Path) -> CloudApiCliModelsBoletoResponse:
     Raises:
         ValueError: If the document path is invalid or the parsing fails.
     """
-    data = parse_document(document_path, "boleto")
-    return CloudApiCliModelsBoletoResponse.from_dict(data)
+    data = SDKContextStore.get_by_thread().ai_sdk.parse_document(
+        document_path, "boleto"
+    )
     return CloudApiCliModelsBoletoResponse.from_dict(data)
