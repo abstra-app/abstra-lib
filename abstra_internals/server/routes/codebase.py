@@ -3,7 +3,10 @@ import os
 import flask
 import flask_sock
 
-from abstra_internals.contracts_generated import AbstraLibApiEditorFilesRenameRequest
+from abstra_internals.contracts_generated import (
+    AbstraLibApiEditorFilesRenameRequest,
+    AbstraLibApiEditorFilesSafeEditRequestItem,
+)
 from abstra_internals.controllers.codebase import CodebaseController
 from abstra_internals.controllers.codebase_events import CodebaseEventController
 from abstra_internals.logger import AbstraLogger
@@ -46,10 +49,16 @@ def get_editor_bp(repos: Repositories):
     def _get_file(path):
         return controller.get_file(path)
 
-    @bp.put("/files/<path:path>")
+    @bp.put("/files/safe/<path:path>")
     def _edit_file(path):
-        data = flask.request.get_data()
-        return controller.edit_file(path, data).to_dict()
+        json = flask.request.json
+        if json is None:
+            flask.abort(400)
+        reqs = [
+            AbstraLibApiEditorFilesSafeEditRequestItem.from_dict(item) for item in json
+        ]
+
+        return controller.edit_file(path, reqs).to_dict()
 
     @bp.post("/files/<path:path>")
     def _create_file(path):

@@ -1,7 +1,7 @@
 import threading
 import time
 from pathlib import Path
-from typing import Callable, List, Literal
+from typing import Callable, Dict, List, Literal, Optional
 
 from watchdog.events import (
     FileCreatedEvent,
@@ -14,6 +14,7 @@ from watchdog.events import (
 from watchdog.observers import Observer
 
 from abstra_internals.settings import Settings
+from abstra_internals.utils.crdt import CRDTManager
 
 IGNORED_PATHS = [
     ".abstra/",
@@ -21,7 +22,9 @@ IGNORED_PATHS = [
     "__pycache__",
 ]
 FSEventType = Literal["changed", "created", "deleted", "moved"]
-Handler = Callable[[Path, FSEventType], None]
+Handler = Callable[[Path, FSEventType, Optional[str]], None]
+
+crdt_managers: Dict[str, CRDTManager] = {}
 
 
 class FileWatcher(FileSystemEventHandler):
@@ -37,12 +40,13 @@ class FileWatcher(FileSystemEventHandler):
         self._observer = observer
 
     def dispatch(self, event: FileSystemEvent):
-        filepath = Path(event.src_path)
+        filepath = Path(event.src_path).absolute()
         filepath_str = str(filepath)
 
         if self.should_ignore_path(filepath):
             return
 
+        content = None
         if isinstance(event, FileCreatedEvent):
             event_type = "created"
         elif isinstance(event, FileDeletedEvent):
@@ -51,6 +55,20 @@ class FileWatcher(FileSystemEventHandler):
             event_type = "moved"
         elif isinstance(event, FileModifiedEvent):
             event_type = "changed"
+            content = (
+                filepath.read_text(encoding="utf-8") if filepath.is_file() else None
+            )
+
+            if filepath_str not in crdt_managers or crdt_managers[filepath_str] is None:
+                crdt_managers[filepath_str] = CRDTManager(file_path=filepath)
+
+            old_content = crdt_managers[filepath_str].get_content()
+            if content is not None and old_content != content:
+                crdt_managers[filepath_str].apply_operations_from_diff(content)
+                new_content = crdt_managers[filepath_str].get_content()
+                if content != new_content:
+                    filepath.write_text(new_content, encoding="utf-8")
+
         else:
             return
 
@@ -61,7 +79,9 @@ class FileWatcher(FileSystemEventHandler):
             time.sleep(0.01)
             threads = []
             for handler in self.handlers:
-                thread = threading.Thread(target=handler, args=(filepath, event_type))
+                thread = threading.Thread(
+                    target=handler, args=(filepath, event_type, content)
+                )
                 thread.start()
                 threads.append(thread)
 

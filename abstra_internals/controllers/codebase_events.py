@@ -1,7 +1,7 @@
 import json
 import threading
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import flask_sock
 from dotenv import load_dotenv
@@ -34,9 +34,11 @@ class CodebaseEventController:
                 pass
 
     @classmethod
-    def broadcast_changes(cls, filepath: Path, event: FSEventType):
+    def broadcast_changes(
+        cls, filepath: Path, event: FSEventType, content: Optional[str]
+    ):
         message = AbstraLibApiEditorCodebaseEventsMessage(
-            filepath=str(filepath), event=event
+            filepath=str(filepath), event=event, content=content
         )
         for listener in cls.listeners:
             try:
@@ -47,7 +49,7 @@ class CodebaseEventController:
     def __init__(self, repositories: Repositories):
         self.repositories = repositories
 
-    def reload_env(self, filepath: Path, event: FSEventType):
+    def reload_env(self, filepath: Path, event: FSEventType, content: Optional[str]):
         if filepath.name == ".env":
             AbstraLogger.info("Reloading .env and all modules")
             load_dotenv(filepath, override=True)
@@ -55,7 +57,9 @@ class CodebaseEventController:
                 reload_module(dep)
             return
 
-    def reload_modules(self, filepath: Path, event: FSEventType):
+    def reload_modules(
+        self, filepath: Path, event: FSEventType, content: Optional[str]
+    ):
         if filepath.suffix == ".py":
             resolved_deps = [
                 dep.resolve()
@@ -67,5 +71,5 @@ class CodebaseEventController:
                 reload_module(filepath)
                 return
 
-    def lint_files(self, filepath: Path, event: FSEventType):
+    def lint_files(self, filepath: Path, event: FSEventType, content: Optional[str]):
         self.repositories.linter.update_checks()

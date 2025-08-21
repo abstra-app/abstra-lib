@@ -8,17 +8,20 @@ import flask
 
 from abstra_internals.contracts_generated import (
     AbstraLibApiEditorFilesDeleteResponse,
-    AbstraLibApiEditorFilesEditResponse,
     AbstraLibApiEditorFilesListResponse,
     AbstraLibApiEditorFilesListResponseItem,
     AbstraLibApiEditorFilesListResponseItemStagesItem,
     AbstraLibApiEditorFilesMkdirResponse,
     AbstraLibApiEditorFilesRenameResponse,
+    AbstraLibApiEditorFilesSafeEditRequest,
+    AbstraLibApiEditorFilesSafeEditResponse,
     AbstraLibApiEditorFilesSettingsResponse,
     CommonFileNode,
 )
 from abstra_internals.repositories.factory import Repositories
+from abstra_internals.services.file_watcher import crdt_managers
 from abstra_internals.services.fs import SKIPPED_DIRNAMES, FileSystemService
+from abstra_internals.utils.crdt import CRDTManager
 
 
 class CodebaseController:
@@ -125,14 +128,24 @@ class CodebaseController:
 
         return AbstraLibApiEditorFilesRenameResponse(ok=True)
 
-    def edit_file(self, path, content: bytes) -> AbstraLibApiEditorFilesEditResponse:
+    def edit_file(
+        self, path, ops: AbstraLibApiEditorFilesSafeEditRequest
+    ) -> AbstraLibApiEditorFilesSafeEditResponse:
         if isinstance(path, str):
-            path = Path(path)
+            path = Path(path).absolute()
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
 
-        path.write_bytes(content)
-        return AbstraLibApiEditorFilesEditResponse(ok=True)
+        if str(path) not in crdt_managers or crdt_managers[str(path)] is None:
+            crdt_managers[str(path)] = CRDTManager(file_path=path)
+
+        for op in ops:
+            crdt_managers[str(path)].apply_operation(op)
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(crdt_managers[str(path)].get_content())
+
+        return AbstraLibApiEditorFilesSafeEditResponse(ok=True)
 
     def get_file(self, path):
         if isinstance(path, str):
