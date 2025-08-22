@@ -8,7 +8,7 @@ from PIL import Image
 from abstra_internals.contracts_generated import (
     CloudApiCliAiV2PromptPostRequestMessagesItem,
     CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage,
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImage,
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl,
     CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText,
 )
 from abstra_internals.controllers.sdk.sdk_ai import AiSDKController
@@ -46,8 +46,8 @@ class TestAiSDKController(unittest.TestCase):
             role="user",
             content=[
                 CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage(
-                    type="image",
-                    image=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImage(
+                    type="image_url",
+                    image_url=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl(
                         url=url
                     ),
                 )
@@ -95,8 +95,8 @@ class TestAiSDKController(unittest.TestCase):
             role="user",
             content=[
                 CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage(
-                    type="image",
-                    image=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImage(
+                    type="image_url",
+                    image_url=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl(
                         url=b64.encode_base_64(image_io)
                     ),
                 )
@@ -121,8 +121,8 @@ class TestAiSDKController(unittest.TestCase):
             role="user",
             content=[
                 CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage(
-                    type="image",
-                    image=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImage(
+                    type="image_url",
+                    image_url=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl(
                         url=url
                     ),
                 )

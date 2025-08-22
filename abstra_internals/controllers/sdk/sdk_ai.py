@@ -12,7 +12,7 @@ from abstra_internals.contracts_generated import (
     CloudApiCliAiV2PromptPostRequestMessages,
     CloudApiCliAiV2PromptPostRequestMessagesItem,
     CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage,
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImage,
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl,
     CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText,
     CloudApiCliAiV2PromptPostRequestTools,
     CloudApiCliAiV2PromptPostRequestToolsItem,
@@ -54,8 +54,8 @@ class AiSDKController:
             role="user",
             content=[
                 CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage(
-                    type="image",
-                    image=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImage(
+                    type="image_url",
+                    image_url=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl(
                         url=url
                     ),
                 )
@@ -177,26 +177,6 @@ class AiSDKController:
                     ],
                 )
             )
-
-        for prompt in prompts:
-            messages.extend(self._make_messages(prompt))
-
-        tools: CloudApiCliAiV2PromptPostRequestTools = []
-        if format:
-            function = build_function_tool_call(format)
-            tools.append(
-                CloudApiCliAiV2PromptPostRequestToolsItem(
-                    type="function", function=function
-                )
-            )
-
-        response = self.ai_client.prompt(
-            prompt_request_body=CloudApiCliAiV2PromptPostRequest(
-                messages=messages,
-                tools=tools,
-                temperature=temperature,
-            )
-        )
 
         for prompt in prompts:
             messages.extend(self._make_messages(prompt))
