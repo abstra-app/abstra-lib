@@ -5,6 +5,7 @@ from abstra_internals.interface.sdk.connectors import (
     get_gmail_credentials,
     get_google_cal_credentials,
     get_gsheets_credentials,
+    run_connection_action,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "get_gmail_credentials",
     "get_bigquery_credentials",
     "get_google_cal_credentials",
+    "run_connection_action",
 ]

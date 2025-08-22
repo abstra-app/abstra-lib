@@ -31,6 +31,24 @@ def get_gsheets_credentials(connection_name: str = "google-sheets"):
     return create_abstra_google_credentials(connection_name)
 
 
+def run_connection_action(connection_name: str, action: str, payload: dict = {}):
+    """
+    Run a connection action with the specified payload.
+
+    Args:
+        connection_name (str): The name of the connection.
+        action (str): The action to perform on the connection.
+        payload (dict): Additional data to pass to the action. Defaults to an empty dictionary.
+
+    Returns:
+        Any: The result of the action performed on the connection.
+    """
+    context = SDKContextStore.get_by_thread()
+    return context.repositories.connectors.run_connection_action(
+        connection_name, action, payload
+    )
+
+
 def get_gdrive_credentials(connection_name: str = "google-drive"):
     """
     Get Google Drive credentials.
