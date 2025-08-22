@@ -13,6 +13,7 @@ from abstra_internals.controllers.codebase_events import CodebaseEventController
 from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import HOST
+from abstra_internals.interface.cli.endpoint_selector import select_cloud_api_endpoint
 from abstra_internals.interface.cli.messages import serve_message
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.logs_watcher import LogsWatcher, on_logs_update
@@ -83,6 +84,9 @@ def editor(headless: bool):
     ensure_certificates()
 
     load_dotenv(Settings.root_path / ".env")
+
+    os.environ["CLOUD_API_ENDPOINT"] = select_cloud_api_endpoint()
+
     serve_message()
     check_latest_version()
     AbstraLogger.init("local")

@@ -29,9 +29,9 @@ OIDC_CLIENT_ID = lambda: os.getenv("ABSTRA_OIDC_CLIENT_ID")  # noqa: E731
 OIDC_AUTHORITY = lambda: os.getenv("ABSTRA_OIDC_AUTHORITY")  # noqa: E731
 
 # CLOUD API
-CLOUD_API_ENDPOINT = (
-    os.getenv("CLOUD_API_ENDPOINT") or "https://cloud.abstra.io/api/cloud-api"
-)
+CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
+
+CLOUDFRONT_CLOUD_API_ENDPOINT = "https://cloud.abstra.io/api/cloud-api"
 
 CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 
