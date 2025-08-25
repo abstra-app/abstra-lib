@@ -1,5 +1,7 @@
 import os
 
+import requests
+
 # LOGS
 DEFAULT_LOGLEVEL = "WARNING"
 LOGLEVEL = lambda: os.getenv("ABSTRA_LOGLEVEL", DEFAULT_LOGLEVEL)  # noqa: E731
@@ -28,10 +30,25 @@ PUBLIC_KEY = os.getenv("ABSTRA_JWT_PUBLIC_KEY_PEM")
 OIDC_CLIENT_ID = lambda: os.getenv("ABSTRA_OIDC_CLIENT_ID")  # noqa: E731
 OIDC_AUTHORITY = lambda: os.getenv("ABSTRA_OIDC_AUTHORITY")  # noqa: E731
 
-# CLOUD API
-CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or "https://cloud-api.abstra.cloud"
 
+# CLOUD API
+CLOUD_API_DEFAULT_ENDPOINT = "https://cloud-api.abstra.cloud"
 CLOUDFRONT_CLOUD_API_ENDPOINT = "https://cloud.abstra.io/api/cloud-api"
+
+
+def select_cloud_api_endpoint() -> str:
+    try:
+        response = requests.get(f"{CLOUD_API_DEFAULT_ENDPOINT}/healthcheck", timeout=10)
+        if response.status_code == 200:
+            return CLOUD_API_DEFAULT_ENDPOINT
+    except Exception as e:
+        print(f"Healthcheck failed for {CLOUD_API_DEFAULT_ENDPOINT}: {e}")
+
+    return CLOUDFRONT_CLOUD_API_ENDPOINT
+
+
+CLOUD_API_ENDPOINT = os.getenv("CLOUD_API_ENDPOINT") or select_cloud_api_endpoint()
+
 
 CLOUD_API_CLI_URL = f"{CLOUD_API_ENDPOINT}/cli"
 
