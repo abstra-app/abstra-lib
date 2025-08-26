@@ -65,12 +65,12 @@ class FileSystemStorage(Generic[T]):
     def _load(self, id: str) -> Optional[T]:
         file_path = self._get_file_path(id)
         if file_path.exists():
-            with file_path.open("r", encoding="utf-8") as f:
-                try:
+            try:
+                with file_path.open("r", encoding="utf-8") as f:
                     dto = json.load(f)
-                    return self.model(**dto)
-                except Exception as e:
-                    AbstraLogger.capture_exception(e)
-                    self.delete(id)
+                return self.model(**dto)
+            except Exception as e:
+                AbstraLogger.capture_exception(e)
+                self.delete(id)
 
         return None

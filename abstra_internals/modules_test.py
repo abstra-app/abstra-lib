@@ -1,4 +1,6 @@
-from unittest import TestCase
+import os
+import platform
+from unittest import TestCase, skipIf
 
 from abstra_internals.modules import import_as_new, reload_module
 from abstra_internals.repositories.project.project import (
@@ -6,6 +8,24 @@ from abstra_internals.repositories.project.project import (
     ScriptStage,
 )
 from tests.fixtures import clear_dir, init_dir
+
+
+def can_create_symlinks():
+    if platform.system() != "Windows":
+        return True
+
+    try:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_dir = os.path.join(temp_dir, "test_target")
+            os.makedirs(test_dir)
+            test_link = os.path.join(temp_dir, "test_link")
+            os.symlink(test_dir, test_link, target_is_directory=True)
+            os.unlink(test_link)
+            return True
+    except (OSError, NotImplementedError):
+        return False
 
 
 class TestImportAsNewAndReload(TestCase):
@@ -102,6 +122,10 @@ class TestReload(TestCase):
         main_module = import_as_new("main.py")
         self.assertEqual(main_module.y, 42)
 
+    @skipIf(
+        not can_create_symlinks(),
+        "Symbolic links not supported or insufficient privileges",
+    )
     def test_reload_nested_module_symlinked_root(self):
         project = self.project_repository.load()
 

@@ -285,7 +285,15 @@ FILE_TYPES = {
 
 
 def is_relative_path(path: str) -> bool:
-    return not path.startswith("<") and not path.startswith("/")
+    if path.startswith("<"):
+        return False
+
+    from pathlib import Path
+
+    try:
+        return not Path(path).is_absolute()
+    except (OSError, ValueError):
+        return not path.startswith("/") and not path.startswith("<")
 
 
 def path2module(path: Path) -> str:

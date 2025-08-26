@@ -17,7 +17,9 @@ class TestDebug(TestCase):
         except Exception as exc:
             debug_data = make_exception_debug_data(exc)
 
-        self.maxDiff = None
+        import os
+
+        expected_filename = os.path.normcase(os.path.normpath(__file__))
 
         self.assertEqual(
             debug_data,
@@ -25,7 +27,7 @@ class TestDebug(TestCase):
                 debug=dict(
                     stack=[
                         dict(
-                            filename=__file__,
+                            filename=expected_filename,
                             lineno=16,
                             name="test_make_debug_data_from_exception",
                             locals=mock.ANY,
@@ -38,14 +40,18 @@ class TestDebug(TestCase):
     def test_make_debug_data_from_frames(self):
         debug_data = make_frame_debug_data(stack())
 
+        import os
+
+        expected_filename = os.path.normcase(os.path.normpath(__file__))
+
         self.assertEqual(
             debug_data,
             dict(
                 debug=dict(
                     stack=[
                         dict(
-                            filename=__file__,
-                            lineno=39,
+                            filename=expected_filename,
+                            lineno=41,
                             name="test_make_debug_data_from_frames",
                             locals=mock.ANY,
                         )
@@ -64,7 +70,14 @@ class TestDebug(TestCase):
         except Exception as exc:
             debug_data = make_exception_debug_data(exc)
 
-        self.maxDiff = None
+        import os
+
+        expected_filename = os.path.normcase(os.path.normpath(__file__))
+        expected_module_filename = os.path.normcase(
+            os.path.normpath(
+                str((Path(__file__) / "../resources/make_debug/module.py").resolve())
+            )
+        )
 
         self.assertEqual(
             debug_data,
@@ -72,24 +85,20 @@ class TestDebug(TestCase):
                 debug=dict(
                     stack=[
                         dict(
-                            filename=__file__,
-                            lineno=62,
+                            filename=expected_filename,
+                            lineno=68,
                             name="test_make_debug_data_nested",
                             locals=mock.ANY,
                         ),
                         dict(
-                            filename=str(
-                                (
-                                    Path(__file__) / "../resources/make_debug/module.py"
-                                ).resolve()
-                            ),
+                            filename=expected_module_filename,
                             lineno=2,
                             name="func",
                             locals=mock.ANY,
                         ),
                         dict(
-                            filename=__file__,
-                            lineno=59,
+                            filename=expected_filename,
+                            lineno=65,
                             name="outer_func",
                             locals=mock.ANY,
                         ),
@@ -110,7 +119,13 @@ class TestDebug(TestCase):
         except Exception as exc:
             debug_data = make_exception_debug_data(exc)
 
-        self.maxDiff = None
+        import os
+
+        expected_module_filename = os.path.normcase(
+            os.path.normpath(
+                str((Path(__file__) / "../resources/make_debug/module.py").resolve())
+            )
+        )
 
         self.assertEqual(
             debug_data,
@@ -118,11 +133,7 @@ class TestDebug(TestCase):
                 debug=dict(
                     stack=[
                         dict(
-                            filename=str(
-                                (
-                                    Path(__file__) / "../resources/make_debug/module.py"
-                                ).resolve()
-                            ),
+                            filename=expected_module_filename,
                             lineno=2,
                             name="func",
                             locals=mock.ANY,

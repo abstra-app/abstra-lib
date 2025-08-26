@@ -20,8 +20,13 @@ def representations(locals: typing.Dict):
 
 
 def _make_debug_item_from_info(info: inspect.FrameInfo):
+    # Normalize path case on Windows for consistent comparison
+    import os
+
+    filename = os.path.normcase(os.path.normpath(info.filename))
+
     return {
-        "filename": info.filename,
+        "filename": filename,
         "lineno": info.lineno,
         "name": info.function,
         "locals": representations(info.frame.f_locals),
@@ -31,10 +36,21 @@ def _make_debug_item_from_info(info: inspect.FrameInfo):
 def _make_debug_item_from_stack(
     frame_summary: traceback.FrameSummary, legacy_filename: str
 ):
+    # Normalize path case on Windows for consistent comparison
+    import os
+
+    filename = frame_summary.filename
+    if filename != "<string>":
+        filename = os.path.normcase(os.path.normpath(filename))
+
+    legacy_filename_normalized = ""
+    if legacy_filename and legacy_filename != "<string>":
+        legacy_filename_normalized = os.path.normcase(os.path.normpath(legacy_filename))
+
     return {
-        "filename": legacy_filename
+        "filename": legacy_filename_normalized
         if frame_summary.filename == "<string>"
-        else frame_summary.filename,
+        else filename,
         "lineno": frame_summary.lineno,
         "name": frame_summary.name,
         "locals": representations(frame_summary.locals or {}),
@@ -48,7 +64,8 @@ def make_frame_debug_data(frames: typing.List[inspect.FrameInfo]):
             "stack": [
                 _make_debug_item_from_info(info)
                 for info in (frames)
-                if root_path in info.filename or is_relative_path(info.filename)
+                if root_path.lower() in info.filename.lower()
+                or is_relative_path(info.filename)
             ]
         }
     }
@@ -72,7 +89,7 @@ def make_exception_debug_data(e: Exception):
             "stack": [
                 _make_debug_item_from_stack(info, filename)
                 for info in (frames)
-                if root_path in info.filename
+                if root_path.lower() in info.filename.lower()
                 or is_relative_path(info.filename)
                 or info.filename == "<string>"
             ]

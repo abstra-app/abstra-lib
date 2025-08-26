@@ -113,8 +113,8 @@ class TestEncoding:
             # ignore _test and test_ files
             if file.name.endswith("_test.py") or file.name.startswith("test_"):
                 continue
-            # Read the file's content
-            content = file.read_text()
+            # Read the file's content with UTF-8 encoding to handle international characters
+            content = file.read_text(encoding="utf-8")
             # Parse the content
             parsed = parse(content)
             # ensure every .write_text(...) attr call has encoding='utf-8'
