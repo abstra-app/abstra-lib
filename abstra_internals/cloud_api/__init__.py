@@ -99,14 +99,20 @@ def connect_tunnel():
         while True:
             headers = resolve_headers()
             if headers is None:
+                await asyncio.sleep(5)
                 continue
             try:
                 async with websockets.connect(
-                    uri=url, additional_headers=headers
+                    uri=url,
+                    additional_headers=headers,
+                    ping_interval=20,
+                    ping_timeout=10,
+                    close_timeout=10,
                 ) as ws:
+                    print("WebSocket connection established")
                     while True:
                         try:
-                            message = await ws.recv()
+                            message = await asyncio.wait_for(ws.recv(), timeout=30.0)
                             assert isinstance(message, str)
                             message_dict = json.loads(message)
 
@@ -162,6 +168,13 @@ def connect_tunnel():
                                     print(
                                         f"You can test your hooks locally by sending requests to: {Fore.GREEN}{public_url}/_hooks/:hook-path{Fore.RESET}"
                                     )
+                        except asyncio.TimeoutError:
+                            try:
+                                await ws.ping()
+                                continue
+                            except Exception:
+                                print("WebSocket ping failed, connection lost")
+                                break
                         except websockets.exceptions.ConnectionClosedOK:
                             print("WebSocket connection closed OK")
                             await asyncio.sleep(5)
