@@ -10,7 +10,15 @@ from abstra_internals.consts.filepaths import (
 )
 from abstra_internals.settings import Settings
 
-SKIPPED_DIRNAMES = {"__pycache__", "venv", ".venv", ".vscode", ".cursor", ".ruff_cache"}
+SKIPPED_DIRNAMES = {
+    "__pycache__",
+    "venv",
+    ".venv",
+    ".vscode",
+    ".cursor",
+    ".ruff_cache",
+    ".abstra",
+}
 
 
 class FileSystemService:
