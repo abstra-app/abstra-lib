@@ -90,9 +90,9 @@ class SessionPathMessage(BaseModel):
 
 
 def connect_tunnel():
-    url = f"{CLOUD_API_ENDPOINT}/tunnel/connect".replace("https://", "wss://").replace(
-        "http://", "ws://"
-    )
+    url = f"{CLOUD_API_ENDPOINT}/tunnel/connect?format=str".replace(
+        "https://", "wss://"
+    ).replace("http://", "ws://")
 
     async def loop():
         await asyncio.sleep(1)
