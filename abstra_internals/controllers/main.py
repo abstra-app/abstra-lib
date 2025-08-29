@@ -3,7 +3,7 @@ import pkgutil
 import webbrowser
 from pathlib import Path
 from shutil import move
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mktemp
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import flask
@@ -389,6 +389,8 @@ class MainController:
         Copywritings:
             Write content to a file
             Writing content to a file...
+
+        Always test the code in chunks using execute_code_snippet before writing any .py code
         """
         Settings.root_path.joinpath(file).write_text(content, encoding="utf-8")
 
@@ -1144,7 +1146,7 @@ class MainController:
             id (str): Unique identifier of the stage to update.
             changes (Dict[str, Any]): Dictionary containing the properties to update.
                 Special keys:
-                - 'code_content': Updates the stage's Python code file. (Always check abstra modules before creating any file)
+                - 'code_content': Updates the stage's Python code file. (Always check abstra modules before creating any file). Always execute snippets of code with `execute_code_snippet` before using them.
                 - 'test_data': Updates the project's test data
                 - Other keys update stage metadata (title, position, etc.)
 
@@ -1669,3 +1671,25 @@ class MainController:
             client=client,
             context=context,
         ).run()
+
+    def execute_code_snippet(self, code: str, title: str = "Debug Snippet"):
+        """
+        Run a code snippet immediately.
+
+        Use this code for testing parts of the code you want to build before writing, debugging or auxiliary tasks.
+        """
+
+        tempfile = Path(mktemp(suffix=".py"))
+
+        stage = self.create_job(title, str(tempfile), (0, 0))
+        tempfile.write_text(code)
+
+        execution_result = ExecutionController(
+            repositories=self.repositories,
+            stage=stage,
+            context=JobContext(),
+        ).run()
+
+        self.delete_job(stage.id, remove_file=True)
+
+        return execution_result
