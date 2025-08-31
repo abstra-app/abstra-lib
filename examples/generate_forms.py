@@ -2,10 +2,9 @@ import json
 import os
 import shutil
 import tempfile
+from multiprocessing import Pipe, Queue
 from pathlib import Path
-from typing import (
-    Union,
-)
+from typing import Union
 
 import flask_sock
 import libcst as cst
@@ -22,6 +21,7 @@ from abstra_internals.repositories.project.project import (
     LocalProjectRepository,
 )
 from abstra_internals.settings import Settings
+from abstra_internals.utils.websockets import bind_ws_with_connection
 
 
 class TypeHintRemoverCST(cst.CSTTransformer):
@@ -173,11 +173,9 @@ class HeadlessRenderer:
 
         context = FormContext(request=request)
 
-        client = FormClient(
-            context=context,
-            production_mode=True,
-            ws=ws,
-        )
+        parent_conn, child_conn = Pipe()
+        bind_ws_with_connection(ws, parent_conn, block=False)
+        client = FormClient(context=context, production_mode=True, conn=child_conn)
 
         ExecutionController(
             repositories=repositories,
@@ -214,7 +212,7 @@ def render_examples():
     project_repository.initialize()
     proj = project_repository.load()
 
-    repos = build_editor_repositories()
+    repos = build_editor_repositories(Queue())
 
     files_with_output = list(Path(__file__).parent.rglob("*.form.py"))
     files_without_output = list(Path(__file__).parent.rglob("*.raw.py"))

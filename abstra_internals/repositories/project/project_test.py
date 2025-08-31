@@ -1,5 +1,7 @@
+from multiprocessing import Queue
 from unittest import TestCase
 
+from abstra_internals.repositories.consumer import EditorConsumer
 from abstra_internals.repositories.factory import build_editor_repositories
 from abstra_internals.repositories.project.project import (
     FormStage,
@@ -14,7 +16,10 @@ from tests.fixtures import clear_dir, init_dir
 class ProjectTests(TestCase):
     def setUp(self):
         self.root = init_dir()
-        self.project_repository = build_editor_repositories().project
+        self.queue = Queue()
+        repos = build_editor_repositories(self.queue)
+        self.project_repository = repos.project
+        self.consumer = EditorConsumer(self.queue)
 
     def tearDown(self) -> None:
         clear_dir(self.root)

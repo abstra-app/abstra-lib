@@ -1,6 +1,7 @@
 import datetime
 import pkgutil
 import webbrowser
+from multiprocessing import Pipe
 from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp, mktemp
@@ -11,6 +12,7 @@ import flask
 from abstra_internals.cloud_api import get_api_key_info, get_project_info
 from abstra_internals.consts.filepaths import TEST_DATA_FILEPATH
 from abstra_internals.controllers.execution.execution import ExecutionController
+from abstra_internals.controllers.execution.execution_client import HeadlessClient
 from abstra_internals.controllers.execution.execution_client_form import FormClient
 from abstra_internals.controllers.execution.execution_client_hook import HookClient
 from abstra_internals.credentials import (
@@ -66,6 +68,7 @@ from abstra_internals.templates import (
 from abstra_internals.utils.ai import AiWs
 from abstra_internals.utils.file import module2path, path2module
 from abstra_internals.utils.validate import validate_json
+from abstra_internals.utils.websockets import bind_ws_with_connection
 
 
 class UnknownNodeTypeError(Exception):
@@ -1547,12 +1550,13 @@ class MainController:
         if not job:
             raise Exception(f"Job with id {id} not found")
 
-        print(f"Running job {job.id} ({job.title})")
-
+        parent_conn, child_conn = Pipe()
+        ctx = JobContext()
         return ExecutionController(
             repositories=self.repositories,
             stage=job,
-            context=JobContext(),
+            context=ctx,
+            client=HeadlessClient(context=ctx, conn=child_conn),
         ).run()
 
     def debug_run_hook(self, id: str, request: Request):
@@ -1579,14 +1583,9 @@ class MainController:
 
         context = HookContext(
             request=request,
-            response=Response(
-                body="",
-                headers={},
-                status=200,
-            ),
         )
-
-        client = HookClient(context=context)
+        parent_conn, child_conn = Pipe()
+        client = HookClient(context=context, conn=child_conn)
 
         run_data = ExecutionController(
             repositories=self.repositories,
@@ -1595,13 +1594,13 @@ class MainController:
             context=context,
         ).run()
 
-        if context.response is None or client.context.response is None:
-            flask.abort(500)
+        response = parent_conn.recv()
+        assert isinstance(response, Response)
 
         return {
-            "body": client.context.response.body,
-            "status": context.response.status,
-            "headers": context.response.headers,
+            "body": response.body,
+            "status": response.status,
+            "headers": response.headers,
             **run_data,
         }
 
@@ -1631,10 +1630,14 @@ class MainController:
         if not task_id:
             raise Exception(f"Tasklet with id {id} not found")
 
+        parent_conn, child_conn = Pipe()
+        ctx = ScriptContext(task_id=task_id)
+
         return ExecutionController(
             repositories=self.repositories,
             stage=script,
-            context=ScriptContext(task_id=task_id),
+            context=ctx,
+            client=HeadlessClient(context=ctx, conn=child_conn),
         ).run()
 
     def debug_run_form_with_ai(self, id, prompt: str, url_params: Dict[str, str] = {}):
@@ -1659,8 +1662,10 @@ class MainController:
         if not form:
             raise Exception(f"Form with id {id} not found")
 
+        parent_conn, child_conn = Pipe()
+        bind_ws_with_connection(ws, parent_conn, block=False)
         client = FormClient(
-            ws=ws,  # type: ignore
+            conn=child_conn,
             context=context,
             production_mode=False,
         )
@@ -1684,10 +1689,13 @@ class MainController:
         stage = self.create_job(title, str(tempfile), (0, 0))
         tempfile.write_text(code)
 
+        parent_conn, child_conn = Pipe()
+        ctx = JobContext()
         execution_result = ExecutionController(
             repositories=self.repositories,
             stage=stage,
-            context=JobContext(),
+            context=ctx,
+            client=HeadlessClient(context=ctx, conn=child_conn),
         ).run()
 
         self.delete_job(stage.id, remove_file=True)

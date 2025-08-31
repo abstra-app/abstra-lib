@@ -1,3 +1,4 @@
+from multiprocessing import Pipe
 from pathlib import Path
 
 from abstra_internals.controllers.execution.execution import ExecutionController
@@ -24,8 +25,7 @@ class ExecutionControllerTest(BaseTest):
                 headers={"auth": "some_secret_token"},
                 query_params={"c": "3"},
                 method="GET",
-            ),
-            response=Response(headers={}, status=200, body=""),
+            )
         )
 
         self.project = self.repositories.project.load(include_disabled_stages=False)
@@ -39,7 +39,8 @@ class ExecutionControllerTest(BaseTest):
         self.project.add_stage(self.stage)
         self.repositories.project.save(self.project)
 
-        self.hook_client = HookClient(self.context)
+        self.parent_conn, child_conn = Pipe()
+        self.hook_client = HookClient(self.context, conn=child_conn)
 
     def test_run_initial_returns_dto(self):
         ExecutionController(
@@ -49,7 +50,10 @@ class ExecutionControllerTest(BaseTest):
             client=self.hook_client,
         ).run()
 
-        if not self.context.response:
+        response = self.parent_conn.recv()
+        assert isinstance(response, Response)
+
+        if not response:
             self.fail("Response was not set")
 
-        self.assertEqual(self.context.response.status, 200)
+        self.assertEqual(response.status, 200)
