@@ -11,7 +11,7 @@ def get_cloud_app(controller: MainController):
     app = flask.Flask(__name__)
     app.config["SOCK_SERVER_OPTIONS"] = {"subprotocols": ["default"]}
     app.url_map.strict_slashes = False
-    flask_cors.CORS(app)
+    flask_cors.CORS(app, supports_credentials=True)
 
     @app.after_request
     def add_security_headers(response):

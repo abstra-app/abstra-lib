@@ -29,7 +29,7 @@ def get_local_app(controller: MainController) -> flask.Flask:
     app = flask.Flask(__name__)
     app.config["SOCK_SERVER_OPTIONS"] = {"subprotocols": ["default"]}
     app.url_map.strict_slashes = False
-    flask_cors.CORS(app)
+    flask_cors.CORS(app, supports_credentials=True)
 
     @app.route("/_healthcheck")
     def _healthcheck():

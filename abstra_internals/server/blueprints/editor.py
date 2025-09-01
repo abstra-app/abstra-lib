@@ -1,5 +1,6 @@
 import flask
 
+from abstra_internals.cloud_api import save_editor_auth_token_to_file
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import PROJECT_ID
 from abstra_internals.logger import AbstraLogger
@@ -147,6 +148,8 @@ def get_editor_auth_bp():
 
         response.headers["Location"] = "/_editor/"
         response.status_code = 302
+
+        save_editor_auth_token_to_file(token)
 
         response.set_cookie(
             "editor_auth",

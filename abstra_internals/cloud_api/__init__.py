@@ -118,9 +118,17 @@ def connect_tunnel():
 
                             if "method" in message_dict:
                                 request = TunnelRequest.model_validate_json(message)
+
+                                cookies = {}
+                                editor_auth_token = get_editor_auth_token_from_file()
+                                if editor_auth_token:
+                                    cookies["editor_auth"] = editor_auth_token
+
                                 kwargs: Any = dict(
                                     headers=request.headers,
                                     params=request.query,
+                                    cookies=cookies,
+                                    **dict(data=request.body if request.body else {}),
                                 )
 
                                 kwargs["json"] = request.body
@@ -228,3 +236,16 @@ def get_tunnel_secret_key() -> str:
     if not path.exists():
         refresh_tunnel_secret_key()
     return path.read_text(encoding="utf-8").strip()
+
+
+def get_editor_auth_token_from_file() -> str:
+    path = Settings.root_path / ".abstra" / "editor_auth_token"
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8").strip()
+
+
+def save_editor_auth_token_to_file(token: str):
+    path = Settings.root_path / ".abstra" / "editor_auth_token"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(token, encoding="utf-8")
