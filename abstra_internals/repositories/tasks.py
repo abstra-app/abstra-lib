@@ -210,7 +210,9 @@ class LocalTasksRepository(TasksRepository):
             and task.status == "pending"
             and self._where_matches(task, where)
         ]
-        pending_tasks = sorted(pending_tasks, key=lambda task: task.created.at)
+        pending_tasks = sorted(
+            pending_tasks, key=lambda task: task.created.at, reverse=True
+        )
 
         if limit is None:
             return pending_tasks[offset:]
@@ -225,7 +227,7 @@ class LocalTasksRepository(TasksRepository):
             for task in all_tasks
             if task.created.by_stage_id == stage_id and self._where_matches(task, where)
         ]
-        sent_tasks = sorted(sent_tasks, key=lambda task: task.created.at)
+        sent_tasks = sorted(sent_tasks, key=lambda task: task.created.at, reverse=True)
 
         if limit is None:
             return sent_tasks[offset:]
@@ -233,13 +235,15 @@ class LocalTasksRepository(TasksRepository):
 
     def get_stage_tasks(self, stage_id: str) -> List[TaskDTO]:
         all_tasks = self.fs_storage.load_all()
-        return [task for task in all_tasks if task.target_stage_id == stage_id]
+        stage_tasks = [task for task in all_tasks if task.target_stage_id == stage_id]
+        return sorted(stage_tasks, key=lambda task: task.created.at, reverse=True)
 
     def get_by_id(self, task_id: str) -> TaskDTO:
         return self.get(task_id)
 
     def get_all_tasks(self) -> List[TaskDTO]:
-        return self.fs_storage.load_all()
+        all_tasks = self.fs_storage.load_all()
+        return sorted(all_tasks, key=lambda task: task.created.at, reverse=True)
 
     def get_execution_sent_tasks(self, execution_id: str) -> List[TaskDTO]:
         all_tasks = self.fs_storage.load_all()
