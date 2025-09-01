@@ -128,7 +128,6 @@ def connect_tunnel():
                                     headers=request.headers,
                                     params=request.query,
                                     cookies=cookies,
-                                    **dict(data=request.body if request.body else {}),
                                 )
 
                                 kwargs["json"] = request.body
