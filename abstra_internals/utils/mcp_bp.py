@@ -20,10 +20,10 @@ def mcp_bp(functions: List[Callable]) -> Blueprint:
     for func in functions:
         if not callable(func):
             raise TypeError(f"Function {func} is not callable")
-        register_function(editor_bp, func, _registered_tools)
         func_name = func.__name__
         if hasattr(func, "_requires_approval"):
             func_name += "__req_approval__"
+        register_function(editor_bp, func, _registered_tools, func_name)
         _registered_functions[f"{func_name}"] = func
 
     # Create dynamic tool handler

@@ -71,7 +71,7 @@ class TunnelRequest(BaseModel):
     method: str
     path: str
     headers: dict
-    body: Optional[str]
+    body: Optional[dict]
     query: dict
     sessionPath: str
     requestId: str
@@ -90,7 +90,7 @@ class SessionPathMessage(BaseModel):
 
 
 def connect_tunnel():
-    url = f"{CLOUD_API_ENDPOINT}/tunnel/connect?format=str".replace(
+    url = f"{CLOUD_API_ENDPOINT}/tunnel/connect?format=dict".replace(
         "https://", "wss://"
     ).replace("http://", "ws://")
 
@@ -121,8 +121,9 @@ def connect_tunnel():
                                 kwargs: Any = dict(
                                     headers=request.headers,
                                     params=request.query,
-                                    **dict(data=request.body if request.body else {}),
                                 )
+
+                                kwargs["json"] = request.body
                                 if (
                                     not request.path.startswith("/_hooks/")
                                     and not request.path.startswith("/_healthcheck")

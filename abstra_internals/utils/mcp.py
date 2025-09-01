@@ -25,16 +25,20 @@ def register_function(
     blueprint: Blueprint,
     func: Callable,
     tools_registry: Optional[Dict[str, Dict[str, Any]]] = None,
+    custom_name: Optional[str] = None,
 ):
     """Decorator to register a function as an MCP tool with automatic metadata generation"""
 
     input_schema = get_function_json_schema(func)
     tool_metadata = get_function_metadata(func)
 
-    func_name = func.__name__
+    func_name = custom_name or func.__name__
     parameters = list(inspect.signature(func).parameters.values())
 
     if tools_registry is not None:
+        if custom_name:
+            tool_metadata = tool_metadata.copy()
+            tool_metadata["name"] = custom_name
         tools_registry[func_name] = tool_metadata
 
     # Register the function in MCP_TOOLS
