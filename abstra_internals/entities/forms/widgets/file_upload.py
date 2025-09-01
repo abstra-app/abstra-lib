@@ -1,7 +1,7 @@
 import io
 import pathlib
 import shutil
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import requests
 
@@ -10,25 +10,28 @@ if TYPE_CHECKING:
 
 from abstra_internals.constants import get_uploads_dir
 from abstra_internals.utils.file import (
-    get_random_filepath,
     get_tmp_upload_dir,
+    make_random_tmp_path,
     upload_file,
 )
 
 
-def upload_widget_file(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> str:
+def upload_widget_file(
+    file: Union[str, io.IOBase, pathlib.Path, "Image"],
+    custom_name: Optional[str] = None,
+) -> str:
     if not file:
         return ""
 
     if isinstance(file, (io.IOBase, pathlib.Path, str)):
-        return upload_file(file)
+        return upload_file(file, custom_name)
 
     from PIL.Image import Image
 
     if isinstance(file, Image):
-        _, file_path = get_random_filepath()
-        file.save(str(file_path))
-        return upload_file(open(file_path, "rb"))
+        path = make_random_tmp_path(custom_name)
+        file.save(str(path))
+        return upload_file(open(path, "rb"), custom_name)
 
     # FileResponse. TODO: check with isinstance without circular import
     if hasattr(file, "file"):

@@ -5,7 +5,7 @@ from abstra_internals.interface.sdk.forms.deprecated.widgets.file_utils import (
 )
 from abstra_internals.server.apps import get_local_app
 from abstra_internals.server.utils import send_from_dist
-from abstra_internals.utils.file import get_random_filepath
+from abstra_internals.utils.file import make_random_tmp_path
 from tests.fixtures import BaseTest, clear_dir
 
 
@@ -48,9 +48,9 @@ class TestFileSending(BaseTest):
 
 
 class TestFileUtils(BaseTest):
-    def test_get_random_filepath(self):
-        external_name, _ = get_random_filepath("test.txt")
-        self.assertTrue(external_name.endswith("/test.txt"))
+    def test_make_random_tmp_path(self):
+        path = make_random_tmp_path("test.txt")
+        self.assertEqual(path.name, "test.txt")
 
 
 class TestFileUpload(BaseTest):

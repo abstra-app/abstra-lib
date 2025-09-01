@@ -453,50 +453,55 @@ def get_tmp_upload_dir():
     return uploaded_files_dir
 
 
-def get_random_filepath(name=None):
+def make_random_tmp_path(name: Optional[str] = None) -> Path:
     if name is None:
         name = str(uuid.uuid4())
     else:
         name = str(uuid.uuid4()) + "/" + Path(name).name
     path = get_tmp_upload_dir() / name
     path.parent.mkdir(exist_ok=True)
-    return name, path
+    return path
 
 
-def upload_file(file: t.Union[str, FileStorage, io.IOBase, pathlib.Path]):
-    public_path = lambda name: f"/_files/{name}"  # noqa: E731
+def upload_file(
+    input: t.Union[str, FileStorage, io.IOBase, pathlib.Path],
+    custom_name: Optional[str] = None,
+) -> str:
+    def get_public_path(path: Path) -> str:
+        # Get path relative to temp upload dir, which includes uuid/filename
+        relative_path = path.relative_to(get_tmp_upload_dir())
+        return f"/_files/{relative_path}"
 
-    if isinstance(file, str):
-        if file.startswith("http") or file.startswith("data:"):
-            return file
+    if isinstance(input, str):
+        if input.startswith("http") or input.startswith("data:"):
+            return input
 
-        name, path = get_random_filepath(file)
-        shutil.copy(file, path)
-        return public_path(name)
+        path = make_random_tmp_path(custom_name or input)
+        shutil.copy(input, path)
+        return get_public_path(path)
 
-    if isinstance(file, (io.BufferedReader, io.TextIOWrapper)):
-        # TODO: use hasattr(file, "name")
-        name, path = get_random_filepath(file.name)
-        shutil.copy(file.name, path)
-        return public_path(name)
+    if isinstance(input, (io.BufferedReader, io.TextIOWrapper)):
+        path = make_random_tmp_path(custom_name or input.name)
+        shutil.copy(input.name, path)
+        return get_public_path(path)
 
-    if isinstance(file, FileStorage):
-        name, path = get_random_filepath(file.filename)
-        file.save(path)
-        return public_path(name)
+    if isinstance(input, FileStorage):
+        path = make_random_tmp_path(custom_name or input.filename)
+        input.save(path)
+        return get_public_path(path)
 
-    if isinstance(file, pathlib.Path):
-        name, path = get_random_filepath(file.name)
-        shutil.copy(file, path)
-        return public_path(name)
+    if isinstance(input, pathlib.Path):
+        path = make_random_tmp_path(custom_name or input.name)
+        shutil.copy(input, path)
+        return get_public_path(path)
 
-    if isinstance(file, io.IOBase):
-        name, path = get_random_filepath()
+    if isinstance(input, io.IOBase):
+        path = make_random_tmp_path(custom_name)
         with open(path, "wb") as f:
-            shutil.copyfileobj(file, f)
-        return public_path(name)
+            shutil.copyfileobj(input, f)
+        return get_public_path(path)
 
-    raise ValueError(f"Cannot upload {type(file)}")
+    raise ValueError(f"Cannot upload {type(input)}")
 
 
 CONFLICTING_STATIC_PATHS = [

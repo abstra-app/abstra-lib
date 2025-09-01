@@ -1,5 +1,5 @@
 import io
-from typing import Union
+from typing import Optional, Union
 
 from abstra_internals.entities.forms.widgets.file_upload import upload_widget_file
 from abstra_internals.entities.forms.widgets.widget_base import OutputWidget
@@ -20,6 +20,7 @@ class FileOutput(OutputWidget):
         *,
         download_text: str = "Download",
         full_width: bool = False,
+        filename_override: Optional[str] = None,
     ):
         """Initialize a FileOutput widget.
 
@@ -27,8 +28,9 @@ class FileOutput(OutputWidget):
             file (Union[str, io.IOBase]): The file to make available for download, as a URL or file-like object.
             download_text (str): Text displayed on the download button.
             full_width (bool): Whether the download button should take up the full width of its container.
+            filename_override (str): Optional filename override to use for the download.
         """
-        self.file = upload_widget_file(file)
+        self.file = upload_widget_file(file, filename_override)
         self.download_text = download_text
         self.full_width = full_width
 

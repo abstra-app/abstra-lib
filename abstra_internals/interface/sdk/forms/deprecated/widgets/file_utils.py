@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 from abstra_internals.constants import get_uploads_dir
 from abstra_internals.utils.file import (
-    get_random_filepath,
     get_tmp_upload_dir,
+    make_random_tmp_path,
     upload_file,
 )
 
@@ -26,7 +26,7 @@ def upload_widget_file(file: Union[str, io.IOBase, pathlib.Path, "Image"]) -> st
     from PIL.Image import Image
 
     if isinstance(file, Image):
-        _, file_path = get_random_filepath()
+        file_path = make_random_tmp_path()
         file.save(str(file_path))
         return upload_file(open(file_path, "rb"))
 

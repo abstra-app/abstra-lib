@@ -256,6 +256,35 @@
       ],
       "return_type": "Unknown",
       "examples": []
+    },
+    "run_connection_action": {
+      "object_type": "function",
+      "description": "Run a connection action with the specified payload.",
+      "params": [
+        {
+          "name": "connection_name",
+          "type": "str",
+          "description": "The name of the connection.",
+          "default": "None",
+          "required": true
+        },
+        {
+          "name": "action",
+          "type": "str",
+          "description": "The action to perform on the connection.",
+          "default": "None",
+          "required": true
+        },
+        {
+          "name": "payload",
+          "type": "dict",
+          "description": "Additional data to pass to the action. Defaults to an empty dictionary. Any: The result of the action performed on the connection.",
+          "default": "{}",
+          "required": false
+        }
+      ],
+      "return_type": "Unknown",
+      "examples": []
     }
   },
   "abstra.ensurepath": {},
@@ -2691,6 +2720,13 @@
             "type": "bool",
             "description": "Whether the download button should take up the full width of its container.",
             "default": "False",
+            "required": false
+          },
+          {
+            "name": "filename_override",
+            "type": "str",
+            "description": "Optional filename override to use for the download.",
+            "default": "None",
             "required": false
           }
         ]
