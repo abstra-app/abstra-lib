@@ -1,5 +1,6 @@
-from multiprocessing.connection import Connection
 from typing import Dict, Optional
+
+import flask_sock
 
 from abstra_internals.controllers.execution.execution_client import ExecutionClient
 from abstra_internals.entities.execution_context import FormContext
@@ -17,38 +18,38 @@ class FormClient(ExecutionClient):
 
     def __init__(
         self,
-        conn: Connection,
+        ws: flask_sock.Server,
         context: FormContext,
         production_mode: bool,
     ) -> None:
         self.context = context
         self._production_mode = production_mode
-        self._conn = conn
+        self._ws = ws
 
     # WEBSOCKET
 
     def _receive_message(self):
         try:
-            str_data = self._conn.recv()
+            str_data = self._ws.receive()
             deserialized = deserialize(str_data)
             if not isinstance(deserialized, dict):
                 raise ValueError("Invalid message format")
             return deserialized
-        except (BrokenPipeError, EOFError):
+        except flask_sock.ConnectionClosed:
             raise ClientAbandoned()
 
     def _send(self, msg: forms_contract.Message) -> None:
         str_data = serialize(msg.to_json())
         try:
-            self._conn.send(str_data)
-        except (BrokenPipeError, EOFError):
+            self._ws.send(str_data)
+        except flask_sock.ConnectionClosed:
             pass
 
     def _user_code_send(self, msg: forms_contract.Message) -> None:
         str_data = serialize(msg.to_json())
         try:
-            self._conn.send(str_data)
-        except (BrokenPipeError, EOFError):
+            self._ws.send(str_data)
+        except flask_sock.ConnectionClosed:
             raise ClientAbandoned()
 
     def _wait_for_message(
@@ -161,14 +162,12 @@ class FormClient(ExecutionClient):
         self._send(
             forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
         )
-        self._conn.close()
 
     def handle_success(self):
         close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
         self._send(
             forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
         )
-        self._conn.close()
 
     ## Testing
 

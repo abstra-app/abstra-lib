@@ -1,12 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor
-from multiprocessing.connection import Client
 from uuid import uuid4
 
 from abstra_internals.controllers.execution.worker_process import process_main
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import (
     EXECUTION_QUEUE_CONCURRENCY,
-    HOST,
     PROCESS_TIMEOUT_SECONDS,
 )
 from abstra_internals.logger import AbstraLogger
@@ -35,36 +33,38 @@ class ConsumerController:
             f"[ConsumerController] Starting loop with {self.concurrency} threads"
         )
 
-        with ThreadPoolExecutor(
+        thread_pool = ThreadPoolExecutor(
             max_workers=self.concurrency,
             thread_name_prefix="ExecutionConsumer",
-        ) as executor:
+        )
+
+        try:
             for msg in self.consumer.iter():
                 AbstraLogger.debug(
                     f"[ConsumerController] Submitting message [{msg.delivery_tag}] for processing"
                 )
-                executor.submit(
+                thread_pool.submit(
                     self.run_subprocess,
                     msg=msg,
                 )
+        finally:
+            AbstraLogger.warning(
+                "[ConsumerController] Consumer main loop exited, waiting for threads to finish"
+            )
+            thread_pool.shutdown(wait=True)
+            AbstraLogger.warning("[ConsumerController] All threads finished")
 
-        AbstraLogger.warning(
-            "[ConsumerController] Consumer main loop exited, waiting for threads to finish"
-        )
-        AbstraLogger.warning("[ConsumerController] All threads finished")
+            # If the loop exits and there are running executions, gracefull shutdown has failed
+            self.main_controller.fail_app_executions(
+                app_id=self.app_id,
+                reason="Failed to set status",
+            )
 
-        # If the loop exits and there are running executions, gracefull shutdown has failed
-        self.main_controller.fail_app_executions(
-            app_id=self.app_id,
-            reason="Failed to set status",
-        )
-
-    def run_subprocess(self, msg: QueueMessage) -> None:
-        connection = None
+    def run_subprocess(self, msg: QueueMessage):
         worker_id = str(uuid4())
-        try:
-            head_id = worker_id.split("-")[0]
+        head_id = worker_id.split("-")[0]
 
+        try:
             mp_context = self.main_controller.repositories.mp_context.get_context()
             stage = self.main_controller.get_stage(msg.preexecution.stage_id)
 
@@ -74,11 +74,13 @@ class ConsumerController:
                 )
                 self.consumer.threadsafe_ack(msg)
                 return
-            connection = Client(
-                (HOST, msg.preexecution.connection_port),
-                family="AF_INET",
-                authkey=msg.preexecution.connection_auth_key.encode(),
-            )
+
+            local_queue = None
+            if isinstance(
+                self.main_controller.repositories.producer, LocalProducerRepository
+            ):
+                local_queue = self.main_controller.repositories.producer.queue
+
             p = mp_context.Process(
                 target=process_main,
                 name=f"Worker-{head_id}",
@@ -89,13 +91,7 @@ class ConsumerController:
                     root_path=Settings.root_path,
                     server_port=Settings.server_port,
                     request=msg.preexecution.context,
-                    connection=connection,
-                    local_queue=self.main_controller.repositories.producer.queue
-                    if isinstance(
-                        self.main_controller.repositories.producer,
-                        LocalProducerRepository,
-                    )
-                    else None,
+                    local_queue=local_queue,
                 ),
             )
 
@@ -105,7 +101,6 @@ class ConsumerController:
             # If timeout is reached, the process is still alive
             if p.is_alive():
                 p.terminate()
-                p.join()  # Wait for termination to complete
                 raise NonCleanExit(
                     f"Run took too long to complete ({PROCESS_TIMEOUT_SECONDS} secs) and was terminated. Please make sure all your requests calls have a timeout set."
                 )
@@ -133,13 +128,6 @@ class ConsumerController:
             )
 
             self.consumer.threadsafe_nack(msg)
-        finally:
-            # Always close the connection when done
-            if connection is not None:
-                try:
-                    connection.close()
-                except Exception:
-                    pass  # Ignore errors when closing
 
             AbstraLogger.warning(
                 f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"

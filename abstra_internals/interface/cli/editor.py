@@ -3,7 +3,6 @@ import ssl
 import subprocess
 import sys
 import threading
-from multiprocessing import Queue
 
 import certifi
 from dotenv import load_dotenv
@@ -37,7 +36,7 @@ def start_consumer(controller: MainController):
 
     th = threading.Thread(
         daemon=True,
-        name="start_consumer::ExecutionConsumer",
+        name="ExecutionConsumer",
         target=ConsumerController(controller, consumer).start_loop,
     )
 
@@ -90,7 +89,7 @@ def editor(headless: bool):
     check_latest_version()
     AbstraLogger.init("local")
 
-    repositories = build_editor_repositories(Queue())
+    repositories = build_editor_repositories()
     main_controller = MainController(repositories)
     main_controller.reset_repositories()
     StdioPatcher.apply(main_controller)

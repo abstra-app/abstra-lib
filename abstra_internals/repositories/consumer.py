@@ -97,9 +97,7 @@ class RabbitConsumer(Consumer):
                 continue
 
             yield QueueMessage(
-                preexecution=PreExecution.model_validate(
-                    deserialize(body.decode("utf-8"))
-                ),
+                preexecution=PreExecution(**deserialize(body.decode("utf-8"))),
                 delivery_tag=method.delivery_tag,
             )
 

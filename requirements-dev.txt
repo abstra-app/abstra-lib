@@ -1,6 +1,6 @@
 pandas
 plotly
-pytest==8.4.1
+pytest==7.1.2
 ruff==0.12.1
 circular-imports
 libcst

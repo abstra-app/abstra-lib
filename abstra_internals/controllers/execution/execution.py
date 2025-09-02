@@ -4,7 +4,10 @@ import traceback
 from pathlib import Path
 from typing import Literal, Optional, Tuple
 
-from abstra_internals.controllers.execution.execution_client import ExecutionClient
+from abstra_internals.controllers.execution.execution_client import (
+    ExecutionClient,
+    HeadlessClient,
+)
 from abstra_internals.controllers.execution.execution_client_form import ClientAbandoned
 from abstra_internals.controllers.sdk.sdk_context import SDKContext
 from abstra_internals.entities.execution import Execution
@@ -27,12 +30,12 @@ class ExecutionController:
         *,
         repositories: Repositories,
         stage: StageWithFile,
-        client: ExecutionClient,
-        context: ClientContext,
+        client: Optional[ExecutionClient] = None,
+        context: Optional[ClientContext] = None,
     ) -> None:
         self.repositories = repositories
         self.stage = stage
-        self.client = client
+        self.client = client or HeadlessClient()
         self.context = context
 
     def run(self):

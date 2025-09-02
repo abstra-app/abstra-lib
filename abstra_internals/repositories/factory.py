@@ -15,8 +15,12 @@ from abstra_internals.repositories.ai import (
     LocalAIRepository,
     ProductionAIRepository,
 )
-from abstra_internals.repositories.connectors import ConnectorsRepository
-from abstra_internals.repositories.email import EmailRepository
+from abstra_internals.repositories.connectors import (
+    ConnectorsRepository,
+)
+from abstra_internals.repositories.email import (
+    EmailRepository,
+)
 from abstra_internals.repositories.execution import (
     ExecutionRepository,
     LocalExecutionRepository,
@@ -106,15 +110,12 @@ class Repositories:
 def build_editor_repositories(local_queue: Optional[Queue] = None):
     mp_context = SpawnContextReposity()
 
-    # If no queue is provided, create one using the same context
-    if local_queue is None:
-        local_queue = mp_context.get_context().Queue()
-
     http_client = HTTPClient(
         base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise
     )
 
     linter = LocalLinterRepository()
+    local_queue = local_queue or mp_context.get_context().Queue()
 
     return Repositories(
         project=LocalProjectRepository(),

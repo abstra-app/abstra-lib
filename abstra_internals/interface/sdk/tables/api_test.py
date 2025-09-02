@@ -2,7 +2,6 @@ import io
 import unittest
 from dataclasses import dataclass
 from datetime import datetime
-from multiprocessing import Pipe
 from typing import List
 from uuid import UUID
 
@@ -26,7 +25,6 @@ from abstra_internals.interface.sdk.tables.api import (
     serialize,
 )
 from abstra_internals.repositories.tables import TablesRepository
-from abstra_internals.utils.websockets import MockWS, bind_ws_with_connection
 from tests.fixtures import BaseTest
 
 
@@ -56,11 +54,8 @@ class TestTables(BaseTest):
         context = FormContext(
             request=Request(body="", query_params={}, headers={}, method="GET"),
         )
-
-        self.parent_conn, child_conn = Pipe()
-        bind_ws_with_connection(MockWS(), self.parent_conn, block=False)
         self.client = FormClient(
-            conn=child_conn,
+            ws=None,  # type: ignore
             context=context,
             production_mode=False,
         )
@@ -72,7 +67,6 @@ class TestTables(BaseTest):
 
     def tearDown(self) -> None:
         self.context.__exit__(None, None, None)
-        self.parent_conn.close()
         super().tearDown()
 
     def test_select(self):

@@ -43,6 +43,7 @@ class JobExecutionMock(ExecutionMock):
 
 class HookContext(Serializable):
     request: Request
+    response: Response
     sent_tasks: List[str] = Field(default_factory=list)
     legacy_thread_data: dict = Field(default_factory=dict)
     mock_execution: HookExecutionMock = Field(default_factory=HookExecutionMock)
