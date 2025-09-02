@@ -14,7 +14,8 @@ from watchdog.events import (
 from watchdog.observers import Observer
 
 from abstra_internals.consts.filepaths import LOCAL_LOGS_DIR_PATH
-from abstra_internals.controllers.execution.execution_stdio import StdioController
+from abstra_internals.controllers.execution.execution_stdio import BroadcastController
+from abstra_internals.utils import serialize
 
 LogUpdateHandler = Callable[[str, str, str], None]  # execution_id, stage_id, content
 
@@ -85,9 +86,15 @@ class LogsWatcher(FileSystemEventHandler):
 
 
 def on_logs_update(execution_id: str, stage_id: str, log_content: str):
-    StdioController.broadcast(
-        type="stdout",
-        execution_id=execution_id,
-        stage_id=stage_id,
-        log=log_content,
+    msg = serialize(
+        dict(
+            type="stdio",
+            payload=dict(
+                type="stdout",
+                log=log_content,
+                execution_id=execution_id,
+                stage_id=stage_id,
+            ),
+        )
     )
+    BroadcastController.broadcast(msg=msg)

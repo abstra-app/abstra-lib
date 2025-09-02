@@ -13,10 +13,9 @@ from abstra_internals.env_masker import GLOBAL_MASKER
 from abstra_internals.environment import IS_PRODUCTION
 from abstra_internals.interface.sdk.user_exceptions import ExecutionNotFound
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.utils import serialize
 
 
-class StdioController:
+class BroadcastController:
     listeners: List[flask_sock.Server] = []
     _lock = threading.Lock()
 
@@ -32,22 +31,12 @@ class StdioController:
                 cls.listeners.remove(listener)
 
     @classmethod
-    def broadcast(
-        cls,
-        *,
-        type: Literal["stdout", "stderr"],
-        execution_id: str,
-        stage_id: str,
-        log: str,
-    ):
-        msg = serialize(
-            dict(type=type, log=log, execution_id=execution_id, stage_id=stage_id)
-        )
+    def broadcast(cls, *, msg: str):
         for listener in cls.listeners:
             try:
                 listener.send(msg)
             except Exception:
-                StdioController.unregister(listener)
+                BroadcastController.unregister(listener)
 
     def __init__(
         self,

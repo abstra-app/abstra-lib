@@ -1,6 +1,6 @@
 import sys
 
-from abstra_internals.controllers.execution.execution_stdio import StdioController
+from abstra_internals.controllers.execution.execution_stdio import BroadcastController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DISABLE_STDIO_PATCH
 
@@ -14,14 +14,14 @@ class StdioPatcher:
         if DISABLE_STDIO_PATCH:
             return
 
-        stdio_controller = StdioController(
+        broadcast_controller = BroadcastController(
             sys_stderr_write=cls.original_sys_stderr_write,
             sys_stdout_write=cls.original_sys_stdout_write,
             main_controller=main_controller,
         )
 
-        sys.stdout.write = stdio_controller.patched_stdout_write
-        sys.stderr.write = stdio_controller.patched_stderr_write
+        sys.stdout.write = broadcast_controller.patched_stdout_write
+        sys.stderr.write = broadcast_controller.patched_stderr_write
 
     @classmethod
     def reset(cls):

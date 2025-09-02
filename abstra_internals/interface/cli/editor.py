@@ -24,6 +24,7 @@ from abstra_internals.server.apps import get_local_app
 from abstra_internals.services.file_watcher import FileWatcher
 from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
+from abstra_internals.tasks_watcher import TasksWatcher, on_tasks_update
 from abstra_internals.utils.browser import background_open_editor
 from abstra_internals.version import check_latest_version
 
@@ -107,6 +108,9 @@ def editor(headless: bool):
 
     logs_watcher = LogsWatcher([on_logs_update])
     logs_watcher.start()
+
+    tasks_watcher = TasksWatcher([on_tasks_update])
+    tasks_watcher.start()
 
     start_consumer(main_controller)
 
