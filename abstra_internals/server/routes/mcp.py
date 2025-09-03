@@ -25,7 +25,7 @@ def get_editor_bp(main_controller: MainController):
             docs_controller.list_function_params_from_abstra_lib,
             docs_controller.list_function_examples_from_abstra_lib,
             docs_controller.get_function_return_type_from_abstra_lib,
-            requires_approval(main_controller.read_file),
+            main_controller.read_file,
             main_controller.read_stage_file,
             main_controller.create_form,
             main_controller.create_hook,
