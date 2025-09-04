@@ -225,6 +225,39 @@ class WorkflowController:
         stage.workflow_transitions.append(transition)
         self.repos.project.save(project)
 
+    def delete_transition(self, transition_id: str):
+        """
+        Delete a transition from the workflow by its ID.
+        This method removes the specified transition from the workflow,
+        breaking the connection between two stages.
+
+        Args:
+            transition_id (str): ID of the transition to delete.
+
+        Raises:
+            ValueError: If the transition with the given ID does not exist.
+
+        Copywritings:
+            Delete a transition from the workflow
+            Deleting a transition from the workflow...
+        """
+        project = self.repos.project.load()
+        transition_found = False
+
+        for stage in project.workflow_stages:
+            for i, transition in enumerate(stage.workflow_transitions):
+                if transition.id == transition_id:
+                    stage.workflow_transitions.pop(i)
+                    transition_found = True
+                    break
+            if transition_found:
+                break
+
+        if not transition_found:
+            raise ValueError(f"Transition {transition_id} does not exist.")
+
+        self.repos.project.save(project)
+
     def update_workflow(self, workflow_state_dto: Dict):
         """
         Update the entire workflow configuration with new stages and transitions.
