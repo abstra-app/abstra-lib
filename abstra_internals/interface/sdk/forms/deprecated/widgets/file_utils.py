@@ -46,7 +46,7 @@ def download_to_path(url: str) -> pathlib.Path:
     execution = SDKContextStore.get_execution()
     save_dir = get_uploads_dir() / execution.id
     save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / url.split("/")[-1]
+    save_path = save_dir / pathlib.Path(url).name
 
     if url.startswith("http://") or url.startswith("https://"):
         with save_path.open("wb") as f, requests.get(url, stream=True) as r:
