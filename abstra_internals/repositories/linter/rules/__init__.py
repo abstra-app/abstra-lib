@@ -3,6 +3,7 @@ from typing import List
 
 from abstra_internals.repositories.linter.models import LinterRule
 
+from .big_py_files import BigPyFiles
 from .conflicting_name import ConflictingName
 from .conflicting_path import ConflictingPath
 from .deprecated_functions import DeprecatedFunctionUsage
@@ -30,6 +31,7 @@ core_rules: List[LinterRule] = [
     Psycopg2MustBeBinary(),
     ConflictingName(),
     DeprecatedFunctionUsage(),
+    BigPyFiles(),
 ]
 
 conditional_rules: List[LinterRule] = []
