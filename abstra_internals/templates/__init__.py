@@ -1,6 +1,8 @@
 import json
 import pathlib
 
+from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
+
 abstraignore = (pathlib.Path(__file__).parent / "abstraignore").read_text(
     encoding="utf-8"
 )
@@ -25,7 +27,7 @@ abstra_favicon = (pathlib.Path(__file__).parent / "abstra_favicon.ico").read_byt
 
 
 def ensure_abstraignore(dir: pathlib.Path):
-    path = dir / ".abstraignore"
+    path = dir / ABSTRA_IGNORE_FILEPATH
     if not path.exists():
         path.write_text(abstraignore, encoding="utf-8")
 

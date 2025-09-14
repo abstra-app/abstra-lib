@@ -11,5 +11,5 @@ CREDENTIALS_FILEPATH = f"{DOT_ABSTRA_DIR}/credentials"
 TEST_DATA_FILEPATH = f"{DOT_ABSTRA_DIR}/test_data.json"
 
 GIT_DIR_PATH = ".git"
-ABSTRA_IGNORE_FILEPATH = ".abstraignore"
+ABSTRA_IGNORE_FILEPATH = ".gitignore"
 ABSTRA_TABLES_FILEPATH = "abstra-tables.json"

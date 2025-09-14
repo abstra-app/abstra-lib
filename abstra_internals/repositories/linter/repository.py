@@ -12,7 +12,7 @@ class LinterRepository(ABC):
         pass
 
     @abstractmethod
-    def update_checks(self):
+    def update_checks(self) -> List[LinterCheck]:
         pass
 
     @abstractmethod
@@ -52,39 +52,6 @@ class LocalLinterRepository(LinterRepository):
                 - description: Human-readable description of what the rule checks
                 - issues: List of specific issues found by this rule
                 - fixes: Available automatic fixes for the issues
-
-        Example:
-            ```python
-            linter_repo = LocalLinterRepository()
-            linter_repo.update_checks()  # Run all checks first
-
-            checks = linter_repo.get_checks()
-            print(f"Found {len(checks)} linter checks")
-
-            for check in checks:
-                print(f"Rule: {check.name} ({check.type})")
-                print(f"Description: {check.description}")
-
-                if check.issues:
-                    print(f"Issues found: {len(check.issues)}")
-                    for issue in check.issues:
-                        print(f"  - {issue.message}")
-                        print(f"    File: {issue.file}:{issue.line}")
-
-                        if issue.fixes:
-                            print(f"    Available fixes: {len(issue.fixes)}")
-                            for fix in issue.fixes:
-                                print(f"      - {fix.name}: {fix.description}")
-                else:
-                    print("✓ No issues found")
-
-            # Filter by severity
-            errors = [c for c in checks if c.type == 'error']
-            warnings = [c for c in checks if c.type == 'warning']
-            security_issues = [c for c in checks if c.type == 'security']
-
-            print(f"Errors: {len(errors)}, Warnings: {len(warnings)}")
-            print(f"Security issues: {len(security_issues)}")
             ```
 
         Note:
@@ -117,6 +84,8 @@ class LocalLinterRepository(LinterRepository):
             thread.join()
 
         self.checks = new_checks
+
+        return self.checks
 
     def fix_issue_in_codebase(self, rule_name: str, fix_name: str):
         """
@@ -216,16 +185,16 @@ class ProductionLinterRepository(LinterRepository):
     """
 
     def find_issues_in_codebase(self) -> List[LinterCheck]:
-        return []
+        raise NotImplementedError("Linters are not available in production.")
 
-    def update_checks(self):
-        pass
+    def update_checks(self) -> List[LinterCheck]:
+        raise NotImplementedError("Linters are not available in production.")
 
     def fix_issue_in_codebase(self, rule_name: str, fix_name: str) -> bool:
-        return False
+        raise NotImplementedError("Linters are not available in production.")
 
     def fix_all_linters(self):
-        pass
+        raise NotImplementedError("Linters are not available in production.")
 
     def get_blocking_checks(self) -> List[LinterCheck]:
-        return []
+        raise NotImplementedError("Linters are not available in production.")

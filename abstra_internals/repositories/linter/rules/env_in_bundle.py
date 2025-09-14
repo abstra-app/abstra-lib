@@ -1,5 +1,6 @@
 from typing import List
 
+from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
 from abstra_internals.repositories.linter.models import (
     LinterFix,
     LinterIssue,
@@ -13,7 +14,7 @@ class AddEnvToAbstraIgnore(LinterFix):
     label = "Add env to abstra ignore"
 
     def fix(self):
-        abstraignore_file = Settings.root_path / ".abstraignore"
+        abstraignore_file = Settings.root_path / ABSTRA_IGNORE_FILEPATH
         with abstraignore_file.open("a") as file:
             file.write("\n.env")
 
@@ -34,11 +35,7 @@ class EnvInBundle(LinterRule):
         if not env_file.exists():
             return []
 
-        ignored_patterns = FileSystemService.load_ignore_patterns(Settings.root_path)
-
-        if FileSystemService.is_ignored(
-            ignored_patterns, env_file.relative_to(Settings.root_path)
-        ):
+        if FileSystemService.is_ignored(env_file):
             return []
 
         return [EnvInBundleFound()]

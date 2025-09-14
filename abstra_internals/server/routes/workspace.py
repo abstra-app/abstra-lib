@@ -41,16 +41,6 @@ def get_editor_bp(controller: MainController):
         except Exception as e:
             return {"error": f"Could not get version: {str(e)}"}, 500
 
-    @bp.post("/open-file")
-    @editor_usage
-    def _open_file():
-        if not flask.request.json:
-            flask.abort(400)
-        file_path = flask.request.json["path"]
-        mode = flask.request.json.get("mode", "file")
-        controller.open_file(file_path, create_if_not_exists=True, mode=mode)
-        return {"success": True}
-
     @bp.post("/init-file")
     @editor_usage
     def _init_file():

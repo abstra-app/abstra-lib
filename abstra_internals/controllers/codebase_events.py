@@ -6,13 +6,12 @@ from typing import List, Optional
 import flask_sock
 from dotenv import load_dotenv
 
-from abstra_internals.contracts_generated import (
-    AbstraLibApiEditorCodebaseEventsMessage,
-)
+from abstra_internals.contracts_generated import AbstraLibApiEditorCodebaseEventsMessage
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.modules import reload_module
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.services.file_watcher import FSEventType
+from abstra_internals.settings import Settings
 
 
 class CodebaseEventController:
@@ -38,7 +37,9 @@ class CodebaseEventController:
         cls, filepath: Path, event: FSEventType, content: Optional[str]
     ):
         message = AbstraLibApiEditorCodebaseEventsMessage(
-            filepath=str(filepath), event=event, content=content
+            filepath=str(filepath.relative_to(Settings.root_path)),
+            event=event,
+            content=content,
         )
         for listener in cls.listeners:
             try:

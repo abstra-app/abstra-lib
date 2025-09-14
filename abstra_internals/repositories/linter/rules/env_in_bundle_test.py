@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
 from abstra_internals.repositories.linter.rules.env_in_bundle import EnvInBundle
 from tests.fixtures import clear_dir, init_dir
 
@@ -20,7 +21,7 @@ class EnvInBundleTest(TestCase):
     def test_env_on_bundle_valid_with_env(self):
         rule = EnvInBundle()
         env_file = self.root / ".env"
-        abstraignore_file = self.root / ".abstraignore"
+        abstraignore_file = self.root / ABSTRA_IGNORE_FILEPATH
         abstraignore_file.write_text(".env")
         env_file.touch()
         self.assertEqual(len(rule.find_issues()), 0)
@@ -34,7 +35,7 @@ class EnvInBundleTest(TestCase):
     def test_env_on_bundle_invalid_with_abstraignore_file(self):
         env_file = self.root / ".env"
         env_file.touch()
-        abstraignore_file = self.root / ".abstraignore"
+        abstraignore_file = self.root / ABSTRA_IGNORE_FILEPATH
         abstraignore_file.touch()
         rule = EnvInBundle()
         self.assertEqual(len(rule.find_issues()), 1)
@@ -46,7 +47,7 @@ class EnvInBundleTest(TestCase):
         self.assertEqual(len(rule.find_issues()), 1)
         rule.find_issues()[0].fixes[0].fix()
         self.assertEqual(len(rule.find_issues()), 0)
-        abstraignore_file = self.root / ".abstraignore"
+        abstraignore_file = self.root / ABSTRA_IGNORE_FILEPATH
         self.assertTrue(abstraignore_file.exists())
         with abstraignore_file.open("r") as file:
             content = file.read()

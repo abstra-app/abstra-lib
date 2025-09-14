@@ -1,24 +1,10 @@
+import fnmatch
 import os
-import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from abstra_internals.consts.filepaths import (
-    ABSTRA_IGNORE_FILEPATH,
-    DOT_ABSTRA_DIR,
-    GIT_DIR_PATH,
-)
+from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
 from abstra_internals.settings import Settings
-
-SKIPPED_DIRNAMES = {
-    "__pycache__",
-    "venv",
-    ".venv",
-    ".vscode",
-    ".cursor",
-    ".ruff_cache",
-    ".abstra",
-}
 
 
 class FileSystemService:
@@ -38,14 +24,14 @@ class FileSystemService:
         include_dirs: bool = False,
         use_ignore: bool = True,
         allowed_suffixes: Optional[List[str]] = None,
-        ignore_dotenv: bool = False,
+        recursive: bool = True,
     ) -> List[Path]:
         """
         List all files in the given directory, optionally filtering by suffixes
         and applying ignore files.
         Args:
             dir (Path): The directory to list.
-            apply_ignore_files (bool): Whether to apply ignore files: .gitignore and .abstraignore.
+            apply_ignore_files (bool): Whether to apply ignore files: .gitignore and .gitignore.
             allowed_suffixes (Optional[List[str]]): List of allowed file suffixes. If None, all files are included.
         """
         return FileSystemService.list_paths(
@@ -53,7 +39,7 @@ class FileSystemService:
             include_dirs=include_dirs,
             use_ignore=use_ignore,
             allowed_suffixes=allowed_suffixes,
-            ignore_dotenv=ignore_dotenv,
+            recursive=recursive,
         )
 
     @staticmethod
@@ -63,7 +49,7 @@ class FileSystemService:
         include_dirs: bool = True,
         use_ignore: bool = True,
         allowed_suffixes: Optional[List[str]] = None,
-        ignore_dotenv: bool = False,
+        recursive: bool = True,
     ) -> List[Path]:
         """ "
         List all files and directories in the given directory, optionally filtering by suffixes
@@ -71,7 +57,7 @@ class FileSystemService:
         Args:
             dir (Path): The directory to list.
             include_dirs (bool): Whether to include directories in the results.
-            apply_ignore_files (bool): Whether to apply ignore files: .gitignore and .abstraignore.
+            apply_ignore_files (bool): Whether to apply ignore files: .gitignore and .gitignore.
             allowed_suffixes (Optional[List[str]]): List of allowed file suffixes. If None, all files are included.
         """
         if not dirpath.exists():
@@ -80,22 +66,7 @@ class FileSystemService:
         if not dirpath.is_dir():
             raise ValueError(f"Provided path {dirpath} is not a directory.")
 
-        ignored_patterns = [
-            *FileSystemService.load_ignore_patterns(
-                dirpath, ignore_dotenv=ignore_dotenv
-            ),
-            *FileSystemService.load_ignore_patterns(
-                Path.cwd(), ignore_dotenv=ignore_dotenv
-            ),
-        ]
-
-        if use_ignore and FileSystemService.is_ignored(ignored_patterns, dirpath):
-            return []
-
-        if dirpath.name in SKIPPED_DIRNAMES:
-            return []
-
-        if dirpath == FileSystemService.venv_path():
+        if use_ignore and (FileSystemService.is_ignored(dirpath)):
             return []
 
         matches: List[Path] = []
@@ -103,28 +74,20 @@ class FileSystemService:
             matches.append(dirpath)
 
         for child in dirpath.iterdir():
-            if (
-                child.is_file()
-                and FileSystemService._suffix_allowed(child, allowed_suffixes)
-                and (
-                    not use_ignore
-                    or not FileSystemService.is_ignored(
-                        ignored_patterns, child.relative_to(dirpath)
-                    )
-                )
+            if use_ignore and (FileSystemService.is_ignored(child)):
+                continue
+            if child.is_dir() or FileSystemService._suffix_allowed(
+                child, allowed_suffixes
             ):
                 matches.append(child)
-            elif child.is_dir():
-                if use_ignore and FileSystemService.is_ignored(
-                    ignored_patterns, child.relative_to(dirpath)
-                ):
-                    continue
+            if child.is_dir() and recursive:
                 matches.extend(
                     FileSystemService.list_paths(
                         child,
                         include_dirs=include_dirs,
                         use_ignore=use_ignore,
                         allowed_suffixes=allowed_suffixes,
+                        recursive=True,
                     )
                 )
         return sorted(matches, key=lambda p: p.as_posix())
@@ -165,13 +128,8 @@ class FileSystemService:
             - Case-sensitive search
         """
         results: List[Tuple[str, int, str]] = []
-        ignored_patterns = FileSystemService.load_ignore_patterns(
-            root_dir, ignore_dotenv=False
-        )
         for file_path in root_dir.glob(glob):
-            if file_path.is_file() and not FileSystemService.is_ignored(
-                ignored_patterns, file_path.relative_to(root_dir)
-            ):
+            if file_path.is_file() and not FileSystemService.is_ignored(root_dir):
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         for line_number, line in enumerate(f, start=1):
@@ -211,52 +169,139 @@ class FileSystemService:
         return any(path.suffix.lower() == suffix.lower() for suffix in allowed_suffixes)
 
     @staticmethod
-    def is_ignored(ignored_paths: List[re.Pattern], path: Path):
-        for ignored_path in ignored_paths:
-            if ignored_path.search(path.as_posix()):
-                return True
+    def is_ignored(path: Path):
+        path = path.resolve()
+
+        # Look for ignore file starting from the path's directory up to the root
+        # For files that don't exist, we need to check if it would be a file based on the path structure
+        # If the path has a suffix or ends with a filename-like component, treat it as a file
+        if path.exists():
+            current_dir = path.parent if path.is_file() else path
+        else:
+            # For non-existent paths, assume it's a file if it has a suffix or doesn't end with '/'
+            current_dir = (
+                path.parent if path.suffix or not str(path).endswith("/") else path
+            )
+
+        while current_dir != current_dir.parent:  # Stop at filesystem root
+            ignore_file = current_dir / ABSTRA_IGNORE_FILEPATH
+            if ignore_file.exists():
+                try:
+                    patterns = ignore_file.read_text().splitlines()
+                    for pattern in patterns:
+                        pattern = pattern.strip()
+                        if pattern and not pattern.startswith("#"):
+                            if FileSystemService._matches_gitignore_pattern(
+                                path, pattern, current_dir
+                            ):
+                                return True
+                except (IOError, UnicodeDecodeError):
+                    continue
+            current_dir = current_dir.parent
+
         return False
 
     @staticmethod
-    def load_ignore_patterns(root_dir: Path, ignore_dotenv=True) -> List[re.Pattern]:
-        git_ignore_path = root_dir.joinpath(".gitignore")
-        abstra_ignore_path = root_dir.joinpath(ABSTRA_IGNORE_FILEPATH)
-        git_path = root_dir.joinpath(GIT_DIR_PATH)
-        abstra_path = root_dir.joinpath(DOT_ABSTRA_DIR)
+    def _matches_gitignore_pattern(path: Path, pattern: str, ignore_dir: Path) -> bool:
+        """
+        Check if a path matches a gitignore pattern according to git rules.
+        """
+        # Handle trailing slash - only matches directories
+        is_dir_only_pattern = pattern.endswith("/")
+        if is_dir_only_pattern:
+            pattern = pattern.rstrip("/")
+            # If pattern is for directories only, the path must be a directory
+            if path.exists() and not path.is_dir():
+                return False
+            # For non-existent paths, assume it's a directory if it doesn't have a suffix
+            elif not path.exists() and path.suffix:
+                return False
 
-        ignored: List[str] = [
-            abstra_ignore_path.name,
-            git_ignore_path.name,
-            abstra_path.name,
-            git_path.name,
-        ]
-
+        # Get relative path from ignore file directory
         try:
-            if abstra_ignore_path.exists():
-                with open(abstra_ignore_path, "r", encoding="utf-8") as f:
-                    ignored.extend(f.read().splitlines())
-            elif git_ignore_path.exists():
-                with open(git_ignore_path, "r", encoding="utf-8") as f:
-                    ignored.extend(f.read().splitlines())
-        except (IOError, UnicodeDecodeError) as e:
-            print(f"Warning: Could not read ignore file: {e}")
-            return []
+            relative_path = path.relative_to(ignore_dir)
+        except ValueError:
+            # Path is not under the ignore directory
+            return False
 
-        return [
-            FileSystemService._make_ignore_regex(p)
-            for p in ignored
-            if p
-            and not p.startswith("#")
-            and not p.startswith("!")
-            and (not p == ".env" or ignore_dotenv)
-        ]
+        relative_str = relative_path.as_posix()
 
-    @staticmethod
-    def _make_ignore_regex(path: str) -> re.Pattern:
-        posix_path = path.replace("\\", "/")
-        ignore_regex = r"^" + re.escape(posix_path).replace(r"\*", ".*").replace(
-            r"\?", "."
-        )
-        if not posix_path.endswith("/"):
-            ignore_regex += r"(/|$)"
-        return re.compile(ignore_regex)
+        # Handle leading slash - pattern is relative to ignore file directory only
+        if pattern.startswith("/"):
+            pattern = pattern.lstrip("/")
+            # For patterns starting with /, only match at the immediate level
+            return fnmatch.fnmatch(relative_str, pattern)
+
+        # Handle double asterisk patterns
+        if "**" in pattern:
+            # Handle special cases for ** patterns
+            if pattern.startswith("**/"):
+                # **/foo matches foo at any level
+                sub_pattern = pattern[3:]  # Remove **/
+                if fnmatch.fnmatch(path.name, sub_pattern):
+                    return True
+                if fnmatch.fnmatch(relative_str, sub_pattern):
+                    return True
+                # Also try matching at any directory level
+                parts = relative_path.parts
+                for i in range(len(parts)):
+                    sub_path = "/".join(parts[i:])
+                    if fnmatch.fnmatch(sub_path, sub_pattern):
+                        return True
+            elif pattern.endswith("/**"):
+                # foo/** matches everything inside foo directory, NOT foo itself
+                base_pattern = pattern[:-3]  # Remove /**
+                if relative_str.startswith(base_pattern + "/"):
+                    return True
+            else:
+                # General ** handling - a/**/b patterns
+                # Split pattern on /** to handle complex cases
+                if "/**/" in pattern:
+                    # Pattern like a/**/b
+                    parts = pattern.split("/**/")
+                    if len(parts) == 2:
+                        prefix, suffix = parts
+                        # Check if path matches prefix/**/suffix pattern
+                        # This should match prefix/suffix, prefix/x/suffix, etc.
+                        if relative_str == f"{prefix}/{suffix}":
+                            return True
+                        if fnmatch.fnmatch(relative_str, pattern.replace("**", "*")):
+                            return True
+                        # Try matching at different levels
+                        path_parts = relative_path.parts
+                        for i in range(len(path_parts)):
+                            sub_path = "/".join(path_parts[i:])
+                            test_pattern = pattern.replace("**", "*")
+                            if fnmatch.fnmatch(sub_path, test_pattern):
+                                return True
+                        return False
+
+                # Simple ** replacement
+                expanded_pattern = pattern.replace("**", "*")
+                if fnmatch.fnmatch(relative_str, expanded_pattern):
+                    return True
+                # Also try matching the pattern at any directory level
+                parts = relative_path.parts
+                for i in range(len(parts)):
+                    sub_path = "/".join(parts[i:])
+                    if fnmatch.fnmatch(sub_path, expanded_pattern):
+                        return True
+            return False
+
+        # For patterns with slash in middle, treat as relative to ignore file
+        if "/" in pattern:
+            return fnmatch.fnmatch(relative_str, pattern)
+
+        # For patterns without slash, can match at any level
+        # Try matching the filename only
+        if fnmatch.fnmatch(path.name, pattern):
+            return True
+
+        # Try matching at any directory level
+        parts = relative_path.parts
+        for i in range(len(parts)):
+            sub_path = "/".join(parts[i:])
+            if fnmatch.fnmatch(sub_path, pattern):
+                return True
+
+        return False

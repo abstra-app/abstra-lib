@@ -1,6 +1,5 @@
 import datetime
 import pkgutil
-import webbrowser
 from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp, mktemp
@@ -65,7 +64,7 @@ from abstra_internals.templates import (
 )
 from abstra_internals.utils.ai import AiWs
 from abstra_internals.utils.diff import compute_updated_code_from_replacements
-from abstra_internals.utils.file import module2path, path2module
+from abstra_internals.utils.file import path2module
 from abstra_internals.utils.validate import validate_json
 
 
@@ -287,16 +286,6 @@ class MainController:
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_text(code, encoding="utf-8")
 
-    def open_file(self, file_path: str, mode: str, create_if_not_exists: bool = False):
-        if mode == "module" or mode == "package":
-            file_path = str(module2path(file_path, mode == "package"))
-        complete_file_path = Settings.root_path.joinpath(file_path)
-
-        if create_if_not_exists and not complete_file_path.is_file():
-            complete_file_path.touch()
-
-        webbrowser.open(complete_file_path.absolute().as_uri())
-
     def read_file(self, file: str):
         """
         Read the contents of a file from the project workspace.
@@ -499,7 +488,7 @@ class MainController:
 
         This method provides different listing modes to browse the project filesystem,
         supporting various file types and Python module discovery. It respects
-        ignore patterns defined in .abstraignore and .gitignore files.
+        ignore patterns defined in .gitignore file.
 
         Args:
             path (str, optional): Relative path from project root to list contents.
@@ -552,7 +541,7 @@ class MainController:
             ```
 
         Note:
-            - Respects .abstraignore and .gitignore patterns when use_ignore=True
+            - Respects .gitignore and .gitignore patterns when use_ignore=True
             - Image mode supports: .png, .jpg, .jpeg, .gif, .svg, .webp, .jfif, .pjp, .pjpeg
             - Module mode uses Python's pkgutil.iter_modules for discovery
             - Paths are always relative to the project root directory

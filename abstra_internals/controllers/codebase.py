@@ -20,7 +20,7 @@ from abstra_internals.contracts_generated import (
 )
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.services.file_watcher import crdt_managers
-from abstra_internals.services.fs import SKIPPED_DIRNAMES, FileSystemService
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.utils.crdt import CRDTManager
 
 
@@ -28,29 +28,20 @@ class CodebaseController:
     def __init__(self, repos: Repositories):
         self.repos = repos
 
-    def file_node(self, child_path: Path, base_path: Path) -> CommonFileNode:
-        is_dir = child_path.is_dir()
-        stats = child_path.stat()
-
-        grand_children = []
-        if is_dir:
-            grand_children = [
-                list(c.relative_to(base_path).parts)
-                for c in child_path.iterdir()
-                if c.name not in SKIPPED_DIRNAMES
-            ]
+    def file_node(self, path: Path) -> CommonFileNode:
+        is_dir = path.is_dir()
+        stats = path.stat()
 
         return CommonFileNode(
-            path_parts=list(child_path.relative_to(base_path).parts),
+            path_parts=list(path.parts),
             size=stats.st_size,
             last_modified=datetime.fromtimestamp(stats.st_mtime),
             type="directory" if is_dir else "file",
-            children=grand_children,
         )
 
     def list_files(self, path) -> AbstraLibApiEditorFilesListResponse:
         if path is None:
-            path = Path.cwd()
+            path = Path()
         elif isinstance(path, str):
             path = Path(path)
         elif not isinstance(path, Path):
@@ -60,17 +51,17 @@ class CodebaseController:
 
         return [
             AbstraLibApiEditorFilesListResponseItem(
-                file=self.file_node(child_path, path),
+                file=self.file_node(child_path),
                 stages=[
                     AbstraLibApiEditorFilesListResponseItemStagesItem(
                         id=stage.id,
-                        type=stage.type_name,  # type: ignore
+                        type=stage.type_name,
                     )
                     for stage in project.get_stages_by_file_path(child_path)
                 ],
             )
             for child_path in FileSystemService.list_files(
-                path, include_dirs=True, use_ignore=False
+                path, include_dirs=True, use_ignore=False, recursive=False
             )
         ]
 

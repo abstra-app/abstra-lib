@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from typing import List
 
+from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
 from abstra_internals.repositories.linter.models import (
     LinterFix,
     LinterIssue,
@@ -36,7 +37,7 @@ class AddVenvToAbstraIgnore(LinterFix):
         root_path, prefix_path = get_root_and_prefix_path()
         venv_folder = prefix_path.replace(root_path, "").lstrip("/")
 
-        abstraignore_file = Settings.root_path / ".abstraignore"
+        abstraignore_file = Settings.root_path / ABSTRA_IGNORE_FILEPATH
         with abstraignore_file.open("a") as file:
             file.write("\n")
             file.write(venv_folder)
@@ -57,7 +58,7 @@ class VenvInBundle(LinterRule):
         return prefix_path.startswith(root_path)
 
     def virtualenv_in_abstraignore(self) -> bool:
-        abstraignore_file = Settings.root_path / ".abstraignore"
+        abstraignore_file = Settings.root_path / ABSTRA_IGNORE_FILEPATH
         if not abstraignore_file.exists():
             return False
 
