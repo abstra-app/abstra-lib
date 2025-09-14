@@ -1,7 +1,11 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
-from abstra_internals.services.requirements import Requirement, RequirementsRepository
+from abstra_internals.services.requirements import (
+    RequirementsRepository,
+    create_requirement,
+    uninstall_requirement,
+)
 from abstra_internals.usage import editor_usage
 
 
@@ -40,8 +44,8 @@ def get_editor_bp(controller: MainController):
 
     @bp.post("/<name>/uninstall")
     def _uninstall_requirement(name: str):
-        req = Requirement(name=name)
-        streamer = req.uninstall()
+        req = create_requirement(name)
+        streamer = uninstall_requirement(req)
         if streamer is None:
             flask.abort(403)
         reqs = RequirementsRepository.load()

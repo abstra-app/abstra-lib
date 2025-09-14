@@ -5,7 +5,10 @@ from abstra_internals.repositories.linter.models import (
     LinterIssue,
     LinterRule,
 )
-from abstra_internals.services.requirements import RequirementsRepository
+from abstra_internals.services.requirements import (
+    RequirementsRepository,
+    requirement_to_dict,
+)
 
 
 class MergeDuplicatePackages(LinterFix):
@@ -52,9 +55,18 @@ class DuplicatePackagesInRequirements(LinterRule):
         duplicates = requirements.get_duplicates()
         issues = []
         for name, versions in duplicates.items():
+            # Extract exact versions from specifiers
+            version_list = []
+            for r in versions:
+                req_dict = requirement_to_dict(r)
+                exact_version = None
+                for spec in req_dict.get("specifiers", []):
+                    if spec["operator"] == "==":
+                        exact_version = spec["version"]
+                        break
+                version_list.append(exact_version)
+
             issues.append(
-                DuplicatePackagesInRequirementsFound(
-                    name=name, versions=[r.version for r in versions]
-                )
+                DuplicatePackagesInRequirementsFound(name=name, versions=version_list)
             )
         return issues

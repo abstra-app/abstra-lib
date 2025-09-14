@@ -21,8 +21,24 @@ class TestRequirementsApi(BaseTest):
         self.assertEqual(
             requirements,
             [
-                {"name": "foo", "version": "1.0.0", "installed_version": None},
-                {"name": "bar", "version": None, "installed_version": None},
+                {
+                    "name": "foo",
+                    "specifiers": [{"operator": "==", "version": "1.0.0"}],
+                    "extras": [],
+                    "marker": None,
+                    "url": None,
+                    "raw_requirement": "foo==1.0.0",
+                    "installed_version": None,
+                },
+                {
+                    "name": "bar",
+                    "specifiers": [],
+                    "extras": [],
+                    "marker": None,
+                    "url": None,
+                    "raw_requirement": "bar",
+                    "installed_version": None,
+                },
             ],
         )
 
@@ -37,7 +53,17 @@ class TestRequirementsApi(BaseTest):
         ]
         self.assertEqual(
             non_abstra_requirements,
-            [{"installed_version": None, "name": "foo", "version": None}],
+            [
+                {
+                    "name": "foo",
+                    "specifiers": [],
+                    "extras": [],
+                    "marker": None,
+                    "url": None,
+                    "raw_requirement": "foo",
+                    "installed_version": None,
+                }
+            ],
         )
 
         self.assertTrue(Path("requirements.txt").exists())
@@ -49,7 +75,18 @@ class TestRequirementsApi(BaseTest):
         self.client.delete("/_editor/api/requirements/foo")
         requirements = self.client.get("/_editor/api/requirements").get_json()
         self.assertEqual(
-            requirements, [{"installed_version": None, "name": "bar", "version": None}]
+            requirements,
+            [
+                {
+                    "name": "bar",
+                    "specifiers": [],
+                    "extras": [],
+                    "marker": None,
+                    "url": None,
+                    "raw_requirement": "bar",
+                    "installed_version": None,
+                }
+            ],
         )
         self.assertTrue(Path("requirements.txt").exists())
         self.assertEqual(Path("requirements.txt").read_text(encoding="utf-8"), "bar")

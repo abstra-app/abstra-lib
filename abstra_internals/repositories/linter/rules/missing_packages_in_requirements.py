@@ -8,6 +8,7 @@ from abstra_internals.repositories.linter.models import (
 from abstra_internals.services.requirements import (
     RequirementRecommendation,
     RequirementsRepository,
+    requirement_to_dict,
 )
 
 
@@ -21,7 +22,17 @@ class AddMissingPackagesToRequirements(LinterFix):
     def fix(self):
         requirements = RequirementsRepository.load()
         requirement_name = self.requirement_recommendation.requirement.name
-        requirement_version = self.requirement_recommendation.requirement.version
+        requirement_dict = requirement_to_dict(
+            self.requirement_recommendation.requirement
+        )
+
+        # Extract exact version from specifiers if available
+        requirement_version = None
+        for spec in requirement_dict.get("specifiers", []):
+            if spec["operator"] == "==":
+                requirement_version = spec["version"]
+                break
+
         requirements.add(requirement_name, requirement_version)
         RequirementsRepository.save(requirements)
 

@@ -1,7 +1,10 @@
 from abstra_internals.repositories.linter.rules.duplicate_package_in_requirements import (
     DuplicatePackagesInRequirements,
 )
-from abstra_internals.services.requirements import RequirementsRepository
+from abstra_internals.services.requirements import (
+    RequirementsRepository,
+    requirement_to_dict,
+)
 from tests.fixtures import BaseTest
 
 
@@ -49,7 +52,16 @@ class TestDuplicatePackagesInRequirements(BaseTest):
         requirements = RequirementsRepository.load()
         self.assertEqual(len(requirements.libraries), 1)
         self.assertEqual(requirements.libraries[0].name, "abstra")
-        self.assertEqual(requirements.libraries[0].version, "1.0.0")
+
+        # Use helper function to get version from Requirement
+        req_dict = requirement_to_dict(requirements.libraries[0])
+        # Extract exact version from specifiers
+        exact_version = None
+        for spec in req_dict.get("specifiers", []):
+            if spec["operator"] == "==":
+                exact_version = spec["version"]
+                break
+        self.assertEqual(exact_version, "1.0.0")
 
     def test_invalid_with_distinct_versions_choose_second(self):
         requirements_txt = self.root / "requirements.txt"
@@ -66,4 +78,13 @@ class TestDuplicatePackagesInRequirements(BaseTest):
         requirements = RequirementsRepository.load()
         self.assertEqual(len(requirements.libraries), 1)
         self.assertEqual(requirements.libraries[0].name, "abstra")
-        self.assertEqual(requirements.libraries[0].version, "2.0.0")
+
+        # Use helper function to get version from Requirement
+        req_dict = requirement_to_dict(requirements.libraries[0])
+        # Extract exact version from specifiers
+        exact_version = None
+        for spec in req_dict.get("specifiers", []):
+            if spec["operator"] == "==":
+                exact_version = spec["version"]
+                break
+        self.assertEqual(exact_version, "2.0.0")
