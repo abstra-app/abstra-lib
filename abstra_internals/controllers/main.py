@@ -168,7 +168,7 @@ class MainController:
 
         This method looks up and returns a single stage from the project
         based on the provided ID. The stage can be of any type (form, hook,
-        job, or script).
+        job, or tasklet).
 
         Args:
             id (str): Unique identifier of the stage to retrieve.
@@ -201,7 +201,7 @@ class MainController:
                 elif isinstance(stage, JobStage):
                     print("This is a job stage")
                 elif isinstance(stage, ScriptStage):
-                    print("This is a script stage")
+                    print("This is a tasklet stage")
             else:
                 print("Stage not found")
             ```
@@ -305,13 +305,13 @@ class MainController:
             ```python
             controller = MainController(repositories)
 
-            # Read a Python script file
-            script_content = controller.read_file("scripts/data_processor.py")
-            if script_content:
-                print("Script content:")
-                print(script_content)
+            # Read a Python tasklet file
+            tasklet_content = controller.read_file("tasklet_data_processor.py")
+            if tasklet_content:
+                print("Tasklet content:")
+                print(tasklet_content)
             else:
-                print("Script file not found")
+                print("Tasklet file not found")
 
             # Read configuration files
             config_content = controller.read_file("config.json")
@@ -372,13 +372,13 @@ class MainController:
             else:
                 print("No requirements file found")
 
-            # Check script files before reading
-            script_path = "scripts/data_processor.py"
-            if controller.check_file(script_path):
-                content = controller.read_file(script_path)
-                print("Script loaded successfully")
+            # Check tasklet files before reading
+            tasklet_path = "tasklet_data_processor.py"
+            if controller.check_file(tasklet_path):
+                content = controller.read_file(tasklet_path)
+                print("Tasklet loaded successfully")
             else:
-                print(f"Script {script_path} not found")
+                print(f"Tasklet {tasklet_path} not found")
 
             # Check configuration files
             config_files = ["config.json", "settings.yaml", ".env"]
@@ -390,8 +390,8 @@ class MainController:
                 print("No configuration files found")
 
             # Directories return False
-            is_file = controller.check_file("scripts")  # Returns False (directory)
-            is_file = controller.check_file("scripts/")  # Returns False (directory)
+            is_file = controller.check_file("tasklets")  # Returns False (directory)
+            is_file = controller.check_file("tasklets/")  # Returns False (directory)
             ```
 
         Note:
@@ -520,8 +520,8 @@ class MainController:
             for item in all_files:
                 print(f"{item['type']}: {item['name']} -> {item['path']}")
 
-            # List only Python files in scripts directory
-            python_files = controller.list_files("scripts", mode="python-file")
+            # List only Python files in tasklets directory
+            python_files = controller.list_files("tasklets", mode="python-file")
             for file in python_files:
                 if file['type'] == 'file':
                     print(f"Python file: {file['path']}")
@@ -830,49 +830,49 @@ class MainController:
         id: Optional[str] = None,
     ) -> ScriptStage:
         """
-        Create a new script stage in the project workflow.
+        Create a new tasklet stage in the project workflow.
 
-        Scripts are programmatic workflow stages that execute Python code
+        Tasklets are programmatic workflow stages that execute Python code
         without user interaction. They are used for data processing, business
         logic, integrations, and automation tasks within workflows.
 
         Args:
-            title (str): Display name for the script stage.
-            file (str): Relative path where the script's Python code will be stored.
+            title (str): Display name for the tasklet stage.
+            file (str): Relative path where the tasklet's Python code will be stored.
                 Must end with .py extension.
             workflow_position (Tuple[int, int], optional): X, Y coordinates for the
-                script's position in the visual workflow editor. Defaults to (0, 0).
-            id (Optional[str], optional): Custom identifier for the script. If None,
+                tasklet's position in the visual workflow editor. Defaults to (0, 0).
+            id (Optional[str], optional): Custom identifier for the tasklet. If None,
                 a unique ID will be automatically generated.
 
         Returns:
-            ScriptStage: The newly created script stage object containing all script metadata.
+            ScriptStage: The newly created tasklet stage object containing all tasklet metadata.
 
         Example:
             ```python
             controller = MainController(repositories)
 
-            # Create a data processing script
-            processor = controller.create_script(
+            # Create a data processing tasklet
+            processor = controller.create_tasklet(
                 title="Data Processor",
-                file="scripts/process_data.py"
+                file="tasklet_process_data.py"
             )
-            print(f"Created script: {processor.id}")
+            print(f"Created tasklet: {processor.id}")
 
-            # Create script with custom positioning
-            validator = controller.create_script(
+            # Create tasklet with custom positioning
+            validator = controller.create_tasklet(
                 title="Input Validator",
-                file="scripts/validate_input.py",
+                file="tasklet_validate_input.py",
                 workflow_position=(200, 300),
                 id="input-validator"
             )
             ```
 
         Note:
-            - The script file will be initialized with default script template code
-            - Scripts can receive data from previous workflow stages
-            - Scripts can send tasks to trigger subsequent workflow stages
-            - Scripts run without user interaction and are ideal for automation
+            - The tasklet file will be initialized with default tasklet template code
+            - Tasklets can receive data from previous workflow stages
+            - Tasklets can send tasks to trigger subsequent workflow stages
+            - Tasklets run without user interaction and are ideal for automation
 
         Copywritings:
             Create a new tasklet stage
@@ -898,13 +898,13 @@ class MainController:
 
     def delete_tasklet(self, id: str, remove_file: bool = False):
         """
-        Delete a script stage from the project workflow.
+        Delete a tasklet stage from the project workflow.
 
-        This method removes a script stage from the project configuration and
+        This method removes a tasklet stage from the project configuration and
         optionally deletes the associated Python file from the filesystem.
 
         Args:
-            id (str): Unique identifier of the script stage to delete.
+            id (str): Unique identifier of the tasklet stage to delete.
             remove_file (bool, optional): Whether to also delete the associated
                 Python file from the filesystem. Defaults to False.
 
@@ -912,15 +912,15 @@ class MainController:
             ```python
             controller = MainController(repositories)
 
-            # Delete script but preserve the file
-            controller.delete_script("data-processor")
+            # Delete tasklet but preserve the file
+            controller.delete_tasklet("data-processor")
 
-            # Delete script and its file completely
-            controller.delete_script("validator-script", remove_file=True)
+            # Delete tasklet and its file completely
+            controller.delete_tasklet("validator-tasklet", remove_file=True)
             ```
 
         Warning:
-            - Deleting a script that is referenced by workflow transitions may
+            - Deleting a tasklet that is referenced by workflow transitions may
               break the workflow flow
             - If remove_file=True, the Python file will be permanently deleted
             - This operation cannot be undone
@@ -965,14 +965,14 @@ class MainController:
             # Create a simple form
             form = controller.create_form(
                 title="User Registration",
-                file="forms/registration.py"
+                file="form_registration.py"
             )
             print(f"Created form with ID: {form.id}")
 
             # Create form with custom position and ID
             custom_form = controller.create_form(
                 title="Data Input Form",
-                file="forms/data_input.py",
+                file="form_data_input.py",
                 workflow_position=(100, 200),
                 id="custom-form-id"
             )
@@ -1088,14 +1088,14 @@ class MainController:
             # Create a webhook for external API integration
             webhook = controller.create_hook(
                 title="Payment Webhook",
-                file="hooks/payment_webhook.py"
+                file="hook_payment_webhook.py"
             )
             print(f"Webhook URL: /hooks/{webhook.id}")
 
             # Create hook with custom positioning
             api_hook = controller.create_hook(
                 title="User API Endpoint",
-                file="hooks/user_api.py",
+                file="hook_user_api.py",
                 workflow_position=(300, 150),
                 id="user-api-hook"
             )
@@ -1231,14 +1231,14 @@ class MainController:
             # Create a daily data processing job
             daily_job = controller.create_job(
                 title="Daily Data Sync",
-                file="jobs/daily_sync.py"
+                file="job_daily_sync.py"
             )
             print(f"Created job: {daily_job.title}")
 
             # Create job with custom position and ID
             cleanup_job = controller.create_job(
                 title="Weekly Cleanup",
-                file="jobs/cleanup.py",
+                file="job_cleanup.py",
                 workflow_position=(500, 100),
                 id="weekly-cleanup"
             )
@@ -1379,7 +1379,7 @@ class MainController:
         Retrieve all workflow stages in the current project.
 
         This method returns a complete list of all stages (forms, hooks, jobs,
-        and scripts) that are part of the project workflow.
+        and tasklets) that are part of the project workflow.
 
         Returns:
             List[Stage]: List containing all workflow stages, including:
@@ -1749,10 +1749,10 @@ class MainController:
 
         script = self.get_script(id)
         if not script:
-            raise Exception(f"Script with id {id} not found")
+            raise Exception(f"Tasklet with id {id} not found")
 
         if not task_id:
-            raise Exception("Task ID is required for script execution")
+            raise Exception("Task ID is required for tasklet execution")
 
         return ExecutionController(
             repositories=self.repositories,
