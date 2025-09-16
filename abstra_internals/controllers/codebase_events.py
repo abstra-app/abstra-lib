@@ -36,8 +36,9 @@ class CodebaseEventController:
     def broadcast_changes(
         cls, filepath: Path, event: FSEventType, content: Optional[str]
     ):
+        absolute_root_path = Settings.root_path.resolve()
         message = AbstraLibApiEditorCodebaseEventsMessage(
-            filepath=str(filepath.relative_to(Settings.root_path)),
+            filepath=str(filepath.relative_to(absolute_root_path)),
             event=event,
             content=content,
         )
