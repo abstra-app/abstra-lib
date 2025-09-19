@@ -1,0 +1,48 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "text-input",
+            "key": "first_name",
+            "label": "Enter your first name:",
+            "value": "",
+            "placeholder": "",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "mask": null,
+            "maxLength": null,
+            "minLength": null,
+            "disabled": false,
+            "errors": []
+        },
+        {
+            "type": "text-input",
+            "key": "last_name",
+            "label": "Enter your last name:",
+            "value": "",
+            "placeholder": "",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "mask": null,
+            "maxLength": null,
+            "minLength": null,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 3,
+        "disabled": false
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        {
+            "key": "i18n_next_action",
+            "label": "i18n_next_action"
+        }
+    ]
+}

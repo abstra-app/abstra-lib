@@ -1,0 +1,37 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "text-input",
+            "key": "welcome",
+            "label": "Welcome! Please choose what information to provide:",
+            "value": "",
+            "placeholder": "",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "mask": null,
+            "maxLength": null,
+            "minLength": null,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        {
+            "key": "personal_info",
+            "label": "Personal Info"
+        },
+        {
+            "key": "company_info",
+            "label": "Company Info"
+        }
+    ]
+}

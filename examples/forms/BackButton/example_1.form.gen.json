@@ -1,0 +1,47 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "text-input",
+            "key": "name",
+            "label": "Enter your full name:",
+            "value": "",
+            "placeholder": "",
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "mask": null,
+            "maxLength": null,
+            "minLength": null,
+            "disabled": false,
+            "errors": []
+        },
+        {
+            "type": "number-input",
+            "key": "age",
+            "label": "Enter your age:",
+            "value": null,
+            "placeholder": null,
+            "required": true,
+            "hint": null,
+            "fullWidth": false,
+            "min": null,
+            "max": null,
+            "disabled": false,
+            "errors": []
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 3,
+        "disabled": false
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        {
+            "key": "i18n_next_action",
+            "label": "i18n_next_action"
+        }
+    ]
+}
