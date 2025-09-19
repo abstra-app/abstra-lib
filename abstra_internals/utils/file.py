@@ -4,6 +4,7 @@ import os
 import pathlib
 import shutil
 import tempfile
+import time
 import typing as t
 import uuid
 import warnings
@@ -13,6 +14,7 @@ from typing import Generator, Optional, Set, Union
 from werkzeug.datastructures import FileStorage
 
 from abstra_internals.utils.ast_cache import ASTCache
+from abstra_internals.utils.platform import is_windows
 
 FILE_TYPES = {
     "txt": {
@@ -544,3 +546,63 @@ def extension_to_mime(extension: str) -> str:
     if extension_without_dot in FILE_TYPES:
         return FILE_TYPES[extension_without_dot]["mime"]
     return FILE_TYPES["unknown"]["mime"]
+
+
+def is_file_locked(filepath: Path) -> bool:
+    if not filepath.exists():
+        return False
+
+    try:
+        if is_windows():
+            with open(filepath, "a", encoding="utf-8"):
+                pass
+
+            with open(filepath, "r", encoding="utf-8"):
+                pass
+        else:
+            with open(filepath, "r+", encoding="utf-8"):
+                pass
+        return False
+    except (PermissionError, OSError):
+        return True
+
+
+def wait_for_file_unlock(
+    filepath: Path, timeout: float = 2.0, check_interval: float = 0.05
+) -> bool:
+    if not filepath.exists():
+        return True
+
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        if not is_file_locked(filepath):
+            return True
+        time.sleep(check_interval)
+
+    return False
+
+
+def safe_read_file(filepath: Path, timeout: float = 2.0) -> Optional[str]:
+    if not filepath.is_file():
+        return None
+
+    if not wait_for_file_unlock(filepath, timeout):
+        return None
+
+    try:
+        return filepath.read_text(encoding="utf-8")
+    except (PermissionError, OSError, UnicodeDecodeError) as e:
+        print(f"Error reading {filepath}: {e}")
+        return None
+
+
+def safe_write_file(filepath: Path, content: str, timeout: float = 2.0) -> bool:
+    if not wait_for_file_unlock(filepath, timeout):
+        return False
+
+    try:
+        filepath.write_text(content, encoding="utf-8")
+        return True
+    except (PermissionError, OSError) as e:
+        print(f"Error writing {filepath}: {e}")
+        return False

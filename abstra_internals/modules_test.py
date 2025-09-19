@@ -1,5 +1,4 @@
 import os
-import platform
 from unittest import TestCase, skipIf
 
 from abstra_internals.modules import import_as_new, reload_module
@@ -7,11 +6,12 @@ from abstra_internals.repositories.project.project import (
     LocalProjectRepository,
     ScriptStage,
 )
+from abstra_internals.utils.platform import is_windows
 from tests.fixtures import clear_dir, init_dir
 
 
 def can_create_symlinks():
-    if platform.system() != "Windows":
+    if not is_windows():
         return True
 
     try:
