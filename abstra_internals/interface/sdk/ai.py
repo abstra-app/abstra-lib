@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, TypeVar, Union
 
 from abstra_internals.contracts_generated import (
     CloudApiCliModelsBoletoResponse,
+    CloudApiCliModelsNfeResponse,
     CloudApiCliModelsNfseResponse,
 )
 from abstra_internals.controllers.sdk.sdk_ai import Format, Prompt
@@ -83,6 +84,20 @@ def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
     """
     data = SDKContextStore.get_by_thread().ai_sdk.parse_document(document_path, "nfse")
     return CloudApiCliModelsNfseResponse.from_dict(data)
+
+
+def parse_nfe(document_path: Path) -> CloudApiCliModelsNfeResponse:
+    """
+    Parse a Nota Fiscal Eletrônica (NFe) document.
+    Args:
+        document_path (Path): The path to the NFe document to be parsed.
+    Returns:
+        CloudApiCliModelsNfeResponse: The parsed NFe response.
+    Raises:
+        ValueError: If the document path is invalid or the parsing fails.
+    """
+    data = SDKContextStore.get_by_thread().ai_sdk.parse_document(document_path, "nfe")
+    return CloudApiCliModelsNfeResponse.from_dict(data)
 
 
 def parse_boleto(document_path: Path) -> CloudApiCliModelsBoletoResponse:

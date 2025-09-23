@@ -1,5 +1,6 @@
 from abstra_internals.interface.sdk.ai import (
     parse_boleto,
+    parse_nfe,
     parse_nfse,
     prompt,
 )
@@ -7,6 +8,7 @@ from abstra_internals.interface.sdk.prompt_browser import experimental_prompt_br
 
 __all__ = [
     "prompt",
+    "parse_nfe",
     "parse_nfse",
     "parse_boleto",
     "experimental_prompt_browser",
