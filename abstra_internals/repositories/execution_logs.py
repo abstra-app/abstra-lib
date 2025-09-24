@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.consts.filepaths import LOCAL_LOGS_DIR_PATH
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.serializer import SerializationHelper
 from abstra_internals.utils import serialize
 from abstra_internals.utils.datetime import from_utc_iso_string, to_utc_iso_string
 
@@ -136,18 +135,9 @@ class ProductionExecutionLogsRepository(ExecutionLogsRepository):
         self.sequence = 0
         self.client = client
 
-    def save(self, log_entry: LogEntry) -> None:
-        validated_payload = SerializationHelper.enforce_max_size(log_entry.payload)
-
-        dto = {
-            **log_entry.to_dto(),
-            "payload": validated_payload,
-        }
-
-        self.client.async_post(
-            endpoint=f"/executions/{log_entry.execution_id}/logs",
-            json=dto,
-        )
+    def save(
+        self, log_entry: LogEntry
+    ) -> None: ...  # No-op in production, as logs are saved directly by the cluster.
 
     def get(
         self,
