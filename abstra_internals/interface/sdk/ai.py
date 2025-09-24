@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, TypeVar, Union
 
 from abstra_internals.contracts_generated import (
+    CloudApiCliModelsBankStatementResponse,
     CloudApiCliModelsBoletoResponse,
     CloudApiCliModelsNfeResponse,
     CloudApiCliModelsNfseResponse,
+    CloudApiCliModelsUsDriverLicenseResponse,
 )
 from abstra_internals.controllers.sdk.sdk_ai import Format, Prompt
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
@@ -72,11 +74,11 @@ def prompt(
     )
 
 
-def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
+def parse_nfse(document_path: Union[Path, str]) -> CloudApiCliModelsNfseResponse:
     """
     Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.
     Args:
-        document_path (Path): The path to the NFSe document to be parsed.
+        document_path (Union[Path, str]): The path to the NFSe document to be parsed.
     Returns:
         CloudApiCliModelsNfseResponse: The parsed NFSe response.
     Raises:
@@ -86,11 +88,11 @@ def parse_nfse(document_path: Path) -> CloudApiCliModelsNfseResponse:
     return CloudApiCliModelsNfseResponse.from_dict(data)
 
 
-def parse_nfe(document_path: Path) -> CloudApiCliModelsNfeResponse:
+def parse_nfe(document_path: Union[Path, str]) -> CloudApiCliModelsNfeResponse:
     """
     Parse a Nota Fiscal Eletrônica (NFe) document.
     Args:
-        document_path (Path): The path to the NFe document to be parsed.
+        document_path (Union[Path, str]): The path to the NFe document to be parsed.
     Returns:
         CloudApiCliModelsNfeResponse: The parsed NFe response.
     Raises:
@@ -100,11 +102,11 @@ def parse_nfe(document_path: Path) -> CloudApiCliModelsNfeResponse:
     return CloudApiCliModelsNfeResponse.from_dict(data)
 
 
-def parse_boleto(document_path: Path) -> CloudApiCliModelsBoletoResponse:
+def parse_boleto(document_path: Union[Path, str]) -> CloudApiCliModelsBoletoResponse:
     """
     Parse a Boleto document.
     Args:
-        document_path (Path): The path to the Boleto document to be parsed.
+        document_path (Union[Path, str]): The path to the Boleto document to be parsed.
     Returns:
         dict: The parsed Boleto data.
     Raises:
@@ -114,3 +116,41 @@ def parse_boleto(document_path: Path) -> CloudApiCliModelsBoletoResponse:
         document_path, "boleto"
     )
     return CloudApiCliModelsBoletoResponse.from_dict(data)
+
+
+def parse_us_driver_license(
+    document_path: Union[Path, str],
+) -> CloudApiCliModelsUsDriverLicenseResponse:
+    """
+    Parse a US Driver License document.
+    Args:
+        document_path (Union[Path, str]): The path to the Driver License document to be parsed.
+    Returns:
+        dict: The parsed Driver License data.
+    Raises:
+        ValueError: If the document path is invalid or the parsing fails.
+    """
+
+    data = SDKContextStore.get_by_thread().ai_sdk.parse_document(
+        document_path, "us-driver-license"
+    )
+    return CloudApiCliModelsUsDriverLicenseResponse.from_dict(data)
+
+
+def parse_bank_statement(
+    document_path: Union[Path, str],
+) -> CloudApiCliModelsBankStatementResponse:
+    """
+    Parse a Bank Statement document.
+    Args:
+        document_path (Union[Path, str]): The path to the Bank Statement document to be parsed.
+    Returns:
+        dict: The parsed Bank Statement data.
+    Raises:
+        ValueError: If the document path is invalid or the parsing fails.
+    """
+
+    data = SDKContextStore.get_by_thread().ai_sdk.parse_document(
+        document_path, "bank-statement"
+    )
+    return CloudApiCliModelsBankStatementResponse.from_dict(data)

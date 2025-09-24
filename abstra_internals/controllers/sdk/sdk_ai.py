@@ -210,7 +210,12 @@ class AiSDKController:
 
         return response["content"]
 
-    def parse_document(self, document_path: pathlib.Path, model: str) -> dict:
+    def parse_document(
+        self, document_path: Union[pathlib.Path, str], model: str
+    ) -> dict:
+        if isinstance(document_path, str):
+            document_path = pathlib.Path(document_path)
+
         if document_path.suffix.lower() == ".pdf":
             mime_type = "application/pdf"
         elif document_path.suffix.lower() in [".jpeg", ".jpg"]:
