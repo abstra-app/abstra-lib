@@ -74,7 +74,7 @@ def prompt(
     )
 
 
-def parse_nfse(document_path: Union[Path, str]) -> CloudApiCliModelsNfseResponse:
+def parse_nfse(document_path: Union["Path", str]) -> CloudApiCliModelsNfseResponse:
     """
     Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.
     Args:
@@ -88,7 +88,7 @@ def parse_nfse(document_path: Union[Path, str]) -> CloudApiCliModelsNfseResponse
     return CloudApiCliModelsNfseResponse.from_dict(data)
 
 
-def parse_nfe(document_path: Union[Path, str]) -> CloudApiCliModelsNfeResponse:
+def parse_nfe(document_path: Union["Path", str]) -> CloudApiCliModelsNfeResponse:
     """
     Parse a Nota Fiscal Eletrônica (NFe) document.
     Args:
@@ -102,7 +102,7 @@ def parse_nfe(document_path: Union[Path, str]) -> CloudApiCliModelsNfeResponse:
     return CloudApiCliModelsNfeResponse.from_dict(data)
 
 
-def parse_boleto(document_path: Union[Path, str]) -> CloudApiCliModelsBoletoResponse:
+def parse_boleto(document_path: Union["Path", str]) -> CloudApiCliModelsBoletoResponse:
     """
     Parse a Boleto document.
     Args:
@@ -119,7 +119,7 @@ def parse_boleto(document_path: Union[Path, str]) -> CloudApiCliModelsBoletoResp
 
 
 def parse_us_driver_license(
-    document_path: Union[Path, str],
+    document_path: Union["Path", str],
 ) -> CloudApiCliModelsUsDriverLicenseResponse:
     """
     Parse a US Driver License document.
@@ -138,7 +138,7 @@ def parse_us_driver_license(
 
 
 def parse_bank_statement(
-    document_path: Union[Path, str],
+    document_path: Union["Path", str],
 ) -> CloudApiCliModelsBankStatementResponse:
     """
     Parse a Bank Statement document.

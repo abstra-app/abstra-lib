@@ -36,13 +36,28 @@
       "return_type": "Unknown",
       "examples": []
     },
+    "parse_nfe": {
+      "object_type": "function",
+      "description": "Parse a Nota Fiscal Eletrônica (NFe) document.",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Union[Path, str]",
+          "description": "The path to the NFe document to be parsed. CloudApiCliModelsNfeResponse: The parsed NFe response. ValueError: If the document path is invalid or the parsing fails.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsNfeResponse",
+      "examples": []
+    },
     "parse_nfse": {
       "object_type": "function",
       "description": "Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document.",
       "params": [
         {
           "name": "document_path",
-          "type": "Path",
+          "type": "Union[Path, str]",
           "description": "The path to the NFSe document to be parsed. CloudApiCliModelsNfseResponse: The parsed NFSe response. ValueError: If the document path is invalid or the parsing fails.",
           "default": "None",
           "required": true
@@ -57,13 +72,43 @@
       "params": [
         {
           "name": "document_path",
-          "type": "Path",
+          "type": "Union[Path, str]",
           "description": "The path to the Boleto document to be parsed. dict: The parsed Boleto data. ValueError: If the document path is invalid or the parsing fails.",
           "default": "None",
           "required": true
         }
       ],
       "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsBoletoResponse",
+      "examples": []
+    },
+    "parse_us_driver_license": {
+      "object_type": "function",
+      "description": "Parse a US Driver License document.",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Union[Path, str]",
+          "description": "The path to the Driver License document to be parsed. dict: The parsed Driver License data. ValueError: If the document path is invalid or the parsing fails.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsUsDriverLicenseResponse",
+      "examples": []
+    },
+    "parse_bank_statement": {
+      "object_type": "function",
+      "description": "Parse a Bank Statement document.",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Union[Path, str]",
+          "description": "The path to the Bank Statement document to be parsed. dict: The parsed Bank Statement data. ValueError: If the document path is invalid or the parsing fails.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsBankStatementResponse",
       "examples": []
     },
     "experimental_prompt_browser": {
@@ -417,7 +462,7 @@
     },
     "Button": {
       "object_type": "class",
-      "description": "Base class for form navigation buttons.",
+      "description": "Render buttons with custom functionality in your form for conditional logic and branching paths. Buttons allow users to trigger custom Python functions, processing or different form behaviors. When a button is pressed, its key becomes `True` in the form state, enabling conditional logic to determine the next steps in your workflow. This makes buttons essential for creating approval workflows, multi-path forms, and interactive decision trees. Unlike automatic navigation buttons (NextButton/BackButton), custom Button widgets give you full control over widget behavior within a page and can be used to implement complex conditional logic based on user choices. ## How Button State Works When a user clicks a button, the button's key is set to `True` in the form state. You can then check this state using `state.get(\"button_key\")` to determine which button was pressed and conditionally render different widgets or forms. ## Usage Pattern Buttons are optionally returned from your Page function (a function that returns a list of widgets). You have two options: **Option 1: Return only widgets (default behavior)** ```python def my_page(state): return [TextOutput(\"Hello\"), TextOutput(\"world!\")] # Default navigation buttons will be used ``` **Option 2: Return widgets + custom buttons as a tuple** ```python def my_page(state): widgets = [TextOutput(\"Hello\"), TextOutput(\"world!\")] buttons = [Button(\"Label 1\", key=\"key1\"), Button(\"Label 2\", key=\"key2\")] return widgets, buttons ``` If you don't return buttons (Option 1), the system automatically provides default navigation buttons (Next/Back). If you want custom buttons, you must return a tuple with widgets as the first element and a list of Button objects as the second element. ## Common Use Cases - **Approval Workflows**: Create \"Approve\" and \"Reject\" buttons for document review processes - **Data Reload**: Refresh page content with updated information from external APIs or databases - **Multi-path Forms**: Allow users to choose between different information collection paths - **Decision Trees**: Build complex conditional forms based on user choices - **Custom Navigation**: Implement non-linear form progression with custom logic",
       "init": {
         "params": [
           {
@@ -449,11 +494,131 @@
         }
       },
       "parent_classes": [],
-      "examples": []
+      "examples": [
+        {
+          "name": "Custom Decision Buttons",
+          "description": "Use custom buttons to create approval workflows with conditional logic based on user decisions",
+          "code": "from abstra.forms import Button, TextInput, run\n\n\ndef approval_workflow(state):\n    # Check which button was pressed\n    if state.get(\"approve\"):\n        return [\n            TextInput(\"Approved! Add your approval comments:\", key=\"approval_comments\")\n        ]\n    elif state.get(\"reject\"):\n        return [\n            TextInput(\n                \"Rejected. Please provide rejection reason:\", key=\"rejection_reason\"\n            )\n        ]\n    else:\n        # Initial form with decision buttons\n        return [TextInput(\"Enter request details:\", key=\"request_details\")], [\n            Button(\"Approve\", key=\"approve\"),\n            Button(\"Reject\", key=\"reject\"),\n        ]\n\n\n# Run the workflow\nresult = run([approval_workflow])\n\n# Print the result\nprint(result)",
+          "output": {
+            "type": "form:render",
+            "widgets": [
+              {
+                "type": "text-input",
+                "key": "request_details",
+                "label": "Enter request details:",
+                "value": "",
+                "placeholder": "",
+                "required": true,
+                "hint": null,
+                "fullWidth": false,
+                "mask": null,
+                "maxLength": null,
+                "minLength": null,
+                "disabled": false,
+                "errors": []
+              }
+            ],
+            "stepsInfo": {
+              "current": 1,
+              "total": 1,
+              "disabled": true
+            },
+            "endPage": false,
+            "seq": 0,
+            "actions": [
+              {
+                "key": "approve",
+                "label": "Approve"
+              },
+              {
+                "key": "reject",
+                "label": "Reject"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Multi-Step Form Navigation",
+          "description": "Use custom buttons to create branching form paths where different buttons lead to different form sections",
+          "code": "from abstra.forms import Button, DropdownInput, TextInput, run\n\n\ndef multi_path_form(state):\n    # Check which path the user chose\n    if state.get(\"personal_info\"):\n        return [\n            TextInput(\"Full Name:\", key=\"name\"),\n            TextInput(\"Email:\", key=\"email\"),\n            TextInput(\"Phone:\", key=\"phone\"),\n        ]\n    elif state.get(\"company_info\"):\n        return [\n            TextInput(\"Company Name:\", key=\"company\"),\n            TextInput(\"Job Title:\", key=\"title\"),\n            DropdownInput(\n                \"Industry:\", [\"Tech\", \"Finance\", \"Healthcare\", \"Other\"], key=\"industry\"\n            ),\n        ]\n    else:\n        # Initial choice form\n        return [\n            TextInput(\n                \"Welcome! Please choose what information to provide:\", key=\"welcome\"\n            )\n        ], [\n            Button(\"Personal Info\", key=\"personal_info\"),\n            Button(\"Company Info\", key=\"company_info\"),\n        ]\n\n\n# Run the form\nresult = run([multi_path_form])\n\n# Print the result\nprint(result)",
+          "output": {
+            "type": "form:render",
+            "widgets": [
+              {
+                "type": "text-input",
+                "key": "welcome",
+                "label": "Welcome! Please choose what information to provide:",
+                "value": "",
+                "placeholder": "",
+                "required": true,
+                "hint": null,
+                "fullWidth": false,
+                "mask": null,
+                "maxLength": null,
+                "minLength": null,
+                "disabled": false,
+                "errors": []
+              }
+            ],
+            "stepsInfo": {
+              "current": 1,
+              "total": 1,
+              "disabled": true
+            },
+            "endPage": false,
+            "seq": 0,
+            "actions": [
+              {
+                "key": "personal_info",
+                "label": "Personal Info"
+              },
+              {
+                "key": "company_info",
+                "label": "Company Info"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Data Reload with Button",
+          "description": "Use custom buttons to refresh page content with updated data from external sources or calculations",
+          "code": "import random\n\nfrom abstra.forms import Button, TextOutput, run\n\nnumber = random.randint(1, 100)\n\n\ndef data_reload_page(state):\n    global number\n    # Generate new random number when refresh button is pressed\n    # This simulates fetching fresh data from an API or database\n    if state.get(\"refresh\"):\n        # Button was pressed, generate new number\n        number = random.randint(1, 100)\n\n    return [\n        TextOutput(f\"Random Number: {number}\"),\n        TextOutput(\"Click the button below to generate a new random number:\"),\n    ], [Button(\"Generate New Number\", key=\"refresh\")]\n\n\n# Run the form\nresult = run([data_reload_page])\n\n# Print the result\nprint(result)",
+          "output": {
+            "type": "form:render",
+            "widgets": [
+              {
+                "type": "text-output",
+                "text": "Random Number: 5",
+                "size": "medium",
+                "fullWidth": false
+              },
+              {
+                "type": "text-output",
+                "text": "Click the button below to generate a new random number:",
+                "size": "medium",
+                "fullWidth": false
+              }
+            ],
+            "stepsInfo": {
+              "current": 1,
+              "total": 1,
+              "disabled": true
+            },
+            "endPage": false,
+            "seq": 0,
+            "actions": [
+              {
+                "key": "refresh",
+                "label": "Generate New Number"
+              }
+            ]
+          }
+        }
+      ]
     },
     "NextButton": {
       "object_type": "class",
-      "description": "Button used to navigate to the next step in a form. Automatically labeled with internationalized \"Next\" text.",
+      "description": "Automatic navigation button for progressing to the next step in multi-step forms. NextButton is automatically added to forms when using multi-step workflows created with the `run()` function. It handles forward navigation between form steps without requiring manual implementation. The button is automatically labeled with internationalized \"Next\" text that adapts to the user's language settings. ## Automatic Behavior - **Auto-added**: NextButton appears automatically on each step of a multi-step form (you don't need to import or create it) - **Smart positioning**: Only shows when there are more steps ahead - **Internationalized**: Button text automatically translates based on user locale - **State preservation**: User input is preserved when navigating between steps ## When to Use NextButton is ideal for: - **Linear workflows**: Step-by-step data collection processes - **Wizards**: Multi-step onboarding or configuration flows - **Progressive forms**: Breaking long forms into manageable sections - **Data collection pipelines**: Structured information gathering processes Unlike custom Button widgets, NextButton doesn't require state management or conditional logic - it's handled automatically by the form system.",
       "init": {
         "params": []
       },
@@ -461,11 +626,65 @@
       "parent_classes": [
         "Button"
       ],
-      "examples": []
+      "examples": [
+        {
+          "name": "Automatic Next Button",
+          "description": "NextButton is automatically added to forms for navigation. This example shows a multi-step form where NextButton handles progression automatically",
+          "code": "from abstra.forms import EmailInput, TextInput, run\n\n\ndef step_1(state):\n    return [\n        TextInput(\"Enter your first name:\", key=\"first_name\"),\n        TextInput(\"Enter your last name:\", key=\"last_name\"),\n    ]\n\n\ndef step_2(state):\n    return [\n        EmailInput(\"Enter your email:\", key=\"email\"),\n        TextInput(\"Enter your phone number:\", key=\"phone\"),\n    ]\n\n\ndef step_3(state):\n    return [\n        TextInput(\n            f\"Thank you {state.get('first_name', '')}! Any additional comments?\",\n            key=\"comments\",\n        )\n    ]\n\n\n# Run multi-step form - NextButton appears automatically on each step\nresult = run([step_1, step_2, step_3])\n\n# Print the result\nprint(result)",
+          "output": {
+            "type": "form:render",
+            "widgets": [
+              {
+                "type": "text-input",
+                "key": "first_name",
+                "label": "Enter your first name:",
+                "value": "",
+                "placeholder": "",
+                "required": true,
+                "hint": null,
+                "fullWidth": false,
+                "mask": null,
+                "maxLength": null,
+                "minLength": null,
+                "disabled": false,
+                "errors": []
+              },
+              {
+                "type": "text-input",
+                "key": "last_name",
+                "label": "Enter your last name:",
+                "value": "",
+                "placeholder": "",
+                "required": true,
+                "hint": null,
+                "fullWidth": false,
+                "mask": null,
+                "maxLength": null,
+                "minLength": null,
+                "disabled": false,
+                "errors": []
+              }
+            ],
+            "stepsInfo": {
+              "current": 1,
+              "total": 3,
+              "disabled": false
+            },
+            "endPage": false,
+            "seq": 0,
+            "actions": [
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
+            ]
+          }
+        }
+      ]
     },
     "BackButton": {
       "object_type": "class",
-      "description": "Button used to navigate to the previous step in a form. Automatically labeled with internationalized \"Back\" text.",
+      "description": "Automatic navigation button for returning to previous steps in multi-step forms. BackButton is automatically added to forms starting from step 2 onwards in multi-step workflows. It enables backward navigation while preserving all user input, allowing users to review and modify their previous responses without losing data. The button is automatically labeled with internationalized \"Back\" text that adapts to the user's language settings. ## Automatic Behavior - **Auto-added**: BackButton appears automatically from step 2 onwards in multi-step forms (you don't need to import or create it) - **Smart positioning**: Only shows when there are previous steps to navigate to - **Internationalized**: Button text automatically translates based on user locale - **Data preservation**: All user input is maintained when navigating backwards - **Seamless integration**: Works automatically with the form system's navigation logic ## Key Features - **Non-destructive navigation**: Users can go back without losing their progress - **Form state management**: Previous inputs are automatically restored when returning - **User-friendly**: Provides confidence for users to explore and correct their inputs ## When BackButton Appears BackButton is ideal for: - **Multi-step wizards**: Allow users to review and modify previous steps - **Data collection forms**: Enable correction of earlier responses - **Progressive workflows**: Provide flexibility in non-linear completion - **Review processes**: Allow users to double-check their inputs before submission Unlike custom Button widgets, BackButton doesn't require any implementation - it's automatically managed by the form system.",
       "init": {
         "params": []
       },
@@ -473,7 +692,60 @@
       "parent_classes": [
         "Button"
       ],
-      "examples": []
+      "examples": [
+        {
+          "name": "Automatic Back Navigation",
+          "description": "BackButton automatically appears on step 2+ of multi-step forms, allowing users to navigate backwards while preserving their input",
+          "code": "from abstra.forms import DropdownInput, NumberInput, TextInput, run\n\n\ndef personal_info(state):\n    return [\n        TextInput(\"Enter your full name:\", key=\"name\"),\n        NumberInput(\"Enter your age:\", key=\"age\"),\n    ]\n\n\ndef preferences(state):\n    return [\n        DropdownInput(\n            \"Select your favorite color:\",\n            [\"Red\", \"Blue\", \"Green\", \"Yellow\"],\n            key=\"color\",\n        ),\n        TextInput(\"What's your hobby?\", key=\"hobby\"),\n    ]\n\n\ndef confirmation(state):\n    name = state.get(\"name\", \"Unknown\")\n    age = state.get(\"age\", \"Unknown\")\n    color = state.get(\"color\", \"Unknown\")\n    hobby = state.get(\"hobby\", \"Unknown\")\n\n    return [\n        TextInput(\n            f\"Confirm your details:\\nName: {name}\\nAge: {age}\\nFavorite Color: {color}\\nHobby: {hobby}\\n\\nUse the Back button to make changes, or Next to submit:\",\n            key=\"confirmation\",\n        )\n    ]\n\n\n# Run multi-step form - BackButton appears automatically from step 2 onwards\nresult = run([personal_info, preferences, confirmation])\n\n# Print the result\nprint(result)",
+          "output": {
+            "type": "form:render",
+            "widgets": [
+              {
+                "type": "text-input",
+                "key": "name",
+                "label": "Enter your full name:",
+                "value": "",
+                "placeholder": "",
+                "required": true,
+                "hint": null,
+                "fullWidth": false,
+                "mask": null,
+                "maxLength": null,
+                "minLength": null,
+                "disabled": false,
+                "errors": []
+              },
+              {
+                "type": "number-input",
+                "key": "age",
+                "label": "Enter your age:",
+                "value": null,
+                "placeholder": null,
+                "required": true,
+                "hint": null,
+                "fullWidth": false,
+                "min": null,
+                "max": null,
+                "disabled": false,
+                "errors": []
+              }
+            ],
+            "stepsInfo": {
+              "current": 1,
+              "total": 3,
+              "disabled": false
+            },
+            "endPage": false,
+            "seq": 0,
+            "actions": [
+              {
+                "key": "i18n_next_action",
+                "label": "i18n_next_action"
+              }
+            ]
+          }
+        }
+      ]
     },
     "Widget": {
       "object_type": "class",
@@ -1156,7 +1428,7 @@
         {
           "name": "Basic Usage",
           "description": "This example runs a form with a single page containing the widget",
-          "code": "from abstra.forms import CardsInput, run\n\n# Create a page with the widget\nexample_page = [\n    CardsInput(\n        \"Choose your favorite dessert\",\n        [\n            {\n                \"title\": \"Crepe\",\n                \"subtitle\": \"French\",\n                \"image\": \"https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg\",\n                \"description\": \"A crêpe or crepe is a type of very thin pancake.\",\n            },\n            {\n                \"title\": \"Pancake\",\n                \"subtitle\": \"American\",\n                \"image\": \"https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg\",\n                \"description\": \"A pancake is a flat cake, often thin and round.\",\n            },\n            {\n                \"title\": \"Waffle\",\n                \"subtitle\": \"Belgian\",\n                \"image\": \"https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg\",\n                \"description\": \"A waffle is a patterned dish made from leavened batter or dough.\",\n            },\n        ],\n    )\n]\n\n# Run the form\nresult = run([example_page])\n\n# Print the result\nprint(result)",
+          "code": "from abstra.forms import CardsInput, run\n\n# Create a page with the widget\nexample_page = [\n    CardsInput(\n        \"Choose your favorite dessert\",\n        [\n            {\n                \"title\": \"Crepe\",\n                \"subtitle\": \"French\",\n                \"image\": \"https://assets.abstra.cloud/docs/images/widgets/pancakes-2020870_1280.jpg\",\n                \"description\": \"A crêpe or crepe is a type of very thin pancake.\",\n            },\n            {\n                \"title\": \"Pancake\",\n                \"subtitle\": \"American\",\n                \"image\": \"https://assets.abstra.cloud/docs/images/widgets/pancake-3529653_1280.jpg\",\n                \"description\": \"A pancake is a flat cake, often thin and round.\",\n            },\n            {\n                \"title\": \"Waffle\",\n                \"subtitle\": \"Belgian\",\n                \"image\": \"https://assets.abstra.cloud/docs/images/widgets/waffles-5192625_1280.jpg\",\n                \"description\": \"A waffle is a patterned dish made from leavened batter or dough.\",\n            },\n        ],\n    )\n]\n\n# Run the form\nresult = run([example_page])\n\n# Print the result\nprint(result)",
           "output": {
             "type": "form:render",
             "widgets": [
@@ -1169,19 +1441,19 @@
                   {
                     "title": "Crepe",
                     "subtitle": "French",
-                    "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",
+                    "image": "https://assets.abstra.cloud/docs/images/widgets/pancakes-2020870_1280.jpg",
                     "description": "A crêpe or crepe is a type of very thin pancake."
                   },
                   {
                     "title": "Pancake",
                     "subtitle": "American",
-                    "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",
+                    "image": "https://assets.abstra.cloud/docs/images/widgets/pancake-3529653_1280.jpg",
                     "description": "A pancake is a flat cake, often thin and round."
                   },
                   {
                     "title": "Waffle",
                     "subtitle": "Belgian",
-                    "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",
+                    "image": "https://assets.abstra.cloud/docs/images/widgets/waffles-5192625_1280.jpg",
                     "description": "A waffle is a patterned dish made from leavened batter or dough."
                   }
                 ],
@@ -1216,7 +1488,7 @@
         {
           "name": "Searchable",
           "description": "You may also add a search bar to the cards input widget.",
-          "code": "from abstra.forms import CardsInput, run\n\n# Create a page with the widget\nexample_page = [\n    CardsInput(\n        \"Choose your favorite dessert\",\n        [\n            {\n                \"title\": \"Crepe\",\n                \"subtitle\": \"French\",\n                \"image\": \"https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg\",\n                \"description\": \"A crêpe or crepe is a type of very thin pancake.\",\n            },\n            {\n                \"title\": \"Pancake\",\n                \"subtitle\": \"American\",\n                \"image\": \"https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg\",\n                \"description\": \"A pancake is a flat cake, often thin and round.\",\n            },\n            {\n                \"title\": \"Waffle\",\n                \"subtitle\": \"Belgian\",\n                \"image\": \"https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg\",\n                \"description\": \"A waffle is a patterned dish made from leavened batter or dough.\",\n            },\n        ],\n        multiple=True,\n        searchable=True,\n    )\n]\n\n# Run the form\nresult = run([example_page])\n\n# Print the result\nprint(result)",
+          "code": "from abstra.forms import CardsInput, run\n\n# Create a page with the widget\nexample_page = [\n    CardsInput(\n        \"Choose your favorite dessert\",\n        [\n            {\n                \"title\": \"Crepe\",\n                \"subtitle\": \"French\",\n                \"image\": \"https://assets.abstra.cloud/docs/images/widgets/pancakes-2020870_1280.jpg\",\n                \"description\": \"A crêpe or crepe is a type of very thin pancake.\",\n            },\n            {\n                \"title\": \"Pancake\",\n                \"subtitle\": \"American\",\n                \"image\": \"https://assets.abstra.cloud/docs/images/widgets/pancake-3529653_1280.jpg\",\n                \"description\": \"A pancake is a flat cake, often thin and round.\",\n            },\n            {\n                \"title\": \"Waffle\",\n                \"subtitle\": \"Belgian\",\n                \"image\": \"https://assets.abstra.cloud/docs/images/widgets/waffles-5192625_1280.jpg\",\n                \"description\": \"A waffle is a patterned dish made from leavened batter or dough.\",\n            },\n        ],\n        multiple=True,\n        searchable=True,\n    )\n]\n\n# Run the form\nresult = run([example_page])\n\n# Print the result\nprint(result)",
           "output": {
             "type": "form:render",
             "widgets": [
@@ -1229,19 +1501,19 @@
                   {
                     "title": "Crepe",
                     "subtitle": "French",
-                    "image": "https://cdn.pixabay.com/photo/2017/01/30/13/56/pancakes-2020870_1280.jpg",
+                    "image": "https://assets.abstra.cloud/docs/images/widgets/pancakes-2020870_1280.jpg",
                     "description": "A crêpe or crepe is a type of very thin pancake."
                   },
                   {
                     "title": "Pancake",
                     "subtitle": "American",
-                    "image": "https://cdn.pixabay.com/photo/2018/07/10/21/23/pancake-3529653_1280.jpg",
+                    "image": "https://assets.abstra.cloud/docs/images/widgets/pancake-3529653_1280.jpg",
                     "description": "A pancake is a flat cake, often thin and round."
                   },
                   {
                     "title": "Waffle",
                     "subtitle": "Belgian",
-                    "image": "https://cdn.pixabay.com/photo/2020/05/19/20/54/waffles-5192625_1280.jpg",
+                    "image": "https://assets.abstra.cloud/docs/images/widgets/waffles-5192625_1280.jpg",
                     "description": "A waffle is a patterned dish made from leavened batter or dough."
                   }
                 ],

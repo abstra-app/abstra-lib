@@ -1,12 +1,18 @@
 import json
 import os
 import pathlib
+import sys
 
-from abstra_internals.utils.sdk import Logger, SDKContractParser
-
+# Add the local development directory to Python path FIRST to ensure local modules are used
 ABSTRA_LIB_ROOT = pathlib.Path(__file__).parent.parent
+sys.path.insert(0, str(ABSTRA_LIB_ROOT))
 
-OUTPUT_FILE = "./sdk_contract/contract.gen.json"
+import abstra_internals.utils.sdk  # noqa: E402
+from abstra_internals.utils.sdk import Logger, SDKContractParser  # noqa: E402
+
+abstra_internals.utils.sdk.ABSTRA_LIB_ROOT = ABSTRA_LIB_ROOT
+
+OUTPUT_FILE = "contract.gen.json"
 
 DEPRECATED_PATHS = [
     "abstra/workflows.py",
