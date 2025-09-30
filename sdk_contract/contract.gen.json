@@ -38,12 +38,12 @@
     },
     "parse_nfe": {
       "object_type": "function",
-      "description": "Parse a Nota Fiscal Eletrônica (NFe) document using AI-powered OCR to extract comprehensive fiscal information from Brazilian electronic invoices including company data, product details, tax calculations, and transportation info.",
+      "description": "Parse a Nota Fiscal Eletrônica (NFe) document using AI-powered OCR to extract comprehensive fiscal information from Brazilian electronic invoices including company data, product details, tax calculations, and transportation info. The parser extracts 70+ fields including: **Company Information:** - chave_acesso: Access key for verification (44 characters) - numero_nota: Invoice number (string) - serie: Series number - cnpj_emitente/razao_social_emitente: Issuer company CNPJ and name - cpf_cnpj_destinatario/nome_destinatario/razao_social_destinatario: Recipient tax ID and names - endereco_emitente/endereco_destinatario: Full addresses - bairro_emitente/bairro_distrito_destinatario: Districts/neighborhoods - cep_emitente/cep_destinatario: ZIP codes - municipio_emitente/municipio_destinatario: Cities - uf_emitente/uf_destinatario: States - telefone_emitente/telefone_destinatario: Phone numbers - inscricao_estadual_emitente/inscricao_estadual_destinatario: State registrations - inscricao_municipal: Municipal registration **Financial Information:** - data_emissao/data_entrada_saida: Issue and entry/exit timestamps - data_protocolo_autorizacao/protocolo_autorizacao: Authorization data - valor_produtos/valor_total: Product and total amounts - valor_icms/valor_ipi/valor_issqn: Tax amounts (ICMS, IPI, ISSQN) - valor_frete/valor_seguro/outras_despesas: Additional costs - valor_fcp_st/valor_tributos: Additional tax values - desconto: Discount amount **Product Information:** - descricao_produto/codigo_produto: Product description and code - quantidade/unidade/valor_unitario: Product quantity, unit, unit value - ncm_sh: NCM/SH classification code - cfop: Fiscal operation code - cst: Tax situation code - aliquota_icms/base_calculo_icms: ICMS tax rate and calculation base - aliquota_ipi/base_calculo_icms_st: IPI rate and ICMS-ST base **Transportation Information:** - natureza_operacao: Nature of operation - razao_social_transportadora/cnpj_transportadora: Carrier info - endereco_transportadora/municipio_transportadora/uf_transportadora: Carrier location - inscricao_estadual_transportadora: Carrier state registration - placa_veiculo/uf_veiculo: Vehicle plate and state - codigo_antt: ANTT code - frete_por_conta: Freight responsibility - peso_bruto_kg/peso_liquido_kg: Gross/net weight in kg - numero_volumes/quantidade_volumes: Volume count - marca_volumes/especie: Volume marking and type - hora_saida: Departure time - informacoes_adicionais: Additional information text",
       "params": [
         {
           "name": "document_path",
           "type": "Union[Path, str]",
-          "description": "The path to the NFe document to be parsed. CloudApiCliModelsNfeResponse: Parsed NFe data with 70+ fields including: - chave_acesso: Access key for verification (44 characters) - numero_nota: Invoice number (string) - serie: Series number - cnpj_emitente/razao_social_emitente: Issuer company CNPJ and name - cpf_cnpj_destinatario/nome_destinatario/razao_social_destinatario: Recipient tax ID and names - data_emissao/data_entrada_saida: Issue and entry/exit timestamps - data_protocolo_autorizacao/protocolo_autorizacao: Authorization data - valor_produtos/valor_total: Product and total amounts - valor_icms/valor_ipi/valor_issqn: Tax amounts (ICMS, IPI, ISSQN) - valor_frete/valor_seguro/outras_despesas: Additional costs - descricao_produto/codigo_produto: Product description and code - quantidade/unidade/valor_unitario: Product quantity, unit, unit value - ncm_sh: NCM/SH classification code - cfop: Fiscal operation code - cst: Tax situation code - aliquota_icms/base_calculo_icms: ICMS tax rate and calculation base - aliquota_ipi/base_calculo_icms_st: IPI rate and ICMS-ST base - endereco_emitente/endereco_destinatario: Full addresses - bairro_emitente/bairro_distrito_destinatario: Districts/neighborhoods - cep_emitente/cep_destinatario: ZIP codes - municipio_emitente/municipio_destinatario: Cities - uf_emitente/uf_destinatario: States - telefone_emitente/telefone_destinatario: Phone numbers - inscricao_estadual_emitente/inscricao_estadual_destinatario: State registrations - inscricao_municipal: Municipal registration - natureza_operacao: Nature of operation - razao_social_transportadora/cnpj_transportadora: Carrier info - endereco_transportadora/municipio_transportadora/uf_transportadora: Carrier location - inscricao_estadual_transportadora: Carrier state registration - placa_veiculo/uf_veiculo: Vehicle plate and state - codigo_antt: ANTT code - frete_por_conta: Freight responsibility - peso_bruto_kg/peso_liquido_kg: Gross/net weight in kg - numero_volumes/quantidade_volumes: Volume count - marca_volumes/especie: Volume marking and type - hora_saida: Departure time - valor_fcp_st/valor_tributos: Additional tax values - desconto: Discount amount - informacoes_adicionais: Additional information text ValueError: If document path is invalid or parsing fails.",
+          "description": "The path to the NFe document to be parsed. dict: The parsed NFe data. ValueError: If document path is invalid or parsing fails.",
           "default": "None",
           "required": true
         }
@@ -53,12 +53,12 @@
     },
     "parse_nfse": {
       "object_type": "function",
-      "description": "Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document using AI-powered OCR to extract service invoice information and tax details from Brazilian electronic service invoices.",
+      "description": "Parse a Nota Fiscal de Serviço Eletrônica (NFSe) document using AI-powered OCR to extract service invoice information and tax details from Brazilian electronic service invoices. The parser extracts service invoice details including: - cnpj_prestador/cnpj_tomador: CNPJ numbers of service provider/recipient - razao_social_prestador/razao_social_tomador: Company names - valor_liquido_centavos/valor_total_centavos: Net/total amounts in cents - numero_nota: Invoice number - data_emissao: Issue date (YYYY-MM-DD) - descricao: Service description - endereco_prestador/endereco_tomador: Full addresses - bairro_prestador/bairro_tomador: District/neighborhood information - cep_prestador/cep_tomador: ZIP codes - municipio_prestador: City of service provider - uf_prestador/uf_tomador: State abbreviations (e.g., \"SP\", \"RJ\") - email_prestador/email_tomador: Email addresses - inscricao_municipal_prestador: Municipal registration",
       "params": [
         {
           "name": "document_path",
           "type": "Union[Path, str]",
-          "description": "The path to the NFSe document to be parsed. CloudApiCliModelsNfseResponse: Parsed NFSe data including: - cnpj_prestador/cnpj_tomador: CNPJ numbers of service provider/recipient - razao_social_prestador/razao_social_tomador: Company names - valor_liquido_centavos/valor_total_centavos: Net/total amounts in cents - numero_nota: Invoice number - data_emissao: Issue date (YYYY-MM-DD) - descricao: Service description - endereco_prestador/endereco_tomador: Full addresses - bairro_prestador/bairro_tomador: District/neighborhood information - cep_prestador/cep_tomador: ZIP codes - municipio_prestador: City of service provider - uf_prestador/uf_tomador: State abbreviations (e.g., \"SP\", \"RJ\") - email_prestador/email_tomador: Email addresses - inscricao_municipal_prestador: Municipal registration ValueError: If document path is invalid or parsing fails.",
+          "description": "The path to the NFSe document to be parsed. dict: The parsed NFSe data. ValueError: If document path is invalid or parsing fails.",
           "default": "None",
           "required": true
         }
@@ -68,12 +68,12 @@
     },
     "parse_boleto": {
       "object_type": "function",
-      "description": "Parse a Brazilian Boleto (bank slip) document. Extracts payment information and banking details from boleto documents using AI-powered OCR for automated payment processing.",
+      "description": "Parse a Brazilian Boleto (bank slip) document using AI-powered OCR for automated payment processing. Extracts payment information and banking details including: - codigo_de_barras: Barcode number for payment processing - valor: Payment amount in centavos (cents) - vencimento: Due date (YYYY-MM-DD) - beneficiario/pagador: Beneficiary and payer names - cpf_cnpj_beneficiario/cpf_cnpj_pagador: Tax IDs - agencia_cod_beneficiario: Bank agency and beneficiary code - carteira: Bank wallet/portfolio number - data_emissao/data_processamento: Issue and processing dates - endereco_beneficiario/endereco_pagador: Addresses - nosso_numero: Bank's internal reference number - numero_documento: Document number",
       "params": [
         {
           "name": "document_path",
           "type": "Union[Path, str]",
-          "description": "The path to the Boleto document to be parsed. CloudApiCliModelsBoletoResponse: Parsed Boleto data including: - codigo_de_barras: Barcode number for payment processing - valor: Payment amount in centavos (cents) - vencimento: Due date (YYYY-MM-DD) - beneficiario/pagador: Beneficiary and payer names - cpf_cnpj_beneficiario/cpf_cnpj_pagador: Tax IDs - agencia_cod_beneficiario: Bank agency and beneficiary code - carteira: Bank wallet/portfolio number - data_emissao/data_processamento: Issue and processing dates - endereco_beneficiario/endereco_pagador: Addresses - nosso_numero: Bank's internal reference number - numero_documento: Document number ValueError: If document path is invalid or parsing fails.",
+          "description": "The path to the Boleto document to be parsed. dict: The parsed Boleto data. ValueError: If document path is invalid or parsing fails.",
           "default": "None",
           "required": true
         }
@@ -83,12 +83,12 @@
     },
     "parse_us_driver_license": {
       "object_type": "function",
-      "description": "Parse a US Driver License document.",
+      "description": "Parse a US Driver License document using AI-powered OCR to extract personal information and license details. The parser extracts key information including: - Personal details (name, date of birth, address) - License information (license number, class, expiration date) - Physical characteristics (height, weight, eye color) - Address information (street, city, state, zip code) - Endorsements and restrictions",
       "params": [
         {
           "name": "document_path",
           "type": "Union[Path, str]",
-          "description": "The path to the Driver License document to be parsed. dict: The parsed Driver License data. ValueError: If the document path is invalid or the parsing fails.",
+          "description": "Path to the US Driver License document (PDF, JPEG, or PNG). dict: The parsed Driver License data. ValueError: If document path is invalid or parsing fails.",
           "default": "None",
           "required": true
         }
@@ -98,12 +98,12 @@
     },
     "parse_bank_statement": {
       "object_type": "function",
-      "description": "Parse a Bank Statement document.",
+      "description": "Parse a Bank Statement document using AI-powered OCR to extract account information and transaction details. The parser extracts banking information including: - Account information (account number, account holder name, bank details) - Balance information (opening balance, closing balance, available balance) - Transaction history (date, description, amount, balance) - Statement period (from date, to date) - Bank and branch information - Customer contact information",
       "params": [
         {
           "name": "document_path",
           "type": "Union[Path, str]",
-          "description": "The path to the Bank Statement document to be parsed. dict: The parsed Bank Statement data. ValueError: If the document path is invalid or the parsing fails.",
+          "description": "Path to the Bank Statement document (PDF, JPEG, or PNG). dict: The parsed Bank Statement data. ValueError: If document path is invalid or parsing fails.",
           "default": "None",
           "required": true
         }
@@ -113,12 +113,12 @@
     },
     "parse_us_passport": {
       "object_type": "function",
-      "description": "Parse a US Passport document using AI-powered OCR to extract personal information and document details from US passports, including MRZ (Machine Readable Zone) processing.",
+      "description": "Parse a US Passport document using AI-powered OCR to extract personal information and document details from US passports, including MRZ (Machine Readable Zone) processing. The parser extracts the following key information: - family_name: Last name/surname of passport holder - given_names: First and middle names - document_id: Passport document number (e.g., \"E00007730\") - date_of_birth: Birth date in YYYY-MM-DD format - issue_date: Passport issuance date in YYYY-MM-DD format - expiration_date: Passport expiration date in YYYY-MM-DD format - mrz_code: Machine Readable Zone code from passport bottom - portrait: Reference to passport photo if available",
       "params": [
         {
           "name": "document_path",
           "type": "Path",
-          "description": "Path to the US Passport document (PDF, JPEG, or PNG). CloudApiCliModelsUsPassportResponse: Parsed passport data including: - family_name: Last name/surname of passport holder - given_names: First and middle names - document_id: Passport document number (e.g., \"E00007730\") - date_of_birth: Birth date in YYYY-MM-DD format - issue_date: Passport issuance date in YYYY-MM-DD format - expiration_date: Passport expiration date in YYYY-MM-DD format - mrz_code: Machine Readable Zone code from passport bottom - portrait: Reference to passport photo if available ValueError: If document path is invalid or parsing fails.",
+          "description": "Path to the US Passport document (PDF, JPEG, or PNG). dict: The parsed US Passport data. ValueError: If document path is invalid or parsing fails.",
           "default": "None",
           "required": true
         }
@@ -477,7 +477,7 @@
     },
     "Button": {
       "object_type": "class",
-      "description": "Render buttons with custom functionality in your form for conditional logic and branching paths. Buttons allow users to trigger custom Python functions, processing or different form behaviors. When a button is pressed, its key becomes `True` in the form state, enabling conditional logic to determine the next steps in your workflow. This makes buttons essential for creating approval workflows, multi-path forms, and interactive decision trees. Unlike automatic navigation buttons (NextButton/BackButton), custom Button widgets give you full control over widget behavior within a page and can be used to implement complex conditional logic based on user choices. ## How Button State Works When a user clicks a button, the button's key is set to `True` in the form state. You can then check this state using `state.get(\"button_key\")` to determine which button was pressed and conditionally render different widgets or forms. ## Usage Pattern Buttons are optionally returned from your Page function (a function that returns a list of widgets). You have two options: **Option 1: Return only widgets (default behavior)** ```python def my_page(state): return [TextOutput(\"Hello\"), TextOutput(\"world!\")] # Default navigation buttons will be used ``` **Option 2: Return widgets + custom buttons as a tuple** ```python def my_page(state): widgets = [TextOutput(\"Hello\"), TextOutput(\"world!\")] buttons = [Button(\"Label 1\", key=\"key1\"), Button(\"Label 2\", key=\"key2\")] return widgets, buttons ``` If you don't return buttons (Option 1), the system automatically provides default navigation buttons (Next/Back). If you want custom buttons, you must return a tuple with widgets as the first element and a list of Button objects as the second element. ## Common Use Cases - **Approval Workflows**: Create \"Approve\" and \"Reject\" buttons for document review processes - **Data Reload**: Refresh page content with updated information from external APIs or databases - **Multi-path Forms**: Allow users to choose between different information collection paths - **Decision Trees**: Build complex conditional forms based on user choices - **Custom Navigation**: Implement non-linear form progression with custom logic",
+      "description": "Render buttons with custom functionality in your form for conditional logic and branching paths. Buttons allow users to trigger custom Python functions, processing or different form behaviors. When a button is pressed, its key becomes `True` in the form state, enabling conditional logic to determine the next steps in your workflow. This makes buttons essential for creating approval workflows, multi-path forms, and interactive decision trees. Unlike automatic navigation buttons (NextButton/BackButton), custom Button widgets give you full control over widget behavior within a page and can be used to implement complex conditional logic based on user choices. ## How Button State Works ## When a user clicks a button, the button's key is set to `True` in the form state. You can then check this state using `state.get(\"button_key\")` to determine which button was pressed and conditionally render different widgets or forms. ## Usage Pattern ## Buttons are optionally returned from your Page function (a function that returns a list of widgets). You have two options: **Option 1: Return only widgets (default behavior)** ```python def my_page(state): return [TextOutput(\"Hello\"), TextOutput(\"world!\")] # Default navigation buttons will be used ``` **Option 2: Return widgets + custom buttons as a tuple** ```python def my_page(state): widgets = [TextOutput(\"Hello\"), TextOutput(\"world!\")] buttons = [Button(\"Label 1\", key=\"key1\"), Button(\"Label 2\", key=\"key2\")] return widgets, buttons ``` If you don't return buttons (Option 1), the system automatically provides default navigation buttons (Next/Back). If you want custom buttons, you must return a tuple with widgets as the first element and a list of Button objects as the second element. ## Common Use Cases - **Approval Workflows**: Create \"Approve\" and \"Reject\" buttons for document review processes - **Data Reload**: Refresh page content with updated information from external APIs or databases - **Multi-path Forms**: Allow users to choose between different information collection paths - **Decision Trees**: Build complex conditional forms based on user choices - **Custom Navigation**: Implement non-linear form progression with custom logic",
       "init": {
         "params": [
           {
@@ -597,13 +597,13 @@
         {
           "name": "Data Reload with Button",
           "description": "Use custom buttons to refresh page content with updated data from external sources or calculations",
-          "code": "import random\n\nfrom abstra.forms import Button, TextOutput, run\n\nnumber = random.randint(1, 100)\n\n\ndef data_reload_page(state):\n    global number\n    # Generate new random number when refresh button is pressed\n    # This simulates fetching fresh data from an API or database\n    if state.get(\"refresh\"):\n        # Button was pressed, generate new number\n        number = random.randint(1, 100)\n\n    return [\n        TextOutput(f\"Random Number: {number}\"),\n        TextOutput(\"Click the button below to generate a new random number:\"),\n    ], [Button(\"Generate New Number\", key=\"refresh\")]\n\n\n# Run the form\nresult = run([data_reload_page])\n\n# Print the result\nprint(result)",
+          "code": "import random\n\nfrom abstra.forms import Button, TextOutput, run\n\nrandom.seed(42)\nnumber = random.randint(1, 100)\n\n\ndef data_reload_page(state):\n    global number\n    # Generate new random number when refresh button is pressed\n    # This simulates fetching fresh data from an API or database\n    if state.get(\"refresh\"):\n        # Button was pressed, generate new number\n        random.seed(42)\n        number = random.randint(1, 100)\n\n    return [\n        TextOutput(f\"Random Number: {number}\"),\n        TextOutput(\"Click the button below to generate a new random number:\"),\n    ], [Button(\"Generate New Number\", key=\"refresh\")]\n\n\n# Run the form\nresult = run([data_reload_page])\n\n# Print the result\nprint(result)",
           "output": {
             "type": "form:render",
             "widgets": [
               {
                 "type": "text-output",
-                "text": "Random Number: 5",
+                "text": "Random Number: 82",
                 "size": "medium",
                 "fullWidth": false
               },
@@ -5284,57 +5284,6 @@
                             "type": "contour"
                           }
                         ],
-                        "heatmapgl": [
-                          {
-                            "colorbar": {
-                              "outlinewidth": 0,
-                              "ticks": ""
-                            },
-                            "colorscale": [
-                              [
-                                0.0,
-                                "#0d0887"
-                              ],
-                              [
-                                0.1111111111111111,
-                                "#46039f"
-                              ],
-                              [
-                                0.2222222222222222,
-                                "#7201a8"
-                              ],
-                              [
-                                0.3333333333333333,
-                                "#9c179e"
-                              ],
-                              [
-                                0.4444444444444444,
-                                "#bd3786"
-                              ],
-                              [
-                                0.5555555555555556,
-                                "#d8576b"
-                              ],
-                              [
-                                0.6666666666666666,
-                                "#ed7953"
-                              ],
-                              [
-                                0.7777777777777778,
-                                "#fb9f3a"
-                              ],
-                              [
-                                0.8888888888888888,
-                                "#fdca26"
-                              ],
-                              [
-                                1.0,
-                                "#f0f921"
-                              ]
-                            ],
-                            "type": "heatmapgl"
-                          }
-                        ],
                         "heatmap": [
                           {
                             "colorbar": {
@@ -5585,6 +5534,17 @@
                               }
                             },
                             "type": "scattermapbox"
+                          }
+                        ],
+                        "scattermap": [
+                          {
+                            "marker": {
+                              "colorbar": {
+                                "outlinewidth": 0,
+                                "ticks": ""
+                              }
+                            },
+                            "type": "scattermap"
                           }
                         ],
                         "scatterpolargl": [

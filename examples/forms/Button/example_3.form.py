@@ -7,6 +7,7 @@ import random
 
 from abstra.forms import Button, TextOutput, run
 
+random.seed(42)
 number = random.randint(1, 100)
 
 
@@ -16,6 +17,7 @@ def data_reload_page(state):
     # This simulates fetching fresh data from an API or database
     if state.get("refresh"):
         # Button was pressed, generate new number
+        random.seed(42)
         number = random.randint(1, 100)
 
     return [

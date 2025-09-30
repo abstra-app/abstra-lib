@@ -3,7 +3,7 @@
     "widgets": [
         {
             "type": "text-output",
-            "text": "Random Number: 5",
+            "text": "Random Number: 82",
             "size": "medium",
             "fullWidth": false
         },

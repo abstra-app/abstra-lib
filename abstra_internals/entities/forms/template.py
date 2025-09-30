@@ -24,11 +24,11 @@ class Button:
 
     Unlike automatic navigation buttons (NextButton/BackButton), custom Button widgets give you full control over widget behavior within a page and can be used to implement complex conditional logic based on user choices.
 
-    ## How Button State Works
+    ## How Button State Works ##
 
     When a user clicks a button, the button's key is set to `True` in the form state. You can then check this state using `state.get("button_key")` to determine which button was pressed and conditionally render different widgets or forms.
 
-    ## Usage Pattern
+    ## Usage Pattern ##
 
     Buttons are optionally returned from your Page function (a function that returns a list of widgets). You have two options:
 
