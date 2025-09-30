@@ -14,6 +14,8 @@ from abstra_internals.utils.file import silent_traverse_code
 from abstra_internals.utils.packages import get_local_package_version
 from abstra_internals.utils.paths import get_relative_path
 
+RETRY_FLAG = "abstra__trigger__retry"
+
 
 @dataclass
 class PythonFile:
@@ -73,22 +75,28 @@ class AiController:
         self,
         body: AbstraLibApiAiStreamRequest,
     ):
-        yield from self.repos.ai.get_ai_messages(
-            CloudApiCliAiV2StreamRequest(
-                conversation_id=body.conversation_id,
-                content=body.content,
-                context={
-                    **body.context,
-                    "libVersion": str(get_local_package_version()),
-                    "knownIssues": [
-                        i.to_dict() for i in self.repos.linter.find_issues_in_codebase()
-                    ],
-                },
-                secret_key=get_tunnel_secret_key(),
-                tunnel_session_path=get_session_path(),
-                human_approval=body.human_approval,
+        try:
+            yield from self.repos.ai.get_ai_messages(
+                CloudApiCliAiV2StreamRequest(
+                    conversation_id=body.conversation_id,
+                    content=body.content,
+                    context={
+                        **body.context,
+                        "libVersion": str(get_local_package_version()),
+                        "knownIssues": [
+                            i.to_dict()
+                            for i in self.repos.linter.find_issues_in_codebase()
+                        ],
+                    },
+                    secret_key=get_tunnel_secret_key(),
+                    tunnel_session_path=get_session_path(),
+                    human_approval=body.human_approval,
+                )
             )
-        )
+        except Exception as e:
+            print(f"Error in send_ai_message: {e}")
+            yield RETRY_FLAG
+            return
 
     def get_history(self, limit: int, offset: int):
         headers = resolve_headers()
