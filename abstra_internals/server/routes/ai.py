@@ -3,7 +3,7 @@ import flask
 from abstra_internals.contracts_generated import AbstraLibApiAiStreamRequest
 from abstra_internals.controllers.ai import AiController
 from abstra_internals.controllers.main import MainController
-from abstra_internals.usage import editor_manual_usage, editor_usage
+from abstra_internals.usage import editor_usage
 
 
 def get_editor_bp(main_controller: MainController):
@@ -65,23 +65,6 @@ def get_editor_bp(main_controller: MainController):
         Delete a conversation thread.
         """
         controller.delete_thread(thread_id)
-        return {"success": True}
-
-    @bp.post("/vote")
-    def _vote():
-        body = flask.request.json
-        if not body:
-            flask.abort(400)
-        vote = body.get("vote")
-        question = body.get("question")
-        answer = body.get("answer")
-        context = body.get("context")
-
-        editor_manual_usage(
-            event="ai_vote",
-            payload=dict(vote=vote, question=question, answer=answer, context=context),
-        )
-
         return {"success": True}
 
     @bp.post("/start-conversation")
