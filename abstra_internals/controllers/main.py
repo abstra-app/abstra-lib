@@ -26,7 +26,7 @@ from abstra_internals.entities.execution_context import (
     Response,
     ScriptContext,
 )
-from abstra_internals.interface.cli.deploy import deploy
+from abstra_internals.interface.cli.deploy import deploy_without_git
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import ExecutionFilter, ExecutionRepository
@@ -54,7 +54,6 @@ from abstra_internals.services.fs import FileSystemService
 from abstra_internals.services.requirements import RequirementsRepository
 from abstra_internals.settings import Settings
 from abstra_internals.templates import (
-    ensure_abstraignore,
     ensure_dotenv,
     ensure_gitignore,
     new_form_code,
@@ -126,7 +125,6 @@ class MainController:
         repositories.project.initialize_or_migrate()
 
         RequirementsRepository.ensure("abstra")
-        ensure_abstraignore(Settings.root_path)
         ensure_gitignore(Settings.root_path)
         ensure_dotenv(Settings.root_path)
 
@@ -143,7 +141,7 @@ class MainController:
         self.execution_logs_repository = repositories.execution_logs
         self.linter_repository = repositories.linter
 
-    def deploy(self):
+    def deploy_without_git(self):
         self.linter_repository.update_checks()
         issues = self.linter_repository.get_blocking_checks()
 
@@ -152,7 +150,7 @@ class MainController:
                 "Please fix all linter issues before deploying your project."
             )
 
-        deploy()
+        deploy_without_git()
 
     def reset_repositories(self):
         self.execution_repository.clear()
@@ -541,7 +539,7 @@ class MainController:
             ```
 
         Note:
-            - Respects .gitignore and .gitignore patterns when use_ignore=True
+            - Respects .gitignore patterns when use_ignore=True
             - Image mode supports: .png, .jpg, .jpeg, .gif, .svg, .webp, .jfif, .pjp, .pjpeg
             - Module mode uses Python's pkgutil.iter_modules for discovery
             - Paths are always relative to the project root directory
@@ -1431,6 +1429,12 @@ class MainController:
         if not headers:
             return {"logged": False, "reason": "NO_API_TOKEN"}
         return get_api_key_info(headers)
+
+    def get_email(self):
+        login = self.get_login()
+        if login.get("logged"):
+            return login.get("info", {}).get("email")
+        return None
 
     def create_login(self, token):
         set_credentials(token)

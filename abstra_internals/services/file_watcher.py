@@ -21,6 +21,17 @@ IGNORED_PATHS = [
     ".abstra/",
     ".venv",
     "__pycache__",
+    ".git/index.lock",
+    ".git/HEAD.lock",
+    ".git/config.lock",
+    ".git/refs/",
+    ".git/objects/",
+    ".git/hooks/",
+    ".git/logs/",
+    ".git/COMMIT_EDITMSG",
+    ".git/MERGE_HEAD",
+    ".git/FETCH_HEAD",
+    ".git/ORIG_HEAD",
 ]
 FSEventType = Literal["changed", "created", "deleted", "moved"]
 Handler = Callable[[Path, FSEventType, Optional[str]], None]
@@ -57,20 +68,18 @@ class FileWatcher(FileSystemEventHandler):
         elif isinstance(event, FileModifiedEvent):
             event_type = "changed"
             content = safe_read_file(filepath, 2.0)
+            if not content:
+                return
 
-            if content is not None:
-                if (
-                    filepath_str not in crdt_managers
-                    or crdt_managers[filepath_str] is None
-                ):
-                    crdt_managers[filepath_str] = CRDTManager(file_path=filepath)
+            if filepath_str not in crdt_managers or crdt_managers[filepath_str] is None:
+                crdt_managers[filepath_str] = CRDTManager(file_path=filepath)
 
-                old_content = crdt_managers[filepath_str].get_content()
-                if old_content != content:
-                    crdt_managers[filepath_str].apply_operations_from_diff(content)
-                    new_content = crdt_managers[filepath_str].get_content()
-                    if content != new_content:
-                        safe_write_file(filepath, new_content, 2.0)
+            old_content = crdt_managers[filepath_str].get_content()
+            if old_content != content:
+                crdt_managers[filepath_str].apply_operations_from_diff(content)
+                new_content = crdt_managers[filepath_str].get_content()
+                if content != new_content:
+                    safe_write_file(filepath, new_content, 2.0)
 
         else:
             return
@@ -97,4 +106,14 @@ class FileWatcher(FileSystemEventHandler):
         self._debounce_timers[filepath_str].start()
 
     def should_ignore_path(self, path: Path) -> bool:
-        return any(ignored_file in str(path) for ignored_file in IGNORED_PATHS)
+        path_str = str(path)
+
+        # Check for exact matches or patterns in ignored paths
+        for ignored_pattern in IGNORED_PATHS:
+            if ignored_pattern in path_str:
+                return True
+
+        if "/.git/" in path_str and path_str.endswith((".lock", ".tmp")):
+            return True
+
+        return False

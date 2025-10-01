@@ -3,7 +3,7 @@ from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
 
-from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
+from abstra_internals.consts.filepaths import GITIGNORE_FILEPATH
 from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 
@@ -34,7 +34,7 @@ class TestFileSystemService(TestCase):
         (test_dir / "file.txt").write_text("abc")
         (test_dir / "__pycache__").mkdir(exist_ok=True)
         (test_dir / "__pycache__" / "cache.pyc").write_text("cache")
-        ignore_path = test_dir / ABSTRA_IGNORE_FILEPATH
+        ignore_path = test_dir / GITIGNORE_FILEPATH
         ignore_path.write_text(
             "__pycache__/"
         )  # Fixed: use correct gitignore pattern for any __pycache__ directory
@@ -53,9 +53,7 @@ class TestFileSystemService(TestCase):
         self.assertFalse(FileSystemService._suffix_allowed(p, [".txt"]))
 
     def test_is_ignored(self):
-        self.test_dir.joinpath(ABSTRA_IGNORE_FILEPATH).write_text(
-            "*.pyc\n__pycache__/\n"
-        )
+        self.test_dir.joinpath(GITIGNORE_FILEPATH).write_text("*.pyc\n__pycache__/\n")
         self.assertTrue(FileSystemService.is_ignored(Path("foo.pyc")))
         self.assertFalse(FileSystemService.is_ignored(Path("foo.py")))
 
@@ -106,7 +104,7 @@ class TestGitIgnoreCompatibility(TestCase):
 
     def _create_ignore_file(self, content: str):
         """Helper to create ignore file with given content."""
-        ignore_file = self.test_dir / ABSTRA_IGNORE_FILEPATH
+        ignore_file = self.test_dir / GITIGNORE_FILEPATH
         ignore_file.write_text(content)
 
     def _assert_ignored(self, pattern: str, path: str, should_be_ignored: bool):

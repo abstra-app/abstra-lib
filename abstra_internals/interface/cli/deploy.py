@@ -28,7 +28,7 @@ def _upload_file(url: str, file_path: pathlib.Path):
         requests.put(url=url, data=f.read())
 
 
-def deploy():
+def deploy_without_git():
     headers = resolve_headers()
     if not headers:
         print(

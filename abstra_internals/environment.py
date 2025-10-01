@@ -110,3 +110,9 @@ SERVER_UUID = lambda: os.getenv(__SERVER_UUID_ENV__)  # noqa: E731
 
 def set_SERVER_UUID(server_uuid: str):
     os.environ[__SERVER_UUID_ENV__] = server_uuid
+
+
+# GIT
+FORCE_GIT_CLIENT = os.getenv("ABSTRA_FORCE_GIT_CLIENT")
+REMOTE_GIT_URL = f"{CLOUD_API_CLI_URL}/git/repo.git"
+REMOTE_NAME = "abstra"

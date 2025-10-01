@@ -2,12 +2,13 @@ import sys
 from pathlib import Path
 from typing import List
 
-from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
+from abstra_internals.consts.filepaths import GITIGNORE_FILEPATH
 from abstra_internals.repositories.linter.models import (
     LinterFix,
     LinterIssue,
     LinterRule,
 )
+from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 
 
@@ -30,14 +31,14 @@ def running_under_virtualenv() -> bool:
     return False
 
 
-class AddVenvToAbstraIgnore(LinterFix):
-    label = "Add virtual env to abstra ignore"
+class AddVenvToGitIgnore(LinterFix):
+    label = "Add virtual env to git ignore"
 
     def fix(self):
         root_path, prefix_path = get_root_and_prefix_path()
         venv_folder = prefix_path.replace(root_path, "").lstrip("/")
 
-        abstraignore_file = Settings.root_path / ABSTRA_IGNORE_FILEPATH
+        abstraignore_file = Settings.root_path / GITIGNORE_FILEPATH
         with abstraignore_file.open("a") as file:
             file.write("\n")
             file.write(venv_folder)
@@ -46,7 +47,7 @@ class AddVenvToAbstraIgnore(LinterFix):
 class VenvInBundleFound(LinterIssue):
     def __init__(self) -> None:
         self.label = "You have not ignored the virtualenv folder"
-        self.fixes = [AddVenvToAbstraIgnore()]
+        self.fixes = [AddVenvToGitIgnore()]
 
 
 class VenvInBundle(LinterRule):
@@ -57,19 +58,11 @@ class VenvInBundle(LinterRule):
         root_path, prefix_path = get_root_and_prefix_path()
         return prefix_path.startswith(root_path)
 
-    def virtualenv_in_abstraignore(self) -> bool:
-        abstraignore_file = Settings.root_path / ABSTRA_IGNORE_FILEPATH
-        if not abstraignore_file.exists():
-            return False
-
+    def virtualenv_ignored(self) -> bool:
         root_path, prefix_path = get_root_and_prefix_path()
         venv_folder = prefix_path.replace(root_path, "").lstrip("/")
 
-        for line in abstraignore_file.read_text(encoding="utf-8").split("\n"):
-            if line == venv_folder:
-                return True
-
-        return False
+        return FileSystemService.is_ignored(Path(venv_folder))
 
     def find_issues(self) -> List[LinterIssue]:
         if not running_under_virtualenv():
@@ -78,7 +71,7 @@ class VenvInBundle(LinterRule):
         if not self.virtualenv_inside_project():
             return []
 
-        if self.virtualenv_in_abstraignore():
+        if self.virtualenv_ignored():
             return []
 
         return [VenvInBundleFound()]

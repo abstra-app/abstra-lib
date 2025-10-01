@@ -1,6 +1,6 @@
 from typing import List
 
-from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
+from abstra_internals.consts.filepaths import GITIGNORE_FILEPATH
 from abstra_internals.repositories.linter.models import (
     LinterFix,
     LinterIssue,
@@ -10,11 +10,11 @@ from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 
 
-class AddEnvToAbstraIgnore(LinterFix):
-    label = "Add env to abstra ignore"
+class AddEnvToGitIgnore(LinterFix):
+    label = "Add env to git ignore"
 
     def fix(self):
-        abstraignore_file = Settings.root_path / ABSTRA_IGNORE_FILEPATH
+        abstraignore_file = Settings.root_path / GITIGNORE_FILEPATH
         with abstraignore_file.open("a") as file:
             file.write("\n.env")
 
@@ -22,7 +22,7 @@ class AddEnvToAbstraIgnore(LinterFix):
 class EnvInBundleFound(LinterIssue):
     def __init__(self) -> None:
         self.label = "You have not ignored the .env file"
-        self.fixes = [AddEnvToAbstraIgnore()]
+        self.fixes = [AddEnvToGitIgnore()]
 
 
 class EnvInBundle(LinterRule):

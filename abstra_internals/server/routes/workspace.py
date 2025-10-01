@@ -112,7 +112,7 @@ def get_editor_bp(controller: MainController):
     @bp.post("/deploy")
     @editor_usage
     def _deploy():
-        controller.deploy()
+        controller.deploy_without_git()
         return {"success": True}
 
     return bp

@@ -3,7 +3,8 @@ from typing import Optional
 import fire
 
 from abstra_internals.consts.filepaths import ABSTRA_TABLES_FILEPATH
-from abstra_internals.interface.cli.deploy import deploy
+from abstra_internals.controllers.git import GitController
+from abstra_internals.interface.cli.deploy import deploy_without_git
 from abstra_internals.interface.cli.dir import select_dir
 from abstra_internals.interface.cli.editor import editor
 from abstra_internals.interface.cli.tables import dump, restore
@@ -21,9 +22,13 @@ class CLI(object):
     def version(self):
         version()
 
-    def deploy(self, root_dir: Optional[str] = None):
+    def deploy(self, root_dir: Optional[str] = None, use_git=False):
         SettingsController.set_root_path(root_dir or select_dir())
-        deploy()
+        if use_git:
+            git_controller = GitController()
+            git_controller.push_and_deploy()
+        else:
+            deploy_without_git()
 
     def editor(self, root_dir: Optional[str] = None, port: int = 3000, headless=False):
         SettingsController.set_root_path(root_dir or select_dir())

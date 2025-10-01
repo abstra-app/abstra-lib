@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from abstra_internals.consts.filepaths import ABSTRA_IGNORE_FILEPATH
+from abstra_internals.consts.filepaths import GITIGNORE_FILEPATH
 from abstra_internals.settings import Settings
 
 
@@ -31,7 +31,7 @@ class FileSystemService:
         and applying ignore files.
         Args:
             dir (Path): The directory to list.
-            apply_ignore_files (bool): Whether to apply ignore files: .gitignore and .gitignore.
+            apply_ignore_files (bool): Whether to apply ignore files: .gitignore.
             allowed_suffixes (Optional[List[str]]): List of allowed file suffixes. If None, all files are included.
         """
         return FileSystemService.list_paths(
@@ -57,7 +57,7 @@ class FileSystemService:
         Args:
             dir (Path): The directory to list.
             include_dirs (bool): Whether to include directories in the results.
-            apply_ignore_files (bool): Whether to apply ignore files: .gitignore and .gitignore.
+            apply_ignore_files (bool): Whether to apply ignore files: .gitignore.
             allowed_suffixes (Optional[List[str]]): List of allowed file suffixes. If None, all files are included.
         """
         if not dirpath.exists():
@@ -187,7 +187,7 @@ class FileSystemService:
         while (
             current_dir != current_dir.parent and current_dir != project_root.parent
         ):  # Stop at project root
-            ignore_file = current_dir / ABSTRA_IGNORE_FILEPATH
+            ignore_file = current_dir / GITIGNORE_FILEPATH
             if ignore_file.exists():
                 try:
                     patterns = ignore_file.read_text().splitlines()
