@@ -84,6 +84,7 @@ def parse_nfse(document_path: Union["Path", str]) -> CloudApiCliModelsNfseRespon
     - razao_social_prestador/razao_social_tomador: Company names
     - valor_liquido_centavos/valor_total_centavos: Net/total amounts in cents
     - numero_nota: Invoice number
+    - codigo_servico: Service code number
     - data_emissao: Issue date (YYYY-MM-DD)
     - descricao: Service description
     - endereco_prestador/endereco_tomador: Full addresses
