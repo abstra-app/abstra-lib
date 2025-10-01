@@ -183,7 +183,10 @@ class FileSystemService:
                 path.parent if path.suffix or not str(path).endswith("/") else path
             )
 
-        while current_dir != current_dir.parent:  # Stop at filesystem root
+        project_root = Settings.root_path
+        while (
+            current_dir != current_dir.parent and current_dir != project_root.parent
+        ):  # Stop at project root
             ignore_file = current_dir / ABSTRA_IGNORE_FILEPATH
             if ignore_file.exists():
                 try:
