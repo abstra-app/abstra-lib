@@ -30,10 +30,16 @@ class CLI(object):
         else:
             deploy_without_git()
 
-    def editor(self, root_dir: Optional[str] = None, port: int = 3000, headless=False):
+    def editor(
+        self,
+        root_dir: Optional[str] = None,
+        port: int = 3000,
+        headless=False,
+        verbose=False,
+    ):
         SettingsController.set_root_path(root_dir or select_dir())
         SettingsController.set_server_port(port)
-        editor(headless=headless)
+        editor(headless=headless, verbose=verbose)
 
     def serve(self, root_dir: Optional[str] = None, port: int = 3000, headless=False):
         print("This command is deprecated. Please use 'abstra editor' instead.")

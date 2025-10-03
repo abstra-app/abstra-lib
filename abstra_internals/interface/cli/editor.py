@@ -80,7 +80,7 @@ def ensure_certificates():
             print(f"Failed to restore certificates: {update_e}")
 
 
-def editor(headless: bool):
+def editor(headless: bool, verbose: bool = False):
     ensure_certificates()
 
     load_dotenv(Settings.root_path / ".env")
@@ -119,6 +119,6 @@ def editor(headless: bool):
     if not headless:
         background_open_editor()
 
-    connect_tunnel()
+    connect_tunnel(verbose=verbose)
 
     server.serve_forever()
