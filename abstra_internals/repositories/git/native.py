@@ -259,14 +259,14 @@ class NativeGitRepository(GitRepositoryInterface):
     def get_repository_status(self) -> GitStatus:
         """Get comprehensive repository status"""
         if not self.is_git_available():
-            return GitStatus(available=False)
+            return GitStatus(available=False, git_installed=False)
 
         git_root = self.find_git_root()
         if (
             git_root is not None
             and git_root.resolve() != self.working_directory.resolve()
         ):
-            return GitStatus(available=False)
+            return GitStatus(available=False, is_monorepo=True)
 
         if self.is_git_repository():
             git_root = self.working_directory

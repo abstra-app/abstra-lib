@@ -1,6 +1,5 @@
 colorama>=0.4.6
 colour>=0.1.5
-dulwich>=0.24.1
 fire>=0.5.0
 Flask>=2.2.2
 Flask-Cors>=4.0.0

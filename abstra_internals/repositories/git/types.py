@@ -45,6 +45,8 @@ class GitFileChange:
 @dataclass
 class GitStatusResponse:
     available: bool
+    git_installed: bool
+    is_monorepo: bool
     branch: str
     branches: List[str]
     last_commit: Optional[GitCommit]
@@ -56,6 +58,8 @@ class GitStatusResponse:
     def to_dict(self) -> Dict[str, Any]:
         result = {
             "available": self.available,
+            "gitInstalled": self.git_installed,
+            "isMonorepo": self.is_monorepo,
             "branch": self.branch,
             "branches": self.branches,
             "lastCommit": {
@@ -102,6 +106,8 @@ class GitStatusResponse:
 @dataclass
 class GitStatus:
     available: bool
+    git_installed: bool = True
+    is_monorepo: bool = False
     branch: str = ""
     branches: List[str] = field(default_factory=list)
     last_commit: Optional[GitCommit] = None

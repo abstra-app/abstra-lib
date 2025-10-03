@@ -165,6 +165,8 @@ class GitController:
 
         status_response = GitStatusResponse(
             available=status.available,
+            git_installed=status.git_installed,
+            is_monorepo=status.is_monorepo,
             branch=status.branch,
             branches=status.branches,
             last_commit=status.last_commit,
