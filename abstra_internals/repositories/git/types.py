@@ -211,7 +211,7 @@ class GitRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def commit_changes(self, message: str, add_all: bool = True) -> bool:
+    def commit_changes(self, message: str, author: Optional[str] = None) -> bool:
         """Commit changes with a message"""
         pass
 

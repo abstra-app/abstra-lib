@@ -2,6 +2,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Optional
 
 from abstra_internals.repositories.git.native import NativeGitRepository
 from abstra_internals.repositories.git.types import (
@@ -20,10 +21,12 @@ class NativeGitRepositoryTest(unittest.TestCase):
         self._original_commit_changes = self.repo.commit_changes
         self.repo.commit_changes = self._commit_changes_wrapper
 
-    def _commit_changes_wrapper(self, message: str, add_all: bool = True) -> bool:
+    def _commit_changes_wrapper(
+        self, message: str, author: Optional[str] = None
+    ) -> bool:
         """Wrapper for commit_changes that ensures git is configured"""
         self.ensure_git_configured()
-        return self._original_commit_changes(message, add_all)
+        return self._original_commit_changes(message, author)
 
     def tearDown(self):
         """Clean up test environment"""

@@ -378,15 +378,21 @@ class NativeGitRepository(GitRepositoryInterface):
 
         return success
 
-    def commit_changes(self, message: str, add_all: bool = True) -> bool:
+    def commit_changes(self, message: str, author: Optional[str] = None) -> bool:
         """Commit changes with a message"""
         if not self.is_git_repository():
             return False
 
-        if add_all:
-            success, _, _ = self._run_git_command(["add", "."])
-            if not success:
-                return False
+        success, _, _ = self._run_git_command(["add", "."])
+        if not success:
+            return False
+
+        if author and "@" in author:
+            author_str = f"{author.split('@')[0]} <{author}>"
+            success, _, _ = self._run_git_command(
+                ["commit", "-m", message, "--author", author_str]
+            )
+            return success
 
         success, _, _ = self._run_git_command(["commit", "-m", message])
         return success

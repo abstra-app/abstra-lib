@@ -215,12 +215,14 @@ class GitController:
 
         return {"success": success, "message": message}
 
-    def commit_changes(self, message: str) -> Dict[str, Any]:
+    def commit_changes(
+        self, message: str, author: Optional[str] = None
+    ) -> Dict[str, Any]:
         commit_message = message.strip()
         if not commit_message:
             return {"success": False, "message": "Commit message cannot be empty"}
 
-        success = self.git_repository.commit_changes(commit_message)
+        success = self.git_repository.commit_changes(commit_message, author)
 
         message = (
             f"Successfully committed changes: {commit_message}"

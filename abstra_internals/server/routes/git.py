@@ -4,7 +4,8 @@ import flask
 
 from abstra_internals.controllers.git import EmailProvider, GitController
 from abstra_internals.controllers.main import MainController
-from abstra_internals.environment import EDITOR_MODE
+from abstra_internals.environment import EDITOR_MODE, PROJECT_ID
+from abstra_internals.services.jwt import decode_jwt
 from abstra_internals.usage import editor_usage
 
 
@@ -85,6 +86,14 @@ def get_editor_bp(controller: MainController):
     @bp.post("/commit")
     @editor_usage
     def _commit_changes():
+        email = None
+        if EDITOR_MODE != "local":
+            token = flask.request.cookies.get("editor_auth")
+            claims = decode_jwt(token, aud=f"web-editor-{PROJECT_ID}")
+            if not claims:
+                return flask.make_response({"ok": False, "error": "Invalid token"}, 403)
+            email = claims.get("email")
+
         if not flask.request.json:
             flask.abort(400)
 
@@ -95,7 +104,7 @@ def get_editor_bp(controller: MainController):
             ), 400
 
         try:
-            result = git_controller.commit_changes(message)
+            result = git_controller.commit_changes(message, email)
             status_code = 200 if result["success"] else 400
             return flask.jsonify(result), status_code
         except Exception as e:
