@@ -1809,7 +1809,7 @@ class MainController:
         tempfile = Path(mktemp(suffix=".py"))
 
         stage = self.create_job(title, str(tempfile), (0, 0))
-        tempfile.write_text(code)
+        tempfile.write_text(code, encoding="utf-8")
 
         execution_result = ExecutionController(
             repositories=self.repositories,
