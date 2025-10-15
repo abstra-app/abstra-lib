@@ -240,10 +240,10 @@ class NativeGitRepository(GitRepositoryInterface):
 
         # If no files to commit or commit failed, create an empty initial commit
         # This ensures we have a branch with at least one commit
-        empty_commit_success, err, out = self._run_git_command(
+        empty_commit_success, _, _ = self._run_git_command(
             ["commit", "--allow-empty", "-m", "First commit"]
         )
-        print("Created empty initial commit AAAA.", empty_commit_success, err, out)
+
         return empty_commit_success
 
     def configure_git_user(self, fallback_email: str, fallback_name: str):

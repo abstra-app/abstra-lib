@@ -1340,7 +1340,7 @@ class ProjectRepository:
         project_dto = project.to_abstra_json_dto()
 
         with temp_file.open("w") as f:
-            json.dump(project_dto.to_dict(), f, indent=2)
+            json.dump(project_dto.to_dict(), f, indent=2, sort_keys=True)
 
         with self.lock:
             shutil.move(str(temp_file), self.get_file_path())
