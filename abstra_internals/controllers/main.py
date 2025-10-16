@@ -1820,3 +1820,65 @@ class MainController:
         self.delete_job(stage.id, remove_file=True)
 
         return execution_result
+
+    def add_and_install_requirement(self, name: str, version: Optional[str] = None):
+        """
+        Add a requirement to requirements.txt and install it automatically.
+
+        This method adds a Python package to the requirements.txt file and
+        immediately installs it using pip, combining both operations in one call.
+
+        Args:
+            name (str): Name of the Python package to add and install.
+            version (str, optional): Specific version to install. If not provided,
+                                   installs the latest version.
+
+        Returns:
+            dict: Result containing the updated requirements list and installation status.
+
+        Copywritings:
+            Add and install Python package
+            Adding and installing Python package...
+        """
+
+        # add to requirements.txt
+        requirements = RequirementsRepository.load()
+        requirements.add(name, version)
+        RequirementsRepository.save(requirements)
+
+        # install the package
+        install_generator = requirements.install()
+        if install_generator is None:
+            return {
+                "status": "error",
+                "message": "Installation not allowed in this environment",
+                "requirements": requirements.to_dict(),
+            }
+
+        # output
+        installation_output = []
+        try:
+            for output_line in install_generator:
+                installation_output.append(output_line)
+                if output_line == "__ABSTRA_STREAM_ERROR__":
+                    return {
+                        "status": "error",
+                        "message": f"Failed to install {name}",
+                        "output": installation_output,
+                        "requirements": requirements.to_dict(),
+                    }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Installation failed: {str(e)}",
+                "output": installation_output,
+                "requirements": requirements.to_dict(),
+            }
+
+        return {
+            "status": "success",
+            "message": f"Successfully added and installed {name}"
+            + (f"=={version}" if version else ""),
+            "output": installation_output,
+            "requirements": requirements.to_dict(),
+        }
