@@ -496,11 +496,8 @@ class FormStage(StageWithFile):
     auto_start: Optional[bool] = False
     start_message: Optional[str] = None
     error_message: Optional[str] = None
-    welcome_title: Optional[str] = None
-    allow_restart: Optional[bool] = False
     timeout_message: Optional[str] = None
     start_button_text: Optional[str] = None
-    restart_button_text: Optional[str] = None
     access_control: AccessSettings = field(
         default_factory=lambda: AccessSettings(is_public=False, required_roles=[])
     )
@@ -541,11 +538,8 @@ class FormStage(StageWithFile):
             auto_start=data["auto_start"],
             start_message=data["start_message"],
             error_message=data["error_message"],
-            welcome_title=data["welcome_title"],
-            allow_restart=data["allow_restart"],
             timeout_message=data["timeout_message"],
             start_button_text=data["start_button_text"],
-            restart_button_text=data["restart_button_text"],
             workflow_position=(x, y),
             is_initial=data["is_initial"],
             workflow_transitions=[
@@ -569,22 +563,17 @@ class FormStage(StageWithFile):
 
     @property
     def browser_runner_dto(self):
-        allow_restart = self.allow_restart if self.is_initial else False
-
         return {
             "id": self.id,
             "path": self.path,
             "title": self.title,
             "is_initial": self.is_initial,
             "auto_start": self.auto_start,
-            "allow_restart": allow_restart,
             "end_message": self.end_message,
             "start_message": self.start_message,
             "error_message": self.error_message,
-            "welcome_title": self.welcome_title,
             "timeout_message": self.timeout_message,
             "start_button_text": self.start_button_text,
-            "restart_button_text": self.restart_button_text,
         }
 
     @property
@@ -618,11 +607,8 @@ class FormStage(StageWithFile):
                 "auto_start",
                 "start_message",
                 "error_message",
-                "welcome_title",
-                "allow_restart",
                 "timeout_message",
                 "start_button_text",
-                "restart_button_text",
             ]:
                 setattr(self, attr, value)
             elif attr == "file":
@@ -657,11 +643,8 @@ class FormStage(StageWithFile):
             auto_start=self.auto_start or False,
             start_message=self.start_message,
             error_message=self.error_message,
-            welcome_title=self.welcome_title,
-            allow_restart=self.allow_restart or False,
             timeout_message=self.timeout_message,
             start_button_text=self.start_button_text,
-            restart_button_text=self.restart_button_text,
             workflow_position=[self.workflow_position[0], self.workflow_position[1]],
             transitions=[t.to_abstra_json_dto() for t in self.workflow_transitions],
             is_initial=self.is_initial,
