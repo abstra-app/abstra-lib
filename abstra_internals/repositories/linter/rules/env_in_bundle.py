@@ -17,6 +17,8 @@ class AddEnvToGitIgnore(LinterFix):
         abstraignore_file = Settings.root_path / GITIGNORE_FILEPATH
         with abstraignore_file.open("a") as file:
             file.write("\n.env")
+        # Clear cache after modifying .gitignore
+        FileSystemService.clear_gitignore_cache()
 
 
 class EnvInBundleFound(LinterIssue):

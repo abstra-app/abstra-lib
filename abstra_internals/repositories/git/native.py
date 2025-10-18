@@ -1,7 +1,7 @@
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from abstra_internals.environment import REMOTE_NAME
 
@@ -19,7 +19,10 @@ class NativeGitRepository(GitRepositoryInterface):
         self._git_available = None
 
     def _run_git_command(
-        self, command: List[str], cwd: Optional[Path] = None
+        self,
+        command: List[str],
+        cwd: Optional[Path] = None,
+        input: Optional[str] = None,
     ) -> Tuple[bool, str, str]:
         """Run a git command and return success, stdout, stderr"""
         try:
@@ -27,7 +30,12 @@ class NativeGitRepository(GitRepositoryInterface):
                 cwd = self.working_directory
 
             result = subprocess.run(
-                ["git"] + command, cwd=cwd, capture_output=True, text=True, timeout=30
+                ["git"] + command,
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                input=input,
             )
             return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
         except (
@@ -582,3 +590,82 @@ class NativeGitRepository(GitRepositoryInterface):
             return "<<<<<<< " in output or "=======" in output or ">>>>>>> " in output
 
         return False
+
+    def check_ignore(self, path: Path) -> bool:
+        """
+        Check if a path should be ignored according to .gitignore rules.
+        Uses git check-ignore for accurate gitignore handling.
+        """
+        if not self.is_git_repository():
+            return False
+
+        try:
+            # Get path relative to working directory
+            try:
+                relative_path = path.relative_to(self.working_directory)
+            except ValueError:
+                # Path is outside working directory, not ignored
+                return False
+
+            # Use git check-ignore -q (quiet mode, exit code only)
+            success, _, _ = self._run_git_command(
+                ["check-ignore", "-q", str(relative_path)]
+            )
+
+            # Exit code 0 means the path is ignored
+            return success
+
+        except Exception:
+            return False
+
+    def check_ignore_batch(self, paths: List[Path]) -> Dict[Path, bool]:
+        """
+        Check multiple paths at once using git check-ignore --stdin.
+        Much more efficient than checking one path at a time.
+        """
+        if not self.is_git_repository():
+            return {path: False for path in paths}
+
+        results = {}
+        relative_paths = []
+        path_map = {}
+
+        # Convert to relative paths
+        for path in paths:
+            try:
+                rel_path = path.relative_to(self.working_directory)
+                rel_path_str = str(rel_path)
+                relative_paths.append(rel_path_str)
+                path_map[rel_path_str] = path
+            except ValueError:
+                # Path outside working directory, not ignored
+                results[path] = False
+
+        if not relative_paths:
+            return results
+
+        try:
+            # Use git check-ignore with stdin for batch processing
+            input_data = "\n".join(relative_paths)
+            success, stdout, _ = self._run_git_command(
+                ["check-ignore", "--stdin"],
+                cwd=self.working_directory,
+                input=input_data,
+            )
+
+            # git check-ignore --stdin returns the paths that ARE ignored in stdout
+            ignored_paths_set = (
+                set(stdout.strip().split("\n")) if stdout.strip() else set()
+            )
+
+            # Map results back to original paths
+            for rel_path_str, path in path_map.items():
+                results[path] = rel_path_str in ignored_paths_set
+
+        except Exception:
+            # On error, mark all remaining as not ignored
+            for path in paths:
+                if path not in results:
+                    results[path] = False
+
+        return results

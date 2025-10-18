@@ -61,6 +61,12 @@ def init_dir(path: typing.Optional[Path] = None):
 
 def clear_dir(path: Path):
     os.chdir(path.parent)
+    # Invalidate cwd cache after changing directory
+    from abstra_internals.utils.fs_cache import clear_all_caches, invalidate_cwd_cache
+
+    invalidate_cwd_cache()
+    # Also clear all filesystem caches to avoid stale data from deleted test directories
+    clear_all_caches()
     rm_tree(path)
 
 

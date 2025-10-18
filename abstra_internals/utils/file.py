@@ -1,6 +1,5 @@
 import ast
 import io
-import os
 import pathlib
 import shutil
 import tempfile
@@ -14,6 +13,7 @@ from typing import Generator, Optional, Set, Union
 from werkzeug.datastructures import FileStorage
 
 from abstra_internals.utils.ast_cache import ASTCache
+from abstra_internals.utils.fs_cache import get_cached_cwd, get_path_cache
 from abstra_internals.utils.platform import is_windows
 
 FILE_TYPES = {
@@ -344,13 +344,17 @@ def _get_file_path_from_relative_module(
     module: str, parent_path: Path
 ) -> Union[Path, None]:
     module_path = parent_path / module2path(module, package=False)
-    resolved_module_path = module_path.resolve().relative_to(os.getcwd())
+    resolved_module_path = (
+        get_path_cache().get_resolved_path(module_path).relative_to(get_cached_cwd())
+    )
 
     if resolved_module_path.is_file():
         return resolved_module_path
 
     package_path = parent_path / module2path(module, package=True)
-    resolved_package_path = package_path.resolve().relative_to(os.getcwd())
+    resolved_package_path = (
+        get_path_cache().get_resolved_path(package_path).relative_to(get_cached_cwd())
+    )
 
     if resolved_package_path.is_file():
         return resolved_package_path

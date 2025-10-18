@@ -271,3 +271,13 @@ class GitRepositoryInterface(ABC):
     ) -> Tuple[int, int]:
         """Calculate ahead/behind count between local and remote commits"""
         pass
+
+    @abstractmethod
+    def check_ignore(self, path: Path) -> bool:
+        """Check if a path should be ignored according to .gitignore rules"""
+        pass
+
+    @abstractmethod
+    def check_ignore_batch(self, paths: List[Path]) -> Dict[Path, bool]:
+        """Check multiple paths at once for better performance"""
+        pass
