@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, TypeVar, Union
 from abstra_internals.contracts_generated import (
     CloudApiCliModelsBankStatementResponse,
     CloudApiCliModelsBoletoResponse,
+    CloudApiCliModelsInvoiceResponse,
     CloudApiCliModelsNfeResponse,
     CloudApiCliModelsNfseResponse,
     CloudApiCliModelsUsDriverLicenseResponse,
@@ -172,6 +173,74 @@ def parse_nfe(document_path: Union["Path", str]) -> CloudApiCliModelsNfeResponse
     """
     data = SDKContextStore.get_by_thread().ai_sdk.parse_document(document_path, "nfe")
     return CloudApiCliModelsNfeResponse.from_dict(data)
+
+
+def parse_invoice(
+    document_path: Union["Path", str],
+) -> CloudApiCliModelsInvoiceResponse:
+    """
+    Parse an invoice document using AI-powered OCR to extract comprehensive invoice information including supplier and receiver details, financial data, shipping information, and line items.
+
+    The parser extracts 35+ fields including:
+
+    **Supplier Information:**
+    - supplier_name: Name of the supplier/vendor
+    - supplier_address: Supplier's full address
+    - supplier_email: Supplier's email address
+    - supplier_phone: Supplier's phone number
+    - supplier_tax_id: Supplier's tax identification number
+    - supplier_registration: Supplier's registration number
+    - supplier_iban: Supplier's IBAN for payments
+    - supplier_payment_ref: Payment reference number
+    - supplier_website: Supplier's website URL
+
+    **Receiver Information:**
+    - receiver_name: Name of the receiver/customer
+    - receiver_address: Receiver's full address
+    - receiver_email: Receiver's email address
+    - receiver_phone: Receiver's phone number
+    - receiver_tax_id: Receiver's tax identification number
+    - receiver_website: Receiver's website URL
+
+    **Financial Information:**
+    - invoice_id: Invoice number/identifier
+    - invoice_date: Date the invoice was issued
+    - due_date: Payment due date
+    - total_amount: Total invoice amount
+    - net_amount: Net amount (after tax/discount)
+    - total_tax_amount: Total tax amount
+    - freight_amount: Freight/shipping cost
+    - amount_paid_since_last_invoice: Amount paid since last invoice
+    - currency: Currency code (e.g., USD, EUR, BRL)
+    - currency_exchange_rate: Exchange rate if applicable
+    - payment_terms: Payment terms and conditions
+
+    **Shipping Information:**
+    - ship_from_name: Ship-from party name
+    - ship_from_address: Ship-from address
+    - ship_to_name: Ship-to party name
+    - ship_to_address: Ship-to destination address
+    - remit_to_name: Remit-to party name
+    - remit_to_address: Remit-to address for payment
+    - carrier: Shipping carrier name
+    - delivery_date: Expected or actual delivery date
+
+    **Other Information:**
+    - purchase_order: Purchase order number reference
+
+    Args:
+        document_path (Union[Path, str]): The path to the invoice document to be parsed.
+
+    Returns:
+        dict: The parsed invoice data.
+
+    Raises:
+        ValueError: If document path is invalid or parsing fails.
+    """
+    data = SDKContextStore.get_by_thread().ai_sdk.parse_document(
+        document_path, "invoice"
+    )
+    return CloudApiCliModelsInvoiceResponse.from_dict(data)
 
 
 def parse_boleto(document_path: Union["Path", str]) -> CloudApiCliModelsBoletoResponse:
