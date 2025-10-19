@@ -6,12 +6,9 @@ from typing import List, Optional
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.consts.filepaths import EXECUTIONS_DIR_PATH
 from abstra_internals.entities.execution import Execution, ExecutionStatus
-from abstra_internals.environment import (
-    SERVER_UUID,
-    WORKER_UUID,
-)
+from abstra_internals.environment import SERVER_UUID, WORKER_UUID
 from abstra_internals.repositories.multiprocessing import MPContext
-from abstra_internals.services.fs_storage import FileSystemStorage
+from abstra_internals.services.sql_storage import SqlStorage
 
 
 @dataclass
@@ -101,7 +98,7 @@ class ExecutionRepository(ABC):
 
 class LocalExecutionRepository(ExecutionRepository):
     def __init__(self, mp_context: MPContext):
-        self.fs_storage = FileSystemStorage(
+        self.fs_storage = SqlStorage(
             mp_context, directory=EXECUTIONS_DIR_PATH, model=Execution
         )
 
