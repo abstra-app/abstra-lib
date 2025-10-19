@@ -368,6 +368,48 @@ class WorkflowController:
             - Changes are persisted immediately to the project configuration
             - Use with caution as it can completely restructure the workflow
         """
+        # Deduplicate transitions from frontend to prevent corrupted state
+        # This handles cases where the client may send duplicate transitions
+        # Rules:
+        # 1. No duplicate IDs (keep first occurrence)
+        # 2. No duplicate source→target pairs (keep last occurrence as an update)
+        # 3. Allow bidirectional: a→b and b→a are both valid
+        if "transitions" in workflow_state_dto:
+            original_count = len(workflow_state_dto["transitions"])
+
+            # Use dict to track transitions by (source, target) pair
+            # This ensures only one transition per direction
+            transitions_by_direction = {}
+
+            for transition in workflow_state_dto["transitions"]:
+                source_id = transition.get("sourceStageId")
+                target_id = transition.get("targetStageId")
+
+                # Skip invalid transitions
+                if not source_id or not target_id:
+                    continue
+
+                # Key by (source, target) to enforce one transition per direction
+                # Note: (a, b) != (b, a), so bidirectional edges are allowed
+                direction_key = (source_id, target_id)
+
+                # Later occurrences replace earlier ones (update semantics)
+                transitions_by_direction[direction_key] = transition
+
+            workflow_state_dto["transitions"] = list(transitions_by_direction.values())
+
+            # Log if duplicates were found and removed
+            deduped_count = len(workflow_state_dto["transitions"])
+            if original_count > deduped_count:
+                from abstra_internals.logger import AbstraLogger
+
+                removed_count = original_count - deduped_count
+                AbstraLogger.warning(
+                    f"Removed {removed_count} duplicate transitions from workflow update "
+                    f"(had {original_count}, now {deduped_count}). "
+                    f"Multiple transitions with same source→target were treated as updates."
+                )
+
         project = self.repos.project.load(include_disabled_stages=True)
 
         for stage_dto in workflow_state_dto["stages"]:
