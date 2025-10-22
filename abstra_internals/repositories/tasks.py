@@ -6,6 +6,11 @@ from uuid import uuid4
 
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.consts.filepaths import TASKS_DIR_PATH
+from abstra_internals.contracts_generated import (
+    CloudApiCliTasksUpdateTaskRequest,
+    CloudApiConsoleWorkflowUpdateTaskRequestCompleted,
+    CloudApiConsoleWorkflowUpdateTaskRequestLocked,
+)
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.services.sql_storage import SqlStorage
 from abstra_internals.utils.datetime import to_utc_iso_string
@@ -296,16 +301,14 @@ class ProductionTasksRepository(TasksRepository):
     ) -> None:
         r = self.client.patch(
             endpoint=f"/tasks/{task_id}",
-            json={
-                "status": "locked",
-                "locked": {
-                    "at": to_utc_iso_string(
-                        datetime.datetime.now(datetime.timezone.utc)
-                    ),
-                    "byExecutionId": execution_id,
-                    "byStageId": stage_id,
-                },
-            },
+            json=CloudApiCliTasksUpdateTaskRequest(
+                status="locked",
+                locked=CloudApiConsoleWorkflowUpdateTaskRequestLocked(
+                    at=datetime.datetime.now(datetime.timezone.utc),
+                    by_execution_id=execution_id,
+                    by_stage_id=stage_id,
+                ),
+            ).to_dict(),
         )
 
         if r.status_code == 409:
@@ -318,16 +321,14 @@ class ProductionTasksRepository(TasksRepository):
     ) -> None:
         r = self.client.patch(
             endpoint=f"/tasks/{task_id}",
-            json={
-                "status": "completed",
-                "completed": {
-                    "at": to_utc_iso_string(
-                        datetime.datetime.now(datetime.timezone.utc)
-                    ),
-                    "byExecutionId": execution_id,
-                    "byStageId": stage_id,
-                },
-            },
+            json=CloudApiCliTasksUpdateTaskRequest(
+                status="completed",
+                completed=CloudApiConsoleWorkflowUpdateTaskRequestCompleted(
+                    at=datetime.datetime.now(datetime.timezone.utc),
+                    by_execution_id=execution_id,
+                    by_stage_id=stage_id,
+                ),
+            ).to_dict(),
         )
 
         if r.status_code == 409:
@@ -338,7 +339,7 @@ class ProductionTasksRepository(TasksRepository):
     def set_task_to_pending(self, task_id: str) -> None:
         r = self.client.patch(
             endpoint=f"/tasks/{task_id}",
-            json={"status": "pending"},
+            json=CloudApiCliTasksUpdateTaskRequest(status="pending").to_dict(),
         )
 
         if r.status_code == 409:
