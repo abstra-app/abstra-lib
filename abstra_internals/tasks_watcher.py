@@ -42,13 +42,28 @@ class TasksWatcher(FileSystemEventHandler):
         if filepath.suffix != ".json" or not filepath.parent.samefile(TASKS_DIR_PATH):
             return
 
+        # Ignore __schema__.json file created by FileSystemJsonTables
+        if filepath.name == "__schema__.json":
+            return
+
         self._handle_file_event(filepath)
 
     def _handle_file_event(self, filepath: Path):
         time.sleep(0.01)
 
+        # Ignore __schema__.json file created by FileSystemJsonTables
+        if filepath.name == "__schema__.json":
+            return
+
         raw_task = filepath.read_text(encoding="utf-8")
-        task = TaskDTO(**json.loads(raw_task))
+        parsed_json = json.loads(raw_task)
+
+        # Ignore files that don't contain valid TaskDTO objects
+        # FileSystemJsonTables may create files with empty arrays or invalid data
+        if not isinstance(parsed_json, dict):
+            return
+
+        task = TaskDTO(**parsed_json)
 
         for handler in self.handlers:
             threading.Thread(target=handler, args=(task,)).start()
