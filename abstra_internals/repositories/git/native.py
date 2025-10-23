@@ -647,7 +647,7 @@ class NativeGitRepository(GitRepositoryInterface):
         try:
             # Use git check-ignore with stdin for batch processing
             input_data = "\n".join(relative_paths)
-            success, stdout, _ = self._run_git_command(
+            _, stdout, _ = self._run_git_command(
                 ["check-ignore", "--stdin"],
                 cwd=self.working_directory,
                 input=input_data,

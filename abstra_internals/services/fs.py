@@ -15,6 +15,7 @@ class FileSystemService:
     _git_ignore_cache: Dict[Path, bool] = {}
     _git_ignore_cache_lock = threading.Lock()
     _git_repository = None
+    _gitignore_mtime: Optional[float] = None
 
     # Fallback cache for Python .gitignore parsing (when git unavailable)
     _gitignore_cache: Dict[Path, List[str]] = {}
@@ -36,11 +37,32 @@ class FileSystemService:
         return git_repo.is_git_repository()
 
     @staticmethod
+    def _check_gitignore_modified():
+        """Check if .gitignore has been modified since last cache, and clear if needed."""
+        gitignore_path = Settings.root_path / GITIGNORE_FILEPATH
+        if gitignore_path.exists():
+            try:
+                current_mtime = gitignore_path.stat().st_mtime
+                if FileSystemService._gitignore_mtime is None:
+                    FileSystemService._gitignore_mtime = current_mtime
+                elif FileSystemService._gitignore_mtime != current_mtime:
+                    FileSystemService.clear_gitignore_cache()
+                    FileSystemService._gitignore_mtime = current_mtime
+            except OSError:
+                pass
+        elif FileSystemService._gitignore_mtime is not None:
+            # .gitignore was deleted
+            FileSystemService.clear_gitignore_cache()
+            FileSystemService._gitignore_mtime = None
+
+    @staticmethod
     def _check_git_ignore_batch(paths: List[Path]) -> Dict[Path, bool]:
         """
         Check multiple paths at once using git check-ignore --stdin.
         Much more efficient than checking one at a time.
         """
+        FileSystemService._check_gitignore_modified()
+
         if not FileSystemService._is_git_available():
             return {path: False for path in paths}
 
@@ -125,6 +147,9 @@ class FileSystemService:
 
         # Clear git repository cache to avoid using stale repository instances
         FileSystemService._git_repository = None
+
+        # Reset mtime tracking
+        FileSystemService._gitignore_mtime = None
 
     @staticmethod
     def venv_path() -> Optional[Path]:
