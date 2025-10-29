@@ -2,7 +2,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 from abstra_internals.repositories.git.native import NativeGitRepository
 from abstra_internals.repositories.git.types import (
@@ -23,7 +23,7 @@ class NativeGitRepositoryTest(unittest.TestCase):
 
     def _commit_changes_wrapper(
         self, message: str, author: Optional[str] = None
-    ) -> bool:
+    ) -> Tuple[bool, Optional[str]]:
         """Wrapper for commit_changes that ensures git is configured"""
         self.ensure_git_configured()
         return self._original_commit_changes(message, author)

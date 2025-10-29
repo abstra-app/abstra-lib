@@ -179,23 +179,17 @@ class GitController:
         return status_response.to_dict()
 
     def checkout_branch(self, branch_name: str) -> Dict[str, Any]:
-        success = self.git_repository.checkout_branch(branch_name)
+        success, error_message = self.git_repository.checkout_branch(branch_name)
 
-        message = (
-            f"Switched to branch '{branch_name}'"
-            if success
-            else f"Failed to switch to branch '{branch_name}'"
-        )
+        message = f"Switched to branch '{branch_name}'" if success else error_message
 
         return {"success": success, "message": message}
 
     def checkout_commit(self, commit_hash: str) -> Dict[str, Any]:
-        success = self.git_repository.checkout_commit(commit_hash)
+        success, error_message = self.git_repository.checkout_commit(commit_hash)
 
         message = (
-            f"Switched to commit '{commit_hash[:8]}'"
-            if success
-            else f"Failed to switch to commit '{commit_hash[:8]}'"
+            f"Switched to commit '{commit_hash[:8]}'" if success else error_message
         )
 
         return {"success": success, "message": message}
@@ -205,13 +199,13 @@ class GitController:
     ) -> Dict[str, Any]:
         self._ensure_authentication()
 
-        success = self.git_repository.pull_changes(
+        success, error_message = self.git_repository.pull_changes(
             strategy=strategy,
             allow_unrelated=allow_unrelated,
             conflict_resolution=conflict_resolution,
         )
 
-        message = "Successfully pulled changes" if success else "Failed to pull changes"
+        message = "Successfully pulled changes" if success else error_message
 
         return {"success": success, "message": message}
 
@@ -222,21 +216,25 @@ class GitController:
         if not commit_message:
             return {"success": False, "message": "Commit message cannot be empty"}
 
-        success = self.git_repository.commit_changes(commit_message, author)
+        success, error_message = self.git_repository.commit_changes(
+            commit_message, author
+        )
 
         message = (
             f"Successfully committed changes: {commit_message}"
             if success
-            else "Failed to commit changes"
+            else error_message or "Commit failed"
         )
 
         return {"success": success, "message": message}
 
     def stash_changes(self, message: str = "WIP") -> Dict[str, Any]:
-        success = self.git_repository.stash_changes(message)
+        success, error_message = self.git_repository.stash_changes(message)
 
         message = (
-            "Successfully stashed changes" if success else "Failed to stash changes"
+            "Successfully stashed changes"
+            if success
+            else error_message or "Stash failed"
         )
 
         return {"success": success, "message": message}
@@ -256,12 +254,12 @@ class GitController:
     def push_and_deploy(self, branch: str = "main") -> Dict[str, Any]:
         self._ensure_authentication()
 
-        success = self.git_repository.push_and_deploy(branch)
+        success, error_message = self.git_repository.push_and_deploy(branch)
 
         message = (
             f"Successfully deployed branch '{branch}' to Abstra"
             if success
-            else f"Failed to deploy branch '{branch}' to Abstra. Push operation failed."
+            else error_message
         )
 
         return {"success": success, "message": message}
@@ -284,12 +282,12 @@ class GitController:
             return {"success": False, "message": f"Commit {commit_hash[:8]} not found"}
 
         try:
-            success = self.git_repository.revert_commit(commit_hash)
+            success, error_message = self.git_repository.revert_commit(commit_hash)
 
             message = (
                 f"Successfully restored content from commit: {commit_to_revert.message}. A new commit was created with the content from that version."
                 if success
-                else f"Failed to restore content from commit {commit_hash[:8]}. Make sure there are no uncommitted changes and the commit exists."
+                else error_message
             )
 
             return {"success": success, "message": message}

@@ -191,12 +191,12 @@ class GitRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def checkout_branch(self, branch_name: str) -> bool:
+    def checkout_branch(self, branch_name: str) -> Tuple[bool, Optional[str]]:
         """Switch to a different branch"""
         pass
 
     @abstractmethod
-    def checkout_commit(self, commit_hash: str) -> bool:
+    def checkout_commit(self, commit_hash: str) -> Tuple[bool, Optional[str]]:
         """Switch to a specific commit (detached HEAD state)"""
         pass
 
@@ -206,17 +206,19 @@ class GitRepositoryInterface(ABC):
         strategy: str = "merge",
         allow_unrelated: bool = True,
         conflict_resolution: Optional[str] = "theirs",
-    ) -> bool:
+    ) -> Tuple[bool, Optional[str]]:
         """Pull changes from remote repository"""
         pass
 
     @abstractmethod
-    def commit_changes(self, message: str, author: Optional[str] = None) -> bool:
+    def commit_changes(
+        self, message: str, author: Optional[str] = None
+    ) -> Tuple[bool, Optional[str]]:
         """Commit changes with a message"""
         pass
 
     @abstractmethod
-    def stash_changes(self, message: str = "WIP") -> bool:
+    def stash_changes(self, message: str = "WIP") -> Tuple[bool, Optional[str]]:
         """Stash uncommitted changes"""
         pass
 
@@ -251,12 +253,12 @@ class GitRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def push_and_deploy(self, branch: str = "main") -> bool:
+    def push_and_deploy(self, branch: str = "main") -> Tuple[bool, Optional[str]]:
         """Deploy to Abstra remote (push to abstra remote)"""
         pass
 
     @abstractmethod
-    def revert_commit(self, commit_hash: str) -> bool:
+    def revert_commit(self, commit_hash: str) -> Tuple[bool, Optional[str]]:
         """Restore content from a previous commit by creating a new commit with that content"""
         pass
 

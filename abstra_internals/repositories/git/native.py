@@ -316,33 +316,44 @@ class NativeGitRepository(GitRepositoryInterface):
             if "original_working_dir" in locals() and original_working_dir is not None:
                 self.working_directory = original_working_dir
 
-    def checkout_branch(self, branch_name: str) -> bool:
+    def checkout_branch(self, branch_name: str) -> Tuple[bool, Optional[str]]:
         """Switch to a different branch"""
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
-        success, _, stderr = self._run_git_command(["checkout", branch_name])
-        if not success and "did not match any file(s) known to git" in stderr:
-            success, _, _ = self._run_git_command(
+        success, _, checkout_err = self._run_git_command(["checkout", branch_name])
+        error_message = (
+            None if success else f"Git checkout failed with error: {checkout_err}"
+        )
+
+        if not success and "did not match any file(s) known to git" in checkout_err:
+            success, _, create_branch_err = self._run_git_command(
                 ["checkout", "-b", branch_name, f"origin/{branch_name}"]
             )
+            error_message = (
+                None
+                if success
+                else f"Git checkout failed with error: {create_branch_err}"
+            )
 
-        return success
+        return success, error_message
 
-    def checkout_commit(self, commit_hash: str) -> bool:
+    def checkout_commit(self, commit_hash: str) -> Tuple[bool, Optional[str]]:
         """Switch to a specific commit (detached HEAD state)"""
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
-        success, _, _ = self._run_git_command(["checkout", commit_hash])
-        return success
+        success, _, error = self._run_git_command(["checkout", commit_hash])
+        error_message = None if success else f"Git checkout failed with error: {error}"
+
+        return success, error_message
 
     def pull_changes(
         self,
         strategy: str = "merge",
         allow_unrelated: bool = True,
         conflict_resolution: Optional[str] = "theirs",
-    ) -> bool:
+    ) -> Tuple[bool, Optional[str]]:
         """Pull changes from abstra remote repository
 
         Args:
@@ -357,7 +368,7 @@ class NativeGitRepository(GitRepositoryInterface):
                 - None: Handle conflicts manually (default)
         """
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
         pull_cmd = ["pull"]
 
@@ -381,39 +392,74 @@ class NativeGitRepository(GitRepositoryInterface):
         pull_cmd.extend([REMOTE_NAME, "main"])
 
         success, _, e = self._run_git_command(pull_cmd)
+        error_message = None if success else f"Git pull failed with error: {e}"
+
+        return success, error_message
+
+    def add_all_files(self) -> Tuple[bool, Optional[str]]:
+        """Add all changes to staging area"""
+        if not self.is_git_repository():
+            return False, "Not a git repository"
+
+        success, _, error = self._run_git_command(["add", "."])
         if not success:
-            print("There was an error during git pull:", e)
+            changed_files = self.get_changed_files()
+            failed_files = []
 
-        return success
+            for file in changed_files:
+                file_success, _, _ = self._run_git_command(["add", file])
+                if not file_success:
+                    failed_files.append(file)
 
-    def commit_changes(self, message: str, author: Optional[str] = None) -> bool:
+            if failed_files:
+                return (
+                    False,
+                    f"Git add failed for the following files: {', '.join(failed_files)}",
+                )
+
+            if not changed_files:
+                return False, f"Git add failed with error: {error}"
+
+        return True, None
+
+    def commit_changes(
+        self, message: str, author: Optional[str] = None
+    ) -> Tuple[bool, Optional[str]]:
         """Commit changes with a message"""
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
-        success, _, _ = self._run_git_command(["add", "."])
-        if not success:
-            return False
+        git_add_success, git_add_error_message = self.add_all_files()
+        if not git_add_success:
+            return False, git_add_error_message
 
         if author and "@" in author:
             author_str = f"{author.split('@')[0]} <{author}>"
-            success, _, _ = self._run_git_command(
+            success, _, error = self._run_git_command(
                 ["commit", "-m", message, "--author", author_str]
             )
-            return success
+            error_message = (
+                None if success else f"Git commit failed with error: {error}"
+            )
 
-        success, _, _ = self._run_git_command(["commit", "-m", message])
-        return success
+            return success, error_message
 
-    def stash_changes(self, message: str = "WIP") -> bool:
+        success, _, error = self._run_git_command(["commit", "-m", message])
+        error_message = None if success else f"Git commit failed with error: {error}"
+
+        return success, error_message
+
+    def stash_changes(self, message: str = "WIP") -> Tuple[bool, Optional[str]]:
         """Stash uncommitted changes"""
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
-        success, _, _ = self._run_git_command(
+        success, _, err = self._run_git_command(
             ["stash", "push", "-m", message, "--include-untracked"]
         )
-        return success
+        error_message = None if success else f"Git stash failed with error: {err}"
+
+        return success, error_message
 
     def get_remotes(self) -> List[str]:
         """Get list of remote names"""
@@ -506,55 +552,61 @@ class NativeGitRepository(GitRepositoryInterface):
 
         return (ahead_count, behind_count)
 
-    def push_and_deploy(self, branch: str = "main") -> bool:
+    def push_and_deploy(self, branch: str = "main") -> Tuple[bool, Optional[str]]:
         """Deploy to Abstra remote (push to abstra remote)"""
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
         if not self.has_remote(REMOTE_NAME):
-            return False
+            return False, "Abstra Remote not found"
 
-        success, _, _ = self._run_git_command(["push", REMOTE_NAME, branch])
+        success, _, err = self._run_git_command(["push", REMOTE_NAME, branch])
+        error_message = None if success else f"Git push failed with error: {err}"
 
-        return success
+        return success, error_message
 
-    def revert_commit(self, commit_hash: str) -> bool:
+    def revert_commit(self, commit_hash: str) -> Tuple[bool, Optional[str]]:
         """Reset working directory to match a previous commit and create a new commit with that content"""
         if not self.is_git_repository():
-            return False
+            return False, "Not a git repository"
 
         if not commit_hash.strip():
-            return False
+            return False, "Invalid commit hash"
 
         if self.has_uncommitted_changes():
-            return False
+            return False, "Uncommitted changes present"
 
         try:
             # Step 1: Reset the working directory and index to match the target commit
             # This will replace all files with their state from the target commit
-            success_reset, _, _ = self._run_git_command(
+            success_reset, _, err = self._run_git_command(
                 ["reset", "--hard", commit_hash]
             )
             if not success_reset:
-                return False
+                return False, f"Git reset failed with error: {err}"
 
             # Step 2: Reset HEAD back to the original position (soft reset)
             # This keeps the files from target commit but moves HEAD back
-            success_soft, _, _ = self._run_git_command(["reset", "--soft", "HEAD@{1}"])
+            success_soft, _, err = self._run_git_command(
+                ["reset", "--soft", "HEAD@{1}"]
+            )
             if not success_soft:
-                return False
+                return False, f"Git soft reset failed with error: {err}"
 
             # Step 3: Create a new commit with the restored content
             commit_message = f"Restore content from commit {commit_hash[:8]}"
-            success_commit, _, _ = self._run_git_command(
+            success_commit, _, err = self._run_git_command(
                 ["commit", "-m", commit_message]
             )
+            error_message = (
+                None if success_commit else f"Git commit failed with error: {err}"
+            )
 
-            return success_commit
+            return success_commit, error_message
 
         except Exception:
             self._run_git_command(["reset", "--hard", "HEAD"])
-            return False
+            return False, "An error occurred during revert"
 
     def check_merge_conflicts(self, remote_commit: str) -> bool:
         """Check if merging with remote commit would cause conflicts"""
