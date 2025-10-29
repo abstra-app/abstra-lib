@@ -888,7 +888,8 @@ class MainController:
 
     def get_scripts(self) -> List[ScriptStage]:
         project = self.repositories.project.load()
-        return project.scripts
+        sorted_scripts = sorted(project.scripts, key=lambda s: s.title.lower())
+        return sorted_scripts
 
     def get_script(self, id: str) -> Optional[ScriptStage]:
         project = self.repositories.project.load()
@@ -994,7 +995,8 @@ class MainController:
 
     def get_forms(self) -> List[FormStage]:
         project = self.repositories.project.load()
-        return project.forms
+        sorted_forms = sorted(project.forms, key=lambda f: f.title.lower())
+        return sorted_forms
 
     def get_form(self, id: str) -> Optional[FormStage]:
         project = self.repositories.project.load()
@@ -1122,7 +1124,8 @@ class MainController:
 
     def get_hooks(self) -> List[HookStage]:
         project = self.repositories.project.load()
-        return project.hooks
+        sorted_hooks = sorted(project.hooks, key=lambda h: h.title.lower())
+        return sorted_hooks
 
     def get_hook_by_path(self, path: str) -> Optional[HookStage]:
         project = self.repositories.project.load()
@@ -1170,7 +1173,8 @@ class MainController:
         project = self.repositories.project.load(
             include_disabled_stages=include_disabled_jobs
         )
-        return project.jobs
+        sorted_jobs = sorted(project.jobs, key=lambda j: j.title.lower())
+        return sorted_jobs
 
     def get_job(self, id: str) -> Optional[JobStage]:
         project = self.repositories.project.load()
