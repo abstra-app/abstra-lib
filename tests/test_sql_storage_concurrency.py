@@ -173,6 +173,10 @@ class TestSqlStorageConcurrency(unittest.TestCase):
                 )
                 processes.append(process)
                 process.start()
+                # Small delay to prevent race condition when multiple processes
+                # simultaneously create SqlStorage and access the same files.
+                # threading.RLock only protects threads within same process.
+                time.sleep(0.1)
 
             # Wait for all processes
             for process in processes:
