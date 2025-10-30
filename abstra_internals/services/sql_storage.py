@@ -1,4 +1,5 @@
 import json
+import threading
 from pathlib import Path
 from typing import Generic, List, Optional, Type, TypeVar
 
@@ -17,7 +18,7 @@ T = TypeVar("T", bound=Serializable)
 
 class SqlStorage(Generic[T]):
     def __init__(self, mp_context: MPContext, directory: str, model: Type[T]):
-        self.lock = mp_context.RLock()
+        self.lock = threading.RLock()
         self.directory = directory
         self.model = model
         self.table_name = "data"
