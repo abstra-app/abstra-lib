@@ -63,7 +63,11 @@ def get_editor_bp(repos: Repositories):
     @bp.post("/files/<path:path>")
     def _create_file(path):
         content = flask.request.get_data()
-        return controller.create_file(path, content).to_dict()
+        overwrite = flask.request.args.get("overwrite", "false").lower() == "true"
+        try:
+            return controller.create_file(path, content, overwrite).to_dict()
+        except FileExistsError as e:
+            flask.abort(409, description=str(e))
 
     @bp.delete("/files/<path:path>")
     def _delete_file(path: str):
@@ -72,11 +76,19 @@ def get_editor_bp(repos: Repositories):
 
     @bp.patch("/files")
     def _rename_file():
-        json = flask.request.json
-        if json is None:
-            flask.abort(400)
-        req = AbstraLibApiEditorFilesRenameRequest.from_dict(json)
-        return controller.rename_file(req.path_parts, req.new_path_parts).to_dict()
+        try:
+            json = flask.request.json
+            if json is None:
+                AbstraLogger.error("rename_file: No JSON body in request")
+                flask.abort(400, description="No JSON body provided")
+
+            AbstraLogger.debug(f"rename_file: Received JSON: {json}")
+            req = AbstraLibApiEditorFilesRenameRequest.from_dict(json)
+            result = controller.rename_file(req.path_parts, req.new_path_parts)
+            return result.to_dict()
+        except Exception as e:
+            AbstraLogger.error(f"rename_file failed: {e}")
+            flask.abort(500, description=str(e))
 
     @bp.post("/dir/<path:path>")
     def _mkdir(path):

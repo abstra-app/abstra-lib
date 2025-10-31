@@ -65,18 +65,35 @@ class CodebaseController:
             )
         ]
 
-    def create_file(self, path, content: Optional[bytes] = None) -> CommonFileNode:
+    def create_file(
+        self, path, content: Optional[bytes] = None, overwrite: bool = False
+    ) -> CommonFileNode:
+        from abstra_internals.settings import Settings
+
         if isinstance(path, str):
             path = Path(path)
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
+
+        relative_path = path
+
+        if not path.is_absolute():
+            path = Settings.root_path / path
+
+        if path.exists() and not overwrite:
+            raise FileExistsError(f"File already exists: {path}")
+
+        if path.exists() and overwrite:
+            path.unlink()
+
+        path.parent.mkdir(parents=True, exist_ok=True)
 
         if content is not None:
             path.write_bytes(content)
         else:
             path.touch()
         return CommonFileNode(
-            path_parts=list(path.parts),
+            path_parts=list(relative_path.parts),
             size=path.stat().st_size,
             last_modified=datetime.fromtimestamp(path.stat().st_mtime),
             type="directory" if path.is_dir() else "file",
@@ -85,7 +102,12 @@ class CodebaseController:
     def delete_file(
         self, path_parts: List[str]
     ) -> AbstraLibApiEditorFilesDeleteResponse:
+        from abstra_internals.settings import Settings
+
         path = Path(*path_parts)
+        if not path.is_absolute():
+            path = Settings.root_path / path
+
         if path.is_dir():
             FileSystemService.rm_tree(path)
         else:
@@ -93,12 +115,17 @@ class CodebaseController:
         return AbstraLibApiEditorFilesDeleteResponse(ok=True)
 
     def rename_file(self, path, new_name) -> AbstraLibApiEditorFilesRenameResponse:
+        from abstra_internals.settings import Settings
+
         if isinstance(path, str):
             path = Path(path)
         elif isinstance(path, List):
             path = Path(*path)
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
+
+        if not path.is_absolute():
+            path = Settings.root_path / path
 
         if isinstance(new_name, str):
             new_path = path.parent / new_name
@@ -111,11 +138,14 @@ class CodebaseController:
         project = self.repos.project.load(include_disabled_stages=True)
         stages = project.get_stages_by_file_path(path)
 
-        if stages:
-            stages[0].update({"file": str(new_path)})
-
         path.rename(new_path)
-        self.repos.project.save(project)
+
+        if stages:
+            from abstra_internals.settings import Settings
+
+            relative_new_path = new_path.relative_to(Settings.root_path)
+            stages[0].update({"file": str(relative_new_path)})
+            self.repos.project.save(project)
 
         return AbstraLibApiEditorFilesRenameResponse(ok=True)
 
@@ -151,12 +181,17 @@ class CodebaseController:
     def mkdir(
         self, path: Union[str, Path, List[str]]
     ) -> AbstraLibApiEditorFilesMkdirResponse:
+        from abstra_internals.settings import Settings
+
         if isinstance(path, str):
             path = Path(path)
         elif isinstance(path, list):
             path = Path(*path)
         elif not isinstance(path, Path):
             raise ValueError(f"Invalid path: {path}")
+
+        if not path.is_absolute():
+            path = Settings.root_path / path
 
         path.mkdir(parents=True, exist_ok=True)
         return AbstraLibApiEditorFilesMkdirResponse(ok=True)
