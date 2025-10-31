@@ -152,6 +152,13 @@ class FileSystemService:
         FileSystemService._gitignore_mtime = None
 
     @staticmethod
+    def untrack_path_from_git(path: Path):
+        """Untrack a path from git (git rm --cached)."""
+        git_repo = FileSystemService._get_git_repository()
+        git_repo.untrack_path(path)
+        FileSystemService.clear_gitignore_cache()
+
+    @staticmethod
     def venv_path() -> Optional[Path]:
         str_path = os.getenv("VIRTUAL_ENV") or os.getenv("CONDA_PREFIX")
         if str_path:

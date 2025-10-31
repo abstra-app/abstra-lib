@@ -721,3 +721,16 @@ class NativeGitRepository(GitRepositoryInterface):
                     results[path] = False
 
         return results
+
+    def untrack_path(self, path: Path):
+        """Untrack a path from git (git rm --cached)"""
+        if not self.is_git_repository():
+            return
+
+        try:
+            relative_path = path.relative_to(self.working_directory)
+        except ValueError:
+            print("Path is outside the working directory; cannot untrack.")
+            return
+
+        self._run_git_command(["rm", "--cached", str(relative_path)])

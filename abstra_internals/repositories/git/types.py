@@ -283,3 +283,8 @@ class GitRepositoryInterface(ABC):
     def check_ignore_batch(self, paths: List[Path]) -> Dict[Path, bool]:
         """Check multiple paths at once for better performance"""
         pass
+
+    @abstractmethod
+    def untrack_path(self, path: Path):
+        """Untrack a path from git (git rm --cached)"""
+        pass

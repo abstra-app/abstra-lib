@@ -10,21 +10,21 @@ from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 
 
-class AddEnvToGitIgnore(LinterFix):
+class UntrackEnv(LinterFix):
     label = "Add env to git ignore"
 
     def fix(self):
         abstraignore_file = Settings.root_path / GITIGNORE_FILEPATH
         with abstraignore_file.open("a") as file:
             file.write("\n.env")
-        # Clear cache after modifying .gitignore
-        FileSystemService.clear_gitignore_cache()
+        env_file = Settings.root_path / ".env"
+        FileSystemService.untrack_path_from_git(env_file)
 
 
 class EnvInBundleFound(LinterIssue):
     def __init__(self) -> None:
         self.label = "You have not ignored the .env file"
-        self.fixes = [AddEnvToGitIgnore()]
+        self.fixes = [UntrackEnv()]
 
 
 class EnvInBundle(LinterRule):
