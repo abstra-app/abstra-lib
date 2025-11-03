@@ -12,17 +12,17 @@ from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, Union
 
 from abstra_internals.constants import ABSTRA_LOGO_URL, get_project_url
 from abstra_internals.contracts_generated import (
-    CommonAbstraJsonV15,
-    CommonAbstraJsonV15DefinitionsFormStage,
-    CommonAbstraJsonV15DefinitionsFormStageAccessControl,
-    CommonAbstraJsonV15DefinitionsFormStageNotificationTrigger,
-    CommonAbstraJsonV15DefinitionsHookStage,
-    CommonAbstraJsonV15DefinitionsJobStage,
-    CommonAbstraJsonV15DefinitionsScriptStage,
-    CommonAbstraJsonV15DefinitionsTransition,
-    CommonAbstraJsonV15Home,
-    CommonAbstraJsonV15HomeAccessControl,
-    CommonAbstraJsonV15Workspace,
+    CommonAbstraJsonV16,
+    CommonAbstraJsonV16DefinitionsFormStage,
+    CommonAbstraJsonV16DefinitionsFormStageAccessControl,
+    CommonAbstraJsonV16DefinitionsFormStageNotificationTrigger,
+    CommonAbstraJsonV16DefinitionsHookStage,
+    CommonAbstraJsonV16DefinitionsJobStage,
+    CommonAbstraJsonV16DefinitionsScriptStage,
+    CommonAbstraJsonV16DefinitionsTransition,
+    CommonAbstraJsonV16Home,
+    CommonAbstraJsonV16HomeAccessControl,
+    CommonAbstraJsonV16Workspace,
     CommonUser,
 )
 from abstra_internals.environment import IS_PRODUCTION
@@ -121,8 +121,8 @@ class NotificationTrigger:
 
     def to_abstra_json_dto(
         self,
-    ) -> CommonAbstraJsonV15DefinitionsFormStageNotificationTrigger:
-        return CommonAbstraJsonV15DefinitionsFormStageNotificationTrigger(
+    ) -> CommonAbstraJsonV16DefinitionsFormStageNotificationTrigger:
+        return CommonAbstraJsonV16DefinitionsFormStageNotificationTrigger(
             variable_name=self.variable_name, enabled=self.enabled
         )
 
@@ -179,8 +179,8 @@ class WorkflowTransition:
         else:
             raise Exception(f"Invalid source type {source_type}")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15DefinitionsTransition:
-        return CommonAbstraJsonV15DefinitionsTransition(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16DefinitionsTransition:
+        return CommonAbstraJsonV16DefinitionsTransition(
             id=self.id,
             target_id=self.target_id,
             target_type=self.target_type,
@@ -267,8 +267,8 @@ class HookStage(StageWithFile):
             else:
                 raise Exception(f"Cannot update {attr} of hook")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15DefinitionsHookStage:
-        return CommonAbstraJsonV15DefinitionsHookStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16DefinitionsHookStage:
+        return CommonAbstraJsonV16DefinitionsHookStage(
             id=self.id,
             file=self.file,
             path=self.path,
@@ -349,8 +349,8 @@ class ScriptStage(StageWithFile):
             else:
                 raise Exception(f"Cannot update {attr} of script")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15DefinitionsScriptStage:
-        return CommonAbstraJsonV15DefinitionsScriptStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16DefinitionsScriptStage:
+        return CommonAbstraJsonV16DefinitionsScriptStage(
             id=self.id,
             file=self.file,
             title=self.title,
@@ -394,8 +394,8 @@ class AccessSettings:
 
     def to_abstra_json_dto(
         self,
-    ) -> CommonAbstraJsonV15DefinitionsFormStageAccessControl:
-        return CommonAbstraJsonV15DefinitionsFormStageAccessControl(
+    ) -> CommonAbstraJsonV16DefinitionsFormStageAccessControl:
+        return CommonAbstraJsonV16DefinitionsFormStageAccessControl(
             is_public=self.is_public, required_roles=self.required_roles
         )
 
@@ -471,8 +471,8 @@ class JobStage(StageWithFile):
             else:
                 raise Exception(f"Cannot update {attr} of job")
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15DefinitionsJobStage:
-        return CommonAbstraJsonV15DefinitionsJobStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16DefinitionsJobStage:
+        return CommonAbstraJsonV16DefinitionsJobStage(
             id=self.id,
             file=self.file,
             title=self.title,
@@ -633,8 +633,8 @@ class FormStage(StageWithFile):
             "required_roles": self.access_control.required_roles,
         }
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15DefinitionsFormStage:
-        return CommonAbstraJsonV15DefinitionsFormStage(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16DefinitionsFormStage:
+        return CommonAbstraJsonV16DefinitionsFormStage(
             id=self.id,
             file=self.file,
             path=self.path,
@@ -797,8 +797,8 @@ class StyleSettings:
             language="en",
         )
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15Workspace:
-        return CommonAbstraJsonV15Workspace(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16Workspace:
+        return CommonAbstraJsonV16Workspace(
             name=self.name,
             language=self.language,
             theme=self.theme,
@@ -901,9 +901,9 @@ class Home:
         if id == "access_control":
             setattr(self, id, AccessSettings.from_dict(changes))
 
-    def to_abstra_json_dto(self) -> CommonAbstraJsonV15Home:
-        return CommonAbstraJsonV15Home(
-            access_control=CommonAbstraJsonV15HomeAccessControl(
+    def to_abstra_json_dto(self) -> CommonAbstraJsonV16Home:
+        return CommonAbstraJsonV16Home(
+            access_control=CommonAbstraJsonV16HomeAccessControl(
                 is_public=self.access_control.is_public,
                 required_roles=self.access_control.required_roles,
             )
@@ -944,8 +944,8 @@ class Project:
         }
 
     def to_abstra_json_dto(self):
-        return CommonAbstraJsonV15(
-            version="15.0",
+        return CommonAbstraJsonV16(
+            version="16.0",
             workspace=self.workspace.to_abstra_json_dto(),
             home=self.home.to_abstra_json_dto(),
             jobs=[job.to_abstra_json_dto() for job in self.jobs],
@@ -1413,7 +1413,7 @@ class ProjectRepository:
         with self.lock:
             data = json.loads(file_path.read_text(encoding="utf-8"))
             if data["version"] == "v13.0":
-                CommonAbstraJsonV15.from_dict(data)
+                CommonAbstraJsonV16.from_dict(data)
             return Project.from_dict(data)
 
     def initialize_or_migrate(self, verbose=True):
@@ -1437,7 +1437,7 @@ class ProductionProjectRepository(ProjectRepository):
         with self.lock:
             data = json.loads(file_path.read_text(encoding="utf-8"))
             if data["version"] == "v13.0":
-                CommonAbstraJsonV15.from_dict(data)
+                CommonAbstraJsonV16.from_dict(data)
 
             if include_disabled_stages:
                 filtered_data = data
