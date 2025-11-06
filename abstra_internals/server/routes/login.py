@@ -30,6 +30,10 @@ def get_editor_bp(controller: MainController):
     def _get_project_info():
         return controller.get_project_info()
 
+    @bp.get("/feature-flags")
+    def _get_project_feature_flags():
+        return controller.get_feature_flags()
+
     @bp.get("/public-url")
     def _get_public_url():
         return controller.get_public_url()

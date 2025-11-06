@@ -67,6 +67,13 @@ def get_project_info(headers: dict, project_id: Optional[str] = None):
     return r.json()
 
 
+def get_feature_flags(headers: dict):
+    url = f"{CLOUD_API_CLI_URL}/project/feature-flags"
+    r = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+    r.raise_for_status()
+    return r.json()
+
+
 class TunnelRequest(BaseModel):
     method: str
     path: str

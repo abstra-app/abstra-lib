@@ -7,7 +7,11 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import flask
 
-from abstra_internals.cloud_api import get_api_key_info, get_project_info
+from abstra_internals.cloud_api import (
+    get_api_key_info,
+    get_feature_flags,
+    get_project_info,
+)
 from abstra_internals.consts.filepaths import TEST_DATA_FILEPATH
 from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.execution.execution_client_form import FormClient
@@ -1454,6 +1458,12 @@ class MainController:
         if headers is None:
             flask.abort(401)
         return get_project_info(headers)
+
+    def get_feature_flags(self):
+        headers = resolve_headers()
+        if headers is None:
+            flask.abort(401)
+        return get_feature_flags(headers)
 
     # access_control
     def list_access_controls(self):
