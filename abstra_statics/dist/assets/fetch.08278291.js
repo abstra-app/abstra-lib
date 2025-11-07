@@ -1,0 +1,2 @@
+import"./jwt-decode.esm.25348500.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="2c210988-bf60-4a0a-906d-a6b252d4c1a2",e._sentryDebugIdIdentifier="sentry-dbid-2c210988-bf60-4a0a-906d-a6b252d4c1a2")}catch{}})();const a=(...e)=>window.fetch(...e);export{a as l};
+//# sourceMappingURL=fetch.08278291.js.map
