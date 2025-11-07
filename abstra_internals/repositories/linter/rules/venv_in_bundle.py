@@ -31,23 +31,24 @@ def running_under_virtualenv() -> bool:
     return False
 
 
-class AddVenvToGitIgnore(LinterFix):
+class UntrackVenv(LinterFix):
     label = "Add virtual env to git ignore"
 
     def fix(self):
         root_path, prefix_path = get_root_and_prefix_path()
         venv_folder = prefix_path.replace(root_path, "").lstrip("/")
 
-        abstraignore_file = Settings.root_path / GITIGNORE_FILEPATH
-        with abstraignore_file.open("a") as file:
+        gitignore_file = Settings.root_path / GITIGNORE_FILEPATH
+        with gitignore_file.open("a") as file:
             file.write("\n")
             file.write(venv_folder)
+        FileSystemService.untrack_path_from_git(Path(venv_folder))
 
 
 class VenvInBundleFound(LinterIssue):
     def __init__(self) -> None:
         self.label = "You have not ignored the virtualenv folder"
-        self.fixes = [AddVenvToGitIgnore()]
+        self.fixes = [UntrackVenv()]
 
 
 class VenvInBundle(LinterRule):

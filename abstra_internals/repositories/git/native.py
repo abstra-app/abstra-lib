@@ -733,4 +733,4 @@ class NativeGitRepository(GitRepositoryInterface):
             print("Path is outside the working directory; cannot untrack.")
             return
 
-        self._run_git_command(["rm", "--cached", str(relative_path)])
+        self._run_git_command(["rm", "--cached", "-r", str(relative_path)])
