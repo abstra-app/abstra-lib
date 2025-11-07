@@ -18,31 +18,135 @@ class NativeGitRepository(GitRepositoryInterface):
         super().__init__(working_directory)
         self._git_available = None
 
+    def _detect_and_cleanup_stale_locks(self) -> bool:
+        """Detect and clean up stale git lock files."""
+        if not self.is_git_repository():
+            return False
+
+        cleaned = False
+        lock_patterns = [
+            self.working_directory / ".git" / "index.lock",
+            self.working_directory / ".git" / "HEAD.lock",
+            self.working_directory / ".git" / "config.lock",
+        ]
+
+        refs_dir = self.working_directory / ".git" / "refs"
+        if refs_dir.exists():
+            lock_patterns.extend(refs_dir.rglob("*.lock"))
+
+        for lock_file in lock_patterns:
+            if isinstance(lock_file, Path) and lock_file.exists():
+                try:
+                    lock_file.unlink()
+                    cleaned = True
+                    print(
+                        f"Cleaned up stale lock file: {lock_file.relative_to(self.working_directory)}"
+                    )
+                except Exception as e:
+                    print(f"Failed to clean lock file {lock_file}: {e}")
+
+        return cleaned
+
+    def _handle_lock_file_error(self, stderr: str) -> Tuple[bool, str]:
+        """Detect if error is due to lock files and attempt to clean them up."""
+        lock_error_indicators = [
+            "index.lock",
+            ".lock': File exists",
+            "Unable to create",
+            "another git process seems to be running",
+            "couldn't set 'refs/heads",
+        ]
+
+        is_lock_error = any(
+            indicator.lower() in stderr.lower() for indicator in lock_error_indicators
+        )
+
+        if is_lock_error:
+            print("Detected stale lock file error. Attempting cleanup...")
+            cleaned = self._detect_and_cleanup_stale_locks()
+
+            if cleaned:
+                return (
+                    True,
+                    "Lock files were cleaned up. Please try your operation again.",
+                )
+            else:
+                return False, (
+                    "Git lock file detected but couldn't be cleaned automatically. "
+                    "This usually means another git operation is in progress. "
+                    "If you're certain no other git operation is running, you may need to manually "
+                    "delete .lock files in the .git directory."
+                )
+
+        return False, stderr
+
     def _run_git_command(
         self,
         command: List[str],
         cwd: Optional[Path] = None,
         input: Optional[str] = None,
+        auto_cleanup_locks: bool = True,
+        timeout: Optional[int] = None,
     ) -> Tuple[bool, str, str]:
         """Run a git command and return success, stdout, stderr"""
+        process = None
         try:
             if cwd is None:
                 cwd = self.working_directory
 
-            result = subprocess.run(
+            if timeout is None:
+                network_operations = ["push", "pull", "fetch", "clone"]
+                if any(op in command for op in network_operations):
+                    timeout = 120
+                else:
+                    timeout = 30
+
+            process = subprocess.Popen(
                 ["git"] + command,
                 cwd=cwd,
-                capture_output=True,
+                stdin=subprocess.PIPE if input else None,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
-                timeout=30,
-                input=input,
             )
-            return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
-        except (
-            subprocess.TimeoutExpired,
-            subprocess.CalledProcessError,
-            FileNotFoundError,
-        ) as e:
+
+            stdout, stderr = process.communicate(input=input, timeout=timeout)
+            success = process.returncode == 0
+
+            if not success and auto_cleanup_locks:
+                should_retry, _ = self._handle_lock_file_error(stderr)
+                if should_retry:
+                    return self._run_git_command(
+                        command, cwd, input, auto_cleanup_locks=False, timeout=timeout
+                    )
+
+            return success, stdout.strip(), stderr.strip()
+
+        except subprocess.TimeoutExpired:
+            if process:
+                try:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait()
+                except Exception:
+                    pass
+
+            timeout_msg = f"Git command timed out after {timeout} seconds"
+            return False, "", timeout_msg
+
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            return False, "", str(e)
+
+        except Exception as e:
+            if process and process.poll() is None:
+                try:
+                    process.kill()
+                    process.wait()
+                except Exception:
+                    pass
             return False, "", str(e)
 
     def is_git_available(self) -> bool:
