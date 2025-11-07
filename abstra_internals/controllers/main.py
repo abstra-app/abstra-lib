@@ -892,7 +892,9 @@ class MainController:
 
     def get_scripts(self) -> List[ScriptStage]:
         project = self.repositories.project.load()
-        sorted_scripts = sorted(project.scripts, key=lambda s: s.title.lower())
+        scripts = project.get_scripts()
+
+        sorted_scripts = sorted(scripts, key=lambda s: s.title.lower())
         return sorted_scripts
 
     def get_script(self, id: str) -> Optional[ScriptStage]:
@@ -999,7 +1001,9 @@ class MainController:
 
     def get_forms(self) -> List[FormStage]:
         project = self.repositories.project.load()
-        sorted_forms = sorted(project.forms, key=lambda f: f.title.lower())
+        forms = project.get_forms()
+
+        sorted_forms = sorted(forms, key=lambda f: f.title.lower())
         return sorted_forms
 
     def get_form(self, id: str) -> Optional[FormStage]:
@@ -1128,7 +1132,9 @@ class MainController:
 
     def get_hooks(self) -> List[HookStage]:
         project = self.repositories.project.load()
-        sorted_hooks = sorted(project.hooks, key=lambda h: h.title.lower())
+        hooks = project.get_hooks()
+
+        sorted_hooks = sorted(hooks, key=lambda h: h.title.lower())
         return sorted_hooks
 
     def get_hook_by_path(self, path: str) -> Optional[HookStage]:
@@ -1177,7 +1183,9 @@ class MainController:
         project = self.repositories.project.load(
             include_disabled_stages=include_disabled_jobs
         )
-        sorted_jobs = sorted(project.jobs, key=lambda j: j.title.lower())
+        jobs = project.get_jobs()
+
+        sorted_jobs = sorted(jobs, key=lambda j: j.title.lower())
         return sorted_jobs
 
     def get_job(self, id: str) -> Optional[JobStage]:
@@ -1324,6 +1332,10 @@ class MainController:
         project = self.repositories.project.load()
         stage = project.get_stage(id)
 
+        stage_module = project.get_stage_module(id)
+        if stage_module is not None:
+            project = stage_module.get_project()
+
         if not stage:
             raise Exception(f"Stage with id {id} not found")
 
@@ -1427,6 +1439,11 @@ class MainController:
         """
         project = self.repositories.project.load()
         return project.workflow_stages
+
+    # Modules
+    def get_modules(self) -> List[str]:
+        project = self.repositories.project.load()
+        return [module.name for module in project.get_installed_modules()]
 
     # Login
     def get_credentials(self):

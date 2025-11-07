@@ -55,8 +55,10 @@ class TestWorkflowA(BaseWorkflowTest):
         ]
 
         update_dto = {
-            "stages": stages,
-            "transitions": transitions,
+            "state": {
+                "stages": stages,
+                "transitions": transitions,
+            }
         }
 
         put_response = self.client.put("/_editor/api/workflows", json=update_dto)
@@ -75,21 +77,27 @@ class TestWorkflowA(BaseWorkflowTest):
                 "stages": [
                     {
                         "id": "job_a",
-                        "position": {"x": 0.0, "y": 0.0},
+                        "position": {"x": 0, "y": 0},
                         "props": {
                             "filename": "job_a.py",
                         },
                         "title": "Job A",
                         "type": "jobs",
+                        "input": False,
+                        "output": False,
+                        "module": None,
                     },
                     {
                         "id": "script_b",
-                        "position": {"x": 20.0, "y": 20.0},
+                        "position": {"x": 20, "y": 20},
                         "props": {
                             "filename": "script_b.py",
                         },
                         "title": "Script B",
                         "type": "scripts",
+                        "input": False,
+                        "output": False,
+                        "module": None,
                     },
                 ],
                 "transitions": [

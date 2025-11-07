@@ -58,6 +58,7 @@ class CodebaseController:
                         type=stage.type_name,
                     )
                     for stage in project.get_stages_by_file_path(child_path)
+                    if stage.type_name != "component"
                 ],
             )
             for child_path in FileSystemService.list_files(

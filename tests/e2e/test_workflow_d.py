@@ -75,8 +75,10 @@ class TestWorkflowD(BaseWorkflowTest):
         ]
 
         update_dto = {
-            "stages": stages,
-            "transitions": transitions,
+            "state": {
+                "stages": stages,
+                "transitions": transitions,
+            }
         }
 
         put_response = self.client.put("/_editor/api/workflows", json=update_dto)
@@ -95,30 +97,39 @@ class TestWorkflowD(BaseWorkflowTest):
                 "stages": [
                     {
                         "id": "job_a",
-                        "position": {"x": 0.0, "y": 0.0},
+                        "position": {"x": 0, "y": 0},
                         "props": {
                             "filename": "job_a.py",
                         },
                         "title": "Job A",
                         "type": "jobs",
+                        "input": False,
+                        "output": False,
+                        "module": None,
                     },
                     {
                         "id": "script_b",
-                        "position": {"x": 20.0, "y": 20.0},
+                        "position": {"x": 20, "y": 20},
                         "props": {
                             "filename": "script_b.py",
                         },
                         "title": "Script B",
                         "type": "scripts",
+                        "input": False,
+                        "output": False,
+                        "module": None,
                     },
                     {
                         "id": "script_c",
-                        "position": {"x": 40.0, "y": 40.0},
+                        "position": {"x": 40, "y": 40},
                         "props": {
                             "filename": "script_c.py",
                         },
                         "title": "Script C",
                         "type": "scripts",
+                        "input": False,
+                        "output": False,
+                        "module": None,
                     },
                 ],
                 "transitions": [

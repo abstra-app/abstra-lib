@@ -37,6 +37,9 @@ class WorkflowTest(BaseTest):
                         "path": "foo",
                     },
                     "position": {"x": 0, "y": 0},
+                    "input": False,
+                    "output": False,
+                    "module": None,
                 }
             ],
             "transitions": [],
@@ -57,6 +60,9 @@ class WorkflowTest(BaseTest):
                         "path": "foo",
                     },
                     "position": {"x": 0, "y": 0},
+                    "input": False,
+                    "output": False,
+                    "module": None,
                 },
                 {
                     "type": "hooks",
@@ -67,6 +73,9 @@ class WorkflowTest(BaseTest):
                     },
                     "title": "Bar",
                     "position": {"x": 0, "y": 0},
+                    "input": False,
+                    "output": False,
+                    "module": None,
                 },
             ],
             "transitions": [
@@ -102,6 +111,9 @@ class WorkflowTest(BaseTest):
                     },
                     "title": "Foo",
                     "position": {"x": 0, "y": 0},
+                    "input": False,
+                    "output": False,
+                    "module": None,
                 },
                 {
                     "type": "hooks",
@@ -112,6 +124,9 @@ class WorkflowTest(BaseTest):
                     },
                     "title": "Bar",
                     "position": {"x": 0, "y": 0},
+                    "input": False,
+                    "output": False,
+                    "module": None,
                 },
             ],
             "transitions": [

@@ -4,6 +4,7 @@ import fire
 
 from abstra_internals.consts.filepaths import ABSTRA_TABLES_FILEPATH
 from abstra_internals.controllers.git import GitController
+from abstra_internals.interface.cli.components import install, uninstall
 from abstra_internals.interface.cli.deploy import deploy_without_git
 from abstra_internals.interface.cli.dir import select_dir
 from abstra_internals.interface.cli.editor import editor
@@ -57,6 +58,12 @@ class CLI(object):
     ):
         SettingsController.set_root_path(root_dir)
         restore(dry_run=dry_run, file=file)
+
+    def install(self, github_url: str, root_dir: Optional[str] = None):
+        install(github_url, root_dir)
+
+    def uninstall(self, component_name: str, root_dir: Optional[str] = None):
+        uninstall(component_name, root_dir)
 
 
 def _SeparateFlagArgs(args):

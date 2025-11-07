@@ -43,6 +43,7 @@ class FileWatcher(FileSystemEventHandler):
     def __init__(self, handlers: List[Handler]):
         super().__init__()
         self._debounce_timers: dict[str, threading.Timer] = {}
+        self._modules_folder_timer: Optional[threading.Timer] = None
         self.handlers: List[Handler] = handlers
 
     def start(self):
@@ -84,9 +85,6 @@ class FileWatcher(FileSystemEventHandler):
         else:
             return
 
-        if filepath_str in self._debounce_timers:
-            self._debounce_timers[filepath_str].cancel()
-
         def execute_handlers():
             time.sleep(0.01)
             threads = []
@@ -100,10 +98,22 @@ class FileWatcher(FileSystemEventHandler):
             for thread in threads:
                 thread.join()
 
-        self._debounce_timers[filepath_str] = threading.Timer(
-            interval=0.5, function=execute_handlers
-        )
-        self._debounce_timers[filepath_str].start()
+        if "/modules/" in filepath_str or filepath_str.endswith("/modules"):
+            if self._modules_folder_timer is not None:
+                self._modules_folder_timer.cancel()
+
+            self._modules_folder_timer = threading.Timer(
+                interval=2.0, function=execute_handlers
+            )
+            self._modules_folder_timer.start()
+        else:
+            if filepath_str in self._debounce_timers:
+                self._debounce_timers[filepath_str].cancel()
+
+            self._debounce_timers[filepath_str] = threading.Timer(
+                interval=0.5, function=execute_handlers
+            )
+            self._debounce_timers[filepath_str].start()
 
     def should_ignore_path(self, path: Path) -> bool:
         path_str = str(path)

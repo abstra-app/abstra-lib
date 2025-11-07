@@ -1,9 +1,11 @@
 import uuid
+from pathlib import Path
 from typing import Dict, List, Optional, TypedDict
 
 from abstra_internals.controllers.main import UnknownNodeTypeError
 from abstra_internals.repositories.factory import Repositories
 from abstra_internals.repositories.project.project import (
+    ComponentStage,
     FormStage,
     HookStage,
     JobStage,
@@ -13,6 +15,7 @@ from abstra_internals.repositories.project.project import (
     Stage,
     WorkflowTransition,
 )
+from abstra_internals.settings import Settings
 from abstra_internals.utils.physics import simulate_layout
 
 
@@ -22,6 +25,9 @@ class StageDTO(TypedDict):
     title: str
     position: Dict[str, float]
     props: Dict[str, Optional[str]]
+    module: Optional[str]  # For module stages only
+    input: bool
+    output: bool
 
 
 class WorkflowController:
@@ -133,6 +139,8 @@ class WorkflowController:
         if isinstance(stage, (FormStage, HookStage)):
             path = stage.path
             props["path"] = path
+        if isinstance(stage, ComponentStage):
+            props["packageName"] = stage.package_name
         return StageDTO(
             id=stage.id,
             type=stage.type_name + "s",
@@ -142,10 +150,15 @@ class WorkflowController:
                 y=stage.workflow_position[1],
             ),
             props=props,
+            input=stage.input,
+            output=stage.output,
+            module=None,
         )
 
     def _make_workflow_dto(self, project: Project):
         stages = []
+        used_modules = set()
+
         for stage in project.workflow_stages:
             stage_dto = self.make_stage_dto(stage)
 
@@ -159,6 +172,10 @@ class WorkflowController:
 
             if isinstance(stage, FormStage) or isinstance(stage, HookStage):
                 stage_dto["props"]["path"] = stage.path
+
+            if isinstance(stage, ComponentStage):
+                stage_dto["props"]["packageName"] = stage.package_name
+                used_modules.add(stage.package_name)
 
             stages.append(stage_dto)
 
@@ -179,6 +196,30 @@ class WorkflowController:
                         props=props,
                     )
                 )
+
+        modules = project.get_installed_modules()
+        for module in modules:
+            if module.name not in used_modules:
+                continue
+            for stage in module.get_stages():
+                stage_dto = self.make_stage_dto(stage)
+                stage_dto["module"] = module.name
+                stages.append(stage_dto)
+                for transition in stage.workflow_transitions:
+                    props: dict = {"taskType": None}
+
+                    if transition.task_type is not None:
+                        props["taskType"] = transition.task_type
+
+                    transitions.append(
+                        dict(
+                            id=transition.id,
+                            sourceStageId=stage.id,
+                            targetStageId=transition.target_id,
+                            type=transition.type,
+                            props=props,
+                        )
+                    )
 
         return dict(
             stages=stages,
@@ -258,7 +299,7 @@ class WorkflowController:
 
         self.repos.project.save(project)
 
-    def update_workflow(self, workflow_state_dto: Dict):
+    def update_workflow(self, workflow_state_dto: Dict, module: Optional[str] = None):
         """
         Update the entire workflow configuration with new stages and transitions.
 
@@ -277,6 +318,8 @@ class WorkflowController:
                 - title: Display name
                 - position: Dict with x, y coordinates
                 - props: Dict with stage-specific properties (filename, path)
+                - input: Boolean indicating if stage is an input stage of a module
+                - output: Boolean indicating if stage is an output stage of a module
 
                 Transition objects should have:
                 - id: Unique transition identifier
@@ -284,6 +327,8 @@ class WorkflowController:
                 - targetStageId: ID of the target stage
                 - type: Transition type
                 - props: Dict with taskType and other transition properties
+
+            module (Optional[str]): If provided, indicates that the workflow update is specific to a particular module. If None, the update applies to the main project workflow.
 
         Returns:
             Dict: The updated workflow configuration in the same format as get_workflow()
@@ -303,7 +348,9 @@ class WorkflowController:
                         "props": {
                             "filename": "forms/registration.py",
                             "path": "/register"
-                        }
+                        },
+                        "input": False,
+                        "output": False
                     },
                     {
                         "id": "data-processor",
@@ -312,7 +359,9 @@ class WorkflowController:
                         "position": {"x": 300, "y": 150},
                         "props": {
                             "filename": "scripts/process_user.py"
-                        }
+                        },
+                        "input": False,
+                        "output": False
                     },
                     {
                         "id": "welcome-hook",
@@ -322,7 +371,9 @@ class WorkflowController:
                         "props": {
                             "filename": "hooks/welcome.py",
                             "path": "/welcome"
-                        }
+                        },
+                        "input": False,
+                        "output": False
                     }
                 ],
                 "transitions": [
@@ -374,6 +425,46 @@ class WorkflowController:
         # 1. No duplicate IDs (keep first occurrence)
         # 2. No duplicate source→target pairs (keep last occurrence as an update)
         # 3. Allow bidirectional: a→b and b→a are both valid
+        project = self.repos.project.load(include_disabled_stages=True)
+
+        module_per_stage = {}
+        for stage in project.workflow_stages:
+            module_per_stage[stage.id] = None
+
+        all_modules = project.get_installed_modules()
+        for m in all_modules:
+            for stage in m.get_stages():
+                module_per_stage[stage.id] = m.name
+
+        for stage in workflow_state_dto["stages"]:
+            if stage["id"] not in module_per_stage:
+                continue  # new stage
+            stage_module = module_per_stage.get(stage["id"])
+            if stage_module != module:
+                workflow_state_dto["stages"] = [
+                    s for s in workflow_state_dto["stages"] if s["id"] != stage["id"]
+                ]
+
+        for transition in workflow_state_dto["transitions"]:
+            source_module = module_per_stage.get(transition["sourceStageId"])
+            target_module = module_per_stage.get(transition["targetStageId"])
+            if (source_module != module and source_module is not None) or (
+                target_module != module and target_module is not None
+            ):
+                workflow_state_dto["transitions"] = [
+                    t
+                    for t in workflow_state_dto["transitions"]
+                    if t["id"] != transition["id"]
+                ]
+
+        installed_module = None
+        if module is not None:
+            for m in all_modules:
+                if m.name == module:
+                    installed_module = m
+                    project = m.get_project()
+                    break
+
         if "transitions" in workflow_state_dto:
             original_count = len(workflow_state_dto["transitions"])
 
@@ -410,10 +501,14 @@ class WorkflowController:
                     f"Multiple transitions with same source→target were treated as updates."
                 )
 
-        project = self.repos.project.load(include_disabled_stages=True)
-
         for stage_dto in workflow_state_dto["stages"]:
-            stage = project.get_stage(stage_dto["id"])
+            stage = project.get_stage(stage_dto["id"], include_modules=False)
+            if installed_module is not None:
+                absolute_updated_path = Settings.root_path / Path(
+                    stage_dto["props"]["filename"]
+                )
+                relative_path = absolute_updated_path.relative_to(installed_module.path)
+                stage_dto["props"]["filename"] = str(relative_path)
             if stage is not None:
                 stage.workflow_position = (
                     stage_dto["position"]["x"],
@@ -430,11 +525,15 @@ class WorkflowController:
                     stage.file = f"{stage_dto['props']['filename']}"
                 if isinstance(stage, FormStage) or isinstance(stage, HookStage):
                     stage.path = stage_dto["props"]["path"]
+                if isinstance(stage, ComponentStage):
+                    package_name = stage_dto.get("props", {}).get("packageName")
+                    if package_name is not None:
+                        stage.update({"package_name": package_name})
             elif stage_dto["type"] == "forms":
                 stage = FormStage(
                     id=stage_dto["id"],
                     path=stage_dto["props"]["path"],
-                    file=f"{stage_dto['props']['filename']}",
+                    file=stage_dto["props"]["filename"],
                     title=stage_dto["title"],
                     workflow_transitions=[],
                     is_initial=False,
@@ -450,7 +549,7 @@ class WorkflowController:
                 project.forms.append(stage)
             elif stage_dto["type"] == "scripts":
                 stage = ScriptStage(
-                    file=f"{stage_dto['props']['filename']}",
+                    file=stage_dto["props"]["filename"],
                     is_initial=False,
                     id=stage_dto["id"],
                     title=stage_dto["title"],
@@ -465,7 +564,7 @@ class WorkflowController:
                 stage = HookStage(
                     id=stage_dto["id"],
                     enabled=True,
-                    file=f"{stage_dto['props']['filename']}",
+                    file=stage_dto["props"]["filename"],
                     is_initial=False,
                     path=stage_dto["props"]["path"],
                     title=stage_dto["title"],
@@ -478,7 +577,7 @@ class WorkflowController:
                 project.hooks.append(stage)
             elif stage_dto["type"] == "jobs":
                 stage = JobStage(
-                    file=f"{stage_dto['props']['filename']}",
+                    file=stage_dto["props"]["filename"],
                     id=stage_dto["id"],
                     schedule="0 * * * *",
                     title=stage_dto["title"],
@@ -489,6 +588,19 @@ class WorkflowController:
                     workflow_transitions=[],
                 )
                 project.jobs.append(stage)
+            elif stage_dto["type"] == "components":
+                stage = ComponentStage(
+                    id=stage_dto["id"],
+                    title=stage_dto["title"],
+                    workflow_position=(
+                        stage_dto["position"]["x"],
+                        stage_dto["position"]["y"],
+                    ),
+                    workflow_transitions=[],
+                    is_initial=False,
+                    package_name=None,
+                )
+                project.components.append(stage)
             else:
                 raise UnknownNodeTypeError(stage_dto["type"])
 
@@ -517,7 +629,7 @@ class WorkflowController:
 
         self.repos.project.save(project)
 
-        return self._make_workflow_dto(project)
+        return self.get_workflow_settings()
 
     def fix_positions_with_autolayout(self, stage_ids: Optional[List[str]] = None):
         """

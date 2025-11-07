@@ -18,6 +18,7 @@ from abstra_internals.server.routes import linters as linters_router
 from abstra_internals.server.routes import login as login_router
 from abstra_internals.server.routes import logs as logs_router
 from abstra_internals.server.routes import mcp as mcp_router
+from abstra_internals.server.routes import modules as modules_router
 from abstra_internals.server.routes import pysa as pysa_router
 from abstra_internals.server.routes import requirements as requirements_router
 from abstra_internals.server.routes import roles as roles_router
@@ -107,6 +108,9 @@ def _get_api_bp(controller: MainController):
 
     git_bp = git_router.get_editor_bp(controller)
     bp.register_blueprint(git_bp, url_prefix="/git")
+
+    modules_bp = modules_router.get_editor_bp(controller)
+    bp.register_blueprint(modules_bp, url_prefix="/modules")
 
     return bp
 
