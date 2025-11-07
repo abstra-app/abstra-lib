@@ -1,7 +1,7 @@
 import threading
 import time
-from pathlib import Path
-from typing import Callable, Dict, List, Literal, Optional
+from pathlib import Path, PurePath
+from typing import Callable, Dict, List, Literal, Optional, Union
 
 from watchdog.events import (
     FileCreatedEvent,
@@ -115,13 +115,26 @@ class FileWatcher(FileSystemEventHandler):
             )
             self._debounce_timers[filepath_str].start()
 
-    def should_ignore_path(self, path: Path) -> bool:
-        path_str = str(path)
+    def should_ignore_path(self, path: Union[Path, PurePath]) -> bool:
+        path_str = str(path).replace("\\", "/")
 
-        # Check for exact matches or patterns in ignored paths
         for ignored_pattern in IGNORED_PATHS:
-            if ignored_pattern in path_str:
-                return True
+            normalized_pattern = ignored_pattern.replace("\\", "/")
+
+            if "/" in normalized_pattern:
+                if normalized_pattern in path_str:
+                    return True
+
+                if path_str.endswith(normalized_pattern):
+                    return True
+            else:
+                if (
+                    f"/{normalized_pattern}/" in path_str
+                    or path_str.endswith(f"/{normalized_pattern}")
+                    or path_str.startswith(f"{normalized_pattern}/")
+                    or path_str == normalized_pattern
+                ):
+                    return True
 
         if "/.git/" in path_str and path_str.endswith((".lock", ".tmp")):
             return True
