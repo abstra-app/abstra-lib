@@ -12,9 +12,9 @@ USER_AUTH_HEADER_KEY = "Authorization"
 
 
 @lru_cache(maxsize=10)
-def decode_jwt(jwt_str: str, aud=PROJECT_ID):
+def decode_jwt(jwt_str: str, aud=PROJECT_ID, skip_verify: bool = False):
     try:
-        if PUBLIC_KEY:
+        if not skip_verify and PUBLIC_KEY:
             return jwt.decode(
                 jwt_str, key=PUBLIC_KEY, algorithms=["RS256"], audience=aud
             )
@@ -50,8 +50,10 @@ class UserClaims:
         return self.claims.get("roles", [])
 
     @classmethod
-    def from_jwt(cls, jwt_str: str) -> typing.Optional["UserClaims"]:
-        claims = decode_jwt(jwt_str)
+    def from_jwt(
+        cls, jwt_str: str, skip_verify: bool = False
+    ) -> typing.Optional["UserClaims"]:
+        claims = decode_jwt(jwt_str, skip_verify=skip_verify)
         if claims is None:
             return None
 

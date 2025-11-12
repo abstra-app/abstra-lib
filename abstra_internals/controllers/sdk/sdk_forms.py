@@ -6,6 +6,7 @@ from abstra_internals.entities.forms.form_entity import (
     Step,
 )
 from abstra_internals.entities.forms.form_state import State
+from abstra_internals.environment import IS_DEVELOPMENT
 from abstra_internals.interface.contract.forms_contract import (
     StepsInfo,
     ValidationResult,
@@ -27,7 +28,7 @@ class FormSDKController:
 
     def get_user(self, force_refresh: bool) -> UserClaims:
         data = self.client.request_auth(force_refresh)
-        claims = UserClaims.from_jwt(data["jwt"])
+        claims = UserClaims.from_jwt(data["jwt"], skip_verify=IS_DEVELOPMENT)
 
         if not claims:
             self.client.handle_invalid_jwt()
