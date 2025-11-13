@@ -63,6 +63,7 @@ class BroadcastController:
         raw: Union[str, bytearray],
     ):
         text = raw.decode("utf-8") if not isinstance(raw, str) else raw
+        stdout_text = text
 
         try:
             execution = self.get_current_execution()
@@ -74,9 +75,9 @@ class BroadcastController:
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
-            sys_write(text)
+            sys_write(stdout_text)
             sys.stdout.flush()
-            return len(text)
+            return len(stdout_text)
 
     def get_current_execution(self) -> Optional[Execution]:
         try:
@@ -106,5 +107,18 @@ class BroadcastController:
         if not execution:
             return raw
 
+        if not raw.strip():
+            return raw
+
         short_id = execution.id.split(sep="-")[0]
-        return f"[RUN {short_id}] {raw}" if raw.strip() else raw
+        prefix = f"[RUN {short_id}] "
+
+        lines = raw.splitlines(keepends=True)
+        if len(lines) <= 1:
+            return f"{prefix}{raw}"
+
+        tagged_lines = []
+        for line in lines:
+            tagged_lines.append(f"{prefix}{line}")
+
+        return "".join(tagged_lines)
