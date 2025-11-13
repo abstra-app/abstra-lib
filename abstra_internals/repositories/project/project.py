@@ -1575,48 +1575,103 @@ class Project:
         self.components = [p for p in self.components if p.id != id]
 
     @staticmethod
-    def __deduplicate_transitions(transitions: List[dict]) -> List[dict]:
+    def _deduplicate_transitions(data: dict) -> dict:
         """
-        Remove duplicate transitions based on ID and target, keeping only the first occurrence.
+        Remove duplicate transitions across all stages, keeping only the first occurrence.
 
         This is necessary to handle corrupted project files that may have accumulated
         duplicate transitions over time, which can cause performance issues when
         loading large workflows.
 
         Rules:
-        1. No duplicate IDs (keeps first occurrence)
-        2. No duplicate targets (keeps first occurrence - since source is implicit from stage)
+        1. No duplicate IDs globally across all stages (keeps first occurrence)
+        2. No duplicate targets within the same stage (keeps first occurrence)
         3. Allows bidirectional: a→b and b→a are in different stages, so both valid
 
         Args:
-            transitions: List of transition dictionaries from the JSON data
-                        (all from the same source stage)
+            data: The project dictionary with potentially duplicate transitions
 
         Returns:
-            List of unique transitions, preserving order
+            The project dictionary with deduplicated transitions
+        """
+        seen_transition_ids = set()
+        stage_keys = ["forms", "hooks", "scripts", "jobs", "components"]
+
+        for key in stage_keys:
+            for stage in data.get(key, []):
+                if "transitions" not in stage:
+                    continue
+
+                transitions = stage["transitions"]
+                seen_targets = set()
+                unique_transitions = []
+                original_count = len(transitions)
+
+                for transition in transitions:
+                    transition_id = transition.get("id")
+                    target_id = transition.get("target_id")
+
+                    # Skip if duplicate ID globally
+                    if transition_id in seen_transition_ids:
+                        continue
+
+                    # Skip if duplicate target within this stage (same source→target)
+                    if target_id in seen_targets:
+                        continue
+
+                    # Valid unique transition
+                    seen_transition_ids.add(transition_id)
+                    seen_targets.add(target_id)
+                    unique_transitions.append(transition)
+
+                stage["transitions"] = unique_transitions
+
+                # Log warning if duplicates were found
+                deduped_count = len(unique_transitions)
+                if original_count > deduped_count:
+                    removed_count = original_count - deduped_count
+                    AbstraLogger.warning(
+                        f"Removed {removed_count} duplicate transitions from stage {stage.get('id', 'unknown')} "
+                        f"(had {original_count}, now {deduped_count})"
+                    )
+
+        return data
+
+    @staticmethod
+    def _deduplicate_stages(data: dict) -> dict:
+        """
+        Remove duplicate stage IDs across all stage types, keeping only the first occurrence.
+
+        This is necessary to handle corrupted project files that may have accumulated
+        duplicate stage IDs over time.
+
+        Args:
+            data: The project dictionary with potentially duplicate stages
+
+        Returns:
+            The project dictionary with deduplicated stages
         """
         seen_ids = set()
-        seen_targets = set()
-        unique_transitions = []
+        stage_keys = ["scripts", "forms", "hooks", "jobs", "components"]
 
-        for transition in transitions:
-            transition_id = transition.get("id")
-            target_id = transition.get("target_id")
+        for key in stage_keys:
+            stages = data.get(key, [])
+            unique_stages = []
 
-            # Skip if duplicate ID
-            if transition_id in seen_ids:
-                continue
+            for stage in stages:
+                stage_id = stage.get("id")
+                if stage_id not in seen_ids:
+                    seen_ids.add(stage_id)
+                    unique_stages.append(stage)
+                else:
+                    AbstraLogger.warning(
+                        f"Removed duplicate {key[:-1]} stage with id '{stage_id}' "
+                        f"(title: '{stage.get('title', 'unknown')}') during load"
+                    )
 
-            # Skip if duplicate target (same source→target)
-            if target_id in seen_targets:
-                continue
+            data[key] = unique_stages
 
-            # Valid unique transition
-            seen_ids.add(transition_id)
-            seen_targets.add(target_id)
-            unique_transitions.append(transition)
-
-        return unique_transitions
+        return data
 
     @staticmethod
     def __from_dict(data: dict):
@@ -1626,23 +1681,8 @@ class Project:
 
         stage_keys = ["forms", "hooks", "scripts", "jobs", "components"]
 
-        # Deduplicate transitions in each stage before processing
-        for key in stage_keys:
-            for stage in data.get(key, []):
-                if "transitions" in stage:
-                    original_count = len(stage["transitions"])
-                    stage["transitions"] = Project.__deduplicate_transitions(
-                        stage["transitions"]
-                    )
-                    deduped_count = len(stage["transitions"])
-
-                    # Log warning if duplicates were found
-                    if original_count > deduped_count:
-                        removed_count = original_count - deduped_count
-                        AbstraLogger.warning(
-                            f"Removed {removed_count} duplicate transitions from stage {stage.get('id', 'unknown')} "
-                            f"(had {original_count}, now {deduped_count})"
-                        )
+        data = Project._deduplicate_stages(data)
+        data = Project._deduplicate_transitions(data)
 
         for key in stage_keys:
             for stage in data.get(key, []):
@@ -1758,9 +1798,13 @@ class ProjectRepository:
         temp_file = Path(tempfile.mkdtemp()) / "abstra.json"
 
         project_dto = project.to_abstra_json_dto()
+        data = project_dto.to_dict()
+
+        data = Project._deduplicate_stages(data)
+        data = Project._deduplicate_transitions(data)
 
         with temp_file.open("w") as f:
-            json.dump(project_dto.to_dict(), f, indent=2, sort_keys=True)
+            json.dump(data, f, indent=2, sort_keys=True)
 
         abstra_json_path = (
             project.abstra_json_path

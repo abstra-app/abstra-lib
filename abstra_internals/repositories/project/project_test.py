@@ -207,7 +207,7 @@ class ProjectTests(TestCase):
         self.assertEqual(p.get_previous_stages_ids(form2.id), [form1.id])
 
     def test_deduplicate_transitions_on_load(self):
-        """Test that duplicate transitions are removed when loading a project from JSON"""
+        """Test that duplicate transitions are removed on save (and remain deduplicated on load)"""
         # Create a project with a script that has duplicate transitions
         script1 = ScriptStage(
             file="script1.py",
@@ -245,24 +245,24 @@ class ProjectTests(TestCase):
         project.add_stage(script2)
         self.project_repository.save(project)
 
-        # Manually add duplicates to the JSON file to simulate corrupted data
+        # Verify that duplicates are removed on save
         import json
 
         json_path = self.project_repository.get_file_path()
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # Verify duplicates were saved (as expected from the in-memory structure)
-        self.assertEqual(len(data["scripts"][0]["transitions"]), 3)
+        # Now with sanitization on save, only one transition should be saved
+        self.assertEqual(len(data["scripts"][0]["transitions"]), 1)
 
-        # Load the project - this should deduplicate the transitions
+        # Load the project - should still have only one transition
         loaded_project = self.project_repository.load()
 
         loaded_script1 = loaded_project.get_script(script1.id)
         self.assertIsNotNone(loaded_script1)
         assert loaded_script1 is not None  # Type narrowing for pyright
 
-        # Verify that only one transition remains after deduplication
+        # Verify that only one transition remains
         self.assertEqual(len(loaded_script1.workflow_transitions), 1)
         self.assertEqual(loaded_script1.workflow_transitions[0].id, "transition1")
         self.assertEqual(loaded_script1.workflow_transitions[0].target_id, script2.id)
@@ -336,7 +336,7 @@ class ProjectTests(TestCase):
         self.assertIn("transition2", transition_ids)
 
     def test_deduplicate_transitions_with_same_source_target(self):
-        """Test that multiple transitions with same source→target (but different IDs) are deduplicated"""
+        """Test that multiple transitions with same source→target (but different IDs) are deduplicated on save"""
         # Create stages
         script1 = ScriptStage(
             file="script1.py",
@@ -391,17 +391,17 @@ class ProjectTests(TestCase):
         project.add_stage(script2)
         self.project_repository.save(project)
 
-        # Manually verify JSON has all 3 transitions
+        # Verify that duplicates are removed on save (defense in depth)
         import json
 
         json_path = self.project_repository.get_file_path()
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # All 3 transitions are saved
-        self.assertEqual(len(data["scripts"][0]["transitions"]), 3)
+        # With sanitization on save, only 1 transition should be saved
+        self.assertEqual(len(data["scripts"][0]["transitions"]), 1)
 
-        # Load the project - should deduplicate by source→target
+        # Load the project - should still have only one transition
         loaded_project = self.project_repository.load()
         loaded_script1 = loaded_project.get_script(script1.id)
 
@@ -484,3 +484,274 @@ class ProjectTests(TestCase):
         self.assertEqual(len(loaded_script2.workflow_transitions), 1)
         self.assertEqual(loaded_script2.workflow_transitions[0].id, "backward")
         self.assertEqual(loaded_script2.workflow_transitions[0].target_id, script1.id)
+
+    def test_save_removes_duplicate_stages(self):
+        """Test that duplicate stages are removed when saving a project"""
+        project = self.project_repository.load()
+
+        # Create two scripts with the same ID (simulating corrupted data)
+        script1 = ScriptStage(
+            file="script1.py",
+            id="duplicate-id",
+            is_initial=True,
+            title="Script 1",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+
+        script2 = ScriptStage(
+            file="script2.py",
+            id="duplicate-id",  # SAME ID
+            is_initial=True,
+            title="Script 2",
+            workflow_position=(100, 100),
+            workflow_transitions=[],
+        )
+
+        # Add both scripts (corrupted state)
+        project.scripts.append(script1)
+        project.scripts.append(script2)
+
+        # Save should deduplicate
+        self.project_repository.save(project)
+
+        # Load and verify only one stage with that ID exists
+        loaded_project = self.project_repository.load()
+        duplicate_stages = [s for s in loaded_project.scripts if s.id == "duplicate-id"]
+
+        self.assertEqual(len(duplicate_stages), 1)
+        self.assertEqual(duplicate_stages[0].title, "Script 1")  # First one is kept
+
+    def test_save_removes_duplicate_stages_across_types(self):
+        """Test that duplicate stage IDs across different stage types are removed"""
+        project = self.project_repository.load()
+
+        # Create stages with the same ID but different types
+        script = ScriptStage(
+            file="script.py",
+            id="duplicate-id",
+            is_initial=True,
+            title="Script",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+
+        form = FormStage(
+            id="duplicate-id",  # SAME ID
+            path="form",
+            title="Form",
+            file="form.py",
+            workflow_position=(100, 100),
+            workflow_transitions=[],
+            notification_trigger=NotificationTrigger(
+                variable_name="val", enabled=False
+            ),
+        )
+
+        # Add both (script added first, form second)
+        project.scripts.append(script)
+        project.forms.append(form)
+
+        # Save should deduplicate
+        self.project_repository.save(project)
+
+        # Load and verify only one stage with that ID exists
+        loaded_project = self.project_repository.load()
+
+        script_matches = [s for s in loaded_project.scripts if s.id == "duplicate-id"]
+        form_matches = [f for f in loaded_project.forms if f.id == "duplicate-id"]
+
+        # Only the first occurrence (script) should remain
+        self.assertEqual(len(script_matches), 1)
+        self.assertEqual(len(form_matches), 0)
+
+    def test_save_removes_duplicate_transitions(self):
+        """Test that duplicate transition IDs are removed when saving a project"""
+        project = self.project_repository.load()
+
+        script1 = ScriptStage(
+            file="script1.py",
+            id="script1",
+            is_initial=True,
+            title="Script 1",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+
+        script2 = ScriptStage(
+            file="script2.py",
+            id="script2",
+            is_initial=False,
+            title="Script 2",
+            workflow_position=(100, 100),
+            workflow_transitions=[],
+        )
+
+        # Create transitions with same ID
+        transition1 = WorkflowTransition(
+            id="duplicate-transition",
+            target_id=script2.id,
+            target_type=script2.type_name,
+            type="task",
+        )
+
+        transition2 = WorkflowTransition(
+            id="duplicate-transition",  # SAME ID
+            target_id=script2.id,
+            target_type=script2.type_name,
+            type="task",
+        )
+
+        script1.workflow_transitions.append(transition1)
+        script1.workflow_transitions.append(transition2)
+
+        project.add_stage(script1)
+        project.add_stage(script2)
+
+        # Save should deduplicate
+        self.project_repository.save(project)
+
+        # Load and verify only one transition exists
+        loaded_project = self.project_repository.load()
+        loaded_script1 = loaded_project.get_script(script1.id)
+
+        self.assertIsNotNone(loaded_script1)
+        assert loaded_script1 is not None
+
+        self.assertEqual(len(loaded_script1.workflow_transitions), 1)
+        self.assertEqual(
+            loaded_script1.workflow_transitions[0].id, "duplicate-transition"
+        )
+
+    def test_save_removes_duplicate_transitions_across_stages(self):
+        """Test that duplicate transition IDs across different stages are removed"""
+        project = self.project_repository.load()
+
+        script1 = ScriptStage(
+            file="script1.py",
+            id="script1",
+            is_initial=True,
+            title="Script 1",
+            workflow_position=(0, 0),
+            workflow_transitions=[],
+        )
+
+        script2 = ScriptStage(
+            file="script2.py",
+            id="script2",
+            is_initial=False,
+            title="Script 2",
+            workflow_position=(100, 100),
+            workflow_transitions=[],
+        )
+
+        script3 = ScriptStage(
+            file="script3.py",
+            id="script3",
+            is_initial=False,
+            title="Script 3",
+            workflow_position=(200, 200),
+            workflow_transitions=[],
+        )
+
+        # Create transitions with same ID in different stages
+        transition1 = WorkflowTransition(
+            id="shared-id",
+            target_id=script3.id,
+            target_type=script3.type_name,
+            type="task",
+        )
+
+        transition2 = WorkflowTransition(
+            id="shared-id",  # SAME ID
+            target_id=script3.id,
+            target_type=script3.type_name,
+            type="task",
+        )
+
+        script1.workflow_transitions.append(transition1)
+        script2.workflow_transitions.append(transition2)  # Same ID in different stage
+
+        project.add_stage(script1)
+        project.add_stage(script2)
+        project.add_stage(script3)
+
+        # Save should deduplicate globally
+        self.project_repository.save(project)
+
+        # Load and verify
+        loaded_project = self.project_repository.load()
+        loaded_script1 = loaded_project.get_script(script1.id)
+        loaded_script2 = loaded_project.get_script(script2.id)
+
+        self.assertIsNotNone(loaded_script1)
+        self.assertIsNotNone(loaded_script2)
+        assert loaded_script1 is not None
+        assert loaded_script2 is not None
+
+        # First stage should keep the transition
+        self.assertEqual(len(loaded_script1.workflow_transitions), 1)
+        self.assertEqual(loaded_script1.workflow_transitions[0].id, "shared-id")
+
+        # Second stage should have it removed
+        self.assertEqual(len(loaded_script2.workflow_transitions), 0)
+
+    def test_load_removes_duplicate_stages_from_corrupted_file(self):
+        """Test that duplicate stages in the JSON file are removed when loading"""
+        import json
+
+        # Create a corrupted JSON file with duplicate stage IDs
+        corrupted_data = {
+            "version": "17.0",
+            "workspace": {
+                "name": "Test",
+                "language": "en",
+                "theme": None,
+                "logo_url": None,
+                "favicon_url": None,
+                "brand_name": None,
+                "main_color": None,
+                "font_family": None,
+                "font_color": None,
+            },
+            "home": {"access_control": {"is_public": False, "required_roles": []}},
+            "scripts": [
+                {
+                    "id": "duplicate-id",
+                    "file": "script1.py",
+                    "title": "Script 1",
+                    "workflow_position": [0, 0],
+                    "is_initial": True,
+                    "transitions": [],
+                    "input": False,
+                    "output": False,
+                },
+                {
+                    "id": "duplicate-id",  # DUPLICATE
+                    "file": "script2.py",
+                    "title": "Script 2",
+                    "workflow_position": [100, 100],
+                    "is_initial": True,
+                    "transitions": [],
+                    "input": False,
+                    "output": False,
+                },
+            ],
+            "forms": [],
+            "hooks": [],
+            "jobs": [],
+            "components": [],
+        }
+
+        # Write corrupted data to file
+        json_path = self.project_repository.get_file_path()
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(corrupted_data, f, indent=2)
+
+        # Load should deduplicate
+        loaded_project = self.project_repository.load()
+
+        # Verify only one stage remains
+        duplicate_stages = [s for s in loaded_project.scripts if s.id == "duplicate-id"]
+        self.assertEqual(len(duplicate_stages), 1)
+        self.assertEqual(duplicate_stages[0].title, "Script 1")  # First one is kept
