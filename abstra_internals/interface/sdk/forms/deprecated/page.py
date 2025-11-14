@@ -2,10 +2,7 @@ import sys
 from typing import Callable, Dict, List, Optional, Union
 
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
-from abstra_internals.interface.contract.forms_contract import (
-    StepsInfo,
-    ValidationResult,
-)
+from abstra_internals.interface.contract import StepsInfo, ValidationResult
 from abstra_internals.interface.sdk.forms.deprecated.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.deprecated.widgets.prop_check import (
     validate_widget_props,

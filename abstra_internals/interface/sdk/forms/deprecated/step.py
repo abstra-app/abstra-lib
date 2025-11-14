@@ -1,6 +1,6 @@
 from typing import Callable, List, Optional, Union
 
-from abstra_internals.interface.contract.forms_contract import StepsInfo
+from abstra_internals.interface.contract import StepsInfo
 from abstra_internals.interface.sdk.forms.deprecated.page import Page
 from abstra_internals.interface.sdk.forms.deprecated.page_response import PageResponse
 from abstra_internals.interface.sdk.forms.deprecated.steps_response import StepsResponse

@@ -1,6 +1,8 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
+from abstra_internals.entities.execution_context import ScriptContext
+from abstra_internals.interface.contract import ExecutionStartedMessage
 from abstra_internals.repositories.project.project import ScriptStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -61,11 +63,25 @@ def get_editor_bp(controller: MainController):
 
     @bp.post("/<path:id>/run")
     @editor_usage
-    def _run_script(id: str):
-        data = flask.request.json
-        if not data:
-            data = {}
-        controller.debug_run_tasklet(id, task_id=data["task_id"])
-        return {"ok": True}
+    def _run_tasklet(id: str):
+        script = controller.get_script(id)
+
+        if script is None:
+            flask.abort(404)
+
+        if flask.request.json is None or "task_id" not in flask.request.json:
+            flask.abort(400)
+
+        task_id = flask.request.json["task_id"]
+
+        conn = controller.repositories.producer.enqueue(
+            id, context=ScriptContext(task_id=task_id)
+        )
+
+        start_msg = conn.recv()
+
+        assert isinstance(start_msg, ExecutionStartedMessage)
+
+        return {"ok": True, "execution_id": start_msg.execution_id}
 
     return bp

@@ -1,60 +1,59 @@
 from typing import Dict, Optional
 
-import flask_sock
-
-from abstra_internals.controllers.execution.execution_client import ExecutionClient
+import abstra_internals.interface.contract as contract
+from abstra_internals.controllers.execution.connection_protocol import (
+    ConnectionProtocol,
+)
+from abstra_internals.controllers.execution.execution_client import (
+    ClientAbandoned,
+    ExecutionClient,
+)
 from abstra_internals.entities.execution_context import FormContext
 from abstra_internals.entities.forms.form_entity import ButtonAction, RenderedForm
-from abstra_internals.interface.contract import forms_contract
 from abstra_internals.utils import deserialize, serialize
-
-
-class ClientAbandoned(Exception):
-    pass
 
 
 class FormClient(ExecutionClient):
     context: FormContext
+    conn: ConnectionProtocol
 
     def __init__(
         self,
-        ws: flask_sock.Server,
+        conn: ConnectionProtocol,
         context: FormContext,
         production_mode: bool,
     ) -> None:
         self.context = context
         self._production_mode = production_mode
-        self._ws = ws
+        self.conn = conn
 
     # WEBSOCKET
 
     def _receive_message(self):
         try:
-            str_data = self._ws.receive()
+            str_data = self.conn.recv()
             deserialized = deserialize(str_data)
             if not isinstance(deserialized, dict):
                 raise ValueError("Invalid message format")
             return deserialized
-        except flask_sock.ConnectionClosed:
+        except (EOFError, BrokenPipeError):
             raise ClientAbandoned()
 
-    def _send(self, msg: forms_contract.Message) -> None:
+    def _send(self, msg: contract.Message) -> None:
         str_data = serialize(msg.to_json())
         try:
-            self._ws.send(str_data)
-        except flask_sock.ConnectionClosed:
+            self.conn.send(str_data)
+        except (EOFError, BrokenPipeError):
             pass
 
-    def _user_code_send(self, msg: forms_contract.Message) -> None:
+    def _user_code_send(self, msg: contract.Message) -> None:
         str_data = serialize(msg.to_json())
         try:
-            self._ws.send(str_data)
-        except flask_sock.ConnectionClosed:
+            self.conn.send(str_data)
+        except (EOFError, BrokenPipeError):
             raise ClientAbandoned()
 
-    def _wait_for_message(
-        self, *target_types: forms_contract.BrowserMessageTypes
-    ) -> Dict:
+    def _wait_for_message(self, *target_types: contract.BrowserMessageTypes) -> Dict:
         ignored_types = ["execution:heartbeat", "debug:close-attempt"]
 
         while True:
@@ -80,7 +79,7 @@ class FormClient(ExecutionClient):
             )
         )
         self._user_code_send(
-            forms_contract.FormRenderMessage(
+            contract.FormRenderMessage(
                 widgets=rendered["widgets"],
                 end_page=rendered["end_page"],
                 steps_info=rendered["steps_info"],
@@ -96,10 +95,10 @@ class FormClient(ExecutionClient):
         actions: list,
         end_program: bool,
         reactive_polling_interval: int,
-        steps_info: Optional[forms_contract.StepsInfo],
+        steps_info: Optional[contract.StepsInfo],
     ) -> None:
         self._user_code_send(
-            forms_contract.FormMountPageMessage(
+            contract.FormMountPageMessage(
                 widgets,
                 actions,
                 end_program,
@@ -110,10 +109,10 @@ class FormClient(ExecutionClient):
         )
 
     def request_page_update(
-        self, widgets: list, validation: forms_contract.ValidationResult, event_seq: int
+        self, widgets: list, validation: contract.ValidationResult, event_seq: int
     ) -> None:
         self._user_code_send(
-            forms_contract.FormUpdatePageMessage(
+            contract.FormUpdatePageMessage(
                 widgets, validation, event_seq, self._production_mode
             )
         )
@@ -123,21 +122,19 @@ class FormClient(ExecutionClient):
 
     def request_auth(self, refresh: bool = False):
         self._user_code_send(
-            forms_contract.AuthRequireInfoMessage(refresh, self._production_mode)
+            contract.AuthRequireInfoMessage(refresh, self._production_mode)
         )
         return self._wait_for_message("auth:saved-jwt")
 
     def handle_invalid_jwt(self):
-        self._user_code_send(
-            forms_contract.AuthInvalidJWTMessage(self._production_mode)
-        )
+        self._user_code_send(contract.AuthInvalidJWTMessage(self._production_mode))
 
     def handle_valid_jwt(self):
-        self._user_code_send(forms_contract.AuthValidJWTMessage(self._production_mode))
+        self._user_code_send(contract.AuthValidJWTMessage(self._production_mode))
 
     def request_execute_js(self, code: str, context: dict):
         self._user_code_send(
-            forms_contract.ExecuteJSRequestMessage(code, context, self._production_mode)
+            contract.ExecuteJSRequestMessage(code, context, self._production_mode)
         )
         data = self._wait_for_message("execute-js:response")
         return data.get("value")
@@ -146,7 +143,7 @@ class FormClient(ExecutionClient):
         self, url: str, query_params: Optional[Dict[str, str]]
     ) -> None:
         _query_params = query_params if query_params is not None else {}
-        self._user_code_send(forms_contract.RedirectRequestMessage(url, _query_params))
+        self._user_code_send(contract.RedirectRequestMessage(url, _query_params))
 
     def next_user_message(self) -> Dict:
         return self._wait_for_message("form:navigation", "form:input")
@@ -155,19 +152,15 @@ class FormClient(ExecutionClient):
 
     def handle_start(self, execution_id: str):
         self._wait_for_message("execution:start")
-        self._send(forms_contract.ExecutionStartedMessage(execution_id))
+        self._send(contract.ExecutionStartedMessage(execution_id))
 
     def handle_failure(self, e: Exception):
-        close_dto = forms_contract.CloseDTO(exit_status="EXCEPTION", exception=e)
-        self._send(
-            forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
-        )
+        close_dto = contract.CloseDTO(exit_status="EXCEPTION", exception=e)
+        self._send(contract.ExecutionEndedMessage(close_dto, self._production_mode))
 
     def handle_success(self):
-        close_dto = forms_contract.CloseDTO(exit_status="SUCCESS")
-        self._send(
-            forms_contract.ExecutionEndedMessage(close_dto, self._production_mode)
-        )
+        close_dto = contract.CloseDTO(exit_status="SUCCESS")
+        self._send(contract.ExecutionEndedMessage(close_dto, self._production_mode))
 
     ## Testing
 

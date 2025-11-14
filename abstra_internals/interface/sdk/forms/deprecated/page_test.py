@@ -1,10 +1,11 @@
+from multiprocessing import Pipe
+
 from abstra.forms import ListItemSchema, Page
 from abstra_internals.controllers.execution.execution_client_form import FormClient
-from abstra_internals.controllers.sdk.sdk_context import (
-    SDKContext,
-)
+from abstra_internals.controllers.sdk.sdk_context import SDKContext
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import FormContext, Request
+from abstra_internals.utils.websockets import MockWS, bind_ws_with_connection
 from tests.fixtures import BaseTest
 
 
@@ -15,10 +16,10 @@ class TestPage(BaseTest):
             request=Request(body="", query_params={}, headers={}, method="GET"),
         )
 
+        self.parent_conn, child_conn = Pipe()
+        bind_ws_with_connection(MockWS(), self.parent_conn, block=False)
         self.client = FormClient(
-            context=form_context,
-            production_mode=False,
-            ws=None,  # type: ignore
+            context=form_context, production_mode=False, conn=child_conn
         )
         execution = Execution.create(
             context=form_context,
@@ -28,6 +29,7 @@ class TestPage(BaseTest):
 
     def tearDown(self) -> None:
         self.context.__exit__(None, None, None)
+        self.parent_conn.close()
         super().tearDown()
 
     def test_reactive_list_dropdown(self):

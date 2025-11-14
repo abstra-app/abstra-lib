@@ -26,4 +26,10 @@ def get_editor_bp(controller: MainController):
         tasks = controller.get_execution_tasks(execution_id)
         return tasks.dump()
 
+    @bp.post("/<execution_id>/stop")
+    @editor_usage
+    def _stop_execution(execution_id):
+        controller.stop_execution(execution_id)
+        return {"status": "stopping"}
+
     return bp

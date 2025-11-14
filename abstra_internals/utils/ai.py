@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 from abstra_internals.contracts_generated import (
     CloudApiCliAiV2PromptPostRequestMessages,
@@ -7,8 +7,10 @@ from abstra_internals.contracts_generated import (
     CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText,
     CloudApiCliAiV2PromptPostRequestToolsItemFunction,
 )
-from abstra_internals.repositories.factory import Repositories
 from abstra_internals.utils.string import to_snake_case
+
+if TYPE_CHECKING:
+    from abstra_internals.repositories.factory import Repositories
 
 
 def build_function_tool_call(
@@ -29,13 +31,13 @@ def build_function_tool_call(
 
 class AiWs:
     seq: int
-    repos: Repositories
+    repos: "Repositories"
     messages: CloudApiCliAiV2PromptPostRequestMessages = []
     url_params: Dict[str, str]
     prompt: str
 
     def __init__(
-        self, repos: Repositories, prompt_text: str, url_params: Dict[str, str]
+        self, repos: "Repositories", prompt_text: str, url_params: Dict[str, str]
     ) -> None:
         self.repos = repos
         self.prompt = prompt_text
@@ -103,3 +105,6 @@ class AiWs:
             )
             self.seq += 1
             return json.dumps({**ans, "seq": self.seq})
+
+    def close(self):
+        self.messages.clear()

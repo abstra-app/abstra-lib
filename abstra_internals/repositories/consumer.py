@@ -39,18 +39,29 @@ class Consumer(ABC):
         raise NotImplementedError
 
 
-class RabbitConsumer(Consumer):
-    """All methods are not thread-safe unless specified otherwise."""
+class RabbitMQConsumer(Consumer):
+    """
+    Base RabbitMQ consumer that works with any queue.
+    Consumes execution requests from a specified queue with configurable concurrency.
+    All methods are not thread-safe unless specified otherwise.
+    """
 
     channel: BlockingChannel
     connection: BlockingConnection
     conn_uri: str
 
-    def __init__(self, conn_uri: str):
-        self.concurrency = EXECUTION_QUEUE_CONCURRENCY
-        self.queue = RABBITMQ_EXECUTION_QUEUE
+    def __init__(
+        self,
+        conn_uri: str,
+        queue_name: str,
+        concurrency: int,
+        logger_prefix: str = "RabbitMQConsumer",
+    ):
+        self.concurrency = concurrency
+        self.queue = queue_name
         self.conn_uri = conn_uri
         self.stop_evt = Event()
+        self.logger_prefix = logger_prefix
 
         self._connect()
 
@@ -60,7 +71,7 @@ class RabbitConsumer(Consumer):
         Retries connection attempts with exponential backoff to handle
         transient network issues during pod startup.
         """
-        AbstraLogger.info("[RabbitConsumer] Connecting...")
+        AbstraLogger.info(f"[{self.logger_prefix}] Connecting...")
 
         params = pika.URLParameters(self.conn_uri)
         params.connection_attempts = 1  # Single attempt per retry iteration
@@ -77,33 +88,33 @@ class RabbitConsumer(Consumer):
                 self.channel.basic_qos(prefetch_count=self.concurrency)
                 self.channel.queue_declare(queue=self.queue, durable=True)
                 AbstraLogger.info(
-                    "[RabbitConsumer] Connection established successfully"
+                    f"[{self.logger_prefix}] Connection established successfully"
                 )
                 return
             except AMQPConnectionError as e:
                 last_exception = e
                 if attempt < RABBITMQ_RETRY_MAX_ATTEMPTS:
                     AbstraLogger.warning(
-                        f"[RabbitConsumer] Connection failed (attempt {attempt}): {e}. "
+                        f"[{self.logger_prefix}] Connection failed (attempt {attempt}): {e}. "
                         f"Retrying in {delay}s..."
                     )
                     time.sleep(delay)
                     delay = min(delay * 2, 30)  # Exponential backoff, max 30s
                 else:
                     AbstraLogger.error(
-                        f"[RabbitConsumer] All {RABBITMQ_RETRY_MAX_ATTEMPTS} connection attempts failed"
+                        f"[{self.logger_prefix}] All {RABBITMQ_RETRY_MAX_ATTEMPTS} connection attempts failed"
                     )
 
         raise last_exception or AMQPConnectionError("Failed to connect to RabbitMQ")
 
     def threadsafe_ack(self, msg: QueueMessage):
         AbstraLogger.debug(
-            f"[RabbitConsumer] Adding ack callback for [{msg.delivery_tag}]"
+            f"[{self.logger_prefix}] Adding ack callback for [{msg.delivery_tag}]"
         )
 
         def callback():
             AbstraLogger.debug(
-                f"[RabbitConsumer] Acknowledging message [{msg.delivery_tag}]"
+                f"[{self.logger_prefix}] Acknowledging message [{msg.delivery_tag}]"
             )
             self.channel.basic_ack(delivery_tag=msg.delivery_tag)
 
@@ -111,19 +122,19 @@ class RabbitConsumer(Consumer):
 
     def threadsafe_nack(self, msg: QueueMessage):
         AbstraLogger.debug(
-            f"[RabbitConsumer] Adding nack callback for [{msg.delivery_tag}]"
+            f"[{self.logger_prefix}] Adding nack callback for [{msg.delivery_tag}]"
         )
 
         def callback():
             AbstraLogger.debug(
-                f"[RabbitConsumer] Not acknowledging message [{msg.delivery_tag}]"
+                f"[{self.logger_prefix}] Not acknowledging message [{msg.delivery_tag}]"
             )
             self.channel.basic_nack(delivery_tag=msg.delivery_tag, requeue=False)
 
         self.connection.add_callback_threadsafe(callback)
 
     def iter(self) -> Generator[QueueMessage, None, None]:
-        AbstraLogger.info("[RabbitConsumer] Starting consumer iteration")
+        AbstraLogger.info(f"[{self.logger_prefix}] Starting consumer iteration")
 
         for method, _, body in self.channel.consume(
             queue=self.queue, inactivity_timeout=10, auto_ack=False
@@ -132,37 +143,53 @@ class RabbitConsumer(Consumer):
                 break
 
             if not method:
-                AbstraLogger.debug("[RabbitConsumer] Consume returned no messages")
+                AbstraLogger.debug(
+                    f"[{self.logger_prefix}] Consume returned no messages"
+                )
                 continue
 
             yield QueueMessage(
-                preexecution=PreExecution(**deserialize(body.decode("utf-8"))),
+                preexecution=PreExecution.model_validate(
+                    deserialize(body.decode("utf-8"))
+                ),
                 delivery_tag=method.delivery_tag,
             )
 
     def stop_iter(self):
-        AbstraLogger.warning("[RabbitConsumer] Setting stop event for consumer")
+        AbstraLogger.warning(f"[{self.logger_prefix}] Setting stop event for consumer")
         self.stop_evt.set()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop_iter()
 
-        AbstraLogger.debug("[RabbitConsumer] Exiting consumer context manager")
+        AbstraLogger.debug(f"[{self.logger_prefix}] Exiting consumer context manager")
         self.connection.process_data_events(time_limit=60)
-        AbstraLogger.warning("[RabbitConsumer] Data events processed")
+        AbstraLogger.warning(f"[{self.logger_prefix}] Data events processed")
 
         if self.connection.is_open:
-            AbstraLogger.warning("[RabbitConsumer] Cancelling channel")
+            AbstraLogger.warning(f"[{self.logger_prefix}] Cancelling channel")
             self.channel.cancel()
-            AbstraLogger.warning("[RabbitConsumer] Closing channel")
+            AbstraLogger.warning(f"[{self.logger_prefix}] Closing channel")
             self.channel.close()
-            AbstraLogger.warning("[RabbitConsumer] Closing connection")
+            AbstraLogger.warning(f"[{self.logger_prefix}] Closing connection")
             self.connection.close()
 
         return False
 
-    def __enter__(self) -> "RabbitConsumer":
+    def __enter__(self):
         return self
+
+
+class RabbitConsumer(RabbitMQConsumer):
+    """Consumer for production environment using 'executions' queue."""
+
+    def __init__(self, conn_uri: str):
+        super().__init__(
+            conn_uri,
+            RABBITMQ_EXECUTION_QUEUE,
+            EXECUTION_QUEUE_CONCURRENCY,
+            "RabbitConsumer",
+        )
 
 
 class EditorConsumer(Consumer):
@@ -189,3 +216,16 @@ class EditorConsumer(Consumer):
                     yield msg
             except Empty:
                 continue
+            except (OSError, ValueError):
+                # Queue was closed (e.g., after process crash)
+                # Stop iteration gracefully
+                break
+
+
+class WebEditorConsumer(RabbitMQConsumer):
+    """Consumer for web editor using 'web_editor_executions' queue."""
+
+    def __init__(self, conn_uri: str, queue_name: str = "web_editor_executions"):
+        super().__init__(
+            conn_uri, queue_name, EXECUTION_QUEUE_CONCURRENCY, "WebEditorConsumer"
+        )

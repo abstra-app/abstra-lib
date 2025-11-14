@@ -2,7 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 
 from abstra_internals.entities.execution import Execution
-from abstra_internals.entities.execution_context import HookContext, Request, Response
+from abstra_internals.entities.execution_context import HookContext, Request
 from abstra_internals.repositories.project.project import HookStage
 from abstra_internals.utils import is_serializable
 from abstra_internals.utils.datetime import from_utc_iso_string
@@ -24,9 +24,7 @@ class ExecutionTest(TestCase):
             method="GET",
         )
 
-        context = HookContext(
-            request=request, response=Response(headers={}, status=200, body="")
-        )
+        context = HookContext(request=request)
 
         execution: Execution[HookContext] = Execution.create(
             stage_id=mock_stage.id, context=context
@@ -57,8 +55,7 @@ class ExecutionTest(TestCase):
                 headers={"auth": "secret_token"},
                 query_params={"c": "3"},
                 method="GET",
-            ),
-            response=Response(headers={}, status=200, body=""),
+            )
         )
 
         execution: Execution[HookContext] = Execution.create(

@@ -6,6 +6,7 @@ from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import (
     EXECUTION_QUEUE_CONCURRENCY,
     PROCESS_TIMEOUT_SECONDS,
+    RABBITMQ_CONNECTION_URI,
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import Consumer, QueueMessage
@@ -33,38 +34,35 @@ class ConsumerController:
             f"[ConsumerController] Starting loop with {self.concurrency} threads"
         )
 
-        thread_pool = ThreadPoolExecutor(
-            max_workers=self.concurrency,
+        with ThreadPoolExecutor(
             thread_name_prefix="ExecutionConsumer",
-        )
-
-        try:
+        ) as executor:
             for msg in self.consumer.iter():
                 AbstraLogger.debug(
                     f"[ConsumerController] Submitting message [{msg.delivery_tag}] for processing"
                 )
-                thread_pool.submit(
+                executor.submit(
                     self.run_subprocess,
                     msg=msg,
                 )
-        finally:
-            AbstraLogger.warning(
-                "[ConsumerController] Consumer main loop exited, waiting for threads to finish"
-            )
-            thread_pool.shutdown(wait=True)
-            AbstraLogger.warning("[ConsumerController] All threads finished")
 
-            # If the loop exits and there are running executions, gracefull shutdown has failed
-            self.main_controller.fail_app_executions(
-                app_id=self.app_id,
-                reason="Failed to set status",
-            )
+        AbstraLogger.warning(
+            "[ConsumerController] Consumer main loop exited, waiting for threads to finish"
+        )
+        AbstraLogger.warning("[ConsumerController] All threads finished")
 
-    def run_subprocess(self, msg: QueueMessage):
+        # If the loop exits and there are running executions, gracefull shutdown has failed
+        self.main_controller.fail_app_executions(
+            app_id=self.app_id,
+            reason="Failed to set status",
+        )
+
+    def run_subprocess(self, msg: QueueMessage) -> None:
+        connection = None
         worker_id = str(uuid4())
-        head_id = worker_id.split("-")[0]
-
         try:
+            head_id = worker_id.split("-")[0]
+
             mp_context = self.main_controller.repositories.mp_context.get_context()
             stage = self.main_controller.get_stage(msg.preexecution.stage_id)
 
@@ -75,11 +73,28 @@ class ConsumerController:
                 self.consumer.threadsafe_ack(msg)
                 return
 
-            local_queue = None
+            # Prepare connection parameters for subprocess
             if isinstance(
                 self.main_controller.repositories.producer, LocalProducerRepository
             ):
-                local_queue = self.main_controller.repositories.producer.queue
+                # Local mode: use the Pipe connection from the message
+                if msg.connection is None:
+                    raise Exception(
+                        "Connection is None in local mode - this should never happen"
+                    )
+                connection = msg.connection
+                rabbitmq_params = None
+            else:
+                # Production mode: pass RabbitMQ parameters (don't create connection here)
+                if RABBITMQ_CONNECTION_URI is None:
+                    raise Exception(
+                        "RABBITMQ_CONNECTION_URI is not set for production execution"
+                    )
+                connection = None
+                rabbitmq_params = {
+                    "connection_uri": RABBITMQ_CONNECTION_URI,
+                    "execution_id": msg.preexecution.execution_id,
+                }
 
             p = mp_context.Process(
                 target=process_main,
@@ -91,7 +106,14 @@ class ConsumerController:
                     root_path=Settings.root_path,
                     server_port=Settings.server_port,
                     request=msg.preexecution.context,
-                    local_queue=local_queue,
+                    connection=connection,
+                    rabbitmq_params=rabbitmq_params,
+                    local_queue=self.main_controller.repositories.producer.queue
+                    if isinstance(
+                        self.main_controller.repositories.producer,
+                        LocalProducerRepository,
+                    )
+                    else None,
                 ),
             )
 
@@ -101,6 +123,7 @@ class ConsumerController:
             # If timeout is reached, the process is still alive
             if p.is_alive():
                 p.terminate()
+                p.join()  # Wait for termination to complete
                 raise NonCleanExit(
                     f"Run took too long to complete ({PROCESS_TIMEOUT_SECONDS} secs) and was terminated. Please make sure all your requests calls have a timeout set."
                 )
@@ -128,7 +151,10 @@ class ConsumerController:
             )
 
             self.consumer.threadsafe_nack(msg)
-
-            AbstraLogger.warning(
-                f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"
-            )
+        finally:
+            # Always close the connection when done
+            if connection is not None:
+                try:
+                    connection.close()
+                except Exception:
+                    pass  # Ignore errors when closing

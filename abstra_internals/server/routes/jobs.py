@@ -1,6 +1,8 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
+from abstra_internals.entities.execution_context import JobContext
+from abstra_internals.interface.contract import ExecutionStartedMessage
 from abstra_internals.repositories.project.project import JobStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -62,8 +64,21 @@ def get_editor_bp(controller: MainController):
     @bp.post("/<path:id>/run")
     @editor_usage
     def _run_job(id: str):
-        controller.debug_run_job(id)
+        status = controller.get_job_status(id)
+        if status == "not_found":
+            flask.abort(404)
 
-        return {"ok": True}
+        if status == "disabled":
+            return {"status": "disabled"}
+
+        conn = controller.repositories.producer.enqueue(id, context=JobContext())
+        start_msg = conn.recv()
+
+        assert isinstance(start_msg, ExecutionStartedMessage)
+
+        return {
+            "ok": True,
+            "execution_id": start_msg.execution_id,
+        }
 
     return bp
