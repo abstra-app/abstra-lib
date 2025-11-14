@@ -1,10 +1,16 @@
 import sys
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from abstra_internals.entities.forms.form_entity import FormEntity, Step
+from abstra_internals.entities.forms.form_entity import (
+    FormEntity,
+    Step,
+)
 from abstra_internals.entities.forms.form_state import State
 from abstra_internals.environment import IS_DEVELOPMENT
-from abstra_internals.interface.contract import StepsInfo, ValidationResult
+from abstra_internals.interface.contract.forms_contract import (
+    StepsInfo,
+    ValidationResult,
+)
 from abstra_internals.interface.sdk import user_exceptions
 from abstra_internals.repositories.users import UsersRepository
 from abstra_internals.services.jwt import UserClaims

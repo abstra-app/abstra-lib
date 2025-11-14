@@ -1,12 +1,7 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution_context import (
-    HookContext,
-    Response,
-    extract_flask_request,
-)
-from abstra_internals.interface.contract import ExecutionStartedMessage
+from abstra_internals.entities.execution_context import extract_flask_request
 from abstra_internals.repositories.project.project import HookStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -68,41 +63,6 @@ def get_editor_bp(controller: MainController):
     @bp.route("/<path:id>/run", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     @editor_usage
     def _run_hook(id: str):
-        hook = controller.get_stage(id)
-
-        if not isinstance(hook, HookStage):
-            flask.abort(400)
-
-        if not hook:
-            flask.abort(404)
-
-        if not hook.file:
-            flask.abort(500)
-
-        context = HookContext(
-            request=extract_flask_request(flask.request),
-        )
-
-        connection = controller.repositories.producer.enqueue(hook.id, context)
-        start_msg = connection.recv()
-
-        assert isinstance(start_msg, ExecutionStartedMessage)
-
-        try:
-            response = connection.recv()
-
-            assert isinstance(response, Response)
-
-            if not response:
-                flask.abort(500)
-        finally:
-            connection.close()
-
-        return {
-            "status": response.status,
-            "body": response.body,
-            "headers": response.headers,
-            "execution_id": start_msg.execution_id,
-        }
+        return controller.debug_run_hook(id, extract_flask_request(flask.request))
 
     return bp

@@ -15,8 +15,12 @@ from abstra_internals.repositories.ai import (
     LocalAIRepository,
     ProductionAIRepository,
 )
-from abstra_internals.repositories.connectors import ConnectorsRepository
-from abstra_internals.repositories.email import EmailRepository
+from abstra_internals.repositories.connectors import (
+    ConnectorsRepository,
+)
+from abstra_internals.repositories.email import (
+    EmailRepository,
+)
 from abstra_internals.repositories.execution import (
     ExecutionRepository,
     LocalExecutionRepository,
@@ -50,7 +54,6 @@ from abstra_internals.repositories.producer import (
     LocalProducerRepository,
     ProducerRepository,
     ProductionProducerRepository,
-    WebEditorProducerRepository,
 )
 from abstra_internals.repositories.project.disabled_stages_loader import (
     ProductionDisabledStagesLoader,
@@ -107,15 +110,12 @@ class Repositories:
 def build_editor_repositories(local_queue: Optional[Queue] = None):
     mp_context = SpawnContextReposity()
 
-    # If no queue is provided, create one using the same context
-    if local_queue is None:
-        local_queue = mp_context.get_context().Queue()
-
     http_client = HTTPClient(
         base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise
     )
 
     linter = LocalLinterRepository()
+    local_queue = local_queue or mp_context.get_context().Queue()
 
     return Repositories(
         project=LocalProjectRepository(),
@@ -162,31 +162,4 @@ def build_prod_repositories():
         kv=ProductionKVRepository(client=http_client),
         mp_context=SpawnContextReposity(),
         linter=ProductionLinterRepository(),
-    )
-
-
-def build_web_editor_repositories(rabbitmq_connection_uri: str):
-    """Build repositories for web editor using RabbitMQ for producer/consumer."""
-    http_client = HTTPClient(
-        base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise
-    )
-
-    linter = LocalLinterRepository()
-
-    return Repositories(
-        project=LocalProjectRepository(),
-        execution=LocalExecutionRepository(SpawnContextReposity().get_context()),
-        producer=WebEditorProducerRepository(rabbitmq_connection_uri),
-        connectors=ConnectorsRepository(client=http_client),
-        tasks=LocalTasksRepository(SpawnContextReposity().get_context()),
-        tables=LocalTablesRepository(client=http_client),
-        email=EmailRepository(client=http_client),
-        roles=LocalRolesRepository(client=http_client),
-        ai=LocalAIRepository(client=http_client),
-        execution_logs=LocalExecutionLogsRepository(),
-        users=LocalUsersRepository(),
-        passwordless=LocalPasswordlessRepository(),
-        kv=LocalKVRepository(),
-        mp_context=SpawnContextReposity(),
-        linter=linter,
     )

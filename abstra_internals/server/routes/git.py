@@ -146,16 +146,16 @@ def get_editor_bp(controller: MainController):
     @editor_usage
     def _deploy_to_abstra():
         try:
-            # controller.linter_repository.update_checks()
-            # issues = controller.linter_repository.get_blocking_checks()
+            controller.linter_repository.update_checks()
+            issues = controller.linter_repository.get_blocking_checks()
 
-            # if len(issues) > 0:
-            #     return flask.jsonify(
-            #         {
-            #             "success": False,
-            #             "message": "Please fix all linter issues before deploying your project.",
-            #         }
-            #     ), 400
+            if len(issues) > 0:
+                return flask.jsonify(
+                    {
+                        "success": False,
+                        "message": "Please fix all linter issues before deploying your project.",
+                    }
+                ), 400
 
             data = flask.request.get_json(silent=True)
             branch = data.get("branch", "main") if data else "main"
