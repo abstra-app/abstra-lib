@@ -31,6 +31,17 @@ def running_under_virtualenv() -> bool:
     return False
 
 
+def virtualenv_inside_project() -> bool:
+    root_path, prefix_path = get_root_and_prefix_path()
+    return prefix_path.startswith(root_path)
+
+
+def virtualenv_ignored() -> bool:
+    root_path, prefix_path = get_root_and_prefix_path()
+    venv_folder = prefix_path.replace(root_path, "").lstrip("/")
+    return FileSystemService.is_ignored(Path(venv_folder))
+
+
 class UntrackVenv(LinterFix):
     label = "Add virtual env to git ignore"
 
@@ -38,10 +49,12 @@ class UntrackVenv(LinterFix):
         root_path, prefix_path = get_root_and_prefix_path()
         venv_folder = prefix_path.replace(root_path, "").lstrip("/")
 
-        gitignore_file = Settings.root_path / GITIGNORE_FILEPATH
-        with gitignore_file.open("a") as file:
-            file.write("\n")
-            file.write(venv_folder)
+        if virtualenv_inside_project() and not virtualenv_ignored():
+            gitignore_file = Settings.root_path / GITIGNORE_FILEPATH
+            with gitignore_file.open("a") as file:
+                file.write("\n")
+                file.write(venv_folder)
+
         FileSystemService.untrack_path_from_git(Path(venv_folder))
 
 
@@ -55,24 +68,14 @@ class VenvInBundle(LinterRule):
     label = "You can't add virtual env to the bundle"
     type = "bug"
 
-    def virtualenv_inside_project(self) -> bool:
-        root_path, prefix_path = get_root_and_prefix_path()
-        return prefix_path.startswith(root_path)
-
-    def virtualenv_ignored(self) -> bool:
-        root_path, prefix_path = get_root_and_prefix_path()
-        venv_folder = prefix_path.replace(root_path, "").lstrip("/")
-
-        return FileSystemService.is_ignored(Path(venv_folder))
-
     def find_issues(self) -> List[LinterIssue]:
         if not running_under_virtualenv():
             return []
 
-        if not self.virtualenv_inside_project():
+        if not virtualenv_inside_project():
             return []
 
-        if self.virtualenv_ignored():
+        if virtualenv_ignored():
             return []
 
         return [VenvInBundleFound()]
