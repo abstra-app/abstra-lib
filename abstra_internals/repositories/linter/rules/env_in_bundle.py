@@ -14,10 +14,13 @@ class UntrackEnv(LinterFix):
     label = "Add env to git ignore"
 
     def fix(self):
-        gitignore_file = Settings.root_path / GITIGNORE_FILEPATH
-        with gitignore_file.open("a") as file:
-            file.write("\n.env")
         env_file = Settings.root_path / ".env"
+
+        if not FileSystemService.is_ignored(env_file):
+            gitignore_file = Settings.root_path / GITIGNORE_FILEPATH
+            with gitignore_file.open("a") as file:
+                file.write("\n.env")
+
         FileSystemService.untrack_path_from_git(env_file)
 
 
