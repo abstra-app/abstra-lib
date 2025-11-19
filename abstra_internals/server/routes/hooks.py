@@ -57,7 +57,7 @@ def get_editor_bp(controller: MainController):
         remove_file = flask.request.args.get(
             "remove_file", default=False, type=is_it_true
         )
-        controller.delete_hook(id, remove_file)
+        controller.delete_stage(id, remove_file)
         return {"success": True}
 
     @bp.route("/<path:id>/run", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])

@@ -901,43 +901,6 @@ class MainController:
         project = self.repositories.project.load()
         return project.get_script(id)
 
-    def delete_tasklet(self, id: str, remove_file: bool = False):
-        """
-        Delete a tasklet stage from the project workflow.
-
-        This method removes a tasklet stage from the project configuration and
-        optionally deletes the associated Python file from the filesystem.
-
-        Args:
-            id (str): Unique identifier of the tasklet stage to delete.
-            remove_file (bool, optional): Whether to also delete the associated
-                Python file from the filesystem. Defaults to False.
-
-        Example:
-            ```python
-            controller = MainController(repositories)
-
-            # Delete tasklet but preserve the file
-            controller.delete_tasklet("data-processor")
-
-            # Delete tasklet and its file completely
-            controller.delete_tasklet("validator-tasklet", remove_file=True)
-            ```
-
-        Warning:
-            - Deleting a tasklet that is referenced by workflow transitions may
-              break the workflow flow
-            - If remove_file=True, the Python file will be permanently deleted
-            - This operation cannot be undone
-
-        Copywritings:
-            Delete a tasklet stage
-            Deleting a tasklet stage...
-        """
-        project = self.repositories.project.load()
-        project.delete_stage(id, remove_file)
-        self.repositories.project.save(project)
-
     def create_form(
         self,
         title: str,
@@ -1026,15 +989,15 @@ class MainController:
             return "{}"
         return test_file.read_text(encoding="utf-8")
 
-    def delete_form(self, id: str, remove_file: bool = False):
+    def delete_stage(self, stage_id: str, remove_file: bool = False):
         """
-        Delete a form stage from the project workflow.
+        Delete a stage from the project workflow.
 
-        This method removes a form stage from the project configuration and
+        This method removes a stage from the project configuration and
         optionally deletes the associated Python file from the filesystem.
 
         Args:
-            id (str): Unique identifier of the form stage to delete.
+            id (str): Unique identifier of the stage to delete.
             remove_file (bool, optional): Whether to also delete the associated
                 Python file from the filesystem. Defaults to False.
 
@@ -1042,25 +1005,24 @@ class MainController:
             ```python
             controller = MainController(repositories)
 
-            # Delete form but keep the file
-            controller.delete_form("form-123")
-
-            # Delete form and its file completely
-            controller.delete_form("form-456", remove_file=True)
+            # Delete stage but keep the file
+            controller.delete_stage("stage-123")
+            # Delete stage and its file completely
+            controller.delete_stage("stage-456", remove_file=True)
             ```
 
         Warning:
-            - Deleting a form that is referenced by workflow transitions may
+            - Deleting a stage that is referenced by workflow transitions may
               break the workflow flow
             - If remove_file=True, the Python file will be permanently deleted
             - This operation cannot be undone
 
         Copywritings:
-            Delete a form stage
-            Deleting a form stage...
+            Delete a stage
+            Deleting a stage...
         """
         project = self.repositories.project.load()
-        project.delete_stage(id, remove_file)
+        project.delete_stage(stage_id, remove_file)
         self.repositories.project.save(project)
 
     def create_hook(
@@ -1140,44 +1102,6 @@ class MainController:
     def get_hook_by_path(self, path: str) -> Optional[HookStage]:
         project = self.repositories.project.load()
         return project.get_hook_by_path(path)
-
-    def delete_hook(self, id: str, remove_file: bool = False) -> None:
-        """
-        Delete a hook stage from the project workflow.
-
-        This method removes a hook stage from the project configuration and
-        optionally deletes the associated Python file from the filesystem.
-        The hook endpoint will no longer be available after deletion.
-
-        Args:
-            id (str): Unique identifier of the hook stage to delete.
-            remove_file (bool, optional): Whether to also delete the associated
-                Python file from the filesystem. Defaults to False.
-
-        Example:
-            ```python
-            controller = MainController(repositories)
-
-            # Delete hook but preserve the file
-            controller.delete_hook("webhook-123")
-
-            # Delete hook and its file completely
-            controller.delete_hook("api-hook-456", remove_file=True)
-            ```
-
-        Warning:
-            - The hook endpoint will become inaccessible immediately
-            - External systems calling this hook will receive 404 errors
-            - If remove_file=True, the Python file will be permanently deleted
-            - This operation cannot be undone
-
-        Copywritings:
-            Delete a hook stage
-            Deleting a hook stage...
-        """
-        project = self.repositories.project.load()
-        project.delete_stage(id, remove_file)
-        self.repositories.project.save(project)
 
     def get_jobs(self, include_disabled_jobs: bool = False) -> List[JobStage]:
         project = self.repositories.project.load(
@@ -1353,44 +1277,6 @@ class MainController:
         stage = project.update_stage(stage, changes)
         self.repositories.project.save(project)
         return stage
-
-    def delete_job(self, id: str, remove_file: bool = False):
-        """
-        Delete a job stage from the project workflow.
-
-        This method removes a job stage from the project configuration and
-        optionally deletes the associated Python file from the filesystem.
-        Any scheduled executions of this job will be stopped.
-
-        Args:
-            id (str): Unique identifier of the job stage to delete.
-            remove_file (bool, optional): Whether to also delete the associated
-                Python file from the filesystem. Defaults to False.
-
-        Example:
-            ```python
-            controller = MainController(repositories)
-
-            # Delete job but keep the file for reference
-            controller.delete_job("daily-sync-job")
-
-            # Delete job and its file completely
-            controller.delete_job("cleanup-job", remove_file=True)
-            ```
-
-        Warning:
-            - The job will no longer execute on its schedule after deletion
-            - Any pending job executions will be cancelled
-            - If remove_file=True, the Python file will be permanently deleted
-            - This operation cannot be undone
-
-        Copywritings:
-            Delete a job stage
-            Deleting a job stage...
-        """
-        project = self.repositories.project.load()
-        project.delete_stage(id, remove_file)
-        self.repositories.project.save(project)
 
     def list_all_stages(self) -> List[Stage]:
         """
@@ -1848,7 +1734,7 @@ class MainController:
             context=JobContext(),
         ).run()
 
-        self.delete_job(stage.id, remove_file=True)
+        self.delete_stage(stage.id, remove_file=True)
 
         return execution_result
 
