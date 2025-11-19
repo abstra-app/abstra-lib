@@ -16,6 +16,7 @@ from .missing_packages_in_requirements import MissingPackagesInRequirements
 from .new_version_of_abstra_available import NewVersionOfAbstraAvailable
 from .psycopg2 import Psycopg2MustBeBinary
 from .syntax_errors import SyntaxErrors
+from .type_checking import TypeCheckingRule
 from .venv_in_bundle import VenvInBundle
 
 core_rules: List[LinterRule] = [
@@ -32,6 +33,7 @@ core_rules: List[LinterRule] = [
     ConflictingName(),
     DeprecatedFunctionUsage(),
     BigPyFiles(),
+    TypeCheckingRule(),
 ]
 
 conditional_rules: List[LinterRule] = []

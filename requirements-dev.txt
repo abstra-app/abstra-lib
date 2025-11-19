@@ -5,3 +5,4 @@ ruff==0.12.1
 circular-imports
 libcst
 selenium
+pyright

@@ -66,6 +66,7 @@ from abstra_internals.templates import (
     new_script_code,
 )
 from abstra_internals.utils.ai import AiWs
+from abstra_internals.utils.code_check import code_check
 from abstra_internals.utils.diff import compute_updated_code_from_replacements
 from abstra_internals.utils.file import path2module
 from abstra_internals.utils.validate import validate_json
@@ -660,6 +661,7 @@ class MainController:
 
         Returns:
             Dict[str, Any]: Operation result with success status and details.
+                If ty type checking fails, returns success=False with observation.
 
         Example:
             ```python
@@ -713,11 +715,13 @@ class MainController:
             - No cascading effects between replacements
             - Rollback capability if any operation fails
             - Context matching prevents positioning errors
+            - Type checking with ty in strict mode before confirming success
 
         Copywritings:
             Replace code sections using exact context matching
             Performing atomic context-based code replacements...
         """
+
         file_path = Settings.root_path.joinpath(file)
         if not file_path.is_file():
             raise Exception(f"File {file} does not exist")
@@ -733,6 +737,24 @@ class MainController:
             temp_file.write_text(modified_content, encoding="utf-8")
             move(str(temp_file), str(file_path))
 
+            type_check_result = code_check(file_path)
+
+            if not type_check_result.success:
+                all_errors = ""
+                if type_check_result.stdout:
+                    all_errors += type_check_result.stdout
+                if type_check_result.stderr:
+                    if all_errors:
+                        all_errors += "\n"
+                    all_errors += type_check_result.stderr
+
+                return {
+                    "success": False,
+                    "file": file,
+                    "total_operations": len(replacements),
+                    "observation": f"Type checking failed:\n{all_errors}",
+                }
+
             return {
                 "success": True,
                 "file": file,
@@ -740,6 +762,7 @@ class MainController:
             }
 
         except Exception as e:
+            print(f"[DEBUG] Exception during replacement: {type(e).__name__}: {str(e)}")
             raise Exception(f"Atomic context replacement failed: {str(e)}")
 
     def replace_file_content(self, file: str, content: str):
@@ -807,6 +830,25 @@ class MainController:
             with temp_file.open("w", encoding="utf-8") as f:
                 f.write(content)
             move(str(temp_file), Settings.root_path.joinpath(file))
+
+            if temp_file.suffix == ".py":
+                type_check_result = code_check(Settings.root_path.joinpath(file))
+
+                if not type_check_result.success:
+                    all_errors = ""
+                    if type_check_result.stdout:
+                        all_errors += type_check_result.stdout
+                    if type_check_result.stderr:
+                        if all_errors:
+                            all_errors += "\n"
+                        all_errors += type_check_result.stderr
+
+                    return {
+                        "success": False,
+                        "file": file,
+                        "observation": f"Type checking failed:\n{all_errors}",
+                    }
+
             return {"success": True}
         except Exception as e:
             raise Exception(f"File content replacement failed: {str(e)}")
