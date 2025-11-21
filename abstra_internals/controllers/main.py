@@ -157,9 +157,19 @@ class MainController:
 
         deploy_without_git()
 
-    def reset_repositories(self):
+    def reset_execution_repository(self):
         self.execution_repository.clear()
+
+    def reset_execution_logs_repository(self):
+        self.execution_logs_repository.clear()
+
+    def reset_tasks_repository(self):
         self.tasks_repository.clear()
+
+    def reset_repositories(self):
+        self.reset_execution_logs_repository()
+        self.reset_execution_repository()
+        self.reset_tasks_repository()
 
     def get_workspace(self) -> StyleSettingsWithSidebar:
         project = self.repositories.project.load()

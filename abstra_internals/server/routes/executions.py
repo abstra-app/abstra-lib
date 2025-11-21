@@ -26,4 +26,11 @@ def get_editor_bp(controller: MainController):
         tasks = controller.get_execution_tasks(execution_id)
         return tasks.dump()
 
+    @bp.delete("/clear")
+    @editor_usage
+    def _clear_executions():
+        controller.reset_execution_repository()
+        controller.reset_execution_logs_repository()
+        return {}, 204
+
     return bp

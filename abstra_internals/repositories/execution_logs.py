@@ -87,6 +87,10 @@ class ExecutionLogsRepository(ABC):
     ) -> List[LogEntry]:
         raise NotImplementedError()
 
+    @abstractmethod
+    def clear(self):
+        raise NotImplementedError()
+
 
 class LocalExecutionLogsRepository(ExecutionLogsRepository):
     def __init__(self):
@@ -129,6 +133,13 @@ class LocalExecutionLogsRepository(ExecutionLogsRepository):
             AbstraLogger.capture_exception(e)
             return []
 
+    def clear(self):
+        log_dir = Path(LOCAL_LOGS_DIR_PATH)
+        if log_dir.exists() and log_dir.is_dir():
+            for log_file in log_dir.iterdir():
+                if log_file.is_file():
+                    log_file.unlink()
+
 
 class ProductionExecutionLogsRepository(ExecutionLogsRepository):
     def __init__(self, client: "HTTPClient"):
@@ -152,3 +163,6 @@ class ProductionExecutionLogsRepository(ExecutionLogsRepository):
         response.raise_for_status()
 
         return [LogEntry.from_dto(log) for log in response.json()]
+
+    def clear(self):
+        raise NotImplementedError()
