@@ -231,45 +231,170 @@ class MainController:
         project = self.repositories.project.load()
         return project.get_stage(id)
 
-    def read_stage_file(self, id: str) -> Optional[str]:
+    def _read_file_lines_with_pagination(
+        self,
+        file_path: Path,
+        start_line: Optional[int],
+        end_line: Optional[int],
+        max_lines: int,
+    ) -> Optional[Dict[str, Any]]:
         """
-        Read the source code of a stage's file.
+        Private helper method to read file lines with pagination support.
+
+        This method contains the common pagination logic used by both
+        read_stage_file_with_pagination and read_file_with_pagination.
+
+        Args:
+            file_path (Path): Absolute path to the file to read.
+            start_line (Optional[int]): 1-indexed line number to start reading from.
+            end_line (Optional[int]): 1-indexed line number to stop reading at (inclusive).
+            max_lines (int): Maximum number of lines to return in a single call.
+
+        Returns:
+            dict | None: Dictionary containing file content and metadata, or None if file cannot be read.
+        """
+        if not file_path.is_file():
+            return None
+
+        # First pass: count total lines without loading into memory
+        try:
+            with file_path.open("r", encoding="utf-8") as f:
+                total_lines = sum(1 for _ in f)
+        except (IOError, OSError) as e:
+            AbstraLogger.error(f"Failed to read file {file_path}: {e}")
+            return None
+        except UnicodeDecodeError as e:
+            AbstraLogger.error(f"Failed to decode file {file_path}: {e}")
+            return None
+
+        # Determine actual range to read
+        actual_start = max(1, start_line or 1)
+        actual_end = min(total_lines, end_line or total_lines)
+
+        # Handle edge case where start_line exceeds total_lines
+        if actual_start > total_lines:
+            return {
+                "content": "",
+                "start_line": actual_start,
+                "end_line": actual_start - 1,
+                "total_lines": total_lines,
+                "has_more": False,
+                "truncated": False,
+            }
+
+        # Apply max_lines limit
+        truncated = False
+        if actual_end - actual_start + 1 > max_lines:
+            actual_end = actual_start + max_lines - 1
+            truncated = True
+
+        # Second pass: read only the required line range using itertools.islice
+        from itertools import islice
+
+        try:
+            with file_path.open("r", encoding="utf-8") as f:
+                # Skip lines before start (0-indexed), then take the range we need
+                start_idx = actual_start - 1
+                num_lines = actual_end - actual_start + 1
+                content_lines = list(islice(f, start_idx, start_idx + num_lines))
+                content = "".join(content_lines)
+        except (IOError, OSError) as e:
+            AbstraLogger.error(f"Failed to read file {file_path}: {e}")
+            return None
+        except UnicodeDecodeError as e:
+            AbstraLogger.error(f"Failed to decode file {file_path}: {e}")
+            return None
+
+        return {
+            "content": content,
+            "start_line": actual_start,
+            "end_line": actual_end,
+            "total_lines": total_lines,
+            "has_more": actual_end < total_lines,
+            "truncated": truncated,
+        }
+
+    def read_stage_file_with_pagination(
+        self,
+        id: str,
+        start_line: Optional[int] = None,
+        end_line: Optional[int] = None,
+        max_lines: int = 500,
+    ):
+        """
+        Read the source code of a stage's file with pagination support.
 
         This method retrieves the content of the file associated with a specific
-        workflow stage by its ID. It returns the file content as a string if the
-        stage exists and has an associated file.
+        workflow stage by its ID. It supports reading specific line ranges to handle
+        large files efficiently without consuming excessive context window space.
 
         Args:
             id (str): Unique identifier of the stage whose file to read.
+            start_line (Optional[int]): 1-indexed line number to start reading from.
+                If None, starts from the beginning. Defaults to None.
+            end_line (Optional[int]): 1-indexed line number to stop reading at (inclusive).
+                If None, reads until max_lines is reached. Defaults to None.
+            max_lines (int): Maximum number of lines to return in a single call.
+                Prevents context overflow for large files. Defaults to 500.
 
         Returns:
-            Optional[str]: The content of the stage's file if it exists, None otherwise.
+            dict | None: Dictionary containing file content and metadata if the stage exists:
+                - content (str): The file content as a string
+                - start_line (int): Actual starting line number (1-indexed)
+                - end_line (int): Actual ending line number (1-indexed)
+                - total_lines (int): Total number of lines in the file
+                - has_more (bool): Whether there are more lines after end_line
+                - truncated (bool): Whether the result was limited by max_lines
+                Returns None if the stage doesn't exist or has no associated file.
 
         Example:
             ```python
             controller = MainController(repositories)
 
-            # Read the source code of a specific stage
-            code = controller.read_stage_file("script-456")
-            if code:
-                print("Stage file content:")
-                print(code)
-            else:
-                print("Stage file not found or has no associated file")
+            # Read entire small stage file
+            result = controller.read_stage_file_with_pagination("script-456")
+            if result:
+                print(result["content"])
+                print(f"File has {result['total_lines']} lines")
+
+            # Read first 200 lines of a large stage file
+            result = controller.read_stage_file_with_pagination("form-123", start_line=1, end_line=200)
+            if result:
+                print(result["content"])
+                if result["has_more"]:
+                    print("Stage file has more content...")
+
+            # Read specific lines 50-250
+            result = controller.read_stage_file_with_pagination("hook-789", start_line=50, end_line=250)
+
+            # Read with automatic pagination
+            result = controller.read_stage_file_with_pagination("job-321", max_lines=500)
+            if result and result["truncated"]:
+                next_result = controller.read_stage_file_with_pagination(
+                    "job-321",
+                    start_line=result["end_line"] + 1,
+                    max_lines=500
+                )
             ```
 
         Note:
             - Returns None if the stage does not exist or has no file
             - The ID is case-sensitive and must match exactly
+            - Line numbers are 1-indexed (first line is 1, not 0)
+            - Automatic truncation at max_lines prevents context overflow
+            - For files with more than max_lines, use pagination to read chunks
 
         Copywritings:
-            Read the source code of a stage's file
-            Reading the source code of a stage's file...
+            Read stage file with pagination
+            Reading stage file with pagination support...
         """
         stage = self.get_stage(id)
-        if isinstance(stage, StageWithFile):
-            return stage.file_path.read_text()
-        return None
+        if not isinstance(stage, StageWithFile):
+            return None
+
+        return self._read_file_lines_with_pagination(
+            stage.file_path, start_line, end_line, max_lines
+        )
 
     def get_async_stage_ids(self):
         project = self.repositories.project.load()
@@ -359,6 +484,88 @@ class MainController:
         if not file_path.is_file():
             return None
         return Settings.root_path.joinpath(file).read_text(encoding="utf-8")
+
+    def read_file_with_pagination(
+        self,
+        file: str,
+        start_line: Optional[int] = None,
+        end_line: Optional[int] = None,
+        max_lines: int = 500,
+    ):
+        """
+        Read the contents of a file from the project workspace with pagination support.
+
+        This method reads and returns the text content of a file within the project
+        directory. It supports reading specific line ranges to handle large files efficiently
+        without consuming excessive context window space.
+
+        Args:
+            file (str): Relative path to the file from the project root directory.
+                Should include the file extension.
+            start_line (Optional[int]): 1-indexed line number to start reading from.
+                If None, starts from the beginning. Defaults to None.
+            end_line (Optional[int]): 1-indexed line number to stop reading at (inclusive).
+                If None, reads until max_lines is reached. Defaults to None.
+            max_lines (int): Maximum number of lines to return in a single call.
+                Prevents context overflow for large files. Defaults to 500.
+
+        Returns:
+            dict | None: Dictionary containing file content and metadata if the file exists:
+                - content (str): The file content as a string
+                - start_line (int): Actual starting line number (1-indexed)
+                - end_line (int): Actual ending line number (1-indexed)
+                - total_lines (int): Total number of lines in the file
+                - has_more (bool): Whether there are more lines after end_line
+                - truncated (bool): Whether the result was limited by max_lines
+                Returns None if the file doesn't exist or is not a regular file.
+
+        Example:
+            ```python
+            controller = MainController(repositories)
+
+            # Read entire small file
+            result = controller.read_file_with_pagination("config.json")
+            if result:
+                print(result["content"])
+                print(f"File has {result['total_lines']} lines")
+
+            # Read first 200 lines of a large file
+            result = controller.read_file_with_pagination("large_log.txt", start_line=1, end_line=200)
+            if result:
+                print(result["content"])
+                if result["has_more"]:
+                    print("File has more content...")
+
+            # Read lines 500-900
+            result = controller.read_file_with_pagination("data.py", start_line=500, end_line=900)
+
+            # Read with automatic pagination (max_lines limit)
+            result = controller.read_file_with_pagination("huge_file.csv", max_lines=500)
+            if result and result["truncated"]:
+                next_result = controller.read_file_with_pagination(
+                    "huge_file.csv",
+                    start_line=result["end_line"] + 1,
+                    max_lines=500
+                )
+            ```
+
+        Note:
+            - Files are read with UTF-8 encoding
+            - Path should be relative to the project root directory
+            - Returns None for directories, non-existent files, or unreadable files
+            - Line numbers are 1-indexed (first line is 1, not 0)
+            - If start_line > total lines, returns empty content with metadata
+            - Automatic truncation at max_lines prevents context overflow
+            - For files with more than max_lines, use pagination to read chunks
+
+        Copywritings:
+            Read file contents with pagination
+            Reading file contents with pagination support...
+        """
+        file_path = Settings.root_path.joinpath(file)
+        return self._read_file_lines_with_pagination(
+            file_path, start_line, end_line, max_lines
+        )
 
     def check_file_exists(self, file_path: str):
         """
@@ -647,6 +854,187 @@ class MainController:
         return FileSystemService.search_in_files(
             Settings.root_path, query, glob, use_ignore=True
         )
+
+    def search_file_with_context(
+        self,
+        file: str,
+        pattern: str,
+        context_lines: int = 5,
+        case_sensitive: bool = True,
+        max_matches: int = 50,
+    ):
+        """
+        Search for a pattern in a file and return matches with surrounding context lines.
+
+        This method searches for a regex pattern in a file and returns matching lines
+        along with configurable context lines before and after each match. This is
+        similar to grep with -C option and is ideal for large files where you need
+        to find specific patterns without loading the entire file into context.
+
+        Args:
+            file (str): Relative path to the file from the project root directory.
+            pattern (str): Regular expression pattern to search for.
+            context_lines (int): Number of lines to include before and after each match.
+                Defaults to 5.
+            case_sensitive (bool): Whether the search should be case-sensitive.
+                Defaults to True.
+            max_matches (int): Maximum number of matches to return to prevent
+                context overflow. Defaults to 50.
+
+        Returns:
+            dict | None: Dictionary containing search results if the file exists:
+                - file (str): The file path that was searched
+                - total_lines (int): Total number of lines in the file
+                - total_matches (int): Total number of matches found
+                - matches_returned (int): Number of matches included (limited by max_matches)
+                - truncated (bool): Whether results were limited by max_matches
+                - matches (List[dict]): List of match objects, each containing:
+                    - match_line (int): Line number where pattern was found (1-indexed)
+                    - match_text (str): The actual line containing the match
+                    - start_line (int): First line of context (1-indexed)
+                    - end_line (int): Last line of context (1-indexed)
+                    - context (str): The matched line with surrounding context
+                Returns None if the file doesn't exist or is not readable.
+
+        Example:
+            ```python
+            controller = MainController(repositories)
+
+            # Search for function definitions with context
+            result = controller.search_file_with_context(
+                "utils.py",
+                r"def \\w+\\(",
+                context_lines=3
+            )
+            if result:
+                print(f"Found {result['total_matches']} matches in {result['file']}")
+                for match in result["matches"]:
+                    print(f"\nMatch at line {match['match_line']}:")
+                    print(match["context"])
+                    print("-" * 40)
+
+            # Case-insensitive search for error handling
+            result = controller.search_file_with_context(
+                "app.py",
+                r"error|exception|fail",
+                context_lines=5,
+                case_sensitive=False
+            )
+
+            # Search for specific class with 10 lines of context
+            result = controller.search_file_with_context(
+                "models.py",
+                r"class UserModel",
+                context_lines=10,
+                max_matches=10
+            )
+
+            # Search imports in a large file
+            result = controller.search_file_with_context(
+                "main.py",
+                r"^import |^from .* import",
+                context_lines=0  # Just the matching lines
+            )
+            ```
+
+        Note:
+            - Pattern uses Python regex syntax (re module)
+            - Context windows may overlap for nearby matches
+            - Line numbers are 1-indexed (first line is 1, not 0)
+            - Returns None for non-existent or unreadable files
+            - Ideal for finding specific code patterns in large files
+            - Much more efficient than reading entire file when searching
+            - Use max_matches to control context window usage
+
+        Copywritings:
+            Search file with context lines
+            Searching file for pattern with context...
+        """
+        import re
+
+        file_path = Settings.root_path.joinpath(file)
+        if not file_path.is_file():
+            return None
+
+        # Compile regex pattern
+        flags = 0 if case_sensitive else re.IGNORECASE
+        try:
+            regex = re.compile(pattern, flags)
+        except re.error as e:
+            AbstraLogger.error(f"Invalid regex pattern '{pattern}': {e}")
+            return None
+
+        # First pass: find matching lines and count total without loading all into memory
+        matches = []
+        total_lines = 0
+        try:
+            with file_path.open("r", encoding="utf-8") as f:
+                for line_num, line in enumerate(f, start=1):
+                    total_lines = line_num
+                    if regex.search(line):
+                        matches.append((line_num, line))
+                        # Early exit if we have enough matches for return
+                        if len(matches) > max_matches + 100:  # Keep some buffer
+                            break
+        except (IOError, OSError) as e:
+            AbstraLogger.error(f"Failed to read file {file_path}: {e}")
+            return None
+        except UnicodeDecodeError as e:
+            AbstraLogger.error(f"Failed to decode file {file_path}: {e}")
+            return None
+
+        # If we stopped early, count remaining lines
+        if len(matches) > max_matches + 100:
+            try:
+                with file_path.open("r", encoding="utf-8") as f:
+                    total_lines = sum(1 for _ in f)
+            except (IOError, OSError, UnicodeDecodeError):
+                pass  # Use the line count we have
+
+        total_matches = len(matches)
+        truncated = total_matches > max_matches
+        matches_to_return = matches[:max_matches]
+
+        # Build context for each match (need to re-read relevant sections)
+        from itertools import islice
+
+        result_matches = []
+        for match_line, match_text in matches_to_return:
+            # Calculate context range
+            start_line = max(1, match_line - context_lines)
+            end_line = min(total_lines, match_line + context_lines)
+
+            # Read only the context lines needed
+            try:
+                with file_path.open("r", encoding="utf-8") as f:
+                    start_idx = start_line - 1
+                    num_lines = end_line - start_line + 1
+                    context_lines_list = list(
+                        islice(f, start_idx, start_idx + num_lines)
+                    )
+                    context = "".join(context_lines_list)
+            except (IOError, OSError, UnicodeDecodeError) as e:
+                AbstraLogger.error(f"Failed to read context for {file_path}: {e}")
+                context = match_text
+
+            result_matches.append(
+                {
+                    "match_line": match_line,
+                    "match_text": match_text.rstrip("\n"),
+                    "start_line": start_line,
+                    "end_line": end_line,
+                    "context": context,
+                }
+            )
+
+        return {
+            "file": file,
+            "total_lines": total_lines,
+            "total_matches": total_matches,
+            "matches_returned": len(result_matches),
+            "truncated": truncated,
+            "matches": result_matches,
+        }
 
     def replace_code_context(self, file: str, replacements: List[Dict[str, str]]):
         """
