@@ -661,6 +661,9 @@ class NativeGitRepository(GitRepositoryInterface):
         if not self.is_git_repository():
             return False, "Not a git repository"
 
+        if self.get_current_branch() != "main":
+            return False, "Deployments are only allowed from the 'main' branch"
+
         if not self.has_remote(REMOTE_NAME):
             return False, "Abstra Remote not found"
 
