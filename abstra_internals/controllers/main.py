@@ -1147,10 +1147,10 @@ class MainController:
                     all_errors += type_check_result.stderr
 
                 return {
-                    "success": False,
+                    "success": True,
                     "file": file,
                     "total_operations": len(replacements),
-                    "observation": f"Type checking failed:\n{all_errors}",
+                    "warning": f"Type checking failed:\n{all_errors}\n\nPlease review the changes made and double check the correct usage of Abstra SDK functions and classes.",
                 }
 
             return {
@@ -1242,12 +1242,12 @@ class MainController:
                         all_errors += type_check_result.stderr
 
                     return {
-                        "success": False,
+                        "success": True,
                         "file": file,
-                        "observation": f"Type checking failed:\n{all_errors}",
+                        "warning": f"Type checking failed:\n{all_errors}\n\nPlease review the changes made and double check the correct usage of Abstra SDK functions and classes.",
                     }
 
-            return {"success": True}
+            return {"success": True, "file": file}
         except Exception as e:
             raise Exception(f"File content replacement failed: {str(e)}")
 
