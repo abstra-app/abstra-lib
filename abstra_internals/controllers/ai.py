@@ -179,6 +179,7 @@ class AiController:
                     secret_key=get_tunnel_secret_key(),
                     tunnel_session_path=get_session_path(),
                     human_approval=body.human_approval,
+                    tool_calls_approval=body.tool_calls_approval,
                 )
             )
         except Exception as e:
