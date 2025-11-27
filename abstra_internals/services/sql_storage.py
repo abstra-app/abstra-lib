@@ -1,4 +1,5 @@
 import json
+import shutil
 import threading
 from pathlib import Path
 from typing import Generic, List, Optional, Type, TypeVar
@@ -197,6 +198,8 @@ class SqlStorage(Generic[T]):
                     ctx={},
                 )
             except Exception as e:
+                shutil.rmtree(self.directory_path, ignore_errors=True)
+                self._tables_instance = None
                 AbstraLogger.capture_exception(e)
 
     def _deserialize_row(self, row: dict) -> dict:
