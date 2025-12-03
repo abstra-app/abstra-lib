@@ -1120,22 +1120,23 @@ class MainController:
             Performing atomic context-based code replacements...
         """
 
-        file_path = Settings.root_path.joinpath(file)
-        if not file_path.is_file():
+        original_file_path = Settings.root_path.joinpath(file)
+        if not original_file_path.is_file():
             raise Exception(f"File {file} does not exist")
 
-        original_content = file_path.read_text(encoding="utf-8")
+        original_content = original_file_path.read_text(encoding="utf-8")
 
         try:
             modified_content = compute_updated_code_from_replacements(
                 original_content, replacements
             )
 
-            temp_file = Path(mkdtemp()) / file_path.name
+            temp_file = Path(mkdtemp()) / file
+            temp_file.parent.mkdir(parents=True, exist_ok=True)
             temp_file.write_text(modified_content, encoding="utf-8")
-            move(str(temp_file), str(file_path))
+            move(str(temp_file), str(original_file_path))
 
-            type_check_result = code_check(file_path)
+            type_check_result = code_check(original_file_path)
 
             if not type_check_result.success:
                 all_errors = ""
@@ -1225,12 +1226,17 @@ class MainController:
         """
         try:
             temp_file = Path(mkdtemp()) / file
+            temp_file.parent.mkdir(parents=True, exist_ok=True)
+
+            original_file_path = Settings.root_path.joinpath(file)
+            original_file_path.parent.mkdir(parents=True, exist_ok=True)
+
             with temp_file.open("w", encoding="utf-8") as f:
                 f.write(content)
-            move(str(temp_file), Settings.root_path.joinpath(file))
+            move(str(temp_file), str(original_file_path))
 
             if temp_file.suffix == ".py":
-                type_check_result = code_check(Settings.root_path.joinpath(file))
+                type_check_result = code_check(original_file_path)
 
                 if not type_check_result.success:
                     all_errors = ""
