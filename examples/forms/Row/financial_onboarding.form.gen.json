@@ -1,0 +1,133 @@
+{
+    "type": "form:render",
+    "widgets": [
+        {
+            "type": "image-output",
+            "imageUrl": "https://www.abstra.io/favicon-32x32.png",
+            "subtitle": "",
+            "fullWidth": false,
+            "label": ""
+        },
+        {
+            "type": "text-output",
+            "text": "# Welcome to Abstra Financial Automation!",
+            "size": "medium",
+            "fullWidth": false
+        },
+        {
+            "type": "text-output",
+            "text": "Please provide some details to help us tailor your experience.",
+            "size": "medium",
+            "fullWidth": false
+        },
+        {
+            "type": "row",
+            "key": "__spreaded_user_name_row_user_email",
+            "widgets": [
+                {
+                    "type": "text-input",
+                    "key": "user_name",
+                    "label": "Your Name",
+                    "value": "",
+                    "placeholder": "John Doe",
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "mask": null,
+                    "maxLength": null,
+                    "minLength": null,
+                    "disabled": false,
+                    "errors": [
+                        "i18n_error_required_field"
+                    ]
+                },
+                {
+                    "type": "email-input",
+                    "key": "user_email",
+                    "label": "Your Email",
+                    "value": "",
+                    "placeholder": "john.doe@example.com",
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "disabled": false,
+                    "errors": [
+                        "i18n_error_required_field",
+                        "i18n_error_invalid_email"
+                    ]
+                }
+            ],
+            "value": {
+                "user_name": "",
+                "user_email": ""
+            },
+            "errors": []
+        },
+        {
+            "type": "text-output",
+            "text": "",
+            "size": "medium",
+            "fullWidth": false
+        },
+        {
+            "type": "row",
+            "key": "__spreaded_ai_interest_rating_row_automation_area",
+            "widgets": [
+                {
+                    "type": "rating-input",
+                    "key": "ai_interest_rating",
+                    "label": "How would you rate your interest in AI-powered financial automation?",
+                    "value": 0,
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "max": 5,
+                    "char": "\u2b50\ufe0f",
+                    "disabled": false,
+                    "errors": []
+                },
+                {
+                    "type": "text-input",
+                    "key": "automation_area",
+                    "label": "Any specific area you'd like to automate?",
+                    "value": "",
+                    "placeholder": "e.g., invoice processing, expense tracking",
+                    "required": true,
+                    "hint": null,
+                    "fullWidth": false,
+                    "mask": null,
+                    "maxLength": null,
+                    "minLength": null,
+                    "disabled": false,
+                    "errors": [
+                        "i18n_error_required_field"
+                    ]
+                }
+            ],
+            "value": {
+                "ai_interest_rating": 0,
+                "automation_area": ""
+            },
+            "errors": []
+        },
+        {
+            "type": "text-output",
+            "text": "Current Form State: {}",
+            "size": "medium",
+            "fullWidth": false
+        }
+    ],
+    "stepsInfo": {
+        "current": 1,
+        "total": 1,
+        "disabled": true
+    },
+    "endPage": false,
+    "seq": 0,
+    "actions": [
+        {
+            "key": "i18n_next_action",
+            "label": "i18n_next_action"
+        }
+    ]
+}

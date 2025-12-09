@@ -81,6 +81,21 @@
       "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsBoletoResponse",
       "examples": []
     },
+    "parse_invoice": {
+      "object_type": "function",
+      "description": "Parse an invoice document using AI-powered OCR to extract comprehensive invoice information including supplier and receiver details, financial data, shipping information, and line items. The parser extracts 35+ fields including: **Supplier Information:** - supplier_name: Name of the supplier/vendor - supplier_address: Supplier's full address - supplier_email: Supplier's email address - supplier_phone: Supplier's phone number - supplier_tax_id: Supplier's tax identification number - supplier_registration: Supplier's registration number - supplier_iban: Supplier's IBAN for payments - supplier_payment_ref: Payment reference number - supplier_website: Supplier's website URL **Receiver Information:** - receiver_name: Name of the receiver/customer - receiver_address: Receiver's full address - receiver_email: Receiver's email address - receiver_phone: Receiver's phone number - receiver_tax_id: Receiver's tax identification number - receiver_website: Receiver's website URL **Financial Information:** - invoice_id: Invoice number/identifier - invoice_date: Date the invoice was issued - due_date: Payment due date - total_amount: Total invoice amount - net_amount: Net amount (after tax/discount) - total_tax_amount: Total tax amount - freight_amount: Freight/shipping cost - amount_paid_since_last_invoice: Amount paid since last invoice - currency: Currency code (e.g., USD, EUR, BRL) - currency_exchange_rate: Exchange rate if applicable - payment_terms: Payment terms and conditions **Shipping Information:** - ship_from_name: Ship-from party name - ship_from_address: Ship-from address - ship_to_name: Ship-to party name - ship_to_address: Ship-to destination address - remit_to_name: Remit-to party name - remit_to_address: Remit-to address for payment - carrier: Shipping carrier name - delivery_date: Expected or actual delivery date **Other Information:** - purchase_order: Purchase order number reference",
+      "params": [
+        {
+          "name": "document_path",
+          "type": "Union[Path, str]",
+          "description": "The path to the invoice document to be parsed. dict: The parsed invoice data. ValueError: If document path is invalid or parsing fails.",
+          "default": "None",
+          "required": true
+        }
+      ],
+      "return_type": "abstra_internals.contracts_generated.CloudApiCliModelsInvoiceResponse",
+      "examples": []
+    },
     "parse_us_driver_license": {
       "object_type": "function",
       "description": "Parse a US Driver License document using AI-powered OCR to extract personal information and license details. The parser extracts key information including: - Personal details (name, date of birth, address) - License information (license number, class, expiration date) - Physical characteristics (height, weight, eye color) - Address information (street, city, state, zip code) - Endorsements and restrictions",
@@ -5284,57 +5299,6 @@
                             "type": "contour"
                           }
                         ],
-                        "heatmapgl": [
-                          {
-                            "colorbar": {
-                              "outlinewidth": 0,
-                              "ticks": ""
-                            },
-                            "colorscale": [
-                              [
-                                0.0,
-                                "#0d0887"
-                              ],
-                              [
-                                0.1111111111111111,
-                                "#46039f"
-                              ],
-                              [
-                                0.2222222222222222,
-                                "#7201a8"
-                              ],
-                              [
-                                0.3333333333333333,
-                                "#9c179e"
-                              ],
-                              [
-                                0.4444444444444444,
-                                "#bd3786"
-                              ],
-                              [
-                                0.5555555555555556,
-                                "#d8576b"
-                              ],
-                              [
-                                0.6666666666666666,
-                                "#ed7953"
-                              ],
-                              [
-                                0.7777777777777778,
-                                "#fb9f3a"
-                              ],
-                              [
-                                0.8888888888888888,
-                                "#fdca26"
-                              ],
-                              [
-                                1.0,
-                                "#f0f921"
-                              ]
-                            ],
-                            "type": "heatmapgl"
-                          }
-                        ],
                         "heatmap": [
                           {
                             "colorbar": {
@@ -5585,6 +5549,17 @@
                               }
                             },
                             "type": "scattermapbox"
+                          }
+                        ],
+                        "scattermap": [
+                          {
+                            "marker": {
+                              "colorbar": {
+                                "outlinewidth": 0,
+                                "ticks": ""
+                              }
+                            },
+                            "type": "scattermap"
                           }
                         ],
                         "scatterpolargl": [
@@ -6290,6 +6265,47 @@
           }
         }
       ]
+    },
+    "Row": {
+      "object_type": "class",
+      "description": "Creates a horizontal layout for organizing other widgets side-by-side.",
+      "init": {
+        "params": [
+          {
+            "name": "widgets",
+            "type": "Template",
+            "description": "A list of widgets to display horizontally in this row.",
+            "default": "None",
+            "required": true
+          },
+          {
+            "name": "key",
+            "type": "Optional[str]",
+            "description": "An optional key to identify this row. If not provided, one will be generated.",
+            "default": "None",
+            "required": false
+          },
+          {
+            "name": "errors",
+            "type": "List[str]",
+            "description": "A list of error messages to start with. Defaults to [].",
+            "default": "[]",
+            "required": false
+          }
+        ]
+      },
+      "properties": {
+        "value": {
+          "name": "value",
+          "type": "Dict[str, State]",
+          "description": "A dictionary containing the current state/values of the nested widgets."
+        }
+      },
+      "parent_classes": [
+        "InputWidget",
+        "Widget"
+      ],
+      "examples": []
     },
     "TagInput": {
       "object_type": "class",

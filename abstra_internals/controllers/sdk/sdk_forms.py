@@ -1,10 +1,7 @@
 import sys
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from abstra_internals.entities.forms.form_entity import (
-    FormEntity,
-    Step,
-)
+from abstra_internals.entities.forms.form_entity import FormEntity, Step
 from abstra_internals.entities.forms.form_state import State
 from abstra_internals.environment import IS_DEVELOPMENT
 from abstra_internals.interface.contract.forms_contract import (

@@ -33,7 +33,6 @@ class CardsInput(InputWidget):
     value: Union[List[CardOption], CardOption, None]
     multiple: bool = False
     multiple_handler: MultipleHandler
-    value: Union[List[CardOption], CardOption, None]
 
     def __init__(
         self,
@@ -71,6 +70,7 @@ class CardsInput(InputWidget):
             max (Optional[int]): Maximum number of cards that can be selected when multiple=True.
             errors (Optional[Union[List[str], str]]): Pre-defined validation error messages to display.
         """
+
         self.label = label
         self.key = key or label
         self.options = [

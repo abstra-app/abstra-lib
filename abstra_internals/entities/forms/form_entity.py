@@ -1,8 +1,6 @@
 from typing import List, Optional, TypedDict
 
-from abstra_internals.entities.forms.form_state import (
-    State,
-)
+from abstra_internals.entities.forms.form_state import State
 from abstra_internals.entities.forms.steps import (
     ComputationStep,
     EndPageStep,
