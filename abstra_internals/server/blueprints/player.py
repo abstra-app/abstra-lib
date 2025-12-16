@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 
 import flask
 import flask_sock
@@ -129,7 +130,7 @@ def get_player_bp(controller: MainController):
                 stage=form,
                 client=client,
                 context=context,
-            ).run()
+            ).run(execution_id=uuid4().__str__())
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
@@ -215,7 +216,7 @@ def get_player_bp(controller: MainController):
             stage=hook,
             client=client,
             context=context,
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
         if not context.response or not client.context.response:
             flask.abort(500)

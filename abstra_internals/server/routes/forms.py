@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import flask
 import flask_sock
 
@@ -40,7 +42,7 @@ def get_editor_bp(controller: MainController):
                 stage=form,
                 client=client,
                 context=context,
-            ).run()
+            ).run(execution_id=uuid4().__str__())
 
         except Exception as e:
             AbstraLogger.capture_exception(e)

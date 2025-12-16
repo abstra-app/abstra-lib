@@ -3,7 +3,7 @@ import unittest
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import requests
 
@@ -60,6 +60,7 @@ class TestTables(BaseTest):
             production_mode=False,
         )
         execution = Execution.create(
+            id=uuid4().__str__(),
             context=context,
             stage_id="mock_stage_id",
         )

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from abstra.forms import ListItemSchema, Page
 from abstra_internals.controllers.execution.execution_client_form import FormClient
 from abstra_internals.controllers.sdk.sdk_context import (
@@ -21,6 +23,7 @@ class TestPage(BaseTest):
             ws=None,  # type: ignore
         )
         execution = Execution.create(
+            id=uuid4().__str__(),
             context=form_context,
             stage_id="mock_stage_id",
         )

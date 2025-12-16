@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 
 from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.execution.execution_client_hook import HookClient
@@ -47,7 +48,7 @@ class ExecutionControllerTest(BaseTest):
             stage=self.stage,
             context=self.context,
             client=self.hook_client,
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
         if not self.context.response:
             self.fail("Response was not set")

@@ -4,6 +4,7 @@ from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp, mktemp
 from typing import Any, Dict, List, Literal, Optional, Tuple
+from uuid import uuid4
 
 import flask
 
@@ -2043,7 +2044,7 @@ class MainController:
             repositories=self.repositories,
             stage=job,
             context=JobContext(),
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
     def debug_run_hook(self, id: str, request: Request):
         """
@@ -2083,7 +2084,7 @@ class MainController:
             stage=hook,
             client=client,
             context=context,
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
         if context.response is None or client.context.response is None:
             flask.abort(500)
@@ -2125,7 +2126,7 @@ class MainController:
             repositories=self.repositories,
             stage=script,
             context=ScriptContext(task_id=task_id),
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
     def debug_run_form_with_ai(self, id, prompt: str, url_params: Dict[str, str] = {}):
         """
@@ -2160,7 +2161,7 @@ class MainController:
             stage=form,
             client=client,
             context=context,
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
     def execute_code_snippet(self, code: str, title: str = "Debug Snippet"):
         """
@@ -2178,7 +2179,7 @@ class MainController:
             repositories=self.repositories,
             stage=stage,
             context=JobContext(),
-        ).run()
+        ).run(execution_id=uuid4().__str__())
 
         self.delete_stage(stage.id, remove_file=True)
 

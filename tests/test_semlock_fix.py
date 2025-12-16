@@ -3,6 +3,7 @@ import time
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
+from uuid import uuid4
 
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import (
@@ -34,6 +35,7 @@ def child_process_main(stage: FakeStage, root_path: str):
 
     # Try to create an execution (write to SqlStorage)
     execution = Execution.create(
+        id=uuid4().__str__(),
         stage_id=stage.id,
         context=FormContext(
             request=Request(

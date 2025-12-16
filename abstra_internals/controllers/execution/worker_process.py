@@ -2,6 +2,7 @@ import threading
 import traceback
 from multiprocessing import Queue
 from typing import Optional
+from uuid import uuid4
 
 from abstra_internals.controllers.execution.execution import ExecutionController
 from abstra_internals.controllers.main import MainController
@@ -56,7 +57,9 @@ def process_main(
             stage=stage,
             client=None,
             context=request,
-        ).run()
+        ).run(
+            execution_id=uuid4().__str__(),
+        )
 
         AbstraLogger.debug("[ConsumerController Subprocess] Finished")
     except Exception as e:

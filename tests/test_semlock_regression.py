@@ -3,6 +3,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from uuid import uuid4
 
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import (
@@ -17,6 +18,7 @@ from abstra_internals.settings import Settings
 
 def create_execution(stage_id: str):
     return Execution.create(
+        id=uuid4().__str__(),
         stage_id=stage_id,
         context=ScriptContext(
             task_id="test",

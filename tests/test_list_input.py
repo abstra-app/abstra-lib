@@ -1,4 +1,5 @@
 from unittest.mock import ANY
+from uuid import uuid4
 
 from abstra.forms import ListItemSchema, Page
 from abstra_internals.controllers.execution.execution_client_form import FormClient
@@ -40,6 +41,7 @@ class TestListInput(BaseTest):
             ws=None,  # type: ignore
         )
         execution = Execution.create(
+            id=uuid4().__str__(),
             context=context,
             stage_id="mock_stage_id",
         )

@@ -1,5 +1,6 @@
 from datetime import datetime
 from unittest import TestCase
+from uuid import uuid4
 
 from abstra_internals.entities.execution import Execution
 from abstra_internals.entities.execution_context import HookContext, Request, Response
@@ -29,7 +30,7 @@ class ExecutionTest(TestCase):
         )
 
         execution: Execution[HookContext] = Execution.create(
-            stage_id=mock_stage.id, context=context
+            id=uuid4().__str__(), stage_id=mock_stage.id, context=context
         )
 
         dto = execution.dump()
@@ -62,7 +63,7 @@ class ExecutionTest(TestCase):
         )
 
         execution: Execution[HookContext] = Execution.create(
-            stage_id=mock_stage.id, context=context
+            id=uuid4().__str__(), stage_id=mock_stage.id, context=context
         )
 
         dto = execution.dump()

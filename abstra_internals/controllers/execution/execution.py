@@ -38,8 +38,9 @@ class ExecutionController:
         self.client = client or HeadlessClient()
         self.context = context
 
-    def run(self):
+    def run(self, execution_id: str):
         execution = Execution.create(
+            id=execution_id,
             context=self.context,
             stage_id=self.stage.id,
         )

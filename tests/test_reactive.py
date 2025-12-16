@@ -1,4 +1,5 @@
 from collections import deque
+from uuid import uuid4
 
 import simplejson
 
@@ -41,6 +42,7 @@ class TestReactive(BaseTest):
             ws=self.mock_ws,  # type: ignore
         )
         execution = Execution.create(
+            id=uuid4().__str__(),
             context=context,
             stage_id="mock_stage_id",
         )
