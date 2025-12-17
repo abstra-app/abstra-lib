@@ -65,6 +65,8 @@ class LocalLinterRepository(LinterRepository):
             Retrieve all linter checks
             Retrieving all linter checks...
         """
+        if len(self.checks) == 0:
+            self.update_checks()
         return self.checks
 
     def update_checks(self):
