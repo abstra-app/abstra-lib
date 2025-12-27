@@ -146,4 +146,9 @@ class ConsumerController:
                 reason=f"{e}",
             )
 
+            self.main_controller.fail_execution(
+                execution_id=msg.preexecution.execution_id,
+                reason=f"{e}",
+            )
+
             self.consumer.threadsafe_nack(msg)

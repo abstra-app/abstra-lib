@@ -60,6 +60,9 @@ class FormClient(ExecutionClient):
             message = self._receive_message()
             message_type = message.get("type")
 
+            if message_type == "kill":
+                raise ClientAbandoned()
+
             if message_type in ignored_types or message_type not in target_types:
                 continue
 

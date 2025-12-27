@@ -48,6 +48,7 @@ def bind_ws_with_connection(ws: WsLike, conn: ConnectionProtocol, block: bool):
                 message = ws.receive()
             except flask_sock.ConnectionClosed:
                 try:
+                    conn.send('{"type": "kill"}')
                     conn.close()
                 except Exception:
                     pass

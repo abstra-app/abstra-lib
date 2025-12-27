@@ -2020,6 +2020,20 @@ class MainController:
             f"[ABSTRA] Failed {len(exited_execs)} running executions for app `{app_id}` with reason: {reason}"
         )
 
+    def fail_execution(self, execution_id: str, reason: str):
+        err_log = LogEntry(
+            execution_id=execution_id,
+            stage_id=self.execution_repository.get(execution_id).stage_id,
+            created_at=datetime.datetime.now(),
+            payload={"text": "[ABSTRA] Execution aborted. " + reason},
+            sequence=999999,
+            event="stderr",
+        )
+        self.execution_logs_repository.save(err_log)
+
+        self.execution_repository.set_failure_by_id(execution_id=execution_id)
+        self.tasks_repository.set_locked_tasks_to_pending(execution_id)
+
     def run_job(self, id: str):
         """
         Run a job stage immediately by its ID.

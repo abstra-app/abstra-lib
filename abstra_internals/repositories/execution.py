@@ -116,7 +116,12 @@ class LocalExecutionRepository(ExecutionRepository):
         self.fs_storage.save(execution.id, execution)
 
     def set_failure_by_id(self, execution_id: str) -> None:
-        raise NotImplementedError()
+        try:
+            execution = self.get(execution_id)
+            execution.set_status("failed")
+            self.update(execution)
+        except Exception:
+            pass
 
     def find_by_worker(
         self, app_id: str, worker_id: str, status: ExecutionStatus
