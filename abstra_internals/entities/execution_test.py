@@ -26,7 +26,8 @@ class ExecutionTest(TestCase):
         )
 
         context = HookContext(
-            request=request, response=Response(headers={}, status=200, body="")
+            request=request,
+            response=Response(headers={}, status=200, body=""),
         )
 
         execution: Execution[HookContext] = Execution.create(

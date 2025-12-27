@@ -41,6 +41,10 @@ class JobExecutionMock(ExecutionMock):
     pass
 
 
+class CodeSnippetExecutionMock(ExecutionMock):
+    pass
+
+
 class HookContext(Serializable):
     request: Request
     response: Response
@@ -69,7 +73,15 @@ class JobContext(Serializable):
     mock_execution: JobExecutionMock = Field(default_factory=JobExecutionMock)
 
 
-ClientContext = Union[HookContext, FormContext, ScriptContext, JobContext]
+class CodeSnippetContext(Serializable):
+    mock_execution: CodeSnippetExecutionMock = Field(
+        default_factory=CodeSnippetExecutionMock
+    )
+
+
+ClientContext = Union[
+    HookContext, FormContext, ScriptContext, JobContext, CodeSnippetContext
+]
 
 
 def extract_flask_request(request: flask.Request) -> Request:

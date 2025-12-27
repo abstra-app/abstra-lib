@@ -16,3 +16,8 @@ class MPContextReposity(abc.ABC):
 class SpawnContextReposity(MPContextReposity):
     def get_context(self) -> "SpawnContext":
         return get_context("spawn")
+
+
+class ForkServerContextRepository(MPContextReposity):
+    def get_context(self) -> "ForkServerContext":
+        return get_context("forkserver")

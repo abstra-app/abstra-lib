@@ -103,3 +103,6 @@ class AiWs:
             )
             self.seq += 1
             return json.dumps({**ans, "seq": self.seq})
+
+    def close(self):
+        self.messages.clear()

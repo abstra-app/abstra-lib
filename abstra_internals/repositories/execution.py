@@ -1,4 +1,7 @@
 import datetime
+import os
+import signal
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional
@@ -95,6 +98,10 @@ class ExecutionRepository(ABC):
     def list(self, filter) -> ExecutionResponse:
         raise NotImplementedError()
 
+    @abstractmethod
+    def stop_execution(self, execution_id: str) -> None:
+        raise NotImplementedError()
+
 
 class LocalExecutionRepository(ExecutionRepository):
     def __init__(self, mp_context: MPContext):
@@ -166,6 +173,26 @@ class LocalExecutionRepository(ExecutionRepository):
             executions=sorted_executions[start_index:end_index],
             total_count=total_count,
         )
+
+    def stop_execution(self, execution_id: str) -> None:
+        try:
+            execution = self.get(execution_id)
+            pid = execution.pid
+
+            os.kill(pid, signal.SIGTERM)
+
+            for _ in range(20):
+                try:
+                    os.kill(pid, 0)
+                    time.sleep(0.1)
+                except OSError:
+                    return
+
+            # Force kill if still alive
+            os.kill(pid, signal.SIGKILL)
+
+        except Exception:
+            pass
 
 
 class ProductionExecutionRepository(ExecutionRepository):
@@ -257,4 +284,7 @@ class ProductionExecutionRepository(ExecutionRepository):
         raise NotImplementedError()
 
     def list(self, filter: ExecutionFilter) -> ExecutionResponse:
+        raise NotImplementedError()
+
+    def stop_execution(self, execution_id: str) -> None:
         raise NotImplementedError()

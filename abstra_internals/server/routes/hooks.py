@@ -1,7 +1,9 @@
 import flask
 
 from abstra_internals.controllers.main import MainController
-from abstra_internals.entities.execution_context import extract_flask_request
+from abstra_internals.entities.execution_context import (
+    extract_flask_request,
+)
 from abstra_internals.repositories.project.project import HookStage
 from abstra_internals.usage import editor_usage
 from abstra_internals.utils import is_it_true
@@ -63,6 +65,11 @@ def get_editor_bp(controller: MainController):
     @bp.route("/<path:id>/run", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
     @editor_usage
     def _run_hook(id: str):
-        return controller.debug_run_hook(id, extract_flask_request(flask.request))
+        hook = controller.get_hook(id)
+
+        if not hook:
+            flask.abort(404)
+
+        return controller.run_hook(id, extract_flask_request(flask.request))
 
     return bp

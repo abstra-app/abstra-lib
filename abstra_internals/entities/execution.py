@@ -1,4 +1,5 @@
 import datetime
+import os
 from typing import Generic, Literal, Optional, TypeVar
 
 from pydantic import field_serializer
@@ -20,6 +21,7 @@ class Execution(Serializable, Generic[T]):
     id: str
     stage_id: str
     status: ExecutionStatus
+    pid: int
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
     context: T
@@ -31,6 +33,7 @@ class Execution(Serializable, Generic[T]):
         id: str,
         stage_id: str,
         context: T,
+        pid: Optional[int] = None,
     ) -> "Execution[T]":
         return cls(
             stage_id=stage_id,
@@ -38,6 +41,7 @@ class Execution(Serializable, Generic[T]):
             status="running",
             id=id,
             created_at=datetime.datetime.now(),
+            pid=pid or os.getpid(),
             updated_at=None,
         )
 

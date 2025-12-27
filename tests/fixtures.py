@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import shutil
 import tempfile
@@ -11,9 +12,8 @@ from abstra_internals.consts.filepaths import DOT_ABSTRA_DIR
 from abstra_internals.controllers.main import MainController
 from abstra_internals.interface.cli.editor import start_consumer
 from abstra_internals.repositories.factory import build_editor_repositories
-from abstra_internals.repositories.project.project import (
-    LocalProjectRepository,
-)
+from abstra_internals.repositories.producer import LocalProducerRepository
+from abstra_internals.repositories.project.project import LocalProjectRepository
 from abstra_internals.server.apps import get_cloud_app, get_local_app
 from abstra_internals.settings import SettingsController
 
@@ -102,10 +102,51 @@ class BaseTest(TestCase):
     def setUp(self) -> None:
         self.root = init_dir()
         self.repositories = build_editor_repositories()
+        producer = self.repositories.producer
+        assert isinstance(producer, LocalProducerRepository)
+        self.queue = producer.queue
         self.controller = MainController(self.repositories)
+        self.consumer, self.consumer_thread, self.consumer_controller = start_consumer(
+            self.controller
+        )
 
     def tearDown(self) -> None:
+        # Close the queue first to interrupt any blocking queue.get() calls
+        self.queue.close()
+
+        # Stop the consumer
+        self.consumer.stop_iter()
+
+        # Shutdown the consumer controller's executor to stop non-daemon threads
+        if hasattr(self, "consumer_controller") and self.consumer_controller:
+            self.consumer_controller.shutdown()
+
+        # Wait for the consumer thread to finish
+        if self.consumer_thread.is_alive():
+            self.consumer_thread.join(timeout=0.25)
+
+        # Force cleanup of any remaining processes
+        for p in multiprocessing.active_children():
+            if p.is_alive():
+                p.terminate()
+                p.join(timeout=3.0)  # Increased timeout
+
+                # Force kill if still alive
+                if p.is_alive():
+                    try:
+                        p.kill()
+                        p.join(timeout=1.0)
+                    except (ProcessLookupError, OSError):
+                        # Process already dead
+                        pass
+
+        # Give extra time for any lingering process cleanup
+        time.sleep(0.2)
+
+        # Wait for all non-daemon threads to finish
         wait_non_daemon_threads()
+
+        # Clean up directory
         clear_dir(self.root)
 
     def get_editor_flask_client(self):
@@ -120,10 +161,7 @@ class BaseWorkflowTest(BaseTest):
         super().setUp()
         self.maxDiff = None
         self.client = self.get_editor_flask_client()
-        self.consumer, self.thread = start_consumer(self.controller)
         (self.root / DOT_ABSTRA_DIR).mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
-        self.consumer.stop_iter()
-        self.thread.join()
         super().tearDown()

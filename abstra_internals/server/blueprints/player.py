@@ -1,21 +1,15 @@
 from pathlib import Path
-from uuid import uuid4
 
 import flask
 import flask_sock
 
 from abstra_internals.constants import get_public_dir
-from abstra_internals.controllers.execution.execution import ExecutionController
-from abstra_internals.controllers.execution.execution_client_form import FormClient
-from abstra_internals.controllers.execution.execution_client_hook import (
-    HookClient,
-    Response,
-)
 from abstra_internals.controllers.main import MainController
 from abstra_internals.entities.execution_context import (
     FormContext,
     HookContext,
     JobContext,
+    Response,
     extract_flask_request,
 )
 from abstra_internals.environment import (
@@ -43,6 +37,7 @@ from abstra_internals.settings import Settings
 from abstra_internals.usage import player_usage
 from abstra_internals.utils import check_is_url
 from abstra_internals.utils.file import get_tmp_upload_dir, path2module, upload_file
+from abstra_internals.utils.websockets import bind_ws_with_connection
 
 
 def get_player_bp(controller: MainController):
@@ -119,18 +114,8 @@ def get_player_bp(controller: MainController):
             if not form:
                 return
 
-            client = FormClient(
-                context=context,
-                production_mode=True,
-                ws=ws,
-            )
-
-            ExecutionController(
-                repositories=controller.repositories,
-                stage=form,
-                client=client,
-                context=context,
-            ).run(execution_id=uuid4().__str__())
+            connection = controller.repositories.producer.enqueue(id, context)
+            bind_ws_with_connection(ws, connection, block=True)
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
@@ -202,34 +187,34 @@ def get_player_bp(controller: MainController):
 
         context = HookContext(
             request=extract_flask_request(flask.request),
-            response=Response(
-                status=200,
-                body="",
-                headers={},
-            ),
+            response=Response(headers={}, status=200, body=""),
         )
 
-        client = HookClient(context)
+        connection = controller.repositories.producer.enqueue(hook.id, context)
 
-        ExecutionController(
-            repositories=controller.repositories,
-            stage=hook,
-            client=client,
-            context=context,
-        ).run(execution_id=uuid4().__str__())
+        try:
+            connection.recv()  # ExecutionStartedMessage
+            response = connection.recv()
 
-        if not context.response or not client.context.response:
-            flask.abort(500)
+            if not response:
+                flask.abort(500)
 
-        return flask.Response(
-            status=context.response.status,
-            response=client.context.response.body,
-            headers=context.response.headers,
+            if not isinstance(response, Response):
+                response = Response(
+                    headers=response.get("headers", {}),
+                    status=response.get("status", 200),
+                    body=response.get("body", ""),
+                )
+        finally:
+            connection.close()
+
+        result = flask.Response(
+            status=response.status,
+            response=response.body,
+            headers=response.headers,
         )
 
-    @bp.route("/_hooks", methods=["POST", "GET", "PUT", "DELETE", "PATCH"])
-    def root_hook_runner():
-        return hook_runner("")
+        return result
 
     @bp.get("/_jobs")
     def list_jobs():

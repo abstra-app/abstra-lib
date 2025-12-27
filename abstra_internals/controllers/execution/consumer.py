@@ -1,15 +1,21 @@
 from concurrent.futures import ThreadPoolExecutor
+from multiprocessing.process import BaseProcess
+from typing import Dict, Optional, cast
 from uuid import uuid4
 
-from abstra_internals.controllers.execution.worker_process import process_main
+from abstra_internals.controllers.execution.executor_config import ExecutorConfig
+from abstra_internals.controllers.execution.executor_pool import ExecutorPool
+from abstra_internals.controllers.execution.executor_process import RabbitMQParams
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import (
     EXECUTION_QUEUE_CONCURRENCY,
-    PROCESS_TIMEOUT_SECONDS,
+    IS_PRODUCTION,
+    RABBITMQ_CONNECTION_URI,
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.consumer import Consumer, QueueMessage
 from abstra_internals.repositories.producer import LocalProducerRepository
+from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
 
 
@@ -27,90 +33,103 @@ class ConsumerController:
         self.consumer = consumer
         self.app_id = str(uuid4())
         self.concurrency = EXECUTION_QUEUE_CONCURRENCY
+        self.executor: Optional[ThreadPoolExecutor] = None
+
+        self.active_processes: Dict[int, BaseProcess] = {}
+
+        config = ExecutorConfig.from_environment()
+        config.validate()
+
+        local_queue = None
+        if isinstance(main_controller.repositories.producer, LocalProducerRepository):
+            local_queue = main_controller.repositories.producer.queue
+
+        self.executor_pool = ExecutorPool(
+            config=config,
+            mp_context=main_controller.repositories.mp_context.get_context(),
+            root_path=str(Settings.root_path),
+            server_port=Settings.server_port,
+            parent_executions_queue=local_queue,
+            verbose=IS_PRODUCTION,
+        )
 
     def start_loop(self):
-        AbstraLogger.debug(
-            f"[ConsumerController] Starting loop with {self.concurrency} threads"
-        )
-
-        thread_pool = ThreadPoolExecutor(
-            max_workers=self.concurrency,
-            thread_name_prefix="ExecutionConsumer",
-        )
+        if self.executor_pool:
+            self.executor_pool.start()
 
         try:
+            self.executor = ThreadPoolExecutor(
+                thread_name_prefix="ExecutionConsumer",
+            )
+
             for msg in self.consumer.iter():
-                AbstraLogger.debug(
-                    f"[ConsumerController] Submitting message [{msg.delivery_tag}] for processing"
-                )
-                thread_pool.submit(
+                if self.executor._shutdown:
+                    break
+
+                self.executor.submit(
                     self.run_subprocess,
                     msg=msg,
                 )
-        finally:
-            AbstraLogger.warning(
-                "[ConsumerController] Consumer main loop exited, waiting for threads to finish"
-            )
-            thread_pool.shutdown(wait=True)
-            AbstraLogger.warning("[ConsumerController] All threads finished")
 
-            # If the loop exits and there are running executions, gracefull shutdown has failed
             self.main_controller.fail_app_executions(
                 app_id=self.app_id,
                 reason="Failed to set status",
             )
+        finally:
+            if self.executor:
+                self.executor.shutdown(wait=True)
+                self.executor = None
+            if self.executor_pool:
+                self.executor_pool.shutdown()
 
-    def run_subprocess(self, msg: QueueMessage):
+    def shutdown(self):
+        if self.executor:
+            self.executor.shutdown(wait=True)
+            self.executor = None
+
+    def run_subprocess(self, msg: QueueMessage) -> None:
         worker_id = str(uuid4())
-        head_id = worker_id.split("-")[0]
+
+        connection = None
+        rabbitmq_params = None
 
         try:
-            mp_context = self.main_controller.repositories.mp_context.get_context()
             stage = self.main_controller.get_stage(msg.preexecution.stage_id)
 
             if stage is None:
-                AbstraLogger.warning(
-                    f"[ConsumerController] Stage not found: {msg.preexecution.stage_id}. Message [{msg.delivery_tag}] will be acknowledged."
+                AbstraLogger.error(
+                    f"[ConsumerController] Stage not found: {msg.preexecution.stage_id}."
+                    f"Aborting execution. Message [{msg.delivery_tag}] will be acknowledged."
                 )
                 self.consumer.threadsafe_ack(msg)
                 return
 
-            local_queue = None
             if isinstance(
                 self.main_controller.repositories.producer, LocalProducerRepository
             ):
-                local_queue = self.main_controller.repositories.producer.queue
-
-            p = mp_context.Process(
-                target=process_main,
-                name=f"Worker-{head_id}",
-                kwargs=dict(
-                    stage=stage,
-                    worker_id=worker_id,
-                    app_id=self.app_id,
-                    root_path=Settings.root_path,
-                    server_port=Settings.server_port,
-                    request=msg.preexecution.context,
-                    local_queue=local_queue,
-                ),
-            )
-
-            p.start()
-            p.join(timeout=PROCESS_TIMEOUT_SECONDS)
-
-            # If timeout is reached, the process is still alive
-            if p.is_alive():
-                p.terminate()
-                raise NonCleanExit(
-                    f"Run took too long to complete ({PROCESS_TIMEOUT_SECONDS} secs) and was terminated. Please make sure all your requests calls have a timeout set."
+                assert msg.connection is not None, "Connection is None in local mode"
+                connection = msg.connection
+            else:
+                assert RABBITMQ_CONNECTION_URI is not None, (
+                    "RABBITMQ_CONNECTION_URI is None in production mode"
+                )
+                rabbitmq_params = RabbitMQParams(
+                    connection_uri=RABBITMQ_CONNECTION_URI,
+                    execution_id=msg.preexecution.execution_id,
                 )
 
-            if p.exitcode != 0:
-                err_msg = f"Run failed with status '{p.exitcode}'"
-                if p.exitcode == -9:
-                    err_msg += ": memory limit reached."
+            response = self.executor_pool.execute(
+                stage=cast(StageWithFile, stage),
+                worker_id=worker_id,
+                app_id=self.app_id,
+                execution_id=msg.preexecution.execution_id,
+                request=msg.preexecution.context,
+                connection=connection,
+                rabbitmq_params=rabbitmq_params,
+            )
 
-                raise NonCleanExit(err_msg)
+            if not response.success:
+                raise NonCleanExit(f"Execution failed: {response.error}")
 
             self.consumer.threadsafe_ack(msg)
 
@@ -128,7 +147,3 @@ class ConsumerController:
             )
 
             self.consumer.threadsafe_nack(msg)
-
-            AbstraLogger.warning(
-                f"[ConsumerController] Message [{msg.delivery_tag}] has been negatively acknowledged"
-            )

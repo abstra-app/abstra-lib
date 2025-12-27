@@ -15,12 +15,8 @@ from abstra_internals.repositories.ai import (
     LocalAIRepository,
     ProductionAIRepository,
 )
-from abstra_internals.repositories.connectors import (
-    ConnectorsRepository,
-)
-from abstra_internals.repositories.email import (
-    EmailRepository,
-)
+from abstra_internals.repositories.connectors import ConnectorsRepository
+from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import (
     ExecutionRepository,
     LocalExecutionRepository,
@@ -42,6 +38,7 @@ from abstra_internals.repositories.linter.repository import (
     ProductionLinterRepository,
 )
 from abstra_internals.repositories.multiprocessing import (
+    ForkServerContextRepository,
     MPContextReposity,
     SpawnContextReposity,
 )
@@ -54,6 +51,7 @@ from abstra_internals.repositories.producer import (
     LocalProducerRepository,
     ProducerRepository,
     ProductionProducerRepository,
+    WebEditorProducerRepository,
 )
 from abstra_internals.repositories.project.disabled_stages_loader import (
     ProductionDisabledStagesLoader,
@@ -85,6 +83,17 @@ from abstra_internals.repositories.users import (
 )
 
 
+def get_mp_context_repository() -> MPContextReposity:
+    """Get the appropriate multiprocessing context repository based on environment variable."""
+    import os
+
+    mp_context = os.environ.get("ABSTRA_MP_CONTEXT", "spawn").lower()
+    if mp_context == "forkserver":
+        return ForkServerContextRepository()
+    else:
+        return SpawnContextReposity()
+
+
 @dataclass
 class Repositories:
     project: ProjectRepository
@@ -108,14 +117,16 @@ class Repositories:
 
 
 def build_editor_repositories(local_queue: Optional[Queue] = None):
-    mp_context = SpawnContextReposity()
+    mp_context = get_mp_context_repository()
+
+    if local_queue is None:
+        local_queue = mp_context.get_context().Queue()
 
     http_client = HTTPClient(
         base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise
     )
 
     linter = LocalLinterRepository()
-    local_queue = local_queue or mp_context.get_context().Queue()
 
     return Repositories(
         project=LocalProjectRepository(),
@@ -160,6 +171,41 @@ def build_prod_repositories():
         ai=ProductionAIRepository(client=http_client),
         passwordless=ProductionPasswordlessRepository(client=http_client),
         kv=ProductionKVRepository(client=http_client),
-        mp_context=SpawnContextReposity(),
+        mp_context=get_mp_context_repository(),
         linter=ProductionLinterRepository(),
+    )
+
+
+def build_web_editor_repositories(rabbitmq_connection_uri: str):
+    """Build repositories for web editor using RabbitMQ for producer/consumer."""
+    from abstra_internals.logger import AbstraLogger
+
+    AbstraLogger.info(
+        f"[Factory] Building web editor repositories with RabbitMQ URI: {rabbitmq_connection_uri}"
+    )
+
+    http_client = HTTPClient(
+        base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise
+    )
+
+    linter = LocalLinterRepository()
+
+    mp_context_repo = get_mp_context_repository()
+
+    return Repositories(
+        project=LocalProjectRepository(),
+        execution=LocalExecutionRepository(mp_context_repo.get_context()),
+        producer=WebEditorProducerRepository(rabbitmq_connection_uri),
+        connectors=ConnectorsRepository(client=http_client),
+        tasks=LocalTasksRepository(mp_context_repo.get_context()),
+        tables=LocalTablesRepository(client=http_client),
+        email=EmailRepository(client=http_client),
+        roles=LocalRolesRepository(client=http_client),
+        ai=LocalAIRepository(client=http_client),
+        execution_logs=LocalExecutionLogsRepository(),
+        users=LocalUsersRepository(),
+        passwordless=LocalPasswordlessRepository(),
+        kv=LocalKVRepository(),
+        mp_context=mp_context_repo,
+        linter=linter,
     )

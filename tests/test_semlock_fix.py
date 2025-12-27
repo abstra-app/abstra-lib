@@ -102,6 +102,11 @@ class TestSemLockFix(unittest.TestCase):
         process.start()
         process.join(timeout=30)
 
+        # Ensure process actually finished
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=2)
+
         self.assertFalse(process.is_alive(), "Process should not be alive")
         self.assertEqual(
             process.exitcode,
@@ -134,6 +139,10 @@ class TestSemLockFix(unittest.TestCase):
         # Wait for all processes
         for process in processes:
             process.join(timeout=30)
+            # Ensure process actually finished
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=2)
 
         # Verify that all completed successfully
         for i, process in enumerate(processes):

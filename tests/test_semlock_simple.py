@@ -57,6 +57,11 @@ class TestSemLockSimple(unittest.TestCase):
         process.start()
         process.join(timeout=10)
 
+        # Ensure process actually finished
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=2)
+
         # Verify that the process completed successfully
         self.assertEqual(
             process.exitcode,

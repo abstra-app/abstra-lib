@@ -1,5 +1,7 @@
 import datetime
+import json
 import pkgutil
+from multiprocessing import Pipe
 from pathlib import Path
 from shutil import move
 from tempfile import mkdtemp, mktemp
@@ -15,8 +17,7 @@ from abstra_internals.cloud_api import (
 )
 from abstra_internals.consts.filepaths import TEST_DATA_FILEPATH
 from abstra_internals.controllers.execution.execution import ExecutionController
-from abstra_internals.controllers.execution.execution_client_form import FormClient
-from abstra_internals.controllers.execution.execution_client_hook import HookClient
+from abstra_internals.controllers.execution.execution_client import HeadlessClient
 from abstra_internals.credentials import (
     delete_credentials,
     get_credentials,
@@ -24,7 +25,6 @@ from abstra_internals.credentials import (
     set_credentials,
 )
 from abstra_internals.entities.execution_context import (
-    FormContext,
     HookContext,
     JobContext,
     Request,
@@ -32,6 +32,7 @@ from abstra_internals.entities.execution_context import (
     ScriptContext,
 )
 from abstra_internals.interface.cli.deploy import deploy_without_git
+from abstra_internals.interface.contract import ExecutionStartedMessage
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
 from abstra_internals.repositories.execution import ExecutionFilter, ExecutionRepository
@@ -66,7 +67,6 @@ from abstra_internals.templates import (
     new_job_code,
     new_script_code,
 )
-from abstra_internals.utils.ai import AiWs
 from abstra_internals.utils.code_check import code_check
 from abstra_internals.utils.diff import compute_updated_code_from_replacements
 from abstra_internals.utils.file import path2module
@@ -1834,6 +1834,9 @@ class MainController:
     def get_executions(self, filter: ExecutionFilter):
         return self.execution_repository.list(filter)
 
+    def stop_execution(self, execution_id: str):
+        self.execution_repository.stop_execution(execution_id)
+
     def get_execution_logs(self, id: str) -> List[LogEntry]:
         """
         Retrieve execution logs for a specific execution by its ID.
@@ -2017,7 +2020,7 @@ class MainController:
             f"[ABSTRA] Failed {len(exited_execs)} running executions for app `{app_id}` with reason: {reason}"
         )
 
-    def debug_run_job(self, id: str):
+    def run_job(self, id: str):
         """
         Run a job stage immediately by its ID.
 
@@ -2034,19 +2037,27 @@ class MainController:
             Run a job for debugging
             Running a job for debugging...
         """
-        job = self.get_job(id)
-        if not job:
+        status = self.get_job_status(id)
+        if status == "not_found":
             raise Exception(f"Job with id {id} not found")
 
-        print(f"Running job {job.id} ({job.title})")
+        if status == "disabled":
+            return {"status": "disabled"}
 
-        return ExecutionController(
-            repositories=self.repositories,
-            stage=job,
-            context=JobContext(),
-        ).run(execution_id=uuid4().__str__())
+        conn = self.repositories.producer.enqueue(id, context=JobContext())
+        start_msg = conn.recv()
 
-    def debug_run_hook(self, id: str, request: Request):
+        if isinstance(start_msg, str):
+            start_msg = json.loads(start_msg)
+
+        start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
+
+        return {
+            "ok": True,
+            "execution_id": start_msg.execution_id,
+        }
+
+    def run_hook(self, id: str, request: Request):
         """
         Run a hook stage immediately by its ID.
 
@@ -2070,33 +2081,43 @@ class MainController:
 
         context = HookContext(
             request=request,
-            response=Response(
-                body="",
-                headers={},
-                status=200,
-            ),
+            response=Response(headers={}, status=200, body=""),
         )
 
-        client = HookClient(context=context)
+        connection = self.repositories.producer.enqueue(hook.id, context)
+        start_msg = connection.recv()
 
-        run_data = ExecutionController(
-            repositories=self.repositories,
-            stage=hook,
-            client=client,
-            context=context,
-        ).run(execution_id=uuid4().__str__())
+        if isinstance(start_msg, str):
+            start_msg = json.loads(start_msg)
 
-        if context.response is None or client.context.response is None:
-            flask.abort(500)
+        start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
+
+        try:
+            response = connection.recv()
+
+            if not response:
+                flask.abort(500)
+
+            if isinstance(response, str):
+                response = json.loads(response)
+
+            if not isinstance(response, Response):
+                response = Response(
+                    headers=response.get("headers", {}),
+                    status=response.get("status", 200),
+                    body=response.get("body", ""),
+                )
+        finally:
+            connection.close()
 
         return {
-            "body": client.context.response.body,
-            "status": context.response.status,
-            "headers": context.response.headers,
-            **run_data,
+            "status": response.status,
+            "body": response.body,
+            "headers": response.headers,
+            "execution_id": start_msg.execution_id,
         }
 
-    def debug_run_tasklet(self, id: str, task_id: str):
+    def run_tasklet(self, id: str, task_id: str):
         """
         Run a tasklet stage immediately by its ID.
 
@@ -2119,49 +2140,18 @@ class MainController:
         if not script:
             raise Exception(f"Tasklet with id {id} not found")
 
-        if not task_id:
-            raise Exception("Task ID is required for tasklet execution")
-
-        return ExecutionController(
-            repositories=self.repositories,
-            stage=script,
-            context=ScriptContext(task_id=task_id),
-        ).run(execution_id=uuid4().__str__())
-
-    def debug_run_form_with_ai(self, id, prompt: str, url_params: Dict[str, str] = {}):
-        """
-        Run a form stage immediately by its ID.
-
-        This method triggers the execution of a form stage, allowing it to run
-        immediately in response to user input. It is useful for testing or
-        manually triggering forms.
-
-        Args:
-            id (str): Unique identifier of the form stage to run.
-            url_params (dict): URL parameters to pass to the form.
-            prompt (str): Prompt message to instruct the AI to fill the form.
-        """
-
-        ws = AiWs(repos=self.repositories, prompt_text=prompt, url_params=url_params)
-        context = FormContext(
-            request=Request(query_params=url_params, headers={}, method="GET", body=""),
-        )
-        form = self.get_form(id)
-        if not form:
-            raise Exception(f"Form with id {id} not found")
-
-        client = FormClient(
-            ws=ws,  # type: ignore
-            context=context,
-            production_mode=False,
+        conn = self.repositories.producer.enqueue(
+            id, context=ScriptContext(task_id=task_id)
         )
 
-        return ExecutionController(
-            repositories=self.repositories,
-            stage=form,
-            client=client,
-            context=context,
-        ).run(execution_id=uuid4().__str__())
+        start_msg = conn.recv()
+
+        if isinstance(start_msg, str):
+            start_msg = json.loads(start_msg)
+
+        start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
+
+        return {"ok": True, "execution_id": start_msg.execution_id}
 
     def execute_code_snippet(self, code: str, title: str = "Debug Snippet"):
         """
@@ -2175,11 +2165,18 @@ class MainController:
         stage = self.create_job(title, str(tempfile), (0, 0))
         tempfile.write_text(code, encoding="utf-8")
 
+        context = JobContext()
+        _, child_conn = Pipe()
+        client = HeadlessClient(context=context, conn=child_conn, production_mode=False)
+
         execution_result = ExecutionController(
             repositories=self.repositories,
             stage=stage,
-            context=JobContext(),
-        ).run(execution_id=uuid4().__str__())
+            client=client,
+            context=context,
+        ).run(
+            execution_id=uuid4().__str__(),
+        )
 
         self.delete_stage(stage.id, remove_file=True)
 

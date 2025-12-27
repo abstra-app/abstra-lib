@@ -280,7 +280,13 @@ class TestSqlStorageConcurrency(unittest.TestCase):
             crash_process.start()
             crash_process.join(timeout=5)
 
+            if crash_process.is_alive():
+                crash_process.terminate()
+                crash_process.join(timeout=2)
+
             self.assertNotEqual(crash_process.exitcode, 0)
+
+            time.sleep(0.1)
 
             success_process = mp_context.Process(
                 target=worker_single_execution, args=("stage-ok", str(test_dir), 0)
@@ -288,6 +294,11 @@ class TestSqlStorageConcurrency(unittest.TestCase):
 
             success_process.start()
             success_process.join(timeout=5)
+
+            # Ensure success process also finished properly
+            if success_process.is_alive():
+                success_process.terminate()
+                success_process.join(timeout=2)
 
             self.assertEqual(success_process.exitcode, 0)
 

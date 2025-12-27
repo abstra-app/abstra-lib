@@ -138,14 +138,15 @@ class TestWorkflowB(BaseWorkflowTest):
             )
 
             tasks = response.get_json()["tasks"]
+
             if (
                 len(tasks) == 1
                 and tasks[0]["targetStageId"] == "script_b"
-                and tasks[0]["status"] == "pending"
+                and tasks[0]["status"] == "completed"
             ):
                 break
 
-            time.sleep(0.1)
+            time.sleep(0.2)
         else:
             self.fail("Script did not completed task")
 
@@ -160,7 +161,7 @@ class TestWorkflowB(BaseWorkflowTest):
                                 "_id": ANY,
                             },
                             "type": "success",
-                            "status": "pending",
+                            "status": "completed",
                             "sourceStageType": "job",
                             "sourceStageTitle": "Job A",
                             "targetStageId": "script_b",
@@ -171,7 +172,11 @@ class TestWorkflowB(BaseWorkflowTest):
                                 "byExecutionId": ANY,
                                 "byStageId": "job_a",
                             },
-                            "completed": None,
+                            "completed": {
+                                "at": ANY,
+                                "byExecutionId": ANY,
+                                "byStageId": "script_b",
+                            },
                             "locked": None,
                         }
                     ],

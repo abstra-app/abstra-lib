@@ -27,7 +27,7 @@ from abstra_internals.repositories.project.project import (
 )
 from abstra_internals.repositories.tasks import TaskDTO, TaskEventDetails
 from abstra_internals.settings import Settings
-from tests.fixtures import BaseTest, clear_dir
+from tests.fixtures import BaseTest
 
 
 class TaskExecutorTest(BaseTest):
@@ -56,7 +56,7 @@ class TaskExecutorTest(BaseTest):
         return self.executor
 
     def tearDown(self) -> None:
-        clear_dir(self.root)
+        super().tearDown()
 
     def create_module_directory(self, module_name: str) -> Path:
         """Helper: Create a module directory structure"""

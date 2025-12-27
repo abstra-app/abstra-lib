@@ -79,6 +79,11 @@ class TestSemLockRegression(unittest.TestCase):
         process.start()
         process.join(timeout=10)
 
+        # Ensure process actually finished
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=2)
+
         self.assertEqual(
             process.exitcode, 0, "Worker should have executed successfully"
         )
@@ -116,6 +121,10 @@ class TestSemLockRegression(unittest.TestCase):
         # Wait for all processes
         for p in processes:
             p.join(timeout=10)
+            # Ensure process actually finished
+            if p.is_alive():
+                p.terminate()
+                p.join(timeout=2)
 
         # Verify that all completed
         for p in processes:
@@ -165,7 +174,15 @@ class TestSemLockRegression(unittest.TestCase):
         crash_p.start()
         crash_p.join(timeout=5)
 
+        # Ensure crash process actually finished
+        if crash_p.is_alive():
+            crash_p.terminate()
+            crash_p.join(timeout=2)
+
         self.assertNotEqual(crash_p.exitcode, 0, "Worker should have crashed")
+
+        # Add small delay to ensure any file handles are closed
+        time.sleep(0.1)
 
         # Worker that works
         ok_p = mp_context.Process(
@@ -173,6 +190,11 @@ class TestSemLockRegression(unittest.TestCase):
         )
         ok_p.start()
         ok_p.join(timeout=5)
+
+        # Ensure success process also finished properly
+        if ok_p.is_alive():
+            ok_p.terminate()
+            ok_p.join(timeout=2)
 
         self.assertEqual(
             ok_p.exitcode, 0, "System should continue functioning after crash"
