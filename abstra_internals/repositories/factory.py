@@ -21,6 +21,7 @@ from abstra_internals.repositories.execution import (
     ExecutionRepository,
     LocalExecutionRepository,
     ProductionExecutionRepository,
+    WebEditorExecutionRepository,
 )
 from abstra_internals.repositories.execution_logs import (
     ExecutionLogsRepository,
@@ -194,7 +195,9 @@ def build_web_editor_repositories(rabbitmq_connection_uri: str):
 
     return Repositories(
         project=LocalProjectRepository(),
-        execution=LocalExecutionRepository(mp_context_repo.get_context()),
+        execution=WebEditorExecutionRepository(
+            mp_context_repo.get_context(), rabbitmq_connection_uri
+        ),
         producer=WebEditorProducerRepository(rabbitmq_connection_uri),
         connectors=ConnectorsRepository(client=http_client),
         tasks=LocalTasksRepository(mp_context_repo.get_context()),

@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing.process import BaseProcess
+from threading import Thread
 from typing import Dict, Optional, cast
 from uuid import uuid4
 
@@ -13,7 +14,11 @@ from abstra_internals.environment import (
     RABBITMQ_CONNECTION_URI,
 )
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.consumer import Consumer, QueueMessage
+from abstra_internals.repositories.consumer import (
+    Consumer,
+    ControlQueueMessage,
+    QueueMessage,
+)
 from abstra_internals.repositories.producer import LocalProducerRepository
 from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
@@ -28,9 +33,15 @@ class NonCleanExit(Exception):
 
 
 class ConsumerController:
-    def __init__(self, main_controller: MainController, consumer: Consumer):
+    def __init__(
+        self,
+        main_controller: MainController,
+        consumer: Consumer,
+        control_consumer: Optional[Consumer] = None,
+    ):
         self.main_controller = main_controller
         self.consumer = consumer
+        self.control_consumer = control_consumer
         self.app_id = str(uuid4())
         self.concurrency = EXECUTION_QUEUE_CONCURRENCY
         self.executor: Optional[ThreadPoolExecutor] = None
@@ -53,9 +64,40 @@ class ConsumerController:
             verbose=IS_PRODUCTION,
         )
 
+    def _control_loop(self):
+        if not self.control_consumer:
+            return
+
+        AbstraLogger.info("[ConsumerController] Starting control loop")
+        for msg in self.control_consumer.iter():
+            try:
+                if isinstance(msg, ControlQueueMessage):
+                    control_msg = msg.message
+                    if control_msg.type == "stop":
+                        execution_id = control_msg.payload.get("execution_id")
+                        if execution_id:
+                            AbstraLogger.info(
+                                f"[ConsumerController] Received stop request for execution {execution_id}"
+                            )
+                            self.executor_pool.kill_execution(execution_id)
+
+                    self.control_consumer.threadsafe_ack(msg)
+                else:
+                    AbstraLogger.warning(
+                        f"[ConsumerController] Received unknown message type in control loop: {type(msg)}"
+                    )
+                    self.control_consumer.threadsafe_ack(msg)
+            except Exception as e:
+                AbstraLogger.error(f"[ConsumerController] Error in control loop: {e}")
+                self.control_consumer.threadsafe_nack(msg)
+
     def start_loop(self):
         if self.executor_pool:
             self.executor_pool.start()
+
+        if self.control_consumer:
+            self.control_thread = Thread(target=self._control_loop, daemon=True)
+            self.control_thread.start()
 
         try:
             self.executor = ThreadPoolExecutor(
@@ -65,6 +107,9 @@ class ConsumerController:
             for msg in self.consumer.iter():
                 if self.executor._shutdown:
                     break
+
+                if isinstance(msg, ControlQueueMessage):
+                    continue
 
                 self.executor.submit(
                     self.run_subprocess,

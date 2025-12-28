@@ -11,6 +11,9 @@ from abstra_internals.consts.filepaths import EXECUTIONS_DIR_PATH
 from abstra_internals.entities.execution import Execution, ExecutionStatus
 from abstra_internals.environment import SERVER_UUID, WORKER_UUID
 from abstra_internals.repositories.multiprocessing import MPContext
+from abstra_internals.repositories.producer import (
+    WebEditorControlProducerRepository,
+)
 from abstra_internals.services.sql_storage import SqlStorage
 
 
@@ -197,6 +200,20 @@ class LocalExecutionRepository(ExecutionRepository):
             os.kill(pid, signal.SIGKILL)
 
         except Exception:
+            pass
+
+
+class WebEditorExecutionRepository(LocalExecutionRepository):
+    def __init__(self, mp_context: MPContext, rabbitmq_uri: str):
+        super().__init__(mp_context)
+        self.control_producer = WebEditorControlProducerRepository(rabbitmq_uri)
+
+    def stop_execution(self, execution_id: str) -> None:
+        try:
+            self.control_producer.stop_execution(execution_id)
+        except Exception:
+            # Fallback to local kill if message fails? Unlikely to work but maybe safe to try?
+            # No, if we are in web editor, local kill is useless.
             pass
 
 

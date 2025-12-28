@@ -2,7 +2,10 @@ from abstra_internals.controllers.execution.consumer import ConsumerController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import DEFAULT_PORT, RABBITMQ_CONNECTION_URI
 from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.consumer import WebEditorConsumer
+from abstra_internals.repositories.consumer import (
+    WebEditorConsumer,
+    WebEditorControlConsumer,
+)
 from abstra_internals.repositories.factory import build_web_editor_repositories
 from abstra_internals.settings import SettingsController
 from abstra_internals.signals import SignalHandlers
@@ -21,8 +24,10 @@ def run():
     controller = MainController(repositories=repositories)
 
     with WebEditorConsumer(RABBITMQ_CONNECTION_URI) as consumer:
-        SignalHandlers.register_sigterm_callback(consumer.stop_iter)
-        ConsumerController(controller, consumer).start_loop()
+        with WebEditorControlConsumer(RABBITMQ_CONNECTION_URI) as control_consumer:
+            SignalHandlers.register_sigterm_callback(consumer.stop_iter)
+            SignalHandlers.register_sigterm_callback(control_consumer.stop_iter)
+            ConsumerController(controller, consumer, control_consumer).start_loop()
 
 
 if __name__ == "__main__":

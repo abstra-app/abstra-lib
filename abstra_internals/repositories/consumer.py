@@ -1,9 +1,10 @@
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from multiprocessing import Queue
 from queue import Empty
 from threading import Event
-from typing import Generator
+from typing import Generator, Union
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
@@ -19,19 +20,31 @@ from abstra_internals.environment import (
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.producer import PreExecution, QueueMessage
 from abstra_internals.utils import deserialize
+from abstra_internals.utils.serializable import Serializable
+
+
+class ControlMessage(Serializable):
+    type: str
+    payload: dict
+
+
+@dataclass
+class ControlQueueMessage:
+    message: ControlMessage
+    delivery_tag: int
 
 
 class Consumer(ABC):
     @abstractmethod
-    def threadsafe_ack(self, msg: QueueMessage):
+    def threadsafe_ack(self, msg: Union[QueueMessage, ControlQueueMessage]):
         raise NotImplementedError
 
     @abstractmethod
-    def threadsafe_nack(self, msg: QueueMessage):
+    def threadsafe_nack(self, msg: Union[QueueMessage, ControlQueueMessage]):
         raise NotImplementedError
 
     @abstractmethod
-    def iter(self) -> Generator[QueueMessage, None, None]:
+    def iter(self) -> Generator[Union[QueueMessage, ControlQueueMessage], None, None]:
         raise NotImplementedError
 
     @abstractmethod
@@ -116,7 +129,7 @@ class RabbitMQConsumer(Consumer):
 
         raise last_exception or AMQPConnectionError("Failed to connect to RabbitMQ")
 
-    def threadsafe_ack(self, msg: QueueMessage):
+    def threadsafe_ack(self, msg: Union[QueueMessage, ControlQueueMessage]):
         AbstraLogger.debug(
             f"[{self.logger_prefix}] Adding ack callback for [{msg.delivery_tag}]"
         )
@@ -139,7 +152,7 @@ class RabbitMQConsumer(Consumer):
 
         self.connection.add_callback_threadsafe(callback)
 
-    def threadsafe_nack(self, msg: QueueMessage):
+    def threadsafe_nack(self, msg: Union[QueueMessage, ControlQueueMessage]):
         AbstraLogger.debug(
             f"[{self.logger_prefix}] Adding nack callback for [{msg.delivery_tag}]"
         )
@@ -164,7 +177,16 @@ class RabbitMQConsumer(Consumer):
 
         self.connection.add_callback_threadsafe(callback)
 
-    def iter(self) -> Generator[QueueMessage, None, None]:
+    def _deserialize(self, body: bytes) -> Union[QueueMessage, ControlQueueMessage]:
+        preexecution_data = PreExecution.model_validate(
+            deserialize(body.decode("utf-8"))
+        )
+        return QueueMessage(
+            preexecution=preexecution_data,
+            delivery_tag=0,  # This will be overwritten by iter
+        )
+
+    def iter(self) -> Generator[Union[QueueMessage, ControlQueueMessage], None, None]:
         AbstraLogger.info(f"[{self.logger_prefix}] Starting consumer iteration")
 
         while not self.stop_evt.is_set():
@@ -182,14 +204,10 @@ class RabbitMQConsumer(Consumer):
                         continue
 
                     try:
-                        preexecution_data = PreExecution.model_validate(
-                            deserialize(body.decode("utf-8"))
-                        )
+                        queue_message = self._deserialize(body)
+                        queue_message.delivery_tag = method.delivery_tag
 
-                        yield QueueMessage(
-                            preexecution=preexecution_data,
-                            delivery_tag=method.delivery_tag,
-                        )
+                        yield queue_message
                     except Exception as e:
                         AbstraLogger.error(
                             f"[{self.logger_prefix}] Error deserializing message: {e}"
@@ -254,16 +272,16 @@ class EditorConsumer(Consumer):
         self.stop_evt = Event()
         self.queue = queue
 
-    def threadsafe_nack(self, msg: QueueMessage):
+    def threadsafe_nack(self, msg: Union[QueueMessage, ControlQueueMessage]):
         pass
 
-    def threadsafe_ack(self, msg: QueueMessage):
+    def threadsafe_ack(self, msg: Union[QueueMessage, ControlQueueMessage]):
         pass
 
     def stop_iter(self):
         self.stop_evt.set()
 
-    def iter(self) -> Generator[QueueMessage, None, None]:
+    def iter(self) -> Generator[Union[QueueMessage, ControlQueueMessage], None, None]:
         while True:
             if self.stop_evt.is_set():
                 break
@@ -285,4 +303,20 @@ class WebEditorConsumer(RabbitMQConsumer):
     def __init__(self, conn_uri: str, queue_name: str = "web_editor_executions"):
         super().__init__(
             conn_uri, queue_name, EXECUTION_QUEUE_CONCURRENCY, "WebEditorConsumer"
+        )
+
+
+class WebEditorControlConsumer(RabbitMQConsumer):
+    """Consumer for web editor control messages."""
+
+    def __init__(self, conn_uri: str, queue_name: str = "web_editor_control"):
+        super().__init__(conn_uri, queue_name, 1, "WebEditorControlConsumer")
+
+    def _deserialize(self, body: bytes) -> ControlQueueMessage:
+        control_message = ControlMessage.model_validate(
+            deserialize(body.decode("utf-8"))
+        )
+        return ControlQueueMessage(
+            message=control_message,
+            delivery_tag=0,  # This will be overwritten by iter
         )

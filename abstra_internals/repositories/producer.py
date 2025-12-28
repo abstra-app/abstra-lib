@@ -180,3 +180,25 @@ class WebEditorProducerRepository(RabbitMQProducerRepository):
 
     def __init__(self, connection_uri: str, queue_name: str = "web_editor_executions"):
         super().__init__(connection_uri, queue_name)
+
+
+class WebEditorControlProducerRepository(RabbitMQProducerRepository):
+    """Producer repository for web editor control messages."""
+
+    def __init__(self, connection_uri: str):
+        super().__init__(connection_uri, "web_editor_control")
+
+    def stop_execution(self, execution_id: str):
+        from abstra_internals.repositories.consumer import ControlMessage
+
+        payload = ControlMessage(type="stop", payload={"execution_id": execution_id})
+
+        with self._connect_with_retry() as connection:
+            with connection.channel() as channel:
+                channel.queue_declare(queue=self.queue_name, durable=True)
+                channel.basic_publish(
+                    body=payload.dump_json(),
+                    routing_key=self.queue_name,
+                    exchange=RABBITMQ_DEFAUT_EXCHANGE,
+                    properties=self.props,
+                )
