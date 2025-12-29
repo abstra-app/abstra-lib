@@ -1,3 +1,4 @@
+import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing.process import BaseProcess
 from threading import Thread
@@ -98,6 +99,22 @@ class ConsumerController:
         if self.control_consumer:
             self.control_thread = Thread(target=self._control_loop, daemon=True)
             self.control_thread.start()
+
+        elapsed_time = 0
+        while not self.executor_pool.can_start_loop():
+            time.sleep(5)
+            elapsed_time += 5
+            if elapsed_time % 60 == 0:
+                AbstraLogger.warning(
+                    "[ConsumerController] Waiting for executor pool to be ready..."
+                    f"Elapsed time: {elapsed_time} seconds"
+                )
+
+            if elapsed_time >= 300:
+                AbstraLogger.error(
+                    "[ConsumerController] Executor pool not ready after 5 minutes. Exiting."
+                )
+                return
 
         try:
             self.executor = ThreadPoolExecutor(

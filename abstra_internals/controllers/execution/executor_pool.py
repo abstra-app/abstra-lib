@@ -174,7 +174,7 @@ class ExecutorPool:
         connection,
         rabbitmq_params: Optional[RabbitMQParams],
     ) -> ExecutorResponse:
-        max_wait = 60.0
+        max_wait = 120.0
         start_time = time.time()
         retry_count = 0
 
@@ -361,6 +361,18 @@ class ExecutorPool:
             "active_executions": active_executions_count,
             **metrics_summary,
         }
+
+    def can_start_loop(self) -> bool:
+        with self.lock:
+            executors = list(self.executors.values())
+
+        form_capable_idle = sum(
+            1
+            for e in executors
+            if e.status == ExecutorStatus.IDLE and e.can_handle_forms
+        )
+
+        return form_capable_idle > 0
 
     def _spawn_executor(self, can_handle_forms: bool) -> ExecutorHandle:
         executor_id = str(uuid4())[:8]
