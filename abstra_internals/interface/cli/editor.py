@@ -153,7 +153,6 @@ def editor(headless: bool, verbose: bool = False):
     if not headless:
         background_open_editor()
 
-    if not is_web_editor:
-        connect_tunnel(verbose=verbose)
+    connect_tunnel(verbose=verbose)
 
     server.serve_forever()
