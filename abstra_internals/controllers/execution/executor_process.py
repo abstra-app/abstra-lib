@@ -225,10 +225,18 @@ def handle_execute(
 
         signal.signal(signal.SIGTERM, sigterm_handler)
 
+        AbstraLogger.info(
+            f"[Executor] Starting execution (execution_id={request.execution_id})"
+        )
         execution_controller.run(execution_id=request.execution_id)
 
         total_time = time.time() - execution_start
         state.executions_completed += 1
+
+        AbstraLogger.info(
+            f"[Executor] Execution completed successfully "
+            f"(execution_id={request.execution_id}, time={total_time:.3f}s)"
+        )
 
         response_queue.put(
             ExecutorResponse(

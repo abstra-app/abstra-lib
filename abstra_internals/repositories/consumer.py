@@ -206,7 +206,8 @@ class RabbitMQConsumer(Consumer):
                     try:
                         queue_message = self._deserialize(body)
                         queue_message.delivery_tag = method.delivery_tag
-
+                        # ACK imediatamente antes do yield para evitar mensagens órfãs
+                        self.channel.basic_ack(delivery_tag=method.delivery_tag)
                         yield queue_message
                     except Exception as e:
                         AbstraLogger.error(

@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 import textwrap
@@ -12,6 +13,8 @@ from abstra_internals.settings import Settings
 
 class TestFileSystemService(TestCase):
     def setUp(self):
+        # Save original working directory to restore later
+        self.original_cwd = Path.cwd()
         self.test_dir = Path(mkdtemp()) / "test_rm_tree_dir"
         Settings.set_root_path(str(self.test_dir.absolute()))
         self.test_dir.mkdir(exist_ok=True)
@@ -21,6 +24,8 @@ class TestFileSystemService(TestCase):
         (self.test_dir / "symlink").symlink_to(self.test_dir / "subdir")
 
     def tearDown(self):
+        # Restore original working directory before cleaning up
+        os.chdir(self.original_cwd)
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir, ignore_errors=True)
         if Path("test_ignore_dir").exists():
@@ -64,6 +69,8 @@ class TestGitIgnoreCompatibility(TestCase):
     """Test suite to ensure FileSystemService.is_ignored follows gitignore rules correctly."""
 
     def setUp(self):
+        # Save original working directory to restore later
+        self.original_cwd = Path.cwd()
         self.test_dir = Path(mkdtemp()) / "gitignore_test"
         Settings.set_root_path(str(self.test_dir.absolute()))
         self.test_dir.mkdir(exist_ok=True)
@@ -113,6 +120,8 @@ class TestGitIgnoreCompatibility(TestCase):
             path.write_text("content")
 
     def tearDown(self):
+        # Restore original working directory before cleaning up
+        os.chdir(self.original_cwd)
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir, ignore_errors=True)
 

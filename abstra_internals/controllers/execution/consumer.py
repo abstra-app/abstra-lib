@@ -137,6 +137,9 @@ class ConsumerController:
                 app_id=self.app_id,
                 reason="Failed to set status",
             )
+        except Exception as e:
+            AbstraLogger.error(f"[ConsumerController] Error in main loop: {e}")
+            AbstraLogger.capture_exception(e)
         finally:
             if self.executor:
                 self.executor.shutdown(wait=True)
