@@ -69,12 +69,14 @@ class RabbitMQConsumer(Consumer):
         queue_name: str,
         concurrency: int,
         logger_prefix: str = "RabbitMQConsumer",
+        connection_factory=pika.BlockingConnection,
     ):
         self.concurrency = concurrency
         self.queue = queue_name
         self.conn_uri = conn_uri
         self.stop_evt = Event()
         self.logger_prefix = logger_prefix
+        self.connection_factory = connection_factory
 
         self._connect()
 
@@ -105,7 +107,7 @@ class RabbitMQConsumer(Consumer):
 
         for attempt in range(1, RABBITMQ_RETRY_MAX_ATTEMPTS + 1):
             try:
-                self.connection = pika.BlockingConnection(params)
+                self.connection = self.connection_factory(params)
                 self.channel = self.connection.channel()
                 self.channel.basic_qos(prefetch_count=self.concurrency)
                 self.channel.queue_declare(queue=self.queue, durable=True)
@@ -206,19 +208,32 @@ class RabbitMQConsumer(Consumer):
                     try:
                         queue_message = self._deserialize(body)
                         queue_message.delivery_tag = method.delivery_tag
-                        # ACK imediatamente antes do yield para evitar mensagens órfãs
-                        self.channel.basic_ack(delivery_tag=method.delivery_tag)
+                        # ACK é responsabilidade do caller via threadsafe_ack()
                         yield queue_message
                     except Exception as e:
                         AbstraLogger.error(
-                            f"[{self.logger_prefix}] Error deserializing message: {e}"
+                            f"[{self.logger_prefix}] Error processing message: {e}"
                         )
-                        self.channel.basic_nack(
-                            delivery_tag=method.delivery_tag, requeue=False
-                        )
+                        try:
+                            if self.channel.is_open:
+                                self.channel.basic_nack(
+                                    delivery_tag=method.delivery_tag, requeue=False
+                                )
+                        except Exception as nack_err:
+                            AbstraLogger.debug(
+                                f"[{self.logger_prefix}] Failed to nack after error: {nack_err}"
+                            )
 
             except AMQPError as e:
                 AbstraLogger.error(f"[{self.logger_prefix}] Connection lost: {e}")
+                # Ensure connection is cleared to force a clean reconnect in next loop iteration
+                if hasattr(self, "connection") and self.connection:
+                    try:
+                        self.connection.close()
+                    except Exception:
+                        pass
+                self.connection = None  # type: ignore
+
                 if not self.stop_evt.is_set():
                     AbstraLogger.info(
                         f"[{self.logger_prefix}] Reconnecting in {RABBITMQ_RETRY_INITIAL_DELAY_SECONDS}s..."
@@ -259,12 +274,13 @@ class RabbitMQConsumer(Consumer):
 class RabbitConsumer(RabbitMQConsumer):
     """Consumer for production environment using 'executions' queue."""
 
-    def __init__(self, conn_uri: str):
+    def __init__(self, conn_uri: str, connection_factory=pika.BlockingConnection):
         super().__init__(
             conn_uri,
             RABBITMQ_EXECUTION_QUEUE,
             EXECUTION_QUEUE_CONCURRENCY,
             "RabbitConsumer",
+            connection_factory=connection_factory,
         )
 
 
@@ -301,17 +317,37 @@ class EditorConsumer(Consumer):
 class WebEditorConsumer(RabbitMQConsumer):
     """Consumer for web editor using 'web_editor_executions' queue."""
 
-    def __init__(self, conn_uri: str, queue_name: str = "web_editor_executions"):
+    def __init__(
+        self,
+        conn_uri: str,
+        queue_name: str = "web_editor_executions",
+        connection_factory=pika.BlockingConnection,
+    ):
         super().__init__(
-            conn_uri, queue_name, EXECUTION_QUEUE_CONCURRENCY, "WebEditorConsumer"
+            conn_uri,
+            queue_name,
+            EXECUTION_QUEUE_CONCURRENCY,
+            "WebEditorConsumer",
+            connection_factory=connection_factory,
         )
 
 
 class WebEditorControlConsumer(RabbitMQConsumer):
     """Consumer for web editor control messages."""
 
-    def __init__(self, conn_uri: str, queue_name: str = "web_editor_control"):
-        super().__init__(conn_uri, queue_name, 1, "WebEditorControlConsumer")
+    def __init__(
+        self,
+        conn_uri: str,
+        queue_name: str = "web_editor_control",
+        connection_factory=pika.BlockingConnection,
+    ):
+        super().__init__(
+            conn_uri,
+            queue_name,
+            1,
+            "WebEditorControlConsumer",
+            connection_factory=connection_factory,
+        )
 
     def _deserialize(self, body: bytes) -> ControlQueueMessage:
         control_message = ControlMessage.model_validate(

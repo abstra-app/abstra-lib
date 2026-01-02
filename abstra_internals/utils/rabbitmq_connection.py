@@ -32,11 +32,13 @@ class RabbitMQConnection:
         recv_queue: str,
         execution_id: str,
         auto_start_consumer: bool = True,
+        connection_factory=pika.BlockingConnection,
     ):
         self.connection_uri = connection_uri
         self.send_queue = send_queue
         self.recv_queue = recv_queue
         self.execution_id = execution_id
+        self.connection_factory = connection_factory
         self._closed = False
         self._recv_buffer: Queue = Queue()
         self._consumer_thread: Optional[threading.Thread] = None
@@ -67,7 +69,7 @@ class RabbitMQConnection:
 
         for attempt in range(1, max_attempts + 1):
             try:
-                return pika.BlockingConnection(params)
+                return self.connection_factory(params)
             except AMQPConnectionError as e:
                 if attempt == max_attempts:
                     AbstraLogger.error(
@@ -115,57 +117,69 @@ class RabbitMQConnection:
 
     def _start_consumer(self):
         def consumer_loop():
-            try:
-                assert self._recv_channel is not None, "Receive channel not initialized"
-                for method, properties, body in self._recv_channel.consume(
-                    queue=self.recv_queue,
-                    auto_ack=True,
-                    inactivity_timeout=1.0,
-                ):
-                    if self._closed:
-                        break
-
-                    if method is None:
-                        continue
-
-                    try:
-                        # Try to determine content type from properties
-                        content_type = (
-                            properties.content_type
-                            if properties and hasattr(properties, "content_type")
-                            else "application/json"
-                        )
-
-                        # Mimic multiprocessing.Connection behavior:
-                        # - For pickle: deserialize to Python object
-                        # - For JSON: return as string (NOT deserialized dict)
-                        # This allows application code to work identically with both connection types
-                        if content_type == "application/python-pickle":
-                            # Pickle: deserialize and return object (like multiprocessing.Connection)
-                            message = pickle.loads(body)
-                        else:
-                            # JSON: return as string, let application layer deserialize
-                            # This matches the behavior of multiprocessing.Connection when
-                            # you send a string via conn.send(str)
-                            if isinstance(body, bytes):
-                                message = body.decode("utf-8")
-                            else:
-                                message = body
-
-                        self._recv_buffer.put(message)
-                    except Exception as e:
-                        AbstraLogger.error(
-                            f"[RabbitMQConnection:{self.execution_id}] Error processing message: {e}"
-                        )
-            except Exception as e:
-                if not self._closed:
-                    AbstraLogger.error(
-                        f"[RabbitMQConnection:{self.execution_id}] Consumer error: {e}"
+            iteration_count = 0
+            while not self._closed:
+                iteration_count += 1
+                if iteration_count % 10 == 0:
+                    AbstraLogger.warning(
+                        f"[RabbitMQConnection:{self.execution_id}] Consumer loop iteration {iteration_count}"
                     )
-            finally:
-                AbstraLogger.debug(
-                    f"[RabbitMQConnection:{self.execution_id}] Consumer thread ended"
-                )
+                try:
+                    if (
+                        not self._recv_connection
+                        or self._recv_connection.is_closed
+                        or not self._recv_channel
+                        or self._recv_channel.is_closed
+                    ):
+                        AbstraLogger.warning(
+                            f"[RabbitMQConnection:{self.execution_id}] Receiver connection lost, reconnecting..."
+                        )
+                        self._setup_connections()
+
+                    assert self._recv_channel is not None, (
+                        "Receive channel not initialized"
+                    )
+                    for method, properties, body in self._recv_channel.consume(
+                        queue=self.recv_queue,
+                        auto_ack=True,
+                        inactivity_timeout=1.0,
+                    ):
+                        if self._closed:
+                            break
+
+                        if method is None:
+                            continue
+
+                        try:
+                            # Try to determine content type from properties
+                            content_type = (
+                                properties.content_type
+                                if properties and hasattr(properties, "content_type")
+                                else "application/json"
+                            )
+
+                            if content_type == "application/python-pickle":
+                                message = pickle.loads(body)
+                            else:
+                                if isinstance(body, bytes):
+                                    message = body.decode("utf-8")
+                                else:
+                                    message = body
+
+                            self._recv_buffer.put(message)
+                        except Exception as e:
+                            AbstraLogger.error(
+                                f"[RabbitMQConnection:{self.execution_id}] Error processing message: {e}"
+                            )
+                except Exception as e:
+                    if not self._closed:
+                        AbstraLogger.error(
+                            f"[RabbitMQConnection:{self.execution_id}] Consumer error: {e}. Retrying in 1s..."
+                        )
+                        time.sleep(1)
+            AbstraLogger.debug(
+                f"[RabbitMQConnection:{self.execution_id}] Consumer thread ended"
+            )
 
         self._consumer_thread = threading.Thread(target=consumer_loop, daemon=True)
         self._consumer_thread.start()
