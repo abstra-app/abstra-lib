@@ -59,6 +59,13 @@ class TestReactive(BaseTest):
 
         ans = Page().read("a", initial_value="x").reactive(render).run()
 
+        # Wait for async message delivery (messages are sent through threads)
+        timeout = 1.0
+        elapsed = 0.0
+        while len(self.mock_ws.python_messages) < 1 and elapsed < timeout:
+            time.sleep(0.01)
+            elapsed += 0.01
+
         # Checking python sent message
         self.assertEqual(len(self.mock_ws.python_messages), 1)
         widgets = self.mock_ws.python_messages[0]["widgets"]

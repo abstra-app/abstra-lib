@@ -1,3 +1,4 @@
+import tempfile
 import unittest
 from io import BytesIO
 from pathlib import Path
@@ -24,6 +25,13 @@ class TestAiSDKController(unittest.TestCase):
         # Mock the AiApiHttpClient to isolate tests from external API calls
         self.mock_ai_client = MagicMock()
         self.controller = AiSDKController(self.mock_ai_client)
+        # Create a temporary directory for test files
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.temp_path = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        # Clean up temporary directory
+        self.temp_dir.cleanup()
 
     def test_extract_pdf_images(self):
         # Mock pdfium.PdfDocument to return a mock page
@@ -108,7 +116,7 @@ class TestAiSDKController(unittest.TestCase):
         self.assertEqual(result, [expected_message])
 
     def test_make_messages_from_path(self):
-        file_path = Path("test.pdf")
+        file_path = self.temp_path / "test.pdf"
         file_path.write_text("dummy content")  # Creating a dummy file
 
         with patch("builtins.open", MagicMock(return_value=BytesIO(b"fake content"))):
@@ -133,7 +141,7 @@ class TestAiSDKController(unittest.TestCase):
 
     def test_make_message_from_txt_path(self):
         # Create a dummy txt
-        file_path = Path("test.txt")
+        file_path = self.temp_path / "test.txt"
         file_path.write_text(content := "dummy content")
 
         result = self.controller._make_messages(file_path)
@@ -150,7 +158,7 @@ class TestAiSDKController(unittest.TestCase):
 
     def test_make_messages_with_txt_file_response(self):
         # Create a dummy txt
-        file_path = Path("test.txt")
+        file_path = self.temp_path / "test.txt"
         file_path.write_text(content := "dummy content")
 
         class MockFileResponse(FileResponse):
@@ -190,7 +198,7 @@ class TestAiSDKController(unittest.TestCase):
 
     def test_make_messages_with_txt_deprecated_file_response(self):
         # Create a dummy txt
-        file_path = Path("test.txt")
+        file_path = self.temp_path / "test.txt"
         file_path.write_text(content := "dummy content")
 
         class MockFileResponse(DeprecatedFileResponse):
@@ -252,7 +260,7 @@ class TestAiSDKController(unittest.TestCase):
         self.mock_ai_client.prompt.return_value = {"content": "Mocked AI response"}
 
         # save dummy file
-        file_path = Path("test.pdf")
+        file_path = self.temp_path / "test.pdf"
         file_path.write_text("dummy content")
 
         class MockFileResponse(FileResponse):
@@ -292,7 +300,7 @@ class TestAiSDKController(unittest.TestCase):
         self.mock_ai_client.prompt.return_value = {"content": "Mocked AI response"}
 
         # save dummy file
-        file_path = Path("test.pdf")
+        file_path = self.temp_path / "test.pdf"
         file_path.write_text("dummy content")
 
         class MockFileResponse(DeprecatedFileResponse):

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import BaseModel
 
-from abstra.ai import prompt
 from abstra.logging import logger
 
 from .drive_commands import commands
@@ -167,6 +166,8 @@ def experimental_prompt_browser(
         Dict containing the results of the browsing task
     """
     from selenium import webdriver
+
+    from abstra.ai import prompt
 
     ABSTRA_ENVIRONMENT = os.getenv("ABSTRA_ENVIRONMENT")
     ABSTRA_SELENIUM_URL = os.getenv("ABSTRA_SELENIUM_URL")

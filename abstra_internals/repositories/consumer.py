@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from multiprocessing import Queue
 from queue import Empty
 from threading import Event
-from typing import Generator, Union
+from typing import Generator, Optional, Type, Union
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
@@ -60,7 +60,7 @@ class RabbitMQConsumer(Consumer):
     """
 
     channel: BlockingChannel
-    connection: BlockingConnection
+    connection: Optional[BlockingConnection]
     conn_uri: str
 
     def __init__(
@@ -69,7 +69,7 @@ class RabbitMQConsumer(Consumer):
         queue_name: str,
         concurrency: int,
         logger_prefix: str = "RabbitMQConsumer",
-        connection_factory=pika.BlockingConnection,
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
     ):
         self.concurrency = concurrency
         self.queue = queue_name
@@ -132,6 +132,12 @@ class RabbitMQConsumer(Consumer):
         raise last_exception or AMQPConnectionError("Failed to connect to RabbitMQ")
 
     def threadsafe_ack(self, msg: Union[QueueMessage, ControlQueueMessage]):
+        if not self.connection:
+            AbstraLogger.warning(
+                f"[{self.logger_prefix}] Connection not established, cannot ack message [{msg.delivery_tag}]"
+            )
+            return
+
         AbstraLogger.debug(
             f"[{self.logger_prefix}] Adding ack callback for [{msg.delivery_tag}]"
         )
@@ -155,6 +161,12 @@ class RabbitMQConsumer(Consumer):
         self.connection.add_callback_threadsafe(callback)
 
     def threadsafe_nack(self, msg: Union[QueueMessage, ControlQueueMessage]):
+        if not self.connection:
+            AbstraLogger.warning(
+                f"[{self.logger_prefix}] Connection not established, cannot nack message [{msg.delivery_tag}]"
+            )
+            return
+
         AbstraLogger.debug(
             f"[{self.logger_prefix}] Adding nack callback for [{msg.delivery_tag}]"
         )
@@ -193,8 +205,16 @@ class RabbitMQConsumer(Consumer):
 
         while not self.stop_evt.is_set():
             try:
-                if not hasattr(self, "connection") or self.connection.is_closed:
+                if (
+                    not hasattr(self, "connection")
+                    or self.connection is None
+                    or self.connection.is_closed
+                ):
                     self._connect()
+
+                # At this point _connect() has either succeeded (setting self.connection) or raised exception
+                # But to satisfy type checker we assert it
+                assert self.connection is not None
 
                 for method, _, body in self.channel.consume(
                     queue=self.queue, inactivity_timeout=1, auto_ack=False
@@ -254,16 +274,18 @@ class RabbitMQConsumer(Consumer):
         self.stop_iter()
 
         AbstraLogger.debug(f"[{self.logger_prefix}] Exiting consumer context manager")
-        self.connection.process_data_events(time_limit=60)
-        AbstraLogger.warning(f"[{self.logger_prefix}] Data events processed")
 
-        if self.connection.is_open:
-            AbstraLogger.warning(f"[{self.logger_prefix}] Cancelling channel")
-            self.channel.cancel()
-            AbstraLogger.warning(f"[{self.logger_prefix}] Closing channel")
-            self.channel.close()
-            AbstraLogger.warning(f"[{self.logger_prefix}] Closing connection")
-            self.connection.close()
+        if self.connection:
+            self.connection.process_data_events(time_limit=60)
+            AbstraLogger.warning(f"[{self.logger_prefix}] Data events processed")
+
+            if self.connection.is_open:
+                AbstraLogger.warning(f"[{self.logger_prefix}] Cancelling channel")
+                self.channel.cancel()
+                AbstraLogger.warning(f"[{self.logger_prefix}] Closing channel")
+                self.channel.close()
+                AbstraLogger.warning(f"[{self.logger_prefix}] Closing connection")
+                self.connection.close()
 
         return False
 
@@ -274,7 +296,11 @@ class RabbitMQConsumer(Consumer):
 class RabbitConsumer(RabbitMQConsumer):
     """Consumer for production environment using 'executions' queue."""
 
-    def __init__(self, conn_uri: str, connection_factory=pika.BlockingConnection):
+    def __init__(
+        self,
+        conn_uri: str,
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
+    ):
         super().__init__(
             conn_uri,
             RABBITMQ_EXECUTION_QUEUE,
@@ -321,7 +347,7 @@ class WebEditorConsumer(RabbitMQConsumer):
         self,
         conn_uri: str,
         queue_name: str = "web_editor_executions",
-        connection_factory=pika.BlockingConnection,
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
     ):
         super().__init__(
             conn_uri,
@@ -339,7 +365,7 @@ class WebEditorControlConsumer(RabbitMQConsumer):
         self,
         conn_uri: str,
         queue_name: str = "web_editor_control",
-        connection_factory=pika.BlockingConnection,
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
     ):
         super().__init__(
             conn_uri,

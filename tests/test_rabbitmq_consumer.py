@@ -14,13 +14,12 @@ class TestRabbitMQConsumerACK(unittest.TestCase):
         self.logger_prefix = "TestConsumer"
 
     @patch("abstra_internals.repositories.consumer.time.sleep")
-    @patch("abstra_internals.repositories.consumer.pika.BlockingConnection")
-    def test_message_acked_before_yield(self, mock_connection_class, mock_sleep):
-        """Test that basic_ack is called immediately before yielding a message"""
+    def test_message_yielded_without_auto_ack(self, mock_sleep):
+        """Test that messages are yielded without auto-ack (caller is responsible for ack)"""
         # Setup mocks
         mock_connection = MagicMock()
         mock_channel = MagicMock()
-        mock_connection_class.return_value = mock_connection
+        mock_connection_factory = MagicMock(return_value=mock_connection)
         mock_connection.channel.return_value = mock_channel
         mock_connection.is_closed = False
 
@@ -29,19 +28,13 @@ class TestRabbitMQConsumerACK(unittest.TestCase):
         mock_method.delivery_tag = 123
         valid_json = b'{"execution_id": "test-exec-id", "stage_id": "test-stage", "context": {"mock_execution": {}}}'
 
-        # Track calls to basic_ack and yield
-        ack_called = False
-
-        def track_ack(*args, **kwargs):
-            nonlocal ack_called
-            ack_called = True
-            return True
-
-        mock_channel.basic_ack.side_effect = track_ack
-
-        # Create consumer first so we can reference it in the mock
+        # Create consumer with mock connection factory
         consumer = RabbitMQConsumer(
-            self.conn_uri, self.queue_name, self.concurrency, self.logger_prefix
+            self.conn_uri,
+            self.queue_name,
+            self.concurrency,
+            self.logger_prefix,
+            connection_factory=mock_connection_factory,
         )
 
         # Mock consume to yield message then None values until stop_evt
@@ -62,21 +55,18 @@ class TestRabbitMQConsumerACK(unittest.TestCase):
 
         # Assertions
         self.assertEqual(len(messages), 1, "Should receive exactly one message")
-        self.assertTrue(ack_called, "basic_ack should have been called")
-        mock_channel.basic_ack.assert_called_once_with(delivery_tag=123)
+        # ACK is NOT called automatically - it's the caller's responsibility via threadsafe_ack()
+        mock_channel.basic_ack.assert_not_called()
         self.assertIsInstance(messages[0], QueueMessage)
         self.assertEqual(messages[0].delivery_tag, 123)
 
     @patch("abstra_internals.repositories.consumer.time.sleep")
-    @patch("abstra_internals.repositories.consumer.pika.BlockingConnection")
-    def test_message_nacked_on_deserialization_error(
-        self, mock_connection_class, mock_sleep
-    ):
+    def test_message_nacked_on_deserialization_error(self, mock_sleep):
         """Test that basic_nack is called when deserialization fails"""
         # Setup mocks
         mock_connection = MagicMock()
         mock_channel = MagicMock()
-        mock_connection_class.return_value = mock_connection
+        mock_connection_factory = MagicMock(return_value=mock_connection)
         mock_connection.channel.return_value = mock_channel
         mock_connection.is_closed = False
 
@@ -85,9 +75,13 @@ class TestRabbitMQConsumerACK(unittest.TestCase):
         mock_method.delivery_tag = 456
         invalid_json = b"invalid json"
 
-        # Create consumer first so we can reference it in the mock
+        # Create consumer with mock connection factory
         consumer = RabbitMQConsumer(
-            self.conn_uri, self.queue_name, self.concurrency, self.logger_prefix
+            self.conn_uri,
+            self.queue_name,
+            self.concurrency,
+            self.logger_prefix,
+            connection_factory=mock_connection_factory,
         )
 
         # Mock consume to yield invalid message then None values
@@ -122,17 +116,20 @@ class TestRabbitMQConsumerACK(unittest.TestCase):
         mock_channel.basic_nack.assert_called_once_with(delivery_tag=456, requeue=False)
         mock_channel.basic_ack.assert_not_called()
 
-    @patch("abstra_internals.repositories.consumer.pika.BlockingConnection")
-    def test_threadsafe_ack_callback(self, mock_connection_class):
+    def test_threadsafe_ack_callback(self):
         """Test that threadsafe_ack properly schedules callback"""
         mock_connection = MagicMock()
         mock_channel = MagicMock()
-        mock_connection_class.return_value = mock_connection
+        mock_connection_factory = MagicMock(return_value=mock_connection)
         mock_connection.channel.return_value = mock_channel
         mock_connection.is_closed = False
 
         consumer = RabbitMQConsumer(
-            self.conn_uri, self.queue_name, self.concurrency, self.logger_prefix
+            self.conn_uri,
+            self.queue_name,
+            self.concurrency,
+            self.logger_prefix,
+            connection_factory=mock_connection_factory,
         )
 
         # Create mock message
@@ -145,17 +142,20 @@ class TestRabbitMQConsumerACK(unittest.TestCase):
         # Verify callback was scheduled
         mock_connection.add_callback_threadsafe.assert_called_once()
 
-    @patch("abstra_internals.repositories.consumer.pika.BlockingConnection")
-    def test_threadsafe_nack_callback(self, mock_connection_class):
+    def test_threadsafe_nack_callback(self):
         """Test that threadsafe_nack properly schedules callback"""
         mock_connection = MagicMock()
         mock_channel = MagicMock()
-        mock_connection_class.return_value = mock_connection
+        mock_connection_factory = MagicMock(return_value=mock_connection)
         mock_connection.channel.return_value = mock_channel
         mock_connection.is_closed = False
 
         consumer = RabbitMQConsumer(
-            self.conn_uri, self.queue_name, self.concurrency, self.logger_prefix
+            self.conn_uri,
+            self.queue_name,
+            self.concurrency,
+            self.logger_prefix,
+            connection_factory=mock_connection_factory,
         )
 
         # Create mock message

@@ -28,6 +28,9 @@ class MockExecutorPool:
     def shutdown(self):
         pass
 
+    def can_start_loop(self):
+        return True
+
 
 class FaultyControlConsumer(Consumer):
     def __init__(self, queue: Queue):

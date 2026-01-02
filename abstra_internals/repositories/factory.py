@@ -82,6 +82,7 @@ from abstra_internals.repositories.users import (
     ProductionUsersRepository,
     UsersRepository,
 )
+from abstra_internals.utils.multiprocessing import safe_multiprocessing_queue
 
 
 def get_mp_context_repository() -> MPContextReposity:
@@ -121,7 +122,7 @@ def build_editor_repositories(local_queue: Optional[Queue] = None):
     mp_context = get_mp_context_repository()
 
     if local_queue is None:
-        local_queue = mp_context.get_context().Queue()
+        local_queue = safe_multiprocessing_queue(mp_context.get_context())
 
     http_client = HTTPClient(
         base_url=CLOUD_API_CLI_URL, base_headers_resolver=resolve_headers_raise

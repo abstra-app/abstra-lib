@@ -23,6 +23,7 @@ from abstra_internals.controllers.execution.executor_process import (
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.repositories.project.project import StageType, StageWithFile
+from abstra_internals.utils.multiprocessing import safe_multiprocessing_queue
 
 
 class ExecutorStatus(str, Enum):
@@ -376,8 +377,8 @@ class ExecutorPool:
 
     def _spawn_executor(self, can_handle_forms: bool) -> ExecutorHandle:
         executor_id = str(uuid4())[:8]
-        work_queue = self.mp_context.Queue()
-        response_queue = self.mp_context.Queue()
+        work_queue = safe_multiprocessing_queue(self.mp_context)
+        response_queue = safe_multiprocessing_queue(self.mp_context)
 
         p = self.mp_context.Process(
             target=executor_main,

@@ -31,6 +31,7 @@ from abstra_internals.settings import Settings
 from abstra_internals.stdio_patcher import StdioPatcher
 from abstra_internals.tasks_watcher import TasksWatcher, on_tasks_update
 from abstra_internals.utils.browser import background_open_editor
+from abstra_internals.utils.multiprocessing import safe_multiprocessing_queue
 from abstra_internals.version import check_latest_version
 
 
@@ -120,7 +121,7 @@ def editor(headless: bool, verbose: bool = False):
         else:
             AbstraLogger.info("[Editor] Running in local editor mode")
         mp_context = get_mp_context_repository()
-        local_queue = mp_context.get_context().Queue()
+        local_queue = safe_multiprocessing_queue(mp_context.get_context())
         repositories = build_editor_repositories(local_queue)
 
     main_controller = MainController(repositories)

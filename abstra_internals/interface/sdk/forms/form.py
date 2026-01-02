@@ -1,6 +1,6 @@
 import inspect
 import types
-from typing import Dict, List, Optional, Union, cast, overload
+from typing import Dict, List, Optional, Sequence, Union, cast, overload
 
 from abstra_internals.controllers.sdk.sdk_context import SDKContextStore
 from abstra_internals.controllers.sdk.sdk_forms import FormSDKController
@@ -21,7 +21,12 @@ from abstra_internals.interface.sdk.forms.exceptions import InvalidRunInputError
 from abstra_internals.utils.code import always_returns_none
 
 Runnable = Union[
-    Step, TemplateFunction, Template, TemplateGeneratorFunction, types.FunctionType
+    Step,
+    TemplateFunction,
+    Template,
+    TemplateGeneratorFunction,
+    types.FunctionType,
+    Sequence[Widget],
 ]
 
 
@@ -51,7 +56,7 @@ class Form:
 
     def __init__(
         self,
-        runnables: List[Runnable],
+        runnables: Sequence[Runnable],
         *,
         initial_state: Optional[Dict] = None,
         hide_steps: bool = False,
@@ -69,7 +74,7 @@ class Form:
 
 @overload
 def run(
-    runnables: List[Runnable],
+    runnables: Sequence[Runnable],
     state: Optional[Dict] = None,
     hide_steps: bool = False,
 ) -> State: ...
@@ -84,7 +89,7 @@ def run(
 
 
 def run(
-    runnables: Union[List["Runnable"], "Widget"],
+    runnables: Union[Sequence["Runnable"], "Widget"],
     state: Optional[Dict] = None,
     hide_steps: bool = False,
 ) -> Union[State, None, object]:
@@ -95,7 +100,7 @@ def run(
     2. Running a single widget to get its value
 
     Args:
-        runnables (Union[List[Runnable], Widget]): Either a list of form steps or a single widget.
+        runnables (Union[Sequence[Runnable], Widget]): Either a list of form steps or a single widget.
         state (Optional[Dict]): Initial state values for the form.
         hide_steps (bool): Whether to hide steps navigation in the UI.
 
@@ -133,7 +138,7 @@ def run(
     if isinstance(runnables, Widget):
         state = Form([[runnables]], initial_state=state, hide_steps=hide_steps).run()
         if isinstance(runnables, InputWidget):
-            return state[runnables._ensure_key]
+            return state[runnables._ensure_key(0)]
         return None
 
     return Form(runnables, initial_state=state, hide_steps=hide_steps).run()

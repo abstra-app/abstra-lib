@@ -3,7 +3,7 @@ import pickle
 import threading
 import time
 from queue import Empty, Queue
-from typing import Any, Optional
+from typing import Any, Optional, Type
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
@@ -32,7 +32,7 @@ class RabbitMQConnection:
         recv_queue: str,
         execution_id: str,
         auto_start_consumer: bool = True,
-        connection_factory=pika.BlockingConnection,
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
     ):
         self.connection_uri = connection_uri
         self.send_queue = send_queue
@@ -160,6 +160,16 @@ class RabbitMQConnection:
 
                             if content_type == "application/python-pickle":
                                 message = pickle.loads(body)
+                            elif content_type == "application/json":
+                                if isinstance(body, bytes):
+                                    decoded_body = body.decode("utf-8")
+                                else:
+                                    decoded_body = body
+                                try:
+                                    message = json.loads(decoded_body)
+                                except json.JSONDecodeError:
+                                    # Fallback to raw string if not valid JSON (though it should be)
+                                    message = decoded_body
                             else:
                                 if isinstance(body, bytes):
                                     message = body.decode("utf-8")
@@ -195,10 +205,10 @@ class RabbitMQConnection:
         try:
             # Try JSON serialization first (preferred for compatibility)
             try:
-                # If it's already a string (pre-serialized), use it directly
+                # If it's already a string, treat it as text/plain to preserve type parity with local Queue
                 if isinstance(obj, str):
                     body = obj.encode("utf-8")
-                    content_type = "application/json"
+                    content_type = "text/plain"
                 # If it has a dump() method (Pydantic/Serializable), serialize it first
                 elif hasattr(obj, "dump") and callable(obj.dump):
                     body = json.dumps(obj.dump()).encode("utf-8")
