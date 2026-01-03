@@ -2,7 +2,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing.process import BaseProcess
 from threading import Thread
-from typing import Dict, Optional, cast
+from typing import TYPE_CHECKING, Dict, Optional, cast
 from uuid import uuid4
 
 from abstra_internals.controllers.execution.executor_config import ExecutorConfig
@@ -23,6 +23,9 @@ from abstra_internals.repositories.consumer import (
 from abstra_internals.repositories.producer import LocalProducerRepository
 from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
+
+if TYPE_CHECKING:
+    from abstra_internals.cloud.metrics_reporter import MetricsReporter
 
 
 class StageNotFound(Exception):
@@ -46,6 +49,7 @@ class ConsumerController:
         self.app_id = str(uuid4())
         self.concurrency = EXECUTION_QUEUE_CONCURRENCY
         self.executor: Optional[ThreadPoolExecutor] = None
+        self.metrics_reporter: Optional["MetricsReporter"] = None
 
         self.active_processes: Dict[int, BaseProcess] = {}
 
@@ -64,6 +68,14 @@ class ConsumerController:
             parent_executions_queue=local_queue,
             verbose=IS_PRODUCTION,
         )
+
+        # Initialize metrics reporter if endpoint is configured
+        try:
+            from abstra_internals.cloud.metrics_reporter import create_metrics_reporter
+
+            self.metrics_reporter = create_metrics_reporter(self.executor_pool)
+        except ImportError:
+            pass
 
     def _control_loop(self):
         if not self.control_consumer:
@@ -95,6 +107,9 @@ class ConsumerController:
     def start_loop(self):
         if self.executor_pool:
             self.executor_pool.start()
+
+        if self.metrics_reporter:
+            self.metrics_reporter.start()
 
         if self.control_consumer:
             self.control_thread = Thread(target=self._control_loop, daemon=True)
@@ -141,6 +156,8 @@ class ConsumerController:
             AbstraLogger.error(f"[ConsumerController] Error in main loop: {e}")
             AbstraLogger.capture_exception(e)
         finally:
+            if self.metrics_reporter:
+                self.metrics_reporter.stop()
             if self.executor:
                 self.executor.shutdown(wait=True)
                 self.executor = None
