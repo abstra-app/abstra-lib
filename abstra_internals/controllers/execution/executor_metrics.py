@@ -39,7 +39,7 @@ class ExecutorMetrics:
     avg_execution_time_ms: float = 0.0
     last_execution_time: Optional[float] = None
     is_alive: bool = True
-    can_handle_forms: bool = True
+    is_form_reserved: bool = True
 
     def record_execution(self, success: bool, execution_time_ms: float) -> None:
         if success:
@@ -82,13 +82,13 @@ class MetricsCollector:
         self.metrics_log_interval_seconds = 60.0
 
     def record_executor_spawned(
-        self, executor_id: str, spawn_time: float, can_handle_forms: bool
+        self, executor_id: str, spawn_time: float, is_form_reserved: bool
     ) -> None:
         with self.lock:
             self.executor_metrics[executor_id] = ExecutorMetrics(
                 executor_id=executor_id,
                 spawn_time=spawn_time,
-                can_handle_forms=can_handle_forms,
+                is_form_reserved=is_form_reserved,
             )
 
     def record_executor_warmup(
@@ -172,7 +172,7 @@ class MetricsCollector:
         form_executors = sum(
             1
             for e in self.executor_metrics.values()
-            if e.is_alive and e.can_handle_forms
+            if e.is_alive and e.is_form_reserved
         )
 
         warmup_times = [

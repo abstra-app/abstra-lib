@@ -42,7 +42,7 @@ class ExecutorHandle:
     response_queue: Queue
     status: ExecutorStatus
     pid: Optional[int] = None
-    can_handle_forms: bool = True
+    is_form_reserved: bool = True
     executions_completed: int = 0
     current_execution_id: Optional[str] = None
     spawn_time: float = field(default_factory=time.time)
@@ -58,11 +58,6 @@ class ExecutorHandle:
 
     def is_ready(self) -> bool:
         return self.status == ExecutorStatus.IDLE and self.is_alive()
-
-    def can_handle_stage(self, stage_type: StageType) -> bool:
-        if stage_type == "form":
-            return self.can_handle_forms
-        return True
 
     def mark_busy(self, execution_id: str) -> None:
         self.status = ExecutorStatus.BUSY
@@ -120,14 +115,14 @@ class ExecutorPool:
     def start(self) -> None:
         with self.lock:
             for i in range(self.config.total_executors):
-                can_handle_forms = i < self.config.min_form_executors
-                executor = self._spawn_executor(can_handle_forms=can_handle_forms)
+                is_form_reserved = i < self.config.min_form_executors
+                executor = self._spawn_executor(is_form_reserved=is_form_reserved)
                 self.executors[executor.executor_id] = executor
                 if self.verbose:
                     AbstraLogger.warning(
                         f"[ExecutorPool] Spawned executor {i + 1}/{self.config.total_executors} "
                         f"(executor_id={executor.executor_id}, pid={executor.pid}, "
-                        f"can_handle_forms={can_handle_forms})"
+                        f"is_form_reserved={is_form_reserved})"
                     )
 
             for executor in list(self.executors.values()):
@@ -325,8 +320,8 @@ class ExecutorPool:
 
         executor.kill()
 
-        can_handle_forms = executor.can_handle_forms
-        replacement = self._spawn_executor(can_handle_forms=can_handle_forms)
+        is_form_reserved = executor.is_form_reserved
+        replacement = self._spawn_executor(is_form_reserved=is_form_reserved)
 
         with self.lock:
             self.executors[replacement.executor_id] = replacement
@@ -349,7 +344,7 @@ class ExecutorPool:
         form_capable_idle = sum(
             1
             for e in executors
-            if e.status == ExecutorStatus.IDLE and e.can_handle_forms
+            if e.status == ExecutorStatus.IDLE and e.is_form_reserved
         )
 
         return {
@@ -370,12 +365,12 @@ class ExecutorPool:
         form_capable_idle = sum(
             1
             for e in executors
-            if e.status == ExecutorStatus.IDLE and e.can_handle_forms
+            if e.status == ExecutorStatus.IDLE and e.is_form_reserved
         )
 
         return form_capable_idle > 0
 
-    def _spawn_executor(self, can_handle_forms: bool) -> ExecutorHandle:
+    def _spawn_executor(self, is_form_reserved: bool) -> ExecutorHandle:
         executor_id = str(uuid4())[:8]
         work_queue = safe_multiprocessing_queue(self.mp_context)
         response_queue = safe_multiprocessing_queue(self.mp_context)
@@ -402,13 +397,13 @@ class ExecutorPool:
             response_queue=response_queue,
             status=ExecutorStatus.SPAWNING,
             pid=p.pid,
-            can_handle_forms=can_handle_forms,
+            is_form_reserved=is_form_reserved,
         )
 
         self.metrics.record_executor_spawned(
             executor_id=executor_id,
             spawn_time=time.time(),
-            can_handle_forms=can_handle_forms,
+            is_form_reserved=is_form_reserved,
         )
 
         return executor
@@ -426,31 +421,31 @@ class ExecutorPool:
         self, stage_type: StageType, execution_id: str
     ) -> Optional[ExecutorHandle]:
         with self.lock:
-            candidates: List[ExecutorHandle] = []
+            idle: List[ExecutorHandle] = []
             for e in self.executors.values():
-                if e.status == ExecutorStatus.IDLE and e.can_handle_stage(stage_type):
-                    if e.is_alive():
-                        candidates.append(e)
-                    else:
-                        e.mark_dead()
-                        self.metrics.record_executor_died(e.executor_id)
+                if e.status != ExecutorStatus.IDLE:
+                    continue
+                if not e.is_alive():
+                    e.mark_dead()
+                    self.metrics.record_executor_died(e.executor_id)
+                    continue
+                idle.append(e)
 
-            if not candidates:
+            if not idle:
                 return None
+
+            form_executors = [e for e in idle if e.is_form_reserved]
+            non_form_executors = [e for e in idle if not e.is_form_reserved]
 
             if stage_type == "form":
-                executor = candidates[0]
+                pool = form_executors or non_form_executors
             else:
-                non_form_executors = [e for e in candidates if not e.can_handle_forms]
-                if non_form_executors:
-                    executor = non_form_executors[0]
-                else:
-                    executor = candidates[0]
+                pool = non_form_executors
 
-            if not executor.is_alive():
-                executor.mark_dead()
-                self.metrics.record_executor_died(executor.executor_id)
+            if not pool:
                 return None
+
+            executor = pool[0]
 
             executor.mark_busy(execution_id)
             self.execution_to_executor[execution_id] = executor.executor_id
@@ -484,8 +479,8 @@ class ExecutorPool:
         if should_recycle:
             executor.kill()
 
-            can_handle_forms = executor.can_handle_forms
-            replacement = self._spawn_executor(can_handle_forms=can_handle_forms)
+            is_form_reserved = executor.is_form_reserved
+            replacement = self._spawn_executor(is_form_reserved=is_form_reserved)
 
             with self.lock:
                 self.executors[replacement.executor_id] = replacement
@@ -546,7 +541,7 @@ class ExecutorPool:
                         self.executors.pop(dead_executor.executor_id, None)
 
                     replacement = self._spawn_executor(
-                        can_handle_forms=dead_executor.can_handle_forms
+                        is_form_reserved=dead_executor.is_form_reserved
                     )
 
                     with self.lock:
