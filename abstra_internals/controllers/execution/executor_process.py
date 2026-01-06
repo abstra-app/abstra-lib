@@ -187,6 +187,7 @@ def handle_execute(
         )
         return
 
+    rabbitmq_connection_to_close = None
     try:
         Settings.set_root_path(root_path)
         Settings.set_server_port(server_port, force=True)
@@ -198,12 +199,13 @@ def handle_execute(
 
         actual_connection = request.connection
         if request.rabbitmq_params is not None:
-            actual_connection = RabbitMQConnection(
+            rabbitmq_connection_to_close = RabbitMQConnection(
                 connection_uri=request.rabbitmq_params.connection_uri,
                 send_queue=f"worker_to_server_{request.rabbitmq_params.execution_id}",
                 recv_queue=f"server_to_worker_{request.rabbitmq_params.execution_id}",
                 execution_id=request.rabbitmq_params.execution_id,
             )
+            actual_connection = rabbitmq_connection_to_close
 
         if actual_connection is None:
             raise Exception("No connection available")
@@ -260,6 +262,15 @@ def handle_execute(
                 error=str(e),
             )
         )
+    finally:
+        if rabbitmq_connection_to_close is not None:
+            try:
+                rabbitmq_connection_to_close.close()
+                AbstraLogger.debug(
+                    f"[Executor] Closed RabbitMQ connection for execution_id={request.execution_id}"
+                )
+            except Exception as e:
+                AbstraLogger.error(f"[Executor] Error closing RabbitMQ connection: {e}")
 
 
 def executor_main(

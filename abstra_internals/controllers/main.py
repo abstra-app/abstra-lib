@@ -2059,17 +2059,20 @@ class MainController:
             return {"status": "disabled"}
 
         conn = self.repositories.producer.enqueue(id, context=JobContext())
-        start_msg = conn.recv()
+        try:
+            start_msg = conn.recv()
 
-        if isinstance(start_msg, str):
-            start_msg = json.loads(start_msg)
+            if isinstance(start_msg, str):
+                start_msg = json.loads(start_msg)
 
-        start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
+            start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
 
-        return {
-            "ok": True,
-            "execution_id": start_msg.execution_id,
-        }
+            return {
+                "ok": True,
+                "execution_id": start_msg.execution_id,
+            }
+        finally:
+            conn.close()
 
     def run_hook(self, id: str, request: Request):
         """
@@ -2158,14 +2161,17 @@ class MainController:
             id, context=ScriptContext(task_id=task_id)
         )
 
-        start_msg = conn.recv()
+        try:
+            start_msg = conn.recv()
 
-        if isinstance(start_msg, str):
-            start_msg = json.loads(start_msg)
+            if isinstance(start_msg, str):
+                start_msg = json.loads(start_msg)
 
-        start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
+            start_msg = ExecutionStartedMessage(execution_id=start_msg["executionId"])
 
-        return {"ok": True, "execution_id": start_msg.execution_id}
+            return {"ok": True, "execution_id": start_msg.execution_id}
+        finally:
+            conn.close()
 
     def execute_code_snippet(self, code: str, title: str = "Debug Snippet"):
         """

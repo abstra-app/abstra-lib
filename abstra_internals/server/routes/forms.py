@@ -19,6 +19,7 @@ def get_editor_bp(controller: MainController):
 
     @sock.route("/socket")
     def _websocket(ws: flask_sock.Server):
+        connection = None
         try:
             context = FormContext(
                 request=extract_flask_request(flask.request),
@@ -38,6 +39,11 @@ def get_editor_bp(controller: MainController):
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
+            if connection is not None:
+                try:
+                    connection.close()
+                except Exception as e:
+                    AbstraLogger.capture_exception(e)
             ws.close(message="Done")
 
     @bp.get("/")

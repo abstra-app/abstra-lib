@@ -104,6 +104,7 @@ def get_player_bp(controller: MainController):
     @guard.socket_by(QueryArgSelector("id"))
     def _websocket(ws: flask_sock.Server):
         context = FormContext(request=extract_flask_request(flask.request))
+        connection = None
 
         try:
             id = flask.request.args.get("id")
@@ -119,6 +120,11 @@ def get_player_bp(controller: MainController):
         except Exception as e:
             AbstraLogger.capture_exception(e)
         finally:
+            if connection is not None:
+                try:
+                    connection.close()
+                except Exception as e:
+                    AbstraLogger.capture_exception(e)
             ws.close(message="Done")
 
     @bp.put("/_files")
@@ -240,7 +246,11 @@ def get_player_bp(controller: MainController):
         if status == "disabled":
             return {"status": "disabled"}
 
-        controller.repositories.producer.enqueue(id, context=JobContext())
+        conn = controller.repositories.producer.enqueue(id, context=JobContext())
+        try:
+            conn.recv()
+        finally:
+            conn.close()
 
         return {"status": "running"}
 

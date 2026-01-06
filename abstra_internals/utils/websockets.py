@@ -63,6 +63,10 @@ def bind_ws_with_connection(ws: WsLike, conn: ConnectionProtocol, block: bool):
                     ws.close()
                 except Exception:
                     pass
+                try:
+                    conn.close()
+                except Exception:
+                    pass
                 break
 
     def client_loop():
@@ -72,6 +76,10 @@ def bind_ws_with_connection(ws: WsLike, conn: ConnectionProtocol, block: bool):
             except (EOFError, BrokenPipeError, ConnectionResetError, OSError):
                 try:
                     ws.close()
+                except Exception:
+                    pass
+                try:
+                    conn.close()
                 except Exception:
                     pass
                 break
