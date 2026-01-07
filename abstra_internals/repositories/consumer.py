@@ -11,7 +11,7 @@ from pika.adapters.blocking_connection import BlockingChannel, BlockingConnectio
 from pika.exceptions import AMQPConnectionError, AMQPError
 
 from abstra_internals.environment import (
-    EXECUTION_QUEUE_CONCURRENCY,
+    ABSTRA_EXECUTOR_POOL_SIZE,
     RABBITMQ_CONNECTION_TIMEOUT_SECONDS,
     RABBITMQ_EXECUTION_QUEUE,
     RABBITMQ_RETRY_INITIAL_DELAY_SECONDS,
@@ -304,7 +304,7 @@ class RabbitConsumer(RabbitMQConsumer):
         super().__init__(
             conn_uri,
             RABBITMQ_EXECUTION_QUEUE,
-            EXECUTION_QUEUE_CONCURRENCY,
+            ABSTRA_EXECUTOR_POOL_SIZE,
             "RabbitConsumer",
             connection_factory=connection_factory,
         )
@@ -352,7 +352,7 @@ class WebEditorConsumer(RabbitMQConsumer):
         super().__init__(
             conn_uri,
             queue_name,
-            EXECUTION_QUEUE_CONCURRENCY,
+            ABSTRA_EXECUTOR_POOL_SIZE,
             "WebEditorConsumer",
             connection_factory=connection_factory,
         )

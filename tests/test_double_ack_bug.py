@@ -1642,7 +1642,7 @@ class TestRabbitConsumerEnvironment(unittest.TestCase):
                 "test-executions",
             ):
                 with patch(
-                    "abstra_internals.repositories.consumer.EXECUTION_QUEUE_CONCURRENCY",
+                    "abstra_internals.repositories.consumer.ABSTRA_EXECUTOR_POOL_SIZE",
                     3,
                 ):
                     consumer = RabbitConsumer(

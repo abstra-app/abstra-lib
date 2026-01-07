@@ -438,7 +438,7 @@ class ExecutorPool:
             non_form_executors = [e for e in idle if not e.is_form_reserved]
 
             if stage_type == "form":
-                pool = form_executors or non_form_executors
+                pool = form_executors + non_form_executors
             else:
                 pool = non_form_executors
 

@@ -10,7 +10,7 @@ from abstra_internals.controllers.execution.executor_pool import ExecutorPool
 from abstra_internals.controllers.execution.executor_process import RabbitMQParams
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import (
-    EXECUTION_QUEUE_CONCURRENCY,
+    ABSTRA_EXECUTOR_POOL_SIZE,
     IS_PRODUCTION,
     RABBITMQ_CONNECTION_URI,
 )
@@ -47,7 +47,7 @@ class ConsumerController:
         self.consumer = consumer
         self.control_consumer = control_consumer
         self.app_id = str(uuid4())
-        self.concurrency = EXECUTION_QUEUE_CONCURRENCY
+        self.concurrency = ABSTRA_EXECUTOR_POOL_SIZE
         self.executor: Optional[ThreadPoolExecutor] = None
         self.metrics_reporter: Optional["MetricsReporter"] = None
 
@@ -133,6 +133,7 @@ class ConsumerController:
 
         try:
             self.executor = ThreadPoolExecutor(
+                max_workers=self.concurrency,
                 thread_name_prefix="ExecutionConsumer",
             )
 
@@ -171,9 +172,10 @@ class ConsumerController:
 
     def run_subprocess(self, msg: QueueMessage) -> None:
         worker_id = str(uuid4())
-
+        execution_id = msg.preexecution.execution_id
         connection = None
         rabbitmq_params = None
+        message_handled = False
 
         try:
             stage = self.main_controller.get_stage(msg.preexecution.stage_id)
@@ -184,6 +186,7 @@ class ConsumerController:
                     f"Aborting execution. Message [{msg.delivery_tag}] will be acknowledged."
                 )
                 self.consumer.threadsafe_ack(msg)
+                message_handled = True
                 return
 
             if isinstance(
@@ -197,14 +200,14 @@ class ConsumerController:
                 )
                 rabbitmq_params = RabbitMQParams(
                     connection_uri=RABBITMQ_CONNECTION_URI,
-                    execution_id=msg.preexecution.execution_id,
+                    execution_id=execution_id,
                 )
 
             response = self.executor_pool.execute(
                 stage=cast(StageWithFile, stage),
                 worker_id=worker_id,
                 app_id=self.app_id,
-                execution_id=msg.preexecution.execution_id,
+                execution_id=execution_id,
                 request=msg.preexecution.context,
                 connection=connection,
                 rabbitmq_params=rabbitmq_params,
@@ -214,23 +217,41 @@ class ConsumerController:
                 raise NonCleanExit(f"Execution failed: {response.error}")
 
             self.consumer.threadsafe_ack(msg)
+            message_handled = True
 
         except Exception as e:
             AbstraLogger.error(
                 f"[ConsumerController] Error processing message [{msg.delivery_tag}]: {e}"
             )
-
             AbstraLogger.capture_exception(e)
 
-            self.main_controller.fail_worker_executions(
-                app_id=self.app_id,
-                worker_id=worker_id,
-                reason=f"{e}",
-            )
+            try:
+                self.main_controller.fail_worker_executions(
+                    app_id=self.app_id,
+                    worker_id=worker_id,
+                    reason=f"{e}",
+                )
+                self.main_controller.fail_execution(
+                    execution_id=execution_id,
+                    reason=f"{e}",
+                )
+            except Exception as db_error:
+                AbstraLogger.error(
+                    f"[ConsumerController] Failed to update execution status in DB: {db_error}"
+                )
+                AbstraLogger.capture_exception(db_error)
 
-            self.main_controller.fail_execution(
-                execution_id=msg.preexecution.execution_id,
-                reason=f"{e}",
-            )
+            self.consumer.threadsafe_ack(msg)
+            message_handled = True
 
-            self.consumer.threadsafe_nack(msg)
+        finally:
+            if not message_handled:
+                AbstraLogger.error(
+                    f"[ConsumerController] Message [{msg.delivery_tag}] was not handled properly, nacking"
+                )
+                try:
+                    self.consumer.threadsafe_nack(msg)
+                except Exception as nack_error:
+                    AbstraLogger.error(
+                        f"[ConsumerController] Failed to nack message [{msg.delivery_tag}]: {nack_error}"
+                    )
