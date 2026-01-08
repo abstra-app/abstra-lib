@@ -350,11 +350,38 @@ class RabbitMQConnection:
             raise TimeoutError("No message received within timeout")
 
     def poll(self, timeout: float = 0.0) -> bool:
-        """Check if there are messages available (compatible with Connection.poll)."""
+        """Check if there are messages available (compatible with Connection.poll).
+
+        If timeout > 0, waits up to timeout seconds for a message to be available.
+        Returns True if a message is available, False otherwise.
+        """
         self._ensure_consumer_started()
 
         if self._closed:
             return False
+
+        # If there's already data in buffer, return immediately
+        if not self._recv_buffer.empty():
+            return True
+
+        # If timeout is 0, return immediately
+        if timeout <= 0:
+            return False
+
+        # Wait for data with timeout using small intervals
+        # This allows checking _closed periodically
+        check_interval = 0.1
+        elapsed = 0.0
+
+        while elapsed < timeout:
+            if self._closed:
+                return False
+            if not self._recv_buffer.empty():
+                return True
+
+            sleep_time = min(check_interval, timeout - elapsed)
+            time.sleep(sleep_time)
+            elapsed += sleep_time
 
         return not self._recv_buffer.empty()
 
