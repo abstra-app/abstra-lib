@@ -105,6 +105,7 @@ class ExecutorPool:
 
         self.executors: Dict[str, ExecutorHandle] = {}
         self.execution_to_executor: Dict[str, str] = {}
+        self._pending_spawns: List[tuple] = []
 
         self.lock = RLock()
 
@@ -113,20 +114,16 @@ class ExecutorPool:
         self.metrics = MetricsCollector()
 
     def start(self) -> None:
-        with self.lock:
-            for i in range(self.config.total_executors):
-                is_form_reserved = i < self.config.min_form_executors
-                executor = self._spawn_executor(is_form_reserved=is_form_reserved)
-                self.executors[executor.executor_id] = executor
-                if self.verbose:
-                    AbstraLogger.warning(
-                        f"[ExecutorPool] Spawned executor {i + 1}/{self.config.total_executors} "
-                        f"(executor_id={executor.executor_id}, pid={executor.pid}, "
-                        f"is_form_reserved={is_form_reserved})"
-                    )
+        if self.verbose:
+            AbstraLogger.warning(
+                f"[ExecutorPool] Starting {self.config.total_executors} executors "
+                f"with warmup_parallelism={self.config.warmup_parallelism}"
+            )
 
-            for executor in list(self.executors.values()):
-                self._start_warmup(executor)
+        self._pending_spawns: List[tuple] = [
+            (i, i < self.config.min_form_executors)
+            for i in range(self.config.total_executors)
+        ]
 
         self.monitor_thread = Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
@@ -347,6 +344,17 @@ class ExecutorPool:
             if e.status == ExecutorStatus.IDLE and e.is_form_reserved
         )
 
+        warming_times = []
+        slow_warmups = 0
+        current_time = time.time()
+
+        for e in executors:
+            if e.status == ExecutorStatus.WARMING_UP and e.warmup_start_time:
+                warmup_elapsed = current_time - e.warmup_start_time
+                warming_times.append(warmup_elapsed)
+                if warmup_elapsed > 5.0:  # Consider > 5s as slow
+                    slow_warmups += 1
+
         return {
             "total_executors": total,
             "idle": idle,
@@ -355,6 +363,11 @@ class ExecutorPool:
             "dead": dead,
             "form_capable_idle": form_capable_idle,
             "active_executions": active_executions_count,
+            "slow_warmups": slow_warmups,
+            "avg_warmup_time": sum(warming_times) / len(warming_times)
+            if warming_times
+            else 0,
+            "max_warmup_time": max(warming_times) if warming_times else 0,
             **metrics_summary,
         }
 
@@ -362,16 +375,13 @@ class ExecutorPool:
         with self.lock:
             executors = list(self.executors.values())
 
-        form_capable_idle = sum(
-            1
-            for e in executors
-            if e.status == ExecutorStatus.IDLE and e.is_form_reserved
-        )
+        idle_count = sum(1 for e in executors if e.status == ExecutorStatus.IDLE)
 
-        return form_capable_idle > 0
+        return idle_count > 0
 
     def _spawn_executor(self, is_form_reserved: bool) -> ExecutorHandle:
         executor_id = str(uuid4())[:8]
+
         work_queue = safe_multiprocessing_queue(self.mp_context)
         response_queue = safe_multiprocessing_queue(self.mp_context)
 
@@ -411,9 +421,21 @@ class ExecutorPool:
     def _start_warmup(self, executor: ExecutorHandle) -> None:
         executor.status = ExecutorStatus.WARMING_UP
         executor.warmup_start_time = time.time()
+
+        if not executor.is_alive():
+            AbstraLogger.error(
+                f"[ExecutorPool] Process died before warmup (executor_id={executor.executor_id})"
+            )
+            executor.mark_dead()
+            self.metrics.record_executor_died(executor.executor_id)
+            return
+
         try:
             executor.work_queue.put(WarmupRequest(), timeout=5.0)
-        except Exception:
+        except Exception as e:
+            AbstraLogger.error(
+                f"[ExecutorPool] Failed to start warmup (executor_id={executor.executor_id}): {e}"
+            )
             executor.mark_dead()
             self.metrics.record_executor_died(executor.executor_id)
 
@@ -489,9 +511,37 @@ class ExecutorPool:
 
     def _monitor_loop(self) -> None:
         while not self.shutdown_requested:
-            time.sleep(0.25)
+            time.sleep(0.1)
 
             try:
+                should_spawn = False
+                spawn_info: Optional[tuple] = None
+
+                with self.lock:
+                    if self._pending_spawns:
+                        warming_count = sum(
+                            1
+                            for e in self.executors.values()
+                            if e.status == ExecutorStatus.WARMING_UP
+                        )
+                        if warming_count < self.config.warmup_parallelism:
+                            spawn_info = self._pending_spawns.pop(0)
+                            should_spawn = True
+
+                if should_spawn and spawn_info is not None:
+                    idx, is_form_reserved = spawn_info
+                    executor = self._spawn_executor(is_form_reserved=is_form_reserved)
+
+                    with self.lock:
+                        self.executors[executor.executor_id] = executor
+
+                    if self.verbose:
+                        AbstraLogger.warning(
+                            f"[ExecutorPool] Spawned executor {idx + 1}/{self.config.total_executors}"
+                        )
+
+                    self._start_warmup(executor)
+
                 warming_executors: List[ExecutorHandle] = []
                 timed_out_executors: List[ExecutorHandle] = []
                 dead_executors: List[ExecutorHandle] = []
@@ -520,17 +570,30 @@ class ExecutorPool:
                                     executor.warmup_start_time or 0
                                 )
 
+                                if self.verbose:
+                                    AbstraLogger.warning(
+                                        f"[ExecutorPool] Warmup completed in {warmup_duration:.3f}s"
+                                    )
+
                                 self.metrics.record_executor_warmup(
                                     executor_id=executor.executor_id,
                                     warmup_duration_ms=warmup_duration * 1000,
                                 )
                             else:
+                                AbstraLogger.error(
+                                    f"[ExecutorPool] Warmup failed (executor_id={executor.executor_id})"
+                                )
                                 executor.mark_dead()
                                 self.metrics.record_executor_died(executor.executor_id)
                     except Exception:
                         if executor.warmup_start_time:
                             warmup_elapsed = time.time() - executor.warmup_start_time
+
                             if warmup_elapsed > self.config.warmup_timeout_seconds:
+                                AbstraLogger.error(
+                                    f"[ExecutorPool] Warmup timeout (executor_id={executor.executor_id}, "
+                                    f"elapsed={warmup_elapsed:.1f}s)"
+                                )
                                 timed_out_executors.append(executor)
 
                 for executor in timed_out_executors:

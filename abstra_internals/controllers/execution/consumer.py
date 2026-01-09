@@ -11,6 +11,7 @@ from abstra_internals.controllers.execution.executor_process import RabbitMQPara
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import (
     ABSTRA_EXECUTOR_POOL_SIZE,
+    EDITOR_MODE,
     IS_PRODUCTION,
     RABBITMQ_CONNECTION_URI,
 )
@@ -66,7 +67,7 @@ class ConsumerController:
             root_path=str(Settings.root_path),
             server_port=Settings.server_port,
             parent_executions_queue=local_queue,
-            verbose=IS_PRODUCTION,
+            verbose=(IS_PRODUCTION is True or EDITOR_MODE == "web"),
         )
 
         # Initialize metrics reporter if endpoint is configured
@@ -117,8 +118,8 @@ class ConsumerController:
 
         elapsed_time = 0
         while not self.executor_pool.can_start_loop():
-            time.sleep(5)
-            elapsed_time += 5
+            time.sleep(1)
+            elapsed_time += 1
             if elapsed_time % 60 == 0:
                 AbstraLogger.warning(
                     "[ConsumerController] Waiting for executor pool to be ready..."
