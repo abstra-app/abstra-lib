@@ -39,7 +39,9 @@ def virtualenv_inside_project() -> bool:
 def virtualenv_ignored() -> bool:
     root_path, prefix_path = get_root_and_prefix_path()
     venv_folder = prefix_path.replace(root_path, "").lstrip("/")
-    return FileSystemService.is_ignored(Path(venv_folder))
+    # Use absolute path to ensure git check-ignore works correctly
+    absolute_venv_path = Settings.root_path / venv_folder
+    return FileSystemService.is_ignored(absolute_venv_path)
 
 
 class UntrackVenv(LinterFix):
