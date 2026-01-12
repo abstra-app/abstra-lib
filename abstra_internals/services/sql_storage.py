@@ -1,5 +1,6 @@
 import json
 import shutil
+import time
 from pathlib import Path
 from typing import Generic, List, Optional, Type, TypeVar
 
@@ -14,6 +15,9 @@ from abstra_internals.settings import Settings
 from abstra_internals.utils.serializable import Serializable
 
 T = TypeVar("T", bound=Serializable)
+
+MAX_RETRIES = 5
+BASE_DELAY = 0.05
 
 
 class SqlStorage(Generic[T]):
@@ -59,7 +63,10 @@ class SqlStorage(Generic[T]):
                 columns=columns,
                 data=[],
             )
-            self.tables.add_table(table)
+            try:
+                self.tables.add_table(table)
+            except ValueError:
+                pass
 
     def _serialize_value(self, value) -> str:
         """Serialize a value to a string for SQL storage."""
@@ -73,6 +80,29 @@ class SqlStorage(Generic[T]):
     def _escape_sql_string(self, value: str) -> str:
         """Escape single quotes in SQL string literals."""
         return value.replace("'", "''")
+
+    def _execute_with_retry(self, sql_code: str) -> list:
+        last_exception: Optional[json.JSONDecodeError] = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                result = eval_sql(
+                    code=sql_code,
+                    tables=self.tables,
+                    ctx={},
+                )
+                return result if result is not None else []
+            except json.JSONDecodeError as e:
+                last_exception = e
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(BASE_DELAY * (2**attempt))
+                    self._tables_instance = None
+            except Exception as e:
+                AbstraLogger.capture_exception(e)
+                raise
+        if last_exception is not None:
+            AbstraLogger.capture_exception(last_exception)
+            raise last_exception
+        raise RuntimeError("Unexpected state in _execute_with_retry")
 
     def save(self, id: str, data: T) -> None:
         with self.lock:
@@ -92,10 +122,8 @@ class SqlStorage(Generic[T]):
 
             # Check if record exists
             try:
-                result = eval_sql(
-                    code=f'SELECT "id" FROM {self.table_name} WHERE "id" = \'{self._escape_sql_string(id)}\'',
-                    tables=self.tables,
-                    ctx={},
+                result = self._execute_with_retry(
+                    f'SELECT "id" FROM {self.table_name} WHERE "id" = \'{self._escape_sql_string(id)}\''
                 )
             except Exception as e:
                 AbstraLogger.capture_exception(e)
@@ -112,15 +140,9 @@ class SqlStorage(Generic[T]):
 
                 if set_parts:
                     set_clause = ", ".join(set_parts)
-                    try:
-                        eval_sql(
-                            code=f"UPDATE {self.table_name} SET {set_clause} WHERE \"id\" = '{self._escape_sql_string(id)}'",
-                            tables=self.tables,
-                            ctx={},
-                        )
-                    except Exception as e:
-                        AbstraLogger.capture_exception(e)
-                        raise
+                    self._execute_with_retry(
+                        f"UPDATE {self.table_name} SET {set_clause} WHERE \"id\" = '{self._escape_sql_string(id)}'"
+                    )
             else:
                 # Insert new record
                 # Use double quotes for column names to handle SQL keywords
@@ -131,29 +153,17 @@ class SqlStorage(Generic[T]):
                         for value in serialized_dict.values()
                     ]
                 )
-                try:
-                    sql_command = (
-                        f"INSERT INTO {self.table_name} ({columns}) VALUES ({values})"
-                    )
-                    eval_sql(
-                        code=sql_command,
-                        tables=self.tables,
-                        ctx={},
-                    )
-                except Exception as e:
-                    AbstraLogger.capture_exception(e)
-                    raise
+                sql_command = (
+                    f"INSERT INTO {self.table_name} ({columns}) VALUES ({values})"
+                )
+                self._execute_with_retry(sql_command)
 
     def load_all(self) -> List[T]:
         with self.lock:
             try:
                 self._ensure_table_exists()
 
-                result = eval_sql(
-                    code=f"SELECT * FROM {self.table_name}",
-                    tables=self.tables,
-                    ctx={},
-                )
+                result = self._execute_with_retry(f"SELECT * FROM {self.table_name}")
 
                 data_list = []
                 if result is not None:
@@ -179,10 +189,8 @@ class SqlStorage(Generic[T]):
         with self.lock:
             try:
                 self._ensure_table_exists()
-                eval_sql(
-                    code=f"DELETE FROM {self.table_name} WHERE \"id\" = '{self._escape_sql_string(id)}'",
-                    tables=self.tables,
-                    ctx={},
+                self._execute_with_retry(
+                    f"DELETE FROM {self.table_name} WHERE \"id\" = '{self._escape_sql_string(id)}'"
                 )
             except Exception as e:
                 AbstraLogger.capture_exception(e)
@@ -191,11 +199,7 @@ class SqlStorage(Generic[T]):
         with self.lock:
             try:
                 self._ensure_table_exists()
-                eval_sql(
-                    code=f"DELETE FROM {self.table_name}",
-                    tables=self.tables,
-                    ctx={},
-                )
+                self._execute_with_retry(f"DELETE FROM {self.table_name}")
             except Exception as e:
                 shutil.rmtree(self.directory_path, ignore_errors=True)
                 self._tables_instance = None
@@ -223,10 +227,8 @@ class SqlStorage(Generic[T]):
         try:
             self._ensure_table_exists()
 
-            result = eval_sql(
-                code=f"SELECT * FROM {self.table_name} WHERE \"id\" = '{self._escape_sql_string(id)}'",
-                tables=self.tables,
-                ctx={},
+            result = self._execute_with_retry(
+                f"SELECT * FROM {self.table_name} WHERE \"id\" = '{self._escape_sql_string(id)}'"
             )
 
             if result and len(result) > 0:

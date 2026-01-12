@@ -94,6 +94,10 @@ class ConsumerController:
                                 f"[ConsumerController] Received stop request for execution {execution_id}"
                             )
                             self.executor_pool.kill_execution(execution_id)
+                    elif control_msg.type == "ping":
+                        AbstraLogger.debug(
+                            "[ConsumerController] Received ping message for worker warmup"
+                        )
 
                     self.control_consumer.threadsafe_ack(msg)
                 else:
