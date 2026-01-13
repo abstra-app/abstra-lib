@@ -37,10 +37,11 @@ class CLI(object):
         port: int = 3000,
         headless=False,
         verbose=False,
+        debug_mode=False,
     ):
         SettingsController.set_root_path(root_dir or select_dir())
         SettingsController.set_server_port(port)
-        editor(headless=headless, verbose=verbose)
+        editor(headless=headless, verbose=verbose, debug_mode=debug_mode)
 
     def serve(self, root_dir: Optional[str] = None, port: int = 3000, headless=False):
         print("This command is deprecated. Please use 'abstra editor' instead.")

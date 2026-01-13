@@ -2,9 +2,14 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing.process import BaseProcess
 from threading import Thread
-from typing import TYPE_CHECKING, Dict, Optional, cast
+from typing import Dict, Optional, cast
 from uuid import uuid4
 
+from abstra_internals.cloud.metrics_reporter import (
+    MetricsReporter,
+    create_metrics_reporter,
+)
+from abstra_internals.controllers.execution.debug_monitor import DebugMonitor
 from abstra_internals.controllers.execution.executor_config import ExecutorConfig
 from abstra_internals.controllers.execution.executor_pool import ExecutorPool
 from abstra_internals.controllers.execution.executor_process import RabbitMQParams
@@ -25,9 +30,6 @@ from abstra_internals.repositories.producer import LocalProducerRepository
 from abstra_internals.repositories.project.project import StageWithFile
 from abstra_internals.settings import Settings
 
-if TYPE_CHECKING:
-    from abstra_internals.cloud.metrics_reporter import MetricsReporter
-
 
 class StageNotFound(Exception):
     pass
@@ -43,6 +45,7 @@ class ConsumerController:
         main_controller: MainController,
         consumer: Consumer,
         control_consumer: Optional[Consumer] = None,
+        debug_mode: bool = False,
     ):
         self.main_controller = main_controller
         self.consumer = consumer
@@ -51,6 +54,8 @@ class ConsumerController:
         self.concurrency = ABSTRA_EXECUTOR_POOL_SIZE
         self.executor: Optional[ThreadPoolExecutor] = None
         self.metrics_reporter: Optional["MetricsReporter"] = None
+        self.debug_monitor: Optional["DebugMonitor"] = None
+        self.debug_mode = debug_mode
 
         self.active_processes: Dict[int, BaseProcess] = {}
 
@@ -61,22 +66,24 @@ class ConsumerController:
         if isinstance(main_controller.repositories.producer, LocalProducerRepository):
             local_queue = main_controller.repositories.producer.queue
 
+        verbose = debug_mode or IS_PRODUCTION is True or EDITOR_MODE == "web"
+
         self.executor_pool = ExecutorPool(
             config=config,
             mp_context=main_controller.repositories.mp_context.get_context(),
             root_path=str(Settings.root_path),
             server_port=Settings.server_port,
             parent_executions_queue=local_queue,
-            verbose=(IS_PRODUCTION is True or EDITOR_MODE == "web"),
+            verbose=verbose,
         )
 
-        # Initialize metrics reporter if endpoint is configured
         try:
-            from abstra_internals.cloud.metrics_reporter import create_metrics_reporter
-
             self.metrics_reporter = create_metrics_reporter(self.executor_pool)
         except ImportError:
             pass
+
+        if debug_mode:
+            self.debug_monitor = DebugMonitor(self.executor_pool)
 
     def _control_loop(self):
         if not self.control_consumer:
@@ -115,6 +122,9 @@ class ConsumerController:
 
         if self.metrics_reporter:
             self.metrics_reporter.start()
+
+        if self.debug_monitor:
+            self.debug_monitor.start()
 
         if self.control_consumer:
             self.control_thread = Thread(target=self._control_loop, daemon=True)
@@ -162,6 +172,8 @@ class ConsumerController:
             AbstraLogger.error(f"[ConsumerController] Error in main loop: {e}")
             AbstraLogger.capture_exception(e)
         finally:
+            if self.debug_monitor:
+                self.debug_monitor.stop()
             if self.metrics_reporter:
                 self.metrics_reporter.stop()
             if self.executor:

@@ -35,10 +35,12 @@ from abstra_internals.utils.multiprocessing import safe_multiprocessing_queue
 from abstra_internals.version import check_latest_version
 
 
-def start_consumer(controller: MainController):
+def start_consumer(controller: MainController, debug_mode: bool = False):
     if isinstance(controller.producer_repository, LocalProducerRepository):
         consumer = EditorConsumer(controller.producer_repository.queue)
-        consumer_controller = ConsumerController(controller, consumer)
+        consumer_controller = ConsumerController(
+            controller, consumer, debug_mode=debug_mode
+        )
 
         th = threading.Thread(
             daemon=True,
@@ -87,7 +89,7 @@ def ensure_certificates():
             print(f"Failed to restore certificates: {update_e}")
 
 
-def editor(headless: bool, verbose: bool = False):
+def editor(headless: bool, verbose: bool = False, debug_mode: bool = False):
     ensure_certificates()
 
     load_dotenv(Settings.root_path / ".env")
@@ -146,7 +148,7 @@ def editor(headless: bool, verbose: bool = False):
     tasks_watcher.start()
 
     if not is_web_editor:
-        start_consumer(main_controller)
+        start_consumer(main_controller, debug_mode=debug_mode)
 
     app = get_local_app(main_controller)
     server = make_server(host=HOST, port=Settings.server_port, threaded=True, app=app)
