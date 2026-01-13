@@ -102,6 +102,11 @@ class ProductionAIRepository(AIRepository):
             "This method is not implemented in ProductionAIRepository."
         )
 
+    def get_user_info(self):
+        raise NotImplementedError(
+            "This method is not implemented in ProductionAIRepository."
+        )
+
 
 class LocalAIRepository(AIRepository):
     def prompt(self, prompt_request_body: CloudApiCliAiV2PromptPostRequest):
@@ -132,9 +137,11 @@ class LocalAIRepository(AIRepository):
         url = "/ai-v2/stream"
         body = req.to_dict()
         headers = resolve_headers()
-        return self.client.post(
-            url, headers=headers, json=body, stream=True
-        ).iter_content(chunk_size=None)
+        response = self.client.post(url, headers=headers, json=body, stream=True)
+        if response.status_code != 200:
+            response.raise_for_status()
+
+        return response.iter_content(chunk_size=None)
 
     def get_history(self, headers: dict, limit: int, offset: int):
         url = "/ai-v2/history"

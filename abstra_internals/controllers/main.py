@@ -1807,13 +1807,19 @@ class MainController:
         headers = resolve_headers()
         if headers is None:
             flask.abort(401)
-        return get_project_info(headers)
+        try:
+            return get_project_info(headers)
+        except Exception:
+            return {}
 
     def get_feature_flags(self):
         headers = resolve_headers()
         if headers is None:
             flask.abort(401)
-        return get_feature_flags(headers)
+        try:
+            return get_feature_flags(headers)
+        except Exception:
+            return {}
 
     # access_control
     def list_access_controls(self):
