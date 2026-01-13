@@ -1,12 +1,24 @@
-from abstra_internals.cloud.server_application import CustomApplication
-from abstra_internals.cloud.server_hooks import GunicornOptionsBuilder
-from abstra_internals.controllers.main import MainController
-from abstra_internals.environment import DEFAULT_PORT
-from abstra_internals.logger import AbstraLogger
-from abstra_internals.repositories.factory import build_prod_repositories
-from abstra_internals.server.apps import get_cloud_app
-from abstra_internals.settings import SettingsController
-from abstra_internals.stdio_patcher import StdioPatcher
+# IMPORTANT: Gevent monkey-patch MUST be done before ANY other imports
+# to avoid RecursionError with SSL in Python 3.12+
+# Only apply when using gevent worker class
+import os
+
+if os.getenv("ABSTRA_WORKER_CLASS", "gthread") == "gevent":
+    from gevent import monkey
+
+    monkey.patch_all()
+
+# Now it's safe to import everything else
+# noqa: E402 to ignore "module level import not at top of file" warning
+from abstra_internals.cloud.server_application import CustomApplication  # noqa: E402
+from abstra_internals.cloud.server_hooks import GunicornOptionsBuilder  # noqa: E402
+from abstra_internals.controllers.main import MainController  # noqa: E402
+from abstra_internals.environment import DEFAULT_PORT  # noqa: E402
+from abstra_internals.logger import AbstraLogger  # noqa: E402
+from abstra_internals.repositories.factory import build_prod_repositories  # noqa: E402
+from abstra_internals.server.apps import get_cloud_app  # noqa: E402
+from abstra_internals.settings import SettingsController  # noqa: E402
+from abstra_internals.stdio_patcher import StdioPatcher  # noqa: E402
 
 
 def run():

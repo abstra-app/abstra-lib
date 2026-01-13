@@ -10,6 +10,7 @@ from abstra_internals.environment import (
     DEFAULT_PORT,
     THREADS,
     WORKER_CLASS,
+    WORKER_CONNECTIONS,
     WORKER_TEMP_DIR,
     WORKERS,
     set_SERVER_UUID,
@@ -80,10 +81,9 @@ class GunicornOptionsBuilder:
             AbstraLogger.capture_exception(e)
 
     def build(self):
-        return {
+        config = {
             "bind": f":{DEFAULT_PORT or 8002}",
             "workers": WORKERS,
-            "threads": THREADS,
             "worker_class": WORKER_CLASS,
             "worker_tmp_dir": WORKER_TEMP_DIR,
             "on_starting": self.on_starting,
@@ -91,3 +91,11 @@ class GunicornOptionsBuilder:
             "child_exit": self.child_exit,
             "on_exit": self.on_exit,
         }
+
+        # Use worker_connections for gevent/eventlet, threads for gthread/sync
+        if WORKER_CLASS in ["gevent", "eventlet"]:
+            config["worker_connections"] = WORKER_CONNECTIONS
+        else:
+            config["threads"] = THREADS
+
+        return config
