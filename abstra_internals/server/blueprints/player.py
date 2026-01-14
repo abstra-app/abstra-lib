@@ -100,6 +100,21 @@ def get_player_bp(controller: MainController):
             }
         )
 
+    @bp.get("/_infra/worker-capacity")
+    def _get_worker_capacity():
+        capacity = controller.repositories.infra.get_worker_capacity()
+        if capacity is None:
+            return flask.jsonify(
+                {"currentWorkers": 0, "maxWorkers": 0, "isAtCapacity": False}
+            )
+        return flask.jsonify(
+            {
+                "currentWorkers": capacity.current_workers,
+                "maxWorkers": capacity.max_workers,
+                "isAtCapacity": capacity.is_at_capacity,
+            }
+        )
+
     @sock.route("/_socket")
     @guard.socket_by(QueryArgSelector("id"))
     def _websocket(ws: flask_sock.Server):

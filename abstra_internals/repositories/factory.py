@@ -28,6 +28,11 @@ from abstra_internals.repositories.execution_logs import (
     LocalExecutionLogsRepository,
     ProductionExecutionLogsRepository,
 )
+from abstra_internals.repositories.infra import (
+    InfraRepository,
+    LocalInfraRepository,
+    ProductionInfraRepository,
+)
 from abstra_internals.repositories.keyvalue import (
     KVRepository,
     LocalKVRepository,
@@ -116,6 +121,7 @@ class Repositories:
     tables: TablesRepository
     users: UsersRepository
     linter: LinterRepository
+    infra: InfraRepository
 
 
 def build_editor_repositories(local_queue: Optional[Queue] = None):
@@ -146,6 +152,7 @@ def build_editor_repositories(local_queue: Optional[Queue] = None):
         kv=LocalKVRepository(),
         mp_context=mp_context,
         linter=linter,
+        infra=LocalInfraRepository(),
     )
 
 
@@ -175,6 +182,7 @@ def build_prod_repositories():
         kv=ProductionKVRepository(client=http_client),
         mp_context=get_mp_context_repository(),
         linter=ProductionLinterRepository(),
+        infra=ProductionInfraRepository(client=http_client),
     )
 
 
@@ -212,4 +220,5 @@ def build_web_editor_repositories(rabbitmq_connection_uri: str):
         kv=LocalKVRepository(),
         mp_context=mp_context_repo,
         linter=linter,
+        infra=LocalInfraRepository(),
     )
