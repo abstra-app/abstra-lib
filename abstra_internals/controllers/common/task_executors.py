@@ -80,11 +80,10 @@ class TaskExecutor:
             if execution:
                 execution.context.sent_tasks.append(task.id)
             if isinstance(stage, ScriptStage):
-                conn = self.repos.producer.enqueue(
+                self.repos.producer.enqueue_fire_and_forget(
                     context=ScriptContext(task_id=task.id),
                     stage_id=stage.id,
                 )
-                conn.close()
 
     def _send_waiting_thread_notification(self, task: TaskDTO):
         stage = self.project.get_stage(task.target_stage_id)

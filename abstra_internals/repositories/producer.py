@@ -46,6 +46,10 @@ class ProducerRepository(ABC):
     def enqueue(self, stage_id: str, context: ClientContext) -> ConnectionProtocol:
         raise NotImplementedError()
 
+    @abstractmethod
+    def enqueue_fire_and_forget(self, stage_id: str, context: ClientContext) -> None:
+        raise NotImplementedError()
+
 
 class LocalProducerRepository(ProducerRepository):
     def __init__(self, local_queue: Queue):
@@ -71,6 +75,25 @@ class LocalProducerRepository(ProducerRepository):
         )
 
         return parent_conn
+
+    def enqueue_fire_and_forget(self, stage_id: str, context: ClientContext) -> None:
+        execution_id = uuid4().__str__()
+
+        _, child_conn = Pipe()
+
+        preexecution = PreExecution(
+            stage_id=stage_id,
+            context=context,
+            execution_id=execution_id,
+        )
+
+        self.queue.put(
+            QueueMessage(
+                preexecution=preexecution,
+                delivery_tag=0,
+                connection=child_conn,
+            ),
+        )
 
 
 class RabbitMQProducerRepository(ProducerRepository):
@@ -166,6 +189,26 @@ class RabbitMQProducerRepository(ProducerRepository):
         )
 
         return rabbitmq_connection
+
+    def enqueue_fire_and_forget(self, stage_id: str, context: ClientContext) -> None:
+        execution_id = uuid4().__str__()
+
+        preexecution = PreExecution(
+            stage_id=stage_id,
+            context=context,
+            execution_id=execution_id,
+        )
+
+        with self._connect_with_retry() as connection:
+            with connection.channel() as channel:
+                channel: BlockingChannel
+                channel.queue_declare(queue=self.queue_name, durable=True)
+                channel.basic_publish(
+                    body=preexecution.dump_json(),
+                    routing_key=self.queue_name,
+                    exchange=RABBITMQ_DEFAUT_EXCHANGE,
+                    properties=self.props,
+                )
 
 
 class ProductionProducerRepository(RabbitMQProducerRepository):

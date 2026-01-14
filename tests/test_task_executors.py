@@ -175,7 +175,7 @@ class TaskExecutorTest(BaseTest):
         self.assertEqual(call_args["type"], "task")
 
         # Script should be enqueued
-        self.mock_producer.enqueue.assert_called_once()
+        self.mock_producer.enqueue_fire_and_forget.assert_called_once()
 
     def test_send_task_no_transitions(self):
         """Test sending task from stage with no transitions shows warning"""
@@ -406,8 +406,8 @@ class TaskExecutorTest(BaseTest):
         )
 
         # Script should be enqueued
-        self.mock_producer.enqueue.assert_called_once()
-        call_args = self.mock_producer.enqueue.call_args[1]
+        self.mock_producer.enqueue_fire_and_forget.assert_called_once()
+        call_args = self.mock_producer.enqueue_fire_and_forget.call_args[1]
         self.assertEqual(call_args["stage_id"], "script-1")
         self.assertIsInstance(call_args["context"], ScriptContext)
         self.assertEqual(call_args["context"].task_id, "task-123")
@@ -1476,7 +1476,7 @@ class TaskExecutorTest(BaseTest):
         self.assertIn("script-1", target_ids)
 
         # Script should be enqueued
-        self.mock_producer.enqueue.assert_called_once()
+        self.mock_producer.enqueue_fire_and_forget.assert_called_once()
 
     # ==================== EDGE CASES ====================
 

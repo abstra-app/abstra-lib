@@ -9,7 +9,11 @@ import pika
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from pika.exceptions import AMQPConnectionError
 
+from abstra_internals.environment import PROCESS_TIMEOUT_SECONDS
 from abstra_internals.logger import AbstraLogger
+
+# +5min buffer
+QUEUE_EXPIRES_MS = (PROCESS_TIMEOUT_SECONDS + 300) * 1000
 
 
 class RabbitMQConnection:
@@ -101,6 +105,7 @@ class RabbitMQConnection:
             durable=False,
             exclusive=False,
             auto_delete=True,
+            arguments={"x-expires": QUEUE_EXPIRES_MS},
         )
 
         self._recv_connection = self._connect_with_retry("receiver")
@@ -111,6 +116,7 @@ class RabbitMQConnection:
             durable=False,
             exclusive=False,
             auto_delete=True,
+            arguments={"x-expires": QUEUE_EXPIRES_MS},
         )
 
     def _ensure_consumer_started(self):
@@ -163,6 +169,7 @@ class RabbitMQConnection:
                 durable=False,
                 exclusive=False,
                 auto_delete=True,
+                arguments={"x-expires": QUEUE_EXPIRES_MS},
             )
             AbstraLogger.warning(
                 f"[RabbitMQConnection:{self.execution_id}] Send connection reconnected successfully"
