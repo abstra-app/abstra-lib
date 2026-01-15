@@ -35,11 +35,12 @@ class ExecutionController:
         self.client = client
         self.context = context
 
-    def run(self, execution_id: str):
+    def run(self, execution_id: str, worker_id: str):
         execution = Execution.create(
             id=execution_id,
             context=self.context,
             stage_id=self.stage.id,
+            worker_id=worker_id,
         )
 
         with SDKContext(execution, self.client, self.repositories):
@@ -60,6 +61,7 @@ class ExecutionController:
                 status = "abandoned"
             except Exception as e:
                 status = "failed"
+                AbstraLogger.error(f"[ExecutionController] Unexpected error: {e}")
                 AbstraLogger.capture_exception(e)
             finally:
                 execution.teardown_tests()

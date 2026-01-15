@@ -50,7 +50,7 @@ class ConsumerController:
         self.main_controller = main_controller
         self.consumer = consumer
         self.control_consumer = control_consumer
-        self.app_id = str(uuid4())
+        self.worker_id = str(uuid4())
         self.concurrency = ABSTRA_EXECUTOR_POOL_SIZE
         self.executor: Optional[ThreadPoolExecutor] = None
         self.metrics_reporter: Optional["MetricsReporter"] = None
@@ -73,6 +73,7 @@ class ConsumerController:
             mp_context=main_controller.repositories.mp_context.get_context(),
             root_path=str(Settings.root_path),
             server_port=Settings.server_port,
+            worker_id=self.worker_id,
             parent_executions_queue=local_queue,
             verbose=verbose,
         )
@@ -164,9 +165,9 @@ class ConsumerController:
                     msg=msg,
                 )
 
-            self.main_controller.fail_app_executions(
-                app_id=self.app_id,
-                reason="Failed to set status",
+            self.main_controller.fail_worker_executions(
+                worker_id=self.worker_id,
+                reason="Worker shutting down",
             )
         except Exception as e:
             AbstraLogger.error(f"[ConsumerController] Error in main loop: {e}")
@@ -188,7 +189,6 @@ class ConsumerController:
             self.executor = None
 
     def run_subprocess(self, msg: QueueMessage) -> None:
-        worker_id = str(uuid4())
         execution_id = msg.preexecution.execution_id
         connection = None
         rabbitmq_params = None
@@ -222,8 +222,7 @@ class ConsumerController:
 
             response = self.executor_pool.execute(
                 stage=cast(StageWithFile, stage),
-                worker_id=worker_id,
-                app_id=self.app_id,
+                worker_id=self.worker_id,
                 execution_id=execution_id,
                 request=msg.preexecution.context,
                 connection=connection,
@@ -243,11 +242,6 @@ class ConsumerController:
             AbstraLogger.capture_exception(e)
 
             try:
-                self.main_controller.fail_worker_executions(
-                    app_id=self.app_id,
-                    worker_id=worker_id,
-                    reason=f"{e}",
-                )
                 self.main_controller.fail_execution(
                     execution_id=execution_id,
                     reason=f"{e}",

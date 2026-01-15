@@ -22,6 +22,7 @@ class Execution(Serializable, Generic[T]):
     stage_id: str
     status: ExecutionStatus
     pid: int
+    worker_id: str
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
     context: T
@@ -33,6 +34,7 @@ class Execution(Serializable, Generic[T]):
         id: str,
         stage_id: str,
         context: T,
+        worker_id: str,
         pid: Optional[int] = None,
     ) -> "Execution[T]":
         return cls(
@@ -41,6 +43,7 @@ class Execution(Serializable, Generic[T]):
             status="running",
             id=id,
             created_at=datetime.datetime.now(),
+            worker_id=worker_id,
             pid=pid or os.getpid(),
             updated_at=None,
         )

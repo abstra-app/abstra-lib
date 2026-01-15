@@ -53,7 +53,7 @@ class ExecutionControllerTest(BaseTest):
             stage=self.stage,
             context=self.context,
             client=self.hook_client,
-        ).run(execution_id=uuid4().__str__())
+        ).run(execution_id=uuid4().__str__(), worker_id="mock-worker-id")
 
         started_msg_str = self.parent_conn.recv()
         assert isinstance(started_msg_str, str), (
@@ -85,7 +85,7 @@ class ExecutionControllerTest(BaseTest):
             stage=self.stage,
             context=self.context,
             client=self.hook_client,
-        ).run(execution_id="test_execution_id")
+        ).run(execution_id="test_execution_id", worker_id="mock-worker-id")
 
         # Receive and verify the message is a valid JSON string
         started_msg_str = self.parent_conn.recv()
@@ -109,7 +109,7 @@ class ExecutionControllerTest(BaseTest):
             stage=self.stage,
             context=self.context,
             client=self.hook_client,
-        ).run(execution_id="test_execution_id")
+        ).run(execution_id="test_execution_id", worker_id="mock-worker-id")
 
         # Skip the started message
         self.parent_conn.recv()

@@ -27,8 +27,6 @@ from abstra_internals.environment import (
     EDITOR_MODE,
     IS_DEVELOPMENT,
     IS_PRODUCTION,
-    set_SERVER_UUID,
-    set_WORKER_UUID,
 )
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.factory import (
@@ -58,7 +56,6 @@ class WarmupRequest:
 class ExecuteRequest:
     command: ExecutorCommand
     worker_id: str
-    app_id: str
     execution_id: str
     stage: StageWithFile
     request: ClientContext
@@ -191,8 +188,6 @@ def handle_execute(
     try:
         Settings.set_root_path(root_path)
         Settings.set_server_port(server_port, force=True)
-        set_SERVER_UUID(request.app_id)
-        set_WORKER_UUID(request.worker_id)
 
         thread = threading.current_thread()
         thread.name = f"Executor[{request.worker_id}]"
@@ -230,7 +225,9 @@ def handle_execute(
         AbstraLogger.info(
             f"[Executor] Starting execution (execution_id={request.execution_id})"
         )
-        execution_controller.run(execution_id=request.execution_id)
+        execution_controller.run(
+            execution_id=request.execution_id, worker_id=request.worker_id
+        )
 
         total_time = time.time() - execution_start
         state.executions_completed += 1
@@ -298,7 +295,11 @@ def executor_main(
 
             elif isinstance(command_data, ExecuteRequest):
                 handle_execute(
-                    state, command_data, response_queue, root_path, server_port
+                    state,
+                    command_data,
+                    response_queue,
+                    root_path,
+                    server_port,
                 )
 
             elif isinstance(command_data, ShutdownRequest):

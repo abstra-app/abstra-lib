@@ -46,6 +46,7 @@ def child_process_main(stage: FakeStage, root_path: str):
             ),
             mock_execution=FormExecutionMock(test_answers=[]),
         ),
+        worker_id="mock-worker-id",
     )
 
     repositories.execution.create(execution)

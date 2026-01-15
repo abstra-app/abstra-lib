@@ -25,7 +25,8 @@ class TestPage(BaseTest):
         execution = Execution.create(
             id=uuid4().__str__(),
             context=form_context,
-            stage_id="mock_stage_id",
+            stage_id="mock-stage-id",
+            worker_id="mock-worker-id",
         )
         self.context = SDKContext(execution, self.client, self.repositories).__enter__()
 

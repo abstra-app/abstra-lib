@@ -31,7 +31,10 @@ class ExecutionTest(TestCase):
         )
 
         execution: Execution[HookContext] = Execution.create(
-            id=uuid4().__str__(), stage_id=mock_stage.id, context=context
+            id=uuid4().__str__(),
+            stage_id=mock_stage.id,
+            context=context,
+            worker_id="mock-worker-id",
         )
 
         dto = execution.dump()
@@ -64,7 +67,10 @@ class ExecutionTest(TestCase):
         )
 
         execution: Execution[HookContext] = Execution.create(
-            id=uuid4().__str__(), stage_id=mock_stage.id, context=context
+            id=uuid4().__str__(),
+            stage_id=mock_stage.id,
+            context=context,
+            worker_id="mock-worker-id",
         )
 
         dto = execution.dump()

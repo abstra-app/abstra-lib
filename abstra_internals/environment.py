@@ -121,23 +121,6 @@ WORKER_CLASS = os.getenv("ABSTRA_WORKER_CLASS", "gthread")
 WORKER_CONNECTIONS = int(os.getenv("ABSTRA_WORKER_CONNECTIONS", 1000))
 WORKER_TEMP_DIR = os.getenv("ABSTRA_WORKER_TEMP_DIR")
 
-# EXECUTORS UUIDS
-__WORKER_UUID_ENV__ = "ABSTRA_WORKER_UUID"
-WORKER_UUID = lambda: os.getenv(__WORKER_UUID_ENV__)  # noqa: E731
-
-
-def set_WORKER_UUID(worker_uuid: str):
-    os.environ[__WORKER_UUID_ENV__] = worker_uuid
-
-
-__SERVER_UUID_ENV__ = "ABSTRA_SERVER_UUID"
-SERVER_UUID = lambda: os.getenv(__SERVER_UUID_ENV__)  # noqa: E731
-
-
-def set_SERVER_UUID(server_uuid: str):
-    os.environ[__SERVER_UUID_ENV__] = server_uuid
-
-
 # GIT
 FORCE_GIT_CLIENT = os.getenv("ABSTRA_FORCE_GIT_CLIENT")
 REMOTE_GIT_URL = f"{CLOUD_API_CLI_URL}/git/repo.git"

@@ -9,7 +9,6 @@ from typing import List, Optional
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.consts.filepaths import EXECUTIONS_DIR_PATH
 from abstra_internals.entities.execution import Execution, ExecutionStatus
-from abstra_internals.environment import SERVER_UUID, WORKER_UUID
 from abstra_internals.repositories.multiprocessing import MPContext
 from abstra_internals.repositories.producer import (
     WebEditorControlProducerRepository,
@@ -85,12 +84,8 @@ class ExecutionRepository(ABC):
 
     @abstractmethod
     def find_by_worker(
-        self, app_id: str, worker_id: str, status: ExecutionStatus
+        self, worker_id: str, status: ExecutionStatus
     ) -> List[Execution]:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -127,11 +122,8 @@ class LocalExecutionRepository(ExecutionRepository):
             pass
 
     def find_by_worker(
-        self, app_id: str, worker_id: str, status: ExecutionStatus
+        self, worker_id: str, status: ExecutionStatus
     ) -> List[Execution]:
-        return []
-
-    def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
         return []
 
     def clear(self):
@@ -234,8 +226,6 @@ class ProductionExecutionRepository(ExecutionRepository):
     def create(self, execution: Execution) -> None:
         request_dto = dict(
             **execution.dump(),
-            workerId=WORKER_UUID(),
-            appId=SERVER_UUID(),
         )
 
         res = self.client.post(
@@ -267,29 +257,13 @@ class ProductionExecutionRepository(ExecutionRepository):
         res.raise_for_status()
 
     def find_by_worker(
-        self, app_id: str, worker_id: str, status: ExecutionStatus
+        self, worker_id: str, status: ExecutionStatus
     ) -> List[Execution]:
         res = self.client.get(
             "/executions",
             params=dict(
-                appId=app_id,
                 status=status,
                 workerId=worker_id,
-            ),
-        )
-
-        res.raise_for_status()
-
-        dtos = self._adapt_legacy_execution_dtos(res.json())
-
-        return [Execution(**dto) for dto in dtos]
-
-    def find_by_app(self, status: ExecutionStatus, app_id: str) -> List[Execution]:
-        res = self.client.get(
-            "/executions",
-            params=dict(
-                appId=app_id,
-                status=status,
             ),
         )
 

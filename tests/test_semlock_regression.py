@@ -24,6 +24,7 @@ def create_execution(stage_id: str):
             task_id="test",
             mock_execution=ScriptExecutionMock(),
         ),
+        worker_id="mock-worker-id",
     )
 
 

@@ -93,6 +93,7 @@ class ExecutorPool:
         mp_context: MPContext,
         root_path: str,
         server_port: int,
+        worker_id: str,
         parent_executions_queue: Optional[Queue] = None,
         verbose: bool = True,
     ):
@@ -100,6 +101,7 @@ class ExecutorPool:
         self.mp_context = mp_context
         self.root_path = root_path
         self.server_port = server_port
+        self.worker_id = worker_id
         self.parent_executions_queue = parent_executions_queue
         self.verbose = verbose
 
@@ -161,7 +163,6 @@ class ExecutorPool:
         self,
         stage: StageWithFile,
         worker_id: str,
-        app_id: str,
         execution_id: str,
         request,
         connection,
@@ -221,7 +222,6 @@ class ExecutorPool:
             execute_request = ExecuteRequest(
                 command=ExecutorCommand.EXECUTE,
                 worker_id=worker_id,
-                app_id=app_id,
                 execution_id=execution_id,
                 stage=stage,
                 request=request,
@@ -356,6 +356,7 @@ class ExecutorPool:
                     slow_warmups += 1
 
         return {
+            **metrics_summary,
             "total_executors": total,
             "idle": idle,
             "busy": busy,
@@ -368,7 +369,6 @@ class ExecutorPool:
             if warming_times
             else 0,
             "max_warmup_time": max(warming_times) if warming_times else 0,
-            **metrics_summary,
         }
 
     def can_start_loop(self) -> bool:
@@ -500,6 +500,7 @@ class ExecutorPool:
 
         if should_recycle:
             executor.kill()
+            self.metrics.record_executor_died(executor.executor_id)
 
             is_form_reserved = executor.is_form_reserved
             replacement = self._spawn_executor(is_form_reserved=is_form_reserved)
