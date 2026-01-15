@@ -167,7 +167,7 @@ class ExecutorPool:
         connection,
         rabbitmq_params: Optional[RabbitMQParams],
     ) -> ExecutorResponse:
-        max_wait = 120.0
+        max_wait = self.config.acquire_timeout_seconds
         start_time = time.time()
         retry_count = 0
 

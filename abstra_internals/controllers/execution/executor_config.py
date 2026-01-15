@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from abstra_internals.environment import (
+    ABSTRA_EXECUTOR_ACQUIRE_TIMEOUT,
     ABSTRA_EXECUTOR_MAX_EXECUTIONS,
     ABSTRA_EXECUTOR_POOL_SIZE,
     ABSTRA_EXECUTOR_WARMUP_PARALLELISM,
@@ -18,6 +19,7 @@ class ExecutorConfig:
     warmup_timeout_seconds: float
     execution_timeout_seconds: float
     warmup_parallelism: int
+    acquire_timeout_seconds: float
 
     @classmethod
     def from_environment(cls) -> "ExecutorConfig":
@@ -26,6 +28,7 @@ class ExecutorConfig:
         max_executions = ABSTRA_EXECUTOR_MAX_EXECUTIONS
         warmup_timeout = ABSTRA_EXECUTOR_WARMUP_TIMEOUT
         warmup_parallelism = ABSTRA_EXECUTOR_WARMUP_PARALLELISM
+        acquire_timeout = ABSTRA_EXECUTOR_ACQUIRE_TIMEOUT
 
         return cls(
             total_executors=total_executors,
@@ -34,6 +37,7 @@ class ExecutorConfig:
             warmup_timeout_seconds=warmup_timeout,
             execution_timeout_seconds=PROCESS_TIMEOUT_SECONDS,
             warmup_parallelism=warmup_parallelism,
+            acquire_timeout_seconds=acquire_timeout,
         )
 
     def validate(self) -> None:
@@ -57,3 +61,6 @@ class ExecutorConfig:
 
         if self.warmup_parallelism < 1:
             raise ValueError("warmup_parallelism must be at least 1")
+
+        if self.acquire_timeout_seconds <= 0:
+            raise ValueError("acquire_timeout_seconds must be positive")
