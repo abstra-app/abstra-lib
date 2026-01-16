@@ -48,6 +48,7 @@ class RabbitMQConnection:
         self._consumer_thread: Optional[threading.Thread] = None
         self._heartbeat_thread: Optional[threading.Thread] = None
         self._consumer_started = False
+        self._consumer_registered = threading.Event()
         self._consumer_lock = threading.Lock()
         self._send_lock = threading.Lock()
 
@@ -64,6 +65,10 @@ class RabbitMQConnection:
         if auto_start_consumer:
             self._start_consumer()
             self._consumer_started = True
+            if not self._consumer_registered.wait(timeout=10.0):
+                AbstraLogger.warning(
+                    f"[RabbitMQConnection:{self.execution_id}] Consumer registration timeout during init"
+                )
 
     def _connect_with_retry(self, purpose: str) -> BlockingConnection:
         params = pika.URLParameters(self.connection_uri)
@@ -124,6 +129,11 @@ class RabbitMQConnection:
             if not self._consumer_started:
                 self._start_consumer()
                 self._consumer_started = True
+
+        if not self._consumer_registered.wait(timeout=10.0):
+            AbstraLogger.warning(
+                f"[RabbitMQConnection:{self.execution_id}] Consumer registration timeout"
+            )
 
     def _start_heartbeat_thread(self):
         def heartbeat_loop():
@@ -210,6 +220,9 @@ class RabbitMQConnection:
                         auto_ack=True,
                         inactivity_timeout=1.0,
                     ):
+                        if not self._consumer_registered.is_set():
+                            self._consumer_registered.set()
+
                         if self._closed:
                             break
 

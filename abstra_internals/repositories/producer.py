@@ -1,3 +1,4 @@
+import threading
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -191,24 +192,26 @@ class RabbitMQProducerRepository(ProducerRepository):
         return rabbitmq_connection
 
     def enqueue_fire_and_forget(self, stage_id: str, context: ClientContext) -> None:
-        execution_id = uuid4().__str__()
+        conn = self.enqueue(stage_id, context)
 
-        preexecution = PreExecution(
-            stage_id=stage_id,
-            context=context,
-            execution_id=execution_id,
-        )
-
-        with self._connect_with_retry() as connection:
-            with connection.channel() as channel:
-                channel: BlockingChannel
-                channel.queue_declare(queue=self.queue_name, durable=True)
-                channel.basic_publish(
-                    body=preexecution.dump_json(),
-                    routing_key=self.queue_name,
-                    exchange=RABBITMQ_DEFAUT_EXCHANGE,
-                    properties=self.props,
+        def wait_and_close():
+            try:
+                if conn.poll(timeout=60.0):
+                    conn.recv()
+                else:
+                    AbstraLogger.warning(
+                        f"[enqueue_fire_and_forget] Timeout waiting for execution:started "
+                        f"(stage_id={stage_id})"
+                    )
+            except Exception as e:
+                AbstraLogger.error(
+                    f"[enqueue_fire_and_forget] Error waiting for execution:started: {e}"
                 )
+            finally:
+                conn.close()
+
+        thread = threading.Thread(target=wait_and_close, daemon=True)
+        thread.start()
 
 
 class ProductionProducerRepository(RabbitMQProducerRepository):
