@@ -1,10 +1,10 @@
 import abc
 from dataclasses import dataclass
+from typing import Any
 
 from abstra_internals.cloud_api.http_client import HTTPClient
 from abstra_internals.contracts_generated import (
     CloudApiCliConnectorsExecuteRequest,
-    CloudApiCliConnectorsExecuteResponse0,
 )
 
 
@@ -30,7 +30,7 @@ class ConnectorsRepository(abc.ABC):
 
     def run_connection_action(
         self, connection_name: str, action: str, payload: dict = {}
-    ) -> dict:
+    ) -> Any:
         response = self.client.post(
             endpoint=f"connectors/connection/{connection_name}/execute",
             json=CloudApiCliConnectorsExecuteRequest(
@@ -41,5 +41,5 @@ class ConnectorsRepository(abc.ABC):
         result = response.json()
         if result["status"] == "error":
             raise Exception(result["message"])
-        result = CloudApiCliConnectorsExecuteResponse0.from_dict(result)
-        return result.data
+
+        return result.get("data")
