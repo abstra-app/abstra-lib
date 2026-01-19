@@ -9,6 +9,7 @@ from .conflicting_path import ConflictingPath
 from .deprecated_functions import DeprecatedFunctionUsage
 from .duplicate_package_in_requirements import DuplicatePackagesInRequirements
 from .env_in_bundle import EnvInBundle
+from .file_outside_project import FileOutsideProjectRoot
 from .missing_abstra_in_requirements import MissingAbstraInRequirements
 from .missing_entrypoint import MissingEntrypoint
 from .missing_env import MissingEnv
@@ -34,6 +35,7 @@ core_rules: List[LinterRule] = [
     ConflictingName(),
     DeprecatedFunctionUsage(),
     BigPyFiles(),
+    FileOutsideProjectRoot(),
     # TypeCheckingRule(),
 ]
 
