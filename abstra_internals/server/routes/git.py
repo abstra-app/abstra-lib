@@ -196,4 +196,23 @@ def get_editor_bp(controller: MainController):
         except Exception as e:
             return flask.jsonify({"success": False, "message": str(e)}), 500
 
+    @bp.post("/gitignore")
+    @editor_usage
+    def _add_to_gitignore():
+        if not flask.request.json:
+            flask.abort(400)
+
+        paths = flask.request.json.get("paths", [])
+        if not paths:
+            return flask.jsonify(
+                {"success": False, "message": "No paths provided"}
+            ), 400
+
+        try:
+            result = git_controller.add_to_gitignore(paths)
+            status_code = 200 if result["success"] else 400
+            return flask.jsonify(result), status_code
+        except Exception as e:
+            return flask.jsonify({"success": False, "message": str(e)}), 500
+
     return bp

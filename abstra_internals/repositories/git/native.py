@@ -5,7 +5,13 @@ from typing import Dict, List, Optional, Tuple
 
 from abstra_internals.environment import REMOTE_NAME
 
-from .types import GitCommit, GitFileChange, GitRepositoryInterface, GitStatus
+from .types import (
+    GitCommit,
+    GitFileChange,
+    GitRepositoryInterface,
+    GitStatus,
+    LargeFileInfo,
+)
 
 TEMP_ABSTRA_EMAIL = "abstra@abstra.app"
 TEMP_ABSTRA_NAME = "Abstra"
@@ -17,6 +23,67 @@ class NativeGitRepository(GitRepositoryInterface):
     def __init__(self, working_directory: Path):
         super().__init__(working_directory)
         self._git_available = None
+
+    def _decode_git_path(self, path: str) -> str:
+        """Decode a git path that may be quoted and contain escape sequences.
+
+        Git uses C-style quoting for paths with special characters:
+        - Paths with spaces, quotes, or non-ASCII chars are wrapped in double quotes
+        - Special chars are escaped (e.g., \\n, \\t, \\", \\\\)
+        - Non-ASCII bytes are shown as octal escapes (e.g., \\303\\241 for á)
+        """
+        if not path:
+            return path
+
+        # Remove surrounding quotes if present
+        if path.startswith('"') and path.endswith('"'):
+            path = path[1:-1]
+
+            # Decode escape sequences
+            result = []
+            i = 0
+            while i < len(path):
+                if path[i] == "\\" and i + 1 < len(path):
+                    next_char = path[i + 1]
+                    if next_char == "n":
+                        result.append("\n")
+                        i += 2
+                    elif next_char == "t":
+                        result.append("\t")
+                        i += 2
+                    elif next_char == "\\":
+                        result.append("\\")
+                        i += 2
+                    elif next_char == '"':
+                        result.append('"')
+                        i += 2
+                    elif next_char.isdigit():
+                        # Octal escape sequence (e.g., \303\241)
+                        octal = ""
+                        j = i + 1
+                        while j < len(path) and len(octal) < 3 and path[j].isdigit():
+                            octal += path[j]
+                            j += 1
+                        if octal:
+                            result.append(chr(int(octal, 8)))
+                            i = j
+                        else:
+                            result.append(path[i])
+                            i += 1
+                    else:
+                        result.append(path[i])
+                        i += 1
+                else:
+                    result.append(path[i])
+                    i += 1
+
+            # Handle UTF-8 encoded as individual bytes
+            try:
+                return "".join(result).encode("latin-1").decode("utf-8")
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                return "".join(result)
+
+        return path
 
     def _detect_and_cleanup_stale_locks(self) -> bool:
         """Detect and clean up stale git lock files."""
@@ -273,6 +340,7 @@ class NativeGitRepository(GitRepositoryInterface):
                 if line.strip():
                     filename = line[2:].lstrip() if len(line) > 2 else ""
                     if filename:
+                        filename = self._decode_git_path(filename)
                         files.append(filename)
             return files
         return []
@@ -295,6 +363,8 @@ class NativeGitRepository(GitRepositoryInterface):
 
                     if not filename:
                         continue
+
+                    filename = self._decode_git_path(filename)
 
                     if status_code[0] == "A" or status_code[1] == "A":
                         status = "added"
@@ -841,3 +911,79 @@ class NativeGitRepository(GitRepositoryInterface):
             return
 
         self._run_git_command(["rm", "--cached", "-r", str(relative_path)])
+
+    def _format_file_size(self, size_bytes: int) -> str:
+        """Format file size in human-readable format"""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        elif size_bytes < 1024 * 1024 * 1024:
+            return f"{size_bytes / (1024 * 1024):.1f} MB"
+        else:
+            return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
+
+    def get_large_files(
+        self, max_size_bytes: int = 5 * 1024 * 1024
+    ) -> List[LargeFileInfo]:
+        """Get list of changed files that exceed the size limit (default 5MB)"""
+        if not self.is_git_repository():
+            return []
+
+        large_files = []
+        changed_files = self.get_changed_files()
+
+        for file_path in changed_files:
+            full_path = self.working_directory / file_path
+            if full_path.exists() and full_path.is_file():
+                try:
+                    size = full_path.stat().st_size
+                    if size > max_size_bytes:
+                        large_files.append(
+                            LargeFileInfo(
+                                path=file_path,
+                                size_bytes=size,
+                                size_human=self._format_file_size(size),
+                            )
+                        )
+                except (OSError, IOError):
+                    continue
+
+        return large_files
+
+    def add_to_gitignore(self, paths: List[str]) -> Tuple[bool, Optional[str]]:
+        """Add paths to .gitignore file"""
+        if not paths:
+            return True, None
+
+        gitignore_path = self.working_directory / ".gitignore"
+
+        try:
+            existing_patterns = set()
+            if gitignore_path.exists():
+                with open(gitignore_path, "r", encoding="utf-8") as f:
+                    existing_patterns = {
+                        line.strip() for line in f.readlines() if line.strip()
+                    }
+
+            new_patterns = [p for p in paths if p not in existing_patterns]
+
+            if not new_patterns:
+                return True, None
+
+            with open(gitignore_path, "a", encoding="utf-8") as f:
+                if existing_patterns and not gitignore_path.read_text().endswith("\n"):
+                    f.write("\n")
+                f.write("\n# Large files (auto-added)\n")
+                for pattern in new_patterns:
+                    f.write(f"{pattern}\n")
+
+            for pattern in new_patterns:
+                full_path = self.working_directory / pattern
+                if full_path.exists():
+                    self.untrack_path(full_path)
+
+            return True, None
+
+        except Exception as e:
+            return False, f"Failed to update .gitignore: {str(e)}"

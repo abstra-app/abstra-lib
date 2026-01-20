@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -209,12 +209,37 @@ class GitController:
 
         return {"success": success, "message": message}
 
+    def check_large_files(
+        self, max_size_bytes: int = 5 * 1024 * 1024
+    ) -> Dict[str, Any]:
+        large_files = self.git_repository.get_large_files(max_size_bytes)
+        return {
+            "hasLargeFiles": len(large_files) > 0,
+            "largeFiles": [
+                {
+                    "path": f.path,
+                    "sizeBytes": f.size_bytes,
+                    "sizeHuman": f.size_human,
+                }
+                for f in large_files
+            ],
+        }
+
     def commit_changes(
         self, message: str, author: Optional[str] = None
     ) -> Dict[str, Any]:
         commit_message = message.strip()
         if not commit_message:
             return {"success": False, "message": "Commit message cannot be empty"}
+
+        large_files_info = self.check_large_files()
+        if large_files_info["hasLargeFiles"]:
+            return {
+                "success": False,
+                "message": "Cannot commit: some files are too large",
+                "errorType": "large_files",
+                "largeFiles": large_files_info["largeFiles"],
+            }
 
         success, error_message = self.git_repository.commit_changes(
             commit_message, author
@@ -224,6 +249,20 @@ class GitController:
             f"Successfully committed changes: {commit_message}"
             if success
             else error_message or "Commit failed"
+        )
+
+        return {"success": success, "message": message}
+
+    def add_to_gitignore(self, paths: List[str]) -> Dict[str, Any]:
+        if not paths:
+            return {"success": False, "message": "No paths provided"}
+
+        success, error_message = self.git_repository.add_to_gitignore(paths)
+
+        message = (
+            f"Successfully added {len(paths)} file(s) to .gitignore"
+            if success
+            else error_message or "Failed to update .gitignore"
         )
 
         return {"success": success, "message": message}
@@ -255,6 +294,30 @@ class GitController:
         self._ensure_authentication()
 
         success, error_message = self.git_repository.push_and_deploy(branch)
+
+        if not success and error_message:
+            large_file_error_indicators = [
+                "curl 18",
+                "transfer closed with outstanding read data remaining",
+                "unexpected disconnect while reading sideband packet",
+                "the remote end hung up unexpectedly",
+                "RPC failed",
+            ]
+
+            is_large_file_error = any(
+                indicator.lower() in error_message.lower()
+                for indicator in large_file_error_indicators
+            )
+
+            if is_large_file_error:
+                large_files_info = self.check_large_files()
+                if large_files_info["hasLargeFiles"]:
+                    return {
+                        "success": False,
+                        "message": "Push failed: your project contains files that are too large to upload. Please add them to .gitignore and try again.",
+                        "errorType": "large_files_push",
+                        "largeFiles": large_files_info.get("largeFiles", []),
+                    }
 
         message = (
             f"Successfully deployed branch '{branch}' to Abstra"

@@ -55,6 +55,14 @@ class NativeGitRepositoryTest(unittest.TestCase):
         file_path.write_text(content)
         return file_path
 
+    def create_file_with_size(self, filename: str, size_bytes: int) -> Path:
+        """Helper to create a file with a specific size"""
+        file_path = self.temp_dir / filename
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, "wb") as f:
+            f.write(b"x" * size_bytes)
+        return file_path
+
     # Test Methods
 
     def test_is_git_available(self):
@@ -353,6 +361,230 @@ class NativeGitRepositoryTest(unittest.TestCase):
             # Check file content
             file_content = (self.temp_dir / "test.txt").read_text()
             self.assertEqual(file_content, "version 1")
+
+    # Large files detection tests
+
+    def test_get_large_files_detects_large_file(self):
+        """Test that large files are detected correctly"""
+        self.repo.init_repository()
+        self.create_file_with_size("large_file.pdf", 6 * 1024 * 1024)
+
+        large_files = self.repo.get_large_files()
+
+        self.assertEqual(len(large_files), 1)
+        self.assertEqual(large_files[0].path, "large_file.pdf")
+        self.assertGreater(large_files[0].size_bytes, 5 * 1024 * 1024)
+        self.assertIn("MB", large_files[0].size_human)
+
+    def test_get_large_files_ignores_small_files(self):
+        """Test that small files are not flagged as large"""
+        self.repo.init_repository()
+        self.create_file_with_size("small_file.txt", 1024)
+
+        large_files = self.repo.get_large_files()
+
+        self.assertEqual(len(large_files), 0)
+
+    def test_get_large_files_custom_threshold(self):
+        """Test that custom size threshold works"""
+        self.repo.init_repository()
+        self.create_file_with_size("medium_file.bin", 2 * 1024 * 1024)
+
+        # With default 5MB threshold, should not be detected
+        large_files_default = self.repo.get_large_files()
+        self.assertEqual(len(large_files_default), 0)
+
+        # With 1MB threshold, should be detected
+        large_files_custom = self.repo.get_large_files(max_size_bytes=1 * 1024 * 1024)
+        self.assertEqual(len(large_files_custom), 1)
+        self.assertEqual(large_files_custom[0].path, "medium_file.bin")
+
+    def test_get_large_files_multiple_files(self):
+        """Test detection of multiple large files"""
+        self.repo.init_repository()
+        self.create_file_with_size("doc1.pdf", 6 * 1024 * 1024)
+        self.create_file_with_size("doc2.pdf", 7 * 1024 * 1024)
+        self.create_file_with_size("small.txt", 1024)
+
+        large_files = self.repo.get_large_files()
+
+        self.assertEqual(len(large_files), 2)
+        paths = {f.path for f in large_files}
+        self.assertIn("doc1.pdf", paths)
+        self.assertIn("doc2.pdf", paths)
+
+    def test_get_large_files_only_uncommitted(self):
+        """Test that only uncommitted files are checked"""
+        self.repo.init_repository()
+
+        # Create a large file and commit it
+        self.create_file_with_size("committed_large.bin", 6 * 1024 * 1024)
+        self.repo.commit_changes("Add large file")
+
+        # Should not detect the committed large file
+        large_files = self.repo.get_large_files()
+        self.assertEqual(len(large_files), 0)
+
+        # Create a new large file (uncommitted)
+        self.create_file_with_size("new_large.bin", 6 * 1024 * 1024)
+
+        # Now should detect only the new file
+        large_files = self.repo.get_large_files()
+        self.assertEqual(len(large_files), 1)
+        self.assertEqual(large_files[0].path, "new_large.bin")
+
+    # Path decoding tests
+
+    def test_decode_simple_path(self):
+        """Test that simple paths are returned unchanged"""
+        result = self.repo._decode_git_path("simple.txt")
+        self.assertEqual(result, "simple.txt")
+
+    def test_decode_path_with_spaces(self):
+        """Test decoding of paths with spaces (quoted by git)"""
+        result = self.repo._decode_git_path('"path with spaces.txt"')
+        self.assertEqual(result, "path with spaces.txt")
+
+    def test_decode_path_with_octal_utf8(self):
+        """Test decoding of UTF-8 characters encoded as octal escapes"""
+        # 'é' in UTF-8 is 0xC3 0xA9 (bytes), which is \303\251 in octal
+        result = self.repo._decode_git_path('"caf\\303\\251.txt"')
+        self.assertEqual(result, "café.txt")
+
+    def test_decode_empty_path(self):
+        """Test that empty paths are handled correctly"""
+        result = self.repo._decode_git_path("")
+        self.assertEqual(result, "")
+
+    # File size formatting tests
+
+    def test_format_bytes(self):
+        """Test formatting of small sizes in bytes"""
+        result = self.repo._format_file_size(500)
+        self.assertEqual(result, "500 B")
+
+    def test_format_kilobytes(self):
+        """Test formatting of kilobyte sizes"""
+        result = self.repo._format_file_size(2048)
+        self.assertEqual(result, "2.0 KB")
+
+    def test_format_megabytes(self):
+        """Test formatting of megabyte sizes"""
+        result = self.repo._format_file_size(5 * 1024 * 1024)
+        self.assertEqual(result, "5.0 MB")
+
+    def test_format_gigabytes(self):
+        """Test formatting of gigabyte sizes"""
+        result = self.repo._format_file_size(2 * 1024 * 1024 * 1024)
+        self.assertEqual(result, "2.0 GB")
+
+    # Gitignore tests
+
+    def test_add_to_gitignore_creates_file(self):
+        """Test that .gitignore is created if it doesn't exist"""
+        self.repo.init_repository()
+        gitignore_path = self.temp_dir / ".gitignore"
+
+        success, error = self.repo.add_to_gitignore(["large_file.pdf"])
+
+        self.assertTrue(success)
+        self.assertIsNone(error)
+        self.assertTrue(gitignore_path.exists())
+        content = gitignore_path.read_text(encoding="utf-8")
+        self.assertIn("large_file.pdf", content)
+
+    def test_add_to_gitignore_appends_to_existing(self):
+        """Test that patterns are appended to existing .gitignore"""
+        self.repo.init_repository()
+        gitignore_path = self.temp_dir / ".gitignore"
+        gitignore_path.write_text("*.log\n", encoding="utf-8")
+
+        success, _ = self.repo.add_to_gitignore(["large_file.pdf"])
+
+        self.assertTrue(success)
+        content = gitignore_path.read_text(encoding="utf-8")
+        self.assertIn("*.log", content)
+        self.assertIn("large_file.pdf", content)
+
+    def test_add_to_gitignore_skips_duplicates(self):
+        """Test that duplicate patterns are not added"""
+        self.repo.init_repository()
+        gitignore_path = self.temp_dir / ".gitignore"
+        gitignore_path.write_text("large_file.pdf\n", encoding="utf-8")
+
+        success, _ = self.repo.add_to_gitignore(["large_file.pdf"])
+
+        self.assertTrue(success)
+        content = gitignore_path.read_text(encoding="utf-8")
+        self.assertEqual(content.count("large_file.pdf"), 1)
+
+    def test_add_to_gitignore_multiple_paths(self):
+        """Test adding multiple paths at once"""
+        self.repo.init_repository()
+        success, error = self.repo.add_to_gitignore(
+            ["file1.pdf", "file2.xlsx", "file3.bin"]
+        )
+
+        self.assertTrue(success)
+        gitignore_path = self.temp_dir / ".gitignore"
+        content = gitignore_path.read_text(encoding="utf-8")
+        self.assertIn("file1.pdf", content)
+        self.assertIn("file2.xlsx", content)
+        self.assertIn("file3.bin", content)
+
+    def test_add_to_gitignore_empty_list(self):
+        """Test that empty list returns success without changes"""
+        self.repo.init_repository()
+        success, error = self.repo.add_to_gitignore([])
+
+        self.assertTrue(success)
+        self.assertIsNone(error)
+
+    # Integration test
+
+    def test_detect_and_gitignore_workflow(self):
+        """Test the full workflow: detect large files and add them to .gitignore"""
+        self.repo.init_repository()
+        self.create_file_with_size("big_spreadsheet.xlsx", 6 * 1024 * 1024)
+        self.create_file_with_size("small_code.py", 1024)
+
+        # Detect large files
+        large_files = self.repo.get_large_files()
+        self.assertEqual(len(large_files), 1)
+        self.assertEqual(large_files[0].path, "big_spreadsheet.xlsx")
+
+        # Add to gitignore
+        paths = [f.path for f in large_files]
+        success, _ = self.repo.add_to_gitignore(paths)
+        self.assertTrue(success)
+
+        # Verify the file is now ignored
+        success, stdout, _ = self.repo._run_git_command(
+            ["check-ignore", "big_spreadsheet.xlsx"]
+        )
+        self.assertTrue(success)
+        self.assertIn("big_spreadsheet.xlsx", stdout)
+
+    def test_files_with_spaces_in_name(self):
+        """Test handling of large files with spaces in their names"""
+        self.repo.init_repository()
+        file_with_spaces = self.temp_dir / "My Large Document.pdf"
+        with open(file_with_spaces, "wb") as f:
+            f.write(b"x" * (6 * 1024 * 1024))
+
+        # Detect large files
+        large_files = self.repo.get_large_files()
+        self.assertEqual(len(large_files), 1)
+        self.assertEqual(large_files[0].path, "My Large Document.pdf")
+
+        # Add to gitignore
+        success, _ = self.repo.add_to_gitignore([large_files[0].path])
+        self.assertTrue(success)
+
+        # Verify gitignore content
+        gitignore_path = self.temp_dir / ".gitignore"
+        content = gitignore_path.read_text(encoding="utf-8")
+        self.assertIn("My Large Document.pdf", content)
 
 
 if __name__ == "__main__":

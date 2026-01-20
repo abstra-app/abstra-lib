@@ -43,6 +43,13 @@ class GitFileChange:
 
 
 @dataclass
+class LargeFileInfo:
+    path: str
+    size_bytes: int
+    size_human: str
+
+
+@dataclass
 class GitStatusResponse:
     available: bool
     git_installed: bool
@@ -287,4 +294,16 @@ class GitRepositoryInterface(ABC):
     @abstractmethod
     def untrack_path(self, path: Path):
         """Untrack a path from git (git rm --cached)"""
+        pass
+
+    @abstractmethod
+    def get_large_files(
+        self, max_size_bytes: int = 5 * 1024 * 1024
+    ) -> List["LargeFileInfo"]:
+        """Get list of changed files that exceed the size limit (default 5MB)"""
+        pass
+
+    @abstractmethod
+    def add_to_gitignore(self, paths: List[str]) -> Tuple[bool, Optional[str]]:
+        """Add paths to .gitignore file"""
         pass

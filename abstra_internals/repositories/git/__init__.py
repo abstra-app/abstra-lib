@@ -5,6 +5,7 @@ from .types import (
     GitRepositoryInterface,
     GitStatus,
     GitStatusResponse,
+    LargeFileInfo,
     RemoteGitStatus,
 )
 
@@ -22,4 +23,5 @@ __all__ = [
     "NativeGitRepository",
     "create_git_repository",
     "AheadBehindInfo",
+    "LargeFileInfo",
 ]
