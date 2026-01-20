@@ -358,22 +358,137 @@ class WebEditorConsumer(RabbitMQConsumer):
         )
 
 
-class WebEditorControlConsumer(RabbitMQConsumer):
-    """Consumer for web editor control messages."""
+class RabbitMQFanoutConsumer(Consumer):
+    """
+    RabbitMQ consumer that subscribes to a fanout exchange.
+    Creates an exclusive queue that is automatically deleted when the consumer disconnects.
+    Used for broadcast messages like control signals that need to reach all workers.
+    """
+
+    channel: BlockingChannel
+    connection: Optional[BlockingConnection]
+    conn_uri: str
+    queue_name: Optional[str]  # Auto-generated exclusive queue name
 
     def __init__(
         self,
         conn_uri: str,
-        queue_name: str = "web_editor_control",
+        exchange_name: str,
+        logger_prefix: str = "RabbitMQFanoutConsumer",
         connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
     ):
-        super().__init__(
-            conn_uri,
-            queue_name,
-            1,
-            "WebEditorControlConsumer",
-            connection_factory=connection_factory,
-        )
+        self.conn_uri = conn_uri
+        self.exchange_name = exchange_name
+        self.stop_evt = Event()
+        self.logger_prefix = logger_prefix
+        self.connection_factory = connection_factory
+        self.queue_name = None
+        self.connection = None
+
+        self._connect()
+
+    def _connect(self):
+        """
+        Establish RabbitMQ connection, declare fanout exchange, create exclusive queue,
+        and bind queue to exchange.
+        """
+        if hasattr(self, "connection") and self.connection:
+            try:
+                self.connection.close()
+            except Exception as e:
+                AbstraLogger.error(
+                    f"[{self.logger_prefix}] Error closing existing connection: {e}"
+                )
+                pass
+
+        AbstraLogger.info(f"[{self.logger_prefix}] Connecting...")
+
+        params = pika.URLParameters(self.conn_uri)
+        params.connection_attempts = 1
+        params.socket_timeout = RABBITMQ_CONNECTION_TIMEOUT_SECONDS
+        params.blocked_connection_timeout = RABBITMQ_CONNECTION_TIMEOUT_SECONDS
+
+        delay = RABBITMQ_RETRY_INITIAL_DELAY_SECONDS
+        last_exception = None
+
+        for attempt in range(1, RABBITMQ_RETRY_MAX_ATTEMPTS + 1):
+            try:
+                self.connection = self.connection_factory(params)
+                self.channel = self.connection.channel()
+                self.channel.basic_qos(prefetch_count=1)
+
+                # Declare the fanout exchange
+                self.channel.exchange_declare(
+                    exchange=self.exchange_name, exchange_type="fanout", durable=True
+                )
+
+                # Create an exclusive queue (auto-named, auto-deleted when disconnected)
+                result = self.channel.queue_declare(queue="", exclusive=True)
+                self.queue_name = result.method.queue
+
+                # Bind the exclusive queue to the fanout exchange
+                self.channel.queue_bind(
+                    exchange=self.exchange_name, queue=self.queue_name
+                )
+
+                AbstraLogger.info(
+                    f"[{self.logger_prefix}] Connected and bound to exchange '{self.exchange_name}' "
+                    f"with exclusive queue '{self.queue_name}'"
+                )
+                return
+            except AMQPConnectionError as e:
+                last_exception = e
+                if attempt < RABBITMQ_RETRY_MAX_ATTEMPTS:
+                    AbstraLogger.warning(
+                        f"[{self.logger_prefix}] Connection failed (attempt {attempt}): {e}. "
+                        f"Retrying in {delay}s..."
+                    )
+                    time.sleep(delay)
+                    delay = min(delay * 2, 30)
+                else:
+                    AbstraLogger.error(
+                        f"[{self.logger_prefix}] All {RABBITMQ_RETRY_MAX_ATTEMPTS} connection attempts failed"
+                    )
+
+        raise last_exception or AMQPConnectionError("Failed to connect to RabbitMQ")
+
+    def threadsafe_ack(self, msg: Union[QueueMessage, ControlQueueMessage]):
+        if not self.connection:
+            AbstraLogger.warning(
+                f"[{self.logger_prefix}] Connection not established, cannot ack message [{msg.delivery_tag}]"
+            )
+            return
+
+        def callback():
+            try:
+                if self.channel.is_open:
+                    self.channel.basic_ack(delivery_tag=msg.delivery_tag)
+            except Exception as e:
+                AbstraLogger.error(
+                    f"[{self.logger_prefix}] Error acknowledging message [{msg.delivery_tag}]: {e}"
+                )
+
+        self.connection.add_callback_threadsafe(callback)
+
+    def threadsafe_nack(self, msg: Union[QueueMessage, ControlQueueMessage]):
+        if not self.connection:
+            AbstraLogger.warning(
+                f"[{self.logger_prefix}] Connection not established, cannot nack message [{msg.delivery_tag}]"
+            )
+            return
+
+        def callback():
+            try:
+                if self.channel.is_open:
+                    self.channel.basic_nack(
+                        delivery_tag=msg.delivery_tag, requeue=False
+                    )
+            except Exception as e:
+                AbstraLogger.error(
+                    f"[{self.logger_prefix}] Error nacking message [{msg.delivery_tag}]: {e}"
+                )
+
+        self.connection.add_callback_threadsafe(callback)
 
     def _deserialize(self, body: bytes) -> ControlQueueMessage:
         control_message = ControlMessage.model_validate(
@@ -381,5 +496,129 @@ class WebEditorControlConsumer(RabbitMQConsumer):
         )
         return ControlQueueMessage(
             message=control_message,
-            delivery_tag=0,  # This will be overwritten by iter
+            delivery_tag=0,
+        )
+
+    def iter(self) -> Generator[Union[QueueMessage, ControlQueueMessage], None, None]:
+        AbstraLogger.info(f"[{self.logger_prefix}] Starting consumer iteration")
+
+        while not self.stop_evt.is_set():
+            try:
+                if (
+                    not hasattr(self, "connection")
+                    or self.connection is None
+                    or self.connection.is_closed
+                ):
+                    self._connect()
+
+                assert self.connection is not None
+                assert self.queue_name is not None
+
+                for method, _, body in self.channel.consume(
+                    queue=self.queue_name, inactivity_timeout=1, auto_ack=False
+                ):
+                    if self.stop_evt.is_set():
+                        break
+
+                    if not method:
+                        continue
+
+                    try:
+                        queue_message = self._deserialize(body)
+                        queue_message.delivery_tag = method.delivery_tag
+                        yield queue_message
+                    except Exception as e:
+                        AbstraLogger.error(
+                            f"[{self.logger_prefix}] Error processing message: {e}"
+                        )
+                        try:
+                            if self.channel.is_open:
+                                self.channel.basic_nack(
+                                    delivery_tag=method.delivery_tag, requeue=False
+                                )
+                        except Exception as nack_err:
+                            AbstraLogger.debug(
+                                f"[{self.logger_prefix}] Failed to nack after error: {nack_err}"
+                            )
+
+            except AMQPError as e:
+                AbstraLogger.error(f"[{self.logger_prefix}] Connection lost: {e}")
+                if hasattr(self, "connection") and self.connection:
+                    try:
+                        self.connection.close()
+                    except Exception:
+                        AbstraLogger.error(
+                            f"[{self.logger_prefix}] Error closing connection after loss: {e}"
+                        )
+                        pass
+                self.connection = None
+
+                if not self.stop_evt.is_set():
+                    AbstraLogger.info(
+                        f"[{self.logger_prefix}] Reconnecting in {RABBITMQ_RETRY_INITIAL_DELAY_SECONDS}s..."
+                    )
+                    time.sleep(RABBITMQ_RETRY_INITIAL_DELAY_SECONDS)
+            except Exception as e:
+                AbstraLogger.error(
+                    f"[{self.logger_prefix}] Unexpected error in consumer loop: {e}"
+                )
+                if not self.stop_evt.is_set():
+                    time.sleep(RABBITMQ_RETRY_INITIAL_DELAY_SECONDS)
+
+    def stop_iter(self):
+        AbstraLogger.warning(f"[{self.logger_prefix}] Setting stop event for consumer")
+        self.stop_evt.set()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop_iter()
+
+        AbstraLogger.debug(f"[{self.logger_prefix}] Exiting consumer context manager")
+
+        if self.connection:
+            self.connection.process_data_events(time_limit=60)
+
+            if self.connection.is_open:
+                self.channel.cancel()
+                self.channel.close()
+                self.connection.close()
+
+        return False
+
+    def __enter__(self):
+        return self
+
+
+class ProductionControlConsumer(RabbitMQFanoutConsumer):
+    """Consumer for production control messages (stop execution, etc).
+    Uses a fanout exchange so all workers receive broadcast messages."""
+
+    def __init__(
+        self,
+        conn_uri: str,
+        exchange_name: str = "control",
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
+    ):
+        super().__init__(
+            conn_uri,
+            exchange_name,
+            "ProductionControlConsumer",
+            connection_factory=connection_factory,
+        )
+
+
+class WebEditorControlConsumer(RabbitMQFanoutConsumer):
+    """Consumer for web editor control messages.
+    Uses a fanout exchange so all workers receive broadcast messages."""
+
+    def __init__(
+        self,
+        conn_uri: str,
+        exchange_name: str = "web_editor_control",
+        connection_factory: Type[BlockingConnection] = pika.BlockingConnection,
+    ):
+        super().__init__(
+            conn_uri,
+            exchange_name,
+            "WebEditorControlConsumer",
+            connection_factory=connection_factory,
         )
