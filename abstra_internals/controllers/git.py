@@ -3,8 +3,10 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from abstra_internals.credentials import get_credentials
+from abstra_internals.cloud_api import get_api_key_info
+from abstra_internals.credentials import get_credentials, resolve_headers
 from abstra_internals.environment import CLOUD_API_CLI_URL, REMOTE_GIT_URL, REMOTE_NAME
+from abstra_internals.interface.cli.deploy_messages import DeployMessages
 from abstra_internals.repositories.git import (
     AheadBehindInfo,
     GitCommit,
@@ -290,9 +292,27 @@ class GitController:
             "hasMore": len(commits) == limit,
         }
 
-    def push_and_deploy(self, branch: str = "main") -> Dict[str, Any]:
+    def _get_project_id(self) -> Optional[str]:
+        try:
+            headers = resolve_headers()
+            if headers:
+                api_key_info = get_api_key_info(headers)
+                if api_key_info.get("logged"):
+                    return api_key_info.get("info", {}).get("projectId")
+        except Exception:
+            pass
+        return None
+
+    def push_and_deploy(
+        self, branch: str = "main", show_start_message: bool = True
+    ) -> Dict[str, Any]:
+        if show_start_message:
+            DeployMessages.start(method="git")
+
+        DeployMessages.authenticating()
         self._ensure_authentication()
 
+        DeployMessages.pushing(branch)
         success, error_message = self.git_repository.push_and_deploy(branch)
 
         if not success and error_message:
@@ -312,18 +332,22 @@ class GitController:
             if is_large_file_error:
                 large_files_info = self.check_large_files()
                 if large_files_info["hasLargeFiles"]:
+                    large_file_error_message = "Push failed: your project contains files that are too large to upload. Please add them to .gitignore and try again."
+                    DeployMessages.error(large_file_error_message)
                     return {
                         "success": False,
-                        "message": "Push failed: your project contains files that are too large to upload. Please add them to .gitignore and try again.",
+                        "message": large_file_error_message,
                         "errorType": "large_files_push",
                         "largeFiles": large_files_info.get("largeFiles", []),
                     }
 
-        message = (
-            f"Successfully deployed branch '{branch}' to Abstra"
-            if success
-            else error_message
-        )
+        if success:
+            project_id = self._get_project_id()
+            DeployMessages.success(project_id)
+            message = f"Successfully deployed branch '{branch}' to Abstra"
+        else:
+            DeployMessages.error(error_message or "Unknown error")
+            message = error_message
 
         return {"success": success, "message": message}
 

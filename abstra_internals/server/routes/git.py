@@ -5,6 +5,7 @@ import flask
 from abstra_internals.controllers.git import EmailProvider, GitController
 from abstra_internals.controllers.main import MainController
 from abstra_internals.environment import EDITOR_MODE, PROJECT_ID
+from abstra_internals.interface.cli.deploy_messages import DeployMessages
 from abstra_internals.services.jwt import decode_jwt
 from abstra_internals.usage import editor_usage
 
@@ -38,17 +39,26 @@ def get_editor_bp(controller: MainController):
         commit_hash = flask.request.json.get("commitHash")
 
         if not branch_name and not commit_hash:
-            return flask.jsonify(
-                {"success": False, "message": "Branch name or commit hash is required"}
-            ), 400
+            return (
+                flask.jsonify(
+                    {
+                        "success": False,
+                        "message": "Branch name or commit hash is required",
+                    }
+                ),
+                400,
+            )
 
         if branch_name and commit_hash:
-            return flask.jsonify(
-                {
-                    "success": False,
-                    "message": "Provide either branch or commit, not both",
-                }
-            ), 400
+            return (
+                flask.jsonify(
+                    {
+                        "success": False,
+                        "message": "Provide either branch or commit, not both",
+                    }
+                ),
+                400,
+            )
 
         try:
             if branch_name:
@@ -99,9 +109,12 @@ def get_editor_bp(controller: MainController):
 
         message = flask.request.json.get("message")
         if not message:
-            return flask.jsonify(
-                {"success": False, "message": "Commit message is required"}
-            ), 400
+            return (
+                flask.jsonify(
+                    {"success": False, "message": "Commit message is required"}
+                ),
+                400,
+            )
 
         try:
             result = git_controller.commit_changes(message, email)
@@ -138,32 +151,43 @@ def get_editor_bp(controller: MainController):
             )
             return flask.jsonify(result), 200
         except Exception as e:
-            return flask.jsonify(
-                {"commits": [], "hasMore": False, "error": str(e)}
-            ), 500
+            return (
+                flask.jsonify({"commits": [], "hasMore": False, "error": str(e)}),
+                500,
+            )
 
     @bp.post("/deploy")
     @editor_usage
     def _deploy_to_abstra():
         try:
+            DeployMessages.start(method="git")
+            DeployMessages.checking_linters()
+
             controller.linter_repository.update_checks()
             issues = controller.linter_repository.get_blocking_checks()
 
             if len(issues) > 0:
-                return flask.jsonify(
-                    {
-                        "success": False,
-                        "message": "Please fix all linter issues before deploying your project.",
-                    }
-                ), 400
+                DeployMessages.error(
+                    "Please fix all linter issues before deploying your project."
+                )
+                return (
+                    flask.jsonify(
+                        {
+                            "success": False,
+                            "message": "Please fix all linter issues before deploying your project.",
+                        }
+                    ),
+                    400,
+                )
 
             data = flask.request.get_json(silent=True)
             branch = data.get("branch", "main") if data else "main"
 
-            result = git_controller.push_and_deploy(branch)
+            result = git_controller.push_and_deploy(branch, show_start_message=False)
             status_code = 200 if result["success"] else 400
             return flask.jsonify(result), status_code
         except Exception as e:
+            DeployMessages.error(str(e))
             return flask.jsonify({"success": False, "message": str(e)}), 500
 
     @bp.get("/remotes")
@@ -173,9 +197,12 @@ def get_editor_bp(controller: MainController):
             result = git_controller.get_remotes()
             return flask.jsonify(result), 200
         except Exception as e:
-            return flask.jsonify(
-                {"remotes": [], "hasAbstraRemote": False, "error": str(e)}
-            ), 500
+            return (
+                flask.jsonify(
+                    {"remotes": [], "hasAbstraRemote": False, "error": str(e)}
+                ),
+                500,
+            )
 
     @bp.post("/revert")
     @editor_usage
@@ -185,9 +212,10 @@ def get_editor_bp(controller: MainController):
 
         commit_hash = flask.request.json.get("commitHash")
         if not commit_hash:
-            return flask.jsonify(
-                {"success": False, "message": "Commit hash is required"}
-            ), 400
+            return (
+                flask.jsonify({"success": False, "message": "Commit hash is required"}),
+                400,
+            )
 
         try:
             result = git_controller.revert_commit(commit_hash)

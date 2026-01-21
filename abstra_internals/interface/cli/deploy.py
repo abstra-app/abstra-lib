@@ -2,11 +2,13 @@ import pathlib
 import tempfile
 import uuid
 import zipfile
+from typing import Optional
 
 import requests
 
-from abstra_internals.cloud_api import create_build, update_build
+from abstra_internals.cloud_api import create_build, get_api_key_info, update_build
 from abstra_internals.credentials import resolve_headers
+from abstra_internals.interface.cli.deploy_messages import DeployMessages
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
@@ -28,24 +30,43 @@ def _upload_file(url: str, file_path: pathlib.Path):
         requests.put(url=url, data=f.read())
 
 
+def _get_project_id(headers: dict) -> Optional[str]:
+    try:
+        api_key_info = get_api_key_info(headers)
+        if api_key_info.get("logged"):
+            return api_key_info.get("info", {}).get("projectId")
+    except Exception:
+        pass
+    return None
+
+
 def deploy_without_git():
+    DeployMessages.start(method="upload")
+
+    DeployMessages.authenticating()
     headers = resolve_headers()
     if not headers:
-        print(
-            "No project credentials found. Please run `abstra editor` and login via the web interface."
-        )
+        DeployMessages.no_credentials()
         return
 
     data = create_build(headers)
 
     try:
+        DeployMessages.packaging()
         zip_path = _generate_zip_file()
+
+        DeployMessages.uploading()
         _upload_file(url=data.url, file_path=zip_path)
+
+        DeployMessages.finalizing()
         update_build(headers=headers, build_id=data.build_id)
+
+        project_id = _get_project_id(headers)
+        DeployMessages.success(project_id)
     except Exception as e:
         update_build(
             headers=headers, build_id=data.build_id, error="Failed to upload files"
         )
-        print("Failed to deploy project", e)
+        DeployMessages.error(str(e))
         AbstraLogger.capture_exception(e)
         raise e
