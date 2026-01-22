@@ -717,7 +717,35 @@ CommonConnectorMetadataTag = str
 
 CommonConnectorMetadataBeta = bool
 
-CommonConnectorMetadataPersonalizedOption = str
+CommonConnectorMetadataPostConnectionSetupItemType = str
+
+CommonConnectorMetadataPostConnectionSetupItemTitle = str
+
+
+@dataclass
+class CommonConnectorMetadataPostConnectionSetupItem:
+    type: CommonConnectorMetadataPostConnectionSetupItemType
+    title: CommonConnectorMetadataPostConnectionSetupItemTitle
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["title"] = self.title
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonConnectorMetadataPostConnectionSetupItem":
+        return cls(
+            type=str(data["type"]),
+            title=str(data["title"]),
+        )
+
+
+CommonConnectorMetadataPostConnectionSetup = typing.List[
+    CommonConnectorMetadataPostConnectionSetupItem
+]
 
 
 @dataclass
@@ -732,9 +760,9 @@ class CommonConnectorMetadata:
     beta: typing.Optional[CommonConnectorMetadataBeta] = field(
         default_factory=lambda: None
     )
-    personalized_option: typing.Optional[CommonConnectorMetadataPersonalizedOption] = (
-        field(default_factory=lambda: None)
-    )
+    post_connection_setup: typing.Optional[
+        CommonConnectorMetadataPostConnectionSetup
+    ] = field(default_factory=lambda: None)
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
@@ -746,8 +774,10 @@ class CommonConnectorMetadata:
             data["tag"] = self.tag
         if self.beta is not None:
             data["beta"] = self.beta
-        if self.personalized_option is not None:
-            data["personalizedOption"] = self.personalized_option
+        if self.post_connection_setup is not None:
+            data["postConnectionSetup"] = [
+                item.to_dict() for item in self.post_connection_setup
+            ]
         return data
 
     @classmethod
@@ -759,9 +789,12 @@ class CommonConnectorMetadata:
             logo_url=str(data["logoUrl"]),
             tag=None if data.get("tag") is None else str(data["tag"]),
             beta=None if data.get("beta") is None else bool(data["beta"]),
-            personalized_option=None
-            if data.get("personalizedOption") is None
-            else str(data["personalizedOption"]),
+            post_connection_setup=None
+            if data.get("postConnectionSetup") is None
+            else [
+                CommonConnectorMetadataPostConnectionSetupItem.from_dict(item)
+                for item in data["postConnectionSetup"]
+            ],
         )
 
 
@@ -2375,17 +2408,21 @@ class CommonAbstraJsonV17Home:
         )
 
 
-CommonAbstraJsonV17DefinitionsJobStageInput = bool
-
-CommonAbstraJsonV17DefinitionsJobStageId = str
-
 CommonAbstraJsonV17DefinitionsJobStageWorkflowPositionItem = float
 
 CommonAbstraJsonV17DefinitionsJobStageWorkflowPosition = typing.List[
     CommonAbstraJsonV17DefinitionsJobStageWorkflowPositionItem
 ]
 
+CommonAbstraJsonV17DefinitionsJobStageInput = bool
+
 CommonAbstraJsonV17DefinitionsJobStageTitle = str
+
+CommonAbstraJsonV17DefinitionsJobStageId = str
+
+CommonAbstraJsonV17DefinitionsJobStageFile = str
+
+CommonAbstraJsonV17DefinitionsJobStageOutput = bool
 
 CommonAbstraJsonV17DefinitionsTransitionId = str
 
@@ -2462,33 +2499,29 @@ CommonAbstraJsonV17DefinitionsJobStageTransitions = typing.List[
     CommonAbstraJsonV17DefinitionsJobStageTransitionsItem
 ]
 
-CommonAbstraJsonV17DefinitionsJobStageOutput = bool
-
-CommonAbstraJsonV17DefinitionsJobStageFile = str
-
 CommonAbstraJsonV17DefinitionsJobStageSchedule = str
 
 
 @dataclass
 class CommonAbstraJsonV17DefinitionsJobStage:
-    input: CommonAbstraJsonV17DefinitionsJobStageInput
-    id: CommonAbstraJsonV17DefinitionsJobStageId
     workflow_position: CommonAbstraJsonV17DefinitionsJobStageWorkflowPosition
+    input: CommonAbstraJsonV17DefinitionsJobStageInput
     title: CommonAbstraJsonV17DefinitionsJobStageTitle
-    transitions: CommonAbstraJsonV17DefinitionsJobStageTransitions
-    output: CommonAbstraJsonV17DefinitionsJobStageOutput
+    id: CommonAbstraJsonV17DefinitionsJobStageId
     file: CommonAbstraJsonV17DefinitionsJobStageFile
+    output: CommonAbstraJsonV17DefinitionsJobStageOutput
+    transitions: CommonAbstraJsonV17DefinitionsJobStageTransitions
     schedule: CommonAbstraJsonV17DefinitionsJobStageSchedule
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["input"] = self.input
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
+        data["input"] = self.input
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
-        data["output"] = self.output
+        data["id"] = self.id
         data["file"] = self.file
+        data["output"] = self.output
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["schedule"] = self.schedule
         return data
 
@@ -2497,16 +2530,16 @@ class CommonAbstraJsonV17DefinitionsJobStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV17DefinitionsJobStage":
         return cls(
-            input=bool(data["input"]),
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
+            input=bool(data["input"]),
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
+            output=bool(data["output"]),
             transitions=[
                 CommonAbstraJsonV17DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            output=bool(data["output"]),
-            file=str(data["file"]),
             schedule=str(data["schedule"]),
         )
 
@@ -2515,17 +2548,21 @@ CommonAbstraJsonV17JobsItem = CommonAbstraJsonV17DefinitionsJobStage
 
 CommonAbstraJsonV17Jobs = typing.List[CommonAbstraJsonV17JobsItem]
 
-CommonAbstraJsonV17DefinitionsHookStageInput = bool
-
-CommonAbstraJsonV17DefinitionsHookStageId = str
-
 CommonAbstraJsonV17DefinitionsHookStageWorkflowPositionItem = float
 
 CommonAbstraJsonV17DefinitionsHookStageWorkflowPosition = typing.List[
     CommonAbstraJsonV17DefinitionsHookStageWorkflowPositionItem
 ]
 
+CommonAbstraJsonV17DefinitionsHookStageInput = bool
+
 CommonAbstraJsonV17DefinitionsHookStageTitle = str
+
+CommonAbstraJsonV17DefinitionsHookStageId = str
+
+CommonAbstraJsonV17DefinitionsHookStageFile = str
+
+CommonAbstraJsonV17DefinitionsHookStageOutput = bool
 
 CommonAbstraJsonV17DefinitionsHookStageTransitionsItem = (
     CommonAbstraJsonV17DefinitionsTransition
@@ -2534,10 +2571,6 @@ CommonAbstraJsonV17DefinitionsHookStageTransitionsItem = (
 CommonAbstraJsonV17DefinitionsHookStageTransitions = typing.List[
     CommonAbstraJsonV17DefinitionsHookStageTransitionsItem
 ]
-
-CommonAbstraJsonV17DefinitionsHookStageOutput = bool
-
-CommonAbstraJsonV17DefinitionsHookStageFile = str
 
 CommonAbstraJsonV17DefinitionsHookStagePath = str
 
@@ -2548,26 +2581,26 @@ CommonAbstraJsonV17DefinitionsHookStageEnabled = bool
 
 @dataclass
 class CommonAbstraJsonV17DefinitionsHookStage:
-    input: CommonAbstraJsonV17DefinitionsHookStageInput
-    id: CommonAbstraJsonV17DefinitionsHookStageId
     workflow_position: CommonAbstraJsonV17DefinitionsHookStageWorkflowPosition
+    input: CommonAbstraJsonV17DefinitionsHookStageInput
     title: CommonAbstraJsonV17DefinitionsHookStageTitle
-    transitions: CommonAbstraJsonV17DefinitionsHookStageTransitions
-    output: CommonAbstraJsonV17DefinitionsHookStageOutput
+    id: CommonAbstraJsonV17DefinitionsHookStageId
     file: CommonAbstraJsonV17DefinitionsHookStageFile
+    output: CommonAbstraJsonV17DefinitionsHookStageOutput
+    transitions: CommonAbstraJsonV17DefinitionsHookStageTransitions
     path: CommonAbstraJsonV17DefinitionsHookStagePath
     is_initial: CommonAbstraJsonV17DefinitionsHookStageIsInitial
     enabled: CommonAbstraJsonV17DefinitionsHookStageEnabled
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["input"] = self.input
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
+        data["input"] = self.input
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
-        data["output"] = self.output
+        data["id"] = self.id
         data["file"] = self.file
+        data["output"] = self.output
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["path"] = self.path
         data["is_initial"] = self.is_initial
         data["enabled"] = self.enabled
@@ -2578,16 +2611,16 @@ class CommonAbstraJsonV17DefinitionsHookStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV17DefinitionsHookStage":
         return cls(
-            input=bool(data["input"]),
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
+            input=bool(data["input"]),
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
+            output=bool(data["output"]),
             transitions=[
                 CommonAbstraJsonV17DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            output=bool(data["output"]),
-            file=str(data["file"]),
             path=str(data["path"]),
             is_initial=bool(data["is_initial"]),
             enabled=bool(data["enabled"]),
@@ -2598,17 +2631,21 @@ CommonAbstraJsonV17HooksItem = CommonAbstraJsonV17DefinitionsHookStage
 
 CommonAbstraJsonV17Hooks = typing.List[CommonAbstraJsonV17HooksItem]
 
-CommonAbstraJsonV17DefinitionsFormStageInput = bool
-
-CommonAbstraJsonV17DefinitionsFormStageId = str
-
 CommonAbstraJsonV17DefinitionsFormStageWorkflowPositionItem = float
 
 CommonAbstraJsonV17DefinitionsFormStageWorkflowPosition = typing.List[
     CommonAbstraJsonV17DefinitionsFormStageWorkflowPositionItem
 ]
 
+CommonAbstraJsonV17DefinitionsFormStageInput = bool
+
 CommonAbstraJsonV17DefinitionsFormStageTitle = str
+
+CommonAbstraJsonV17DefinitionsFormStageId = str
+
+CommonAbstraJsonV17DefinitionsFormStageFile = str
+
+CommonAbstraJsonV17DefinitionsFormStageOutput = bool
 
 CommonAbstraJsonV17DefinitionsFormStageTransitionsItem = (
     CommonAbstraJsonV17DefinitionsTransition
@@ -2617,108 +2654,6 @@ CommonAbstraJsonV17DefinitionsFormStageTransitionsItem = (
 CommonAbstraJsonV17DefinitionsFormStageTransitions = typing.List[
     CommonAbstraJsonV17DefinitionsFormStageTransitionsItem
 ]
-
-CommonAbstraJsonV17DefinitionsFormStageOutput = bool
-
-CommonAbstraJsonV17DefinitionsFormStageFile = str
-
-CommonAbstraJsonV17DefinitionsFormStageEndMessageString = str
-
-CommonAbstraJsonV17DefinitionsFormStageEndMessageNull = type(None)
-
-CommonAbstraJsonV17DefinitionsFormStageEndMessage = typing.Union[
-    CommonAbstraJsonV17DefinitionsFormStageEndMessageString,
-    CommonAbstraJsonV17DefinitionsFormStageEndMessageNull,
-]
-
-
-def common_abstra_json_v17_definitions_form_stage_end_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV17DefinitionsFormStageEndMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV17DefinitionsFormStageEndMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV17DefinitionsFormStageIsInitial = bool
-
-CommonAbstraJsonV17DefinitionsFormStageErrorMessageString = str
-
-CommonAbstraJsonV17DefinitionsFormStageErrorMessageNull = type(None)
-
-CommonAbstraJsonV17DefinitionsFormStageErrorMessage = typing.Union[
-    CommonAbstraJsonV17DefinitionsFormStageErrorMessageString,
-    CommonAbstraJsonV17DefinitionsFormStageErrorMessageNull,
-]
-
-
-def common_abstra_json_v17_definitions_form_stage_error_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV17DefinitionsFormStageErrorMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV17DefinitionsFormStageErrorMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV17DefinitionsFormStageAccessControlIsPublic = bool
-
-CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRolesItem = str
-
-CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRoles = typing.List[
-    CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRolesItem
-]
-
-
-@dataclass
-class CommonAbstraJsonV17DefinitionsFormStageAccessControl:
-    is_public: CommonAbstraJsonV17DefinitionsFormStageAccessControlIsPublic
-    required_roles: CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRoles
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["is_public"] = self.is_public
-        data["required_roles"] = self.required_roles
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonAbstraJsonV17DefinitionsFormStageAccessControl":
-        return cls(
-            is_public=bool(data["is_public"]),
-            required_roles=[str(item) for item in data["required_roles"]],
-        )
-
-
-CommonAbstraJsonV17DefinitionsFormStageStartMessageString = str
-
-CommonAbstraJsonV17DefinitionsFormStageStartMessageNull = type(None)
-
-CommonAbstraJsonV17DefinitionsFormStageStartMessage = typing.Union[
-    CommonAbstraJsonV17DefinitionsFormStageStartMessageString,
-    CommonAbstraJsonV17DefinitionsFormStageStartMessageNull,
-]
-
-
-def common_abstra_json_v17_definitions_form_stage_start_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV17DefinitionsFormStageStartMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV17DefinitionsFormStageStartMessage from dict: {data}"
-    )
-
 
 CommonAbstraJsonV17DefinitionsFormStageStartButtonTextString = str
 
@@ -2742,7 +2677,27 @@ def common_abstra_json_v17_definitions_form_stage_start_button_text_from_dict(
     )
 
 
-CommonAbstraJsonV17DefinitionsFormStagePath = str
+CommonAbstraJsonV17DefinitionsFormStageErrorMessageString = str
+
+CommonAbstraJsonV17DefinitionsFormStageErrorMessageNull = type(None)
+
+CommonAbstraJsonV17DefinitionsFormStageErrorMessage = typing.Union[
+    CommonAbstraJsonV17DefinitionsFormStageErrorMessageString,
+    CommonAbstraJsonV17DefinitionsFormStageErrorMessageNull,
+]
+
+
+def common_abstra_json_v17_definitions_form_stage_error_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV17DefinitionsFormStageErrorMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV17DefinitionsFormStageErrorMessage from dict: {data}"
+    )
+
 
 CommonAbstraJsonV17DefinitionsFormStageNotificationTriggerVariableName = str
 
@@ -2794,48 +2749,125 @@ def common_abstra_json_v17_definitions_form_stage_timeout_message_from_dict(
     )
 
 
+CommonAbstraJsonV17DefinitionsFormStageIsInitial = bool
+
 CommonAbstraJsonV17DefinitionsFormStageAutoStart = bool
+
+CommonAbstraJsonV17DefinitionsFormStageEndMessageString = str
+
+CommonAbstraJsonV17DefinitionsFormStageEndMessageNull = type(None)
+
+CommonAbstraJsonV17DefinitionsFormStageEndMessage = typing.Union[
+    CommonAbstraJsonV17DefinitionsFormStageEndMessageString,
+    CommonAbstraJsonV17DefinitionsFormStageEndMessageNull,
+]
+
+
+def common_abstra_json_v17_definitions_form_stage_end_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV17DefinitionsFormStageEndMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV17DefinitionsFormStageEndMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV17DefinitionsFormStageStartMessageString = str
+
+CommonAbstraJsonV17DefinitionsFormStageStartMessageNull = type(None)
+
+CommonAbstraJsonV17DefinitionsFormStageStartMessage = typing.Union[
+    CommonAbstraJsonV17DefinitionsFormStageStartMessageString,
+    CommonAbstraJsonV17DefinitionsFormStageStartMessageNull,
+]
+
+
+def common_abstra_json_v17_definitions_form_stage_start_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV17DefinitionsFormStageStartMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV17DefinitionsFormStageStartMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV17DefinitionsFormStagePath = str
+
+CommonAbstraJsonV17DefinitionsFormStageAccessControlIsPublic = bool
+
+CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRolesItem = str
+
+CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRoles = typing.List[
+    CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRolesItem
+]
+
+
+@dataclass
+class CommonAbstraJsonV17DefinitionsFormStageAccessControl:
+    is_public: CommonAbstraJsonV17DefinitionsFormStageAccessControlIsPublic
+    required_roles: CommonAbstraJsonV17DefinitionsFormStageAccessControlRequiredRoles
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["is_public"] = self.is_public
+        data["required_roles"] = self.required_roles
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonAbstraJsonV17DefinitionsFormStageAccessControl":
+        return cls(
+            is_public=bool(data["is_public"]),
+            required_roles=[str(item) for item in data["required_roles"]],
+        )
 
 
 @dataclass
 class CommonAbstraJsonV17DefinitionsFormStage:
-    input: CommonAbstraJsonV17DefinitionsFormStageInput
-    id: CommonAbstraJsonV17DefinitionsFormStageId
     workflow_position: CommonAbstraJsonV17DefinitionsFormStageWorkflowPosition
+    input: CommonAbstraJsonV17DefinitionsFormStageInput
     title: CommonAbstraJsonV17DefinitionsFormStageTitle
-    transitions: CommonAbstraJsonV17DefinitionsFormStageTransitions
-    output: CommonAbstraJsonV17DefinitionsFormStageOutput
+    id: CommonAbstraJsonV17DefinitionsFormStageId
     file: CommonAbstraJsonV17DefinitionsFormStageFile
-    end_message: CommonAbstraJsonV17DefinitionsFormStageEndMessage
-    is_initial: CommonAbstraJsonV17DefinitionsFormStageIsInitial
-    error_message: CommonAbstraJsonV17DefinitionsFormStageErrorMessage
-    access_control: CommonAbstraJsonV17DefinitionsFormStageAccessControl
-    start_message: CommonAbstraJsonV17DefinitionsFormStageStartMessage
+    output: CommonAbstraJsonV17DefinitionsFormStageOutput
+    transitions: CommonAbstraJsonV17DefinitionsFormStageTransitions
     start_button_text: CommonAbstraJsonV17DefinitionsFormStageStartButtonText
-    path: CommonAbstraJsonV17DefinitionsFormStagePath
+    error_message: CommonAbstraJsonV17DefinitionsFormStageErrorMessage
     notification_trigger: CommonAbstraJsonV17DefinitionsFormStageNotificationTrigger
     timeout_message: CommonAbstraJsonV17DefinitionsFormStageTimeoutMessage
+    is_initial: CommonAbstraJsonV17DefinitionsFormStageIsInitial
     auto_start: CommonAbstraJsonV17DefinitionsFormStageAutoStart
+    end_message: CommonAbstraJsonV17DefinitionsFormStageEndMessage
+    start_message: CommonAbstraJsonV17DefinitionsFormStageStartMessage
+    path: CommonAbstraJsonV17DefinitionsFormStagePath
+    access_control: CommonAbstraJsonV17DefinitionsFormStageAccessControl
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["input"] = self.input
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
+        data["input"] = self.input
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
-        data["output"] = self.output
+        data["id"] = self.id
         data["file"] = self.file
-        data["end_message"] = self.end_message
-        data["is_initial"] = self.is_initial
-        data["error_message"] = self.error_message
-        data["access_control"] = self.access_control.to_dict()
-        data["start_message"] = self.start_message
+        data["output"] = self.output
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["start_button_text"] = self.start_button_text
-        data["path"] = self.path
+        data["error_message"] = self.error_message
         data["notification_trigger"] = self.notification_trigger.to_dict()
         data["timeout_message"] = self.timeout_message
+        data["is_initial"] = self.is_initial
         data["auto_start"] = self.auto_start
+        data["end_message"] = self.end_message
+        data["start_message"] = self.start_message
+        data["path"] = self.path
+        data["access_control"] = self.access_control.to_dict()
         return data
 
     @classmethod
@@ -2843,41 +2875,26 @@ class CommonAbstraJsonV17DefinitionsFormStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV17DefinitionsFormStage":
         return cls(
-            input=bool(data["input"]),
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
+            input=bool(data["input"]),
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
+            output=bool(data["output"]),
             transitions=[
                 CommonAbstraJsonV17DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            output=bool(data["output"]),
-            file=str(data["file"]),
-            end_message=(
-                str(data["end_message"])
-                if isinstance(data["end_message"], str)
-                else None
-            ),
-            is_initial=bool(data["is_initial"]),
-            error_message=(
-                str(data["error_message"])
-                if isinstance(data["error_message"], str)
-                else None
-            ),
-            access_control=CommonAbstraJsonV17DefinitionsFormStageAccessControl.from_dict(
-                data["access_control"]
-            ),
-            start_message=(
-                str(data["start_message"])
-                if isinstance(data["start_message"], str)
-                else None
-            ),
             start_button_text=(
                 str(data["start_button_text"])
                 if isinstance(data["start_button_text"], str)
                 else None
             ),
-            path=str(data["path"]),
+            error_message=(
+                str(data["error_message"])
+                if isinstance(data["error_message"], str)
+                else None
+            ),
             notification_trigger=CommonAbstraJsonV17DefinitionsFormStageNotificationTrigger.from_dict(
                 data["notification_trigger"]
             ),
@@ -2886,7 +2903,22 @@ class CommonAbstraJsonV17DefinitionsFormStage:
                 if isinstance(data["timeout_message"], str)
                 else None
             ),
+            is_initial=bool(data["is_initial"]),
             auto_start=bool(data["auto_start"]),
+            end_message=(
+                str(data["end_message"])
+                if isinstance(data["end_message"], str)
+                else None
+            ),
+            start_message=(
+                str(data["start_message"])
+                if isinstance(data["start_message"], str)
+                else None
+            ),
+            path=str(data["path"]),
+            access_control=CommonAbstraJsonV17DefinitionsFormStageAccessControl.from_dict(
+                data["access_control"]
+            ),
         )
 
 
@@ -2894,17 +2926,21 @@ CommonAbstraJsonV17FormsItem = CommonAbstraJsonV17DefinitionsFormStage
 
 CommonAbstraJsonV17Forms = typing.List[CommonAbstraJsonV17FormsItem]
 
-CommonAbstraJsonV17DefinitionsScriptStageInput = bool
-
-CommonAbstraJsonV17DefinitionsScriptStageId = str
-
 CommonAbstraJsonV17DefinitionsScriptStageWorkflowPositionItem = float
 
 CommonAbstraJsonV17DefinitionsScriptStageWorkflowPosition = typing.List[
     CommonAbstraJsonV17DefinitionsScriptStageWorkflowPositionItem
 ]
 
+CommonAbstraJsonV17DefinitionsScriptStageInput = bool
+
 CommonAbstraJsonV17DefinitionsScriptStageTitle = str
+
+CommonAbstraJsonV17DefinitionsScriptStageId = str
+
+CommonAbstraJsonV17DefinitionsScriptStageFile = str
+
+CommonAbstraJsonV17DefinitionsScriptStageOutput = bool
 
 CommonAbstraJsonV17DefinitionsScriptStageTransitionsItem = (
     CommonAbstraJsonV17DefinitionsTransition
@@ -2914,33 +2950,29 @@ CommonAbstraJsonV17DefinitionsScriptStageTransitions = typing.List[
     CommonAbstraJsonV17DefinitionsScriptStageTransitionsItem
 ]
 
-CommonAbstraJsonV17DefinitionsScriptStageOutput = bool
-
-CommonAbstraJsonV17DefinitionsScriptStageFile = str
-
 CommonAbstraJsonV17DefinitionsScriptStageIsInitial = bool
 
 
 @dataclass
 class CommonAbstraJsonV17DefinitionsScriptStage:
-    input: CommonAbstraJsonV17DefinitionsScriptStageInput
-    id: CommonAbstraJsonV17DefinitionsScriptStageId
     workflow_position: CommonAbstraJsonV17DefinitionsScriptStageWorkflowPosition
+    input: CommonAbstraJsonV17DefinitionsScriptStageInput
     title: CommonAbstraJsonV17DefinitionsScriptStageTitle
-    transitions: CommonAbstraJsonV17DefinitionsScriptStageTransitions
-    output: CommonAbstraJsonV17DefinitionsScriptStageOutput
+    id: CommonAbstraJsonV17DefinitionsScriptStageId
     file: CommonAbstraJsonV17DefinitionsScriptStageFile
+    output: CommonAbstraJsonV17DefinitionsScriptStageOutput
+    transitions: CommonAbstraJsonV17DefinitionsScriptStageTransitions
     is_initial: CommonAbstraJsonV17DefinitionsScriptStageIsInitial
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["input"] = self.input
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
+        data["input"] = self.input
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
-        data["output"] = self.output
+        data["id"] = self.id
         data["file"] = self.file
+        data["output"] = self.output
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["is_initial"] = self.is_initial
         return data
 
@@ -2949,16 +2981,16 @@ class CommonAbstraJsonV17DefinitionsScriptStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV17DefinitionsScriptStage":
         return cls(
-            input=bool(data["input"]),
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
+            input=bool(data["input"]),
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
+            output=bool(data["output"]),
             transitions=[
                 CommonAbstraJsonV17DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            output=bool(data["output"]),
-            file=str(data["file"]),
             is_initial=bool(data["is_initial"]),
         )
 
@@ -3406,8 +3438,6 @@ class CommonAbstraJsonV16Home:
         )
 
 
-CommonAbstraJsonV16DefinitionsJobStageId = str
-
 CommonAbstraJsonV16DefinitionsJobStageWorkflowPositionItem = float
 
 CommonAbstraJsonV16DefinitionsJobStageWorkflowPosition = typing.List[
@@ -3415,6 +3445,10 @@ CommonAbstraJsonV16DefinitionsJobStageWorkflowPosition = typing.List[
 ]
 
 CommonAbstraJsonV16DefinitionsJobStageTitle = str
+
+CommonAbstraJsonV16DefinitionsJobStageId = str
+
+CommonAbstraJsonV16DefinitionsJobStageFile = str
 
 CommonAbstraJsonV16DefinitionsTransitionId = str
 
@@ -3491,27 +3525,25 @@ CommonAbstraJsonV16DefinitionsJobStageTransitions = typing.List[
     CommonAbstraJsonV16DefinitionsJobStageTransitionsItem
 ]
 
-CommonAbstraJsonV16DefinitionsJobStageFile = str
-
 CommonAbstraJsonV16DefinitionsJobStageSchedule = str
 
 
 @dataclass
 class CommonAbstraJsonV16DefinitionsJobStage:
-    id: CommonAbstraJsonV16DefinitionsJobStageId
     workflow_position: CommonAbstraJsonV16DefinitionsJobStageWorkflowPosition
     title: CommonAbstraJsonV16DefinitionsJobStageTitle
-    transitions: CommonAbstraJsonV16DefinitionsJobStageTransitions
+    id: CommonAbstraJsonV16DefinitionsJobStageId
     file: CommonAbstraJsonV16DefinitionsJobStageFile
+    transitions: CommonAbstraJsonV16DefinitionsJobStageTransitions
     schedule: CommonAbstraJsonV16DefinitionsJobStageSchedule
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["schedule"] = self.schedule
         return data
 
@@ -3520,14 +3552,14 @@ class CommonAbstraJsonV16DefinitionsJobStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV16DefinitionsJobStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV16DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             schedule=str(data["schedule"]),
         )
 
@@ -3535,8 +3567,6 @@ class CommonAbstraJsonV16DefinitionsJobStage:
 CommonAbstraJsonV16JobsItem = CommonAbstraJsonV16DefinitionsJobStage
 
 CommonAbstraJsonV16Jobs = typing.List[CommonAbstraJsonV16JobsItem]
-
-CommonAbstraJsonV16DefinitionsHookStageId = str
 
 CommonAbstraJsonV16DefinitionsHookStageWorkflowPositionItem = float
 
@@ -3546,6 +3576,10 @@ CommonAbstraJsonV16DefinitionsHookStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV16DefinitionsHookStageTitle = str
 
+CommonAbstraJsonV16DefinitionsHookStageId = str
+
+CommonAbstraJsonV16DefinitionsHookStageFile = str
+
 CommonAbstraJsonV16DefinitionsHookStageTransitionsItem = (
     CommonAbstraJsonV16DefinitionsTransition
 )
@@ -3553,8 +3587,6 @@ CommonAbstraJsonV16DefinitionsHookStageTransitionsItem = (
 CommonAbstraJsonV16DefinitionsHookStageTransitions = typing.List[
     CommonAbstraJsonV16DefinitionsHookStageTransitionsItem
 ]
-
-CommonAbstraJsonV16DefinitionsHookStageFile = str
 
 CommonAbstraJsonV16DefinitionsHookStagePath = str
 
@@ -3565,22 +3597,22 @@ CommonAbstraJsonV16DefinitionsHookStageEnabled = bool
 
 @dataclass
 class CommonAbstraJsonV16DefinitionsHookStage:
-    id: CommonAbstraJsonV16DefinitionsHookStageId
     workflow_position: CommonAbstraJsonV16DefinitionsHookStageWorkflowPosition
     title: CommonAbstraJsonV16DefinitionsHookStageTitle
-    transitions: CommonAbstraJsonV16DefinitionsHookStageTransitions
+    id: CommonAbstraJsonV16DefinitionsHookStageId
     file: CommonAbstraJsonV16DefinitionsHookStageFile
+    transitions: CommonAbstraJsonV16DefinitionsHookStageTransitions
     path: CommonAbstraJsonV16DefinitionsHookStagePath
     is_initial: CommonAbstraJsonV16DefinitionsHookStageIsInitial
     enabled: CommonAbstraJsonV16DefinitionsHookStageEnabled
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["path"] = self.path
         data["is_initial"] = self.is_initial
         data["enabled"] = self.enabled
@@ -3591,14 +3623,14 @@ class CommonAbstraJsonV16DefinitionsHookStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV16DefinitionsHookStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV16DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             path=str(data["path"]),
             is_initial=bool(data["is_initial"]),
             enabled=bool(data["enabled"]),
@@ -3609,8 +3641,6 @@ CommonAbstraJsonV16HooksItem = CommonAbstraJsonV16DefinitionsHookStage
 
 CommonAbstraJsonV16Hooks = typing.List[CommonAbstraJsonV16HooksItem]
 
-CommonAbstraJsonV16DefinitionsFormStageId = str
-
 CommonAbstraJsonV16DefinitionsFormStageWorkflowPositionItem = float
 
 CommonAbstraJsonV16DefinitionsFormStageWorkflowPosition = typing.List[
@@ -3619,6 +3649,10 @@ CommonAbstraJsonV16DefinitionsFormStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV16DefinitionsFormStageTitle = str
 
+CommonAbstraJsonV16DefinitionsFormStageId = str
+
+CommonAbstraJsonV16DefinitionsFormStageFile = str
+
 CommonAbstraJsonV16DefinitionsFormStageTransitionsItem = (
     CommonAbstraJsonV16DefinitionsTransition
 )
@@ -3626,106 +3660,6 @@ CommonAbstraJsonV16DefinitionsFormStageTransitionsItem = (
 CommonAbstraJsonV16DefinitionsFormStageTransitions = typing.List[
     CommonAbstraJsonV16DefinitionsFormStageTransitionsItem
 ]
-
-CommonAbstraJsonV16DefinitionsFormStageFile = str
-
-CommonAbstraJsonV16DefinitionsFormStageEndMessageString = str
-
-CommonAbstraJsonV16DefinitionsFormStageEndMessageNull = type(None)
-
-CommonAbstraJsonV16DefinitionsFormStageEndMessage = typing.Union[
-    CommonAbstraJsonV16DefinitionsFormStageEndMessageString,
-    CommonAbstraJsonV16DefinitionsFormStageEndMessageNull,
-]
-
-
-def common_abstra_json_v16_definitions_form_stage_end_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV16DefinitionsFormStageEndMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV16DefinitionsFormStageEndMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV16DefinitionsFormStageIsInitial = bool
-
-CommonAbstraJsonV16DefinitionsFormStageErrorMessageString = str
-
-CommonAbstraJsonV16DefinitionsFormStageErrorMessageNull = type(None)
-
-CommonAbstraJsonV16DefinitionsFormStageErrorMessage = typing.Union[
-    CommonAbstraJsonV16DefinitionsFormStageErrorMessageString,
-    CommonAbstraJsonV16DefinitionsFormStageErrorMessageNull,
-]
-
-
-def common_abstra_json_v16_definitions_form_stage_error_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV16DefinitionsFormStageErrorMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV16DefinitionsFormStageErrorMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV16DefinitionsFormStageAccessControlIsPublic = bool
-
-CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRolesItem = str
-
-CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRoles = typing.List[
-    CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRolesItem
-]
-
-
-@dataclass
-class CommonAbstraJsonV16DefinitionsFormStageAccessControl:
-    is_public: CommonAbstraJsonV16DefinitionsFormStageAccessControlIsPublic
-    required_roles: CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRoles
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["is_public"] = self.is_public
-        data["required_roles"] = self.required_roles
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonAbstraJsonV16DefinitionsFormStageAccessControl":
-        return cls(
-            is_public=bool(data["is_public"]),
-            required_roles=[str(item) for item in data["required_roles"]],
-        )
-
-
-CommonAbstraJsonV16DefinitionsFormStageStartMessageString = str
-
-CommonAbstraJsonV16DefinitionsFormStageStartMessageNull = type(None)
-
-CommonAbstraJsonV16DefinitionsFormStageStartMessage = typing.Union[
-    CommonAbstraJsonV16DefinitionsFormStageStartMessageString,
-    CommonAbstraJsonV16DefinitionsFormStageStartMessageNull,
-]
-
-
-def common_abstra_json_v16_definitions_form_stage_start_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV16DefinitionsFormStageStartMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV16DefinitionsFormStageStartMessage from dict: {data}"
-    )
-
 
 CommonAbstraJsonV16DefinitionsFormStageStartButtonTextString = str
 
@@ -3749,7 +3683,27 @@ def common_abstra_json_v16_definitions_form_stage_start_button_text_from_dict(
     )
 
 
-CommonAbstraJsonV16DefinitionsFormStagePath = str
+CommonAbstraJsonV16DefinitionsFormStageErrorMessageString = str
+
+CommonAbstraJsonV16DefinitionsFormStageErrorMessageNull = type(None)
+
+CommonAbstraJsonV16DefinitionsFormStageErrorMessage = typing.Union[
+    CommonAbstraJsonV16DefinitionsFormStageErrorMessageString,
+    CommonAbstraJsonV16DefinitionsFormStageErrorMessageNull,
+]
+
+
+def common_abstra_json_v16_definitions_form_stage_error_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV16DefinitionsFormStageErrorMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV16DefinitionsFormStageErrorMessage from dict: {data}"
+    )
+
 
 CommonAbstraJsonV16DefinitionsFormStageNotificationTriggerVariableName = str
 
@@ -3801,44 +3755,121 @@ def common_abstra_json_v16_definitions_form_stage_timeout_message_from_dict(
     )
 
 
+CommonAbstraJsonV16DefinitionsFormStageIsInitial = bool
+
 CommonAbstraJsonV16DefinitionsFormStageAutoStart = bool
+
+CommonAbstraJsonV16DefinitionsFormStageEndMessageString = str
+
+CommonAbstraJsonV16DefinitionsFormStageEndMessageNull = type(None)
+
+CommonAbstraJsonV16DefinitionsFormStageEndMessage = typing.Union[
+    CommonAbstraJsonV16DefinitionsFormStageEndMessageString,
+    CommonAbstraJsonV16DefinitionsFormStageEndMessageNull,
+]
+
+
+def common_abstra_json_v16_definitions_form_stage_end_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV16DefinitionsFormStageEndMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV16DefinitionsFormStageEndMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV16DefinitionsFormStageStartMessageString = str
+
+CommonAbstraJsonV16DefinitionsFormStageStartMessageNull = type(None)
+
+CommonAbstraJsonV16DefinitionsFormStageStartMessage = typing.Union[
+    CommonAbstraJsonV16DefinitionsFormStageStartMessageString,
+    CommonAbstraJsonV16DefinitionsFormStageStartMessageNull,
+]
+
+
+def common_abstra_json_v16_definitions_form_stage_start_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV16DefinitionsFormStageStartMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV16DefinitionsFormStageStartMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV16DefinitionsFormStagePath = str
+
+CommonAbstraJsonV16DefinitionsFormStageAccessControlIsPublic = bool
+
+CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRolesItem = str
+
+CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRoles = typing.List[
+    CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRolesItem
+]
+
+
+@dataclass
+class CommonAbstraJsonV16DefinitionsFormStageAccessControl:
+    is_public: CommonAbstraJsonV16DefinitionsFormStageAccessControlIsPublic
+    required_roles: CommonAbstraJsonV16DefinitionsFormStageAccessControlRequiredRoles
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["is_public"] = self.is_public
+        data["required_roles"] = self.required_roles
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonAbstraJsonV16DefinitionsFormStageAccessControl":
+        return cls(
+            is_public=bool(data["is_public"]),
+            required_roles=[str(item) for item in data["required_roles"]],
+        )
 
 
 @dataclass
 class CommonAbstraJsonV16DefinitionsFormStage:
-    id: CommonAbstraJsonV16DefinitionsFormStageId
     workflow_position: CommonAbstraJsonV16DefinitionsFormStageWorkflowPosition
     title: CommonAbstraJsonV16DefinitionsFormStageTitle
-    transitions: CommonAbstraJsonV16DefinitionsFormStageTransitions
+    id: CommonAbstraJsonV16DefinitionsFormStageId
     file: CommonAbstraJsonV16DefinitionsFormStageFile
-    end_message: CommonAbstraJsonV16DefinitionsFormStageEndMessage
-    is_initial: CommonAbstraJsonV16DefinitionsFormStageIsInitial
-    error_message: CommonAbstraJsonV16DefinitionsFormStageErrorMessage
-    access_control: CommonAbstraJsonV16DefinitionsFormStageAccessControl
-    start_message: CommonAbstraJsonV16DefinitionsFormStageStartMessage
+    transitions: CommonAbstraJsonV16DefinitionsFormStageTransitions
     start_button_text: CommonAbstraJsonV16DefinitionsFormStageStartButtonText
-    path: CommonAbstraJsonV16DefinitionsFormStagePath
+    error_message: CommonAbstraJsonV16DefinitionsFormStageErrorMessage
     notification_trigger: CommonAbstraJsonV16DefinitionsFormStageNotificationTrigger
     timeout_message: CommonAbstraJsonV16DefinitionsFormStageTimeoutMessage
+    is_initial: CommonAbstraJsonV16DefinitionsFormStageIsInitial
     auto_start: CommonAbstraJsonV16DefinitionsFormStageAutoStart
+    end_message: CommonAbstraJsonV16DefinitionsFormStageEndMessage
+    start_message: CommonAbstraJsonV16DefinitionsFormStageStartMessage
+    path: CommonAbstraJsonV16DefinitionsFormStagePath
+    access_control: CommonAbstraJsonV16DefinitionsFormStageAccessControl
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
-        data["end_message"] = self.end_message
-        data["is_initial"] = self.is_initial
-        data["error_message"] = self.error_message
-        data["access_control"] = self.access_control.to_dict()
-        data["start_message"] = self.start_message
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["start_button_text"] = self.start_button_text
-        data["path"] = self.path
+        data["error_message"] = self.error_message
         data["notification_trigger"] = self.notification_trigger.to_dict()
         data["timeout_message"] = self.timeout_message
+        data["is_initial"] = self.is_initial
         data["auto_start"] = self.auto_start
+        data["end_message"] = self.end_message
+        data["start_message"] = self.start_message
+        data["path"] = self.path
+        data["access_control"] = self.access_control.to_dict()
         return data
 
     @classmethod
@@ -3846,39 +3877,24 @@ class CommonAbstraJsonV16DefinitionsFormStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV16DefinitionsFormStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV16DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
-            end_message=(
-                str(data["end_message"])
-                if isinstance(data["end_message"], str)
-                else None
-            ),
-            is_initial=bool(data["is_initial"]),
-            error_message=(
-                str(data["error_message"])
-                if isinstance(data["error_message"], str)
-                else None
-            ),
-            access_control=CommonAbstraJsonV16DefinitionsFormStageAccessControl.from_dict(
-                data["access_control"]
-            ),
-            start_message=(
-                str(data["start_message"])
-                if isinstance(data["start_message"], str)
-                else None
-            ),
             start_button_text=(
                 str(data["start_button_text"])
                 if isinstance(data["start_button_text"], str)
                 else None
             ),
-            path=str(data["path"]),
+            error_message=(
+                str(data["error_message"])
+                if isinstance(data["error_message"], str)
+                else None
+            ),
             notification_trigger=CommonAbstraJsonV16DefinitionsFormStageNotificationTrigger.from_dict(
                 data["notification_trigger"]
             ),
@@ -3887,15 +3903,28 @@ class CommonAbstraJsonV16DefinitionsFormStage:
                 if isinstance(data["timeout_message"], str)
                 else None
             ),
+            is_initial=bool(data["is_initial"]),
             auto_start=bool(data["auto_start"]),
+            end_message=(
+                str(data["end_message"])
+                if isinstance(data["end_message"], str)
+                else None
+            ),
+            start_message=(
+                str(data["start_message"])
+                if isinstance(data["start_message"], str)
+                else None
+            ),
+            path=str(data["path"]),
+            access_control=CommonAbstraJsonV16DefinitionsFormStageAccessControl.from_dict(
+                data["access_control"]
+            ),
         )
 
 
 CommonAbstraJsonV16FormsItem = CommonAbstraJsonV16DefinitionsFormStage
 
 CommonAbstraJsonV16Forms = typing.List[CommonAbstraJsonV16FormsItem]
-
-CommonAbstraJsonV16DefinitionsScriptStageId = str
 
 CommonAbstraJsonV16DefinitionsScriptStageWorkflowPositionItem = float
 
@@ -3905,6 +3934,10 @@ CommonAbstraJsonV16DefinitionsScriptStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV16DefinitionsScriptStageTitle = str
 
+CommonAbstraJsonV16DefinitionsScriptStageId = str
+
+CommonAbstraJsonV16DefinitionsScriptStageFile = str
+
 CommonAbstraJsonV16DefinitionsScriptStageTransitionsItem = (
     CommonAbstraJsonV16DefinitionsTransition
 )
@@ -3913,27 +3946,25 @@ CommonAbstraJsonV16DefinitionsScriptStageTransitions = typing.List[
     CommonAbstraJsonV16DefinitionsScriptStageTransitionsItem
 ]
 
-CommonAbstraJsonV16DefinitionsScriptStageFile = str
-
 CommonAbstraJsonV16DefinitionsScriptStageIsInitial = bool
 
 
 @dataclass
 class CommonAbstraJsonV16DefinitionsScriptStage:
-    id: CommonAbstraJsonV16DefinitionsScriptStageId
     workflow_position: CommonAbstraJsonV16DefinitionsScriptStageWorkflowPosition
     title: CommonAbstraJsonV16DefinitionsScriptStageTitle
-    transitions: CommonAbstraJsonV16DefinitionsScriptStageTransitions
+    id: CommonAbstraJsonV16DefinitionsScriptStageId
     file: CommonAbstraJsonV16DefinitionsScriptStageFile
+    transitions: CommonAbstraJsonV16DefinitionsScriptStageTransitions
     is_initial: CommonAbstraJsonV16DefinitionsScriptStageIsInitial
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["is_initial"] = self.is_initial
         return data
 
@@ -3942,14 +3973,14 @@ class CommonAbstraJsonV16DefinitionsScriptStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV16DefinitionsScriptStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV16DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             is_initial=bool(data["is_initial"]),
         )
 
@@ -4271,8 +4302,6 @@ class CommonAbstraJsonV15Home:
         )
 
 
-CommonAbstraJsonV15DefinitionsJobStageId = str
-
 CommonAbstraJsonV15DefinitionsJobStageWorkflowPositionItem = float
 
 CommonAbstraJsonV15DefinitionsJobStageWorkflowPosition = typing.List[
@@ -4280,6 +4309,10 @@ CommonAbstraJsonV15DefinitionsJobStageWorkflowPosition = typing.List[
 ]
 
 CommonAbstraJsonV15DefinitionsJobStageTitle = str
+
+CommonAbstraJsonV15DefinitionsJobStageId = str
+
+CommonAbstraJsonV15DefinitionsJobStageFile = str
 
 CommonAbstraJsonV15DefinitionsTransitionId = str
 
@@ -4356,27 +4389,25 @@ CommonAbstraJsonV15DefinitionsJobStageTransitions = typing.List[
     CommonAbstraJsonV15DefinitionsJobStageTransitionsItem
 ]
 
-CommonAbstraJsonV15DefinitionsJobStageFile = str
-
 CommonAbstraJsonV15DefinitionsJobStageSchedule = str
 
 
 @dataclass
 class CommonAbstraJsonV15DefinitionsJobStage:
-    id: CommonAbstraJsonV15DefinitionsJobStageId
     workflow_position: CommonAbstraJsonV15DefinitionsJobStageWorkflowPosition
     title: CommonAbstraJsonV15DefinitionsJobStageTitle
-    transitions: CommonAbstraJsonV15DefinitionsJobStageTransitions
+    id: CommonAbstraJsonV15DefinitionsJobStageId
     file: CommonAbstraJsonV15DefinitionsJobStageFile
+    transitions: CommonAbstraJsonV15DefinitionsJobStageTransitions
     schedule: CommonAbstraJsonV15DefinitionsJobStageSchedule
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["schedule"] = self.schedule
         return data
 
@@ -4385,14 +4416,14 @@ class CommonAbstraJsonV15DefinitionsJobStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV15DefinitionsJobStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV15DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             schedule=str(data["schedule"]),
         )
 
@@ -4400,8 +4431,6 @@ class CommonAbstraJsonV15DefinitionsJobStage:
 CommonAbstraJsonV15JobsItem = CommonAbstraJsonV15DefinitionsJobStage
 
 CommonAbstraJsonV15Jobs = typing.List[CommonAbstraJsonV15JobsItem]
-
-CommonAbstraJsonV15DefinitionsHookStageId = str
 
 CommonAbstraJsonV15DefinitionsHookStageWorkflowPositionItem = float
 
@@ -4411,6 +4440,10 @@ CommonAbstraJsonV15DefinitionsHookStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV15DefinitionsHookStageTitle = str
 
+CommonAbstraJsonV15DefinitionsHookStageId = str
+
+CommonAbstraJsonV15DefinitionsHookStageFile = str
+
 CommonAbstraJsonV15DefinitionsHookStageTransitionsItem = (
     CommonAbstraJsonV15DefinitionsTransition
 )
@@ -4418,8 +4451,6 @@ CommonAbstraJsonV15DefinitionsHookStageTransitionsItem = (
 CommonAbstraJsonV15DefinitionsHookStageTransitions = typing.List[
     CommonAbstraJsonV15DefinitionsHookStageTransitionsItem
 ]
-
-CommonAbstraJsonV15DefinitionsHookStageFile = str
 
 CommonAbstraJsonV15DefinitionsHookStagePath = str
 
@@ -4430,22 +4461,22 @@ CommonAbstraJsonV15DefinitionsHookStageEnabled = bool
 
 @dataclass
 class CommonAbstraJsonV15DefinitionsHookStage:
-    id: CommonAbstraJsonV15DefinitionsHookStageId
     workflow_position: CommonAbstraJsonV15DefinitionsHookStageWorkflowPosition
     title: CommonAbstraJsonV15DefinitionsHookStageTitle
-    transitions: CommonAbstraJsonV15DefinitionsHookStageTransitions
+    id: CommonAbstraJsonV15DefinitionsHookStageId
     file: CommonAbstraJsonV15DefinitionsHookStageFile
+    transitions: CommonAbstraJsonV15DefinitionsHookStageTransitions
     path: CommonAbstraJsonV15DefinitionsHookStagePath
     is_initial: CommonAbstraJsonV15DefinitionsHookStageIsInitial
     enabled: CommonAbstraJsonV15DefinitionsHookStageEnabled
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["path"] = self.path
         data["is_initial"] = self.is_initial
         data["enabled"] = self.enabled
@@ -4456,14 +4487,14 @@ class CommonAbstraJsonV15DefinitionsHookStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV15DefinitionsHookStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV15DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             path=str(data["path"]),
             is_initial=bool(data["is_initial"]),
             enabled=bool(data["enabled"]),
@@ -4474,8 +4505,6 @@ CommonAbstraJsonV15HooksItem = CommonAbstraJsonV15DefinitionsHookStage
 
 CommonAbstraJsonV15Hooks = typing.List[CommonAbstraJsonV15HooksItem]
 
-CommonAbstraJsonV15DefinitionsFormStageId = str
-
 CommonAbstraJsonV15DefinitionsFormStageWorkflowPositionItem = float
 
 CommonAbstraJsonV15DefinitionsFormStageWorkflowPosition = typing.List[
@@ -4484,6 +4513,10 @@ CommonAbstraJsonV15DefinitionsFormStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV15DefinitionsFormStageTitle = str
 
+CommonAbstraJsonV15DefinitionsFormStageId = str
+
+CommonAbstraJsonV15DefinitionsFormStageFile = str
+
 CommonAbstraJsonV15DefinitionsFormStageTransitionsItem = (
     CommonAbstraJsonV15DefinitionsTransition
 )
@@ -4491,106 +4524,6 @@ CommonAbstraJsonV15DefinitionsFormStageTransitionsItem = (
 CommonAbstraJsonV15DefinitionsFormStageTransitions = typing.List[
     CommonAbstraJsonV15DefinitionsFormStageTransitionsItem
 ]
-
-CommonAbstraJsonV15DefinitionsFormStageFile = str
-
-CommonAbstraJsonV15DefinitionsFormStageEndMessageString = str
-
-CommonAbstraJsonV15DefinitionsFormStageEndMessageNull = type(None)
-
-CommonAbstraJsonV15DefinitionsFormStageEndMessage = typing.Union[
-    CommonAbstraJsonV15DefinitionsFormStageEndMessageString,
-    CommonAbstraJsonV15DefinitionsFormStageEndMessageNull,
-]
-
-
-def common_abstra_json_v15_definitions_form_stage_end_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV15DefinitionsFormStageEndMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV15DefinitionsFormStageEndMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV15DefinitionsFormStageIsInitial = bool
-
-CommonAbstraJsonV15DefinitionsFormStageErrorMessageString = str
-
-CommonAbstraJsonV15DefinitionsFormStageErrorMessageNull = type(None)
-
-CommonAbstraJsonV15DefinitionsFormStageErrorMessage = typing.Union[
-    CommonAbstraJsonV15DefinitionsFormStageErrorMessageString,
-    CommonAbstraJsonV15DefinitionsFormStageErrorMessageNull,
-]
-
-
-def common_abstra_json_v15_definitions_form_stage_error_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV15DefinitionsFormStageErrorMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV15DefinitionsFormStageErrorMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV15DefinitionsFormStageAccessControlIsPublic = bool
-
-CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRolesItem = str
-
-CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRoles = typing.List[
-    CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRolesItem
-]
-
-
-@dataclass
-class CommonAbstraJsonV15DefinitionsFormStageAccessControl:
-    is_public: CommonAbstraJsonV15DefinitionsFormStageAccessControlIsPublic
-    required_roles: CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRoles
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["is_public"] = self.is_public
-        data["required_roles"] = self.required_roles
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonAbstraJsonV15DefinitionsFormStageAccessControl":
-        return cls(
-            is_public=bool(data["is_public"]),
-            required_roles=[str(item) for item in data["required_roles"]],
-        )
-
-
-CommonAbstraJsonV15DefinitionsFormStageStartMessageString = str
-
-CommonAbstraJsonV15DefinitionsFormStageStartMessageNull = type(None)
-
-CommonAbstraJsonV15DefinitionsFormStageStartMessage = typing.Union[
-    CommonAbstraJsonV15DefinitionsFormStageStartMessageString,
-    CommonAbstraJsonV15DefinitionsFormStageStartMessageNull,
-]
-
-
-def common_abstra_json_v15_definitions_form_stage_start_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV15DefinitionsFormStageStartMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV15DefinitionsFormStageStartMessage from dict: {data}"
-    )
-
 
 CommonAbstraJsonV15DefinitionsFormStageStartButtonTextString = str
 
@@ -4614,7 +4547,27 @@ def common_abstra_json_v15_definitions_form_stage_start_button_text_from_dict(
     )
 
 
-CommonAbstraJsonV15DefinitionsFormStagePath = str
+CommonAbstraJsonV15DefinitionsFormStageErrorMessageString = str
+
+CommonAbstraJsonV15DefinitionsFormStageErrorMessageNull = type(None)
+
+CommonAbstraJsonV15DefinitionsFormStageErrorMessage = typing.Union[
+    CommonAbstraJsonV15DefinitionsFormStageErrorMessageString,
+    CommonAbstraJsonV15DefinitionsFormStageErrorMessageNull,
+]
+
+
+def common_abstra_json_v15_definitions_form_stage_error_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV15DefinitionsFormStageErrorMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV15DefinitionsFormStageErrorMessage from dict: {data}"
+    )
+
 
 CommonAbstraJsonV15DefinitionsFormStageNotificationTriggerVariableName = str
 
@@ -4666,44 +4619,121 @@ def common_abstra_json_v15_definitions_form_stage_timeout_message_from_dict(
     )
 
 
+CommonAbstraJsonV15DefinitionsFormStageIsInitial = bool
+
 CommonAbstraJsonV15DefinitionsFormStageAutoStart = bool
+
+CommonAbstraJsonV15DefinitionsFormStageEndMessageString = str
+
+CommonAbstraJsonV15DefinitionsFormStageEndMessageNull = type(None)
+
+CommonAbstraJsonV15DefinitionsFormStageEndMessage = typing.Union[
+    CommonAbstraJsonV15DefinitionsFormStageEndMessageString,
+    CommonAbstraJsonV15DefinitionsFormStageEndMessageNull,
+]
+
+
+def common_abstra_json_v15_definitions_form_stage_end_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV15DefinitionsFormStageEndMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV15DefinitionsFormStageEndMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV15DefinitionsFormStageStartMessageString = str
+
+CommonAbstraJsonV15DefinitionsFormStageStartMessageNull = type(None)
+
+CommonAbstraJsonV15DefinitionsFormStageStartMessage = typing.Union[
+    CommonAbstraJsonV15DefinitionsFormStageStartMessageString,
+    CommonAbstraJsonV15DefinitionsFormStageStartMessageNull,
+]
+
+
+def common_abstra_json_v15_definitions_form_stage_start_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV15DefinitionsFormStageStartMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV15DefinitionsFormStageStartMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV15DefinitionsFormStagePath = str
+
+CommonAbstraJsonV15DefinitionsFormStageAccessControlIsPublic = bool
+
+CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRolesItem = str
+
+CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRoles = typing.List[
+    CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRolesItem
+]
+
+
+@dataclass
+class CommonAbstraJsonV15DefinitionsFormStageAccessControl:
+    is_public: CommonAbstraJsonV15DefinitionsFormStageAccessControlIsPublic
+    required_roles: CommonAbstraJsonV15DefinitionsFormStageAccessControlRequiredRoles
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["is_public"] = self.is_public
+        data["required_roles"] = self.required_roles
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonAbstraJsonV15DefinitionsFormStageAccessControl":
+        return cls(
+            is_public=bool(data["is_public"]),
+            required_roles=[str(item) for item in data["required_roles"]],
+        )
 
 
 @dataclass
 class CommonAbstraJsonV15DefinitionsFormStage:
-    id: CommonAbstraJsonV15DefinitionsFormStageId
     workflow_position: CommonAbstraJsonV15DefinitionsFormStageWorkflowPosition
     title: CommonAbstraJsonV15DefinitionsFormStageTitle
-    transitions: CommonAbstraJsonV15DefinitionsFormStageTransitions
+    id: CommonAbstraJsonV15DefinitionsFormStageId
     file: CommonAbstraJsonV15DefinitionsFormStageFile
-    end_message: CommonAbstraJsonV15DefinitionsFormStageEndMessage
-    is_initial: CommonAbstraJsonV15DefinitionsFormStageIsInitial
-    error_message: CommonAbstraJsonV15DefinitionsFormStageErrorMessage
-    access_control: CommonAbstraJsonV15DefinitionsFormStageAccessControl
-    start_message: CommonAbstraJsonV15DefinitionsFormStageStartMessage
+    transitions: CommonAbstraJsonV15DefinitionsFormStageTransitions
     start_button_text: CommonAbstraJsonV15DefinitionsFormStageStartButtonText
-    path: CommonAbstraJsonV15DefinitionsFormStagePath
+    error_message: CommonAbstraJsonV15DefinitionsFormStageErrorMessage
     notification_trigger: CommonAbstraJsonV15DefinitionsFormStageNotificationTrigger
     timeout_message: CommonAbstraJsonV15DefinitionsFormStageTimeoutMessage
+    is_initial: CommonAbstraJsonV15DefinitionsFormStageIsInitial
     auto_start: CommonAbstraJsonV15DefinitionsFormStageAutoStart
+    end_message: CommonAbstraJsonV15DefinitionsFormStageEndMessage
+    start_message: CommonAbstraJsonV15DefinitionsFormStageStartMessage
+    path: CommonAbstraJsonV15DefinitionsFormStagePath
+    access_control: CommonAbstraJsonV15DefinitionsFormStageAccessControl
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
-        data["end_message"] = self.end_message
-        data["is_initial"] = self.is_initial
-        data["error_message"] = self.error_message
-        data["access_control"] = self.access_control.to_dict()
-        data["start_message"] = self.start_message
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["start_button_text"] = self.start_button_text
-        data["path"] = self.path
+        data["error_message"] = self.error_message
         data["notification_trigger"] = self.notification_trigger.to_dict()
         data["timeout_message"] = self.timeout_message
+        data["is_initial"] = self.is_initial
         data["auto_start"] = self.auto_start
+        data["end_message"] = self.end_message
+        data["start_message"] = self.start_message
+        data["path"] = self.path
+        data["access_control"] = self.access_control.to_dict()
         return data
 
     @classmethod
@@ -4711,39 +4741,24 @@ class CommonAbstraJsonV15DefinitionsFormStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV15DefinitionsFormStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV15DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
-            end_message=(
-                str(data["end_message"])
-                if isinstance(data["end_message"], str)
-                else None
-            ),
-            is_initial=bool(data["is_initial"]),
-            error_message=(
-                str(data["error_message"])
-                if isinstance(data["error_message"], str)
-                else None
-            ),
-            access_control=CommonAbstraJsonV15DefinitionsFormStageAccessControl.from_dict(
-                data["access_control"]
-            ),
-            start_message=(
-                str(data["start_message"])
-                if isinstance(data["start_message"], str)
-                else None
-            ),
             start_button_text=(
                 str(data["start_button_text"])
                 if isinstance(data["start_button_text"], str)
                 else None
             ),
-            path=str(data["path"]),
+            error_message=(
+                str(data["error_message"])
+                if isinstance(data["error_message"], str)
+                else None
+            ),
             notification_trigger=CommonAbstraJsonV15DefinitionsFormStageNotificationTrigger.from_dict(
                 data["notification_trigger"]
             ),
@@ -4752,15 +4767,28 @@ class CommonAbstraJsonV15DefinitionsFormStage:
                 if isinstance(data["timeout_message"], str)
                 else None
             ),
+            is_initial=bool(data["is_initial"]),
             auto_start=bool(data["auto_start"]),
+            end_message=(
+                str(data["end_message"])
+                if isinstance(data["end_message"], str)
+                else None
+            ),
+            start_message=(
+                str(data["start_message"])
+                if isinstance(data["start_message"], str)
+                else None
+            ),
+            path=str(data["path"]),
+            access_control=CommonAbstraJsonV15DefinitionsFormStageAccessControl.from_dict(
+                data["access_control"]
+            ),
         )
 
 
 CommonAbstraJsonV15FormsItem = CommonAbstraJsonV15DefinitionsFormStage
 
 CommonAbstraJsonV15Forms = typing.List[CommonAbstraJsonV15FormsItem]
-
-CommonAbstraJsonV15DefinitionsScriptStageId = str
 
 CommonAbstraJsonV15DefinitionsScriptStageWorkflowPositionItem = float
 
@@ -4770,6 +4798,10 @@ CommonAbstraJsonV15DefinitionsScriptStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV15DefinitionsScriptStageTitle = str
 
+CommonAbstraJsonV15DefinitionsScriptStageId = str
+
+CommonAbstraJsonV15DefinitionsScriptStageFile = str
+
 CommonAbstraJsonV15DefinitionsScriptStageTransitionsItem = (
     CommonAbstraJsonV15DefinitionsTransition
 )
@@ -4778,27 +4810,25 @@ CommonAbstraJsonV15DefinitionsScriptStageTransitions = typing.List[
     CommonAbstraJsonV15DefinitionsScriptStageTransitionsItem
 ]
 
-CommonAbstraJsonV15DefinitionsScriptStageFile = str
-
 CommonAbstraJsonV15DefinitionsScriptStageIsInitial = bool
 
 
 @dataclass
 class CommonAbstraJsonV15DefinitionsScriptStage:
-    id: CommonAbstraJsonV15DefinitionsScriptStageId
     workflow_position: CommonAbstraJsonV15DefinitionsScriptStageWorkflowPosition
     title: CommonAbstraJsonV15DefinitionsScriptStageTitle
-    transitions: CommonAbstraJsonV15DefinitionsScriptStageTransitions
+    id: CommonAbstraJsonV15DefinitionsScriptStageId
     file: CommonAbstraJsonV15DefinitionsScriptStageFile
+    transitions: CommonAbstraJsonV15DefinitionsScriptStageTransitions
     is_initial: CommonAbstraJsonV15DefinitionsScriptStageIsInitial
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["is_initial"] = self.is_initial
         return data
 
@@ -4807,14 +4837,14 @@ class CommonAbstraJsonV15DefinitionsScriptStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV15DefinitionsScriptStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV15DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             is_initial=bool(data["is_initial"]),
         )
 
@@ -5136,8 +5166,6 @@ class CommonAbstraJsonV14Home:
         )
 
 
-CommonAbstraJsonV14DefinitionsJobStageId = str
-
 CommonAbstraJsonV14DefinitionsJobStageWorkflowPositionItem = float
 
 CommonAbstraJsonV14DefinitionsJobStageWorkflowPosition = typing.List[
@@ -5145,6 +5173,10 @@ CommonAbstraJsonV14DefinitionsJobStageWorkflowPosition = typing.List[
 ]
 
 CommonAbstraJsonV14DefinitionsJobStageTitle = str
+
+CommonAbstraJsonV14DefinitionsJobStageId = str
+
+CommonAbstraJsonV14DefinitionsJobStageFile = str
 
 CommonAbstraJsonV14DefinitionsTransitionId = str
 
@@ -5225,27 +5257,25 @@ CommonAbstraJsonV14DefinitionsJobStageTransitions = typing.List[
     CommonAbstraJsonV14DefinitionsJobStageTransitionsItem
 ]
 
-CommonAbstraJsonV14DefinitionsJobStageFile = str
-
 CommonAbstraJsonV14DefinitionsJobStageSchedule = str
 
 
 @dataclass
 class CommonAbstraJsonV14DefinitionsJobStage:
-    id: CommonAbstraJsonV14DefinitionsJobStageId
     workflow_position: CommonAbstraJsonV14DefinitionsJobStageWorkflowPosition
     title: CommonAbstraJsonV14DefinitionsJobStageTitle
-    transitions: CommonAbstraJsonV14DefinitionsJobStageTransitions
+    id: CommonAbstraJsonV14DefinitionsJobStageId
     file: CommonAbstraJsonV14DefinitionsJobStageFile
+    transitions: CommonAbstraJsonV14DefinitionsJobStageTransitions
     schedule: CommonAbstraJsonV14DefinitionsJobStageSchedule
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["schedule"] = self.schedule
         return data
 
@@ -5254,14 +5284,14 @@ class CommonAbstraJsonV14DefinitionsJobStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV14DefinitionsJobStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV14DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             schedule=str(data["schedule"]),
         )
 
@@ -5269,8 +5299,6 @@ class CommonAbstraJsonV14DefinitionsJobStage:
 CommonAbstraJsonV14JobsItem = CommonAbstraJsonV14DefinitionsJobStage
 
 CommonAbstraJsonV14Jobs = typing.List[CommonAbstraJsonV14JobsItem]
-
-CommonAbstraJsonV14DefinitionsHookStageId = str
 
 CommonAbstraJsonV14DefinitionsHookStageWorkflowPositionItem = float
 
@@ -5280,6 +5308,10 @@ CommonAbstraJsonV14DefinitionsHookStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV14DefinitionsHookStageTitle = str
 
+CommonAbstraJsonV14DefinitionsHookStageId = str
+
+CommonAbstraJsonV14DefinitionsHookStageFile = str
+
 CommonAbstraJsonV14DefinitionsHookStageTransitionsItem = (
     CommonAbstraJsonV14DefinitionsTransition
 )
@@ -5287,8 +5319,6 @@ CommonAbstraJsonV14DefinitionsHookStageTransitionsItem = (
 CommonAbstraJsonV14DefinitionsHookStageTransitions = typing.List[
     CommonAbstraJsonV14DefinitionsHookStageTransitionsItem
 ]
-
-CommonAbstraJsonV14DefinitionsHookStageFile = str
 
 CommonAbstraJsonV14DefinitionsHookStagePath = str
 
@@ -5299,22 +5329,22 @@ CommonAbstraJsonV14DefinitionsHookStageEnabled = bool
 
 @dataclass
 class CommonAbstraJsonV14DefinitionsHookStage:
-    id: CommonAbstraJsonV14DefinitionsHookStageId
     workflow_position: CommonAbstraJsonV14DefinitionsHookStageWorkflowPosition
     title: CommonAbstraJsonV14DefinitionsHookStageTitle
-    transitions: CommonAbstraJsonV14DefinitionsHookStageTransitions
+    id: CommonAbstraJsonV14DefinitionsHookStageId
     file: CommonAbstraJsonV14DefinitionsHookStageFile
+    transitions: CommonAbstraJsonV14DefinitionsHookStageTransitions
     path: CommonAbstraJsonV14DefinitionsHookStagePath
     is_initial: CommonAbstraJsonV14DefinitionsHookStageIsInitial
     enabled: CommonAbstraJsonV14DefinitionsHookStageEnabled
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["path"] = self.path
         data["is_initial"] = self.is_initial
         data["enabled"] = self.enabled
@@ -5325,14 +5355,14 @@ class CommonAbstraJsonV14DefinitionsHookStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV14DefinitionsHookStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV14DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             path=str(data["path"]),
             is_initial=bool(data["is_initial"]),
             enabled=bool(data["enabled"]),
@@ -5343,8 +5373,6 @@ CommonAbstraJsonV14HooksItem = CommonAbstraJsonV14DefinitionsHookStage
 
 CommonAbstraJsonV14Hooks = typing.List[CommonAbstraJsonV14HooksItem]
 
-CommonAbstraJsonV14DefinitionsFormStageId = str
-
 CommonAbstraJsonV14DefinitionsFormStageWorkflowPositionItem = float
 
 CommonAbstraJsonV14DefinitionsFormStageWorkflowPosition = typing.List[
@@ -5353,6 +5381,10 @@ CommonAbstraJsonV14DefinitionsFormStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV14DefinitionsFormStageTitle = str
 
+CommonAbstraJsonV14DefinitionsFormStageId = str
+
+CommonAbstraJsonV14DefinitionsFormStageFile = str
+
 CommonAbstraJsonV14DefinitionsFormStageTransitionsItem = (
     CommonAbstraJsonV14DefinitionsTransition
 )
@@ -5360,106 +5392,6 @@ CommonAbstraJsonV14DefinitionsFormStageTransitionsItem = (
 CommonAbstraJsonV14DefinitionsFormStageTransitions = typing.List[
     CommonAbstraJsonV14DefinitionsFormStageTransitionsItem
 ]
-
-CommonAbstraJsonV14DefinitionsFormStageFile = str
-
-CommonAbstraJsonV14DefinitionsFormStageEndMessageString = str
-
-CommonAbstraJsonV14DefinitionsFormStageEndMessageNull = type(None)
-
-CommonAbstraJsonV14DefinitionsFormStageEndMessage = typing.Union[
-    CommonAbstraJsonV14DefinitionsFormStageEndMessageString,
-    CommonAbstraJsonV14DefinitionsFormStageEndMessageNull,
-]
-
-
-def common_abstra_json_v14_definitions_form_stage_end_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV14DefinitionsFormStageEndMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageEndMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV14DefinitionsFormStageIsInitial = bool
-
-CommonAbstraJsonV14DefinitionsFormStageErrorMessageString = str
-
-CommonAbstraJsonV14DefinitionsFormStageErrorMessageNull = type(None)
-
-CommonAbstraJsonV14DefinitionsFormStageErrorMessage = typing.Union[
-    CommonAbstraJsonV14DefinitionsFormStageErrorMessageString,
-    CommonAbstraJsonV14DefinitionsFormStageErrorMessageNull,
-]
-
-
-def common_abstra_json_v14_definitions_form_stage_error_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV14DefinitionsFormStageErrorMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageErrorMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV14DefinitionsFormStageAccessControlIsPublic = bool
-
-CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRolesItem = str
-
-CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRoles = typing.List[
-    CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRolesItem
-]
-
-
-@dataclass
-class CommonAbstraJsonV14DefinitionsFormStageAccessControl:
-    is_public: CommonAbstraJsonV14DefinitionsFormStageAccessControlIsPublic
-    required_roles: CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRoles
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["is_public"] = self.is_public
-        data["required_roles"] = self.required_roles
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonAbstraJsonV14DefinitionsFormStageAccessControl":
-        return cls(
-            is_public=bool(data["is_public"]),
-            required_roles=[str(item) for item in data["required_roles"]],
-        )
-
-
-CommonAbstraJsonV14DefinitionsFormStageStartMessageString = str
-
-CommonAbstraJsonV14DefinitionsFormStageStartMessageNull = type(None)
-
-CommonAbstraJsonV14DefinitionsFormStageStartMessage = typing.Union[
-    CommonAbstraJsonV14DefinitionsFormStageStartMessageString,
-    CommonAbstraJsonV14DefinitionsFormStageStartMessageNull,
-]
-
-
-def common_abstra_json_v14_definitions_form_stage_start_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV14DefinitionsFormStageStartMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageStartMessage from dict: {data}"
-    )
-
 
 CommonAbstraJsonV14DefinitionsFormStageStartButtonTextString = str
 
@@ -5505,27 +5437,25 @@ def common_abstra_json_v14_definitions_form_stage_restart_button_text_from_dict(
     )
 
 
-CommonAbstraJsonV14DefinitionsFormStagePath = str
+CommonAbstraJsonV14DefinitionsFormStageErrorMessageString = str
 
-CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleString = str
+CommonAbstraJsonV14DefinitionsFormStageErrorMessageNull = type(None)
 
-CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleNull = type(None)
-
-CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle = typing.Union[
-    CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleString,
-    CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleNull,
+CommonAbstraJsonV14DefinitionsFormStageErrorMessage = typing.Union[
+    CommonAbstraJsonV14DefinitionsFormStageErrorMessageString,
+    CommonAbstraJsonV14DefinitionsFormStageErrorMessageNull,
 ]
 
 
-def common_abstra_json_v14_definitions_form_stage_welcome_title_from_dict(
+def common_abstra_json_v14_definitions_form_stage_error_message_from_dict(
     data: typing.Any,
-) -> "CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle":
+) -> "CommonAbstraJsonV14DefinitionsFormStageErrorMessage":
     if isinstance(data, str):
         return str(data)
     if data is None:
         return None
     raise ValueError(
-        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle from dict: {data}"
+        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageErrorMessage from dict: {data}"
     )
 
 
@@ -5579,51 +5509,151 @@ def common_abstra_json_v14_definitions_form_stage_timeout_message_from_dict(
     )
 
 
+CommonAbstraJsonV14DefinitionsFormStageIsInitial = bool
+
 CommonAbstraJsonV14DefinitionsFormStageAutoStart = bool
+
+CommonAbstraJsonV14DefinitionsFormStageEndMessageString = str
+
+CommonAbstraJsonV14DefinitionsFormStageEndMessageNull = type(None)
+
+CommonAbstraJsonV14DefinitionsFormStageEndMessage = typing.Union[
+    CommonAbstraJsonV14DefinitionsFormStageEndMessageString,
+    CommonAbstraJsonV14DefinitionsFormStageEndMessageNull,
+]
+
+
+def common_abstra_json_v14_definitions_form_stage_end_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV14DefinitionsFormStageEndMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageEndMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleString = str
+
+CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleNull = type(None)
+
+CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle = typing.Union[
+    CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleString,
+    CommonAbstraJsonV14DefinitionsFormStageWelcomeTitleNull,
+]
+
+
+def common_abstra_json_v14_definitions_form_stage_welcome_title_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle from dict: {data}"
+    )
+
+
+CommonAbstraJsonV14DefinitionsFormStageStartMessageString = str
+
+CommonAbstraJsonV14DefinitionsFormStageStartMessageNull = type(None)
+
+CommonAbstraJsonV14DefinitionsFormStageStartMessage = typing.Union[
+    CommonAbstraJsonV14DefinitionsFormStageStartMessageString,
+    CommonAbstraJsonV14DefinitionsFormStageStartMessageNull,
+]
+
+
+def common_abstra_json_v14_definitions_form_stage_start_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV14DefinitionsFormStageStartMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV14DefinitionsFormStageStartMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV14DefinitionsFormStagePath = str
+
+CommonAbstraJsonV14DefinitionsFormStageAccessControlIsPublic = bool
+
+CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRolesItem = str
+
+CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRoles = typing.List[
+    CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRolesItem
+]
+
+
+@dataclass
+class CommonAbstraJsonV14DefinitionsFormStageAccessControl:
+    is_public: CommonAbstraJsonV14DefinitionsFormStageAccessControlIsPublic
+    required_roles: CommonAbstraJsonV14DefinitionsFormStageAccessControlRequiredRoles
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["is_public"] = self.is_public
+        data["required_roles"] = self.required_roles
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonAbstraJsonV14DefinitionsFormStageAccessControl":
+        return cls(
+            is_public=bool(data["is_public"]),
+            required_roles=[str(item) for item in data["required_roles"]],
+        )
+
 
 CommonAbstraJsonV14DefinitionsFormStageAllowRestart = bool
 
 
 @dataclass
 class CommonAbstraJsonV14DefinitionsFormStage:
-    id: CommonAbstraJsonV14DefinitionsFormStageId
     workflow_position: CommonAbstraJsonV14DefinitionsFormStageWorkflowPosition
     title: CommonAbstraJsonV14DefinitionsFormStageTitle
-    transitions: CommonAbstraJsonV14DefinitionsFormStageTransitions
+    id: CommonAbstraJsonV14DefinitionsFormStageId
     file: CommonAbstraJsonV14DefinitionsFormStageFile
-    end_message: CommonAbstraJsonV14DefinitionsFormStageEndMessage
-    is_initial: CommonAbstraJsonV14DefinitionsFormStageIsInitial
-    error_message: CommonAbstraJsonV14DefinitionsFormStageErrorMessage
-    access_control: CommonAbstraJsonV14DefinitionsFormStageAccessControl
-    start_message: CommonAbstraJsonV14DefinitionsFormStageStartMessage
+    transitions: CommonAbstraJsonV14DefinitionsFormStageTransitions
     start_button_text: CommonAbstraJsonV14DefinitionsFormStageStartButtonText
     restart_button_text: CommonAbstraJsonV14DefinitionsFormStageRestartButtonText
-    path: CommonAbstraJsonV14DefinitionsFormStagePath
-    welcome_title: CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle
+    error_message: CommonAbstraJsonV14DefinitionsFormStageErrorMessage
     notification_trigger: CommonAbstraJsonV14DefinitionsFormStageNotificationTrigger
     timeout_message: CommonAbstraJsonV14DefinitionsFormStageTimeoutMessage
+    is_initial: CommonAbstraJsonV14DefinitionsFormStageIsInitial
     auto_start: CommonAbstraJsonV14DefinitionsFormStageAutoStart
+    end_message: CommonAbstraJsonV14DefinitionsFormStageEndMessage
+    welcome_title: CommonAbstraJsonV14DefinitionsFormStageWelcomeTitle
+    start_message: CommonAbstraJsonV14DefinitionsFormStageStartMessage
+    path: CommonAbstraJsonV14DefinitionsFormStagePath
+    access_control: CommonAbstraJsonV14DefinitionsFormStageAccessControl
     allow_restart: CommonAbstraJsonV14DefinitionsFormStageAllowRestart
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
-        data["end_message"] = self.end_message
-        data["is_initial"] = self.is_initial
-        data["error_message"] = self.error_message
-        data["access_control"] = self.access_control.to_dict()
-        data["start_message"] = self.start_message
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["start_button_text"] = self.start_button_text
         data["restart_button_text"] = self.restart_button_text
-        data["path"] = self.path
-        data["welcome_title"] = self.welcome_title
+        data["error_message"] = self.error_message
         data["notification_trigger"] = self.notification_trigger.to_dict()
         data["timeout_message"] = self.timeout_message
+        data["is_initial"] = self.is_initial
         data["auto_start"] = self.auto_start
+        data["end_message"] = self.end_message
+        data["welcome_title"] = self.welcome_title
+        data["start_message"] = self.start_message
+        data["path"] = self.path
+        data["access_control"] = self.access_control.to_dict()
         data["allow_restart"] = self.allow_restart
         return data
 
@@ -5632,33 +5662,14 @@ class CommonAbstraJsonV14DefinitionsFormStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV14DefinitionsFormStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV14DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
-            end_message=(
-                str(data["end_message"])
-                if isinstance(data["end_message"], str)
-                else None
-            ),
-            is_initial=bool(data["is_initial"]),
-            error_message=(
-                str(data["error_message"])
-                if isinstance(data["error_message"], str)
-                else None
-            ),
-            access_control=CommonAbstraJsonV14DefinitionsFormStageAccessControl.from_dict(
-                data["access_control"]
-            ),
-            start_message=(
-                str(data["start_message"])
-                if isinstance(data["start_message"], str)
-                else None
-            ),
             start_button_text=(
                 str(data["start_button_text"])
                 if isinstance(data["start_button_text"], str)
@@ -5669,10 +5680,9 @@ class CommonAbstraJsonV14DefinitionsFormStage:
                 if isinstance(data["restart_button_text"], str)
                 else None
             ),
-            path=str(data["path"]),
-            welcome_title=(
-                str(data["welcome_title"])
-                if isinstance(data["welcome_title"], str)
+            error_message=(
+                str(data["error_message"])
+                if isinstance(data["error_message"], str)
                 else None
             ),
             notification_trigger=CommonAbstraJsonV14DefinitionsFormStageNotificationTrigger.from_dict(
@@ -5683,7 +5693,27 @@ class CommonAbstraJsonV14DefinitionsFormStage:
                 if isinstance(data["timeout_message"], str)
                 else None
             ),
+            is_initial=bool(data["is_initial"]),
             auto_start=bool(data["auto_start"]),
+            end_message=(
+                str(data["end_message"])
+                if isinstance(data["end_message"], str)
+                else None
+            ),
+            welcome_title=(
+                str(data["welcome_title"])
+                if isinstance(data["welcome_title"], str)
+                else None
+            ),
+            start_message=(
+                str(data["start_message"])
+                if isinstance(data["start_message"], str)
+                else None
+            ),
+            path=str(data["path"]),
+            access_control=CommonAbstraJsonV14DefinitionsFormStageAccessControl.from_dict(
+                data["access_control"]
+            ),
             allow_restart=bool(data["allow_restart"]),
         )
 
@@ -5691,8 +5721,6 @@ class CommonAbstraJsonV14DefinitionsFormStage:
 CommonAbstraJsonV14FormsItem = CommonAbstraJsonV14DefinitionsFormStage
 
 CommonAbstraJsonV14Forms = typing.List[CommonAbstraJsonV14FormsItem]
-
-CommonAbstraJsonV14DefinitionsScriptStageId = str
 
 CommonAbstraJsonV14DefinitionsScriptStageWorkflowPositionItem = float
 
@@ -5702,6 +5730,10 @@ CommonAbstraJsonV14DefinitionsScriptStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV14DefinitionsScriptStageTitle = str
 
+CommonAbstraJsonV14DefinitionsScriptStageId = str
+
+CommonAbstraJsonV14DefinitionsScriptStageFile = str
+
 CommonAbstraJsonV14DefinitionsScriptStageTransitionsItem = (
     CommonAbstraJsonV14DefinitionsTransition
 )
@@ -5710,27 +5742,25 @@ CommonAbstraJsonV14DefinitionsScriptStageTransitions = typing.List[
     CommonAbstraJsonV14DefinitionsScriptStageTransitionsItem
 ]
 
-CommonAbstraJsonV14DefinitionsScriptStageFile = str
-
 CommonAbstraJsonV14DefinitionsScriptStageIsInitial = bool
 
 
 @dataclass
 class CommonAbstraJsonV14DefinitionsScriptStage:
-    id: CommonAbstraJsonV14DefinitionsScriptStageId
     workflow_position: CommonAbstraJsonV14DefinitionsScriptStageWorkflowPosition
     title: CommonAbstraJsonV14DefinitionsScriptStageTitle
-    transitions: CommonAbstraJsonV14DefinitionsScriptStageTransitions
+    id: CommonAbstraJsonV14DefinitionsScriptStageId
     file: CommonAbstraJsonV14DefinitionsScriptStageFile
+    transitions: CommonAbstraJsonV14DefinitionsScriptStageTransitions
     is_initial: CommonAbstraJsonV14DefinitionsScriptStageIsInitial
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["is_initial"] = self.is_initial
         return data
 
@@ -5739,14 +5769,14 @@ class CommonAbstraJsonV14DefinitionsScriptStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV14DefinitionsScriptStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV14DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             is_initial=bool(data["is_initial"]),
         )
 
@@ -6068,8 +6098,6 @@ class CommonAbstraJsonV13Home:
         )
 
 
-CommonAbstraJsonV13DefinitionsJobStageId = str
-
 CommonAbstraJsonV13DefinitionsJobStageWorkflowPositionItem = float
 
 CommonAbstraJsonV13DefinitionsJobStageWorkflowPosition = typing.List[
@@ -6077,6 +6105,10 @@ CommonAbstraJsonV13DefinitionsJobStageWorkflowPosition = typing.List[
 ]
 
 CommonAbstraJsonV13DefinitionsJobStageTitle = str
+
+CommonAbstraJsonV13DefinitionsJobStageId = str
+
+CommonAbstraJsonV13DefinitionsJobStageFile = str
 
 CommonAbstraJsonV13DefinitionsTransitionId = str
 
@@ -6153,27 +6185,25 @@ CommonAbstraJsonV13DefinitionsJobStageTransitions = typing.List[
     CommonAbstraJsonV13DefinitionsJobStageTransitionsItem
 ]
 
-CommonAbstraJsonV13DefinitionsJobStageFile = str
-
 CommonAbstraJsonV13DefinitionsJobStageSchedule = str
 
 
 @dataclass
 class CommonAbstraJsonV13DefinitionsJobStage:
-    id: CommonAbstraJsonV13DefinitionsJobStageId
     workflow_position: CommonAbstraJsonV13DefinitionsJobStageWorkflowPosition
     title: CommonAbstraJsonV13DefinitionsJobStageTitle
-    transitions: CommonAbstraJsonV13DefinitionsJobStageTransitions
+    id: CommonAbstraJsonV13DefinitionsJobStageId
     file: CommonAbstraJsonV13DefinitionsJobStageFile
+    transitions: CommonAbstraJsonV13DefinitionsJobStageTransitions
     schedule: CommonAbstraJsonV13DefinitionsJobStageSchedule
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["schedule"] = self.schedule
         return data
 
@@ -6182,14 +6212,14 @@ class CommonAbstraJsonV13DefinitionsJobStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV13DefinitionsJobStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV13DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             schedule=str(data["schedule"]),
         )
 
@@ -6197,8 +6227,6 @@ class CommonAbstraJsonV13DefinitionsJobStage:
 CommonAbstraJsonV13JobsItem = CommonAbstraJsonV13DefinitionsJobStage
 
 CommonAbstraJsonV13Jobs = typing.List[CommonAbstraJsonV13JobsItem]
-
-CommonAbstraJsonV13DefinitionsHookStageId = str
 
 CommonAbstraJsonV13DefinitionsHookStageWorkflowPositionItem = float
 
@@ -6208,6 +6236,10 @@ CommonAbstraJsonV13DefinitionsHookStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV13DefinitionsHookStageTitle = str
 
+CommonAbstraJsonV13DefinitionsHookStageId = str
+
+CommonAbstraJsonV13DefinitionsHookStageFile = str
+
 CommonAbstraJsonV13DefinitionsHookStageTransitionsItem = (
     CommonAbstraJsonV13DefinitionsTransition
 )
@@ -6215,8 +6247,6 @@ CommonAbstraJsonV13DefinitionsHookStageTransitionsItem = (
 CommonAbstraJsonV13DefinitionsHookStageTransitions = typing.List[
     CommonAbstraJsonV13DefinitionsHookStageTransitionsItem
 ]
-
-CommonAbstraJsonV13DefinitionsHookStageFile = str
 
 CommonAbstraJsonV13DefinitionsHookStagePath = str
 
@@ -6227,22 +6257,22 @@ CommonAbstraJsonV13DefinitionsHookStageEnabled = bool
 
 @dataclass
 class CommonAbstraJsonV13DefinitionsHookStage:
-    id: CommonAbstraJsonV13DefinitionsHookStageId
     workflow_position: CommonAbstraJsonV13DefinitionsHookStageWorkflowPosition
     title: CommonAbstraJsonV13DefinitionsHookStageTitle
-    transitions: CommonAbstraJsonV13DefinitionsHookStageTransitions
+    id: CommonAbstraJsonV13DefinitionsHookStageId
     file: CommonAbstraJsonV13DefinitionsHookStageFile
+    transitions: CommonAbstraJsonV13DefinitionsHookStageTransitions
     path: CommonAbstraJsonV13DefinitionsHookStagePath
     is_initial: CommonAbstraJsonV13DefinitionsHookStageIsInitial
     enabled: CommonAbstraJsonV13DefinitionsHookStageEnabled
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["path"] = self.path
         data["is_initial"] = self.is_initial
         data["enabled"] = self.enabled
@@ -6253,14 +6283,14 @@ class CommonAbstraJsonV13DefinitionsHookStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV13DefinitionsHookStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV13DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             path=str(data["path"]),
             is_initial=bool(data["is_initial"]),
             enabled=bool(data["enabled"]),
@@ -6271,8 +6301,6 @@ CommonAbstraJsonV13HooksItem = CommonAbstraJsonV13DefinitionsHookStage
 
 CommonAbstraJsonV13Hooks = typing.List[CommonAbstraJsonV13HooksItem]
 
-CommonAbstraJsonV13DefinitionsFormStageId = str
-
 CommonAbstraJsonV13DefinitionsFormStageWorkflowPositionItem = float
 
 CommonAbstraJsonV13DefinitionsFormStageWorkflowPosition = typing.List[
@@ -6281,6 +6309,10 @@ CommonAbstraJsonV13DefinitionsFormStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV13DefinitionsFormStageTitle = str
 
+CommonAbstraJsonV13DefinitionsFormStageId = str
+
+CommonAbstraJsonV13DefinitionsFormStageFile = str
+
 CommonAbstraJsonV13DefinitionsFormStageTransitionsItem = (
     CommonAbstraJsonV13DefinitionsTransition
 )
@@ -6288,106 +6320,6 @@ CommonAbstraJsonV13DefinitionsFormStageTransitionsItem = (
 CommonAbstraJsonV13DefinitionsFormStageTransitions = typing.List[
     CommonAbstraJsonV13DefinitionsFormStageTransitionsItem
 ]
-
-CommonAbstraJsonV13DefinitionsFormStageFile = str
-
-CommonAbstraJsonV13DefinitionsFormStageEndMessageString = str
-
-CommonAbstraJsonV13DefinitionsFormStageEndMessageNull = type(None)
-
-CommonAbstraJsonV13DefinitionsFormStageEndMessage = typing.Union[
-    CommonAbstraJsonV13DefinitionsFormStageEndMessageString,
-    CommonAbstraJsonV13DefinitionsFormStageEndMessageNull,
-]
-
-
-def common_abstra_json_v13_definitions_form_stage_end_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV13DefinitionsFormStageEndMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageEndMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV13DefinitionsFormStageIsInitial = bool
-
-CommonAbstraJsonV13DefinitionsFormStageErrorMessageString = str
-
-CommonAbstraJsonV13DefinitionsFormStageErrorMessageNull = type(None)
-
-CommonAbstraJsonV13DefinitionsFormStageErrorMessage = typing.Union[
-    CommonAbstraJsonV13DefinitionsFormStageErrorMessageString,
-    CommonAbstraJsonV13DefinitionsFormStageErrorMessageNull,
-]
-
-
-def common_abstra_json_v13_definitions_form_stage_error_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV13DefinitionsFormStageErrorMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageErrorMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV13DefinitionsFormStageAccessControlIsPublic = bool
-
-CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRolesItem = str
-
-CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRoles = typing.List[
-    CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRolesItem
-]
-
-
-@dataclass
-class CommonAbstraJsonV13DefinitionsFormStageAccessControl:
-    is_public: CommonAbstraJsonV13DefinitionsFormStageAccessControlIsPublic
-    required_roles: CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRoles
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["is_public"] = self.is_public
-        data["required_roles"] = self.required_roles
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonAbstraJsonV13DefinitionsFormStageAccessControl":
-        return cls(
-            is_public=bool(data["is_public"]),
-            required_roles=[str(item) for item in data["required_roles"]],
-        )
-
-
-CommonAbstraJsonV13DefinitionsFormStageStartMessageString = str
-
-CommonAbstraJsonV13DefinitionsFormStageStartMessageNull = type(None)
-
-CommonAbstraJsonV13DefinitionsFormStageStartMessage = typing.Union[
-    CommonAbstraJsonV13DefinitionsFormStageStartMessageString,
-    CommonAbstraJsonV13DefinitionsFormStageStartMessageNull,
-]
-
-
-def common_abstra_json_v13_definitions_form_stage_start_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV13DefinitionsFormStageStartMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageStartMessage from dict: {data}"
-    )
-
 
 CommonAbstraJsonV13DefinitionsFormStageStartButtonTextString = str
 
@@ -6433,27 +6365,25 @@ def common_abstra_json_v13_definitions_form_stage_restart_button_text_from_dict(
     )
 
 
-CommonAbstraJsonV13DefinitionsFormStagePath = str
+CommonAbstraJsonV13DefinitionsFormStageErrorMessageString = str
 
-CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleString = str
+CommonAbstraJsonV13DefinitionsFormStageErrorMessageNull = type(None)
 
-CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleNull = type(None)
-
-CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle = typing.Union[
-    CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleString,
-    CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleNull,
+CommonAbstraJsonV13DefinitionsFormStageErrorMessage = typing.Union[
+    CommonAbstraJsonV13DefinitionsFormStageErrorMessageString,
+    CommonAbstraJsonV13DefinitionsFormStageErrorMessageNull,
 ]
 
 
-def common_abstra_json_v13_definitions_form_stage_welcome_title_from_dict(
+def common_abstra_json_v13_definitions_form_stage_error_message_from_dict(
     data: typing.Any,
-) -> "CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle":
+) -> "CommonAbstraJsonV13DefinitionsFormStageErrorMessage":
     if isinstance(data, str):
         return str(data)
     if data is None:
         return None
     raise ValueError(
-        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle from dict: {data}"
+        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageErrorMessage from dict: {data}"
     )
 
 
@@ -6507,51 +6437,151 @@ def common_abstra_json_v13_definitions_form_stage_timeout_message_from_dict(
     )
 
 
+CommonAbstraJsonV13DefinitionsFormStageIsInitial = bool
+
 CommonAbstraJsonV13DefinitionsFormStageAutoStart = bool
+
+CommonAbstraJsonV13DefinitionsFormStageEndMessageString = str
+
+CommonAbstraJsonV13DefinitionsFormStageEndMessageNull = type(None)
+
+CommonAbstraJsonV13DefinitionsFormStageEndMessage = typing.Union[
+    CommonAbstraJsonV13DefinitionsFormStageEndMessageString,
+    CommonAbstraJsonV13DefinitionsFormStageEndMessageNull,
+]
+
+
+def common_abstra_json_v13_definitions_form_stage_end_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV13DefinitionsFormStageEndMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageEndMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleString = str
+
+CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleNull = type(None)
+
+CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle = typing.Union[
+    CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleString,
+    CommonAbstraJsonV13DefinitionsFormStageWelcomeTitleNull,
+]
+
+
+def common_abstra_json_v13_definitions_form_stage_welcome_title_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle from dict: {data}"
+    )
+
+
+CommonAbstraJsonV13DefinitionsFormStageStartMessageString = str
+
+CommonAbstraJsonV13DefinitionsFormStageStartMessageNull = type(None)
+
+CommonAbstraJsonV13DefinitionsFormStageStartMessage = typing.Union[
+    CommonAbstraJsonV13DefinitionsFormStageStartMessageString,
+    CommonAbstraJsonV13DefinitionsFormStageStartMessageNull,
+]
+
+
+def common_abstra_json_v13_definitions_form_stage_start_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV13DefinitionsFormStageStartMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV13DefinitionsFormStageStartMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV13DefinitionsFormStagePath = str
+
+CommonAbstraJsonV13DefinitionsFormStageAccessControlIsPublic = bool
+
+CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRolesItem = str
+
+CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRoles = typing.List[
+    CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRolesItem
+]
+
+
+@dataclass
+class CommonAbstraJsonV13DefinitionsFormStageAccessControl:
+    is_public: CommonAbstraJsonV13DefinitionsFormStageAccessControlIsPublic
+    required_roles: CommonAbstraJsonV13DefinitionsFormStageAccessControlRequiredRoles
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["is_public"] = self.is_public
+        data["required_roles"] = self.required_roles
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonAbstraJsonV13DefinitionsFormStageAccessControl":
+        return cls(
+            is_public=bool(data["is_public"]),
+            required_roles=[str(item) for item in data["required_roles"]],
+        )
+
 
 CommonAbstraJsonV13DefinitionsFormStageAllowRestart = bool
 
 
 @dataclass
 class CommonAbstraJsonV13DefinitionsFormStage:
-    id: CommonAbstraJsonV13DefinitionsFormStageId
     workflow_position: CommonAbstraJsonV13DefinitionsFormStageWorkflowPosition
     title: CommonAbstraJsonV13DefinitionsFormStageTitle
-    transitions: CommonAbstraJsonV13DefinitionsFormStageTransitions
+    id: CommonAbstraJsonV13DefinitionsFormStageId
     file: CommonAbstraJsonV13DefinitionsFormStageFile
-    end_message: CommonAbstraJsonV13DefinitionsFormStageEndMessage
-    is_initial: CommonAbstraJsonV13DefinitionsFormStageIsInitial
-    error_message: CommonAbstraJsonV13DefinitionsFormStageErrorMessage
-    access_control: CommonAbstraJsonV13DefinitionsFormStageAccessControl
-    start_message: CommonAbstraJsonV13DefinitionsFormStageStartMessage
+    transitions: CommonAbstraJsonV13DefinitionsFormStageTransitions
     start_button_text: CommonAbstraJsonV13DefinitionsFormStageStartButtonText
     restart_button_text: CommonAbstraJsonV13DefinitionsFormStageRestartButtonText
-    path: CommonAbstraJsonV13DefinitionsFormStagePath
-    welcome_title: CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle
+    error_message: CommonAbstraJsonV13DefinitionsFormStageErrorMessage
     notification_trigger: CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger
     timeout_message: CommonAbstraJsonV13DefinitionsFormStageTimeoutMessage
+    is_initial: CommonAbstraJsonV13DefinitionsFormStageIsInitial
     auto_start: CommonAbstraJsonV13DefinitionsFormStageAutoStart
+    end_message: CommonAbstraJsonV13DefinitionsFormStageEndMessage
+    welcome_title: CommonAbstraJsonV13DefinitionsFormStageWelcomeTitle
+    start_message: CommonAbstraJsonV13DefinitionsFormStageStartMessage
+    path: CommonAbstraJsonV13DefinitionsFormStagePath
+    access_control: CommonAbstraJsonV13DefinitionsFormStageAccessControl
     allow_restart: CommonAbstraJsonV13DefinitionsFormStageAllowRestart
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
-        data["end_message"] = self.end_message
-        data["is_initial"] = self.is_initial
-        data["error_message"] = self.error_message
-        data["access_control"] = self.access_control.to_dict()
-        data["start_message"] = self.start_message
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["start_button_text"] = self.start_button_text
         data["restart_button_text"] = self.restart_button_text
-        data["path"] = self.path
-        data["welcome_title"] = self.welcome_title
+        data["error_message"] = self.error_message
         data["notification_trigger"] = self.notification_trigger.to_dict()
         data["timeout_message"] = self.timeout_message
+        data["is_initial"] = self.is_initial
         data["auto_start"] = self.auto_start
+        data["end_message"] = self.end_message
+        data["welcome_title"] = self.welcome_title
+        data["start_message"] = self.start_message
+        data["path"] = self.path
+        data["access_control"] = self.access_control.to_dict()
         data["allow_restart"] = self.allow_restart
         return data
 
@@ -6560,33 +6590,14 @@ class CommonAbstraJsonV13DefinitionsFormStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV13DefinitionsFormStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV13DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
-            end_message=(
-                str(data["end_message"])
-                if isinstance(data["end_message"], str)
-                else None
-            ),
-            is_initial=bool(data["is_initial"]),
-            error_message=(
-                str(data["error_message"])
-                if isinstance(data["error_message"], str)
-                else None
-            ),
-            access_control=CommonAbstraJsonV13DefinitionsFormStageAccessControl.from_dict(
-                data["access_control"]
-            ),
-            start_message=(
-                str(data["start_message"])
-                if isinstance(data["start_message"], str)
-                else None
-            ),
             start_button_text=(
                 str(data["start_button_text"])
                 if isinstance(data["start_button_text"], str)
@@ -6597,10 +6608,9 @@ class CommonAbstraJsonV13DefinitionsFormStage:
                 if isinstance(data["restart_button_text"], str)
                 else None
             ),
-            path=str(data["path"]),
-            welcome_title=(
-                str(data["welcome_title"])
-                if isinstance(data["welcome_title"], str)
+            error_message=(
+                str(data["error_message"])
+                if isinstance(data["error_message"], str)
                 else None
             ),
             notification_trigger=CommonAbstraJsonV13DefinitionsFormStageNotificationTrigger.from_dict(
@@ -6611,7 +6621,27 @@ class CommonAbstraJsonV13DefinitionsFormStage:
                 if isinstance(data["timeout_message"], str)
                 else None
             ),
+            is_initial=bool(data["is_initial"]),
             auto_start=bool(data["auto_start"]),
+            end_message=(
+                str(data["end_message"])
+                if isinstance(data["end_message"], str)
+                else None
+            ),
+            welcome_title=(
+                str(data["welcome_title"])
+                if isinstance(data["welcome_title"], str)
+                else None
+            ),
+            start_message=(
+                str(data["start_message"])
+                if isinstance(data["start_message"], str)
+                else None
+            ),
+            path=str(data["path"]),
+            access_control=CommonAbstraJsonV13DefinitionsFormStageAccessControl.from_dict(
+                data["access_control"]
+            ),
             allow_restart=bool(data["allow_restart"]),
         )
 
@@ -6619,8 +6649,6 @@ class CommonAbstraJsonV13DefinitionsFormStage:
 CommonAbstraJsonV13FormsItem = CommonAbstraJsonV13DefinitionsFormStage
 
 CommonAbstraJsonV13Forms = typing.List[CommonAbstraJsonV13FormsItem]
-
-CommonAbstraJsonV13DefinitionsScriptStageId = str
 
 CommonAbstraJsonV13DefinitionsScriptStageWorkflowPositionItem = float
 
@@ -6630,6 +6658,10 @@ CommonAbstraJsonV13DefinitionsScriptStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV13DefinitionsScriptStageTitle = str
 
+CommonAbstraJsonV13DefinitionsScriptStageId = str
+
+CommonAbstraJsonV13DefinitionsScriptStageFile = str
+
 CommonAbstraJsonV13DefinitionsScriptStageTransitionsItem = (
     CommonAbstraJsonV13DefinitionsTransition
 )
@@ -6638,27 +6670,25 @@ CommonAbstraJsonV13DefinitionsScriptStageTransitions = typing.List[
     CommonAbstraJsonV13DefinitionsScriptStageTransitionsItem
 ]
 
-CommonAbstraJsonV13DefinitionsScriptStageFile = str
-
 CommonAbstraJsonV13DefinitionsScriptStageIsInitial = bool
 
 
 @dataclass
 class CommonAbstraJsonV13DefinitionsScriptStage:
-    id: CommonAbstraJsonV13DefinitionsScriptStageId
     workflow_position: CommonAbstraJsonV13DefinitionsScriptStageWorkflowPosition
     title: CommonAbstraJsonV13DefinitionsScriptStageTitle
-    transitions: CommonAbstraJsonV13DefinitionsScriptStageTransitions
+    id: CommonAbstraJsonV13DefinitionsScriptStageId
     file: CommonAbstraJsonV13DefinitionsScriptStageFile
+    transitions: CommonAbstraJsonV13DefinitionsScriptStageTransitions
     is_initial: CommonAbstraJsonV13DefinitionsScriptStageIsInitial
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["is_initial"] = self.is_initial
         return data
 
@@ -6667,14 +6697,14 @@ class CommonAbstraJsonV13DefinitionsScriptStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV13DefinitionsScriptStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV13DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             is_initial=bool(data["is_initial"]),
         )
 
@@ -7160,8 +7190,6 @@ class CommonAbstraJsonV12Home:
         )
 
 
-CommonAbstraJsonV12DefinitionsJobStageId = str
-
 CommonAbstraJsonV12DefinitionsJobStageWorkflowPositionItem = float
 
 CommonAbstraJsonV12DefinitionsJobStageWorkflowPosition = typing.List[
@@ -7169,6 +7197,10 @@ CommonAbstraJsonV12DefinitionsJobStageWorkflowPosition = typing.List[
 ]
 
 CommonAbstraJsonV12DefinitionsJobStageTitle = str
+
+CommonAbstraJsonV12DefinitionsJobStageId = str
+
+CommonAbstraJsonV12DefinitionsJobStageFile = str
 
 CommonAbstraJsonV12DefinitionsTransitionId = str
 
@@ -7245,27 +7277,25 @@ CommonAbstraJsonV12DefinitionsJobStageTransitions = typing.List[
     CommonAbstraJsonV12DefinitionsJobStageTransitionsItem
 ]
 
-CommonAbstraJsonV12DefinitionsJobStageFile = str
-
 CommonAbstraJsonV12DefinitionsJobStageSchedule = str
 
 
 @dataclass
 class CommonAbstraJsonV12DefinitionsJobStage:
-    id: CommonAbstraJsonV12DefinitionsJobStageId
     workflow_position: CommonAbstraJsonV12DefinitionsJobStageWorkflowPosition
     title: CommonAbstraJsonV12DefinitionsJobStageTitle
-    transitions: CommonAbstraJsonV12DefinitionsJobStageTransitions
+    id: CommonAbstraJsonV12DefinitionsJobStageId
     file: CommonAbstraJsonV12DefinitionsJobStageFile
+    transitions: CommonAbstraJsonV12DefinitionsJobStageTransitions
     schedule: CommonAbstraJsonV12DefinitionsJobStageSchedule
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["schedule"] = self.schedule
         return data
 
@@ -7274,14 +7304,14 @@ class CommonAbstraJsonV12DefinitionsJobStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV12DefinitionsJobStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV12DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             schedule=str(data["schedule"]),
         )
 
@@ -7289,8 +7319,6 @@ class CommonAbstraJsonV12DefinitionsJobStage:
 CommonAbstraJsonV12JobsItem = CommonAbstraJsonV12DefinitionsJobStage
 
 CommonAbstraJsonV12Jobs = typing.List[CommonAbstraJsonV12JobsItem]
-
-CommonAbstraJsonV12DefinitionsHookStageId = str
 
 CommonAbstraJsonV12DefinitionsHookStageWorkflowPositionItem = float
 
@@ -7300,6 +7328,10 @@ CommonAbstraJsonV12DefinitionsHookStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV12DefinitionsHookStageTitle = str
 
+CommonAbstraJsonV12DefinitionsHookStageId = str
+
+CommonAbstraJsonV12DefinitionsHookStageFile = str
+
 CommonAbstraJsonV12DefinitionsHookStageTransitionsItem = (
     CommonAbstraJsonV12DefinitionsTransition
 )
@@ -7307,8 +7339,6 @@ CommonAbstraJsonV12DefinitionsHookStageTransitionsItem = (
 CommonAbstraJsonV12DefinitionsHookStageTransitions = typing.List[
     CommonAbstraJsonV12DefinitionsHookStageTransitionsItem
 ]
-
-CommonAbstraJsonV12DefinitionsHookStageFile = str
 
 CommonAbstraJsonV12DefinitionsHookStagePath = str
 
@@ -7319,22 +7349,22 @@ CommonAbstraJsonV12DefinitionsHookStageEnabled = bool
 
 @dataclass
 class CommonAbstraJsonV12DefinitionsHookStage:
-    id: CommonAbstraJsonV12DefinitionsHookStageId
     workflow_position: CommonAbstraJsonV12DefinitionsHookStageWorkflowPosition
     title: CommonAbstraJsonV12DefinitionsHookStageTitle
-    transitions: CommonAbstraJsonV12DefinitionsHookStageTransitions
+    id: CommonAbstraJsonV12DefinitionsHookStageId
     file: CommonAbstraJsonV12DefinitionsHookStageFile
+    transitions: CommonAbstraJsonV12DefinitionsHookStageTransitions
     path: CommonAbstraJsonV12DefinitionsHookStagePath
     is_initial: CommonAbstraJsonV12DefinitionsHookStageIsInitial
     enabled: CommonAbstraJsonV12DefinitionsHookStageEnabled
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["path"] = self.path
         data["is_initial"] = self.is_initial
         data["enabled"] = self.enabled
@@ -7345,14 +7375,14 @@ class CommonAbstraJsonV12DefinitionsHookStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV12DefinitionsHookStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV12DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             path=str(data["path"]),
             is_initial=bool(data["is_initial"]),
             enabled=bool(data["enabled"]),
@@ -7363,8 +7393,6 @@ CommonAbstraJsonV12HooksItem = CommonAbstraJsonV12DefinitionsHookStage
 
 CommonAbstraJsonV12Hooks = typing.List[CommonAbstraJsonV12HooksItem]
 
-CommonAbstraJsonV12DefinitionsFormStageId = str
-
 CommonAbstraJsonV12DefinitionsFormStageWorkflowPositionItem = float
 
 CommonAbstraJsonV12DefinitionsFormStageWorkflowPosition = typing.List[
@@ -7373,6 +7401,10 @@ CommonAbstraJsonV12DefinitionsFormStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV12DefinitionsFormStageTitle = str
 
+CommonAbstraJsonV12DefinitionsFormStageId = str
+
+CommonAbstraJsonV12DefinitionsFormStageFile = str
+
 CommonAbstraJsonV12DefinitionsFormStageTransitionsItem = (
     CommonAbstraJsonV12DefinitionsTransition
 )
@@ -7380,106 +7412,6 @@ CommonAbstraJsonV12DefinitionsFormStageTransitionsItem = (
 CommonAbstraJsonV12DefinitionsFormStageTransitions = typing.List[
     CommonAbstraJsonV12DefinitionsFormStageTransitionsItem
 ]
-
-CommonAbstraJsonV12DefinitionsFormStageFile = str
-
-CommonAbstraJsonV12DefinitionsFormStageEndMessageString = str
-
-CommonAbstraJsonV12DefinitionsFormStageEndMessageNull = type(None)
-
-CommonAbstraJsonV12DefinitionsFormStageEndMessage = typing.Union[
-    CommonAbstraJsonV12DefinitionsFormStageEndMessageString,
-    CommonAbstraJsonV12DefinitionsFormStageEndMessageNull,
-]
-
-
-def common_abstra_json_v12_definitions_form_stage_end_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV12DefinitionsFormStageEndMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageEndMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV12DefinitionsFormStageIsInitial = bool
-
-CommonAbstraJsonV12DefinitionsFormStageErrorMessageString = str
-
-CommonAbstraJsonV12DefinitionsFormStageErrorMessageNull = type(None)
-
-CommonAbstraJsonV12DefinitionsFormStageErrorMessage = typing.Union[
-    CommonAbstraJsonV12DefinitionsFormStageErrorMessageString,
-    CommonAbstraJsonV12DefinitionsFormStageErrorMessageNull,
-]
-
-
-def common_abstra_json_v12_definitions_form_stage_error_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV12DefinitionsFormStageErrorMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageErrorMessage from dict: {data}"
-    )
-
-
-CommonAbstraJsonV12DefinitionsFormStageAccessControlIsPublic = bool
-
-CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRolesItem = str
-
-CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRoles = typing.List[
-    CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRolesItem
-]
-
-
-@dataclass
-class CommonAbstraJsonV12DefinitionsFormStageAccessControl:
-    is_public: CommonAbstraJsonV12DefinitionsFormStageAccessControlIsPublic
-    required_roles: CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRoles
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["is_public"] = self.is_public
-        data["required_roles"] = self.required_roles
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonAbstraJsonV12DefinitionsFormStageAccessControl":
-        return cls(
-            is_public=bool(data["is_public"]),
-            required_roles=[str(item) for item in data["required_roles"]],
-        )
-
-
-CommonAbstraJsonV12DefinitionsFormStageStartMessageString = str
-
-CommonAbstraJsonV12DefinitionsFormStageStartMessageNull = type(None)
-
-CommonAbstraJsonV12DefinitionsFormStageStartMessage = typing.Union[
-    CommonAbstraJsonV12DefinitionsFormStageStartMessageString,
-    CommonAbstraJsonV12DefinitionsFormStageStartMessageNull,
-]
-
-
-def common_abstra_json_v12_definitions_form_stage_start_message_from_dict(
-    data: typing.Any,
-) -> "CommonAbstraJsonV12DefinitionsFormStageStartMessage":
-    if isinstance(data, str):
-        return str(data)
-    if data is None:
-        return None
-    raise ValueError(
-        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageStartMessage from dict: {data}"
-    )
-
 
 CommonAbstraJsonV12DefinitionsFormStageStartButtonTextString = str
 
@@ -7525,27 +7457,25 @@ def common_abstra_json_v12_definitions_form_stage_restart_button_text_from_dict(
     )
 
 
-CommonAbstraJsonV12DefinitionsFormStagePath = str
+CommonAbstraJsonV12DefinitionsFormStageErrorMessageString = str
 
-CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleString = str
+CommonAbstraJsonV12DefinitionsFormStageErrorMessageNull = type(None)
 
-CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleNull = type(None)
-
-CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle = typing.Union[
-    CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleString,
-    CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleNull,
+CommonAbstraJsonV12DefinitionsFormStageErrorMessage = typing.Union[
+    CommonAbstraJsonV12DefinitionsFormStageErrorMessageString,
+    CommonAbstraJsonV12DefinitionsFormStageErrorMessageNull,
 ]
 
 
-def common_abstra_json_v12_definitions_form_stage_welcome_title_from_dict(
+def common_abstra_json_v12_definitions_form_stage_error_message_from_dict(
     data: typing.Any,
-) -> "CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle":
+) -> "CommonAbstraJsonV12DefinitionsFormStageErrorMessage":
     if isinstance(data, str):
         return str(data)
     if data is None:
         return None
     raise ValueError(
-        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle from dict: {data}"
+        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageErrorMessage from dict: {data}"
     )
 
 
@@ -7599,51 +7529,151 @@ def common_abstra_json_v12_definitions_form_stage_timeout_message_from_dict(
     )
 
 
+CommonAbstraJsonV12DefinitionsFormStageIsInitial = bool
+
 CommonAbstraJsonV12DefinitionsFormStageAutoStart = bool
+
+CommonAbstraJsonV12DefinitionsFormStageEndMessageString = str
+
+CommonAbstraJsonV12DefinitionsFormStageEndMessageNull = type(None)
+
+CommonAbstraJsonV12DefinitionsFormStageEndMessage = typing.Union[
+    CommonAbstraJsonV12DefinitionsFormStageEndMessageString,
+    CommonAbstraJsonV12DefinitionsFormStageEndMessageNull,
+]
+
+
+def common_abstra_json_v12_definitions_form_stage_end_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV12DefinitionsFormStageEndMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageEndMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleString = str
+
+CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleNull = type(None)
+
+CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle = typing.Union[
+    CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleString,
+    CommonAbstraJsonV12DefinitionsFormStageWelcomeTitleNull,
+]
+
+
+def common_abstra_json_v12_definitions_form_stage_welcome_title_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle from dict: {data}"
+    )
+
+
+CommonAbstraJsonV12DefinitionsFormStageStartMessageString = str
+
+CommonAbstraJsonV12DefinitionsFormStageStartMessageNull = type(None)
+
+CommonAbstraJsonV12DefinitionsFormStageStartMessage = typing.Union[
+    CommonAbstraJsonV12DefinitionsFormStageStartMessageString,
+    CommonAbstraJsonV12DefinitionsFormStageStartMessageNull,
+]
+
+
+def common_abstra_json_v12_definitions_form_stage_start_message_from_dict(
+    data: typing.Any,
+) -> "CommonAbstraJsonV12DefinitionsFormStageStartMessage":
+    if isinstance(data, str):
+        return str(data)
+    if data is None:
+        return None
+    raise ValueError(
+        f"Could not parse CommonAbstraJsonV12DefinitionsFormStageStartMessage from dict: {data}"
+    )
+
+
+CommonAbstraJsonV12DefinitionsFormStagePath = str
+
+CommonAbstraJsonV12DefinitionsFormStageAccessControlIsPublic = bool
+
+CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRolesItem = str
+
+CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRoles = typing.List[
+    CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRolesItem
+]
+
+
+@dataclass
+class CommonAbstraJsonV12DefinitionsFormStageAccessControl:
+    is_public: CommonAbstraJsonV12DefinitionsFormStageAccessControlIsPublic
+    required_roles: CommonAbstraJsonV12DefinitionsFormStageAccessControlRequiredRoles
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["is_public"] = self.is_public
+        data["required_roles"] = self.required_roles
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonAbstraJsonV12DefinitionsFormStageAccessControl":
+        return cls(
+            is_public=bool(data["is_public"]),
+            required_roles=[str(item) for item in data["required_roles"]],
+        )
+
 
 CommonAbstraJsonV12DefinitionsFormStageAllowRestart = bool
 
 
 @dataclass
 class CommonAbstraJsonV12DefinitionsFormStage:
-    id: CommonAbstraJsonV12DefinitionsFormStageId
     workflow_position: CommonAbstraJsonV12DefinitionsFormStageWorkflowPosition
     title: CommonAbstraJsonV12DefinitionsFormStageTitle
-    transitions: CommonAbstraJsonV12DefinitionsFormStageTransitions
+    id: CommonAbstraJsonV12DefinitionsFormStageId
     file: CommonAbstraJsonV12DefinitionsFormStageFile
-    end_message: CommonAbstraJsonV12DefinitionsFormStageEndMessage
-    is_initial: CommonAbstraJsonV12DefinitionsFormStageIsInitial
-    error_message: CommonAbstraJsonV12DefinitionsFormStageErrorMessage
-    access_control: CommonAbstraJsonV12DefinitionsFormStageAccessControl
-    start_message: CommonAbstraJsonV12DefinitionsFormStageStartMessage
+    transitions: CommonAbstraJsonV12DefinitionsFormStageTransitions
     start_button_text: CommonAbstraJsonV12DefinitionsFormStageStartButtonText
     restart_button_text: CommonAbstraJsonV12DefinitionsFormStageRestartButtonText
-    path: CommonAbstraJsonV12DefinitionsFormStagePath
-    welcome_title: CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle
+    error_message: CommonAbstraJsonV12DefinitionsFormStageErrorMessage
     notification_trigger: CommonAbstraJsonV12DefinitionsFormStageNotificationTrigger
     timeout_message: CommonAbstraJsonV12DefinitionsFormStageTimeoutMessage
+    is_initial: CommonAbstraJsonV12DefinitionsFormStageIsInitial
     auto_start: CommonAbstraJsonV12DefinitionsFormStageAutoStart
+    end_message: CommonAbstraJsonV12DefinitionsFormStageEndMessage
+    welcome_title: CommonAbstraJsonV12DefinitionsFormStageWelcomeTitle
+    start_message: CommonAbstraJsonV12DefinitionsFormStageStartMessage
+    path: CommonAbstraJsonV12DefinitionsFormStagePath
+    access_control: CommonAbstraJsonV12DefinitionsFormStageAccessControl
     allow_restart: CommonAbstraJsonV12DefinitionsFormStageAllowRestart
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
-        data["end_message"] = self.end_message
-        data["is_initial"] = self.is_initial
-        data["error_message"] = self.error_message
-        data["access_control"] = self.access_control.to_dict()
-        data["start_message"] = self.start_message
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["start_button_text"] = self.start_button_text
         data["restart_button_text"] = self.restart_button_text
-        data["path"] = self.path
-        data["welcome_title"] = self.welcome_title
+        data["error_message"] = self.error_message
         data["notification_trigger"] = self.notification_trigger.to_dict()
         data["timeout_message"] = self.timeout_message
+        data["is_initial"] = self.is_initial
         data["auto_start"] = self.auto_start
+        data["end_message"] = self.end_message
+        data["welcome_title"] = self.welcome_title
+        data["start_message"] = self.start_message
+        data["path"] = self.path
+        data["access_control"] = self.access_control.to_dict()
         data["allow_restart"] = self.allow_restart
         return data
 
@@ -7652,33 +7682,14 @@ class CommonAbstraJsonV12DefinitionsFormStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV12DefinitionsFormStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV12DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
-            end_message=(
-                str(data["end_message"])
-                if isinstance(data["end_message"], str)
-                else None
-            ),
-            is_initial=bool(data["is_initial"]),
-            error_message=(
-                str(data["error_message"])
-                if isinstance(data["error_message"], str)
-                else None
-            ),
-            access_control=CommonAbstraJsonV12DefinitionsFormStageAccessControl.from_dict(
-                data["access_control"]
-            ),
-            start_message=(
-                str(data["start_message"])
-                if isinstance(data["start_message"], str)
-                else None
-            ),
             start_button_text=(
                 str(data["start_button_text"])
                 if isinstance(data["start_button_text"], str)
@@ -7689,10 +7700,9 @@ class CommonAbstraJsonV12DefinitionsFormStage:
                 if isinstance(data["restart_button_text"], str)
                 else None
             ),
-            path=str(data["path"]),
-            welcome_title=(
-                str(data["welcome_title"])
-                if isinstance(data["welcome_title"], str)
+            error_message=(
+                str(data["error_message"])
+                if isinstance(data["error_message"], str)
                 else None
             ),
             notification_trigger=CommonAbstraJsonV12DefinitionsFormStageNotificationTrigger.from_dict(
@@ -7703,7 +7713,27 @@ class CommonAbstraJsonV12DefinitionsFormStage:
                 if isinstance(data["timeout_message"], str)
                 else None
             ),
+            is_initial=bool(data["is_initial"]),
             auto_start=bool(data["auto_start"]),
+            end_message=(
+                str(data["end_message"])
+                if isinstance(data["end_message"], str)
+                else None
+            ),
+            welcome_title=(
+                str(data["welcome_title"])
+                if isinstance(data["welcome_title"], str)
+                else None
+            ),
+            start_message=(
+                str(data["start_message"])
+                if isinstance(data["start_message"], str)
+                else None
+            ),
+            path=str(data["path"]),
+            access_control=CommonAbstraJsonV12DefinitionsFormStageAccessControl.from_dict(
+                data["access_control"]
+            ),
             allow_restart=bool(data["allow_restart"]),
         )
 
@@ -7711,8 +7741,6 @@ class CommonAbstraJsonV12DefinitionsFormStage:
 CommonAbstraJsonV12FormsItem = CommonAbstraJsonV12DefinitionsFormStage
 
 CommonAbstraJsonV12Forms = typing.List[CommonAbstraJsonV12FormsItem]
-
-CommonAbstraJsonV12DefinitionsScriptStageId = str
 
 CommonAbstraJsonV12DefinitionsScriptStageWorkflowPositionItem = float
 
@@ -7722,6 +7750,10 @@ CommonAbstraJsonV12DefinitionsScriptStageWorkflowPosition = typing.List[
 
 CommonAbstraJsonV12DefinitionsScriptStageTitle = str
 
+CommonAbstraJsonV12DefinitionsScriptStageId = str
+
+CommonAbstraJsonV12DefinitionsScriptStageFile = str
+
 CommonAbstraJsonV12DefinitionsScriptStageTransitionsItem = (
     CommonAbstraJsonV12DefinitionsTransition
 )
@@ -7730,27 +7762,25 @@ CommonAbstraJsonV12DefinitionsScriptStageTransitions = typing.List[
     CommonAbstraJsonV12DefinitionsScriptStageTransitionsItem
 ]
 
-CommonAbstraJsonV12DefinitionsScriptStageFile = str
-
 CommonAbstraJsonV12DefinitionsScriptStageIsInitial = bool
 
 
 @dataclass
 class CommonAbstraJsonV12DefinitionsScriptStage:
-    id: CommonAbstraJsonV12DefinitionsScriptStageId
     workflow_position: CommonAbstraJsonV12DefinitionsScriptStageWorkflowPosition
     title: CommonAbstraJsonV12DefinitionsScriptStageTitle
-    transitions: CommonAbstraJsonV12DefinitionsScriptStageTransitions
+    id: CommonAbstraJsonV12DefinitionsScriptStageId
     file: CommonAbstraJsonV12DefinitionsScriptStageFile
+    transitions: CommonAbstraJsonV12DefinitionsScriptStageTransitions
     is_initial: CommonAbstraJsonV12DefinitionsScriptStageIsInitial
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["id"] = self.id
         data["workflow_position"] = self.workflow_position
         data["title"] = self.title
-        data["transitions"] = [item.to_dict() for item in self.transitions]
+        data["id"] = self.id
         data["file"] = self.file
+        data["transitions"] = [item.to_dict() for item in self.transitions]
         data["is_initial"] = self.is_initial
         return data
 
@@ -7759,14 +7789,14 @@ class CommonAbstraJsonV12DefinitionsScriptStage:
         cls, data: typing.Dict[str, typing.Any]
     ) -> "CommonAbstraJsonV12DefinitionsScriptStage":
         return cls(
-            id=str(data["id"]),
             workflow_position=[float(item) for item in data["workflow_position"]],
             title=str(data["title"]),
+            id=str(data["id"]),
+            file=str(data["file"]),
             transitions=[
                 CommonAbstraJsonV12DefinitionsTransition.from_dict(item)
                 for item in data["transitions"]
             ],
-            file=str(data["file"]),
             is_initial=bool(data["is_initial"]),
         )
 
@@ -7823,6 +7853,592 @@ class CommonAbstraJsonV12:
                 for item in data["scripts"]
             ],
             version=data["version"],
+        )
+
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabled = typing.Union[
+    typing.Literal["true"], typing.Literal["false"]
+]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabledValues: typing.List[
+    CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabled
+] = ["true", "false"]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDir = typing.Union[
+    typing.Literal["true"], typing.Literal["false"]
+]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDirValues: typing.List[
+    CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDir
+] = ["true", "false"]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabled = (
+    typing.Union[typing.Literal["true"], typing.Literal["false"]]
+)
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabledValues: typing.List[
+    CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabled
+] = ["true", "false"]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsCPU = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsCPU = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsMemory = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsMemory = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesMinReplicas = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesComputeUnits = float
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesTimeoutSeconds = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerType = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersion = typing.Union[
+    typing.Literal["3.9"],
+    typing.Literal["3.10"],
+    typing.Literal["3.11"],
+    typing.Literal["3.12"],
+]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersionValues: typing.List[
+    CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersion
+] = ["3.9", "3.10", "3.11", "3.12"]
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerNumber = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesBaseDockerfile = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesQueueMessagesPerWorker = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMinWorker = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMaxWorker = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorPoolSize = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesMinFormsExecutors = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorMaxExecutions = str
+
+CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorWarmupParallelism = str
+
+
+@dataclass
+class CommonDeploymentResourcesOrganizationDeploymentResources:
+    watermark_enabled: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabled
+    ] = field(default_factory=lambda: None)
+    native_temp_dir: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDir
+    ] = field(default_factory=lambda: None)
+    notifications_enabled: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabled
+    ] = field(default_factory=lambda: None)
+    requests_c_p_u: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsCPU
+    ] = field(default_factory=lambda: None)
+    limits_c_p_u: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsCPU
+    ] = field(default_factory=lambda: None)
+    requests_memory: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsMemory
+    ] = field(default_factory=lambda: None)
+    limits_memory: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsMemory
+    ] = field(default_factory=lambda: None)
+    min_replicas: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesMinReplicas
+    ] = field(default_factory=lambda: None)
+    compute_units: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesComputeUnits
+    ] = field(default_factory=lambda: None)
+    timeout_seconds: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesTimeoutSeconds
+    ] = field(default_factory=lambda: None)
+    worker_type: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerType
+    ] = field(default_factory=lambda: None)
+    python_version: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersion
+    ] = field(default_factory=lambda: None)
+    worker_number: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerNumber
+    ] = field(default_factory=lambda: None)
+    base_dockerfile: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesBaseDockerfile
+    ] = field(default_factory=lambda: None)
+    queue_messages_per_worker: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesQueueMessagesPerWorker
+    ] = field(default_factory=lambda: None)
+    autoscale_min_worker: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMinWorker
+    ] = field(default_factory=lambda: None)
+    autoscale_max_worker: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMaxWorker
+    ] = field(default_factory=lambda: None)
+    executor_pool_size: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorPoolSize
+    ] = field(default_factory=lambda: None)
+    min_forms_executors: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesMinFormsExecutors
+    ] = field(default_factory=lambda: None)
+    executor_max_executions: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorMaxExecutions
+    ] = field(default_factory=lambda: None)
+    executor_warmup_parallelism: typing.Optional[
+        CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorWarmupParallelism
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.watermark_enabled is not None:
+            data["watermarkEnabled"] = self.watermark_enabled
+        if self.native_temp_dir is not None:
+            data["nativeTempDir"] = self.native_temp_dir
+        if self.notifications_enabled is not None:
+            data["notificationsEnabled"] = self.notifications_enabled
+        if self.requests_c_p_u is not None:
+            data["requestsCPU"] = self.requests_c_p_u
+        if self.limits_c_p_u is not None:
+            data["limitsCPU"] = self.limits_c_p_u
+        if self.requests_memory is not None:
+            data["requestsMemory"] = self.requests_memory
+        if self.limits_memory is not None:
+            data["limitsMemory"] = self.limits_memory
+        if self.min_replicas is not None:
+            data["minReplicas"] = self.min_replicas
+        if self.compute_units is not None:
+            data["computeUnits"] = self.compute_units
+        if self.timeout_seconds is not None:
+            data["timeoutSeconds"] = self.timeout_seconds
+        if self.worker_type is not None:
+            data["workerType"] = self.worker_type
+        if self.python_version is not None:
+            data["pythonVersion"] = self.python_version
+        if self.worker_number is not None:
+            data["workerNumber"] = self.worker_number
+        if self.base_dockerfile is not None:
+            data["baseDockerfile"] = self.base_dockerfile
+        if self.queue_messages_per_worker is not None:
+            data["queueMessagesPerWorker"] = self.queue_messages_per_worker
+        if self.autoscale_min_worker is not None:
+            data["autoscaleMinWorker"] = self.autoscale_min_worker
+        if self.autoscale_max_worker is not None:
+            data["autoscaleMaxWorker"] = self.autoscale_max_worker
+        if self.executor_pool_size is not None:
+            data["executorPoolSize"] = self.executor_pool_size
+        if self.min_forms_executors is not None:
+            data["minFormsExecutors"] = self.min_forms_executors
+        if self.executor_max_executions is not None:
+            data["executorMaxExecutions"] = self.executor_max_executions
+        if self.executor_warmup_parallelism is not None:
+            data["executorWarmupParallelism"] = self.executor_warmup_parallelism
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonDeploymentResourcesOrganizationDeploymentResources":
+        return cls(
+            watermark_enabled=None
+            if data.get("watermarkEnabled") is None
+            else data["watermarkEnabled"],
+            native_temp_dir=None
+            if data.get("nativeTempDir") is None
+            else data["nativeTempDir"],
+            notifications_enabled=None
+            if data.get("notificationsEnabled") is None
+            else data["notificationsEnabled"],
+            requests_c_p_u=None
+            if data.get("requestsCPU") is None
+            else str(data["requestsCPU"]),
+            limits_c_p_u=None
+            if data.get("limitsCPU") is None
+            else str(data["limitsCPU"]),
+            requests_memory=None
+            if data.get("requestsMemory") is None
+            else str(data["requestsMemory"]),
+            limits_memory=None
+            if data.get("limitsMemory") is None
+            else str(data["limitsMemory"]),
+            min_replicas=None
+            if data.get("minReplicas") is None
+            else str(data["minReplicas"]),
+            compute_units=None
+            if data.get("computeUnits") is None
+            else float(data["computeUnits"]),
+            timeout_seconds=None
+            if data.get("timeoutSeconds") is None
+            else str(data["timeoutSeconds"]),
+            worker_type=None
+            if data.get("workerType") is None
+            else str(data["workerType"]),
+            python_version=None
+            if data.get("pythonVersion") is None
+            else data["pythonVersion"],
+            worker_number=None
+            if data.get("workerNumber") is None
+            else str(data["workerNumber"]),
+            base_dockerfile=None
+            if data.get("baseDockerfile") is None
+            else str(data["baseDockerfile"]),
+            queue_messages_per_worker=None
+            if data.get("queueMessagesPerWorker") is None
+            else str(data["queueMessagesPerWorker"]),
+            autoscale_min_worker=None
+            if data.get("autoscaleMinWorker") is None
+            else str(data["autoscaleMinWorker"]),
+            autoscale_max_worker=None
+            if data.get("autoscaleMaxWorker") is None
+            else str(data["autoscaleMaxWorker"]),
+            executor_pool_size=None
+            if data.get("executorPoolSize") is None
+            else str(data["executorPoolSize"]),
+            min_forms_executors=None
+            if data.get("minFormsExecutors") is None
+            else str(data["minFormsExecutors"]),
+            executor_max_executions=None
+            if data.get("executorMaxExecutions") is None
+            else str(data["executorMaxExecutions"]),
+            executor_warmup_parallelism=None
+            if data.get("executorWarmupParallelism") is None
+            else str(data["executorWarmupParallelism"]),
+        )
+
+
+CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabled = typing.Union[
+    typing.Literal["true"], typing.Literal["false"]
+]
+
+CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabledValues: typing.List[
+    CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabled
+] = ["true", "false"]
+
+CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabled = (
+    typing.Union[typing.Literal["true"], typing.Literal["false"]]
+)
+
+CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabledValues: typing.List[
+    CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabled
+] = ["true", "false"]
+
+CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabled = typing.Union[
+    typing.Literal["true"], typing.Literal["false"]
+]
+
+CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabledValues: typing.List[
+    CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabled
+] = ["true", "false"]
+
+CommonDeploymentResourcesProjectDeploymentResourcesRequestsCPU = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesLimitsCPU = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesRequestsMemory = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesLimitsMemory = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesMinReplicas = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesComputeUnits = float
+
+CommonDeploymentResourcesProjectDeploymentResourcesTimeoutSeconds = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesWorkerType = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesPythonVersion = typing.Union[
+    typing.Literal["3.9"],
+    typing.Literal["3.10"],
+    typing.Literal["3.11"],
+    typing.Literal["3.12"],
+]
+
+CommonDeploymentResourcesProjectDeploymentResourcesPythonVersionValues: typing.List[
+    CommonDeploymentResourcesProjectDeploymentResourcesPythonVersion
+] = ["3.9", "3.10", "3.11", "3.12"]
+
+CommonDeploymentResourcesProjectDeploymentResourcesWorkerNumber = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesBaseDockerfile = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesQueueMessagesPerWorker = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMinWorker = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMaxWorker = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIpsItem = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIps = typing.List[
+    CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIpsItem
+]
+
+CommonDeploymentResourcesProjectDeploymentResourcesExecutorPoolSize = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesMinFormsExecutors = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesExecutorMaxExecutions = str
+
+CommonDeploymentResourcesProjectDeploymentResourcesExecutorWarmupParallelism = str
+
+
+@dataclass
+class CommonDeploymentResourcesProjectDeploymentResources:
+    watermark_enabled: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabled
+    ] = field(default_factory=lambda: None)
+    selenium_instance_enabled: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabled
+    ] = field(default_factory=lambda: None)
+    notifications_enabled: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabled
+    ] = field(default_factory=lambda: None)
+    requests_c_p_u: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesRequestsCPU
+    ] = field(default_factory=lambda: None)
+    limits_c_p_u: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesLimitsCPU
+    ] = field(default_factory=lambda: None)
+    requests_memory: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesRequestsMemory
+    ] = field(default_factory=lambda: None)
+    limits_memory: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesLimitsMemory
+    ] = field(default_factory=lambda: None)
+    min_replicas: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesMinReplicas
+    ] = field(default_factory=lambda: None)
+    compute_units: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesComputeUnits
+    ] = field(default_factory=lambda: None)
+    timeout_seconds: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesTimeoutSeconds
+    ] = field(default_factory=lambda: None)
+    worker_type: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesWorkerType
+    ] = field(default_factory=lambda: None)
+    python_version: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesPythonVersion
+    ] = field(default_factory=lambda: None)
+    worker_number: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesWorkerNumber
+    ] = field(default_factory=lambda: None)
+    base_dockerfile: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesBaseDockerfile
+    ] = field(default_factory=lambda: None)
+    queue_messages_per_worker: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesQueueMessagesPerWorker
+    ] = field(default_factory=lambda: None)
+    autoscale_min_worker: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMinWorker
+    ] = field(default_factory=lambda: None)
+    autoscale_max_worker: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMaxWorker
+    ] = field(default_factory=lambda: None)
+    whitelist_ips: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIps
+    ] = field(default_factory=lambda: None)
+    executor_pool_size: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesExecutorPoolSize
+    ] = field(default_factory=lambda: None)
+    min_forms_executors: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesMinFormsExecutors
+    ] = field(default_factory=lambda: None)
+    executor_max_executions: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesExecutorMaxExecutions
+    ] = field(default_factory=lambda: None)
+    executor_warmup_parallelism: typing.Optional[
+        CommonDeploymentResourcesProjectDeploymentResourcesExecutorWarmupParallelism
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.watermark_enabled is not None:
+            data["watermarkEnabled"] = self.watermark_enabled
+        if self.selenium_instance_enabled is not None:
+            data["seleniumInstanceEnabled"] = self.selenium_instance_enabled
+        if self.notifications_enabled is not None:
+            data["notificationsEnabled"] = self.notifications_enabled
+        if self.requests_c_p_u is not None:
+            data["requestsCPU"] = self.requests_c_p_u
+        if self.limits_c_p_u is not None:
+            data["limitsCPU"] = self.limits_c_p_u
+        if self.requests_memory is not None:
+            data["requestsMemory"] = self.requests_memory
+        if self.limits_memory is not None:
+            data["limitsMemory"] = self.limits_memory
+        if self.min_replicas is not None:
+            data["minReplicas"] = self.min_replicas
+        if self.compute_units is not None:
+            data["computeUnits"] = self.compute_units
+        if self.timeout_seconds is not None:
+            data["timeoutSeconds"] = self.timeout_seconds
+        if self.worker_type is not None:
+            data["workerType"] = self.worker_type
+        if self.python_version is not None:
+            data["pythonVersion"] = self.python_version
+        if self.worker_number is not None:
+            data["workerNumber"] = self.worker_number
+        if self.base_dockerfile is not None:
+            data["baseDockerfile"] = self.base_dockerfile
+        if self.queue_messages_per_worker is not None:
+            data["queueMessagesPerWorker"] = self.queue_messages_per_worker
+        if self.autoscale_min_worker is not None:
+            data["autoscaleMinWorker"] = self.autoscale_min_worker
+        if self.autoscale_max_worker is not None:
+            data["autoscaleMaxWorker"] = self.autoscale_max_worker
+        if self.whitelist_ips is not None:
+            data["whitelistIps"] = self.whitelist_ips
+        if self.executor_pool_size is not None:
+            data["executorPoolSize"] = self.executor_pool_size
+        if self.min_forms_executors is not None:
+            data["minFormsExecutors"] = self.min_forms_executors
+        if self.executor_max_executions is not None:
+            data["executorMaxExecutions"] = self.executor_max_executions
+        if self.executor_warmup_parallelism is not None:
+            data["executorWarmupParallelism"] = self.executor_warmup_parallelism
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CommonDeploymentResourcesProjectDeploymentResources":
+        return cls(
+            watermark_enabled=None
+            if data.get("watermarkEnabled") is None
+            else data["watermarkEnabled"],
+            selenium_instance_enabled=None
+            if data.get("seleniumInstanceEnabled") is None
+            else data["seleniumInstanceEnabled"],
+            notifications_enabled=None
+            if data.get("notificationsEnabled") is None
+            else data["notificationsEnabled"],
+            requests_c_p_u=None
+            if data.get("requestsCPU") is None
+            else str(data["requestsCPU"]),
+            limits_c_p_u=None
+            if data.get("limitsCPU") is None
+            else str(data["limitsCPU"]),
+            requests_memory=None
+            if data.get("requestsMemory") is None
+            else str(data["requestsMemory"]),
+            limits_memory=None
+            if data.get("limitsMemory") is None
+            else str(data["limitsMemory"]),
+            min_replicas=None
+            if data.get("minReplicas") is None
+            else str(data["minReplicas"]),
+            compute_units=None
+            if data.get("computeUnits") is None
+            else float(data["computeUnits"]),
+            timeout_seconds=None
+            if data.get("timeoutSeconds") is None
+            else str(data["timeoutSeconds"]),
+            worker_type=None
+            if data.get("workerType") is None
+            else str(data["workerType"]),
+            python_version=None
+            if data.get("pythonVersion") is None
+            else data["pythonVersion"],
+            worker_number=None
+            if data.get("workerNumber") is None
+            else str(data["workerNumber"]),
+            base_dockerfile=None
+            if data.get("baseDockerfile") is None
+            else str(data["baseDockerfile"]),
+            queue_messages_per_worker=None
+            if data.get("queueMessagesPerWorker") is None
+            else str(data["queueMessagesPerWorker"]),
+            autoscale_min_worker=None
+            if data.get("autoscaleMinWorker") is None
+            else str(data["autoscaleMinWorker"]),
+            autoscale_max_worker=None
+            if data.get("autoscaleMaxWorker") is None
+            else str(data["autoscaleMaxWorker"]),
+            whitelist_ips=None
+            if data.get("whitelistIps") is None
+            else [str(item) for item in data["whitelistIps"]],
+            executor_pool_size=None
+            if data.get("executorPoolSize") is None
+            else str(data["executorPoolSize"]),
+            min_forms_executors=None
+            if data.get("minFormsExecutors") is None
+            else str(data["minFormsExecutors"]),
+            executor_max_executions=None
+            if data.get("executorMaxExecutions") is None
+            else str(data["executorMaxExecutions"]),
+            executor_warmup_parallelism=None
+            if data.get("executorWarmupParallelism") is None
+            else str(data["executorWarmupParallelism"]),
+        )
+
+
+CommonFilesItemType = typing.Union[typing.Literal["file"], typing.Literal["directory"]]
+
+CommonFilesItemTypeValues: typing.List[CommonFilesItemType] = ["file", "directory"]
+
+CommonFilesItemPath = str
+
+CommonFilesItemName = str
+
+CommonFilesItemDate = datetime.datetime
+
+CommonFilesItemSizeBytes = int
+
+CommonFilesItemSizeHuman = str
+
+CommonFilesItemItemCount = int
+
+
+@dataclass
+class CommonFilesItem:
+    type: CommonFilesItemType
+    path: CommonFilesItemPath
+    name: CommonFilesItemName
+    date: CommonFilesItemDate
+    size_bytes: typing.Optional[CommonFilesItemSizeBytes] = field(
+        default_factory=lambda: None
+    )
+    size_human: typing.Optional[CommonFilesItemSizeHuman] = field(
+        default_factory=lambda: None
+    )
+    item_count: typing.Optional[CommonFilesItemItemCount] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["path"] = self.path
+        data["name"] = self.name
+        data["date"] = self.date.isoformat()
+        if self.size_bytes is not None:
+            data["sizeBytes"] = self.size_bytes
+        if self.size_human is not None:
+            data["sizeHuman"] = self.size_human
+        if self.item_count is not None:
+            data["itemCount"] = self.item_count
+        return data
+
+    @classmethod
+    def from_dict(cls, data: typing.Dict[str, typing.Any]) -> "CommonFilesItem":
+        return cls(
+            type=data["type"],
+            path=str(data["path"]),
+            name=str(data["name"]),
+            date=datetime.datetime.fromisoformat(data["date"]),
+            size_bytes=None
+            if data.get("sizeBytes") is None
+            else int(data["sizeBytes"]),
+            size_human=None
+            if data.get("sizeHuman") is None
+            else str(data["sizeHuman"]),
+            item_count=None
+            if data.get("itemCount") is None
+            else int(data["itemCount"]),
         )
 
 
@@ -9499,1897 +10115,67 @@ class CommonAiActionsV0GeneralActions:
         )
 
 
-CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabled = typing.Union[
-    typing.Literal["true"], typing.Literal["false"]
-]
+CloudApiCliApiKeyInfoResponseAuthorId = str
 
-CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabledValues: typing.List[
-    CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabled
-] = ["true", "false"]
+CloudApiCliApiKeyInfoResponseProjectId = str
 
-CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDir = typing.Union[
-    typing.Literal["true"], typing.Literal["false"]
-]
+CloudApiCliApiKeyInfoResponseEmail = str
 
-CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDirValues: typing.List[
-    CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDir
-] = ["true", "false"]
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabled = (
-    typing.Union[typing.Literal["true"], typing.Literal["false"]]
-)
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabledValues: typing.List[
-    CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabled
-] = ["true", "false"]
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsCPU = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsCPU = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsMemory = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsMemory = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesMinReplicas = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesComputeUnits = float
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesTimeoutSeconds = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerType = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersion = typing.Union[
-    typing.Literal["3.9"],
-    typing.Literal["3.10"],
-    typing.Literal["3.11"],
-    typing.Literal["3.12"],
-]
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersionValues: typing.List[
-    CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersion
-] = ["3.9", "3.10", "3.11", "3.12"]
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerNumber = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesBaseDockerfile = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesQueueMessagesPerWorker = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMinWorker = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMaxWorker = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorPoolSize = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesMinFormsExecutors = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorMaxExecutions = str
-
-CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorWarmupParallelism = str
+CloudApiCliApiKeyInfoResponseIntercomHash = str
 
 
 @dataclass
-class CommonDeploymentResourcesOrganizationDeploymentResources:
-    watermark_enabled: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesWatermarkEnabled
-    ] = field(default_factory=lambda: None)
-    native_temp_dir: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesNativeTempDir
-    ] = field(default_factory=lambda: None)
-    notifications_enabled: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesNotificationsEnabled
-    ] = field(default_factory=lambda: None)
-    requests_c_p_u: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsCPU
-    ] = field(default_factory=lambda: None)
-    limits_c_p_u: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsCPU
-    ] = field(default_factory=lambda: None)
-    requests_memory: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesRequestsMemory
-    ] = field(default_factory=lambda: None)
-    limits_memory: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesLimitsMemory
-    ] = field(default_factory=lambda: None)
-    min_replicas: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesMinReplicas
-    ] = field(default_factory=lambda: None)
-    compute_units: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesComputeUnits
-    ] = field(default_factory=lambda: None)
-    timeout_seconds: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesTimeoutSeconds
-    ] = field(default_factory=lambda: None)
-    worker_type: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerType
-    ] = field(default_factory=lambda: None)
-    python_version: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesPythonVersion
-    ] = field(default_factory=lambda: None)
-    worker_number: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesWorkerNumber
-    ] = field(default_factory=lambda: None)
-    base_dockerfile: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesBaseDockerfile
-    ] = field(default_factory=lambda: None)
-    queue_messages_per_worker: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesQueueMessagesPerWorker
-    ] = field(default_factory=lambda: None)
-    autoscale_min_worker: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMinWorker
-    ] = field(default_factory=lambda: None)
-    autoscale_max_worker: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesAutoscaleMaxWorker
-    ] = field(default_factory=lambda: None)
-    executor_pool_size: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorPoolSize
-    ] = field(default_factory=lambda: None)
-    min_forms_executors: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesMinFormsExecutors
-    ] = field(default_factory=lambda: None)
-    executor_max_executions: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorMaxExecutions
-    ] = field(default_factory=lambda: None)
-    executor_warmup_parallelism: typing.Optional[
-        CommonDeploymentResourcesOrganizationDeploymentResourcesExecutorWarmupParallelism
-    ] = field(default_factory=lambda: None)
+class CloudApiCliApiKeyInfoResponse:
+    author_id: CloudApiCliApiKeyInfoResponseAuthorId
+    project_id: CloudApiCliApiKeyInfoResponseProjectId
+    email: CloudApiCliApiKeyInfoResponseEmail
+    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        if self.watermark_enabled is not None:
-            data["watermarkEnabled"] = self.watermark_enabled
-        if self.native_temp_dir is not None:
-            data["nativeTempDir"] = self.native_temp_dir
-        if self.notifications_enabled is not None:
-            data["notificationsEnabled"] = self.notifications_enabled
-        if self.requests_c_p_u is not None:
-            data["requestsCPU"] = self.requests_c_p_u
-        if self.limits_c_p_u is not None:
-            data["limitsCPU"] = self.limits_c_p_u
-        if self.requests_memory is not None:
-            data["requestsMemory"] = self.requests_memory
-        if self.limits_memory is not None:
-            data["limitsMemory"] = self.limits_memory
-        if self.min_replicas is not None:
-            data["minReplicas"] = self.min_replicas
-        if self.compute_units is not None:
-            data["computeUnits"] = self.compute_units
-        if self.timeout_seconds is not None:
-            data["timeoutSeconds"] = self.timeout_seconds
-        if self.worker_type is not None:
-            data["workerType"] = self.worker_type
-        if self.python_version is not None:
-            data["pythonVersion"] = self.python_version
-        if self.worker_number is not None:
-            data["workerNumber"] = self.worker_number
-        if self.base_dockerfile is not None:
-            data["baseDockerfile"] = self.base_dockerfile
-        if self.queue_messages_per_worker is not None:
-            data["queueMessagesPerWorker"] = self.queue_messages_per_worker
-        if self.autoscale_min_worker is not None:
-            data["autoscaleMinWorker"] = self.autoscale_min_worker
-        if self.autoscale_max_worker is not None:
-            data["autoscaleMaxWorker"] = self.autoscale_max_worker
-        if self.executor_pool_size is not None:
-            data["executorPoolSize"] = self.executor_pool_size
-        if self.min_forms_executors is not None:
-            data["minFormsExecutors"] = self.min_forms_executors
-        if self.executor_max_executions is not None:
-            data["executorMaxExecutions"] = self.executor_max_executions
-        if self.executor_warmup_parallelism is not None:
-            data["executorWarmupParallelism"] = self.executor_warmup_parallelism
+        data["authorId"] = self.author_id
+        data["projectId"] = self.project_id
+        data["email"] = self.email
+        data["intercomHash"] = self.intercom_hash
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonDeploymentResourcesOrganizationDeploymentResources":
+    ) -> "CloudApiCliApiKeyInfoResponse":
         return cls(
-            watermark_enabled=None
-            if data.get("watermarkEnabled") is None
-            else data["watermarkEnabled"],
-            native_temp_dir=None
-            if data.get("nativeTempDir") is None
-            else data["nativeTempDir"],
-            notifications_enabled=None
-            if data.get("notificationsEnabled") is None
-            else data["notificationsEnabled"],
-            requests_c_p_u=None
-            if data.get("requestsCPU") is None
-            else str(data["requestsCPU"]),
-            limits_c_p_u=None
-            if data.get("limitsCPU") is None
-            else str(data["limitsCPU"]),
-            requests_memory=None
-            if data.get("requestsMemory") is None
-            else str(data["requestsMemory"]),
-            limits_memory=None
-            if data.get("limitsMemory") is None
-            else str(data["limitsMemory"]),
-            min_replicas=None
-            if data.get("minReplicas") is None
-            else str(data["minReplicas"]),
-            compute_units=None
-            if data.get("computeUnits") is None
-            else float(data["computeUnits"]),
-            timeout_seconds=None
-            if data.get("timeoutSeconds") is None
-            else str(data["timeoutSeconds"]),
-            worker_type=None
-            if data.get("workerType") is None
-            else str(data["workerType"]),
-            python_version=None
-            if data.get("pythonVersion") is None
-            else data["pythonVersion"],
-            worker_number=None
-            if data.get("workerNumber") is None
-            else str(data["workerNumber"]),
-            base_dockerfile=None
-            if data.get("baseDockerfile") is None
-            else str(data["baseDockerfile"]),
-            queue_messages_per_worker=None
-            if data.get("queueMessagesPerWorker") is None
-            else str(data["queueMessagesPerWorker"]),
-            autoscale_min_worker=None
-            if data.get("autoscaleMinWorker") is None
-            else str(data["autoscaleMinWorker"]),
-            autoscale_max_worker=None
-            if data.get("autoscaleMaxWorker") is None
-            else str(data["autoscaleMaxWorker"]),
-            executor_pool_size=None
-            if data.get("executorPoolSize") is None
-            else str(data["executorPoolSize"]),
-            min_forms_executors=None
-            if data.get("minFormsExecutors") is None
-            else str(data["minFormsExecutors"]),
-            executor_max_executions=None
-            if data.get("executorMaxExecutions") is None
-            else str(data["executorMaxExecutions"]),
-            executor_warmup_parallelism=None
-            if data.get("executorWarmupParallelism") is None
-            else str(data["executorWarmupParallelism"]),
+            author_id=str(data["authorId"]),
+            project_id=str(data["projectId"]),
+            email=str(data["email"]),
+            intercom_hash=str(data["intercomHash"]),
         )
 
 
-CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabled = typing.Union[
-    typing.Literal["true"], typing.Literal["false"]
-]
+CloudApiCliBuildCreateResponseUrl = str
 
-CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabledValues: typing.List[
-    CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabled
-] = ["true", "false"]
-
-CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabled = (
-    typing.Union[typing.Literal["true"], typing.Literal["false"]]
-)
-
-CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabledValues: typing.List[
-    CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabled
-] = ["true", "false"]
-
-CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabled = typing.Union[
-    typing.Literal["true"], typing.Literal["false"]
-]
-
-CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabledValues: typing.List[
-    CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabled
-] = ["true", "false"]
-
-CommonDeploymentResourcesProjectDeploymentResourcesRequestsCPU = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesLimitsCPU = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesRequestsMemory = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesLimitsMemory = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesMinReplicas = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesComputeUnits = float
-
-CommonDeploymentResourcesProjectDeploymentResourcesTimeoutSeconds = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesWorkerType = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesPythonVersion = typing.Union[
-    typing.Literal["3.9"],
-    typing.Literal["3.10"],
-    typing.Literal["3.11"],
-    typing.Literal["3.12"],
-]
-
-CommonDeploymentResourcesProjectDeploymentResourcesPythonVersionValues: typing.List[
-    CommonDeploymentResourcesProjectDeploymentResourcesPythonVersion
-] = ["3.9", "3.10", "3.11", "3.12"]
-
-CommonDeploymentResourcesProjectDeploymentResourcesWorkerNumber = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesBaseDockerfile = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesQueueMessagesPerWorker = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMinWorker = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMaxWorker = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIpsItem = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIps = typing.List[
-    CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIpsItem
-]
-
-CommonDeploymentResourcesProjectDeploymentResourcesExecutorPoolSize = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesMinFormsExecutors = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesExecutorMaxExecutions = str
-
-CommonDeploymentResourcesProjectDeploymentResourcesExecutorWarmupParallelism = str
+CloudApiCliBuildCreateResponseBuildId = str
 
 
 @dataclass
-class CommonDeploymentResourcesProjectDeploymentResources:
-    watermark_enabled: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesWatermarkEnabled
-    ] = field(default_factory=lambda: None)
-    selenium_instance_enabled: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesSeleniumInstanceEnabled
-    ] = field(default_factory=lambda: None)
-    notifications_enabled: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesNotificationsEnabled
-    ] = field(default_factory=lambda: None)
-    requests_c_p_u: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesRequestsCPU
-    ] = field(default_factory=lambda: None)
-    limits_c_p_u: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesLimitsCPU
-    ] = field(default_factory=lambda: None)
-    requests_memory: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesRequestsMemory
-    ] = field(default_factory=lambda: None)
-    limits_memory: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesLimitsMemory
-    ] = field(default_factory=lambda: None)
-    min_replicas: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesMinReplicas
-    ] = field(default_factory=lambda: None)
-    compute_units: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesComputeUnits
-    ] = field(default_factory=lambda: None)
-    timeout_seconds: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesTimeoutSeconds
-    ] = field(default_factory=lambda: None)
-    worker_type: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesWorkerType
-    ] = field(default_factory=lambda: None)
-    python_version: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesPythonVersion
-    ] = field(default_factory=lambda: None)
-    worker_number: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesWorkerNumber
-    ] = field(default_factory=lambda: None)
-    base_dockerfile: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesBaseDockerfile
-    ] = field(default_factory=lambda: None)
-    queue_messages_per_worker: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesQueueMessagesPerWorker
-    ] = field(default_factory=lambda: None)
-    autoscale_min_worker: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMinWorker
-    ] = field(default_factory=lambda: None)
-    autoscale_max_worker: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesAutoscaleMaxWorker
-    ] = field(default_factory=lambda: None)
-    whitelist_ips: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesWhitelistIps
-    ] = field(default_factory=lambda: None)
-    executor_pool_size: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesExecutorPoolSize
-    ] = field(default_factory=lambda: None)
-    min_forms_executors: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesMinFormsExecutors
-    ] = field(default_factory=lambda: None)
-    executor_max_executions: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesExecutorMaxExecutions
-    ] = field(default_factory=lambda: None)
-    executor_warmup_parallelism: typing.Optional[
-        CommonDeploymentResourcesProjectDeploymentResourcesExecutorWarmupParallelism
-    ] = field(default_factory=lambda: None)
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.watermark_enabled is not None:
-            data["watermarkEnabled"] = self.watermark_enabled
-        if self.selenium_instance_enabled is not None:
-            data["seleniumInstanceEnabled"] = self.selenium_instance_enabled
-        if self.notifications_enabled is not None:
-            data["notificationsEnabled"] = self.notifications_enabled
-        if self.requests_c_p_u is not None:
-            data["requestsCPU"] = self.requests_c_p_u
-        if self.limits_c_p_u is not None:
-            data["limitsCPU"] = self.limits_c_p_u
-        if self.requests_memory is not None:
-            data["requestsMemory"] = self.requests_memory
-        if self.limits_memory is not None:
-            data["limitsMemory"] = self.limits_memory
-        if self.min_replicas is not None:
-            data["minReplicas"] = self.min_replicas
-        if self.compute_units is not None:
-            data["computeUnits"] = self.compute_units
-        if self.timeout_seconds is not None:
-            data["timeoutSeconds"] = self.timeout_seconds
-        if self.worker_type is not None:
-            data["workerType"] = self.worker_type
-        if self.python_version is not None:
-            data["pythonVersion"] = self.python_version
-        if self.worker_number is not None:
-            data["workerNumber"] = self.worker_number
-        if self.base_dockerfile is not None:
-            data["baseDockerfile"] = self.base_dockerfile
-        if self.queue_messages_per_worker is not None:
-            data["queueMessagesPerWorker"] = self.queue_messages_per_worker
-        if self.autoscale_min_worker is not None:
-            data["autoscaleMinWorker"] = self.autoscale_min_worker
-        if self.autoscale_max_worker is not None:
-            data["autoscaleMaxWorker"] = self.autoscale_max_worker
-        if self.whitelist_ips is not None:
-            data["whitelistIps"] = self.whitelist_ips
-        if self.executor_pool_size is not None:
-            data["executorPoolSize"] = self.executor_pool_size
-        if self.min_forms_executors is not None:
-            data["minFormsExecutors"] = self.min_forms_executors
-        if self.executor_max_executions is not None:
-            data["executorMaxExecutions"] = self.executor_max_executions
-        if self.executor_warmup_parallelism is not None:
-            data["executorWarmupParallelism"] = self.executor_warmup_parallelism
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CommonDeploymentResourcesProjectDeploymentResources":
-        return cls(
-            watermark_enabled=None
-            if data.get("watermarkEnabled") is None
-            else data["watermarkEnabled"],
-            selenium_instance_enabled=None
-            if data.get("seleniumInstanceEnabled") is None
-            else data["seleniumInstanceEnabled"],
-            notifications_enabled=None
-            if data.get("notificationsEnabled") is None
-            else data["notificationsEnabled"],
-            requests_c_p_u=None
-            if data.get("requestsCPU") is None
-            else str(data["requestsCPU"]),
-            limits_c_p_u=None
-            if data.get("limitsCPU") is None
-            else str(data["limitsCPU"]),
-            requests_memory=None
-            if data.get("requestsMemory") is None
-            else str(data["requestsMemory"]),
-            limits_memory=None
-            if data.get("limitsMemory") is None
-            else str(data["limitsMemory"]),
-            min_replicas=None
-            if data.get("minReplicas") is None
-            else str(data["minReplicas"]),
-            compute_units=None
-            if data.get("computeUnits") is None
-            else float(data["computeUnits"]),
-            timeout_seconds=None
-            if data.get("timeoutSeconds") is None
-            else str(data["timeoutSeconds"]),
-            worker_type=None
-            if data.get("workerType") is None
-            else str(data["workerType"]),
-            python_version=None
-            if data.get("pythonVersion") is None
-            else data["pythonVersion"],
-            worker_number=None
-            if data.get("workerNumber") is None
-            else str(data["workerNumber"]),
-            base_dockerfile=None
-            if data.get("baseDockerfile") is None
-            else str(data["baseDockerfile"]),
-            queue_messages_per_worker=None
-            if data.get("queueMessagesPerWorker") is None
-            else str(data["queueMessagesPerWorker"]),
-            autoscale_min_worker=None
-            if data.get("autoscaleMinWorker") is None
-            else str(data["autoscaleMinWorker"]),
-            autoscale_max_worker=None
-            if data.get("autoscaleMaxWorker") is None
-            else str(data["autoscaleMaxWorker"]),
-            whitelist_ips=None
-            if data.get("whitelistIps") is None
-            else [str(item) for item in data["whitelistIps"]],
-            executor_pool_size=None
-            if data.get("executorPoolSize") is None
-            else str(data["executorPoolSize"]),
-            min_forms_executors=None
-            if data.get("minFormsExecutors") is None
-            else str(data["minFormsExecutors"]),
-            executor_max_executions=None
-            if data.get("executorMaxExecutions") is None
-            else str(data["executorMaxExecutions"]),
-            executor_warmup_parallelism=None
-            if data.get("executorWarmupParallelism") is None
-            else str(data["executorWarmupParallelism"]),
-        )
-
-
-CommonFilesItemType = typing.Union[typing.Literal["file"], typing.Literal["directory"]]
-
-CommonFilesItemTypeValues: typing.List[CommonFilesItemType] = ["file", "directory"]
-
-CommonFilesItemPath = str
-
-CommonFilesItemName = str
-
-CommonFilesItemDate = datetime.datetime
-
-CommonFilesItemSizeBytes = int
-
-CommonFilesItemSizeHuman = str
-
-CommonFilesItemItemCount = int
-
-
-@dataclass
-class CommonFilesItem:
-    type: CommonFilesItemType
-    path: CommonFilesItemPath
-    name: CommonFilesItemName
-    date: CommonFilesItemDate
-    size_bytes: typing.Optional[CommonFilesItemSizeBytes] = field(
-        default_factory=lambda: None
-    )
-    size_human: typing.Optional[CommonFilesItemSizeHuman] = field(
-        default_factory=lambda: None
-    )
-    item_count: typing.Optional[CommonFilesItemItemCount] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["path"] = self.path
-        data["name"] = self.name
-        data["date"] = self.date.isoformat()
-        if self.size_bytes is not None:
-            data["sizeBytes"] = self.size_bytes
-        if self.size_human is not None:
-            data["sizeHuman"] = self.size_human
-        if self.item_count is not None:
-            data["itemCount"] = self.item_count
-        return data
-
-    @classmethod
-    def from_dict(cls, data: typing.Dict[str, typing.Any]) -> "CommonFilesItem":
-        return cls(
-            type=data["type"],
-            path=str(data["path"]),
-            name=str(data["name"]),
-            date=datetime.datetime.fromisoformat(data["date"]),
-            size_bytes=None
-            if data.get("sizeBytes") is None
-            else int(data["sizeBytes"]),
-            size_human=None
-            if data.get("sizeHuman") is None
-            else str(data["sizeHuman"]),
-            item_count=None
-            if data.get("itemCount") is None
-            else int(data["itemCount"]),
-        )
-
-
-CloudApiCliConnectorsExecuteRequestConnectionName = str
-
-CloudApiCliConnectorsExecuteRequestActionName = str
-
-CloudApiCliConnectorsExecuteRequestParameters = typing.Dict[str, typing.Any]
-
-
-@dataclass
-class CloudApiCliConnectorsExecuteRequest:
-    connection_name: CloudApiCliConnectorsExecuteRequestConnectionName
-    action_name: CloudApiCliConnectorsExecuteRequestActionName
-    parameters: typing.Optional[CloudApiCliConnectorsExecuteRequestParameters] = field(
-        default_factory=lambda: {}
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["connectionName"] = self.connection_name
-        data["actionName"] = self.action_name
-        if self.parameters is not None:
-            data["parameters"] = self.parameters
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliConnectorsExecuteRequest":
-        return cls(
-            connection_name=str(data["connectionName"]),
-            action_name=str(data["actionName"]),
-            parameters=None
-            if data.get("parameters") is None
-            else dict(**data["parameters"]),
-        )
-
-
-CloudApiCliConnectorsExecuteResponse0Status = typing.Literal["success"]
-
-CloudApiCliConnectorsExecuteResponse0StatusValues: typing.List[
-    CloudApiCliConnectorsExecuteResponse0Status
-] = ["success"]
-
-CloudApiCliConnectorsExecuteResponse0Data = typing.Dict[str, typing.Any]
-
-
-@dataclass
-class CloudApiCliConnectorsExecuteResponse0:
-    status: CloudApiCliConnectorsExecuteResponse0Status
-    data: CloudApiCliConnectorsExecuteResponse0Data
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["status"] = self.status
-        data["data"] = self.data
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliConnectorsExecuteResponse0":
-        return cls(
-            status=data["status"],
-            data=dict(**data["data"]),
-        )
-
-
-CloudApiCliConnectorsExecuteResponse1Status = typing.Literal["error"]
-
-CloudApiCliConnectorsExecuteResponse1StatusValues: typing.List[
-    CloudApiCliConnectorsExecuteResponse1Status
-] = ["error"]
-
-CloudApiCliConnectorsExecuteResponse1Message = str
-
-
-@dataclass
-class CloudApiCliConnectorsExecuteResponse1:
-    status: CloudApiCliConnectorsExecuteResponse1Status
-    message: CloudApiCliConnectorsExecuteResponse1Message
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["status"] = self.status
-        data["message"] = self.message
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliConnectorsExecuteResponse1":
-        return cls(
-            status=data["status"],
-            message=str(data["message"]),
-        )
-
-
-CloudApiCliConnectorsExecuteResponse = typing.Union[
-    CloudApiCliConnectorsExecuteResponse0, CloudApiCliConnectorsExecuteResponse1
-]
-
-
-def cloud_api_cli_connectors_execute_response_from_dict(
-    data: typing.Any,
-) -> "CloudApiCliConnectorsExecuteResponse":
-    if isinstance(data, dict) and (data.get("status", None) == "success"):
-        return CloudApiCliConnectorsExecuteResponse0.from_dict(data)
-    if isinstance(data, dict) and (data.get("status", None) == "error"):
-        return CloudApiCliConnectorsExecuteResponse1.from_dict(data)
-    raise ValueError(
-        f"Could not parse CloudApiCliConnectorsExecuteResponse from dict: {data}"
-    )
-
-
-CloudApiCliTablesDumpResponse = CommonTablesSnapshot
-
-CloudApiCliTablesRestoreRequest = CommonTablesSnapshot
-
-CloudApiCliAiV2AbortRequestConversationId = str
-
-
-@dataclass
-class CloudApiCliAiV2AbortRequest:
-    conversation_id: CloudApiCliAiV2AbortRequestConversationId
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["conversationId"] = self.conversation_id
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2AbortRequest":
-        return cls(
-            conversation_id=str(data["conversationId"]),
-        )
-
-
-CloudApiCliAiV2StreamRequestConversationId = str
-
-CloudApiCliAiV2StreamRequestTunnelSessionPath = str
-
-CloudApiCliAiV2StreamRequestSecretKey = str
-
-CloudApiCliAiV2StreamRequestHumanApproval = str
-
-CloudApiCliAiV2StreamRequestToolCallsApprovalApprovedItem = str
-
-CloudApiCliAiV2StreamRequestToolCallsApprovalApproved = typing.List[
-    CloudApiCliAiV2StreamRequestToolCallsApprovalApprovedItem
-]
-
-CloudApiCliAiV2StreamRequestToolCallsApprovalRejectedItem = str
-
-CloudApiCliAiV2StreamRequestToolCallsApprovalRejected = typing.List[
-    CloudApiCliAiV2StreamRequestToolCallsApprovalRejectedItem
-]
-
-
-@dataclass
-class CloudApiCliAiV2StreamRequestToolCallsApproval:
-    approved: CloudApiCliAiV2StreamRequestToolCallsApprovalApproved
-    rejected: CloudApiCliAiV2StreamRequestToolCallsApprovalRejected
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["approved"] = self.approved
-        data["rejected"] = self.rejected
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2StreamRequestToolCallsApproval":
-        return cls(
-            approved=[str(item) for item in data["approved"]],
-            rejected=[str(item) for item in data["rejected"]],
-        )
-
-
-CloudApiCliAiV2StreamRequestEmail = str
-
-CloudApiCliAiV2StreamRequestStatus = typing.Union[
-    typing.Literal["pending"], typing.Literal["active"], typing.Literal["invited"]
-]
-
-CloudApiCliAiV2StreamRequestStatusValues: typing.List[
-    CloudApiCliAiV2StreamRequestStatus
-] = ["pending", "active", "invited"]
-
-CloudApiCliAiV2StreamRequestContentItemAssistantTextInputType = typing.Literal["text"]
-
-CloudApiCliAiV2StreamRequestContentItemAssistantTextInputTypeValues: typing.List[
-    CloudApiCliAiV2StreamRequestContentItemAssistantTextInputType
-] = ["text"]
-
-CloudApiCliAiV2StreamRequestContentItemAssistantTextInputText = str
-
-
-@dataclass
-class CloudApiCliAiV2StreamRequestContentItemAssistantTextInput:
-    type: CloudApiCliAiV2StreamRequestContentItemAssistantTextInputType
-    text: CloudApiCliAiV2StreamRequestContentItemAssistantTextInputText
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["text"] = self.text
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2StreamRequestContentItemAssistantTextInput":
-        return cls(
-            type=data["type"],
-            text=str(data["text"]),
-        )
-
-
-CloudApiCliAiV2StreamRequestContentItemAssistantFileInputType = typing.Literal["file"]
-
-CloudApiCliAiV2StreamRequestContentItemAssistantFileInputTypeValues: typing.List[
-    CloudApiCliAiV2StreamRequestContentItemAssistantFileInputType
-] = ["file"]
-
-CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileName = str
-
-CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileContent = str
-
-
-@dataclass
-class CloudApiCliAiV2StreamRequestContentItemAssistantFileInput:
-    type: CloudApiCliAiV2StreamRequestContentItemAssistantFileInputType
-    file_name: CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileName
-    file_content: CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileContent
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["fileName"] = self.file_name
-        data["fileContent"] = self.file_content
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2StreamRequestContentItemAssistantFileInput":
-        return cls(
-            type=data["type"],
-            file_name=str(data["fileName"]),
-            file_content=str(data["fileContent"]),
-        )
-
-
-CloudApiCliAiV2StreamRequestContentItem = typing.Union[
-    CloudApiCliAiV2StreamRequestContentItemAssistantTextInput,
-    CloudApiCliAiV2StreamRequestContentItemAssistantFileInput,
-]
-
-
-def cloud_api_cli_ai_v2_stream_request_content_item_from_dict(
-    data: typing.Any,
-) -> "CloudApiCliAiV2StreamRequestContentItem":
-    if isinstance(data, dict) and (data.get("type", None) == "text"):
-        return CloudApiCliAiV2StreamRequestContentItemAssistantTextInput.from_dict(data)
-    if isinstance(data, dict) and (data.get("type", None) == "file"):
-        return CloudApiCliAiV2StreamRequestContentItemAssistantFileInput.from_dict(data)
-    raise ValueError(
-        f"Could not parse CloudApiCliAiV2StreamRequestContentItem from dict: {data}"
-    )
-
-
-CloudApiCliAiV2StreamRequestContent = typing.List[
-    CloudApiCliAiV2StreamRequestContentItem
-]
-
-CloudApiCliAiV2StreamRequestContext = typing.Dict[str, typing.Any]
-
-CloudApiConsoleBrowserToolsDefinitionName = str
-
-CloudApiConsoleBrowserToolsDefinitionDescription = str
-
-CloudApiConsoleBrowserToolsDefinitionPayloadSchema = typing.Dict[str, typing.Any]
-
-
-@dataclass
-class CloudApiConsoleBrowserToolsDefinition:
-    name: CloudApiConsoleBrowserToolsDefinitionName
-    description: CloudApiConsoleBrowserToolsDefinitionDescription
-    payload_schema: CloudApiConsoleBrowserToolsDefinitionPayloadSchema
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["name"] = self.name
-        data["description"] = self.description
-        data["payloadSchema"] = self.payload_schema
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiConsoleBrowserToolsDefinition":
-        return cls(
-            name=str(data["name"]),
-            description=str(data["description"]),
-            payload_schema=dict(**data["payloadSchema"]),
-        )
-
-
-CloudApiCliAiV2StreamRequestBrowserToolsItem = CloudApiConsoleBrowserToolsDefinition
-
-CloudApiCliAiV2StreamRequestBrowserTools = typing.List[
-    CloudApiCliAiV2StreamRequestBrowserToolsItem
-]
-
-CloudApiConsoleBrowserToolsResponseToolCallId = str
-
-CloudApiConsoleBrowserToolsResponseResponse = typing.Any
-
-
-@dataclass
-class CloudApiConsoleBrowserToolsResponse:
-    tool_call_id: CloudApiConsoleBrowserToolsResponseToolCallId
-    response: CloudApiConsoleBrowserToolsResponseResponse
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["toolCallId"] = self.tool_call_id
-        data["response"] = self.response
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiConsoleBrowserToolsResponse":
-        return cls(
-            tool_call_id=str(data["toolCallId"]),
-            response=data["response"],
-        )
-
-
-CloudApiCliAiV2StreamRequestBrowserToolResponsesItem = (
-    CloudApiConsoleBrowserToolsResponse
-)
-
-CloudApiCliAiV2StreamRequestBrowserToolResponses = typing.List[
-    CloudApiCliAiV2StreamRequestBrowserToolResponsesItem
-]
-
-
-@dataclass
-class CloudApiCliAiV2StreamRequest:
-    conversation_id: CloudApiCliAiV2StreamRequestConversationId
-    content: CloudApiCliAiV2StreamRequestContent
-    tunnel_session_path: typing.Optional[
-        CloudApiCliAiV2StreamRequestTunnelSessionPath
-    ] = field(default_factory=lambda: None)
-    secret_key: typing.Optional[CloudApiCliAiV2StreamRequestSecretKey] = field(
-        default_factory=lambda: None
-    )
-    human_approval: typing.Optional[CloudApiCliAiV2StreamRequestHumanApproval] = field(
-        default_factory=lambda: None
-    )
-    tool_calls_approval: typing.Optional[
-        CloudApiCliAiV2StreamRequestToolCallsApproval
-    ] = field(default_factory=lambda: None)
-    email: typing.Optional[CloudApiCliAiV2StreamRequestEmail] = field(
-        default_factory=lambda: None
-    )
-    status: typing.Optional[CloudApiCliAiV2StreamRequestStatus] = field(
-        default_factory=lambda: None
-    )
-    context: typing.Optional[CloudApiCliAiV2StreamRequestContext] = field(
-        default_factory=lambda: None
-    )
-    browser_tools: typing.Optional[CloudApiCliAiV2StreamRequestBrowserTools] = field(
-        default_factory=lambda: None
-    )
-    browser_tool_responses: typing.Optional[
-        CloudApiCliAiV2StreamRequestBrowserToolResponses
-    ] = field(default_factory=lambda: None)
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["conversationId"] = self.conversation_id
-        data["content"] = [item.to_dict() for item in self.content]
-        if self.tunnel_session_path is not None:
-            data["tunnelSessionPath"] = self.tunnel_session_path
-        if self.secret_key is not None:
-            data["secretKey"] = self.secret_key
-        if self.human_approval is not None:
-            data["humanApproval"] = self.human_approval
-        if self.tool_calls_approval is not None:
-            data["toolCallsApproval"] = self.tool_calls_approval.to_dict()
-        if self.email is not None:
-            data["email"] = self.email
-        if self.status is not None:
-            data["status"] = self.status
-        if self.context is not None:
-            data["context"] = self.context
-        if self.browser_tools is not None:
-            data["browserTools"] = [item.to_dict() for item in self.browser_tools]
-        if self.browser_tool_responses is not None:
-            data["browserToolResponses"] = [
-                item.to_dict() for item in self.browser_tool_responses
-            ]
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2StreamRequest":
-        return cls(
-            conversation_id=str(data["conversationId"]),
-            content=[
-                (
-                    CloudApiCliAiV2StreamRequestContentItemAssistantTextInput.from_dict(
-                        item
-                    )
-                    if isinstance(item, dict) and (item.get("type", None) == "text")
-                    else CloudApiCliAiV2StreamRequestContentItemAssistantFileInput.from_dict(
-                        item
-                    )
-                )
-                for item in data["content"]
-            ],
-            tunnel_session_path=None
-            if data.get("tunnelSessionPath") is None
-            else str(data["tunnelSessionPath"]),
-            secret_key=None
-            if data.get("secretKey") is None
-            else str(data["secretKey"]),
-            human_approval=None
-            if data.get("humanApproval") is None
-            else str(data["humanApproval"]),
-            tool_calls_approval=None
-            if data.get("toolCallsApproval") is None
-            else CloudApiCliAiV2StreamRequestToolCallsApproval.from_dict(
-                data["toolCallsApproval"]
-            ),
-            email=None if data.get("email") is None else str(data["email"]),
-            status=None if data.get("status") is None else data["status"],
-            context=None if data.get("context") is None else dict(**data["context"]),
-            browser_tools=None
-            if data.get("browserTools") is None
-            else [
-                CloudApiConsoleBrowserToolsDefinition.from_dict(item)
-                for item in data["browserTools"]
-            ],
-            browser_tool_responses=None
-            if data.get("browserToolResponses") is None
-            else [
-                CloudApiConsoleBrowserToolsResponse.from_dict(item)
-                for item in data["browserToolResponses"]
-            ],
-        )
-
-
-CloudApiCliAiV2PromptPostRequestMessagesItemRole = typing.Union[
-    typing.Literal["system"], typing.Literal["user"], typing.Literal["assistant"]
-]
-
-CloudApiCliAiV2PromptPostRequestMessagesItemRoleValues: typing.List[
-    CloudApiCliAiV2PromptPostRequestMessagesItemRole
-] = ["system", "user", "assistant"]
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextType = typing.Literal["text"]
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextTypeValues: typing.List[
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextType
-] = ["text"]
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextText = str
-
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText:
-    type: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextType
-    text: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextText
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["text"] = self.text
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText":
-        return cls(
-            type=data["type"],
-            text=str(data["text"]),
-        )
-
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageType = typing.Literal[
-    "image_url"
-]
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageTypeValues: typing.List[
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageType
-] = ["image_url"]
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrlUrl = str
-
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl:
-    url: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrlUrl
+class CloudApiCliBuildCreateResponse:
+    url: CloudApiCliBuildCreateResponseUrl
+    build_id: CloudApiCliBuildCreateResponseBuildId
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
         data["url"] = self.url
+        data["buildId"] = self.build_id
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl":
+    ) -> "CloudApiCliBuildCreateResponse":
         return cls(
             url=str(data["url"]),
+            build_id=str(data["buildId"]),
         )
 
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage:
-    type: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageType
-    image_url: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["image_url"] = self.image_url.to_dict()
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage":
-        return cls(
-            type=data["type"],
-            image_url=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl.from_dict(
-                data["image_url"]
-            ),
-        )
-
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContentItem = typing.Union[
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText,
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage,
-]
-
-
-def cloud_api_cli_ai_v2_prompt_post_request_messages_item_content_item_from_dict(
-    data: typing.Any,
-) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItem":
-    if isinstance(data, dict) and (data.get("type", None) == "text"):
-        return CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText.from_dict(
-            data
-        )
-    if isinstance(data, dict) and (data.get("type", None) == "image_url"):
-        return CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage.from_dict(
-            data
-        )
-    raise ValueError(
-        f"Could not parse CloudApiCliAiV2PromptPostRequestMessagesItemContentItem from dict: {data}"
-    )
-
-
-CloudApiCliAiV2PromptPostRequestMessagesItemContent = typing.List[
-    CloudApiCliAiV2PromptPostRequestMessagesItemContentItem
-]
-
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequestMessagesItem:
-    role: CloudApiCliAiV2PromptPostRequestMessagesItemRole
-    content: CloudApiCliAiV2PromptPostRequestMessagesItemContent
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["role"] = self.role
-        data["content"] = [item.to_dict() for item in self.content]
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItem":
-        return cls(
-            role=data["role"],
-            content=[
-                (
-                    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText.from_dict(
-                        item
-                    )
-                    if isinstance(item, dict) and (item.get("type", None) == "text")
-                    else CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage.from_dict(
-                        item
-                    )
-                )
-                for item in data["content"]
-            ],
-        )
-
-
-CloudApiCliAiV2PromptPostRequestMessages = typing.List[
-    CloudApiCliAiV2PromptPostRequestMessagesItem
-]
-
-CloudApiCliAiV2PromptPostRequestToolsItemType = typing.Literal["function"]
-
-CloudApiCliAiV2PromptPostRequestToolsItemTypeValues: typing.List[
-    CloudApiCliAiV2PromptPostRequestToolsItemType
-] = ["function"]
-
-CloudApiCliAiV2PromptPostRequestToolsItemFunctionName = str
-
-CloudApiCliAiV2PromptPostRequestToolsItemFunctionParameters = typing.Dict[
-    str, typing.Any
-]
-
-CloudApiCliAiV2PromptPostRequestToolsItemFunctionDescription = str
-
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequestToolsItemFunction:
-    name: CloudApiCliAiV2PromptPostRequestToolsItemFunctionName
-    parameters: CloudApiCliAiV2PromptPostRequestToolsItemFunctionParameters
-    description: typing.Optional[
-        CloudApiCliAiV2PromptPostRequestToolsItemFunctionDescription
-    ] = field(default_factory=lambda: None)
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["name"] = self.name
-        data["parameters"] = self.parameters
-        if self.description is not None:
-            data["description"] = self.description
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequestToolsItemFunction":
-        return cls(
-            name=str(data["name"]),
-            parameters=dict(**data["parameters"]),
-            description=None
-            if data.get("description") is None
-            else str(data["description"]),
-        )
-
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequestToolsItem:
-    type: CloudApiCliAiV2PromptPostRequestToolsItemType
-    function: CloudApiCliAiV2PromptPostRequestToolsItemFunction
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["function"] = self.function.to_dict()
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequestToolsItem":
-        return cls(
-            type=data["type"],
-            function=CloudApiCliAiV2PromptPostRequestToolsItemFunction.from_dict(
-                data["function"]
-            ),
-        )
-
-
-CloudApiCliAiV2PromptPostRequestTools = typing.List[
-    CloudApiCliAiV2PromptPostRequestToolsItem
-]
-
-CloudApiCliAiV2PromptPostRequestTemperature = float
-
-
-@dataclass
-class CloudApiCliAiV2PromptPostRequest:
-    messages: CloudApiCliAiV2PromptPostRequestMessages
-    tools: CloudApiCliAiV2PromptPostRequestTools
-    temperature: typing.Optional[CloudApiCliAiV2PromptPostRequestTemperature] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["messages"] = [item.to_dict() for item in self.messages]
-        data["tools"] = [item.to_dict() for item in self.tools]
-        if self.temperature is not None:
-            data["temperature"] = self.temperature
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2PromptPostRequest":
-        return cls(
-            messages=[
-                CloudApiCliAiV2PromptPostRequestMessagesItem.from_dict(item)
-                for item in data["messages"]
-            ],
-            tools=[
-                CloudApiCliAiV2PromptPostRequestToolsItem.from_dict(item)
-                for item in data["tools"]
-            ],
-            temperature=None
-            if data.get("temperature") is None
-            else float(data["temperature"]),
-        )
-
-
-CloudApiCliAiV2ConversationGetResponseId = str
-
-CloudApiCliAiV2ConversationGetResponseCreatedAt = datetime.datetime
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemRole = typing.Union[
-    typing.Literal["user"], typing.Literal["assistant"]
-]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemRoleValues: typing.List[
-    CloudApiCliAiV2ConversationGetResponseMessagesItemRole
-] = ["user", "assistant"]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent0 = str
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Type = typing.Literal[
-    "text"
-]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0TypeValues: typing.List[
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Type
-] = ["text"]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Text = str
-
-
-@dataclass
-class CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0:
-    type: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Type
-    text: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Text
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["text"] = self.text
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0":
-        return cls(
-            type=data["type"],
-            text=str(data["text"]),
-        )
-
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1Type = typing.Literal[
-    "image_url"
-]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1TypeValues: typing.List[
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1Type
-] = ["image_url"]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrlUrl = str
-
-
-@dataclass
-class CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl:
-    url: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrlUrl
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["url"] = self.url
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl":
-        return cls(
-            url=str(data["url"]),
-        )
-
-
-@dataclass
-class CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1:
-    type: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1Type
-    image_url: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["image_url"] = self.image_url.to_dict()
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1":
-        return cls(
-            type=data["type"],
-            image_url=CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl.from_dict(
-                data["image_url"]
-            ),
-        )
-
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item = typing.Union[
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0,
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1,
-]
-
-
-def cloud_api_cli_ai_v2_conversation_get_response_messages_item_content1_item_from_dict(
-    data: typing.Any,
-) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item":
-    if isinstance(data, dict) and (data.get("type", None) == "text"):
-        return (
-            CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0.from_dict(
-                data
-            )
-        )
-    if isinstance(data, dict) and (data.get("type", None) == "image_url"):
-        return (
-            CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1.from_dict(
-                data
-            )
-        )
-    raise ValueError(
-        f"Could not parse CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item from dict: {data}"
-    )
-
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent1 = typing.List[
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item
-]
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemContent = typing.Union[
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent0,
-    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1,
-]
-
-
-def cloud_api_cli_ai_v2_conversation_get_response_messages_item_content_from_dict(
-    data: typing.Any,
-) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent":
-    if isinstance(data, str):
-        return str(data)
-    if isinstance(data, list) and all(
-        isinstance(item, dict)
-        and (item.get("type", None) == "text")
-        or isinstance(item, dict)
-        and (item.get("type", None) == "image_url")
-        for item in data
-    ):
-        return [
-            (
-                CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0.from_dict(
-                    item
-                )
-                if isinstance(item, dict) and (item.get("type", None) == "text")
-                else CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1.from_dict(
-                    item
-                )
-            )
-            for item in data
-        ]
-    raise ValueError(
-        f"Could not parse CloudApiCliAiV2ConversationGetResponseMessagesItemContent from dict: {data}"
-    )
-
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemCreatedAt = datetime.datetime
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemToolTitle = str
-
-CloudApiCliAiV2ConversationGetResponseMessagesItemToolCallId = str
-
-
-@dataclass
-class CloudApiCliAiV2ConversationGetResponseMessagesItem:
-    role: CloudApiCliAiV2ConversationGetResponseMessagesItemRole
-    content: CloudApiCliAiV2ConversationGetResponseMessagesItemContent
-    created_at: CloudApiCliAiV2ConversationGetResponseMessagesItemCreatedAt
-    tool_title: typing.Optional[
-        CloudApiCliAiV2ConversationGetResponseMessagesItemToolTitle
-    ] = field(default_factory=lambda: None)
-    tool_call_id: typing.Optional[
-        CloudApiCliAiV2ConversationGetResponseMessagesItemToolCallId
-    ] = field(default_factory=lambda: None)
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["role"] = self.role
-        data["content"] = (
-            self.content
-            if isinstance(self.content, str)
-            else [item.to_dict() for item in self.content]
-        )
-        data["createdAt"] = self.created_at.isoformat()
-        if self.tool_title is not None:
-            data["toolTitle"] = self.tool_title
-        if self.tool_call_id is not None:
-            data["toolCallId"] = self.tool_call_id
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItem":
-        return cls(
-            role=data["role"],
-            content=(
-                str(data["content"])
-                if isinstance(data["content"], str)
-                else [
-                    (
-                        CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0.from_dict(
-                            item
-                        )
-                        if isinstance(item, dict) and (item.get("type", None) == "text")
-                        else CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1.from_dict(
-                            item
-                        )
-                    )
-                    for item in data["content"]
-                ]
-            ),
-            created_at=datetime.datetime.fromisoformat(data["createdAt"]),
-            tool_title=None
-            if data.get("toolTitle") is None
-            else str(data["toolTitle"]),
-            tool_call_id=None
-            if data.get("toolCallId") is None
-            else str(data["toolCallId"]),
-        )
-
-
-CloudApiCliAiV2ConversationGetResponseMessages = typing.List[
-    CloudApiCliAiV2ConversationGetResponseMessagesItem
-]
-
-
-@dataclass
-class CloudApiCliAiV2ConversationGetResponse:
-    id: CloudApiCliAiV2ConversationGetResponseId
-    created_at: CloudApiCliAiV2ConversationGetResponseCreatedAt
-    messages: CloudApiCliAiV2ConversationGetResponseMessages
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["id"] = self.id
-        data["createdAt"] = self.created_at.isoformat()
-        data["messages"] = [item.to_dict() for item in self.messages]
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationGetResponse":
-        return cls(
-            id=str(data["id"]),
-            created_at=datetime.datetime.fromisoformat(data["createdAt"]),
-            messages=[
-                CloudApiCliAiV2ConversationGetResponseMessagesItem.from_dict(item)
-                for item in data["messages"]
-            ],
-        )
-
-
-CloudApiCliAiV2ConversationsResponseItem = CloudApiCliAiV2ConversationGetResponse
-
-CloudApiCliAiV2ConversationsResponse = typing.List[
-    CloudApiCliAiV2ConversationsResponseItem
-]
-
-CloudApiCliAiV2ConversationPostRequestTunnelSessionPath = str
-
-CloudApiCliAiV2ConversationPostRequestSecretKey = str
-
-
-@dataclass
-class CloudApiCliAiV2ConversationPostRequest:
-    tunnel_session_path: CloudApiCliAiV2ConversationPostRequestTunnelSessionPath
-    secret_key: CloudApiCliAiV2ConversationPostRequestSecretKey
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["tunnelSessionPath"] = self.tunnel_session_path
-        data["secretKey"] = self.secret_key
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationPostRequest":
-        return cls(
-            tunnel_session_path=str(data["tunnelSessionPath"]),
-            secret_key=str(data["secretKey"]),
-        )
-
-
-CloudApiCliAiV2ConversationPostResponseConversationId = str
-
-
-@dataclass
-class CloudApiCliAiV2ConversationPostResponse:
-    conversation_id: CloudApiCliAiV2ConversationPostResponseConversationId
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["conversationId"] = self.conversation_id
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAiV2ConversationPostResponse":
-        return cls(
-            conversation_id=str(data["conversationId"]),
-        )
-
-
-CloudApiConsoleWorkflowUpdateTaskRequestStatus = typing.Union[
-    typing.Literal["pending"], typing.Literal["locked"], typing.Literal["completed"]
-]
-
-CloudApiConsoleWorkflowUpdateTaskRequestStatusValues: typing.List[
-    CloudApiConsoleWorkflowUpdateTaskRequestStatus
-] = ["pending", "locked", "completed"]
-
-CloudApiConsoleWorkflowUpdateTaskRequestCompletedAt = datetime.datetime
-
-CloudApiConsoleWorkflowUpdateTaskRequestCompletedByExecutionId = str
-
-CloudApiConsoleWorkflowUpdateTaskRequestCompletedByStageId = str
-
-
-@dataclass
-class CloudApiConsoleWorkflowUpdateTaskRequestCompleted:
-    at: CloudApiConsoleWorkflowUpdateTaskRequestCompletedAt
-    by_execution_id: typing.Optional[
-        CloudApiConsoleWorkflowUpdateTaskRequestCompletedByExecutionId
-    ] = field(default_factory=lambda: None)
-    by_stage_id: typing.Optional[
-        CloudApiConsoleWorkflowUpdateTaskRequestCompletedByStageId
-    ] = field(default_factory=lambda: None)
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["at"] = self.at.isoformat()
-        if self.by_execution_id is not None:
-            data["byExecutionId"] = self.by_execution_id
-        if self.by_stage_id is not None:
-            data["byStageId"] = self.by_stage_id
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiConsoleWorkflowUpdateTaskRequestCompleted":
-        return cls(
-            at=datetime.datetime.fromisoformat(data["at"]),
-            by_execution_id=None
-            if data.get("byExecutionId") is None
-            else str(data["byExecutionId"]),
-            by_stage_id=None
-            if data.get("byStageId") is None
-            else str(data["byStageId"]),
-        )
-
-
-CloudApiConsoleWorkflowUpdateTaskRequestLockedAt = datetime.datetime
-
-CloudApiConsoleWorkflowUpdateTaskRequestLockedByExecutionId = str
-
-CloudApiConsoleWorkflowUpdateTaskRequestLockedByStageId = str
-
-
-@dataclass
-class CloudApiConsoleWorkflowUpdateTaskRequestLocked:
-    at: CloudApiConsoleWorkflowUpdateTaskRequestLockedAt
-    by_execution_id: typing.Optional[
-        CloudApiConsoleWorkflowUpdateTaskRequestLockedByExecutionId
-    ] = field(default_factory=lambda: None)
-    by_stage_id: typing.Optional[
-        CloudApiConsoleWorkflowUpdateTaskRequestLockedByStageId
-    ] = field(default_factory=lambda: None)
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["at"] = self.at.isoformat()
-        if self.by_execution_id is not None:
-            data["byExecutionId"] = self.by_execution_id
-        if self.by_stage_id is not None:
-            data["byStageId"] = self.by_stage_id
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiConsoleWorkflowUpdateTaskRequestLocked":
-        return cls(
-            at=datetime.datetime.fromisoformat(data["at"]),
-            by_execution_id=None
-            if data.get("byExecutionId") is None
-            else str(data["byExecutionId"]),
-            by_stage_id=None
-            if data.get("byStageId") is None
-            else str(data["byStageId"]),
-        )
-
-
-@dataclass
-class CloudApiConsoleWorkflowUpdateTaskRequest:
-    status: typing.Optional[CloudApiConsoleWorkflowUpdateTaskRequestStatus] = field(
-        default_factory=lambda: None
-    )
-    completed: typing.Optional[CloudApiConsoleWorkflowUpdateTaskRequestCompleted] = (
-        field(default_factory=lambda: None)
-    )
-    locked: typing.Optional[CloudApiConsoleWorkflowUpdateTaskRequestLocked] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.status is not None:
-            data["status"] = self.status
-        if self.completed is not None:
-            data["completed"] = self.completed.to_dict()
-        if self.locked is not None:
-            data["locked"] = self.locked.to_dict()
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiConsoleWorkflowUpdateTaskRequest":
-        return cls(
-            status=None if data.get("status") is None else data["status"],
-            completed=None
-            if data.get("completed") is None
-            else CloudApiConsoleWorkflowUpdateTaskRequestCompleted.from_dict(
-                data["completed"]
-            ),
-            locked=None
-            if data.get("locked") is None
-            else CloudApiConsoleWorkflowUpdateTaskRequestLocked.from_dict(
-                data["locked"]
-            ),
-        )
-
-
-CloudApiCliTasksUpdateTaskRequest = CloudApiConsoleWorkflowUpdateTaskRequest
-
-CloudApiCliRoleUpdateRequestDescription = CommonRoleDescription
-
-
-@dataclass
-class CloudApiCliRoleUpdateRequest:
-    description: CloudApiCliRoleUpdateRequestDescription
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["description"] = self.description
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliRoleUpdateRequest":
-        return cls(
-            description=str(data["description"]),
-        )
-
-
-CloudApiCliRoleUpdateResponse = CommonRole
-
-CloudApiCliRoleListQueryOffset = int
-
-CloudApiCliRoleListQueryLimit = int
-
-
-@dataclass
-class CloudApiCliRoleListQuery:
-    offset: typing.Optional[CloudApiCliRoleListQueryOffset] = field(
-        default_factory=lambda: 0
-    )
-    limit: typing.Optional[CloudApiCliRoleListQueryLimit] = field(
-        default_factory=lambda: 10
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.offset is not None:
-            data["offset"] = self.offset
-        if self.limit is not None:
-            data["limit"] = self.limit
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliRoleListQuery":
-        return cls(
-            offset=None if data.get("offset") is None else int(data["offset"]),
-            limit=data.get("limit", 10),
-        )
-
-
-CloudApiCliRoleListResponseItem = CommonRole
-
-CloudApiCliRoleListResponse = typing.List[CloudApiCliRoleListResponseItem]
-
-CloudApiCliRoleCreateRequestName = CommonRoleName
-
-CloudApiCliRoleCreateRequestDescription = CommonRoleDescription
-
-
-@dataclass
-class CloudApiCliRoleCreateRequest:
-    name: CloudApiCliRoleCreateRequestName
-    description: typing.Optional[CloudApiCliRoleCreateRequestDescription] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["name"] = self.name
-        if self.description is not None:
-            data["description"] = self.description
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliRoleCreateRequest":
-        return cls(
-            name=str(data["name"]),
-            description=None
-            if data.get("description") is None
-            else str(data["description"]),
-        )
-
-
-CloudApiCliRoleCreateResponse = CommonRole
-
-CloudApiCliAgentsRunRequestBodyPrompt = str
-
-CloudApiCliAgentsRunRequestBodyResponseFormat = typing.Dict[str, typing.Any]
-
-CloudApiCliAgentsRunRequestBodyMcpUrl = str
-
-CloudApiCliAgentsRunRequestBodyCallbackUrl = str
-
-
-@dataclass
-class CloudApiCliAgentsRunRequestBody:
-    prompt: CloudApiCliAgentsRunRequestBodyPrompt
-    callback_url: CloudApiCliAgentsRunRequestBodyCallbackUrl
-    response_format: typing.Optional[CloudApiCliAgentsRunRequestBodyResponseFormat] = (
-        field(default_factory=lambda: None)
-    )
-    mcp_url: typing.Optional[CloudApiCliAgentsRunRequestBodyMcpUrl] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["prompt"] = self.prompt
-        data["callbackUrl"] = self.callback_url
-        if self.response_format is not None:
-            data["responseFormat"] = self.response_format
-        if self.mcp_url is not None:
-            data["mcpUrl"] = self.mcp_url
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliAgentsRunRequestBody":
-        return cls(
-            prompt=str(data["prompt"]),
-            callback_url=str(data["callbackUrl"]),
-            response_format=None
-            if data.get("responseFormat") is None
-            else dict(**data["responseFormat"]),
-            mcp_url=None if data.get("mcpUrl") is None else str(data["mcpUrl"]),
-        )
-
-
-CloudApiCliUserGetResponse = CommonUser
 
 CloudApiCliModelsNfseResponseBairroPrestador = str
 
@@ -13167,66 +11953,1310 @@ class CloudApiCliModelsInvoiceResponse:
         )
 
 
-CloudApiCliBuildCreateResponseUrl = str
+CloudApiCliUserGetResponse = CommonUser
 
-CloudApiCliBuildCreateResponseBuildId = str
+CloudApiCliAgentsRunRequestBodyPrompt = str
+
+CloudApiCliAgentsRunRequestBodyResponseFormat = typing.Dict[str, typing.Any]
+
+CloudApiCliAgentsRunRequestBodyMcpUrl = str
+
+CloudApiCliAgentsRunRequestBodyCallbackUrl = str
 
 
 @dataclass
-class CloudApiCliBuildCreateResponse:
-    url: CloudApiCliBuildCreateResponseUrl
-    build_id: CloudApiCliBuildCreateResponseBuildId
+class CloudApiCliAgentsRunRequestBody:
+    prompt: CloudApiCliAgentsRunRequestBodyPrompt
+    callback_url: CloudApiCliAgentsRunRequestBodyCallbackUrl
+    response_format: typing.Optional[CloudApiCliAgentsRunRequestBodyResponseFormat] = (
+        field(default_factory=lambda: None)
+    )
+    mcp_url: typing.Optional[CloudApiCliAgentsRunRequestBodyMcpUrl] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["prompt"] = self.prompt
+        data["callbackUrl"] = self.callback_url
+        if self.response_format is not None:
+            data["responseFormat"] = self.response_format
+        if self.mcp_url is not None:
+            data["mcpUrl"] = self.mcp_url
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAgentsRunRequestBody":
+        return cls(
+            prompt=str(data["prompt"]),
+            callback_url=str(data["callbackUrl"]),
+            response_format=None
+            if data.get("responseFormat") is None
+            else dict(**data["responseFormat"]),
+            mcp_url=None if data.get("mcpUrl") is None else str(data["mcpUrl"]),
+        )
+
+
+CloudApiCliRoleUpdateRequestDescription = CommonRoleDescription
+
+
+@dataclass
+class CloudApiCliRoleUpdateRequest:
+    description: CloudApiCliRoleUpdateRequestDescription
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["description"] = self.description
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliRoleUpdateRequest":
+        return cls(
+            description=str(data["description"]),
+        )
+
+
+CloudApiCliRoleUpdateResponse = CommonRole
+
+CloudApiCliRoleListQueryOffset = int
+
+CloudApiCliRoleListQueryLimit = int
+
+
+@dataclass
+class CloudApiCliRoleListQuery:
+    offset: typing.Optional[CloudApiCliRoleListQueryOffset] = field(
+        default_factory=lambda: 0
+    )
+    limit: typing.Optional[CloudApiCliRoleListQueryLimit] = field(
+        default_factory=lambda: 10
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.offset is not None:
+            data["offset"] = self.offset
+        if self.limit is not None:
+            data["limit"] = self.limit
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliRoleListQuery":
+        return cls(
+            offset=None if data.get("offset") is None else int(data["offset"]),
+            limit=data.get("limit", 10),
+        )
+
+
+CloudApiCliRoleListResponseItem = CommonRole
+
+CloudApiCliRoleListResponse = typing.List[CloudApiCliRoleListResponseItem]
+
+CloudApiCliRoleCreateRequestName = CommonRoleName
+
+CloudApiCliRoleCreateRequestDescription = CommonRoleDescription
+
+
+@dataclass
+class CloudApiCliRoleCreateRequest:
+    name: CloudApiCliRoleCreateRequestName
+    description: typing.Optional[CloudApiCliRoleCreateRequestDescription] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["name"] = self.name
+        if self.description is not None:
+            data["description"] = self.description
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliRoleCreateRequest":
+        return cls(
+            name=str(data["name"]),
+            description=None
+            if data.get("description") is None
+            else str(data["description"]),
+        )
+
+
+CloudApiCliRoleCreateResponse = CommonRole
+
+CloudApiConsoleWorkflowUpdateTaskRequestStatus = typing.Union[
+    typing.Literal["pending"], typing.Literal["locked"], typing.Literal["completed"]
+]
+
+CloudApiConsoleWorkflowUpdateTaskRequestStatusValues: typing.List[
+    CloudApiConsoleWorkflowUpdateTaskRequestStatus
+] = ["pending", "locked", "completed"]
+
+CloudApiConsoleWorkflowUpdateTaskRequestCompletedAt = datetime.datetime
+
+CloudApiConsoleWorkflowUpdateTaskRequestCompletedByExecutionId = str
+
+CloudApiConsoleWorkflowUpdateTaskRequestCompletedByStageId = str
+
+
+@dataclass
+class CloudApiConsoleWorkflowUpdateTaskRequestCompleted:
+    at: CloudApiConsoleWorkflowUpdateTaskRequestCompletedAt
+    by_execution_id: typing.Optional[
+        CloudApiConsoleWorkflowUpdateTaskRequestCompletedByExecutionId
+    ] = field(default_factory=lambda: None)
+    by_stage_id: typing.Optional[
+        CloudApiConsoleWorkflowUpdateTaskRequestCompletedByStageId
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["at"] = self.at.isoformat()
+        if self.by_execution_id is not None:
+            data["byExecutionId"] = self.by_execution_id
+        if self.by_stage_id is not None:
+            data["byStageId"] = self.by_stage_id
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiConsoleWorkflowUpdateTaskRequestCompleted":
+        return cls(
+            at=datetime.datetime.fromisoformat(data["at"]),
+            by_execution_id=None
+            if data.get("byExecutionId") is None
+            else str(data["byExecutionId"]),
+            by_stage_id=None
+            if data.get("byStageId") is None
+            else str(data["byStageId"]),
+        )
+
+
+CloudApiConsoleWorkflowUpdateTaskRequestLockedAt = datetime.datetime
+
+CloudApiConsoleWorkflowUpdateTaskRequestLockedByExecutionId = str
+
+CloudApiConsoleWorkflowUpdateTaskRequestLockedByStageId = str
+
+
+@dataclass
+class CloudApiConsoleWorkflowUpdateTaskRequestLocked:
+    at: CloudApiConsoleWorkflowUpdateTaskRequestLockedAt
+    by_execution_id: typing.Optional[
+        CloudApiConsoleWorkflowUpdateTaskRequestLockedByExecutionId
+    ] = field(default_factory=lambda: None)
+    by_stage_id: typing.Optional[
+        CloudApiConsoleWorkflowUpdateTaskRequestLockedByStageId
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["at"] = self.at.isoformat()
+        if self.by_execution_id is not None:
+            data["byExecutionId"] = self.by_execution_id
+        if self.by_stage_id is not None:
+            data["byStageId"] = self.by_stage_id
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiConsoleWorkflowUpdateTaskRequestLocked":
+        return cls(
+            at=datetime.datetime.fromisoformat(data["at"]),
+            by_execution_id=None
+            if data.get("byExecutionId") is None
+            else str(data["byExecutionId"]),
+            by_stage_id=None
+            if data.get("byStageId") is None
+            else str(data["byStageId"]),
+        )
+
+
+@dataclass
+class CloudApiConsoleWorkflowUpdateTaskRequest:
+    status: typing.Optional[CloudApiConsoleWorkflowUpdateTaskRequestStatus] = field(
+        default_factory=lambda: None
+    )
+    completed: typing.Optional[CloudApiConsoleWorkflowUpdateTaskRequestCompleted] = (
+        field(default_factory=lambda: None)
+    )
+    locked: typing.Optional[CloudApiConsoleWorkflowUpdateTaskRequestLocked] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.status is not None:
+            data["status"] = self.status
+        if self.completed is not None:
+            data["completed"] = self.completed.to_dict()
+        if self.locked is not None:
+            data["locked"] = self.locked.to_dict()
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiConsoleWorkflowUpdateTaskRequest":
+        return cls(
+            status=None if data.get("status") is None else data["status"],
+            completed=None
+            if data.get("completed") is None
+            else CloudApiConsoleWorkflowUpdateTaskRequestCompleted.from_dict(
+                data["completed"]
+            ),
+            locked=None
+            if data.get("locked") is None
+            else CloudApiConsoleWorkflowUpdateTaskRequestLocked.from_dict(
+                data["locked"]
+            ),
+        )
+
+
+CloudApiCliTasksUpdateTaskRequest = CloudApiConsoleWorkflowUpdateTaskRequest
+
+CloudApiCliAiV2AbortRequestConversationId = str
+
+
+@dataclass
+class CloudApiCliAiV2AbortRequest:
+    conversation_id: CloudApiCliAiV2AbortRequestConversationId
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["conversationId"] = self.conversation_id
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2AbortRequest":
+        return cls(
+            conversation_id=str(data["conversationId"]),
+        )
+
+
+CloudApiCliAiV2StreamRequestConversationId = str
+
+CloudApiCliAiV2StreamRequestTunnelSessionPath = str
+
+CloudApiCliAiV2StreamRequestSecretKey = str
+
+CloudApiCliAiV2StreamRequestHumanApproval = str
+
+CloudApiCliAiV2StreamRequestToolCallsApprovalApprovedItem = str
+
+CloudApiCliAiV2StreamRequestToolCallsApprovalApproved = typing.List[
+    CloudApiCliAiV2StreamRequestToolCallsApprovalApprovedItem
+]
+
+CloudApiCliAiV2StreamRequestToolCallsApprovalRejectedItem = str
+
+CloudApiCliAiV2StreamRequestToolCallsApprovalRejected = typing.List[
+    CloudApiCliAiV2StreamRequestToolCallsApprovalRejectedItem
+]
+
+
+@dataclass
+class CloudApiCliAiV2StreamRequestToolCallsApproval:
+    approved: CloudApiCliAiV2StreamRequestToolCallsApprovalApproved
+    rejected: CloudApiCliAiV2StreamRequestToolCallsApprovalRejected
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["approved"] = self.approved
+        data["rejected"] = self.rejected
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2StreamRequestToolCallsApproval":
+        return cls(
+            approved=[str(item) for item in data["approved"]],
+            rejected=[str(item) for item in data["rejected"]],
+        )
+
+
+CloudApiCliAiV2StreamRequestEmail = str
+
+CloudApiCliAiV2StreamRequestStatus = typing.Union[
+    typing.Literal["pending"], typing.Literal["active"], typing.Literal["invited"]
+]
+
+CloudApiCliAiV2StreamRequestStatusValues: typing.List[
+    CloudApiCliAiV2StreamRequestStatus
+] = ["pending", "active", "invited"]
+
+CloudApiCliAiV2StreamRequestContentItemAssistantTextInputType = typing.Literal["text"]
+
+CloudApiCliAiV2StreamRequestContentItemAssistantTextInputTypeValues: typing.List[
+    CloudApiCliAiV2StreamRequestContentItemAssistantTextInputType
+] = ["text"]
+
+CloudApiCliAiV2StreamRequestContentItemAssistantTextInputText = str
+
+
+@dataclass
+class CloudApiCliAiV2StreamRequestContentItemAssistantTextInput:
+    type: CloudApiCliAiV2StreamRequestContentItemAssistantTextInputType
+    text: CloudApiCliAiV2StreamRequestContentItemAssistantTextInputText
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["text"] = self.text
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2StreamRequestContentItemAssistantTextInput":
+        return cls(
+            type=data["type"],
+            text=str(data["text"]),
+        )
+
+
+CloudApiCliAiV2StreamRequestContentItemAssistantFileInputType = typing.Literal["file"]
+
+CloudApiCliAiV2StreamRequestContentItemAssistantFileInputTypeValues: typing.List[
+    CloudApiCliAiV2StreamRequestContentItemAssistantFileInputType
+] = ["file"]
+
+CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileName = str
+
+CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileContent = str
+
+
+@dataclass
+class CloudApiCliAiV2StreamRequestContentItemAssistantFileInput:
+    type: CloudApiCliAiV2StreamRequestContentItemAssistantFileInputType
+    file_name: CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileName
+    file_content: CloudApiCliAiV2StreamRequestContentItemAssistantFileInputFileContent
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["fileName"] = self.file_name
+        data["fileContent"] = self.file_content
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2StreamRequestContentItemAssistantFileInput":
+        return cls(
+            type=data["type"],
+            file_name=str(data["fileName"]),
+            file_content=str(data["fileContent"]),
+        )
+
+
+CloudApiCliAiV2StreamRequestContentItem = typing.Union[
+    CloudApiCliAiV2StreamRequestContentItemAssistantTextInput,
+    CloudApiCliAiV2StreamRequestContentItemAssistantFileInput,
+]
+
+
+def cloud_api_cli_ai_v2_stream_request_content_item_from_dict(
+    data: typing.Any,
+) -> "CloudApiCliAiV2StreamRequestContentItem":
+    if isinstance(data, dict) and (data.get("type", None) == "text"):
+        return CloudApiCliAiV2StreamRequestContentItemAssistantTextInput.from_dict(data)
+    if isinstance(data, dict) and (data.get("type", None) == "file"):
+        return CloudApiCliAiV2StreamRequestContentItemAssistantFileInput.from_dict(data)
+    raise ValueError(
+        f"Could not parse CloudApiCliAiV2StreamRequestContentItem from dict: {data}"
+    )
+
+
+CloudApiCliAiV2StreamRequestContent = typing.List[
+    CloudApiCliAiV2StreamRequestContentItem
+]
+
+CloudApiCliAiV2StreamRequestContext = typing.Dict[str, typing.Any]
+
+CloudApiConsoleBrowserToolsDefinitionName = str
+
+CloudApiConsoleBrowserToolsDefinitionDescription = str
+
+CloudApiConsoleBrowserToolsDefinitionPayloadSchema = typing.Dict[str, typing.Any]
+
+
+@dataclass
+class CloudApiConsoleBrowserToolsDefinition:
+    name: CloudApiConsoleBrowserToolsDefinitionName
+    description: CloudApiConsoleBrowserToolsDefinitionDescription
+    payload_schema: CloudApiConsoleBrowserToolsDefinitionPayloadSchema
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["name"] = self.name
+        data["description"] = self.description
+        data["payloadSchema"] = self.payload_schema
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiConsoleBrowserToolsDefinition":
+        return cls(
+            name=str(data["name"]),
+            description=str(data["description"]),
+            payload_schema=dict(**data["payloadSchema"]),
+        )
+
+
+CloudApiCliAiV2StreamRequestBrowserToolsItem = CloudApiConsoleBrowserToolsDefinition
+
+CloudApiCliAiV2StreamRequestBrowserTools = typing.List[
+    CloudApiCliAiV2StreamRequestBrowserToolsItem
+]
+
+CloudApiConsoleBrowserToolsResponseToolCallId = str
+
+CloudApiConsoleBrowserToolsResponseResponse = typing.Any
+
+
+@dataclass
+class CloudApiConsoleBrowserToolsResponse:
+    tool_call_id: CloudApiConsoleBrowserToolsResponseToolCallId
+    response: CloudApiConsoleBrowserToolsResponseResponse
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["toolCallId"] = self.tool_call_id
+        data["response"] = self.response
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiConsoleBrowserToolsResponse":
+        return cls(
+            tool_call_id=str(data["toolCallId"]),
+            response=data["response"],
+        )
+
+
+CloudApiCliAiV2StreamRequestBrowserToolResponsesItem = (
+    CloudApiConsoleBrowserToolsResponse
+)
+
+CloudApiCliAiV2StreamRequestBrowserToolResponses = typing.List[
+    CloudApiCliAiV2StreamRequestBrowserToolResponsesItem
+]
+
+
+@dataclass
+class CloudApiCliAiV2StreamRequest:
+    conversation_id: CloudApiCliAiV2StreamRequestConversationId
+    content: CloudApiCliAiV2StreamRequestContent
+    tunnel_session_path: typing.Optional[
+        CloudApiCliAiV2StreamRequestTunnelSessionPath
+    ] = field(default_factory=lambda: None)
+    secret_key: typing.Optional[CloudApiCliAiV2StreamRequestSecretKey] = field(
+        default_factory=lambda: None
+    )
+    human_approval: typing.Optional[CloudApiCliAiV2StreamRequestHumanApproval] = field(
+        default_factory=lambda: None
+    )
+    tool_calls_approval: typing.Optional[
+        CloudApiCliAiV2StreamRequestToolCallsApproval
+    ] = field(default_factory=lambda: None)
+    email: typing.Optional[CloudApiCliAiV2StreamRequestEmail] = field(
+        default_factory=lambda: None
+    )
+    status: typing.Optional[CloudApiCliAiV2StreamRequestStatus] = field(
+        default_factory=lambda: None
+    )
+    context: typing.Optional[CloudApiCliAiV2StreamRequestContext] = field(
+        default_factory=lambda: None
+    )
+    browser_tools: typing.Optional[CloudApiCliAiV2StreamRequestBrowserTools] = field(
+        default_factory=lambda: None
+    )
+    browser_tool_responses: typing.Optional[
+        CloudApiCliAiV2StreamRequestBrowserToolResponses
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["conversationId"] = self.conversation_id
+        data["content"] = [item.to_dict() for item in self.content]
+        if self.tunnel_session_path is not None:
+            data["tunnelSessionPath"] = self.tunnel_session_path
+        if self.secret_key is not None:
+            data["secretKey"] = self.secret_key
+        if self.human_approval is not None:
+            data["humanApproval"] = self.human_approval
+        if self.tool_calls_approval is not None:
+            data["toolCallsApproval"] = self.tool_calls_approval.to_dict()
+        if self.email is not None:
+            data["email"] = self.email
+        if self.status is not None:
+            data["status"] = self.status
+        if self.context is not None:
+            data["context"] = self.context
+        if self.browser_tools is not None:
+            data["browserTools"] = [item.to_dict() for item in self.browser_tools]
+        if self.browser_tool_responses is not None:
+            data["browserToolResponses"] = [
+                item.to_dict() for item in self.browser_tool_responses
+            ]
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2StreamRequest":
+        return cls(
+            conversation_id=str(data["conversationId"]),
+            content=[
+                (
+                    CloudApiCliAiV2StreamRequestContentItemAssistantTextInput.from_dict(
+                        item
+                    )
+                    if isinstance(item, dict) and (item.get("type", None) == "text")
+                    else CloudApiCliAiV2StreamRequestContentItemAssistantFileInput.from_dict(
+                        item
+                    )
+                )
+                for item in data["content"]
+            ],
+            tunnel_session_path=None
+            if data.get("tunnelSessionPath") is None
+            else str(data["tunnelSessionPath"]),
+            secret_key=None
+            if data.get("secretKey") is None
+            else str(data["secretKey"]),
+            human_approval=None
+            if data.get("humanApproval") is None
+            else str(data["humanApproval"]),
+            tool_calls_approval=None
+            if data.get("toolCallsApproval") is None
+            else CloudApiCliAiV2StreamRequestToolCallsApproval.from_dict(
+                data["toolCallsApproval"]
+            ),
+            email=None if data.get("email") is None else str(data["email"]),
+            status=None if data.get("status") is None else data["status"],
+            context=None if data.get("context") is None else dict(**data["context"]),
+            browser_tools=None
+            if data.get("browserTools") is None
+            else [
+                CloudApiConsoleBrowserToolsDefinition.from_dict(item)
+                for item in data["browserTools"]
+            ],
+            browser_tool_responses=None
+            if data.get("browserToolResponses") is None
+            else [
+                CloudApiConsoleBrowserToolsResponse.from_dict(item)
+                for item in data["browserToolResponses"]
+            ],
+        )
+
+
+CloudApiCliAiV2ConversationGetResponseId = str
+
+CloudApiCliAiV2ConversationGetResponseCreatedAt = datetime.datetime
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemRole = typing.Union[
+    typing.Literal["user"], typing.Literal["assistant"]
+]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemRoleValues: typing.List[
+    CloudApiCliAiV2ConversationGetResponseMessagesItemRole
+] = ["user", "assistant"]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent0 = str
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Type = typing.Literal[
+    "text"
+]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0TypeValues: typing.List[
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Type
+] = ["text"]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Text = str
+
+
+@dataclass
+class CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0:
+    type: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Type
+    text: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0Text
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["text"] = self.text
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0":
+        return cls(
+            type=data["type"],
+            text=str(data["text"]),
+        )
+
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1Type = typing.Literal[
+    "image_url"
+]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1TypeValues: typing.List[
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1Type
+] = ["image_url"]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrlUrl = str
+
+
+@dataclass
+class CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl:
+    url: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrlUrl
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
         data["url"] = self.url
-        data["buildId"] = self.build_id
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliBuildCreateResponse":
+    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl":
         return cls(
             url=str(data["url"]),
-            build_id=str(data["buildId"]),
         )
-
-
-CloudApiCliApiKeyInfoResponseAuthorId = str
-
-CloudApiCliApiKeyInfoResponseProjectId = str
-
-CloudApiCliApiKeyInfoResponseEmail = str
-
-CloudApiCliApiKeyInfoResponseIntercomHash = str
 
 
 @dataclass
-class CloudApiCliApiKeyInfoResponse:
-    author_id: CloudApiCliApiKeyInfoResponseAuthorId
-    project_id: CloudApiCliApiKeyInfoResponseProjectId
-    email: CloudApiCliApiKeyInfoResponseEmail
-    intercom_hash: CloudApiCliApiKeyInfoResponseIntercomHash
+class CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1:
+    type: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1Type
+    image_url: CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["authorId"] = self.author_id
-        data["projectId"] = self.project_id
-        data["email"] = self.email
-        data["intercomHash"] = self.intercom_hash
+        data["type"] = self.type
+        data["image_url"] = self.image_url.to_dict()
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "CloudApiCliApiKeyInfoResponse":
+    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1":
         return cls(
-            author_id=str(data["authorId"]),
-            project_id=str(data["projectId"]),
-            email=str(data["email"]),
-            intercom_hash=str(data["intercomHash"]),
+            type=data["type"],
+            image_url=CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1ImageUrl.from_dict(
+                data["image_url"]
+            ),
         )
+
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item = typing.Union[
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0,
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1,
+]
+
+
+def cloud_api_cli_ai_v2_conversation_get_response_messages_item_content1_item_from_dict(
+    data: typing.Any,
+) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item":
+    if isinstance(data, dict) and (data.get("type", None) == "text"):
+        return (
+            CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0.from_dict(
+                data
+            )
+        )
+    if isinstance(data, dict) and (data.get("type", None) == "image_url"):
+        return (
+            CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1.from_dict(
+                data
+            )
+        )
+    raise ValueError(
+        f"Could not parse CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item from dict: {data}"
+    )
+
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent1 = typing.List[
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item
+]
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemContent = typing.Union[
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent0,
+    CloudApiCliAiV2ConversationGetResponseMessagesItemContent1,
+]
+
+
+def cloud_api_cli_ai_v2_conversation_get_response_messages_item_content_from_dict(
+    data: typing.Any,
+) -> "CloudApiCliAiV2ConversationGetResponseMessagesItemContent":
+    if isinstance(data, str):
+        return str(data)
+    if isinstance(data, list) and all(
+        isinstance(item, dict)
+        and (item.get("type", None) == "text")
+        or isinstance(item, dict)
+        and (item.get("type", None) == "image_url")
+        for item in data
+    ):
+        return [
+            (
+                CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0.from_dict(
+                    item
+                )
+                if isinstance(item, dict) and (item.get("type", None) == "text")
+                else CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1.from_dict(
+                    item
+                )
+            )
+            for item in data
+        ]
+    raise ValueError(
+        f"Could not parse CloudApiCliAiV2ConversationGetResponseMessagesItemContent from dict: {data}"
+    )
+
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemCreatedAt = datetime.datetime
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemToolTitle = str
+
+CloudApiCliAiV2ConversationGetResponseMessagesItemToolCallId = str
+
+
+@dataclass
+class CloudApiCliAiV2ConversationGetResponseMessagesItem:
+    role: CloudApiCliAiV2ConversationGetResponseMessagesItemRole
+    content: CloudApiCliAiV2ConversationGetResponseMessagesItemContent
+    created_at: CloudApiCliAiV2ConversationGetResponseMessagesItemCreatedAt
+    tool_title: typing.Optional[
+        CloudApiCliAiV2ConversationGetResponseMessagesItemToolTitle
+    ] = field(default_factory=lambda: None)
+    tool_call_id: typing.Optional[
+        CloudApiCliAiV2ConversationGetResponseMessagesItemToolCallId
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["role"] = self.role
+        data["content"] = (
+            self.content
+            if isinstance(self.content, str)
+            else [item.to_dict() for item in self.content]
+        )
+        data["createdAt"] = self.created_at.isoformat()
+        if self.tool_title is not None:
+            data["toolTitle"] = self.tool_title
+        if self.tool_call_id is not None:
+            data["toolCallId"] = self.tool_call_id
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2ConversationGetResponseMessagesItem":
+        return cls(
+            role=data["role"],
+            content=(
+                str(data["content"])
+                if isinstance(data["content"], str)
+                else [
+                    (
+                        CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item0.from_dict(
+                            item
+                        )
+                        if isinstance(item, dict) and (item.get("type", None) == "text")
+                        else CloudApiCliAiV2ConversationGetResponseMessagesItemContent1Item1.from_dict(
+                            item
+                        )
+                    )
+                    for item in data["content"]
+                ]
+            ),
+            created_at=datetime.datetime.fromisoformat(data["createdAt"]),
+            tool_title=None
+            if data.get("toolTitle") is None
+            else str(data["toolTitle"]),
+            tool_call_id=None
+            if data.get("toolCallId") is None
+            else str(data["toolCallId"]),
+        )
+
+
+CloudApiCliAiV2ConversationGetResponseMessages = typing.List[
+    CloudApiCliAiV2ConversationGetResponseMessagesItem
+]
+
+
+@dataclass
+class CloudApiCliAiV2ConversationGetResponse:
+    id: CloudApiCliAiV2ConversationGetResponseId
+    created_at: CloudApiCliAiV2ConversationGetResponseCreatedAt
+    messages: CloudApiCliAiV2ConversationGetResponseMessages
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["id"] = self.id
+        data["createdAt"] = self.created_at.isoformat()
+        data["messages"] = [item.to_dict() for item in self.messages]
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2ConversationGetResponse":
+        return cls(
+            id=str(data["id"]),
+            created_at=datetime.datetime.fromisoformat(data["createdAt"]),
+            messages=[
+                CloudApiCliAiV2ConversationGetResponseMessagesItem.from_dict(item)
+                for item in data["messages"]
+            ],
+        )
+
+
+CloudApiCliAiV2ConversationsResponseItem = CloudApiCliAiV2ConversationGetResponse
+
+CloudApiCliAiV2ConversationsResponse = typing.List[
+    CloudApiCliAiV2ConversationsResponseItem
+]
+
+CloudApiCliAiV2ConversationPostRequestTunnelSessionPath = str
+
+CloudApiCliAiV2ConversationPostRequestSecretKey = str
+
+
+@dataclass
+class CloudApiCliAiV2ConversationPostRequest:
+    tunnel_session_path: CloudApiCliAiV2ConversationPostRequestTunnelSessionPath
+    secret_key: CloudApiCliAiV2ConversationPostRequestSecretKey
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["tunnelSessionPath"] = self.tunnel_session_path
+        data["secretKey"] = self.secret_key
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2ConversationPostRequest":
+        return cls(
+            tunnel_session_path=str(data["tunnelSessionPath"]),
+            secret_key=str(data["secretKey"]),
+        )
+
+
+CloudApiCliAiV2ConversationPostResponseConversationId = str
+
+
+@dataclass
+class CloudApiCliAiV2ConversationPostResponse:
+    conversation_id: CloudApiCliAiV2ConversationPostResponseConversationId
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["conversationId"] = self.conversation_id
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2ConversationPostResponse":
+        return cls(
+            conversation_id=str(data["conversationId"]),
+        )
+
+
+CloudApiCliAiV2PromptPostRequestMessagesItemRole = typing.Union[
+    typing.Literal["system"], typing.Literal["user"], typing.Literal["assistant"]
+]
+
+CloudApiCliAiV2PromptPostRequestMessagesItemRoleValues: typing.List[
+    CloudApiCliAiV2PromptPostRequestMessagesItemRole
+] = ["system", "user", "assistant"]
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextType = typing.Literal["text"]
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextTypeValues: typing.List[
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextType
+] = ["text"]
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextText = str
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText:
+    type: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextType
+    text: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemTextText
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["text"] = self.text
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText":
+        return cls(
+            type=data["type"],
+            text=str(data["text"]),
+        )
+
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageType = typing.Literal[
+    "image_url"
+]
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageTypeValues: typing.List[
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageType
+] = ["image_url"]
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrlUrl = str
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl:
+    url: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrlUrl
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["url"] = self.url
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl":
+        return cls(
+            url=str(data["url"]),
+        )
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage:
+    type: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageType
+    image_url: CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["image_url"] = self.image_url.to_dict()
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage":
+        return cls(
+            type=data["type"],
+            image_url=CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImageImageUrl.from_dict(
+                data["image_url"]
+            ),
+        )
+
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContentItem = typing.Union[
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText,
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage,
+]
+
+
+def cloud_api_cli_ai_v2_prompt_post_request_messages_item_content_item_from_dict(
+    data: typing.Any,
+) -> "CloudApiCliAiV2PromptPostRequestMessagesItemContentItem":
+    if isinstance(data, dict) and (data.get("type", None) == "text"):
+        return CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText.from_dict(
+            data
+        )
+    if isinstance(data, dict) and (data.get("type", None) == "image_url"):
+        return CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage.from_dict(
+            data
+        )
+    raise ValueError(
+        f"Could not parse CloudApiCliAiV2PromptPostRequestMessagesItemContentItem from dict: {data}"
+    )
+
+
+CloudApiCliAiV2PromptPostRequestMessagesItemContent = typing.List[
+    CloudApiCliAiV2PromptPostRequestMessagesItemContentItem
+]
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequestMessagesItem:
+    role: CloudApiCliAiV2PromptPostRequestMessagesItemRole
+    content: CloudApiCliAiV2PromptPostRequestMessagesItemContent
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["role"] = self.role
+        data["content"] = [item.to_dict() for item in self.content]
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequestMessagesItem":
+        return cls(
+            role=data["role"],
+            content=[
+                (
+                    CloudApiCliAiV2PromptPostRequestMessagesItemContentItemText.from_dict(
+                        item
+                    )
+                    if isinstance(item, dict) and (item.get("type", None) == "text")
+                    else CloudApiCliAiV2PromptPostRequestMessagesItemContentItemImage.from_dict(
+                        item
+                    )
+                )
+                for item in data["content"]
+            ],
+        )
+
+
+CloudApiCliAiV2PromptPostRequestMessages = typing.List[
+    CloudApiCliAiV2PromptPostRequestMessagesItem
+]
+
+CloudApiCliAiV2PromptPostRequestToolsItemType = typing.Literal["function"]
+
+CloudApiCliAiV2PromptPostRequestToolsItemTypeValues: typing.List[
+    CloudApiCliAiV2PromptPostRequestToolsItemType
+] = ["function"]
+
+CloudApiCliAiV2PromptPostRequestToolsItemFunctionName = str
+
+CloudApiCliAiV2PromptPostRequestToolsItemFunctionParameters = typing.Dict[
+    str, typing.Any
+]
+
+CloudApiCliAiV2PromptPostRequestToolsItemFunctionDescription = str
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequestToolsItemFunction:
+    name: CloudApiCliAiV2PromptPostRequestToolsItemFunctionName
+    parameters: CloudApiCliAiV2PromptPostRequestToolsItemFunctionParameters
+    description: typing.Optional[
+        CloudApiCliAiV2PromptPostRequestToolsItemFunctionDescription
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["name"] = self.name
+        data["parameters"] = self.parameters
+        if self.description is not None:
+            data["description"] = self.description
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequestToolsItemFunction":
+        return cls(
+            name=str(data["name"]),
+            parameters=dict(**data["parameters"]),
+            description=None
+            if data.get("description") is None
+            else str(data["description"]),
+        )
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequestToolsItem:
+    type: CloudApiCliAiV2PromptPostRequestToolsItemType
+    function: CloudApiCliAiV2PromptPostRequestToolsItemFunction
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["function"] = self.function.to_dict()
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequestToolsItem":
+        return cls(
+            type=data["type"],
+            function=CloudApiCliAiV2PromptPostRequestToolsItemFunction.from_dict(
+                data["function"]
+            ),
+        )
+
+
+CloudApiCliAiV2PromptPostRequestTools = typing.List[
+    CloudApiCliAiV2PromptPostRequestToolsItem
+]
+
+CloudApiCliAiV2PromptPostRequestTemperature = float
+
+
+@dataclass
+class CloudApiCliAiV2PromptPostRequest:
+    messages: CloudApiCliAiV2PromptPostRequestMessages
+    tools: CloudApiCliAiV2PromptPostRequestTools
+    temperature: typing.Optional[CloudApiCliAiV2PromptPostRequestTemperature] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["messages"] = [item.to_dict() for item in self.messages]
+        data["tools"] = [item.to_dict() for item in self.tools]
+        if self.temperature is not None:
+            data["temperature"] = self.temperature
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliAiV2PromptPostRequest":
+        return cls(
+            messages=[
+                CloudApiCliAiV2PromptPostRequestMessagesItem.from_dict(item)
+                for item in data["messages"]
+            ],
+            tools=[
+                CloudApiCliAiV2PromptPostRequestToolsItem.from_dict(item)
+                for item in data["tools"]
+            ],
+            temperature=None
+            if data.get("temperature") is None
+            else float(data["temperature"]),
+        )
+
+
+CloudApiCliTablesDumpResponse = CommonTablesSnapshot
+
+CloudApiCliTablesRestoreRequest = CommonTablesSnapshot
+
+CloudApiCliConnectorsExecuteRequestConnectionName = str
+
+CloudApiCliConnectorsExecuteRequestActionName = str
+
+CloudApiCliConnectorsExecuteRequestParameters = typing.Dict[str, typing.Any]
+
+
+@dataclass
+class CloudApiCliConnectorsExecuteRequest:
+    connection_name: CloudApiCliConnectorsExecuteRequestConnectionName
+    action_name: CloudApiCliConnectorsExecuteRequestActionName
+    parameters: typing.Optional[CloudApiCliConnectorsExecuteRequestParameters] = field(
+        default_factory=lambda: {}
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["connectionName"] = self.connection_name
+        data["actionName"] = self.action_name
+        if self.parameters is not None:
+            data["parameters"] = self.parameters
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliConnectorsExecuteRequest":
+        return cls(
+            connection_name=str(data["connectionName"]),
+            action_name=str(data["actionName"]),
+            parameters=None
+            if data.get("parameters") is None
+            else dict(**data["parameters"]),
+        )
+
+
+CloudApiCliConnectorsExecuteResponse0Status = typing.Literal["success"]
+
+CloudApiCliConnectorsExecuteResponse0StatusValues: typing.List[
+    CloudApiCliConnectorsExecuteResponse0Status
+] = ["success"]
+
+CloudApiCliConnectorsExecuteResponse0Data = typing.Dict[str, typing.Any]
+
+
+@dataclass
+class CloudApiCliConnectorsExecuteResponse0:
+    status: CloudApiCliConnectorsExecuteResponse0Status
+    data: CloudApiCliConnectorsExecuteResponse0Data
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["status"] = self.status
+        data["data"] = self.data
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliConnectorsExecuteResponse0":
+        return cls(
+            status=data["status"],
+            data=dict(**data["data"]),
+        )
+
+
+CloudApiCliConnectorsExecuteResponse1Status = typing.Literal["error"]
+
+CloudApiCliConnectorsExecuteResponse1StatusValues: typing.List[
+    CloudApiCliConnectorsExecuteResponse1Status
+] = ["error"]
+
+CloudApiCliConnectorsExecuteResponse1Message = str
+
+
+@dataclass
+class CloudApiCliConnectorsExecuteResponse1:
+    status: CloudApiCliConnectorsExecuteResponse1Status
+    message: CloudApiCliConnectorsExecuteResponse1Message
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["status"] = self.status
+        data["message"] = self.message
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "CloudApiCliConnectorsExecuteResponse1":
+        return cls(
+            status=data["status"],
+            message=str(data["message"]),
+        )
+
+
+CloudApiCliConnectorsExecuteResponse = typing.Union[
+    CloudApiCliConnectorsExecuteResponse0, CloudApiCliConnectorsExecuteResponse1
+]
+
+
+def cloud_api_cli_connectors_execute_response_from_dict(
+    data: typing.Any,
+) -> "CloudApiCliConnectorsExecuteResponse":
+    if isinstance(data, dict) and (data.get("status", None) == "success"):
+        return CloudApiCliConnectorsExecuteResponse0.from_dict(data)
+    if isinstance(data, dict) and (data.get("status", None) == "error"):
+        return CloudApiCliConnectorsExecuteResponse1.from_dict(data)
+    raise ValueError(
+        f"Could not parse CloudApiCliConnectorsExecuteResponse from dict: {data}"
+    )
 
 
 AbstraLibApiStageCardContentKey = str
@@ -13567,107 +13597,54 @@ AbstraLibApiStagesItem = AbstraLibApiStage
 
 AbstraLibApiStages = typing.List[AbstraLibApiStagesItem]
 
-AbstraLibApiAiStreamRequestConversationId = CloudApiCliAiV2StreamRequestConversationId
-
-AbstraLibApiAiStreamRequestContent = CloudApiCliAiV2StreamRequestContent
-
-AbstraLibApiAiStreamRequestContext = typing.Dict[str, typing.Any]
-
-AbstraLibApiAiStreamRequestHumanApproval = str
-
-AbstraLibApiAiStreamRequestToolCallsApproval = (
-    CloudApiCliAiV2StreamRequestToolCallsApproval
-)
-
-AbstraLibApiAiStreamRequestBrowserToolsItem = CloudApiConsoleBrowserToolsDefinition
-
-AbstraLibApiAiStreamRequestBrowserTools = typing.List[
-    AbstraLibApiAiStreamRequestBrowserToolsItem
-]
-
-AbstraLibApiAiStreamRequestBrowserToolResponsesItem = (
-    CloudApiConsoleBrowserToolsResponse
-)
-
-AbstraLibApiAiStreamRequestBrowserToolResponses = typing.List[
-    AbstraLibApiAiStreamRequestBrowserToolResponsesItem
-]
+AbstraLibApiPlayerUserSignupEmail = CommonUserEmail
 
 
 @dataclass
-class AbstraLibApiAiStreamRequest:
-    conversation_id: AbstraLibApiAiStreamRequestConversationId
-    content: AbstraLibApiAiStreamRequestContent
-    context: AbstraLibApiAiStreamRequestContext
-    human_approval: typing.Optional[AbstraLibApiAiStreamRequestHumanApproval] = field(
-        default_factory=lambda: None
-    )
-    tool_calls_approval: typing.Optional[
-        AbstraLibApiAiStreamRequestToolCallsApproval
-    ] = field(default_factory=lambda: None)
-    browser_tools: typing.Optional[AbstraLibApiAiStreamRequestBrowserTools] = field(
-        default_factory=lambda: None
-    )
-    browser_tool_responses: typing.Optional[
-        AbstraLibApiAiStreamRequestBrowserToolResponses
-    ] = field(default_factory=lambda: None)
+class AbstraLibApiPlayerUserSignup:
+    email: AbstraLibApiPlayerUserSignupEmail
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["conversationId"] = self.conversation_id
-        data["content"] = [item.to_dict() for item in self.content]
-        data["context"] = self.context
-        if self.human_approval is not None:
-            data["humanApproval"] = self.human_approval
-        if self.tool_calls_approval is not None:
-            data["toolCallsApproval"] = self.tool_calls_approval.to_dict()
-        if self.browser_tools is not None:
-            data["browserTools"] = [item.to_dict() for item in self.browser_tools]
-        if self.browser_tool_responses is not None:
-            data["browserToolResponses"] = [
-                item.to_dict() for item in self.browser_tool_responses
-            ]
+        data["email"] = self.email
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiAiStreamRequest":
+    ) -> "AbstraLibApiPlayerUserSignup":
         return cls(
-            conversation_id=str(data["conversationId"]),
-            content=[
-                (
-                    CloudApiCliAiV2StreamRequestContentItemAssistantTextInput.from_dict(
-                        item
-                    )
-                    if isinstance(item, dict) and (item.get("type", None) == "text")
-                    else CloudApiCliAiV2StreamRequestContentItemAssistantFileInput.from_dict(
-                        item
-                    )
-                )
-                for item in data["content"]
-            ],
-            context=dict(**data["context"]),
-            human_approval=None
-            if data.get("humanApproval") is None
-            else str(data["humanApproval"]),
-            tool_calls_approval=None
-            if data.get("toolCallsApproval") is None
-            else CloudApiCliAiV2StreamRequestToolCallsApproval.from_dict(
-                data["toolCallsApproval"]
-            ),
-            browser_tools=None
-            if data.get("browserTools") is None
-            else [
-                CloudApiConsoleBrowserToolsDefinition.from_dict(item)
-                for item in data["browserTools"]
-            ],
-            browser_tool_responses=None
-            if data.get("browserToolResponses") is None
-            else [
-                CloudApiConsoleBrowserToolsResponse.from_dict(item)
-                for item in data["browserToolResponses"]
-            ],
+            email=str(data["email"]),
+        )
+
+
+AbstraLibApiPlayerUserNavigationGuardStatus = typing.Union[
+    typing.Literal["ALLOWED"],
+    typing.Literal["UNAUTHORIZED"],
+    typing.Literal["FORBIDEN"],
+    typing.Literal["NOT_FOUND"],
+]
+
+AbstraLibApiPlayerUserNavigationGuardStatusValues: typing.List[
+    AbstraLibApiPlayerUserNavigationGuardStatus
+] = ["ALLOWED", "UNAUTHORIZED", "FORBIDEN", "NOT_FOUND"]
+
+
+@dataclass
+class AbstraLibApiPlayerUserNavigationGuard:
+    status: AbstraLibApiPlayerUserNavigationGuardStatus
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["status"] = self.status
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiPlayerUserNavigationGuard":
+        return cls(
+            status=data["status"],
         )
 
 
@@ -13713,286 +13690,6 @@ class AbstraLibApiEditorCodebaseEventsMessage:
             content=None if data.get("content") is None else str(data["content"]),
         )
 
-
-AbstraLibApiEditorFilesSettingsResponseSeparator = str
-
-
-@dataclass
-class AbstraLibApiEditorFilesSettingsResponse:
-    separator: AbstraLibApiEditorFilesSettingsResponseSeparator
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["separator"] = self.separator
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesSettingsResponse":
-        return cls(
-            separator=str(data["separator"]),
-        )
-
-
-AbstraLibApiEditorFilesDeleteResponseOk = bool
-
-
-@dataclass
-class AbstraLibApiEditorFilesDeleteResponse:
-    ok: typing.Optional[AbstraLibApiEditorFilesDeleteResponseOk] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.ok is not None:
-            data["ok"] = self.ok
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesDeleteResponse":
-        return cls(
-            ok=None if data.get("ok") is None else bool(data["ok"]),
-        )
-
-
-AbstraLibApiEditorFilesListResponseItemFile = CommonFileNode
-
-AbstraLibApiEditorFilesListResponseItemStagesItemType = typing.Union[
-    typing.Literal["form"],
-    typing.Literal["hook"],
-    typing.Literal["job"],
-    typing.Literal["script"],
-]
-
-AbstraLibApiEditorFilesListResponseItemStagesItemTypeValues: typing.List[
-    AbstraLibApiEditorFilesListResponseItemStagesItemType
-] = ["form", "hook", "job", "script"]
-
-AbstraLibApiEditorFilesListResponseItemStagesItemId = str
-
-
-@dataclass
-class AbstraLibApiEditorFilesListResponseItemStagesItem:
-    type: AbstraLibApiEditorFilesListResponseItemStagesItemType
-    id: AbstraLibApiEditorFilesListResponseItemStagesItemId
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["type"] = self.type
-        data["id"] = self.id
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesListResponseItemStagesItem":
-        return cls(
-            type=data["type"],
-            id=str(data["id"]),
-        )
-
-
-AbstraLibApiEditorFilesListResponseItemStages = typing.List[
-    AbstraLibApiEditorFilesListResponseItemStagesItem
-]
-
-
-@dataclass
-class AbstraLibApiEditorFilesListResponseItem:
-    file: AbstraLibApiEditorFilesListResponseItemFile
-    stages: AbstraLibApiEditorFilesListResponseItemStages
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["file"] = self.file.to_dict()
-        data["stages"] = [item.to_dict() for item in self.stages]
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesListResponseItem":
-        return cls(
-            file=CommonFileNode.from_dict(data["file"]),
-            stages=[
-                AbstraLibApiEditorFilesListResponseItemStagesItem.from_dict(item)
-                for item in data["stages"]
-            ],
-        )
-
-
-AbstraLibApiEditorFilesListResponse = typing.List[
-    AbstraLibApiEditorFilesListResponseItem
-]
-
-AbstraLibApiEditorFilesMkdirResponseOk = bool
-
-
-@dataclass
-class AbstraLibApiEditorFilesMkdirResponse:
-    ok: typing.Optional[AbstraLibApiEditorFilesMkdirResponseOk] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.ok is not None:
-            data["ok"] = self.ok
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesMkdirResponse":
-        return cls(
-            ok=None if data.get("ok") is None else bool(data["ok"]),
-        )
-
-
-AbstraLibApiEditorFilesRenameRequestPathPartsItem = str
-
-AbstraLibApiEditorFilesRenameRequestPathParts = typing.List[
-    AbstraLibApiEditorFilesRenameRequestPathPartsItem
-]
-
-AbstraLibApiEditorFilesRenameRequestNewPathPartsItem = str
-
-AbstraLibApiEditorFilesRenameRequestNewPathParts = typing.List[
-    AbstraLibApiEditorFilesRenameRequestNewPathPartsItem
-]
-
-
-@dataclass
-class AbstraLibApiEditorFilesRenameRequest:
-    path_parts: AbstraLibApiEditorFilesRenameRequestPathParts
-    new_path_parts: AbstraLibApiEditorFilesRenameRequestNewPathParts
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["pathParts"] = self.path_parts
-        data["newPathParts"] = self.new_path_parts
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesRenameRequest":
-        return cls(
-            path_parts=[str(item) for item in data["pathParts"]],
-            new_path_parts=[str(item) for item in data["newPathParts"]],
-        )
-
-
-AbstraLibApiEditorFilesRenameResponseOk = bool
-
-
-@dataclass
-class AbstraLibApiEditorFilesRenameResponse:
-    ok: typing.Optional[AbstraLibApiEditorFilesRenameResponseOk] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.ok is not None:
-            data["ok"] = self.ok
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesRenameResponse":
-        return cls(
-            ok=None if data.get("ok") is None else bool(data["ok"]),
-        )
-
-
-AbstraLibApiEditorFilesSafeEditRequestItemSiteId = str
-
-AbstraLibApiEditorFilesSafeEditRequestItemPos = int
-
-AbstraLibApiEditorFilesSafeEditRequestItemType = typing.Union[
-    typing.Literal["delete"], typing.Literal["insert"]
-]
-
-AbstraLibApiEditorFilesSafeEditRequestItemTypeValues: typing.List[
-    AbstraLibApiEditorFilesSafeEditRequestItemType
-] = ["delete", "insert"]
-
-AbstraLibApiEditorFilesSafeEditRequestItemValue = str
-
-AbstraLibApiEditorFilesSafeEditRequestItemLength = int
-
-
-@dataclass
-class AbstraLibApiEditorFilesSafeEditRequestItem:
-    site_id: AbstraLibApiEditorFilesSafeEditRequestItemSiteId
-    pos: AbstraLibApiEditorFilesSafeEditRequestItemPos
-    type: AbstraLibApiEditorFilesSafeEditRequestItemType
-    value: typing.Optional[AbstraLibApiEditorFilesSafeEditRequestItemValue] = field(
-        default_factory=lambda: None
-    )
-    length: typing.Optional[AbstraLibApiEditorFilesSafeEditRequestItemLength] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["siteId"] = self.site_id
-        data["pos"] = self.pos
-        data["type"] = self.type
-        if self.value is not None:
-            data["value"] = self.value
-        if self.length is not None:
-            data["length"] = self.length
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesSafeEditRequestItem":
-        return cls(
-            site_id=str(data["siteId"]),
-            pos=int(data["pos"]),
-            type=data["type"],
-            value=None if data.get("value") is None else str(data["value"]),
-            length=None if data.get("length") is None else int(data["length"]),
-        )
-
-
-AbstraLibApiEditorFilesSafeEditRequest = typing.List[
-    AbstraLibApiEditorFilesSafeEditRequestItem
-]
-
-AbstraLibApiEditorFilesSafeEditResponseOk = bool
-
-
-@dataclass
-class AbstraLibApiEditorFilesSafeEditResponse:
-    ok: typing.Optional[AbstraLibApiEditorFilesSafeEditResponseOk] = field(
-        default_factory=lambda: None
-    )
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        if self.ok is not None:
-            data["ok"] = self.ok
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorFilesSafeEditResponse":
-        return cls(
-            ok=None if data.get("ok") is None else bool(data["ok"]),
-        )
-
-
-AbstraLibApiEditorFilesCreateResponse = CommonFileNode
 
 AbstraLibApiEditorLintersRuleName = str
 
@@ -14099,33 +13796,6 @@ class AbstraLibApiEditorLintersRule:
         )
 
 
-AbstraLibApiEditorLintersFixResponseSuccess = bool
-
-
-@dataclass
-class AbstraLibApiEditorLintersFixResponse:
-    success: AbstraLibApiEditorLintersFixResponseSuccess
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        data = {}
-        data["success"] = self.success
-        return data
-
-    @classmethod
-    def from_dict(
-        cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiEditorLintersFixResponse":
-        return cls(
-            success=bool(data["success"]),
-        )
-
-
-AbstraLibApiEditorLintersCheckResponseItem = AbstraLibApiEditorLintersRule
-
-AbstraLibApiEditorLintersCheckResponse = typing.List[
-    AbstraLibApiEditorLintersCheckResponseItem
-]
-
 AbstraLibApiEditorWebEditorResponseWaitingRoomUrl = str
 
 
@@ -14172,16 +13842,6 @@ class AbstraLibApiEditorEnvVarsModel:
             value=str(data["value"]),
         )
 
-
-AbstraLibApiEditorEnvVarsListResponseItem = AbstraLibApiEditorEnvVarsModel
-
-AbstraLibApiEditorEnvVarsListResponse = typing.List[
-    AbstraLibApiEditorEnvVarsListResponseItem
-]
-
-AbstraLibApiEditorEnvVarsCreateRequest = AbstraLibApiEditorEnvVarsModel
-
-AbstraLibApiEditorEnvVarsCreateResponse = AbstraLibApiEditorEnvVarsModel
 
 AbstraLibApiEditorGitLargeFilePath = str
 
@@ -14891,54 +14551,424 @@ class AbstraLibApiEditorGitAddToGitignoreResponse:
         )
 
 
-AbstraLibApiPlayerUserSignupEmail = CommonUserEmail
+AbstraLibApiEditorEnvVarsListResponseItem = AbstraLibApiEditorEnvVarsModel
+
+AbstraLibApiEditorEnvVarsListResponse = typing.List[
+    AbstraLibApiEditorEnvVarsListResponseItem
+]
+
+AbstraLibApiEditorEnvVarsCreateRequest = AbstraLibApiEditorEnvVarsModel
+
+AbstraLibApiEditorEnvVarsCreateResponse = AbstraLibApiEditorEnvVarsModel
+
+AbstraLibApiEditorLintersFixResponseSuccess = bool
 
 
 @dataclass
-class AbstraLibApiPlayerUserSignup:
-    email: AbstraLibApiPlayerUserSignupEmail
+class AbstraLibApiEditorLintersFixResponse:
+    success: AbstraLibApiEditorLintersFixResponseSuccess
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["email"] = self.email
+        data["success"] = self.success
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiPlayerUserSignup":
+    ) -> "AbstraLibApiEditorLintersFixResponse":
         return cls(
-            email=str(data["email"]),
+            success=bool(data["success"]),
         )
 
 
-AbstraLibApiPlayerUserNavigationGuardStatus = typing.Union[
-    typing.Literal["ALLOWED"],
-    typing.Literal["UNAUTHORIZED"],
-    typing.Literal["FORBIDEN"],
-    typing.Literal["NOT_FOUND"],
+AbstraLibApiEditorLintersCheckResponseItem = AbstraLibApiEditorLintersRule
+
+AbstraLibApiEditorLintersCheckResponse = typing.List[
+    AbstraLibApiEditorLintersCheckResponseItem
 ]
 
-AbstraLibApiPlayerUserNavigationGuardStatusValues: typing.List[
-    AbstraLibApiPlayerUserNavigationGuardStatus
-] = ["ALLOWED", "UNAUTHORIZED", "FORBIDEN", "NOT_FOUND"]
+AbstraLibApiEditorFilesSettingsResponseSeparator = str
 
 
 @dataclass
-class AbstraLibApiPlayerUserNavigationGuard:
-    status: AbstraLibApiPlayerUserNavigationGuardStatus
+class AbstraLibApiEditorFilesSettingsResponse:
+    separator: AbstraLibApiEditorFilesSettingsResponseSeparator
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         data = {}
-        data["status"] = self.status
+        data["separator"] = self.separator
         return data
 
     @classmethod
     def from_dict(
         cls, data: typing.Dict[str, typing.Any]
-    ) -> "AbstraLibApiPlayerUserNavigationGuard":
+    ) -> "AbstraLibApiEditorFilesSettingsResponse":
         return cls(
-            status=data["status"],
+            separator=str(data["separator"]),
+        )
+
+
+AbstraLibApiEditorFilesDeleteResponseOk = bool
+
+
+@dataclass
+class AbstraLibApiEditorFilesDeleteResponse:
+    ok: typing.Optional[AbstraLibApiEditorFilesDeleteResponseOk] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.ok is not None:
+            data["ok"] = self.ok
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesDeleteResponse":
+        return cls(
+            ok=None if data.get("ok") is None else bool(data["ok"]),
+        )
+
+
+AbstraLibApiEditorFilesListResponseItemFile = CommonFileNode
+
+AbstraLibApiEditorFilesListResponseItemStagesItemType = typing.Union[
+    typing.Literal["form"],
+    typing.Literal["hook"],
+    typing.Literal["job"],
+    typing.Literal["script"],
+]
+
+AbstraLibApiEditorFilesListResponseItemStagesItemTypeValues: typing.List[
+    AbstraLibApiEditorFilesListResponseItemStagesItemType
+] = ["form", "hook", "job", "script"]
+
+AbstraLibApiEditorFilesListResponseItemStagesItemId = str
+
+
+@dataclass
+class AbstraLibApiEditorFilesListResponseItemStagesItem:
+    type: AbstraLibApiEditorFilesListResponseItemStagesItemType
+    id: AbstraLibApiEditorFilesListResponseItemStagesItemId
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["type"] = self.type
+        data["id"] = self.id
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesListResponseItemStagesItem":
+        return cls(
+            type=data["type"],
+            id=str(data["id"]),
+        )
+
+
+AbstraLibApiEditorFilesListResponseItemStages = typing.List[
+    AbstraLibApiEditorFilesListResponseItemStagesItem
+]
+
+
+@dataclass
+class AbstraLibApiEditorFilesListResponseItem:
+    file: AbstraLibApiEditorFilesListResponseItemFile
+    stages: AbstraLibApiEditorFilesListResponseItemStages
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["file"] = self.file.to_dict()
+        data["stages"] = [item.to_dict() for item in self.stages]
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesListResponseItem":
+        return cls(
+            file=CommonFileNode.from_dict(data["file"]),
+            stages=[
+                AbstraLibApiEditorFilesListResponseItemStagesItem.from_dict(item)
+                for item in data["stages"]
+            ],
+        )
+
+
+AbstraLibApiEditorFilesListResponse = typing.List[
+    AbstraLibApiEditorFilesListResponseItem
+]
+
+AbstraLibApiEditorFilesMkdirResponseOk = bool
+
+
+@dataclass
+class AbstraLibApiEditorFilesMkdirResponse:
+    ok: typing.Optional[AbstraLibApiEditorFilesMkdirResponseOk] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.ok is not None:
+            data["ok"] = self.ok
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesMkdirResponse":
+        return cls(
+            ok=None if data.get("ok") is None else bool(data["ok"]),
+        )
+
+
+AbstraLibApiEditorFilesRenameRequestPathPartsItem = str
+
+AbstraLibApiEditorFilesRenameRequestPathParts = typing.List[
+    AbstraLibApiEditorFilesRenameRequestPathPartsItem
+]
+
+AbstraLibApiEditorFilesRenameRequestNewPathPartsItem = str
+
+AbstraLibApiEditorFilesRenameRequestNewPathParts = typing.List[
+    AbstraLibApiEditorFilesRenameRequestNewPathPartsItem
+]
+
+
+@dataclass
+class AbstraLibApiEditorFilesRenameRequest:
+    path_parts: AbstraLibApiEditorFilesRenameRequestPathParts
+    new_path_parts: AbstraLibApiEditorFilesRenameRequestNewPathParts
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["pathParts"] = self.path_parts
+        data["newPathParts"] = self.new_path_parts
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesRenameRequest":
+        return cls(
+            path_parts=[str(item) for item in data["pathParts"]],
+            new_path_parts=[str(item) for item in data["newPathParts"]],
+        )
+
+
+AbstraLibApiEditorFilesRenameResponseOk = bool
+
+
+@dataclass
+class AbstraLibApiEditorFilesRenameResponse:
+    ok: typing.Optional[AbstraLibApiEditorFilesRenameResponseOk] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.ok is not None:
+            data["ok"] = self.ok
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesRenameResponse":
+        return cls(
+            ok=None if data.get("ok") is None else bool(data["ok"]),
+        )
+
+
+AbstraLibApiEditorFilesSafeEditRequestItemSiteId = str
+
+AbstraLibApiEditorFilesSafeEditRequestItemPos = int
+
+AbstraLibApiEditorFilesSafeEditRequestItemType = typing.Union[
+    typing.Literal["delete"], typing.Literal["insert"]
+]
+
+AbstraLibApiEditorFilesSafeEditRequestItemTypeValues: typing.List[
+    AbstraLibApiEditorFilesSafeEditRequestItemType
+] = ["delete", "insert"]
+
+AbstraLibApiEditorFilesSafeEditRequestItemValue = str
+
+AbstraLibApiEditorFilesSafeEditRequestItemLength = int
+
+
+@dataclass
+class AbstraLibApiEditorFilesSafeEditRequestItem:
+    site_id: AbstraLibApiEditorFilesSafeEditRequestItemSiteId
+    pos: AbstraLibApiEditorFilesSafeEditRequestItemPos
+    type: AbstraLibApiEditorFilesSafeEditRequestItemType
+    value: typing.Optional[AbstraLibApiEditorFilesSafeEditRequestItemValue] = field(
+        default_factory=lambda: None
+    )
+    length: typing.Optional[AbstraLibApiEditorFilesSafeEditRequestItemLength] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["siteId"] = self.site_id
+        data["pos"] = self.pos
+        data["type"] = self.type
+        if self.value is not None:
+            data["value"] = self.value
+        if self.length is not None:
+            data["length"] = self.length
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesSafeEditRequestItem":
+        return cls(
+            site_id=str(data["siteId"]),
+            pos=int(data["pos"]),
+            type=data["type"],
+            value=None if data.get("value") is None else str(data["value"]),
+            length=None if data.get("length") is None else int(data["length"]),
+        )
+
+
+AbstraLibApiEditorFilesSafeEditRequest = typing.List[
+    AbstraLibApiEditorFilesSafeEditRequestItem
+]
+
+AbstraLibApiEditorFilesSafeEditResponseOk = bool
+
+
+@dataclass
+class AbstraLibApiEditorFilesSafeEditResponse:
+    ok: typing.Optional[AbstraLibApiEditorFilesSafeEditResponseOk] = field(
+        default_factory=lambda: None
+    )
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        if self.ok is not None:
+            data["ok"] = self.ok
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiEditorFilesSafeEditResponse":
+        return cls(
+            ok=None if data.get("ok") is None else bool(data["ok"]),
+        )
+
+
+AbstraLibApiEditorFilesCreateResponse = CommonFileNode
+
+AbstraLibApiAiStreamRequestConversationId = CloudApiCliAiV2StreamRequestConversationId
+
+AbstraLibApiAiStreamRequestContent = CloudApiCliAiV2StreamRequestContent
+
+AbstraLibApiAiStreamRequestContext = typing.Dict[str, typing.Any]
+
+AbstraLibApiAiStreamRequestHumanApproval = str
+
+AbstraLibApiAiStreamRequestToolCallsApproval = (
+    CloudApiCliAiV2StreamRequestToolCallsApproval
+)
+
+AbstraLibApiAiStreamRequestBrowserToolsItem = CloudApiConsoleBrowserToolsDefinition
+
+AbstraLibApiAiStreamRequestBrowserTools = typing.List[
+    AbstraLibApiAiStreamRequestBrowserToolsItem
+]
+
+AbstraLibApiAiStreamRequestBrowserToolResponsesItem = (
+    CloudApiConsoleBrowserToolsResponse
+)
+
+AbstraLibApiAiStreamRequestBrowserToolResponses = typing.List[
+    AbstraLibApiAiStreamRequestBrowserToolResponsesItem
+]
+
+
+@dataclass
+class AbstraLibApiAiStreamRequest:
+    conversation_id: AbstraLibApiAiStreamRequestConversationId
+    content: AbstraLibApiAiStreamRequestContent
+    context: AbstraLibApiAiStreamRequestContext
+    human_approval: typing.Optional[AbstraLibApiAiStreamRequestHumanApproval] = field(
+        default_factory=lambda: None
+    )
+    tool_calls_approval: typing.Optional[
+        AbstraLibApiAiStreamRequestToolCallsApproval
+    ] = field(default_factory=lambda: None)
+    browser_tools: typing.Optional[AbstraLibApiAiStreamRequestBrowserTools] = field(
+        default_factory=lambda: None
+    )
+    browser_tool_responses: typing.Optional[
+        AbstraLibApiAiStreamRequestBrowserToolResponses
+    ] = field(default_factory=lambda: None)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        data = {}
+        data["conversationId"] = self.conversation_id
+        data["content"] = [item.to_dict() for item in self.content]
+        data["context"] = self.context
+        if self.human_approval is not None:
+            data["humanApproval"] = self.human_approval
+        if self.tool_calls_approval is not None:
+            data["toolCallsApproval"] = self.tool_calls_approval.to_dict()
+        if self.browser_tools is not None:
+            data["browserTools"] = [item.to_dict() for item in self.browser_tools]
+        if self.browser_tool_responses is not None:
+            data["browserToolResponses"] = [
+                item.to_dict() for item in self.browser_tool_responses
+            ]
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: typing.Dict[str, typing.Any]
+    ) -> "AbstraLibApiAiStreamRequest":
+        return cls(
+            conversation_id=str(data["conversationId"]),
+            content=[
+                (
+                    CloudApiCliAiV2StreamRequestContentItemAssistantTextInput.from_dict(
+                        item
+                    )
+                    if isinstance(item, dict) and (item.get("type", None) == "text")
+                    else CloudApiCliAiV2StreamRequestContentItemAssistantFileInput.from_dict(
+                        item
+                    )
+                )
+                for item in data["content"]
+            ],
+            context=dict(**data["context"]),
+            human_approval=None
+            if data.get("humanApproval") is None
+            else str(data["humanApproval"]),
+            tool_calls_approval=None
+            if data.get("toolCallsApproval") is None
+            else CloudApiCliAiV2StreamRequestToolCallsApproval.from_dict(
+                data["toolCallsApproval"]
+            ),
+            browser_tools=None
+            if data.get("browserTools") is None
+            else [
+                CloudApiConsoleBrowserToolsDefinition.from_dict(item)
+                for item in data["browserTools"]
+            ],
+            browser_tool_responses=None
+            if data.get("browserToolResponses") is None
+            else [
+                CloudApiConsoleBrowserToolsResponse.from_dict(item)
+                for item in data["browserToolResponses"]
+            ],
         )
 
 
