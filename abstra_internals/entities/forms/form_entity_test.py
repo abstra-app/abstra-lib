@@ -74,7 +74,7 @@ rendered_pandas_row_selection_input = {
         "schema": {
             "fields": [
                 {"name": "index", "type": "integer"},
-                {"name": "name", "type": "string"},
+                {"name": "name", "type": "string", "extDtype": "str"},
                 {"name": "amount", "type": "integer"},
             ],
             "primaryKey": ["index"],
