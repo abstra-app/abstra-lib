@@ -1,2 +1,0 @@
-import"./jwt-decode.esm-CQuHW7W6.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},d=new Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="ddda210c-74b5-4068-bd71-da8a84ecaa2f",e._sentryDebugIdIdentifier="sentry-dbid-ddda210c-74b5-4068-bd71-da8a84ecaa2f")}catch{}})();var t={};class r{static get isMac(){return navigator.userAgent.includes("Mac OS X")}static get buildPlatform(){return t.CURRENT_PLATFORM||"web"}}export{r as O};
-//# sourceMappingURL=os-yLfSEHEc.js.map

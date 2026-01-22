@@ -8,6 +8,7 @@ import requests
 if TYPE_CHECKING:
     from PIL.Image import Image
 
+from abstra_internals.cloud_api import get_editor_auth_token_from_file
 from abstra_internals.constants import get_uploads_dir
 from abstra_internals.environment import SERVER_URL
 from abstra_internals.utils.file import (
@@ -57,7 +58,7 @@ def download_to_path(url: str) -> pathlib.Path:
     if url.startswith("http://") or url.startswith("https://"):
         with save_path.open("wb") as f, requests.get(url, stream=True) as r:
             r.raise_for_status()
-            for chunk in r.iter_content(chunk_size=8192):
+            for chunk in r.iter_content(chunk_size=FILE_CHUNK_SIZE):
                 f.write(chunk)
 
         return save_path
@@ -65,7 +66,14 @@ def download_to_path(url: str) -> pathlib.Path:
     elif url.startswith("/_files/"):
         if SERVER_URL:
             full_url = f"{SERVER_URL}{url}"
-            with save_path.open("wb") as f, requests.get(full_url, stream=True) as r:
+            cookies = {}
+            editor_auth_token = get_editor_auth_token_from_file()
+            if editor_auth_token:
+                cookies["editor_auth"] = editor_auth_token
+            with (
+                save_path.open("wb") as f,
+                requests.get(full_url, stream=True, cookies=cookies) as r,
+            ):
                 r.raise_for_status()
                 for chunk in r.iter_content(chunk_size=FILE_CHUNK_SIZE):
                     f.write(chunk)
