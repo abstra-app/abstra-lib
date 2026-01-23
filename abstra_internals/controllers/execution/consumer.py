@@ -158,6 +158,7 @@ class ConsumerController:
                     break
 
                 if isinstance(msg, ControlQueueMessage):
+                    self.consumer.threadsafe_ack(msg)
                     continue
 
                 self.executor.submit(
