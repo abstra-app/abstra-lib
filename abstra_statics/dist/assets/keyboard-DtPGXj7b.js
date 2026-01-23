@@ -1,0 +1,2 @@
+import{O as t}from"./os-CVfn_hzj.js";import"./jwt-decode.esm-DNC_0_Mz.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},s=new Error().stack;s&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[s]="f3aad38f-e303-4b6a-84b5-bce1b11d3ea1",e._sentryDebugIdIdentifier="sentry-dbid-f3aad38f-e303-4b6a-84b5-bce1b11d3ea1")}catch{}})();const n=e=>t.isMac?e.metaKey:e.ctrlKey,f=e=>e.shiftKey;export{n as c,f as s};
+//# sourceMappingURL=keyboard-DtPGXj7b.js.map
