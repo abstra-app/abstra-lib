@@ -112,7 +112,10 @@ def get_editor_bp(controller: MainController):
     @bp.post("/deploy")
     @editor_usage
     def _deploy():
-        controller.deploy_without_git()
-        return {"success": True}
+        try:
+            controller.deploy_without_git()
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "message": str(e)}, 400
 
     return bp

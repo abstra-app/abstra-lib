@@ -81,3 +81,13 @@ class DeployMessages:
             + Style.RESET_ALL
             + "Please run 'abstra editor' and login via the web interface.\n"
         )
+
+    @staticmethod
+    def validation_error(message: str):
+        print(
+            Fore.RED
+            + Style.BRIGHT
+            + "\n[Deploy] Package validation failed: "
+            + Style.RESET_ALL
+            + f"{message}\n"
+        )

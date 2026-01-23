@@ -32,6 +32,7 @@ from abstra_internals.entities.execution_context import (
     ScriptContext,
 )
 from abstra_internals.interface.cli.deploy import deploy_without_git
+from abstra_internals.interface.cli.deploy_messages import DeployMessages
 from abstra_internals.interface.contract import ExecutionStartedMessage
 from abstra_internals.logger import AbstraLogger
 from abstra_internals.repositories.email import EmailRepository
@@ -148,6 +149,9 @@ class MainController:
         self.linter_repository = repositories.linter
 
     def deploy_without_git(self):
+        DeployMessages.start(method="upload")
+        DeployMessages.checking_linters()
+
         self.linter_repository.update_checks()
         issues = self.linter_repository.get_blocking_checks()
 
@@ -156,7 +160,7 @@ class MainController:
                 "Please fix all linter issues before deploying your project."
             )
 
-        deploy_without_git()
+        deploy_without_git(show_start_message=False)
 
     def reset_execution_repository(self):
         self.execution_repository.clear()

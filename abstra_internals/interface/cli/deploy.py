@@ -14,6 +14,37 @@ from abstra_internals.services.fs import FileSystemService
 from abstra_internals.settings import Settings
 
 
+class ZipValidationError(Exception):
+    """Raised when the generated zip file fails validation."""
+
+    pass
+
+
+def _validate_zip_file(zip_path: pathlib.Path) -> None:
+    """
+    Validates the generated zip file before upload.
+    Raises ZipValidationError if validation fails.
+    """
+    with zipfile.ZipFile(zip_path, "r") as zip_file:
+        file_list = zip_file.namelist()
+
+        # Check if zip is empty
+        if not file_list:
+            raise ZipValidationError(
+                "The generated zip file is empty. No files were packaged for deploy. "
+                "Please check your .gitignore file and ensure your project files exist. "
+                "If the problem persists, contact us."
+            )
+
+        # Check if abstra.json exists
+        if "abstra.json" not in file_list:
+            raise ZipValidationError(
+                "The abstra.json file is missing from the deploy package. "
+                "This file is required for deployment. Please ensure it exists in your project root. "
+                "If the problem persists, contact us."
+            )
+
+
 def _generate_zip_file() -> pathlib.Path:
     root_path = Settings.root_path
     zip_path = pathlib.Path(tempfile.gettempdir(), f"{uuid.uuid4()}.zip")
@@ -40,8 +71,9 @@ def _get_project_id(headers: dict) -> Optional[str]:
     return None
 
 
-def deploy_without_git():
-    DeployMessages.start(method="upload")
+def deploy_without_git(show_start_message: bool = True):
+    if show_start_message:
+        DeployMessages.start(method="upload")
 
     DeployMessages.authenticating()
     headers = resolve_headers()
@@ -54,6 +86,7 @@ def deploy_without_git():
     try:
         DeployMessages.packaging()
         zip_path = _generate_zip_file()
+        _validate_zip_file(zip_path)
 
         DeployMessages.uploading()
         _upload_file(url=data.url, file_path=zip_path)
@@ -63,6 +96,10 @@ def deploy_without_git():
 
         project_id = _get_project_id(headers)
         DeployMessages.success(project_id)
+    except ZipValidationError as e:
+        update_build(headers=headers, build_id=data.build_id, error=str(e))
+        DeployMessages.validation_error(str(e))
+        raise e
     except Exception as e:
         update_build(
             headers=headers, build_id=data.build_id, error="Failed to upload files"

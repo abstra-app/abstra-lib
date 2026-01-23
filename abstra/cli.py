@@ -29,7 +29,11 @@ class CLI(object):
             git_controller = GitController()
             git_controller.push_and_deploy()
         else:
-            deploy_without_git()
+            try:
+                deploy_without_git()
+            except Exception:
+                # Error messages are already printed in deploy_without_git
+                pass
 
     def editor(
         self,
