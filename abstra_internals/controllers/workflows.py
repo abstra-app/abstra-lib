@@ -237,10 +237,30 @@ class WorkflowController:
         This method creates a new transition from the source stage to the target stage,
         allowing for task-based routing in the workflow.
 
+        IMPORTANT - Task Routing via task_type:
+        - When a stage calls send_task(task_type, payload), the task routes through transitions
+          where the transition's task_type matches (or is null/empty).
+        - If task_type is None or empty: The transition matches ALL tasks (catch-all behavior).
+        - If task_type is set: The transition ONLY matches tasks where the send_task's task_type
+          EXACTLY equals this value (case-sensitive string match).
+        - Multiple transitions can match the same task, causing it to go to multiple target stages.
+
+        Example:
+            # Create a transition that only routes "approved" tasks:
+            add_transition("form-stage", "approval-processor", task_type="approved")
+
+            # In the form stage code, this will route through the transition:
+            send_task("approved", {"user_id": 123})  # Goes to approval-processor
+
+            # But this will NOT route through (no matching transition):
+            send_task("rejected", {"user_id": 123})  # No route unless another transition exists
+
         Args:
             source_stage_id (str): ID of the source stage where the transition starts.
             target_stage_id (str): ID of the target stage where the transition ends.
-            task_type (Optional[str]): Optional filter that should filter only tasks of this type.
+            task_type (Optional[str]): Optional filter for task routing. If None or empty,
+                matches ALL tasks. If set, only matches tasks with this exact type string.
+
         Raises:
             ValueError: If the source or target stage does not exist in the workflow.
             UnknownNodeTypeError: If the source or target stage type is invalid.

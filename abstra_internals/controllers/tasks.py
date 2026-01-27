@@ -405,11 +405,21 @@ class TasksController:
         with the provided payload data. Tasks are the primary mechanism for workflow
         progression and data passing between stages.
 
+        IMPORTANT - Difference from send_task():
+        - This method (create_task) sends a task DIRECTLY to a specific stage_id,
+          bypassing transition-based routing.
+        - In contrast, the SDK's send_task(task_type, payload) routes tasks through
+          transitions based on task_type matching.
+        - Use this when you need to send a task to a specific stage regardless of
+          the workflow's transition configuration.
+
         Args:
             name (str): Type/name of the task (e.g., 'user_registration', 'data_processing').
+                This becomes task.type and can be used for filtering/identification.
             stage_id (str): Unique identifier of the target stage that will execute this task.
+                The task goes directly to this stage (no transition routing).
             payload (dict): Data to be passed to the target stage when it executes.
-                This data will be available to the stage during execution.
+                This data will be available to the stage during execution via task.payload.
             source_stage_id (Optional[str], optional): ID of the stage that is creating
                 this task. Used for workflow tracking and debugging.
             execution_id (Optional[str], optional): ID of the execution context that
@@ -423,7 +433,7 @@ class TasksController:
             ```python
             controller = TasksController(repositories)
 
-            # Create a simple task
+            # Create a simple task directly to a stage
             task = controller.create_task(
                 name="user_signup",
                 stage_id="welcome-form",
@@ -439,25 +449,14 @@ class TasksController:
                 source_stage_id="order-form",
                 execution_id="exec-789"
             )
-
-            # Create workflow progression task
-            approval_task = controller.create_task(
-                name="approval_needed",
-                stage_id="approval-form",
-                payload={
-                    "request_id": "req-456",
-                    "amount": 1000.00,
-                    "description": "Budget approval needed"
-                }
-            )
             ```
 
         Note:
             - Tasks are created in 'pending' status and will be picked up for execution
             - The payload must be JSON-serializable
             - Target stage must exist or task creation may fail
-            - Source stage and execution tracking help with workflow debugging
-            - Tasks enable asynchronous workflow execution
+            - This bypasses transition routing - task goes directly to stage_id
+            - For transition-based routing in stage code, use send_task(task_type, payload)
 
         Copywritings:
             Create a new task for a stage
