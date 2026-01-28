@@ -1,0 +1,2 @@
+import{O as t}from"./os-CyqgRI72.js";import"./jwt-decode.esm-BRRA-bKi.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},s=new Error().stack;s&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[s]="ca8ba9b5-6a2f-4f09-8968-c5d3c14ed584",e._sentryDebugIdIdentifier="sentry-dbid-ca8ba9b5-6a2f-4f09-8968-c5d3c14ed584")}catch{}})();const f=e=>t.isMac?e.metaKey:e.ctrlKey,a=e=>e.shiftKey;export{f as c,a as s};
+//# sourceMappingURL=keyboard-DEkoFK-7.js.map
